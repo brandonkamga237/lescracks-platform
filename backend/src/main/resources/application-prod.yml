@@ -1,0 +1,68 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+  web:
+    error:
+      include-message: never
+      include-stacktrace: never
+
+  # MinIO Configuration for Production
+  minio:
+    url: ${MINIO_ENDPOINT}
+    access-key: ${MINIO_ACCESS_KEY}
+    secret-key: ${MINIO_SECRET_KEY}
+    bucket: ${MINIO_BUCKET}
+    public-url: ${MINIO_PUBLIC_URL}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION:3600000}
+  frontend:
+    url: ${APP_URL}
+  cors:
+    allowed-origins: ${CORS_ORIGINS}
+  swagger:
+    enabled: false
+
+server:
+  port: ${SERVER_PORT:8080}
+  compression:
+    enabled: true
+
+logging:
+  level:
+    com.brandonkamga.lescracks: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+  file:
+    name: /var/log/lescracks/application.log
+    max-size: 10MB
+    max-history: 30

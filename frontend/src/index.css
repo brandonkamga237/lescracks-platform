@@ -1,0 +1,269 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   NOUVEAU DESIGN SYSTEM - LESCRACKS PREMIUM
+   Dark Mode uniquement
+   ============================================ */
+
+@layer base {
+  /* ========== DARK MODE ========== */
+  .dark {
+    --background: #000000;
+    --foreground: #ffffff;
+    
+    --card: #111111;
+    --card-foreground: #ffffff;
+    
+    --popover: #111111;
+    --popover-foreground: #ffffff;
+    
+    --primary: #d4af37;
+    --primary-foreground: #000000;
+    
+    --secondary: #1a1a1a;
+    --secondary-foreground: #ffffff;
+    
+    --muted: #1a1a1a;
+    --muted-foreground: #a3a3a3;
+    
+    --accent: #d4af37;
+    --accent-foreground: #000000;
+    
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    
+    --border: rgba(255, 255, 255, 0.08);
+    --input: rgba(255, 255, 255, 0.08);
+    --ring: #d4af37;
+    
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --error: #ef4444;
+  }
+
+  /* ========== BASE STYLES ========== */
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* ========== CUSTOM SCROLLBAR - GOLD RECTANGULAR ========== */
+  /* Scrollbar track */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #111111;
+  }
+  
+  /* Scrollbar thumb - gold rectangular */
+  ::-webkit-scrollbar-thumb {
+    background: #d4af37;
+    border-radius: 0;
+    border: 2px solid #111111;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #e8c547;
+  }
+  
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 #111111;
+  }
+
+  /* ========== TYPOGRAPHY ========== */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight;
+  }
+  
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold leading-tight;
+  }
+  
+  h2 {
+    @apply text-3xl md:text-4xl font-semibold leading-tight;
+  }
+  
+  h3 {
+    @apply text-xl md:text-2xl font-semibold;
+  }
+  
+  p {
+    @apply text-base leading-relaxed;
+  }
+
+  /* ========== SELECTION ========== */
+  ::selection {
+    background-color: rgba(212, 175, 55, 0.3);
+    color: #ffffff;
+  }
+}
+
+@layer components {
+  /* ========== GOLD GLOW EFFECT ========== */
+  .gold-glow {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3),
+                0 0 40px rgba(212, 175, 55, 0.1);
+  }
+  
+  .gold-glow-hover:hover {
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.4),
+                0 0 50px rgba(212, 175, 55, 0.2);
+  }
+  
+  .gold-border {
+    border: 1px solid rgba(212, 175, 55, 0.3);
+  }
+  
+  .gold-text {
+    color: #d4af37;
+  }
+  
+  .gold-gradient-text {
+    background: linear-gradient(135deg, #d4af37 0%, #e8c547 50%, #d4af37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ========== BUTTONS ========== */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 
+           bg-gold text-black font-medium rounded-lg
+           transition-all duration-300
+           hover:bg-gold-light hover:gold-glow-hover
+           focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-black
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 
+           bg-transparent border border-white/20 text-white font-medium rounded-lg
+           transition-all duration-300
+           hover:border-gold/50 hover:text-gold
+           focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-black
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* ========== CARDS ========== */
+  .card {
+    @apply bg-card rounded-xl border border-white/5 p-6 
+           transition-all duration-300;
+  }
+  
+  .card-hover:hover {
+    @apply border-gold/30;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);
+  }
+
+  /* ========== INPUTS ========== */
+  .input {
+    @apply w-full px-4 py-3 bg-secondary text-foreground
+           border border-white/10 rounded-lg
+           placeholder:text-muted-foreground
+           focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent
+           transition-all duration-200;
+  }
+
+  /* ========== LINKS ========== */
+  .link {
+    @apply text-gold hover:text-gold-light 
+           transition-colors duration-200
+           underline-offset-4 hover:underline;
+  }
+
+  /* ========== SECTIONS ========== */
+  .section {
+    @apply py-16 md:py-24 lg:py-32;
+  }
+  
+  .section-dark {
+    @apply bg-noir-900;
+  }
+  
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+@layer utilities {
+  /* ========== ANIMATIONS ========== */
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  /* ========== TEXT GRADIENTS ========== */
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #d4af37 0%, #f5d98b 50%, #d4af37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ========== SCROLLBAR ========== */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.3);
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 175, 55, 0.5);
+  }
+
+  /* ========== RESPONSIVE UTILITIES ========== */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
