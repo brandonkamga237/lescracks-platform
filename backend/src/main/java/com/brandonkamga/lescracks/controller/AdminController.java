@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -25,6 +26,8 @@ public class AdminController {
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
     private final RoleRepository roleRepository;
+    private final ApplicationRepository applicationRepository;
+    private final PremiumRequestRepository premiumRequestRepository;
 
     public AdminController(
             UserRepository userRepository,
@@ -32,13 +35,17 @@ public class AdminController {
             EventRepository eventRepository,
             CategoryRepository categoryRepository,
             TagRepository tagRepository,
-            RoleRepository roleRepository) {
+            RoleRepository roleRepository,
+            ApplicationRepository applicationRepository,
+            PremiumRequestRepository premiumRequestRepository) {
         this.userRepository = userRepository;
         this.resourceRepository = resourceRepository;
         this.eventRepository = eventRepository;
         this.categoryRepository = categoryRepository;
         this.tagRepository = tagRepository;
         this.roleRepository = roleRepository;
+        this.applicationRepository = applicationRepository;
+        this.premiumRequestRepository = premiumRequestRepository;
     }
 
     // === DASHBOARD ===
@@ -47,7 +54,8 @@ public class AdminController {
         Map<String, Object> stats = new HashMap<>();
         
         // Basic counts
-        stats.put("totalUsers", userRepository.count());
+        long totalUsers = userRepository.count();
+        stats.put("totalUsers", totalUsers);
         stats.put("totalResources", resourceRepository.count());
         stats.put("totalEvents", eventRepository.count());
         stats.put("totalCategories", categoryRepository.count());
@@ -102,25 +110,106 @@ public class AdminController {
             "A_VENIR", upcomingEvents
         ));
         
-        // Active users (created in last 30 days)
-        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+        // Time windows
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime thirtyDaysAgo = now.minusDays(30);
+        LocalDateTime sixtyDaysAgo = now.minusDays(60);
+
+        // Growth — current vs previous period
         long newUsersLast30Days = userRepository.countByCreatedAtAfter(thirtyDaysAgo);
+        long newUsersPrev30Days = userRepository.countByCreatedAtAfter(sixtyDaysAgo) - newUsersLast30Days;
         stats.put("newUsersLast30Days", newUsersLast30Days);
-        
-        // Active resources (created in last 30 days)
+        stats.put("newUsersPrev30Days", newUsersPrev30Days);
+
         long newResourcesLast30Days = resourceRepository.countByCreatedAtAfter(thirtyDaysAgo);
         stats.put("newResourcesLast30Days", newResourcesLast30Days);
-        
+
+        // Premium conversion rate (premium_user + admin) / total * 100
+        double premiumRate = (totalUsers > 0)
+                ? Math.round(((adminCount + premiumCount) * 100.0) / totalUsers * 10) / 10.0
+                : 0.0;
+        stats.put("premiumConversionRate", premiumRate);
+
+        // Application funnel
+        long appPending = applicationRepository.countByStatus(ApplicationStatus.pending);
+        long appAccepted = applicationRepository.countByStatus(ApplicationStatus.accepted);
+        long appRejected = applicationRepository.countByStatus(ApplicationStatus.rejected);
+        stats.put("applicationsByStatus", Map.of(
+                "En attente", appPending,
+                "Accepté", appAccepted,
+                "Rejeté", appRejected
+        ));
+
+        // Premium requests pipeline
+        long prPending = premiumRequestRepository.countByStatus(PremiumRequestStatus.PENDING);
+        long prContacted = premiumRequestRepository.countByStatus(PremiumRequestStatus.CONTACTED);
+        long prPaid = premiumRequestRepository.countByStatus(PremiumRequestStatus.PAID);
+        long prRejected = premiumRequestRepository.countByStatus(PremiumRequestStatus.REJECTED);
+        stats.put("premiumRequestsByStatus", Map.of(
+                "En attente", prPending,
+                "Contacté", prContacted,
+                "Payé", prPaid,
+                "Rejeté", prRejected
+        ));
+        stats.put("totalPremiumRequests", prPending + prContacted + prPaid + prRejected);
+
+        // Engagement — total views and downloads across all resources
+        List<Resource> allResources = resourceRepository.findAll();
+        long totalViews = allResources.stream().mapToLong(Resource::getViewCount).sum();
+        long totalDownloads = allResources.stream().mapToLong(Resource::getDownloadCount).sum();
+        stats.put("totalViews", totalViews);
+        stats.put("totalDownloads", totalDownloads);
+
+        // Top 5 resources by views
+        List<Map<String, Object>> topViewed = resourceRepository.findTop5ByOrderByViewCountDesc()
+                .stream().map(r -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id", r.getId());
+                    m.put("title", r.getTitle());
+                    m.put("viewCount", r.getViewCount());
+                    m.put("downloadCount", r.getDownloadCount());
+                    m.put("type", r.getResourceType() != null ? r.getResourceType().getName().name().toUpperCase() : "");
+                    return m;
+                }).toList();
+        stats.put("topViewedResources", topViewed);
+
+        // Top 5 resources by downloads
+        List<Map<String, Object>> topDownloaded = resourceRepository.findTop5ByOrderByDownloadCountDesc()
+                .stream().map(r -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id", r.getId());
+                    m.put("title", r.getTitle());
+                    m.put("viewCount", r.getViewCount());
+                    m.put("downloadCount", r.getDownloadCount());
+                    m.put("type", r.getResourceType() != null ? r.getResourceType().getName().name().toUpperCase() : "");
+                    return m;
+                }).toList();
+        stats.put("topDownloadedResources", topDownloaded);
+
+        // Daily new users — last 7 days (sparkline data)
+        List<Map<String, Object>> dailyUsers = new ArrayList<>();
+        for (int i = 6; i >= 0; i--) {
+            LocalDateTime dayStart = LocalDate.now().minusDays(i).atStartOfDay();
+            LocalDateTime dayEnd = dayStart.plusDays(1);
+            long count = userRepository.countByCreatedAtAfter(dayStart)
+                    - userRepository.countByCreatedAtAfter(dayEnd);
+            Map<String, Object> day = new HashMap<>();
+            day.put("date", LocalDate.now().minusDays(i).toString());
+            day.put("count", Math.max(0, count));
+            dailyUsers.add(day);
+        }
+        stats.put("dailyNewUsers", dailyUsers);
+
         // Recent users (last 5)
         Pageable recentUsersPage = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<User> recentUsers = userRepository.findAll(recentUsersPage);
         stats.put("recentUsers", recentUsers.getContent().stream().map(this::mapUserToResponse).toList());
-        
+
         // Recent resources (last 5)
         Pageable recentResourcesPage = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Resource> recentResources = resourceRepository.findAll(recentResourcesPage);
         stats.put("recentResources", recentResources.getContent().stream().map(this::mapResourceToResponse).toList());
-        
+
         return ResponseEntity.ok(ApiResponse.success(stats));
     }
 

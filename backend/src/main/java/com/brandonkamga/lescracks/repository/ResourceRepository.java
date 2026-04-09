@@ -89,6 +89,18 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
             @Param("tagIds") List<Long> tagIds,
             Pageable pageable);
     
+    // Text search with optional type and category filters (no tags — avoids null collection issue)
+    @Query("SELECT r FROM Resource r " +
+           "WHERE (:typeName IS NULL OR r.resourceType.name = :typeName) " +
+           "AND (:categoryId IS NULL OR r.category.id = :categoryId) " +
+           "AND (LOWER(r.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+           "  OR LOWER(r.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+    Page<Resource> searchByTermWithFilters(
+            @Param("typeName") String typeName,
+            @Param("categoryId") Long categoryId,
+            @Param("searchTerm") String searchTerm,
+            Pageable pageable);
+
     // Atomic increment — avoids load/save race conditions
     @Modifying
     @Query("UPDATE Resource r SET r.viewCount = r.viewCount + 1 WHERE r.id = :id")
@@ -97,6 +109,10 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
     @Modifying
     @Query("UPDATE Resource r SET r.downloadCount = r.downloadCount + 1 WHERE r.id = :id")
     void incrementDownloadCount(@Param("id") Long id);
+
+    // Top resources
+    List<Resource> findTop5ByOrderByViewCountDesc();
+    List<Resource> findTop5ByOrderByDownloadCountDesc();
 
     // Dashboard analytics methods
     long countByResourceType_Name(ResourceTypeName typeName);

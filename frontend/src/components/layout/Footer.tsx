@@ -1,14 +1,13 @@
 import { Link } from 'react-router-dom';
-import { Linkedin, Github, Youtube, Mail, BookOpen, Video, Code2, Users, Compass, GraduationCap, Calendar, Info, ArrowUpRight } from 'lucide-react';
+import { Linkedin, Github, Youtube, Mail, BookOpen, Video, Code2, Users, Compass, Calendar, Info, ArrowUpRight } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 
 const NAV = [
   {
-    title: 'Nos parcours',
+    title: 'Accompagnement',
     links: [
       { label: 'Accompagnement 360', href: '/postuler', icon: Compass },
-      { label: 'Formation pratique', href: '/postuler?service=formation', icon: GraduationCap },
       { label: 'Postuler maintenant', href: '/postuler', icon: ArrowUpRight, highlight: true },
     ],
   },
@@ -57,7 +56,7 @@ const Footer = () => {
             <Link to="/" className="inline-block mb-5">
               <LesCracksLogo
                 height={52}
-                lesColor="#FFFFFF"
+                lesColor="#000000"
                 className="w-auto opacity-90"
               />
             </Link>

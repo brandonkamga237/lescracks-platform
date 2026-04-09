@@ -25,6 +25,7 @@ export interface Resource {
   title: string;
   description: string;
   url: string;
+  previewImageUrl?: string;
   createdAt: string;
   categoryId: number;
   categoryName: string;
@@ -42,6 +43,8 @@ export interface Resource {
     originalFileName?: string;
   };
 }
+
+/** Upload an image (preview, avatar, etc.) and get back its public URL. */
 
 export interface Tag {
   id: number;
@@ -247,6 +250,23 @@ class ApiService {
   async trackResourceDownload(id: string): Promise<string> {
     const data = await this.request<string>(`/resources/${id}/download`, { method: 'POST' }, true);
     return data;
+  }
+
+  /** Upload an image file and get back its public URL. Reuses the resource upload endpoint. */
+  async uploadImage(file: File): Promise<string> {
+    const token = authService.getToken();
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/resources/upload`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const json = await response.json();
+    if (!response.ok) throw new Error(json.message || 'Upload failed');
+    if (json.success && json.data !== undefined) return json.data as string;
+    throw new Error(json.message || 'Upload failed');
   }
 
   /** Upload a file (PDF, video, etc.) and get back its public URL. */

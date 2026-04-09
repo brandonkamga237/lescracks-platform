@@ -38,18 +38,16 @@ const VALUES = [
 ];
 
 const MILESTONES = [
-  { year: '2019', title: 'Naissance de l\'idée', desc: 'Brandon Kamga commence à coacher ses premiers apprenants de manière informelle à Yaoundé.' },
-  { year: '2021', title: 'Première structure', desc: 'LesCracks prend forme en tant qu\'agence structurée, avec les premiers programmes d\'accompagnement formalisés.' },
-  { year: '2023', title: 'Expansion régionale', desc: 'La communauté s\'étend à d\'autres pays francophones. Les bootcamps et hackathons deviennent récurrents.' },
-  { year: '2024', title: 'Plateforme en ligne', desc: 'Lancement de la bibliothèque de ressources et des outils pour accompagner les apprenants à distance.' },
-  { year: '2025+', title: 'Prochaine étape', desc: 'Renforcer notre programme d\'accompagnement 360 et ouvrir notre impact open source à des contributeurs internationaux.' },
+  { year: '2024', title: 'Naissance de l\'idée', desc: 'Brandon Kamga identifie un vide : des talents tech motivés en Afrique francophone, mais sans structure sérieuse pour les accompagner. L\'idée LesCracks prend forme.' },
+  { year: '2025', title: 'Première structure & accompagnement pratique', desc: 'LesCracks se formalise avec ses premiers programmes d\'accompagnement, des sessions pratiques régulières et une communauté qui commence à grandir.' },
+  { year: '2026', title: 'Accompagnement 360 · Attestations · LesCracks OpenSource', desc: 'Lancement officiel de l\'Accompagnement 360, introduction des attestations de complétion et démarrage de LesCracks OpenSource pour contribuer à des projets réels.', current: true },
 ];
 
 const NUMBERS = [
-  { value: '200+', label: 'apprenants accompagnés' },
+  { value: '+20',  label: 'apprenants accompagnés' },
   { value: '3',    label: 'pays couverts' },
   { value: '94%',  label: 'taux de satisfaction' },
-  { value: '5+',   label: 'ans d\'expérience terrain' },
+  { value: '2',    label: 'ans d\'existence' },
 ];
 
 const fadeUp = {
@@ -118,22 +116,23 @@ const About = () => {
               </h2>
               <div className="space-y-4 text-white/55 leading-relaxed">
                 <p>
-                  Brandon Kamga travaillait dans la tech et voyait autour de lui des jeunes motivés,
-                  intelligents, capables — mais perdus. Sans accès à des mentors locaux, sans formation
-                  adaptée à leur contexte, sans réseau pour démarrer.
+                  En 2024, Brandon Kamga fait un constat simple : des jeunes motivés, intelligents,
+                  capables — mais perdus. Sans mentors locaux, sans formation adaptée à leur contexte,
+                  sans réseau pour démarrer dans la tech.
                 </p>
                 <p>
                   Les ressources en ligne existaient, mais en anglais, pour des contextes occidentaux,
                   sans suivi humain. Ce n'était pas suffisant.
                 </p>
                 <p>
-                  LesCracks a commencé par des sessions informelles, du coaching de pair à pair, des
-                  petits groupes qui avançaient ensemble. Avec le temps, une méthode s'est formalisée.
-                  Une communauté a grandi. Une agence est née.
+                  LesCracks démarre en 2024 avec une idée simple : accompagner concrètement. En 2025,
+                  les premiers programmes prennent forme — sessions pratiques, petits groupes, méthode
+                  qui se rode. Une communauté commence à grandir.
                 </p>
                 <p>
-                  Aujourd'hui, on accompagne des apprenants au Cameroun, au Sénégal, en Côte d'Ivoire
-                  et au-delà. Mais l'ADN reste le même : du terrain, de l'humain, du concret.
+                  En 2026, on franchit une nouvelle étape : lancement de l'Accompagnement 360, des
+                  attestations et de LesCracks OpenSource. L'ADN reste le même : du terrain, de l'humain,
+                  du concret.
                 </p>
               </div>
             </motion.div>
@@ -223,14 +222,15 @@ const About = () => {
                   className="flex gap-6 pl-2"
                 >
                   {/* Dot */}
-                  <div className="flex-shrink-0 w-9 h-9 rounded-full bg-background border-2 border-gold/40 flex items-center justify-center z-10">
-                    <div className="w-2 h-2 rounded-full bg-gold" />
+                  <div className={`flex-shrink-0 w-9 h-9 rounded-full bg-background flex items-center justify-center z-10 ${m.current ? 'border-2 border-gold' : 'border-2 border-gold/40'}`}>
+                    <div className={`rounded-full ${m.current ? 'w-3 h-3 bg-gold' : 'w-2 h-2 bg-gold/60'}`} />
                   </div>
                   {/* Content */}
                   <div className="pb-2">
                     <div className="flex items-baseline gap-3 mb-1">
-                      <span className="text-xs font-mono text-gold/70 tracking-wider">{m.year}</span>
+                      <span className={`text-xs font-mono tracking-wider ${m.current ? 'text-gold' : 'text-gold/70'}`}>{m.year}</span>
                       <h3 className="font-display font-semibold">{m.title}</h3>
+                      {m.current && <span className="text-[10px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/25 font-medium">Actuel</span>}
                     </div>
                     <p className="text-sm text-white/45 leading-relaxed">{m.desc}</p>
                   </div>

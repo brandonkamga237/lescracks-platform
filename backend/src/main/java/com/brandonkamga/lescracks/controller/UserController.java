@@ -104,7 +104,7 @@ public class UserController {
     }
 
     @PutMapping("/me")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Mettre à jour le profil utilisateur", 
                description = "Met à jour les informations de l'utilisateur actuellement connecté.")
     @ApiResponses(value = {
@@ -139,6 +139,9 @@ public class UserController {
             throw new BadRequestException("Username already exists");
         }
 
+        // Prevent self-role modification: users cannot change their own role
+        userRequest.setRoleName(null);
+
         User updatedUser = userMapper.updateEntity(currentUser, userRequest);
         User savedUser = userService.save(updatedUser);
 
@@ -146,7 +149,7 @@ public class UserController {
     }
 
     @DeleteMapping("/me")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Supprimer son propre compte", 
                description = "Supprime le compte de l'utilisateur actuellement connecté.")
     @ApiResponses(value = {
@@ -281,7 +284,7 @@ public class UserController {
     }
 
     @PostMapping("/me/change-password")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Changer le mot de passe", 
                description = "Permet à l'utilisateur de changer son mot de passe.")
     @ApiResponses(value = {

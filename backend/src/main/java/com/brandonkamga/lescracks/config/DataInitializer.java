@@ -12,6 +12,7 @@ import com.brandonkamga.lescracks.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -48,6 +49,7 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
         // Initialize Roles FIRST
         if (roleRepository.count() == 0) {
@@ -77,13 +79,13 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("User count: " + userRepository.count());
         System.out.println("Admin exists: " + userRepository.findByEmail("admin@admin.com").isPresent());
         
+        Role adminRole = roleRepository.findByName(RoleName.admin).orElse(null);
+        Provider localProvider = providerRepository.findByProviderName(ProviderType.LOCAL).orElse(null);
+
+        System.out.println("Admin role: " + (adminRole != null ? adminRole.getName() : "NULL"));
+        System.out.println("Local provider: " + (localProvider != null ? localProvider.getProviderName() : "NULL"));
+
         if (!userRepository.findByEmail("admin@admin.com").isPresent()) {
-            Role adminRole = roleRepository.findByName(RoleName.admin).orElse(null);
-            Provider localProvider = providerRepository.findByProviderName(ProviderType.LOCAL).orElse(null);
-            
-            System.out.println("Admin role: " + (adminRole != null ? adminRole.getName() : "NULL"));
-            System.out.println("Local provider: " + (localProvider != null ? localProvider.getProviderName() : "NULL"));
-            
             if (adminRole != null && localProvider != null) {
                 User adminUser = User.builder()
                         .email("admin@admin.com")
@@ -98,7 +100,16 @@ public class DataInitializer implements CommandLineRunner {
                 System.out.println("=== Admin user NOT created - role or provider is null! ===");
             }
         } else {
-            System.out.println("=== Admin user already exists ===");
+            // Ensure admin always has the admin role (in case it was accidentally changed)
+            userRepository.findByEmail("admin@admin.com").ifPresent(existingAdmin -> {
+                if (adminRole != null && (existingAdmin.getRole() == null || existingAdmin.getRole().getName() != RoleName.admin)) {
+                    existingAdmin.setRole(adminRole);
+                    userRepository.save(existingAdmin);
+                    System.out.println("=== Admin role restored to admin! ===");
+                } else {
+                    System.out.println("=== Admin user already exists with correct role ===");
+                }
+            });
         }
 
         // Initialize Categories

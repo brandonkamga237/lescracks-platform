@@ -7,7 +7,6 @@ import { apiService } from '@/services/api';
 import Layout from '@/components/layout/Layout';
 import {
   Crown,
-  BookOpen,
   CheckCircle,
   Loader2,
   ArrowRight,
@@ -17,35 +16,19 @@ import {
   BarChart3,
 } from 'lucide-react';
 
-// ApplicationTypeId as defined in the seeded DB
-// accompagnement_360 = 4, formation_classique = 5  (adjust to your seed values)
-const SERVICE_TYPES = [
-  {
-    id: 'accompagnement_360',
-    typeId: 4,
-    label: 'Accompagnement 360',
-    tagline: 'Transformation complète · Résultat garanti',
-    badge: 'RECOMMANDÉ',
-    icon: Crown,
-    color: 'gold',
-    description:
-      'Un suivi personnalisé de A à Z : bilan initial, plan sur-mesure, coaching hebdomadaire et accompagnement jusqu\'à l\'insertion professionnelle (emploi, freelance ou projet).',
-    forWho: 'Débutants, reconversions, profils bloqués depuis + de 6 mois.',
-    result: 'Emploi · Freelance · Projet concret en 6 mois',
-  },
-  {
-    id: 'formation_classique',
-    typeId: 5,
-    label: 'Formation pratique',
-    tagline: 'Compétences ciblées · À ton rythme',
-    badge: null,
-    icon: BookOpen,
-    color: 'white',
-    description:
-      'Cours structurés, projets guidés et exercices pratiques pour acquérir des compétences tech spécifiques. Sans accompagnement profond ni garantie d\'insertion.',
-    forWho: 'Ceux qui savent ce qu\'ils veulent apprendre et qui avancent seuls.',
-    result: 'Compétences certifiées · Portfolio de projets',
-  },
+// ApplicationTypeId as defined in the seeded DB — accompagnement_360 = 4
+const ACCOMPAGNEMENT = {
+  typeId: 4,
+  label: 'Accompagnement 360',
+};
+
+const FEATURES = [
+  'Bilan de profil approfondi',
+  'Plan de progression personnalisé',
+  'Séances de coaching régulières avec un mentor',
+  'Accès aux ressources et à la communauté LesCracks',
+  'Préparation à l\'emploi, au freelance ou à la création',
+  'Attestation de complétion',
 ];
 
 const LEVELS = [
@@ -60,9 +43,6 @@ const Postuler = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const defaultService = searchParams.get('service') === 'formation' ? 'formation_classique' : 'accompagnement_360';
-
-  const [selectedService, setSelectedService] = useState(defaultService);
   const [level, setLevel] = useState('');
   const [motivation, setMotivation] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -70,10 +50,8 @@ const Postuler = () => {
   const [error, setError] = useState('');
 
   if (!isAuthenticated) {
-    return <Navigate to={`/inscription?redirect=/postuler${searchParams.get('service') ? `?service=${searchParams.get('service')}` : ''}`} replace />;
+    return <Navigate to="/inscription?redirect=/postuler" replace />;
   }
-
-  const selected = SERVICE_TYPES.find((s) => s.id === selectedService)!;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +69,7 @@ const Postuler = () => {
     setSubmitting(true);
     try {
       await apiService.submitServiceApplication({
-        applicationTypeId: selected.typeId,
+        applicationTypeId: ACCOMPAGNEMENT.typeId,
         motivationText: motivation.trim(),
         technicalLevel: level,
       });
@@ -115,22 +93,16 @@ const Postuler = () => {
             <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-10 h-10 text-green-400" />
             </div>
-            <h1 className="text-2xl font-display font-bold mb-3">
-              Candidature reçue !
-            </h1>
+            <h1 className="text-2xl font-display font-bold mb-3">Candidature reçue !</h1>
             <p className="text-white/60 leading-relaxed mb-2">
-              Merci <strong className="text-white">{user?.firstName || user?.username}</strong>. Votre demande d'<strong className="text-gold">{selected.label}</strong> a bien été enregistrée.
+              Merci <strong className="text-white">{user?.firstName || user?.username}</strong>. Ta demande d'<strong className="text-gold">Accompagnement 360</strong> a bien été enregistrée.
             </p>
             <p className="text-white/40 text-sm mb-8">
-              Notre équipe vous contactera sous 48h pour la suite du processus.
+              Notre équipe te contactera sous 48h pour la suite du processus.
             </p>
             <div className="flex gap-3 justify-center">
-              <Link to="/profil" className="btn-secondary">
-                Voir mon profil
-              </Link>
-              <Link to="/" className="btn-primary">
-                Retour à l'accueil
-              </Link>
+              <Link to="/profil" className="btn-secondary">Voir mon profil</Link>
+              <Link to="/" className="btn-primary">Retour à l'accueil</Link>
             </div>
           </motion.div>
         </div>
@@ -151,72 +123,40 @@ const Postuler = () => {
           </div>
 
           {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-10"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
+            <p className="text-[11px] text-gold uppercase tracking-[0.4em] mb-4">Accompagnement 360</p>
             <h1 className="text-3xl sm:text-4xl font-display font-bold mb-3">
-              Choisissez votre <span className="text-gold">parcours</span>
+              Rejoindre <span className="text-gold">LesCracks</span>
             </h1>
-            <p className="text-white/50 text-lg">
-              Sélectionnez l'offre qui correspond à votre situation, puis complétez votre candidature.
+            <p className="text-white/50 text-lg max-w-xl">
+              Un suivi humain et structuré pour passer de débutant à profil employable dans la tech.
             </p>
           </motion.div>
 
-          {/* Service selector */}
-          <div className="grid sm:grid-cols-2 gap-4 mb-10">
-            {SERVICE_TYPES.map((service) => {
-              const Icon = service.icon;
-              const isSelected = selectedService === service.id;
-              return (
-                <motion.button
-                  key={service.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  onClick={() => setSelectedService(service.id)}
-                  className={`relative text-left p-6 rounded-2xl border-2 transition-all ${
-                    isSelected
-                      ? service.color === 'gold'
-                        ? 'border-gold bg-gold/10'
-                        : 'border-white/40 bg-white/5'
-                      : 'border-white/10 bg-white/2 hover:border-white/20'
-                  }`}
-                >
-                  {service.badge && (
-                    <span className="absolute -top-3 left-4 px-3 py-0.5 bg-gold text-black text-xs font-bold rounded-full">
-                      {service.badge}
-                    </span>
-                  )}
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${
-                    service.color === 'gold' ? 'bg-gold/20' : 'bg-white/10'
-                  }`}>
-                    <Icon className={`w-5 h-5 ${service.color === 'gold' ? 'text-gold' : 'text-white/60'}`} />
-                  </div>
-                  <h3 className={`font-display font-bold text-lg mb-1 ${service.color === 'gold' ? 'text-gold' : 'text-white'}`}>
-                    {service.label}
-                  </h3>
-                  <p className="text-xs text-white/40 mb-3">{service.tagline}</p>
-                  <p className="text-sm text-white/60 leading-relaxed">{service.description}</p>
-                  <div className="mt-4 pt-4 border-t border-white/10">
-                    <p className="text-xs text-white/30 mb-1">Résultat attendu</p>
-                    <p className={`text-sm font-medium ${service.color === 'gold' ? 'text-gold' : 'text-white/70'}`}>
-                      {service.result}
-                    </p>
-                  </div>
-                  {isSelected && (
-                    <div className={`absolute top-4 right-4 w-5 h-5 rounded-full flex items-center justify-center ${
-                      service.color === 'gold' ? 'bg-gold' : 'bg-white'
-                    }`}>
-                      <CheckCircle className="w-5 h-5 text-black" />
-                    </div>
-                  )}
-                </motion.button>
-              );
-            })}
-          </div>
+          {/* What you get */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="rounded-2xl border border-gold/20 bg-gold/3 p-6 mb-8"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-lg bg-gold/15 flex items-center justify-center">
+                <Crown className="w-4 h-4 text-gold" />
+              </div>
+              <p className="font-display font-semibold text-white">Ce que tu obtiens</p>
+            </div>
+            <ul className="grid sm:grid-cols-2 gap-2.5">
+              {FEATURES.map((f) => (
+                <li key={f} className="flex items-start gap-2 text-sm text-white/60">
+                  <CheckCircle className="w-4 h-4 text-gold/60 mt-0.5 flex-shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </motion.div>
 
-          {/* Application form */}
+          {/* Form */}
           <motion.form
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -229,8 +169,8 @@ const Postuler = () => {
                 <User className="w-5 h-5 text-gold" />
               </div>
               <div>
-                <h2 className="font-display font-semibold text-lg">Votre candidature</h2>
-                <p className="text-white/40 text-sm">pour l'offre <span className="text-gold">{selected.label}</span></p>
+                <h2 className="font-display font-semibold text-lg">Ta candidature</h2>
+                <p className="text-white/40 text-sm">pour l'<span className="text-gold">Accompagnement 360</span></p>
               </div>
             </div>
 
@@ -238,7 +178,7 @@ const Postuler = () => {
             <div>
               <label className="flex items-center gap-2 text-sm text-white/60 mb-3">
                 <BarChart3 className="w-4 h-4 text-gold" />
-                Votre niveau technique actuel <span className="text-red-400">*</span>
+                Ton niveau technique actuel <span className="text-red-400">*</span>
               </label>
               <div className="space-y-2">
                 {LEVELS.map((l) => (
@@ -268,14 +208,14 @@ const Postuler = () => {
             <div>
               <label className="flex items-center gap-2 text-sm text-white/60 mb-2">
                 <MessageSquare className="w-4 h-4 text-gold" />
-                Votre motivation <span className="text-red-400">*</span>
+                Ta motivation <span className="text-red-400">*</span>
               </label>
               <textarea
                 value={motivation}
                 onChange={(e) => setMotivation(e.target.value)}
                 rows={5}
                 className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold resize-none text-sm"
-                placeholder={`Dites-nous pourquoi vous souhaitez rejoindre le programme ${selected.label}. Où en êtes-vous ? Quel est votre objectif concret ? (min. 50 caractères)`}
+                placeholder="Où en es-tu ? Quel est ton objectif concret ? Pourquoi tu veux rejoindre LesCracks ? (min. 50 caractères)"
                 required
               />
               <p className={`text-xs mt-1 ${motivation.length >= 50 ? 'text-green-400' : 'text-white/30'}`}>
@@ -304,9 +244,10 @@ const Postuler = () => {
               )}
             </button>
             <p className="text-center text-white/20 text-xs">
-              Notre équipe vous contactera sous 48h par email ou WhatsApp.
+              Notre équipe te contactera sous 48h par email ou WhatsApp.
             </p>
           </motion.form>
+
         </div>
       </div>
     </Layout>

@@ -16,6 +16,8 @@ import {
   ChevronRight,
   LogOut,
   Shield,
+  Code2,
+  UserCheck,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -23,14 +25,16 @@ interface AdminLayoutProps {
 }
 
 const menuItems = [
-  { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/admin/users', label: 'Utilisateurs', icon: Users },
-  { path: '/admin/applications', label: 'Candidatures', icon: ClipboardList },
-  { path: '/admin/premium-requests', label: 'Demandes Premium', icon: Crown },
-  { path: '/admin/categories', label: 'Catégories', icon: FolderOpen },
-  { path: '/admin/tags', label: 'Tags', icon: Tags },
-  { path: '/admin/resources', label: 'Ressources', icon: FileText },
-  { path: '/admin/events', label: 'Événements', icon: Calendar },
+  { path: '/admin', label: 'Dashboard', icon: LayoutDashboard, group: 'main' },
+  { path: '/admin/users', label: 'Utilisateurs', icon: Users, group: 'main' },
+  { path: '/admin/applications', label: 'Candidatures', icon: ClipboardList, group: 'main' },
+  { path: '/admin/premium-requests', label: 'Demandes Premium', icon: Crown, group: 'main' },
+  { path: '/admin/categories', label: 'Catégories', icon: FolderOpen, group: 'content' },
+  { path: '/admin/tags', label: 'Tags', icon: Tags, group: 'content' },
+  { path: '/admin/resources', label: 'Ressources', icon: FileText, group: 'content' },
+  { path: '/admin/events', label: 'Événements', icon: Calendar, group: 'content' },
+  { path: '/admin/open-source', label: 'Projets OS', icon: Code2, group: 'opensource' },
+  { path: '/admin/contributors', label: 'Contributeurs', icon: UserCheck, group: 'opensource' },
 ];
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
@@ -89,25 +93,38 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         </button>
 
         {/* Menu */}
-        <nav className="p-2 space-y-1">
-          {menuItems.map((item) => {
+        <nav className="p-2 space-y-1 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 10rem)' }}>
+          {menuItems.map((item, idx) => {
             const Icon = item.icon;
             const active = isActive(item.path);
-            
+            const prevGroup = idx > 0 ? menuItems[idx - 1].group : item.group;
+            const showSeparator = idx > 0 && item.group !== prevGroup;
+
             return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                  active 
-                    ? 'bg-gold text-black' 
-                    : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                }`}
-                title={sidebarCollapsed ? item.label : undefined}
-              >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
-              </Link>
+              <div key={item.path}>
+                {showSeparator && !sidebarCollapsed && (
+                  <div className="px-3 pt-3 pb-1">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-600">
+                      {item.group === 'content' ? 'Contenu' : item.group === 'opensource' ? 'Open Source' : ''}
+                    </p>
+                  </div>
+                )}
+                {showSeparator && sidebarCollapsed && (
+                  <div className="mx-3 my-2 border-t border-gray-800" />
+                )}
+                <Link
+                  to={item.path}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                    active
+                      ? 'bg-gold text-black'
+                      : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  }`}
+                  title={sidebarCollapsed ? item.label : undefined}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
+                </Link>
+              </div>
             );
           })}
         </nav>

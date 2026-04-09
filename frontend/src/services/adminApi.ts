@@ -93,8 +93,18 @@ export interface DashboardStats {
   resourcesByType: { [key: string]: number };
   resourcesByCategory: { categoryName: string; count: number }[];
   eventsByStatus: { [key: string]: number };
+  applicationsByStatus: { [key: string]: number };
+  premiumRequestsByStatus: { [key: string]: number };
+  totalPremiumRequests: number;
   newUsersLast30Days: number;
+  newUsersPrev30Days: number;
   newResourcesLast30Days: number;
+  premiumConversionRate: number;
+  totalViews: number;
+  totalDownloads: number;
+  topViewedResources: any[];
+  topDownloadedResources: any[];
+  dailyUsers: { date: string; count: number }[];
   recentUsers: AdminUser[];
   recentResources: AdminResource[];
 }
@@ -314,9 +324,41 @@ class AdminApiService {
   }
 
   async deleteEvent(id: number): Promise<void> {
-    await this.request<void>(`/admin/events/${id}`, {
-      method: 'DELETE',
-    });
+    await this.request<void>(`/admin/events/${id}`, { method: 'DELETE' });
+  }
+
+  // === OPEN SOURCE PROJECTS ===
+  async getOpenSourceProjects(): Promise<any[]> {
+    return this.request<any[]>('/open-source/admin/projects');
+  }
+
+  async createOpenSourceProject(data: object): Promise<any> {
+    return this.request<any>('/open-source/admin/projects', { method: 'POST', body: JSON.stringify(data) });
+  }
+
+  async updateOpenSourceProject(id: number, data: object): Promise<any> {
+    return this.request<any>(`/open-source/admin/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+  }
+
+  async deleteOpenSourceProject(id: number): Promise<void> {
+    await this.request<void>(`/open-source/admin/projects/${id}`, { method: 'DELETE' });
+  }
+
+  // === CONTRIBUTORS ===
+  async getContributors(): Promise<any[]> {
+    return this.request<any[]>('/open-source/admin/contributors');
+  }
+
+  async createContributor(data: object): Promise<any> {
+    return this.request<any>('/open-source/admin/contributors', { method: 'POST', body: JSON.stringify(data) });
+  }
+
+  async updateContributor(id: number, data: object): Promise<any> {
+    return this.request<any>(`/open-source/admin/contributors/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+  }
+
+  async deleteContributor(id: number): Promise<void> {
+    await this.request<void>(`/open-source/admin/contributors/${id}`, { method: 'DELETE' });
   }
 }
 

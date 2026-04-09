@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Menu, X, ArrowRight, BookOpen, Video, Code2, ChevronRight,
-  User, Settings, LogOut, Shield, Crown, GraduationCap,
+  User, Settings, LogOut, Shield, Crown,
   Compass, Users,
 } from 'lucide-react';
 import LesCracksLogo from '@/components/common/LesCracksLogo';
@@ -15,23 +15,9 @@ const menuItems = [
   {
     title: 'Accompagnement',
     href: '/postuler',
-    pulse: true,          // gold blinking dot
+    pulse: true,
     alignRight: false,
-    hasMegaMenu: true,
-    columns: [
-      {
-        title: 'Accompagnement 360',
-        description: 'Suivi personnalisé de A à Z vers l\'insertion professionnelle',
-        href: '/postuler',
-        icon: Compass,
-      },
-      {
-        title: 'Formation pratique',
-        description: 'Compétences ciblées, à votre rythme, par la pratique',
-        href: '/postuler?service=formation',
-        icon: GraduationCap,
-      },
-    ],
+    hasMegaMenu: false,
   },
   {
     title: 'Ressources',
@@ -307,14 +293,14 @@ const Header = () => {
               </div>
             ) : (
               <div className="hidden md:flex items-center gap-3">
-                <Link to="/connexion" className="text-foreground/50 hover:text-foreground text-sm transition-colors">
-                  Connexion
+                <Link to="/inscription" className="text-foreground/50 hover:text-foreground text-sm transition-colors">
+                  S'inscrire
                 </Link>
                 <Link
-                  to="/inscription"
+                  to="/postuler"
                   className="inline-flex items-center gap-1.5 px-4 py-2 bg-gold text-black text-sm font-semibold hover:bg-gold-light transition-colors rounded-sm"
                 >
-                  S'inscrire
+                  Postuler
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -345,20 +331,13 @@ const Header = () => {
 
               {/* Accompagnement */}
               <div className="pt-2 pb-1 border-t border-border/50">
-                <div className="flex items-center gap-2 px-4 mb-1">
-                  <p className="text-[10px] text-foreground/35 uppercase tracking-widest">Accompagnement</p>
+                <Link to="/postuler" onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 py-2.5 px-4 text-gold hover:bg-gold/8 rounded-xl text-sm font-medium">
                   <span className="relative flex h-1.5 w-1.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75" />
                     <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-gold" />
                   </span>
-                </div>
-                <Link to="/postuler" onClick={() => setMobileMenuOpen(false)}
-                  className="block py-2.5 px-4 pl-7 text-gold hover:bg-gold/8 rounded-xl text-sm font-medium">
                   Accompagnement 360
-                </Link>
-                <Link to="/postuler?service=formation" onClick={() => setMobileMenuOpen(false)}
-                  className="block py-2.5 px-4 pl-7 text-foreground/60 hover:text-foreground hover:bg-secondary rounded-xl text-sm">
-                  Formation pratique
                 </Link>
               </div>
 
@@ -398,13 +377,13 @@ const Header = () => {
                 </div>
               ) : (
                 <div className="border-t border-border/50 mt-2 pt-3 space-y-2">
-                  <Link to="/connexion" onClick={() => setMobileMenuOpen(false)}
-                    className="block py-2.5 px-4 text-foreground/60 hover:text-foreground hover:bg-secondary rounded-xl text-sm">
-                    Connexion
-                  </Link>
                   <Link to="/inscription" onClick={() => setMobileMenuOpen(false)}
+                    className="block py-2.5 px-4 text-foreground/60 hover:text-foreground hover:bg-secondary rounded-xl text-sm">
+                    S'inscrire
+                  </Link>
+                  <Link to="/postuler" onClick={() => setMobileMenuOpen(false)}
                     className="block py-3 px-4 bg-gold text-black font-semibold rounded-xl text-sm text-center">
-                    S'inscrire gratuitement
+                    Postuler
                   </Link>
                 </div>
               )}

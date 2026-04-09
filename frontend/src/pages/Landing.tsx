@@ -14,7 +14,6 @@ import {
   Target,
   TrendingUp,
   Compass,
-  GraduationCap,
   Calendar,
   MapPin,
   ChevronRight,
@@ -28,10 +27,10 @@ import {
 // ─── data ─────────────────────────────────────────────────────────────────────
 
 const STATS = [
-  { value: '200+', label: 'apprenants formés' },
+  { value: '+20', label: 'apprenants formés' },
   { value: '3', label: 'pays couverts' },
   { value: '94%', label: 'taux de satisfaction' },
-  { value: '2019', label: 'année de création' },
+  { value: '2', label: 'ans d\'existence' },
 ];
 
 const PAIN_POINTS = [
@@ -52,13 +51,13 @@ const PAIN_POINTS = [
   },
 ];
 
-const COMPARISON = [
-  { label: 'Objectif',       acc: 'Évolution professionnelle',        form: 'Acquisition de compétences' },
-  { label: 'Suivi',          acc: 'Coaching personnalisé régulier',    form: 'Auto-apprentissage guidé' },
-  { label: 'Plan',           acc: 'Feuille de route sur-mesure',      form: 'Programme standardisé' },
-  { label: 'Réseau',         acc: 'Accès réseau LesCracks',           form: 'Communauté d\'apprenants' },
-  { label: 'Rythme',         acc: 'Encadré et structuré',             form: 'Flexible, à votre rythme' },
-  { label: 'Profil cible',   acc: 'Reconversion, débutants, bloqués', form: 'Autodidactes motivés' },
+const ACC_FEATURES = [
+  'Bilan de profil approfondi',
+  'Plan de progression personnalisé',
+  'Séances de coaching régulières avec un mentor',
+  'Accès aux ressources et à la communauté LesCracks',
+  'Préparation à l\'emploi, au freelance ou à la création',
+  'Attestation de complétion',
 ];
 
 const PROCESS_STEPS = [
@@ -133,30 +132,30 @@ const Landing = () => {
 
             <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.7 }}
               className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold leading-tight mb-6">
-              Devenez un professionnel{' '}
+              Devenez aussi{' '}
               <span className="relative inline-block text-gold">
-                de la tech
-                <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 260 10" preserveAspectRatio="none">
-                  <path d="M0 7 Q130 12 260 7" stroke="#D4AF37" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                un crack de la tech
+                <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 420 10" preserveAspectRatio="none">
+                  <path d="M0 7 Q210 12 420 7" stroke="#D4AF37" strokeWidth="2.5" fill="none" strokeLinecap="round" />
                 </svg>
               </span>
             </motion.h1>
 
             <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
               className="text-lg text-white/55 max-w-lg mb-10">
-              Deux parcours complémentaires pour acquérir des compétences réelles et évoluer dans le secteur tech, depuis l'Afrique.
+              Un accompagnement structuré pour passer de débutant à profil employable — avec un mentor, des projets réels et une communauté.
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
               className="flex flex-col sm:flex-row gap-4">
               <Link to={postulerHref}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gold text-black font-bold text-base hover:bg-gold-light transition-colors">
-                Postuler
+                Postuler à l'accompagnement
                 <ArrowRight className="w-5 h-5" />
               </Link>
-              <Link to="#offres"
+              <Link to="#parcours"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors text-base">
-                Découvrir nos offres
+                Découvrir le parcours
               </Link>
             </motion.div>
 
@@ -211,115 +210,64 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* ── DEUX OFFRES ─────────────────────────────────────────────── */}
-      <section id="offres" className="py-24 bg-secondary">
+      {/* ── ACCOMPAGNEMENT 360 ──────────────────────────────────────── */}
+      <section id="parcours" className="py-24 bg-secondary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-14">
-            <SL>Nos parcours</SL>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
-              Deux chemins selon <span className="text-gold">votre situation</span>
-            </h2>
-            <p className="text-white/40 mt-3 max-w-xl text-sm leading-relaxed">
-              Les deux offres sont complémentaires. Choisissez celle qui correspond à là où vous en êtes.
-            </p>
-          </motion.div>
+          <div className="grid lg:grid-cols-2 gap-14 items-center">
 
-          {/* Cards — equal visual weight */}
-          <div className="grid md:grid-cols-2 gap-6 mb-14">
+            {/* Left — pitch */}
+            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
+              <SL>Notre offre</SL>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-5">
+                L'<span className="text-gold">Accompagnement 360</span>
+              </h2>
+              <p className="text-white/55 text-sm leading-relaxed mb-8">
+                Un suivi humain et structuré qui t'emmène de "je ne sais pas par où commencer" jusqu'à ton premier poste, ta première mission freelance ou le lancement de ton projet. Avec un mentor dédié, des projets concrets et une communauté qui avance avec toi.
+              </p>
 
-            {/* Accompagnement 360 */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              className="rounded-2xl border border-gold/30 bg-gold/4 p-8 flex flex-col">
-              <div className="flex items-center gap-3 mb-5">
+              {/* For who */}
+              <div className="p-4 rounded-xl bg-white/4 border border-white/8 mb-8">
+                <p className="text-[11px] text-gold/60 uppercase tracking-widest mb-2">Pour qui</p>
+                <p className="text-sm text-white/55 leading-relaxed">
+                  Débutants, personnes en reconversion, profils qui tournent en rond depuis des mois sans résultats concrets.
+                </p>
+              </div>
+
+              <Link to={postulerHref}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-gold text-black font-bold hover:bg-gold-light transition-colors">
+                Postuler maintenant
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <p className="text-white/20 text-xs mt-3">Réponse sous 48h · Sans engagement immédiat</p>
+            </motion.div>
+
+            {/* Right — feature list */}
+            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
+              className="rounded-2xl border border-gold/20 bg-gold/3 p-8">
+              <div className="flex items-center gap-3 mb-6">
                 <div className="w-11 h-11 rounded-xl bg-gold/15 flex items-center justify-center">
                   <Compass className="w-5 h-5 text-gold" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-display font-bold text-white">Accompagnement 360</h3>
-                  <p className="text-xs text-white/40">Suivi personnalisé · Orienté résultat</p>
+                  <p className="font-display font-bold text-white">Ce que tu obtiens</p>
+                  <p className="text-xs text-white/35">Accompagnement 360 · Suivi personnalisé</p>
                 </div>
               </div>
-              <p className="text-white/60 text-sm leading-relaxed mb-6">
-                Un suivi structuré qui va de la compréhension de votre profil à la mise en situation professionnelle. Idéal si vous avez besoin d'un cadre, d'un mentor et d'une communauté.
-              </p>
-              <ul className="space-y-2.5 mb-7 flex-1">
-                {['Bilan de situation initial', 'Plan de progression sur-mesure', 'Sessions de coaching régulières', 'Accès aux ressources LesCracks', 'Préparation à l\'emploi ou au freelance'].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-white/65">
+              <ul className="space-y-3.5">
+                {ACC_FEATURES.map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-sm text-white/70">
                     <CheckCircle className="w-4 h-4 text-gold/70 mt-0.5 flex-shrink-0" />
                     {item}
                   </li>
                 ))}
               </ul>
-              <div className="p-3.5 rounded-xl bg-white/4 border border-white/8 mb-6 text-sm text-white/45">
-                <span className="text-white/25 text-xs">Pour qui : </span>
-                Débutants, personnes en reconversion, profils qui stagnent depuis plusieurs mois.
+              <div className="mt-6 pt-6 border-t border-white/8">
+                <p className="text-xs text-white/25 mb-1">Résultat attendu</p>
+                <p className="text-sm font-medium text-gold">Emploi · Freelance · Projet personnel lancé</p>
               </div>
-              <Link to={postulerHref}
-                className="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-gold text-black font-bold hover:bg-gold-light transition-colors text-sm">
-                Postuler à l'Accompagnement 360
-                <ArrowRight className="w-4 h-4" />
-              </Link>
             </motion.div>
 
-            {/* Formation pratique */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.08 }}
-              className="rounded-2xl border border-white/12 p-8 flex flex-col">
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-11 h-11 rounded-xl bg-white/7 flex items-center justify-center">
-                  <GraduationCap className="w-5 h-5 text-white/60" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-display font-bold text-white">Formation pratique</h3>
-                  <p className="text-xs text-white/40">Compétences ciblées · Flexible</p>
-                </div>
-              </div>
-              <p className="text-white/60 text-sm leading-relaxed mb-6">
-                Des cours structurés, des projets concrets et des exercices pratiques pour monter en compétence sur une technologie précise. Accessible à votre propre rythme.
-              </p>
-              <ul className="space-y-2.5 mb-7 flex-1">
-                {['Cours vidéo et articles structurés', 'Exercices et projets pratiques', 'Accès à la bibliothèque de ressources', 'Communauté d\'apprenants active', 'Certifications de complétion'].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5 text-sm text-white/55">
-                    <CheckCircle className="w-4 h-4 text-white/25 mt-0.5 flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <div className="p-3.5 rounded-xl bg-white/4 border border-white/8 mb-6 text-sm text-white/45">
-                <span className="text-white/25 text-xs">Pour qui : </span>
-                Autodidactes motivés qui savent ce qu'ils veulent apprendre et avancent à leur propre rythme.
-              </div>
-              <Link to="/postuler?service=formation"
-                className="inline-flex items-center justify-center gap-2 w-full py-3.5 border border-white/20 text-white/70 hover:text-white hover:border-white/40 transition-colors text-sm font-semibold">
-                Commencer la Formation
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </motion.div>
           </div>
-
-          {/* Comparison table */}
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <p className="text-xs text-white/30 uppercase tracking-widest text-center mb-6">Comparaison rapide</p>
-            <div className="rounded-2xl overflow-hidden border border-white/8">
-              <div className="grid grid-cols-3 bg-white/4 border-b border-white/8">
-                <div className="p-4" />
-                <div className="p-4 text-center border-l border-white/8">
-                  <span className="text-xs font-semibold text-gold/80 uppercase tracking-wider">Accompagnement 360</span>
-                </div>
-                <div className="p-4 text-center border-l border-white/8">
-                  <span className="text-xs font-semibold text-white/30 uppercase tracking-wider">Formation pratique</span>
-                </div>
-              </div>
-              {COMPARISON.map((row, i) => (
-                <div key={row.label} className={`grid grid-cols-3 ${i < COMPARISON.length - 1 ? 'border-b border-white/5' : ''}`}>
-                  <div className="p-4 text-xs text-white/35 font-medium">{row.label}</div>
-                  <div className="p-4 text-xs text-white/70 border-l border-white/8 bg-gold/3">{row.acc}</div>
-                  <div className="p-4 text-xs text-white/35 border-l border-white/8">{row.form}</div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
         </div>
       </section>
 
@@ -410,20 +358,6 @@ const Landing = () => {
                 alt="Open Source"
                 className="w-full h-72 object-cover opacity-70"
               />
-              <div className="p-6 bg-white/3">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                  <span className="text-xs text-white/40">Projets actifs en ce moment</span>
-                </div>
-                <div className="space-y-2">
-                  {['LesCracks Platform', 'Afrika Dev Tools', 'OpenMentor API'].map((proj) => (
-                    <div key={proj} className="flex items-center gap-3 p-2.5 rounded-lg bg-white/4 border border-white/6">
-                      <Code2 className="w-3.5 h-3.5 text-gold/60" />
-                      <span className="text-xs text-white/60">{proj}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </motion.div>
           </div>
         </div>
@@ -553,7 +487,7 @@ const Landing = () => {
               Prêt à changer<br />de <span className="text-gold">trajectoire</span> ?
             </h2>
             <p className="text-white/45 mb-10 max-w-lg mx-auto text-sm leading-relaxed">
-              Des centaines d'apprenants nous ont fait confiance. Rejoignez une communauté qui avance vraiment.
+              Rejoins une communauté qui avance vraiment. Ton parcours commence par une candidature.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to={postulerHref}

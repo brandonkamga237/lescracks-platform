@@ -128,8 +128,9 @@ public class ResourceController {
         
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
         
-        // Use the unified search method
-        Page<Resource> resourcePage = resourceService.searchWithFilters(type, categoryId, tagIdList, search, pageable);
+        // Use the unified search method — convert type to lowercase to match enum storage
+        Page<Resource> resourcePage = resourceService.searchWithFilters(
+                type != null ? type.toLowerCase() : null, categoryId, tagIdList, search, pageable);
         
         // Convert to response format
         List<ResourceResponse> content = resourcePage.getContent().stream()
@@ -199,7 +200,7 @@ public class ResourceController {
             @Parameter(description = "Taille de la page") @RequestParam(defaultValue = "12") int size) {
         
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Resource> resourcePage = resourceService.findByResourceTypeName(resourceTypeName.toUpperCase(), pageable);
+        Page<Resource> resourcePage = resourceService.findByResourceTypeName(resourceTypeName.toLowerCase(), pageable);
         
         List<ResourceResponse> content = resourcePage.getContent().stream()
                 .map(this::toResponse)
@@ -446,7 +447,7 @@ public class ResourceController {
                 .categoryId(resource.getCategory().getId())
                 .categoryName(resource.getCategory().getName())
                 .resourceTypeId(resource.getResourceType().getId())
-                .resourceTypeName(resource.getResourceType().getName().name())
+                .resourceTypeName(resource.getResourceType().getName().name().toUpperCase())
                 .tags(tags)
                 .metadata(metadataDto)
                 .build();

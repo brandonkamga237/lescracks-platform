@@ -24,9 +24,12 @@ import AdminResources from './pages/admin/AdminResources';
 import AdminEvents from './pages/admin/AdminEvents';
 import AdminPremiumRequests from './pages/admin/AdminPremiumRequests';
 import AdminApplications from './pages/admin/AdminApplications';
+import AdminOpenSource from './pages/admin/AdminOpenSource';
+import AdminContributors from './pages/admin/AdminContributors';
 import Premium from './pages/Premium';
 import Postuler from './pages/Postuler';
 import About from './pages/About';
+import OpenSource from './pages/OpenSource';
 
 // Protected Route wrapper for admin
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
@@ -81,6 +84,7 @@ function AppContent() {
           
           {/* Public Routes */}
           <Route path="/about" element={<About />} />
+          <Route path="/open-source" element={<OpenSource />} />
           <Route path="/evenements" element={<Evenements />} />
           <Route path="/evenements/:id" element={<Evenements />} />
           <Route path="/ressources" element={<Ressources />} />
@@ -126,7 +130,17 @@ function AppContent() {
               <AdminPremiumRequests />
             </AdminRoute>
           } />
-          
+          <Route path="/admin/open-source" element={
+            <AdminRoute>
+              <AdminOpenSource />
+            </AdminRoute>
+          } />
+          <Route path="/admin/contributors" element={
+            <AdminRoute>
+              <AdminContributors />
+            </AdminRoute>
+          } />
+
           {/* 404 */}
           <Route path="*" element={<Landing />} />
         </Routes>

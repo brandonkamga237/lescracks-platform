@@ -115,19 +115,38 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     @Transactional(readOnly = true)
     public Page<Resource> searchWithFilters(String typeName, Long categoryId, List<Long> tagIds, String searchTerm, Pageable page) {
-        // Determine which query to use based on provided filters
         boolean hasType = typeName != null && !typeName.isEmpty();
         boolean hasCategory = categoryId != null;
         boolean hasTags = tagIds != null && !tagIds.isEmpty();
         boolean hasSearch = searchTerm != null && !searchTerm.isEmpty();
-        
-        // If no filters at all, return all resources
+
         if (!hasType && !hasCategory && !hasTags && !hasSearch) {
             return resourceRepository.findAll(page);
         }
-        
-        // Use the unified search query for complex filtering
-        return resourceRepository.searchWithFilters(typeName, categoryId, searchTerm, tagIds, page);
+
+        // When tags are involved or a text search is combined with tags, use the unified query
+        // (tagIds is guaranteed non-null when hasTags=true, avoiding Hibernate null collection issue)
+        if (hasTags) {
+            return resourceRepository.searchWithFilters(typeName, categoryId, searchTerm, tagIds, page);
+        }
+
+        // Text search without tags — use a dedicated query that avoids the IN(:tagIds) problem
+        if (hasSearch) {
+            return resourceRepository.searchByTermWithFilters(typeName, categoryId, searchTerm, page);
+        }
+
+        // Simple filters: type and/or category only — use specific efficient methods
+        if (hasType && hasCategory) {
+            return resourceRepository.findByTypeNameAndCategoryId(typeName, categoryId, page);
+        }
+        if (hasType) {
+            return resourceRepository.findByResourceTypeName(typeName, page);
+        }
+        if (hasCategory) {
+            return resourceRepository.findByCategoryIdWithPagination(categoryId, page);
+        }
+
+        return resourceRepository.findAll(page);
     }
 
     @Override

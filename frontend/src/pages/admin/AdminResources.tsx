@@ -1,6 +1,6 @@
 // src/pages/admin/AdminResources.tsx
 import { useState, useEffect, useRef } from 'react';
-import { FileText, Plus, Loader2, Trash2, Eye, Video, File, ChevronLeft, ChevronRight, Search, Filter, X, Save, Youtube, Upload, Crown, Download, Lock } from 'lucide-react';
+import { FileText, Plus, Loader2, Trash2, Eye, Video, File, ChevronLeft, ChevronRight, Search, Filter, X, Save, Youtube, Upload, Crown, Download, Lock, Pencil } from 'lucide-react';
 import adminApi, { AdminResource, AdminCategory, PaginatedResponse } from '@/services/adminApi';
 import apiService from '@/services/api';
 
@@ -37,6 +37,8 @@ const AdminResources = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingPreview, setUploadingPreview] = useState(false);
 
   // Resource types
   const resourceTypes = [
@@ -105,9 +107,30 @@ const AdminResources = () => {
     setPage(0);
   };
 
+  const openEditModal = (resource: AdminResource) => {
+    setEditingResource(resource);
+    setUploadedFileName((resource as any).sourceType === 'UPLOADED' ? resource.url.split('/').pop() || '' : '');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (previewInputRef.current) previewInputRef.current.value = '';
+    setFormData({
+      title: resource.title,
+      description: resource.description || '',
+      url: resource.url,
+      previewImageUrl: resource.previewImageUrl || '',
+      categoryId: resource.categoryId.toString(),
+      resourceTypeId: resource.resourceTypeId.toString(),
+      sourceType: ((resource as any).sourceType || 'EXTERNAL') as 'EXTERNAL' | 'UPLOADED',
+      isPremium: (resource as any).premium || false,
+      isDownloadable: (resource as any).downloadable !== false,
+    });
+    setShowModal(true);
+  };
+
   const openCreateModal = () => {
     setEditingResource(null);
     setUploadedFileName('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (previewInputRef.current) previewInputRef.current.value = '';
     setFormData({
       title: '',
       description: '',
@@ -120,6 +143,25 @@ const AdminResources = () => {
       isDownloadable: true,
     });
     setShowModal(true);
+  };
+
+  const handlePreviewImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+    if (!allowed.includes(file.type)) {
+      alert('Format non supporté. Formats acceptés : PNG, JPEG, GIF, WebP.');
+      return;
+    }
+    setUploadingPreview(true);
+    try {
+      const url = await apiService.uploadImage(file);
+      setFormData(prev => ({ ...prev, previewImageUrl: url }));
+    } catch (err: any) {
+      alert(err.message || 'Erreur lors de l\'upload de l\'image');
+    } finally {
+      setUploadingPreview(false);
+    }
   };
 
   // Real multipart upload — sends file to backend, stores URL from response
@@ -318,6 +360,10 @@ const AdminResources = () => {
                           className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg" title="Voir">
                           <Eye className="w-4 h-4" />
                         </a>
+                        <button onClick={() => openEditModal(resource)}
+                          className="p-1.5 text-gold hover:bg-gold/10 rounded-lg" title="Modifier">
+                          <Pencil className="w-4 h-4" />
+                        </button>
                         <button onClick={() => handleDelete(resource.id)}
                           className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg" title="Supprimer">
                           <Trash2 className="w-4 h-4" />
@@ -481,15 +527,38 @@ const AdminResources = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Image de prévisualisation</label>
-                <input
-                  type="url"
-                  value={formData.previewImageUrl}
-                  onChange={(e) => setFormData({ ...formData, previewImageUrl: e.target.value })}
-                  placeholder="https://exemple.com/image-preview.jpg"
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/50"
-                />
-                <p className="text-xs text-gray-500 mt-1">URL de l'image qui s'affichera comme aperçu</p>
+                <label className="block text-sm font-medium mb-1">Image de prévisualisation *</label>
+                <div className="space-y-2">
+                  {formData.previewImageUrl ? (
+                    <div className="relative w-full h-32 rounded-lg overflow-hidden border border-gray-200 group">
+                      <img src={formData.previewImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => { setFormData(prev => ({ ...prev, previewImageUrl: '' })); if (previewInputRef.current) previewInputRef.current.value = ''; }}
+                        className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label
+                      className="flex flex-col items-center justify-center w-full px-4 py-5 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gold transition-colors"
+                      onClick={() => previewInputRef.current?.click()}
+                    >
+                      {uploadingPreview ? (
+                        <Loader2 className="w-6 h-6 animate-spin text-gold mb-1" />
+                      ) : (
+                        <Upload className="w-6 h-6 text-gray-400 mb-1" />
+                      )}
+                      <span className="text-sm text-gray-600">
+                        {uploadingPreview ? 'Upload en cours...' : 'Uploader une image d\'aperçu'}
+                      </span>
+                      <p className="text-xs text-gray-400 mt-1">PNG · JPEG · GIF · WebP</p>
+                      <input ref={previewInputRef} type="file" accept=".png,.jpg,.jpeg,.gif,.webp"
+                        onChange={handlePreviewImageChange} className="hidden" />
+                    </label>
+                  )}
+                </div>
               </div>
 
               <div>
