@@ -1,0 +1,161 @@
+# =============================================================================
+# LesCracks Platform — Production Stack
+# =============================================================================
+#
+# Services: PostgreSQL · MinIO · Backend (Spring Boot) · Frontend (Nginx/SPA)
+#
+# Prerequisites on the server:
+#   - Docker + Docker Compose plugin installed
+#   - Traefik running on network "traefik-public" (see /root/traefik/)
+#   - .env file at /root/lescracks/.env  (copy from .env.example, fill secrets)
+#
+# First-time setup:
+#   mkdir -p /root/lescracks && cd /root/lescracks
+#   cp .env.example .env && nano .env
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Daily operations:
+#   docker compose -f docker-compose.prod.yml ps
+#   docker compose -f docker-compose.prod.yml logs -f backend
+#   docker compose -f docker-compose.prod.yml restart backend
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: lescracks-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB:       ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:         ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      interval:     10s
+      timeout:      5s
+      retries:      5
+      start_period: 15s
+    networks:
+      - lescracks-internal
+
+  # ---------------------------------------------------------------------------
+  # MinIO — stockage fichiers (ressources, images)
+  # Console: https://minio.lescracks.com
+  # ---------------------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: lescracks-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER:     ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test:         ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval:     30s
+      timeout:      10s
+      retries:      3
+      start_period: 10s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lescracks-minio.rule=Host(`minio.lescracks.com`)"
+      - "traefik.http.routers.lescracks-minio.entrypoints=websecure"
+      - "traefik.http.routers.lescracks-minio.tls.certresolver=le"
+      - "traefik.http.services.lescracks-minio.loadbalancer.server.port=9001"
+    networks:
+      - lescracks-internal
+      - traefik-public
+
+  # ---------------------------------------------------------------------------
+  # Backend API — Spring Boot (port 8080)
+  # API: https://api.lescracks.com
+  # ---------------------------------------------------------------------------
+  backend:
+    image: brandoniscoding/backend-lescracks:latest
+    container_name: lescracks-backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Override ddl-auto (update = safe for first deploy, change to validate after)
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_DDL_AUTO:-update}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    volumes:
+      - backend_uploads:/app/uploads
+      - backend_logs:/var/log/lescracks
+    healthcheck:
+      test:         ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval:     30s
+      timeout:      10s
+      retries:      5
+      start_period: 60s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lescracks-api.rule=Host(`api.lescracks.com`)"
+      - "traefik.http.routers.lescracks-api.entrypoints=websecure"
+      - "traefik.http.routers.lescracks-api.tls.certresolver=le"
+      - "traefik.http.services.lescracks-api.loadbalancer.server.port=8080"
+    networks:
+      - lescracks-internal
+      - traefik-public
+
+  # ---------------------------------------------------------------------------
+  # Frontend — React SPA servie par Nginx
+  # Site: https://lescracks.com + https://www.lescracks.com
+  # ---------------------------------------------------------------------------
+  frontend:
+    image: brandoniscoding/frontend-lescracks:latest
+    container_name: lescracks-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lescracks.rule=Host(`lescracks.com`) || Host(`www.lescracks.com`)"
+      - "traefik.http.routers.lescracks.entrypoints=websecure"
+      - "traefik.http.routers.lescracks.tls.certresolver=le"
+      - "traefik.http.services.lescracks.loadbalancer.server.port=80"
+      # Redirect www → apex
+      - "traefik.http.middlewares.lescracks-www.redirectregex.regex=^https://www\\.lescracks\\.com/(.*)"
+      - "traefik.http.middlewares.lescracks-www.redirectregex.replacement=https://lescracks.com/$${1}"
+      - "traefik.http.routers.lescracks.middlewares=lescracks-www"
+    networks:
+      - lescracks-internal
+      - traefik-public
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  postgres_data:
+    name: lescracks_postgres_data
+  minio_data:
+    name: lescracks_minio_data
+  backend_uploads:
+    name: lescracks_backend_uploads
+  backend_logs:
+    name: lescracks_backend_logs
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  lescracks-internal:
+    name: lescracks-internal
+    driver: bridge
+
+  traefik-public:
+    name: traefik-public
+    external: true
