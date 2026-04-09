@@ -123,14 +123,22 @@ services:
         condition: service_healthy
     labels:
       - "traefik.enable=true"
+      # ── HTTPS router (TLS) ──────────────────────────────────────────────────
       - "traefik.http.routers.lescracks.rule=Host(`lescracks.com`) || Host(`www.lescracks.com`)"
       - "traefik.http.routers.lescracks.entrypoints=websecure"
       - "traefik.http.routers.lescracks.tls.certresolver=le"
       - "traefik.http.services.lescracks.loadbalancer.server.port=80"
-      # Redirect www → apex
+      # Redirect www → apex (HTTPS only)
       - "traefik.http.middlewares.lescracks-www.redirectregex.regex=^https://www\\.lescracks\\.com/(.*)"
       - "traefik.http.middlewares.lescracks-www.redirectregex.replacement=https://lescracks.com/$${1}"
       - "traefik.http.routers.lescracks.middlewares=lescracks-www"
+      # ── HTTP router (port 80) — needed for Let's Encrypt HTTP-01 challenge ──
+      - "traefik.http.routers.lescracks-http.rule=Host(`lescracks.com`) || Host(`www.lescracks.com`)"
+      - "traefik.http.routers.lescracks-http.entrypoints=web"
+      # Redirect HTTP → HTTPS
+      - "traefik.http.middlewares.lescracks-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.lescracks-https-redirect.redirectscheme.permanent=true"
+      - "traefik.http.routers.lescracks-http.middlewares=lescracks-https-redirect"
     networks:
       - lescracks-internal
       - traefik-public
