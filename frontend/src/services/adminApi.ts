@@ -109,6 +109,42 @@ export interface DashboardStats {
   recentResources: AdminResource[];
 }
 
+export type LearnerStatus = 'EN_COURS' | 'TERMINE_AVEC_CERTIFICAT' | 'TERMINE_SANS_CERTIFICAT';
+
+export interface AdminLearner {
+  id: number;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  slug: string;
+  bio?: string;
+  photoUrl?: string;
+  email?: string;
+  linkedinUrl?: string;
+  portfolioUrl?: string;
+  status: LearnerStatus;
+  cohort?: string;
+  showcased: boolean;
+  visible: boolean;
+  displayOrder: number;
+  createdAt: string;
+}
+
+export interface AdminLearnerRequest {
+  firstName: string;
+  lastName: string;
+  bio?: string;
+  photoUrl?: string;
+  email?: string;
+  linkedinUrl?: string;
+  portfolioUrl?: string;
+  status: LearnerStatus;
+  cohort?: string;
+  showcased: boolean;
+  visible: boolean;
+  displayOrder: number;
+}
+
 // Pagination
 export interface PaginatedResponse<T> {
   content: T[];
@@ -359,6 +395,23 @@ class AdminApiService {
 
   async deleteContributor(id: number): Promise<void> {
     await this.request<void>(`/open-source/admin/contributors/${id}`, { method: 'DELETE' });
+  }
+
+  // === LEARNERS ===
+  async getLearners(): Promise<AdminLearner[]> {
+    return this.request<AdminLearner[]>('/learners/admin/all');
+  }
+
+  async createLearner(data: AdminLearnerRequest): Promise<AdminLearner> {
+    return this.request<AdminLearner>('/learners/admin', { method: 'POST', body: JSON.stringify(data) });
+  }
+
+  async updateLearner(id: number, data: AdminLearnerRequest): Promise<AdminLearner> {
+    return this.request<AdminLearner>(`/learners/admin/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+  }
+
+  async deleteLearner(id: number): Promise<void> {
+    await this.request<void>(`/learners/admin/${id}`, { method: 'DELETE' });
   }
 }
 

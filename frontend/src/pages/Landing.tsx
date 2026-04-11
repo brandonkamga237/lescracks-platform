@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { apiService, Event } from '@/services/api';
+import apiService, { Event, Learner } from '@/services/api';
 import Layout from '@/components/layout/Layout';
 import Testimonials from '@/components/landing/Testimonials';
 import FAQ from '@/components/landing/FAQ';
@@ -22,6 +22,8 @@ import {
   Globe,
   Zap,
   Heart,
+  Award,
+  Linkedin,
 } from 'lucide-react';
 
 // ─── data ─────────────────────────────────────────────────────────────────────
@@ -92,6 +94,7 @@ const SL = ({ children }: { children: React.ReactNode }) => (
 const Landing = () => {
   const { isAuthenticated } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
+  const [showcasedLearners, setShowcasedLearners] = useState<Learner[]>([]);
   const heroRef = useRef<HTMLElement>(null);
 
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
@@ -100,6 +103,7 @@ const Landing = () => {
 
   useEffect(() => {
     apiService.getEvents({ status: 'OUVERT' }).then((d) => setEvents(d.slice(0, 4))).catch(() => {});
+    apiService.getShowcasedLearners().then(setShowcasedLearners).catch(() => {});
   }, []);
 
   const postulerHref = isAuthenticated ? '/postuler' : '/inscription';
@@ -416,6 +420,84 @@ const Landing = () => {
           )}
         </div>
       </section>
+
+      {/* ── NOS APPRENANTS ───────────────────────────────────────────── */}
+      {showcasedLearners.length > 0 && (
+        <section className="py-24 bg-secondary">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-14 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <div>
+                <SL>Communauté</SL>
+                <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
+                  Ils sont <span className="text-gold">devenus des cracks</span>
+                </h2>
+                <p className="text-white/40 mt-3 max-w-xl text-sm leading-relaxed">
+                  Rencontrez quelques-uns des apprenants qui ont suivi notre accompagnement et qui construisent aujourd'hui leur carrière tech.
+                </p>
+              </div>
+              <Link to="/apprenants" className="flex-shrink-0 flex items-center gap-1.5 text-sm text-gold hover:text-gold/70 transition-colors">
+                Voir tous les apprenants <ChevronRight className="w-4 h-4" />
+              </Link>
+            </motion.div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {showcasedLearners.slice(0, 8).map((l, i) => (
+                <motion.div
+                  key={l.id}
+                  initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}
+                >
+                  <Link
+                    to={`/apprenants/${l.slug}`}
+                    className="group block bg-white/3 border border-white/8 rounded-2xl p-5 hover:border-gold/25 hover:bg-white/6 transition-all duration-300"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      {l.photoUrl ? (
+                        <img src={l.photoUrl} alt={l.fullName} className="w-11 h-11 rounded-full object-cover border border-white/10 group-hover:border-gold/30 transition-colors flex-shrink-0" />
+                      ) : (
+                        <div className="w-11 h-11 rounded-full bg-gold/10 border border-gold/15 flex items-center justify-center text-gold font-bold text-sm flex-shrink-0">
+                          {l.firstName[0]}{l.lastName[0]}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-semibold text-white text-sm truncate">{l.fullName}</p>
+                        {l.cohort && <p className="text-xs text-white/35">Cohorte {l.cohort}</p>}
+                      </div>
+                    </div>
+                    {l.bio && <p className="text-xs text-white/45 line-clamp-2 mb-3">{l.bio}</p>}
+                    <div className="flex items-center justify-between">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        l.status === 'TERMINE_AVEC_CERTIFICAT'
+                          ? 'bg-gold/10 text-gold border border-gold/20'
+                          : l.status === 'EN_COURS'
+                          ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                          : 'bg-white/5 text-white/40 border border-white/10'
+                      }`}>
+                        {l.status === 'TERMINE_AVEC_CERTIFICAT' && <Award className="w-3 h-3 inline mr-1 -mt-0.5" />}
+                        {l.status === 'TERMINE_AVEC_CERTIFICAT' ? 'Certifié' : l.status === 'EN_COURS' ? 'En cours' : 'Diplômé'}
+                      </span>
+                      {l.linkedinUrl && (
+                        <a href={l.linkedinUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="text-white/25 hover:text-blue-400 transition-colors">
+                          <Linkedin className="w-3.5 h-3.5" />
+                        </a>
+                      )}
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="mt-10 text-center">
+              <Link
+                to="/apprenants"
+                className="inline-flex items-center gap-2 border border-white/10 text-white/60 hover:border-gold/30 hover:text-gold transition-colors px-6 py-3 rounded-xl text-sm"
+              >
+                <Users className="w-4 h-4" />
+                Découvrir toute la communauté
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── À PROPOS ─────────────────────────────────────────────────── */}
       <section className="py-24 bg-secondary" id="about">

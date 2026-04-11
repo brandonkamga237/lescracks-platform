@@ -18,6 +18,7 @@ import {
   Shield,
   Code2,
   UserCheck,
+  GraduationCap,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -35,6 +36,7 @@ const menuItems = [
   { path: '/admin/events', label: 'Événements', icon: Calendar, group: 'content' },
   { path: '/admin/open-source', label: 'Projets OS', icon: Code2, group: 'opensource' },
   { path: '/admin/contributors', label: 'Contributeurs', icon: UserCheck, group: 'opensource' },
+  { path: '/admin/apprenants', label: 'Apprenants', icon: GraduationCap, group: 'apprenants' },
 ];
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
@@ -105,7 +107,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                 {showSeparator && !sidebarCollapsed && (
                   <div className="px-3 pt-3 pb-1">
                     <p className="text-xs font-semibold uppercase tracking-wider text-gray-600">
-                      {item.group === 'content' ? 'Contenu' : item.group === 'opensource' ? 'Open Source' : ''}
+                      {item.group === 'content' ? 'Contenu' : item.group === 'opensource' ? 'Open Source' : item.group === 'apprenants' ? 'Communauté' : ''}
                     </p>
                   </div>
                 )}

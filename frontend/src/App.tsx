@@ -26,6 +26,9 @@ import AdminPremiumRequests from './pages/admin/AdminPremiumRequests';
 import AdminApplications from './pages/admin/AdminApplications';
 import AdminOpenSource from './pages/admin/AdminOpenSource';
 import AdminContributors from './pages/admin/AdminContributors';
+import AdminApprenants from './pages/admin/AdminApprenants';
+import Apprenants from './pages/Apprenants';
+import ApprennantProfile from './pages/ApprennantProfile';
 import Premium from './pages/Premium';
 import Postuler from './pages/Postuler';
 import About from './pages/About';
@@ -88,6 +91,8 @@ function AppContent() {
           <Route path="/evenements" element={<Evenements />} />
           <Route path="/evenements/:id" element={<Evenements />} />
           <Route path="/ressources" element={<Ressources />} />
+          <Route path="/apprenants" element={<Apprenants />} />
+          <Route path="/apprenants/:slug" element={<ApprennantProfile />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={
@@ -138,6 +143,11 @@ function AppContent() {
           <Route path="/admin/contributors" element={
             <AdminRoute>
               <AdminContributors />
+            </AdminRoute>
+          } />
+          <Route path="/admin/apprenants" element={
+            <AdminRoute>
+              <AdminApprenants />
             </AdminRoute>
           } />
 

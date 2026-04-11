@@ -44,7 +44,26 @@ export interface Resource {
   };
 }
 
-/** Upload an image (preview, avatar, etc.) and get back its public URL. */
+export type LearnerStatus = 'EN_COURS' | 'TERMINE_AVEC_CERTIFICAT' | 'TERMINE_SANS_CERTIFICAT';
+
+export interface Learner {
+  id: number;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  slug: string;
+  bio?: string;
+  photoUrl?: string;
+  email?: string;
+  linkedinUrl?: string;
+  portfolioUrl?: string;
+  status: LearnerStatus;
+  cohort?: string;
+  showcased: boolean;
+  visible: boolean;
+  displayOrder: number;
+  createdAt: string;
+}
 
 export interface Tag {
   id: number;
@@ -284,6 +303,22 @@ class ApiService {
     if (!response.ok) throw new Error(json.message || 'Upload failed');
     if (json.success && json.data !== undefined) return json.data as string;
     throw new Error(json.message || 'Upload failed');
+  }
+
+  // === LEARNERS (public) ===
+  async getLearners(status?: LearnerStatus): Promise<Learner[]> {
+    const params = status ? `?status=${status}` : '';
+    const data = await this.request<Learner[]>(`/learners${params}`);
+    return Array.isArray(data) ? data : [];
+  }
+
+  async getShowcasedLearners(): Promise<Learner[]> {
+    const data = await this.request<Learner[]>('/learners/showcased');
+    return Array.isArray(data) ? data : [];
+  }
+
+  async getLearnerBySlug(slug: string): Promise<Learner> {
+    return this.request<Learner>(`/learners/${slug}`);
   }
 
   async getMyApplications(): Promise<any[]> {

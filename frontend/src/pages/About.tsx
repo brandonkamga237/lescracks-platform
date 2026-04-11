@@ -268,6 +268,32 @@ const About = () => {
           </motion.div>
         </section>
 
+        {/* ── NOS APPRENANTS ──────────────────────────────────────── */}
+        <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <motion.div
+            {...fadeUp}
+            className="card p-8 sm:p-10 flex flex-col sm:flex-row gap-6 items-center justify-between"
+          >
+            <div className="flex items-start gap-5">
+              <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center">
+                <Users className="w-7 h-7 text-gold" />
+              </div>
+              <div>
+                <h3 className="font-display font-semibold text-lg mb-2">Découvrez nos apprenants</h3>
+                <p className="text-white/50 text-sm leading-relaxed max-w-md">
+                  Rencontrez les cracks qui ont suivi ou suivent actuellement notre accompagnement. Profils, parcours, portfolios et liens LinkedIn.
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/apprenants"
+              className="flex-shrink-0 flex items-center gap-2 btn-secondary text-sm whitespace-nowrap"
+            >
+              Voir les apprenants <ChevronRight className="w-4 h-4" />
+            </Link>
+          </motion.div>
+        </section>
+
         {/* ── CTA ────────────────────────────────────────────────── */}
         <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
           <motion.div
