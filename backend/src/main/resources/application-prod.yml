@@ -56,6 +56,8 @@ server:
   port: ${SERVER_PORT:8080}
   compression:
     enabled: true
+  # Trust X-Forwarded-Proto from Traefik/Nginx so Spring generates https:// redirect URIs
+  forward-headers-strategy: native
 
 logging:
   level:
