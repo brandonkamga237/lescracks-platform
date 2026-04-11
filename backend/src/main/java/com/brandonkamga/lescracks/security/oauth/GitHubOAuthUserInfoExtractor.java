@@ -28,7 +28,21 @@ public class GitHubOAuthUserInfoExtractor implements OAuthUserInfoExtractor {
 
     @Override
     public String extractEmail(OAuth2User oauthUser) {
-        return oauthUser.getAttribute("email");
+        String email = oauthUser.getAttribute("email");
+        if (email != null && !email.isBlank()) {
+            return email;
+        }
+        // GitHub hides email when user set it to private.
+        // Fall back to the GitHub no-reply address: {id}+{login}@users.noreply.github.com
+        Object id    = oauthUser.getAttributes().get("id");
+        String login = oauthUser.getAttribute("login");
+        if (id != null && login != null) {
+            return id + "+" + login + "@users.noreply.github.com";
+        }
+        if (login != null) {
+            return login + "@users.noreply.github.com";
+        }
+        return null;
     }
 
     @Override
