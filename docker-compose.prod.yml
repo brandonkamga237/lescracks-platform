@@ -66,10 +66,15 @@ services:
       start_period: 10s
     labels:
       - "traefik.enable=true"
+      # ── HTTPS router ────────────────────────────────────────────────────────
       - "traefik.http.routers.lescracks-minio.rule=Host(`minio.lescracks.com`)"
       - "traefik.http.routers.lescracks-minio.entrypoints=websecure"
       - "traefik.http.routers.lescracks-minio.tls.certresolver=le"
       - "traefik.http.services.lescracks-minio.loadbalancer.server.port=9001"
+      # ── HTTP router (port 80) — Let's Encrypt HTTP-01 challenge ─────────────
+      - "traefik.http.routers.lescracks-minio-http.rule=Host(`minio.lescracks.com`)"
+      - "traefik.http.routers.lescracks-minio-http.entrypoints=web"
+      - "traefik.http.routers.lescracks-minio-http.middlewares=lescracks-https-redirect"
     networks:
       - lescracks-internal
       - traefik-public
@@ -102,10 +107,15 @@ services:
       start_period: 60s
     labels:
       - "traefik.enable=true"
+      # ── HTTPS router ────────────────────────────────────────────────────────
       - "traefik.http.routers.lescracks-api.rule=Host(`api.lescracks.com`)"
       - "traefik.http.routers.lescracks-api.entrypoints=websecure"
       - "traefik.http.routers.lescracks-api.tls.certresolver=le"
       - "traefik.http.services.lescracks-api.loadbalancer.server.port=8080"
+      # ── HTTP router (port 80) — Let's Encrypt HTTP-01 challenge ─────────────
+      - "traefik.http.routers.lescracks-api-http.rule=Host(`api.lescracks.com`)"
+      - "traefik.http.routers.lescracks-api-http.entrypoints=web"
+      - "traefik.http.routers.lescracks-api-http.middlewares=lescracks-https-redirect"
     networks:
       - lescracks-internal
       - traefik-public
