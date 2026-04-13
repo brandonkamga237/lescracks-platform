@@ -9,42 +9,36 @@ const testimonials = [
     role: 'Etudiant en licence 2 a UY1',
     company: 'Yaounde, Cameroun',
     quote: "J'ai suivi le parcours propose par leur academie et je suis passe de noob a developpeur frontend junior. Une transformation incredible en quelques mois.",
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
   },
   {
     name: 'Kegne Joyce',
     role: 'Etudiant en licence 2 a UY1',
     company: 'Yaounde, Cameroun',
     quote: "J'ai toujours voulu devenir ingenieur logiciel. Je pense que LesCracks Academy a joue un grand role dans l'accomplissement de cette rever.",
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop',
   },
   {
     name: 'Cedrik Darek Yegmo',
     role: 'CEO de XyberClan',
     company: 'Douala, Cameroun',
     quote: "D'etudiant a CEO de ma startup XyberClan, je ne peut que feliciter l'equipe de LesCracks qui m'a forme et inspire dans mon parcours.",
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop',
   },
   {
     name: 'Marie L.',
     role: 'Developpeuse Full Stack',
     company: 'Paris, France',
     quote: "En 6 mois, j'ai transforme ma carriere. Le programme m'a donne les competencias et la confiance necessaires pour reintegrer le marche tech.",
-    image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop',
   },
   {
     name: 'Aminata S.',
     role: 'Etudiante en informatique',
     company: 'Abidjan, Cote dIvoire',
     quote: "Une formation de qualite accessible depuis l'Afrique. Le mentorat individualise m'a permis de progreser tres rapidement.",
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop',
   },
   {
     name: 'Thomas M.',
     role: 'Backend Engineer',
     company: 'Lyon, France',
     quote: "L'accompagnement personnalise fait toute la difference. Les projets Open Source m'ont permis de construire un portfolio solide.",
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop',
   },
 ];
 
@@ -92,11 +86,11 @@ const Testimonials = () => {
                 }`}
               >
                 <div className="flex items-center gap-4 mb-6">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${
+                    isDark ? 'bg-gold/15 text-gold border border-gold/20' : 'bg-gold/20 text-gold border border-gold/30'
+                  }`}>
+                    {testimonial.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                  </div>
                   <div>
                     <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{testimonial.name}</p>
                     <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{testimonial.role}</p>

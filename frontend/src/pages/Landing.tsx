@@ -356,9 +356,9 @@ const Landing = () => {
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
               className="rounded-2xl overflow-hidden border border-white/8">
               <img
-                src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=700&h=500&fit=crop"
-                alt="Open Source"
-                className="w-full h-72 object-cover opacity-70"
+                src="/images/community-2.jpg"
+                alt="Communauté LesCracks"
+                className="w-full h-72 object-cover opacity-80"
               />
             </motion.div>
           </div>
@@ -505,7 +505,7 @@ const Landing = () => {
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
               className="relative rounded-2xl overflow-hidden border border-white/8 order-2 md:order-1">
               <img
-                src="https://images.unsplash.com/photo-1573164574572-cb89e39749b4?w=700&h=500&fit=crop"
+                src="/images/about.jpg"
                 alt="Apprenants LesCracks — Afrique francophone"
                 className="w-full h-80 object-cover"
               />
@@ -557,7 +557,7 @@ const Landing = () => {
       {/* ── CTA FINAL ────────────────────────────────────────────────── */}
       <section className="py-28 relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src="https://images.unsplash.com/photo-1573164574572-cb89e39749b4?w=1920&h=800&fit=crop" alt="" className="w-full h-full object-cover opacity-50" />
+          <img src="/images/community-1.jpg" alt="" className="w-full h-full object-cover opacity-50" />
           <div className="absolute inset-0 bg-black/65" />
         </div>
         <div className="relative z-10 max-w-2xl mx-auto px-4 text-center">
