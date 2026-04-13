@@ -120,14 +120,23 @@ public class DataInitializer implements CommandLineRunner {
                 System.out.println("=== Admin user NOT created - role or provider is null! ===");
             }
         } else {
-            // Ensure admin always has the admin role (in case it was accidentally changed)
+            // Ensure admin always has the admin role and email verified
             userRepository.findByEmail("admin@admin.com").ifPresent(existingAdmin -> {
+                boolean changed = false;
                 if (adminRole != null && (existingAdmin.getRole() == null || existingAdmin.getRole().getName() != RoleName.admin)) {
                     existingAdmin.setRole(adminRole);
-                    userRepository.save(existingAdmin);
+                    changed = true;
                     System.out.println("=== Admin role restored to admin! ===");
+                }
+                if (!existingAdmin.isEmailVerified()) {
+                    existingAdmin.setEmailVerified(true);
+                    changed = true;
+                    System.out.println("=== Admin emailVerified set to true ===");
+                }
+                if (changed) {
+                    userRepository.save(existingAdmin);
                 } else {
-                    System.out.println("=== Admin user already exists with correct role ===");
+                    System.out.println("=== Admin user already exists with correct role and emailVerified ===");
                 }
             });
         }
