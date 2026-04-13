@@ -26,6 +26,8 @@ ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=dev"]
 # ── Stage 3 : image de run Prod ────────────────────────────────────────────────
 FROM eclipse-temurin:21-jre-alpine AS prod
 WORKDIR /app
+# wget is required for the Docker healthcheck (not present in alpine-jre by default)
+RUN apk add --no-cache wget
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]

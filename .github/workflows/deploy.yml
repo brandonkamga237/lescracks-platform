@@ -198,22 +198,31 @@ jobs:
                 pg_isready -U "$DB_USERNAME" -d "$DB_NAME" >/dev/null 2>&1; \
               do sleep 3; done'
 
-            echo "  Démarrage backend (Spring Boot — peut prendre ~30s)..."
+            echo "  Démarrage backend (Spring Boot — peut prendre ~60s)..."
             docker compose -f docker-compose.prod.yml up -d backend --remove-orphans
 
-            echo "  Attente backend healthy..."
-            for i in $(seq 1 20); do
-              if docker compose -f docker-compose.prod.yml exec -T backend \
-                  wget -qO- http://localhost:8080/actuator/health >/dev/null 2>&1; then
-                echo "  Backend healthy (tentative $i)"
+            echo "  Attente backend healthy (max 5 min)..."
+            BACKEND_OK=0
+            for i in $(seq 1 30); do
+              STATUS=$(docker inspect --format='{{.State.Health.Status}}' lescracks-backend 2>/dev/null || echo "unknown")
+              if [ "$STATUS" = "healthy" ]; then
+                echo "  Backend healthy (tentative $i — statut Docker: healthy)"
+                BACKEND_OK=1
                 break
               fi
-              echo "  Tentative $i/20 — pas encore prêt, retry dans 5s..."
-              sleep 5
-              if [ "$i" -eq 20 ]; then
-                echo "  Warning: health check timeout, déploiement frontend quand même"
-              fi
+              echo "  Tentative $i/30 — statut: $STATUS, retry dans 10s..."
+              sleep 10
             done
+
+            if [ "$BACKEND_OK" -eq 0 ]; then
+              echo ""
+              echo "══════ ERREUR : backend non healthy après 5 min ══════"
+              echo "  Dernières 100 lignes de logs backend :"
+              echo "──────────────────────────────────────────────────────"
+              docker logs --tail=100 lescracks-backend 2>&1 || true
+              echo "──────────────────────────────────────────────────────"
+              exit 1
+            fi
 
             # ── 4. Frontend ───────────────────────────────────────
             echo ""
