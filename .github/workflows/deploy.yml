@@ -1,13 +1,16 @@
 # =============================================================================
-# LesCracks Platform — Deploy Pipeline
+# LesCracks Platform — CI/CD Pipeline
 # =============================================================================
 #
-# Déclenché sur push main ou dispatch manuel.
+# Branching strategy — Gitflow Léger :
+#   feature/* / fix/*  →  develop  →  (PR)  →  main  →  deploy prod
+#   hotfix/*           →  main (direct, urgence prod)
 #
-# Ordre des jobs :
-#   1. build-backend  — build & push image Spring Boot
-#   2. build-frontend — build & push image Nginx/React
-#   3. deploy         — SSH : pull → up
+# Déclencheurs :
+#   • push main        → build + deploy prod (automatique)
+#   • push develop     → build + CI uniquement (pas de deploy)
+#   • pull_request → main → build + CI (validation avant merge)
+#   • workflow_dispatch → deploy manuel (choix du service)
 #
 # Required GitHub Secrets:
 #   DOCKER_USERNAME   — Docker Hub username
@@ -15,17 +18,14 @@
 #   VPS_HOST          — IP du VPS
 #   VPS_USER          — Utilisateur SSH (root)
 #   VPS_SSH_KEY       — Clé privée SSH
-#
-# Server prerequisites:
-#   - Docker + Docker Compose plugin installés
-#   - Traefik en cours d'exécution sur le réseau "traefik-public"
-#   - /root/lescracks/.env présent (depuis .env.example)
 # =============================================================================
 
-name: Deploy — LesCracks Platform
+name: CI/CD — LesCracks Platform
 
 on:
   push:
+    branches: [main, develop]
+  pull_request:
     branches: [main]
   workflow_dispatch:
     inputs:
@@ -92,7 +92,8 @@ jobs:
         with:
           context:    ./backend
           target:     prod
-          push:       true
+          # Push only on main (not on develop, not on PRs)
+          push:       ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
           tags: |
             ${{ env.BACKEND_IMAGE }}:latest
             ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
@@ -124,7 +125,8 @@ jobs:
       - uses: docker/build-push-action@v5
         with:
           context:    ./frontend
-          push:       true
+          # Push only on main (not on develop, not on PRs)
+          push:       ${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
           tags: |
             ${{ env.FRONTEND_IMAGE }}:latest
             ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
@@ -138,7 +140,10 @@ jobs:
     name: Deploy to production
     runs-on: ubuntu-latest
     needs: [build-backend, build-frontend]
+    # Only deploy on push to main (not on develop, not on PRs, not on failed builds)
     if: |
+      github.ref == 'refs/heads/main' &&
+      github.event_name != 'pull_request' &&
       always() &&
       !contains(needs.*.result, 'failure') &&
       !contains(needs.*.result, 'cancelled')
