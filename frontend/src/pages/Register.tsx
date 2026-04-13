@@ -1,12 +1,13 @@
 // src/pages/Register.tsx
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { ArrowLeft, Mail, Lock, User, Github, Loader2, CheckCircle } from 'lucide-react';
 
 const Register = () => {
   const { register, loginWithGoogle, loginWithGitHub, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -55,7 +56,7 @@ const Register = () => {
 
   const handleOAuth = (provider: 'google' | 'github') => {
     if (provider === 'google') {
-      loginWithGoogle();
+      navigate(`/provider-unavailable?provider=google&from=/inscription`);
     } else {
       loginWithGitHub();
     }

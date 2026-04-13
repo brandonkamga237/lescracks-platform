@@ -37,7 +37,7 @@ const Login = () => {
 
   const handleOAuth = (provider: 'google' | 'github') => {
     if (provider === 'google') {
-      loginWithGoogle();
+      navigate(`/provider-unavailable?provider=google&from=/connexion`);
     } else {
       loginWithGitHub();
     }
