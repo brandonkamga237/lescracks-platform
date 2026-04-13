@@ -64,10 +64,12 @@ public class AdminController {
         // Users by role
         long adminCount = userRepository.countByRole_Name(com.brandonkamga.lescracks.domain.RoleName.admin);
         long premiumCount = userRepository.countByRole_Name(com.brandonkamga.lescracks.domain.RoleName.premium_user);
+        long learnerCount = userRepository.countByRole_Name(com.brandonkamga.lescracks.domain.RoleName.learner);
         long freeCount = userRepository.countByRole_Name(com.brandonkamga.lescracks.domain.RoleName.user);
         stats.put("usersByRole", Map.of(
             "ADMIN", adminCount,
             "PREMIUM", premiumCount,
+            "LEARNER", learnerCount,
             "FREE", freeCount
         ));
         
@@ -124,9 +126,9 @@ public class AdminController {
         long newResourcesLast30Days = resourceRepository.countByCreatedAtAfter(thirtyDaysAgo);
         stats.put("newResourcesLast30Days", newResourcesLast30Days);
 
-        // Premium conversion rate (premium_user + admin) / total * 100
+        // Premium conversion rate (premium_user + learner + admin) / total * 100
         double premiumRate = (totalUsers > 0)
-                ? Math.round(((adminCount + premiumCount) * 100.0) / totalUsers * 10) / 10.0
+                ? Math.round(((adminCount + premiumCount + learnerCount) * 100.0) / totalUsers * 10) / 10.0
                 : 0.0;
         stats.put("premiumConversionRate", premiumRate);
 
@@ -140,18 +142,10 @@ public class AdminController {
                 "Rejeté", appRejected
         ));
 
-        // Premium requests pipeline
-        long prPending = premiumRequestRepository.countByStatus(PremiumRequestStatus.PENDING);
-        long prContacted = premiumRequestRepository.countByStatus(PremiumRequestStatus.CONTACTED);
-        long prPaid = premiumRequestRepository.countByStatus(PremiumRequestStatus.PAID);
-        long prRejected = premiumRequestRepository.countByStatus(PremiumRequestStatus.REJECTED);
-        stats.put("premiumRequestsByStatus", Map.of(
-                "En attente", prPending,
-                "Contacté", prContacted,
-                "Payé", prPaid,
-                "Rejeté", prRejected
-        ));
-        stats.put("totalPremiumRequests", prPending + prContacted + prPaid + prRejected);
+        // Premium requests — all requests are pending by definition (no status field anymore)
+        long prPending = premiumRequestRepository.count();
+        stats.put("premiumRequestsByStatus", Map.of("En attente", prPending));
+        stats.put("totalPremiumRequests", prPending);
 
         // Engagement — total views and downloads across all resources
         List<Resource> allResources = resourceRepository.findAll();
@@ -255,6 +249,7 @@ public class AdminController {
             RoleName roleName = switch (newRole.toUpperCase()) {
                 case "ADMIN" -> RoleName.admin;
                 case "PREMIUM", "PREMIUM_USER" -> RoleName.premium_user;
+                case "LEARNER" -> RoleName.learner;
                 default -> RoleName.user;
             };
             Optional<Role> roleOpt = roleRepository.findByName(roleName);

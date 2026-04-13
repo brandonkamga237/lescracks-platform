@@ -25,16 +25,14 @@ public class PremiumRequest {
     @Column(name = "whatsapp_number", nullable = false)
     private String whatsappNumber;
 
+    @Column(name = "contact_email", nullable = false)
+    private String contactEmail;
+
     @Column(nullable = false)
     private String country;
 
     @Column(length = 1000)
     private String message;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Builder.Default
-    private PremiumRequestStatus status = PremiumRequestStatus.PENDING;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

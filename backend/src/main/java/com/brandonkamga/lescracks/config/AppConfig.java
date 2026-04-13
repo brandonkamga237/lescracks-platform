@@ -2,6 +2,8 @@ package com.brandonkamga.lescracks.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import jakarta.annotation.PostConstruct;
 import java.io.InputStream;
@@ -22,6 +24,8 @@ import java.util.concurrent.TimeUnit;
  * Supports environment variable rotation without application restart.
  */
 @Configuration
+@EnableAsync
+@EnableScheduling
 @ConfigurationProperties(prefix = "app.config")
 public class AppConfig {
 

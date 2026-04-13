@@ -67,6 +67,11 @@ public class GitHubOAuthUserInfoExtractor implements OAuthUserInfoExtractor {
     }
 
     @Override
+    public String extractPictureUrl(OAuth2User oauthUser) {
+        return oauthUser.getAttribute("avatar_url");
+    }
+
+    @Override
     public String extractFirstName(OAuth2User oauthUser) {
         String name = extractName(oauthUser);
         if (name == null) {

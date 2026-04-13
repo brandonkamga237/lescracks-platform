@@ -27,6 +27,12 @@ public class UserMapper {
             return null;
         }
 
+        // Determine picture: stored pictureUrl first, then imageAsset if present
+        String picture = user.getPictureUrl();
+        if (picture == null && user.getImageAsset() != null) {
+            picture = user.getImageAsset().getUrl();
+        }
+
         return UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -36,7 +42,9 @@ public class UserMapper {
                 .providerName(user.getProvider() != null ? user.getProvider().getProviderName().name() : null)
                 .providerUserId(user.getProviderUserId())
                 .roleName(user.getRole() != null ? user.getRole().getName().name() : null)
+                .picture(picture)
                 .premiumActivatedAt(user.getPremiumActivatedAt())
+                .premiumExpiresAt(user.getPremiumExpiresAt())
                 .build();
     }
 

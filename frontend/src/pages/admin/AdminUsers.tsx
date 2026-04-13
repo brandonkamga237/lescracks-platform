@@ -43,6 +43,8 @@ const AdminUsers = () => {
       case 'PREMIUM_USER':
       case 'PREMIUM':
         return <span className="px-2 py-1 text-xs bg-gold/20 text-gold rounded-full flex items-center gap-1"><Crown className="w-3 h-3" /> Premium</span>;
+      case 'LEARNER':
+        return <span className="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded-full flex items-center gap-1">🎓 Apprenant</span>;
       default:
         return <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">Free</span>;
     }
@@ -196,6 +198,7 @@ const AdminUsers = () => {
               >
                 <option value="USER">Free</option>
                 <option value="PREMIUM_USER">Premium</option>
+                <option value="LEARNER">Apprenant (Crack Accompagné)</option>
                 <option value="ADMIN">Admin</option>
               </select>
             </div>

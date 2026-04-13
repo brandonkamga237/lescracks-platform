@@ -1,7 +1,6 @@
 package com.brandonkamga.lescracks.service.interfaces;
 
 import com.brandonkamga.lescracks.domain.PremiumRequest;
-import com.brandonkamga.lescracks.domain.PremiumRequestStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,32 +9,32 @@ import java.util.Optional;
 public interface PremiumRequestService {
 
     /**
-     * Submit a new premium request for the given user.
+     * Submit a new premium request. Throws if user already has a pending request or is already premium.
      */
-    PremiumRequest submitRequest(Long userId, String whatsappNumber, String country, String message);
+    PremiumRequest submitRequest(Long userId, String whatsappNumber, String contactEmail, String country, String message);
 
     /**
-     * Get the latest premium request for a user.
+     * Get the pending request for a user (if any).
      */
-    Optional<PremiumRequest> getLatestRequestByUser(Long userId);
+    Optional<PremiumRequest> getPendingRequestByUser(Long userId);
 
     /**
-     * Get all premium requests (admin use).
+     * Get all pending requests (admin).
      */
     Page<PremiumRequest> getAllRequests(Pageable pageable);
 
     /**
-     * Get premium requests by status (admin use).
+     * Accept request: activate premium for the given duration, send email, delete the request.
      */
-    Page<PremiumRequest> getRequestsByStatus(PremiumRequestStatus status, Pageable pageable);
+    void acceptRequest(Long requestId, int months);
 
     /**
-     * Update request status. When status is PAID, activates the user's premium account.
+     * Reject request: delete the request with no further action.
      */
-    PremiumRequest updateRequestStatus(Long requestId, PremiumRequestStatus status);
+    void rejectRequest(Long requestId);
 
     /**
-     * Count requests by status.
+     * Count pending requests (admin dashboard).
      */
-    long countByStatus(PremiumRequestStatus status);
+    long countPending();
 }

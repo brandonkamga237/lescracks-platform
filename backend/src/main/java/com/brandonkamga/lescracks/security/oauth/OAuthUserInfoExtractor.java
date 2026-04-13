@@ -63,6 +63,15 @@ public interface OAuthUserInfoExtractor {
     User buildUser(OAuth2User oauthUser, Role role, Provider provider);
     
     /**
+     * Extract the profile picture URL from OAuth2 user.
+     * @param oauthUser the OAuth2 user object
+     * @return the picture URL, or null if not available
+     */
+    default String extractPictureUrl(OAuth2User oauthUser) {
+        return null;
+    }
+
+    /**
      * Extract the first name from OAuth2 user.
      * @param oauthUser the OAuth2 user object
      * @return the first name, or null if not available

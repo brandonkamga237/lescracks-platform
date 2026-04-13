@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.controller;
 
+import com.brandonkamga.lescracks.domain.PasswordResetToken;
 import com.brandonkamga.lescracks.domain.Provider;
 import com.brandonkamga.lescracks.domain.ProviderType;
 import com.brandonkamga.lescracks.domain.Role;
@@ -7,13 +8,17 @@ import com.brandonkamga.lescracks.domain.RoleName;
 import com.brandonkamga.lescracks.domain.User;
 import com.brandonkamga.lescracks.dto.ApiResponse;
 import com.brandonkamga.lescracks.dto.AuthResponse;
+import com.brandonkamga.lescracks.dto.ForgotPasswordRequest;
 import com.brandonkamga.lescracks.dto.LoginRequest;
+import com.brandonkamga.lescracks.dto.ResetPasswordRequest;
 import com.brandonkamga.lescracks.dto.UserRequest;
 import com.brandonkamga.lescracks.exception.BadRequestException;
 import com.brandonkamga.lescracks.mapper.UserMapper;
+import com.brandonkamga.lescracks.repository.PasswordResetTokenRepository;
 import com.brandonkamga.lescracks.repository.ProviderRepository;
 import com.brandonkamga.lescracks.repository.RoleRepository;
 import com.brandonkamga.lescracks.security.jwt.JwtService;
+import com.brandonkamga.lescracks.service.impl.MailServiceImpl;
 import com.brandonkamga.lescracks.service.interfaces.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,7 +36,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -45,6 +54,8 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final ProviderRepository providerRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final MailServiceImpl mailService;
 
     public AuthController(
             UserService userService,
@@ -53,7 +64,9 @@ public class AuthController {
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
             RoleRepository roleRepository,
-            ProviderRepository providerRepository) {
+            ProviderRepository providerRepository,
+            PasswordResetTokenRepository passwordResetTokenRepository,
+            MailServiceImpl mailService) {
         this.userService = userService;
         this.userMapper = userMapper;
         this.jwtService = jwtService;
@@ -61,6 +74,8 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
         this.providerRepository = providerRepository;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.mailService = mailService;
     }
 
     @PostMapping("/register")
@@ -108,6 +123,7 @@ public class AuthController {
         User savedUser = userService.save(user);
 
         String token = jwtService.generateTokenForUser(savedUser.getEmail());
+        mailService.sendWelcome(savedUser.getEmail(), savedUser.getUsername());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -146,8 +162,58 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/forgot-password")
+    @Transactional
+    @Operation(summary = "Demande de réinitialisation de mot de passe",
+               description = "Envoie un email avec un lien de réinitialisation valable 30 minutes. " +
+                           "Retourne toujours 200 pour ne pas révéler si l'email existe.")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        User user = userService.findByEmail(request.getEmail());
+        if (user != null) {
+            // Delete any existing tokens for this email
+            passwordResetTokenRepository.deleteByEmail(request.getEmail());
+
+            String token = UUID.randomUUID().toString();
+            PasswordResetToken resetToken = PasswordResetToken.builder()
+                    .token(token)
+                    .email(request.getEmail())
+                    .expiresAt(LocalDateTime.now().plusMinutes(30))
+                    .used(false)
+                    .build();
+            passwordResetTokenRepository.save(resetToken);
+            mailService.sendPasswordReset(request.getEmail(), token);
+        }
+        // Always 200 — don't reveal if email exists
+        return ResponseEntity.ok(ApiResponse.success(null, "Si cet email est enregistré, un lien de réinitialisation a été envoyé."));
+    }
+
+    @PostMapping("/reset-password")
+    @Transactional
+    @Operation(summary = "Réinitialisation du mot de passe",
+               description = "Réinitialise le mot de passe avec le token reçu par email.")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        PasswordResetToken resetToken = passwordResetTokenRepository
+                .findByTokenAndUsedFalse(request.getToken())
+                .orElseThrow(() -> new BadRequestException("Token invalide ou déjà utilisé"));
+
+        if (resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("Ce lien de réinitialisation a expiré");
+        }
+
+        User user = userService.findByEmail(resetToken.getEmail());
+        if (user == null) {
+            throw new BadRequestException("Utilisateur introuvable");
+        }
+
+        userService.updatePassword(user, request.getNewPassword());
+        resetToken.setUsed(true);
+        passwordResetTokenRepository.save(resetToken);
+
+        return ResponseEntity.ok(ApiResponse.success(null, "Mot de passe réinitialisé avec succès"));
+    }
+
     @PostMapping("/logout")
-    @Operation(summary = "Déconnexion", 
+    @Operation(summary = "Déconnexion",
                description = "Déconnecte l'utilisateur en cours et invalide la session HTTP.")
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 

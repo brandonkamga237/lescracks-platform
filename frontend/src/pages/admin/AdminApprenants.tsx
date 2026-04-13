@@ -204,7 +204,14 @@ export default function AdminApprenants() {
                           </div>
                         )}
                         <div>
-                          <p className="font-medium text-gray-900">{l.fullName}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-gray-900">{l.fullName}</p>
+                            {l.userId ? (
+                              <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full">Compte lié</span>
+                            ) : (
+                              <span className="text-xs bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full">Manuel</span>
+                            )}
+                          </div>
                           {l.email && <p className="text-xs text-gray-400">{l.email}</p>}
                         </div>
                       </div>

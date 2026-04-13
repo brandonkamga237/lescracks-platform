@@ -19,13 +19,24 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,8 +45,14 @@ import java.util.stream.Collectors;
 @SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
+    private static final long MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5 MB
+    private static final List<String> ALLOWED_TYPES = List.of("image/jpeg", "image/png", "image/webp", "image/gif");
+
     private final UserService userService;
     private final UserMapper userMapper;
+
+    @Value("${app.uploads.dir:uploads/resources}")
+    private String uploadsDir;
 
     public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
@@ -281,6 +298,70 @@ public class UserController {
         }
         return authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals(RoleName.admin.name()));
+    }
+
+    @PostMapping(value = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Mettre à jour la photo de profil",
+               description = "Upload une image (JPEG/PNG/WebP/GIF, max 5 Mo) et la définit comme photo de profil.")
+    public ResponseEntity<ApiResponse<UserResponse>> uploadAvatar(
+            @RequestParam MultipartFile file) throws IOException {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = userService.findByEmail(authentication.getName());
+        if (currentUser == null) {
+            throw new ResourceNotFoundException("User", "email", authentication.getName());
+        }
+
+        if (file.isEmpty()) {
+            throw new BadRequestException("Le fichier est vide");
+        }
+        if (file.getSize() > MAX_AVATAR_SIZE) {
+            throw new BadRequestException("Le fichier dépasse la taille maximale autorisée (5 Mo)");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_TYPES.contains(contentType)) {
+            throw new BadRequestException("Format non supporté. Utilisez JPEG, PNG, WebP ou GIF.");
+        }
+
+        // Store file under uploads/avatars/
+        Path avatarDir = Paths.get(uploadsDir).getParent().resolve("avatars");
+        Files.createDirectories(avatarDir);
+
+        String ext = "";
+        String original = file.getOriginalFilename();
+        if (original != null && original.contains(".")) {
+            ext = original.substring(original.lastIndexOf('.'));
+        }
+        String filename = UUID.randomUUID() + ext;
+        Files.write(avatarDir.resolve(filename), file.getBytes());
+
+        currentUser.setPictureUrl("/api/users/avatars/" + filename);
+        User saved = userService.save(currentUser);
+
+        return ResponseEntity.ok(ApiResponse.success(userMapper.toResponse(saved), "Photo de profil mise à jour"));
+    }
+
+    @GetMapping("/avatars/{filename:.+}")
+    @Operation(summary = "Récupérer un avatar",
+               description = "Sert les photos de profil uploadées.")
+    public ResponseEntity<org.springframework.core.io.Resource> serveAvatar(
+            @PathVariable String filename) throws MalformedURLException {
+        Path filePath = Paths.get(uploadsDir).getParent().resolve("avatars").resolve(filename).normalize();
+        org.springframework.core.io.Resource resource = new UrlResource(filePath.toUri());
+        if (!resource.exists()) {
+            throw new ResourceNotFoundException("Avatar", "filename", filename);
+        }
+        String contentType = "application/octet-stream";
+        try {
+            contentType = Files.probeContentType(filePath);
+            if (contentType == null) contentType = "application/octet-stream";
+        } catch (IOException ignored) {}
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(resource);
     }
 
     @PostMapping("/me/change-password")

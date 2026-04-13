@@ -18,6 +18,14 @@ public class Learner {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Linked user account. Null for manually-created learner profiles (legacy).
+     * When set, firstName/lastName/photoUrl are derived from the user at display time.
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true)
+    private User user;
+
     @Column(nullable = false)
     private String firstName;
 

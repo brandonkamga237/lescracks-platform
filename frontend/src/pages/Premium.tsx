@@ -1,6 +1,6 @@
 // src/pages/Premium.tsx
 import { useState, useEffect } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { authService, PremiumRequestResponse } from '@/services/auth';
@@ -13,34 +13,12 @@ import {
   Loader2,
   CheckCircle,
   Clock,
-  Phone,
+  Mail,
   Star,
   Zap,
   Shield,
+  AlertTriangle,
 } from 'lucide-react';
-
-const STATUS_LABELS: Record<string, { label: string; color: string; icon: JSX.Element }> = {
-  PENDING: {
-    label: 'En attente',
-    color: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20',
-    icon: <Clock className="w-4 h-4" />,
-  },
-  CONTACTED: {
-    label: 'Contacté',
-    color: 'text-blue-400 bg-blue-400/10 border-blue-400/20',
-    icon: <Phone className="w-4 h-4" />,
-  },
-  PAID: {
-    label: 'Activé',
-    color: 'text-green-400 bg-green-400/10 border-green-400/20',
-    icon: <CheckCircle className="w-4 h-4" />,
-  },
-  REJECTED: {
-    label: 'Refusé',
-    color: 'text-red-400 bg-red-400/10 border-red-400/20',
-    icon: <span className="w-4 h-4 inline-block">✕</span>,
-  },
-};
 
 const PREMIUM_BENEFITS = [
   { icon: <Zap className="w-5 h-5" />, text: 'Accès à toutes les ressources exclusives' },
@@ -56,30 +34,41 @@ const SOCIAL_PROOF_STATS = [
   { value: '94%', label: 'taux de satisfaction' },
 ];
 
+const isNoreplyEmail = (email: string) =>
+  email.includes('noreply') || email.includes('no-reply') || email.includes('@users.github.com');
+
+const daysUntil = (dateStr: string): number => {
+  const diff = new Date(dateStr).getTime() - Date.now();
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+};
+
 const Premium = () => {
-  const { user, isAuthenticated, isPremium } = useAuth();
+  const { user, isPremium } = useAuth();
   const [existingRequest, setExistingRequest] = useState<PremiumRequestResponse | null | undefined>(undefined);
   const [loadingRequest, setLoadingRequest] = useState(true);
 
   // Form state
   const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
   const [country, setCountry] = useState(user?.country || '');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
 
+  // Pre-fill contactEmail with user email if it's not a noreply address
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (user?.email && !isNoreplyEmail(user.email)) {
+      setContactEmail(user.email);
+    }
+  }, [user?.email]);
+
+  useEffect(() => {
     authService.getMyPremiumRequest().then((res) => {
       setExistingRequest(res.data ?? null);
       setLoadingRequest(false);
     });
-  }, [isAuthenticated]);
-
-  if (!isAuthenticated) {
-    return <Navigate to="/connexion" replace />;
-  }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,6 +76,10 @@ const Premium = () => {
 
     if (!whatsappNumber.trim()) {
       setError('Le numéro WhatsApp est requis');
+      return;
+    }
+    if (!contactEmail.trim()) {
+      setError("L'email de contact est requis");
       return;
     }
     if (!country.trim()) {
@@ -98,6 +91,7 @@ const Premium = () => {
     try {
       const res = await authService.submitPremiumRequest({
         whatsappNumber: whatsappNumber.trim(),
+        contactEmail: contactEmail.trim(),
         country: country.trim(),
         message: message.trim() || undefined,
       });
@@ -115,81 +109,66 @@ const Premium = () => {
     }
   };
 
-  const renderExistingRequest = (req: PremiumRequestResponse) => {
-    const statusInfo = STATUS_LABELS[req.status];
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="card p-8"
-      >
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center">
-            <Clock className="w-5 h-5 text-gold" />
-          </div>
-          <div>
-            <h2 className="text-xl font-display font-semibold">Votre demande</h2>
-            <p className="text-white/40 text-sm">Statut actuel de votre demande PREMIUM</p>
-          </div>
+  // Days left for current premium
+  const premiumDaysLeft = user?.premiumExpiresAt ? daysUntil(user.premiumExpiresAt) : null;
+  const isExpiringSoon = premiumDaysLeft !== null && premiumDaysLeft <= 7;
+
+  const renderExistingRequest = (req: PremiumRequestResponse) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="card p-8"
+    >
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center">
+          <Clock className="w-5 h-5 text-gold" />
         </div>
-
-        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-medium mb-6 ${statusInfo.color}`}>
-          {statusInfo.icon}
-          {statusInfo.label}
+        <div>
+          <h2 className="text-xl font-display font-semibold">Demande en cours</h2>
+          <p className="text-white/40 text-sm">Notre équipe va vous contacter sur WhatsApp</p>
         </div>
+      </div>
 
-        <div className="grid md:grid-cols-2 gap-4 text-sm">
-          <div>
-            <span className="text-white/40">WhatsApp</span>
-            <p className="text-white mt-1">{req.whatsappNumber}</p>
-          </div>
-          <div>
-            <span className="text-white/40">Pays</span>
-            <p className="text-white mt-1">{req.country}</p>
-          </div>
-          {req.message && (
-            <div className="md:col-span-2">
-              <span className="text-white/40">Message</span>
-              <p className="text-white mt-1">{req.message}</p>
-            </div>
-          )}
-          <div>
-            <span className="text-white/40">Soumise le</span>
-            <p className="text-white mt-1">
-              {new Date(req.createdAt).toLocaleDateString('fr-FR', {
-                day: '2-digit', month: 'long', year: 'numeric'
-              })}
-            </p>
-          </div>
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-medium mb-6 text-yellow-400 bg-yellow-400/10 border-yellow-400/20">
+        <Clock className="w-4 h-4" />
+        En attente de traitement
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4 text-sm">
+        <div>
+          <span className="text-white/40">WhatsApp</span>
+          <p className="text-white mt-1">{req.whatsappNumber}</p>
         </div>
-
-        {req.status === 'PENDING' && (
-          <div className="mt-6 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-sm">
-            Notre service client va vous contacter sur WhatsApp <strong>{req.whatsappNumber}</strong> pour finaliser votre abonnement.
+        <div>
+          <span className="text-white/40">Email de contact</span>
+          <p className="text-white mt-1">{req.contactEmail}</p>
+        </div>
+        <div>
+          <span className="text-white/40">Pays</span>
+          <p className="text-white mt-1">{req.country}</p>
+        </div>
+        <div>
+          <span className="text-white/40">Soumise le</span>
+          <p className="text-white mt-1">
+            {new Date(req.createdAt).toLocaleDateString('fr-FR', {
+              day: '2-digit', month: 'long', year: 'numeric',
+            })}
+          </p>
+        </div>
+        {req.message && (
+          <div className="md:col-span-2">
+            <span className="text-white/40">Message</span>
+            <p className="text-white mt-1">{req.message}</p>
           </div>
         )}
+      </div>
 
-        {req.status === 'CONTACTED' && (
-          <div className="mt-6 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-300 text-sm">
-            Notre équipe vous a contacté. Suivez les instructions reçues sur WhatsApp pour procéder au paiement.
-          </div>
-        )}
-
-        {req.status === 'PAID' && (
-          <div className="mt-6 p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-green-300 text-sm flex items-center gap-2">
-            <CheckCircle className="w-5 h-5" />
-            Votre compte est maintenant PREMIUM. Profitez de tous les avantages !
-          </div>
-        )}
-
-        {req.status === 'REJECTED' && (
-          <div className="mt-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-sm">
-            Votre demande a été refusée. Contactez-nous directement si vous pensez qu'il s'agit d'une erreur.
-          </div>
-        )}
-      </motion.div>
-    );
-  };
+      <div className="mt-6 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-sm">
+        Notre équipe va vous contacter sur WhatsApp au <strong>{req.whatsappNumber}</strong> pour finaliser votre abonnement.
+        Un email de confirmation vous sera envoyé à <strong>{req.contactEmail}</strong>.
+      </div>
+    </motion.div>
+  );
 
   return (
     <Layout>
@@ -210,7 +189,7 @@ const Premium = () => {
             </h1>
             <p className="text-white/60 text-lg max-w-xl mx-auto">
               {isPremium
-                ? 'Vous bénéficiez déjà de tous les avantages PREMIUM.'
+                ? 'Vous bénéficiez de tous les avantages PREMIUM.'
                 : 'Accédez à tous les contenus exclusifs et boostez votre apprentissage.'}
             </p>
           </motion.div>
@@ -265,12 +244,52 @@ const Premium = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="card p-8 text-center"
+              className="card p-8"
             >
-              <CheckCircle className="w-12 h-12 text-gold mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2">Vous êtes PREMIUM</h2>
-              <p className="text-white/60">Profitez de tous les avantages exclusifs disponibles sur la plateforme.</p>
-              <Link to="/ressources" className="btn-primary mt-6 inline-flex">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 rounded-xl bg-gold/20 flex items-center justify-center">
+                  <Crown className="w-6 h-6 text-gold" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-semibold">Vous êtes PREMIUM</h2>
+                  <p className="text-white/50 text-sm">Profitez de tous les avantages exclusifs</p>
+                </div>
+              </div>
+
+              {user?.premiumExpiresAt && (
+                <div className={`p-4 rounded-lg border mb-6 ${
+                  isExpiringSoon
+                    ? 'bg-orange-500/10 border-orange-500/20 text-orange-300'
+                    : 'bg-gold/10 border-gold/20 text-gold'
+                }`}>
+                  {isExpiringSoon ? (
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+                      <span className="text-sm">
+                        Votre abonnement expire dans <strong>{premiumDaysLeft} jour{premiumDaysLeft! > 1 ? 's' : ''}</strong> — le{' '}
+                        {new Date(user.premiumExpiresAt).toLocaleDateString('fr-FR', {
+                          day: '2-digit', month: 'long', year: 'numeric',
+                        })}.
+                        Contactez-nous sur WhatsApp pour renouveler.
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                      <span className="text-sm">
+                        Accès valable jusqu'au{' '}
+                        <strong>
+                          {new Date(user.premiumExpiresAt).toLocaleDateString('fr-FR', {
+                            day: '2-digit', month: 'long', year: 'numeric',
+                          })}
+                        </strong>
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <Link to="/ressources" className="btn-primary inline-flex">
                 Accéder aux ressources
               </Link>
             </motion.div>
@@ -283,9 +302,8 @@ const Premium = () => {
             </div>
           )}
 
-          {/* Existing request */}
+          {/* Existing pending request */}
           {!isPremium && !loadingRequest && existingRequest && !submitted &&
-            (existingRequest.status === 'PENDING' || existingRequest.status === 'CONTACTED' || existingRequest.status === 'PAID') &&
             renderExistingRequest(existingRequest)
           }
 
@@ -302,7 +320,8 @@ const Premium = () => {
               <h2 className="text-2xl font-display font-bold mb-3">Demande envoyée !</h2>
               <p className="text-white/70 text-lg leading-relaxed max-w-md mx-auto">
                 Votre demande a été enregistrée.<br />
-                Notre service client vous contactera sur WhatsApp pour finaliser votre abonnement.
+                Notre équipe vous contactera sur WhatsApp pour finaliser votre abonnement.
+                Un email de confirmation a été envoyé à <strong className="text-white">{existingRequest?.contactEmail}</strong>.
               </p>
               <Link to="/profil" className="btn-primary mt-8 inline-flex">
                 Retour au profil
@@ -310,9 +329,8 @@ const Premium = () => {
             </motion.div>
           )}
 
-          {/* Form */}
-          {!isPremium && !loadingRequest && !submitted &&
-            (!existingRequest || existingRequest.status === 'REJECTED') && (
+          {/* Form — shown only when no pending request and not yet submitted */}
+          {!isPremium && !loadingRequest && !submitted && !existingRequest && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -326,7 +344,7 @@ const Premium = () => {
                 <div>
                   <h2 className="text-xl font-display font-semibold">Faire une demande</h2>
                   <p className="text-white/40 text-sm">
-                    Remplissez le formulaire — notre équipe vous contactera sur WhatsApp
+                    Notre équipe vous contactera sur WhatsApp pour finaliser
                   </p>
                 </div>
               </div>
@@ -346,6 +364,24 @@ const Premium = () => {
                     required
                   />
                   <p className="text-white/30 text-xs mt-1">Incluez l'indicatif pays (ex: +237 pour le Cameroun)</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm text-white/60 mb-2">
+                    <Mail className="w-4 h-4 inline mr-1" />
+                    Email de contact <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
+                    placeholder="votre@email.com"
+                    required
+                  />
+                  <p className="text-white/30 text-xs mt-1">
+                    Email sur lequel recevoir la confirmation d'activation et les rappels d'expiration
+                  </p>
                 </div>
 
                 <div>

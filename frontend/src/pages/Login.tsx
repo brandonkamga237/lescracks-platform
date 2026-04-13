@@ -1,14 +1,16 @@
 // src/pages/Login.tsx
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { ArrowLeft, Mail, Lock, Github, Loader2 } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/profil';
   const { login, loginWithGoogle, loginWithGitHub, isLoading } = useAuth();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,7 +24,7 @@ const Login = () => {
     try {
       const response = await login(email, password);
       if (response.success) {
-        navigate('/profil');
+        navigate(redirectTo, { replace: true });
       } else {
         setError(response.message || 'Erreur de connexion');
       }
@@ -142,7 +144,12 @@ const Login = () => {
             </div>
 
             <div>
-              <label className="block text-sm text-white/60 mb-2">Mot de passe</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm text-white/60">Mot de passe</label>
+                <Link to="/mot-de-passe-oublie" className="text-xs text-gold/70 hover:text-gold transition-colors">
+                  Mot de passe oublié ?
+                </Link>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
                 <input

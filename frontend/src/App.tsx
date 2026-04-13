@@ -9,6 +9,8 @@ import GlobalLoader from './components/common/GlobalLoader';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
 import Evenements from './pages/Evenements';
 import Ressources from './pages/Ressources';
@@ -34,10 +36,11 @@ import Postuler from './pages/Postuler';
 import About from './pages/About';
 import OpenSource from './pages/OpenSource';
 
-// Protected Route wrapper for admin
-const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isAdmin, isLoading } = useAuth();
-  
+// Protected Route wrapper for any authenticated user
+const UserRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -45,18 +48,35 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   }
-  
+
+  if (!isAuthenticated) {
+    return <Navigate to={`/connexion?redirect=${encodeURIComponent(location.pathname)}`} replace />;
+  }
+
+  return <>{children}</>;
+};
+
+// Protected Route wrapper for admin
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
   if (!isAuthenticated || !isAdmin) {
     return <Navigate to="/" replace />;
   }
-  
+
   return <AdminLayout>{children}</AdminLayout>;
 };
 
 function AppContent() {
   const location = useLocation();
-  const isAuthPage = location.pathname === '/connexion' || location.pathname === '/inscription';
-
   // Scroll to top on route change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -78,12 +98,14 @@ function AppContent() {
           {/* Auth Routes */}
           <Route path="/connexion" element={<Login />} />
           <Route path="/inscription" element={<Register />} />
+          <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/oauth/callback" element={<OAuthCallback />} />
           
-          {/* Protected Routes */}
-          <Route path="/profil" element={<Profile />} />
-          <Route path="/premium" element={<Premium />} />
-          <Route path="/postuler" element={<Postuler />} />
+          {/* Protected Routes — authenticated users only */}
+          <Route path="/profil" element={<UserRoute><Profile /></UserRoute>} />
+          <Route path="/premium" element={<UserRoute><Premium /></UserRoute>} />
+          <Route path="/postuler" element={<UserRoute><Postuler /></UserRoute>} />
           
           {/* Public Routes */}
           <Route path="/about" element={<About />} />

@@ -97,10 +97,13 @@ public class UserServiceImpl implements UserService {
      */
     private void updateOAuthUserFromProvider(User existingUser, OAuth2User oauthUser, OAuthUserInfoExtractor extractor) {
         String username = extractor.extractUsername(oauthUser);
-        
-        // Update fields only if they are not null/empty from the provider
         if (username != null && !username.isEmpty()) {
             existingUser.setUsername(username);
+        }
+        // Refresh the OAuth picture URL on every login
+        String pictureUrl = extractor.extractPictureUrl(oauthUser);
+        if (pictureUrl != null && !pictureUrl.isEmpty()) {
+            existingUser.setPictureUrl(pictureUrl);
         }
     }
 

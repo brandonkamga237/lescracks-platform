@@ -18,4 +18,8 @@ public interface LearnerRepository extends JpaRepository<Learner, Long> {
     Optional<Learner> findBySlug(String slug);
 
     boolean existsBySlug(String slug);
+
+    Optional<Learner> findByUserId(Long userId);
+
+    boolean existsByUserId(Long userId);
 }

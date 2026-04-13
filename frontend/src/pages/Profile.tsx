@@ -1,6 +1,6 @@
 // src/pages/Profile.tsx
-import { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { authService } from '@/services/auth';
@@ -18,12 +18,38 @@ import {
   CheckCircle,
   Eye,
   EyeOff,
+  Camera,
+  GraduationCap,
+  Linkedin,
+  Globe,
+  FileText,
+  ExternalLink,
 } from 'lucide-react';
 
+const STATUS_LABELS: Record<string, string> = {
+  EN_COURS: 'En cours',
+  TERMINE_AVEC_CERTIFICAT: 'Terminé avec certificat',
+  TERMINE_SANS_CERTIFICAT: 'Terminé',
+};
+
 const Profile = () => {
-  const { user, isAuthenticated, isPremium, refreshUser } = useAuth();
+  const { user, isPremium, isLearner, refreshUser, logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
+
+  // Learner profile state
+  const [learnerProfile, setLearnerProfile] = useState<any>(null);
+  const [loadingLearner, setLoadingLearner] = useState(false);
+  const [editingLearner, setEditingLearner] = useState(false);
+  const [learnerData, setLearnerData] = useState({ bio: '', linkedinUrl: '', portfolioUrl: '' });
+  const [savingLearner, setSavingLearner] = useState(false);
+  const [learnerError, setLearnerError] = useState('');
+  const [learnerSuccess, setLearnerSuccess] = useState('');
+
+  // Avatar upload state
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
   
   // Profile edit state
   const [editingProfile, setEditingProfile] = useState(false);
@@ -50,12 +76,80 @@ const Profile = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
-  if (!isAuthenticated) {
-    return <Navigate to="/connexion" replace />;
-  }
+  // Load learner profile if user is a learner
+  useEffect(() => {
+    if (!isLearner) return;
+    setLoadingLearner(true);
+    fetch('/api/learners/me', {
+      headers: { Authorization: `Bearer ${authService.getToken()}` },
+    })
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && json.data) {
+          setLearnerProfile(json.data);
+          setLearnerData({
+            bio: json.data.bio || '',
+            linkedinUrl: json.data.linkedinUrl || '',
+            portfolioUrl: json.data.portfolioUrl || '',
+          });
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingLearner(false));
+  }, [isLearner]);
+
+  const handleSaveLearnerProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLearnerError('');
+    setLearnerSuccess('');
+    setSavingLearner(true);
+    try {
+      const res = await fetch('/api/learners/me', {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${authService.getToken()}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(learnerData),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setLearnerProfile(json.data);
+        setLearnerSuccess('Profil apprenant mis à jour');
+        setEditingLearner(false);
+      } else {
+        setLearnerError(json.message || 'Erreur lors de la mise à jour');
+      }
+    } catch {
+      setLearnerError('Une erreur est survenue');
+    } finally {
+      setSavingLearner(false);
+    }
+  };
 
   const handleUpgrade = () => {
     navigate('/premium');
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarError('');
+    setUploadingAvatar(true);
+    try {
+      const result = await authService.uploadAvatar(file);
+      if (result.success) {
+        await refreshUser();
+      } else {
+        setAvatarError(result.message || 'Échec de l\'upload');
+      }
+    } catch {
+      setAvatarError('Une erreur est survenue');
+    } finally {
+      setUploadingAvatar(false);
+      // Reset input so same file can be re-selected
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
+    }
   };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
@@ -151,13 +245,36 @@ const Profile = () => {
             className="card p-8 mb-8"
           >
             <div className="flex flex-col sm:flex-row items-center gap-6">
-              {/* Avatar */}
-              <div className="w-24 h-24 rounded-full bg-gold/20 flex items-center justify-center">
-                {user?.picture ? (
-                  <img src={user.picture} alt="" className="w-24 h-24 rounded-full" />
-                ) : (
-                  <User className="w-12 h-12 text-gold" />
-                )}
+              {/* Avatar — cliquable pour upload */}
+              <div className="relative group">
+                <div className="w-24 h-24 rounded-full bg-gold/20 flex items-center justify-center overflow-hidden">
+                  {user?.picture ? (
+                    <img src={user.picture} alt="Avatar" className="w-24 h-24 rounded-full object-cover" />
+                  ) : (
+                    <User className="w-12 h-12 text-gold" />
+                  )}
+                </div>
+                {/* Overlay au survol */}
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  title="Changer la photo"
+                >
+                  {uploadingAvatar
+                    ? <Loader2 className="w-6 h-6 text-white animate-spin" />
+                    : <Camera className="w-6 h-6 text-white" />
+                  }
+                </button>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
+                <p className="text-center text-xs text-white/30 mt-2">Cliquer pour changer</p>
               </div>
 
               {/* Info */}
@@ -166,7 +283,13 @@ const Profile = () => {
                   <h1 className="text-2xl font-display font-bold">
                     {user?.name || `${user?.firstName} ${user?.lastName}` || 'Utilisateur'}
                   </h1>
-                  {isPremium && (
+                  {isLearner && (
+                    <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-sm">
+                      <GraduationCap className="w-4 h-4" />
+                      Crack Accompagné
+                    </span>
+                  )}
+                  {!isLearner && isPremium && (
                     <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-gold/20 text-gold text-sm">
                       <Crown className="w-4 h-4" />
                       Premium
@@ -184,6 +307,12 @@ const Profile = () => {
                 </div>
               </div>
             </div>
+
+            {avatarError && (
+              <div className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                {avatarError}
+              </div>
+            )}
 
             {/* Premium Upgrade Banner (if not premium) */}
             {!isPremium && (
@@ -227,6 +356,19 @@ const Profile = () => {
               <User className="w-4 h-4 inline mr-2" />
               Profil
             </button>
+            {isLearner && (
+              <button
+                onClick={() => setActiveTab('learner')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                  activeTab === 'learner'
+                    ? 'bg-purple-500 text-white'
+                    : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <GraduationCap className="w-4 h-4 inline mr-2" />
+                Mon parcours
+              </button>
+            )}
             <button
               onClick={() => setActiveTab('settings')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
@@ -460,6 +602,165 @@ const Profile = () => {
                   </div>
                 )}
               </motion.div>
+            </motion.div>
+          )}
+
+          {/* Learner Tab */}
+          {activeTab === 'learner' && isLearner && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+              {loadingLearner ? (
+                <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 text-gold animate-spin" /></div>
+              ) : !learnerProfile ? (
+                <div className="card p-8 text-center text-white/50">Profil apprenant non disponible.</div>
+              ) : (
+                <div className="card p-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                        <GraduationCap className="w-5 h-5 text-purple-400" />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-display font-semibold">Mon parcours apprenant</h2>
+                        <p className="text-white/40 text-sm">Ces informations apparaissent sur votre profil public</p>
+                      </div>
+                    </div>
+                    {!editingLearner && (
+                      <button
+                        onClick={() => setEditingLearner(true)}
+                        className="px-4 py-2 rounded-lg bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-colors text-sm"
+                      >
+                        Modifier
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Status + cohort (read-only — admin manages these) */}
+                  <div className="grid grid-cols-2 gap-4 mb-6 p-4 rounded-xl bg-white/5">
+                    <div>
+                      <p className="text-white/40 text-xs mb-1">Statut</p>
+                      <p className="text-white text-sm font-medium">
+                        {STATUS_LABELS[learnerProfile.status] || learnerProfile.status}
+                      </p>
+                    </div>
+                    {learnerProfile.cohort && (
+                      <div>
+                        <p className="text-white/40 text-xs mb-1">Cohorte</p>
+                        <p className="text-white text-sm font-medium">{learnerProfile.cohort}</p>
+                      </div>
+                    )}
+                    {learnerProfile.slug && (
+                      <div className="col-span-2">
+                        <p className="text-white/40 text-xs mb-1">Profil public</p>
+                        <a
+                          href={`/apprenants/${learnerProfile.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-gold text-sm hover:underline"
+                        >
+                          /apprenants/{learnerProfile.slug}
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
+                  {editingLearner ? (
+                    <form onSubmit={handleSaveLearnerProfile} className="space-y-4">
+                      <div>
+                        <label className="block text-sm text-white/60 mb-2">
+                          <FileText className="w-4 h-4 inline mr-1" />
+                          Bio
+                        </label>
+                        <textarea
+                          value={learnerData.bio}
+                          onChange={(e) => setLearnerData({ ...learnerData, bio: e.target.value })}
+                          rows={4}
+                          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold resize-none"
+                          placeholder="Parlez de vous, votre parcours, vos projets..."
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-white/60 mb-2">
+                          <Linkedin className="w-4 h-4 inline mr-1" />
+                          LinkedIn
+                        </label>
+                        <input
+                          type="url"
+                          value={learnerData.linkedinUrl}
+                          onChange={(e) => setLearnerData({ ...learnerData, linkedinUrl: e.target.value })}
+                          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
+                          placeholder="https://linkedin.com/in/votre-profil"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-white/60 mb-2">
+                          <Globe className="w-4 h-4 inline mr-1" />
+                          Portfolio / GitHub
+                        </label>
+                        <input
+                          type="url"
+                          value={learnerData.portfolioUrl}
+                          onChange={(e) => setLearnerData({ ...learnerData, portfolioUrl: e.target.value })}
+                          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
+                          placeholder="https://github.com/votre-profil"
+                        />
+                      </div>
+
+                      {learnerError && (
+                        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{learnerError}</div>
+                      )}
+                      {learnerSuccess && (
+                        <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4" />{learnerSuccess}
+                        </div>
+                      )}
+
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingLearner(false);
+                            setLearnerData({ bio: learnerProfile.bio || '', linkedinUrl: learnerProfile.linkedinUrl || '', portfolioUrl: learnerProfile.portfolioUrl || '' });
+                            setLearnerError(''); setLearnerSuccess('');
+                          }}
+                          className="px-4 py-2 rounded-lg bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-colors text-sm"
+                        >
+                          Annuler
+                        </button>
+                        <button type="submit" disabled={savingLearner} className="btn-primary text-sm">
+                          {savingLearner ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Enregistrer'}
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-white/40 text-xs mb-2">Bio</p>
+                        <p className="text-white/80 text-sm leading-relaxed">
+                          {learnerProfile.bio || <span className="italic text-white/30">Aucune bio renseignée</span>}
+                        </p>
+                      </div>
+                      <div className="flex gap-4 pt-2">
+                        {learnerProfile.linkedinUrl && (
+                          <a href={learnerProfile.linkedinUrl} target="_blank" rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-sm">
+                            <Linkedin className="w-4 h-4" /> LinkedIn
+                          </a>
+                        )}
+                        {learnerProfile.portfolioUrl && (
+                          <a href={learnerProfile.portfolioUrl} target="_blank" rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 text-gold hover:text-gold/80 text-sm">
+                            <Globe className="w-4 h-4" /> Portfolio
+                          </a>
+                        )}
+                        {!learnerProfile.linkedinUrl && !learnerProfile.portfolioUrl && (
+                          <span className="text-white/30 text-sm italic">Aucun lien renseigné</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </motion.div>
           )}
 

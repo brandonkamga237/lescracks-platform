@@ -63,9 +63,9 @@ export interface AdminPremiumRequest {
   username: string;
   email: string;
   whatsappNumber: string;
+  contactEmail: string;
   country: string;
   message?: string;
-  status: 'PENDING' | 'CONTACTED' | 'PAID' | 'REJECTED';
   createdAt: string;
 }
 
@@ -113,6 +113,7 @@ export type LearnerStatus = 'EN_COURS' | 'TERMINE_AVEC_CERTIFICAT' | 'TERMINE_SA
 
 export interface AdminLearner {
   id: number;
+  userId?: number;
   firstName: string;
   lastName: string;
   fullName: string;
@@ -338,19 +339,32 @@ class AdminApiService {
   }
 
   // === PREMIUM REQUESTS ===
-  async getPremiumRequests(page = 0, size = 20, status?: string): Promise<PaginatedResponse<AdminPremiumRequest>> {
+  async getPremiumRequests(page = 0, size = 20): Promise<PaginatedResponse<AdminPremiumRequest>> {
     const params = new URLSearchParams({ page: String(page), size: String(size) });
-    if (status) params.append('status', status);
     return this.request<PaginatedResponse<AdminPremiumRequest>>(`/premium/admin/requests?${params}`);
   }
 
-  async updatePremiumRequestStatus(id: number, status: string): Promise<AdminPremiumRequest> {
-    return this.request<AdminPremiumRequest>(`/premium/admin/requests/${id}/status?status=${status}`, {
-      method: 'PUT',
+  async acceptPremiumRequest(id: number, months: number): Promise<void> {
+    await this.request<void>(`/premium/admin/requests/${id}/accept?months=${months}`, {
+      method: 'POST',
     });
   }
 
-  async getPremiumStats(): Promise<{ pending: number; contacted: number; paid: number; rejected: number }> {
+  // === LEARNERS ===
+  async assignLearnerRole(userId: number, cohort?: string): Promise<AdminLearner> {
+    return this.request<AdminLearner>(`/learners/admin/assign/${userId}`, {
+      method: 'POST',
+      body: JSON.stringify({ cohort: cohort ?? null }),
+    });
+  }
+
+  async rejectPremiumRequest(id: number): Promise<void> {
+    await this.request<void>(`/premium/admin/requests/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getPremiumStats(): Promise<{ pending: number }> {
     return this.request(`/premium/admin/stats`);
   }
 

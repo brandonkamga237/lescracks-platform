@@ -51,12 +51,15 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        // Initialize Roles FIRST
-        if (roleRepository.count() == 0) {
+        // Initialize Roles — idempotent: insert only missing roles
+        if (roleRepository.findByName(RoleName.user).isEmpty())
             roleRepository.save(Role.builder().name(RoleName.user).build());
+        if (roleRepository.findByName(RoleName.premium_user).isEmpty())
             roleRepository.save(Role.builder().name(RoleName.premium_user).build());
+        if (roleRepository.findByName(RoleName.learner).isEmpty())
+            roleRepository.save(Role.builder().name(RoleName.learner).build());
+        if (roleRepository.findByName(RoleName.admin).isEmpty())
             roleRepository.save(Role.builder().name(RoleName.admin).build());
-        }
 
         // Initialize Providers FIRST (required for admin user creation)
         if (providerRepository.count() == 0) {

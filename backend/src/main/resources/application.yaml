@@ -43,6 +43,20 @@ spring:
             client-secret: ${GOOGLE_CLIENT_SECRET}
             scope: profile, email
 
+  mail:
+    host: ${MAIL_HOST:mail.privateemail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:contact@lescracks.com}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+        debug: false
+
   servlet:
     multipart:
       max-file-size: 10MB
@@ -59,6 +73,11 @@ app:
 
   uploads:
     dir: ${UPLOADS_DIR:uploads/resources}
+
+  mail:
+    from: ${MAIL_FROM:LesCracks <contact@lescracks.com>}
+    admin: ${MAIL_ADMIN:contact@lescracks.com}
+    reset-token-expiry-minutes: 30
 
   # MinIO Configuration
   minio:

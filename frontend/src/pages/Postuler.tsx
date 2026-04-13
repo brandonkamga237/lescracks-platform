@@ -1,6 +1,6 @@
 // src/pages/Postuler.tsx
 import { useState } from 'react';
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiService } from '@/services/api';
@@ -39,19 +39,14 @@ const LEVELS = [
 ];
 
 const Postuler = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   const [level, setLevel] = useState('');
   const [motivation, setMotivation] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
-
-  if (!isAuthenticated) {
-    return <Navigate to="/inscription?redirect=/postuler" replace />;
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

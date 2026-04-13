@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,5 +32,11 @@ public interface UserRepository extends JpaRepository<User, Long>{
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.createdAt > :dateTime")
     long countByCreatedAtAfter(@Param("dateTime") LocalDateTime dateTime);
+
+    @Query("SELECT u FROM User u WHERE u.role.name = 'premium_user' AND u.premiumExpiresAt IS NOT NULL AND u.premiumExpiresAt <= :now")
+    List<User> findExpiredPremiumUsers(@Param("now") LocalDateTime now);
+
+    @Query("SELECT u FROM User u WHERE u.role.name = 'premium_user' AND u.premiumExpiresAt >= :from AND u.premiumExpiresAt < :to")
+    List<User> findPremiumUsersExpiringBetween(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
 }

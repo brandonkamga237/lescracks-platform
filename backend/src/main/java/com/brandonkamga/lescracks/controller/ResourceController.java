@@ -29,6 +29,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -89,27 +90,29 @@ public class ResourceController {
             description = "Liste des ressources avec pagination")
     })
     public ResponseEntity<ApiResponse<PaginatedResourceResponse>> getAllResources(
-            @Parameter(description = "Type de ressource (VIDEO ou DOCUMENT)") 
+            @Parameter(description = "Type de ressource (VIDEO ou DOCUMENT)")
             @RequestParam(required = false) String type,
-            
-            @Parameter(description = "ID de la catégorie") 
+
+            @Parameter(description = "ID de la catégorie")
             @RequestParam(required = false) Long categoryId,
-            
-            @Parameter(description = "IDs des tags séparés par des virgules (filtre OU)") 
+
+            @Parameter(description = "IDs des tags séparés par des virgules (filtre OU)")
             @RequestParam(required = false) String tagIds,
-            
-            @Parameter(description = "Terme de recherche dans le titre ou la description") 
+
+            @Parameter(description = "Terme de recherche dans le titre ou la description")
             @RequestParam(required = false) String search,
-            
-            @Parameter(description = "Numéro de page (0-based)") 
+
+            @Parameter(description = "Numéro de page (0-based)")
             @RequestParam(defaultValue = "0") int page,
-            
-            @Parameter(description = "Taille de la page") 
+
+            @Parameter(description = "Taille de la page")
             @RequestParam(defaultValue = "12") int size,
-            
-            @Parameter(description = "Tri (ex: createdAt,desc ou title,asc)") 
-            @RequestParam(defaultValue = "createdAt,desc") String sort) {
-        
+
+            @Parameter(description = "Tri (ex: createdAt,desc ou title,asc)")
+            @RequestParam(defaultValue = "createdAt,desc") String sort,
+
+            Authentication authentication) {
+
         // Parse tagIds
         List<Long> tagIdList = null;
         if (tagIds != null && !tagIds.isEmpty()) {
@@ -118,23 +121,25 @@ public class ResourceController {
                     .map(Long::parseLong)
                     .collect(Collectors.toList());
         }
-        
+
         // Parse sort
         String[] sortParams = sort.split(",");
         String sortField = sortParams[0];
-        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc") 
-                ? Sort.Direction.ASC 
+        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
                 : Sort.Direction.DESC;
-        
+
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
-        
+
         // Use the unified search method — convert type to lowercase to match enum storage
         Page<Resource> resourcePage = resourceService.searchWithFilters(
                 type != null ? type.toLowerCase() : null, categoryId, tagIdList, search, pageable);
-        
-        // Convert to response format
+
+        boolean canAccessPremium = hasPremiumAccess(authentication);
+
+        // Convert to response format — mask URL for premium resources if user has no access
         List<ResourceResponse> content = resourcePage.getContent().stream()
-                .map(this::toResponse)
+                .map(r -> toResponse(r, canAccessPremium))
                 .collect(Collectors.toList());
         
         PaginatedResourceResponse response = new PaginatedResourceResponse(
@@ -151,19 +156,25 @@ public class ResourceController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Récupérer une ressource par ID", 
-               description = "Retourne les détails d'une ressource spécifique.")
+    @Operation(summary = "Récupérer une ressource par ID",
+               description = "Retourne les détails d'une ressource spécifique. Les ressources PREMIUM nécessitent un compte actif.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
             description = "Ressource trouvée"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
+            description = "Accès refusé — ressource PREMIUM"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
             description = "Ressource non trouvée")
     })
     public ResponseEntity<ApiResponse<ResourceResponse>> getResourceById(
-            @Parameter(description = "ID de la ressource", required = true) @PathVariable Long id) {
-        return resourceService.findByIdOptional(id)
-                .map(resource -> ResponseEntity.ok(ApiResponse.success(toResponse(resource))))
+            @Parameter(description = "ID de la ressource", required = true) @PathVariable Long id,
+            Authentication authentication) {
+        Resource resource = resourceService.findByIdOptional(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource", "id", id));
+        if (resource.isPremium() && !hasPremiumAccess(authentication)) {
+            throw new com.brandonkamga.lescracks.exception.ForbiddenException("Cette ressource est réservée aux membres PREMIUM");
+        }
+        return ResponseEntity.ok(ApiResponse.success(toResponse(resource)));
     }
 
     @GetMapping("/category/{categoryId}")
@@ -172,13 +183,15 @@ public class ResourceController {
     public ResponseEntity<ApiResponse<PaginatedResourceResponse>> getResourcesByCategory(
             @Parameter(description = "ID de la catégorie", required = true) @PathVariable Long categoryId,
             @Parameter(description = "Numéro de page (0-based)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Taille de la page") @RequestParam(defaultValue = "12") int size) {
-        
+            @Parameter(description = "Taille de la page") @RequestParam(defaultValue = "12") int size,
+            Authentication authentication) {
+
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Resource> resourcePage = resourceService.findByCategoryId(categoryId, pageable);
-        
+        boolean canAccessPremium = hasPremiumAccess(authentication);
+
         List<ResourceResponse> content = resourcePage.getContent().stream()
-                .map(this::toResponse)
+                .map(r -> toResponse(r, canAccessPremium))
                 .collect(Collectors.toList());
         
         PaginatedResourceResponse response = new PaginatedResourceResponse(
@@ -194,16 +207,18 @@ public class ResourceController {
     @Operation(summary = "Récupérer les ressources par type avec pagination", 
                description = "Filtre les ressources par type (VIDEO ou DOCUMENT) avec support de pagination.")
     public ResponseEntity<ApiResponse<PaginatedResourceResponse>> getResourcesByType(
-            @Parameter(description = "Type de ressource (VIDEO ou DOCUMENT)", required = true) 
+            @Parameter(description = "Type de ressource (VIDEO ou DOCUMENT)", required = true)
             @PathVariable String resourceTypeName,
             @Parameter(description = "Numéro de page (0-based)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Taille de la page") @RequestParam(defaultValue = "12") int size) {
-        
+            @Parameter(description = "Taille de la page") @RequestParam(defaultValue = "12") int size,
+            Authentication authentication) {
+
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Resource> resourcePage = resourceService.findByResourceTypeName(resourceTypeName.toLowerCase(), pageable);
-        
+        boolean canAccessPremium = hasPremiumAccess(authentication);
+
         List<ResourceResponse> content = resourcePage.getContent().stream()
-                .map(this::toResponse)
+                .map(r -> toResponse(r, canAccessPremium))
                 .collect(Collectors.toList());
         
         PaginatedResourceResponse response = new PaginatedResourceResponse(
@@ -219,21 +234,23 @@ public class ResourceController {
     @Operation(summary = "Récupérer les ressources par tags avec pagination", 
                description = "Filtre les ressources par tags (ressources ayant AU MOINS UN des tags) avec pagination.")
     public ResponseEntity<ApiResponse<PaginatedResourceResponse>> getResourcesByTags(
-            @Parameter(description = "IDs des tags séparés par des virgules", required = true) 
+            @Parameter(description = "IDs des tags séparés par des virgules", required = true)
             @RequestParam String tagIds,
             @Parameter(description = "Numéro de page (0-based)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Taille de la page") @RequestParam(defaultValue = "12") int size) {
-        
+            @Parameter(description = "Taille de la page") @RequestParam(defaultValue = "12") int size,
+            Authentication authentication) {
+
         List<Long> tagIdList = List.of(tagIds.split(",")).stream()
                 .map(String::trim)
                 .map(Long::parseLong)
                 .collect(Collectors.toList());
-        
+
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Resource> resourcePage = resourceService.findByTagsIn(tagIdList, pageable);
-        
+        boolean canAccessPremium = hasPremiumAccess(authentication);
+
         List<ResourceResponse> content = resourcePage.getContent().stream()
-                .map(this::toResponse)
+                .map(r -> toResponse(r, canAccessPremium))
                 .collect(Collectors.toList());
         
         PaginatedResourceResponse response = new PaginatedResourceResponse(
@@ -340,9 +357,12 @@ public class ResourceController {
     @PostMapping("/{id}/download")
     @Operation(summary = "Enregistrer un téléchargement et récupérer l'URL",
                description = "Incrémente le compteur de téléchargements et retourne l'URL de la ressource.")
-    public ResponseEntity<ApiResponse<String>> trackDownload(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<String>> trackDownload(@PathVariable Long id, Authentication authentication) {
         Resource resource = resourceService.findByIdOptional(id)
                 .orElseThrow(() -> new com.brandonkamga.lescracks.exception.ResourceNotFoundException("Resource", "id", id));
+        if (resource.isPremium() && !hasPremiumAccess(authentication)) {
+            throw new com.brandonkamga.lescracks.exception.ForbiddenException("Cette ressource est réservée aux membres PREMIUM");
+        }
         if (!resource.isDownloadable()) {
             throw new com.brandonkamga.lescracks.exception.BadRequestException("Le téléchargement n'est pas autorisé pour cette ressource");
         }
@@ -369,6 +389,21 @@ public class ResourceController {
         }
         resourceService.deleteById(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Resource deleted successfully"));
+    }
+
+    /**
+     * Returns true if the authenticated user has premium or admin access.
+     * Admins can always access premium resources.
+     * Premium users can access only if their premium has not expired (enforced by the scheduler at the role level).
+     */
+    private boolean hasPremiumAccess(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_premium_user")
+                        || a.getAuthority().equals("ROLE_learner")
+                        || a.getAuthority().equals("ROLE_admin"));
     }
 
     private Resource toEntity(ResourceRequest request) {
@@ -417,6 +452,10 @@ public class ResourceController {
     }
 
     private ResourceResponse toResponse(Resource resource) {
+        return toResponse(resource, true);
+    }
+
+    private ResourceResponse toResponse(Resource resource, boolean canAccessPremium) {
         Set<ResourceResponse.TagDto> tags = resource.getTags().stream()
                 .map(tag -> ResourceResponse.TagDto.builder()
                         .id(tag.getId())
@@ -432,11 +471,14 @@ public class ResourceController {
                     .build();
         }
 
+        // For premium resources, only expose the URL if the caller has access
+        String url = (resource.isPremium() && !canAccessPremium) ? null : resource.getUrl();
+
         return ResourceResponse.builder()
                 .id(resource.getId())
                 .title(resource.getTitle())
                 .description(resource.getDescription())
-                .url(resource.getUrl())
+                .url(url)
                 .previewImageUrl(resource.getPreviewImageUrl())
                 .sourceType(resource.getSourceType() != null ? resource.getSourceType().name() : ResourceSourceType.EXTERNAL.name())
                 .premium(resource.isPremium())

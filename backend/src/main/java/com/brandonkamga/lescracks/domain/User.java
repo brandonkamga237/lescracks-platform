@@ -39,6 +39,9 @@ public class User {
 
     private String country;
 
+    @Column(name = "picture_url", length = 512)
+    private String pictureUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
@@ -51,6 +54,13 @@ public class User {
 
     @Column(name = "premium_activated_at")
     private LocalDateTime premiumActivatedAt;
+
+    @Column(name = "premium_expires_at")
+    private LocalDateTime premiumExpiresAt;
+
+    /** Email used for premium reminders — provided by the user at request time. */
+    @Column(name = "premium_contact_email", length = 255)
+    private String premiumContactEmail;
 
     @PrePersist
     protected void onCreate() {
