@@ -2,12 +2,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '@/services/auth';
+import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
 const OAuthCallback = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [error, setError] = useState<string | null>(null);
+  const { refreshUser } = useAuth();
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
@@ -25,18 +27,14 @@ const OAuthCallback = () => {
       }
 
       try {
-        // Store the token
+        // Store the token in localStorage
         authService.setToken(token);
 
-        // Fetch the current user
-        const user = await authService.getCurrentUser();
-        
-        if (user) {
-          // Redirect to profile
-          navigate('/profil', { replace: true });
-        } else {
-          setError('Failed to fetch user information');
-        }
+        // Fetch user AND update AuthContext state so isAuthenticated becomes true
+        await refreshUser();
+
+        // Navigate — AuthContext is now up to date
+        navigate('/profil', { replace: true });
       } catch (err) {
         console.error('OAuth callback error:', err);
         setError('Authentication failed');
@@ -44,7 +42,7 @@ const OAuthCallback = () => {
     };
 
     handleOAuthCallback();
-  }, [navigate, searchParams]);
+  }, [navigate, searchParams, refreshUser]);
 
   if (error) {
     return (
