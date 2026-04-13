@@ -1,5 +1,6 @@
 // src/pages/Landing.tsx
 import { useState, useEffect, useRef } from 'react';
+import SEO from '@/components/common/SEO';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import apiService, { Event, Learner } from '@/services/api';
@@ -108,6 +109,11 @@ const Landing = () => {
 
   return (
     <Layout>
+      <SEO
+        title="LesCracks – Devenez un crack de la tech"
+        description="Un accompagnement structuré de 6 à 12 mois pour passer de débutant à profil employable — avec un mentor, des projets réels et une communauté. Agence edtech Afrique francophone."
+        url="/"
+      />
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
       <section

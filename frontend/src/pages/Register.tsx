@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import SEO from '@/components/common/SEO';
 import { ArrowLeft, Mail, Lock, User, Github, Loader2, CheckCircle } from 'lucide-react';
 
 const Register = () => {
@@ -91,6 +92,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4 py-20">
+      <SEO title="Créer un compte" description="Rejoins la communauté LesCracks — crée ton compte gratuitement et accède aux ressources tech." url="/inscription" />
       {/* Background */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(212,175,55,0.1)_0%,_transparent_50%)]" />
 

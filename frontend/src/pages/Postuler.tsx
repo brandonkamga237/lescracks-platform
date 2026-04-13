@@ -1,6 +1,7 @@
 // src/pages/Postuler.tsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import SEO from '@/components/common/SEO';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiService } from '@/services/api';
@@ -150,6 +151,11 @@ const Postuler = () => {
 
   return (
     <Layout>
+      <SEO
+        title="Postuler à l'Accompagnement 360"
+        description="Rejoins l'Accompagnement 360 de LesCracks — suivi personnalisé de 6 à 12 mois avec mentor dédié, projets réels et attestation. Postule maintenant."
+        url="/postuler"
+      />
       <div className="pt-8 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
 

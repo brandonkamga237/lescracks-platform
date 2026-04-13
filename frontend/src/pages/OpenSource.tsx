@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Layout from '@/components/layout/Layout';
+import SEO from '@/components/common/SEO';
 import { Github, Linkedin, Globe, Twitter, Star, GitFork, ExternalLink, Users, Code2, Loader2 } from 'lucide-react';
 import { ENV } from '@/config/env';
 
@@ -73,6 +74,11 @@ const OpenSource = () => {
 
   return (
     <Layout>
+      <SEO
+        title="Projets Open Source LesCracks"
+        description="Contribue à des projets open source réels avec la communauté LesCracks. Construis ton portfolio, gagne en visibilité et collabore avec des devs africains."
+        url="/open-source"
+      />
       {/* ── Hero ── */}
       <section className="relative pt-32 pb-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-black via-zinc-900 to-black" />

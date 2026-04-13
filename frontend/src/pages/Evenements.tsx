@@ -1,5 +1,6 @@
 // src/pages/Evenements.tsx
 import { useState, useEffect } from 'react';
+import SEO from '@/components/common/SEO';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { apiService, Event } from '@/services/api';
@@ -63,6 +64,11 @@ const Evenements = () => {
 
   return (
     <Layout>
+      <SEO
+        title="Événements tech — Bootcamps, Hackathons, Meetups"
+        description="Découvres les prochains bootcamps, hackathons, meetups et workshops organisés par LesCracks. Rejoins la communauté tech d'Afrique francophone."
+        url="/evenements"
+      />
       <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
