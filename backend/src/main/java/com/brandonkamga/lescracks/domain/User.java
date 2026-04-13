@@ -63,7 +63,7 @@ public class User {
     private String premiumContactEmail;
 
     /** True once the user has clicked the verification link in their welcome email. */
-    @Column(name = "email_verified", nullable = false)
+    @Column(name = "email_verified", nullable = false, columnDefinition = "boolean NOT NULL DEFAULT false")
     @Builder.Default
     private boolean emailVerified = false;
 
