@@ -46,11 +46,12 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         OAuth2User oauthUser = extractOAuthUser(authentication);
         String provider = extractProvider(authentication);
 
-        // Process user (create if doesn't exist)
-        userService.processOAuthPostLogin(oauthUser, provider);
+        // Process user (create if doesn't exist) — returns the resolved User with correct email
+        com.brandonkamga.lescracks.domain.User user =
+                userService.processOAuthPostLogin(oauthUser, provider);
 
-        // Generate JWT token
-        String token = jwtService.generateToken(authentication);
+        // Generate JWT using the stored email (handles private GitHub emails via fallback)
+        String token = jwtService.generateTokenForUser(user.getEmail());
 
         // Redirect to frontend with token
         sendRedirect(response, token);
