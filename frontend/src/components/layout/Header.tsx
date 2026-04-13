@@ -173,18 +173,18 @@ const Header = () => {
       <header className="fixed top-0 left-0 right-0 z-50 px-4 py-4 bg-background/80 backdrop-blur-lg border-b border-border">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
 
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-1 flex-shrink-0">
+          {/* Logo — redirects to /ressources when logged in */}
+          <Link to={isAuthenticated ? '/ressources' : '/'} className="flex items-center gap-1 flex-shrink-0">
             <LesCracksLogo height={40} lesColor="#000000" className="w-auto" />
           </Link>
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-0.5">
             <Link
-              to="/"
+              to={isAuthenticated ? '/ressources' : '/'}
               className="px-3.5 py-2 text-sm text-foreground/50 hover:text-foreground transition-colors rounded-lg hover:bg-secondary/40"
             >
-              Accueil
+              {isAuthenticated ? 'Ressources' : 'Accueil'}
             </Link>
 
             {menuItems.map((item) => (
@@ -324,9 +324,9 @@ const Header = () => {
             className="fixed top-[72px] left-0 right-0 z-40 bg-background/97 backdrop-blur-xl lg:hidden border-b border-border overflow-hidden"
           >
             <div className="p-5 space-y-1">
-              <Link to="/" onClick={() => setMobileMenuOpen(false)}
+              <Link to={isAuthenticated ? '/ressources' : '/'} onClick={() => setMobileMenuOpen(false)}
                 className="block py-2.5 px-4 text-foreground/60 hover:text-foreground hover:bg-secondary rounded-xl text-sm">
-                Accueil
+                {isAuthenticated ? 'Ressources' : 'Accueil'}
               </Link>
 
               {/* Accompagnement */}

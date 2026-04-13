@@ -33,8 +33,21 @@ import Apprenants from './pages/Apprenants';
 import ApprennantProfile from './pages/ApprennantProfile';
 import Premium from './pages/Premium';
 import Postuler from './pages/Postuler';
+import VerifyEmail from './pages/VerifyEmail';
 import About from './pages/About';
 import OpenSource from './pages/OpenSource';
+
+// Home route — landing for guests, /ressources for logged-in users
+const HomeRoute = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" />
+    </div>
+  );
+  if (isAuthenticated) return <Navigate to="/ressources" replace />;
+  return <Landing />;
+};
 
 // Protected Route wrapper for any authenticated user
 const UserRoute = ({ children }: { children: React.ReactNode }) => {
@@ -92,20 +105,23 @@ function AppContent() {
         transition={{ duration: 0.3 }}
       >
         <Routes location={location}>
-          {/* Landing Page */}
-          <Route path="/" element={<Landing />} />
+          {/* Landing Page — redirects to /ressources when authenticated */}
+          <Route path="/" element={<HomeRoute />} />
           
           {/* Auth Routes */}
           <Route path="/connexion" element={<Login />} />
           <Route path="/inscription" element={<Register />} />
           <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/oauth/callback" element={<OAuthCallback />} />
-          
+
           {/* Protected Routes — authenticated users only */}
           <Route path="/profil" element={<UserRoute><Profile /></UserRoute>} />
           <Route path="/premium" element={<UserRoute><Premium /></UserRoute>} />
-          <Route path="/postuler" element={<UserRoute><Postuler /></UserRoute>} />
+
+          {/* Public — Postuler accessible sans compte */}
+          <Route path="/postuler" element={<Postuler />} />
           
           {/* Public Routes */}
           <Route path="/about" element={<About />} />
@@ -174,7 +190,7 @@ function AppContent() {
           } />
 
           {/* 404 */}
-          <Route path="*" element={<Landing />} />
+          <Route path="*" element={<HomeRoute />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

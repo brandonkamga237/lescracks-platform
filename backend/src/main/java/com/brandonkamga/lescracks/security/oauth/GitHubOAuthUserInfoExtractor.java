@@ -116,8 +116,9 @@ public class GitHubOAuthUserInfoExtractor implements OAuthUserInfoExtractor {
         user.setRole(role);
         user.setProvider(provider);
         user.setProviderUserId(providerUserId);
-        // OAuth users don't have a password
         user.setPassword(null);
+        // Email already verified by GitHub
+        user.setEmailVerified(true);
 
         return user;
     }

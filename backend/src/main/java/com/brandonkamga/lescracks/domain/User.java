@@ -62,6 +62,15 @@ public class User {
     @Column(name = "premium_contact_email", length = 255)
     private String premiumContactEmail;
 
+    /** True once the user has clicked the verification link in their welcome email. */
+    @Column(name = "email_verified", nullable = false)
+    @Builder.Default
+    private boolean emailVerified = false;
+
+    /** One-time token sent in the verification email. Cleared after use. */
+    @Column(name = "verification_token", length = 100)
+    private String verificationToken;
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {

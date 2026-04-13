@@ -112,6 +112,7 @@ public class DataInitializer implements CommandLineRunner {
                         .username("admin")
                         .provider(localProvider)
                         .role(adminRole)
+                        .emailVerified(true)
                         .build();
                 userRepository.save(adminUser);
                 System.out.println("=== Admin user created successfully! ===");

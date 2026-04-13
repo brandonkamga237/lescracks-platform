@@ -17,6 +17,7 @@ import com.brandonkamga.lescracks.mapper.UserMapper;
 import com.brandonkamga.lescracks.repository.PasswordResetTokenRepository;
 import com.brandonkamga.lescracks.repository.ProviderRepository;
 import com.brandonkamga.lescracks.repository.RoleRepository;
+import com.brandonkamga.lescracks.repository.UserRepository;
 import com.brandonkamga.lescracks.security.jwt.JwtService;
 import com.brandonkamga.lescracks.service.impl.MailServiceImpl;
 import com.brandonkamga.lescracks.service.interfaces.UserService;
@@ -55,6 +56,7 @@ public class AuthController {
     private final RoleRepository roleRepository;
     private final ProviderRepository providerRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final UserRepository userRepository;
     private final MailServiceImpl mailService;
 
     public AuthController(
@@ -66,6 +68,7 @@ public class AuthController {
             RoleRepository roleRepository,
             ProviderRepository providerRepository,
             PasswordResetTokenRepository passwordResetTokenRepository,
+            UserRepository userRepository,
             MailServiceImpl mailService) {
         this.userService = userService;
         this.userMapper = userMapper;
@@ -75,6 +78,7 @@ public class AuthController {
         this.roleRepository = roleRepository;
         this.providerRepository = providerRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.userRepository = userRepository;
         this.mailService = mailService;
     }
 
@@ -91,7 +95,7 @@ public class AuthController {
             description = "Données invalides ou email/username déjà utilisé",
             content = @Content(mediaType = "application/json"))
     })
-    public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody UserRequest userRequest) {
+    public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody UserRequest userRequest) {
         if (userRequest.getEmail() == null || userService.existsByEmail(userRequest.getEmail())) {
             throw new BadRequestException("Email already exists or is required");
         }
@@ -105,9 +109,10 @@ public class AuthController {
         Role role = roleRepository.findByName(RoleName.user)
                 .orElseThrow(() -> new RuntimeException("Role not found"));
 
-        // Get the LOCAL provider for local registration
         Provider localProvider = providerRepository.findByProviderName(ProviderType.LOCAL)
                 .orElseThrow(() -> new RuntimeException("LOCAL provider not found"));
+
+        String verificationToken = UUID.randomUUID().toString();
 
         User user = new User();
         user.setEmail(userRequest.getEmail());
@@ -117,17 +122,36 @@ public class AuthController {
         user.setPhone(userRequest.getPhone());
         user.setCountry(userRequest.getCountry());
         user.setProvider(localProvider);
-        // Local users don't have a providerUserId
         user.setProviderUserId(null);
+        user.setEmailVerified(false);
+        user.setVerificationToken(verificationToken);
 
         User savedUser = userService.save(user);
-
-        String token = jwtService.generateTokenForUser(savedUser.getEmail());
-        mailService.sendWelcome(savedUser.getEmail(), savedUser.getUsername());
+        mailService.sendEmailVerification(savedUser.getEmail(), savedUser.getUsername(), verificationToken);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(AuthResponse.of(token, userMapper.toResponse(savedUser)), "User registered successfully"));
+                .body(ApiResponse.success(null, "Compte créé — vérifie ta boîte mail pour activer ton compte."));
+    }
+
+    @PostMapping("/verify-email")
+    @Transactional
+    @Operation(summary = "Vérification de l'adresse email",
+               description = "Active le compte en vérifiant le token reçu par email.")
+    public ResponseEntity<ApiResponse<AuthResponse>> verifyEmail(@RequestParam String token) {
+        User user = userRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new BadRequestException("Lien de vérification invalide ou déjà utilisé."));
+
+        user.setEmailVerified(true);
+        user.setVerificationToken(null);
+        userService.save(user);
+
+        mailService.sendWelcome(user.getEmail(), user.getUsername());
+
+        String jwt = jwtService.generateTokenForUser(user.getEmail());
+        return ResponseEntity.ok(ApiResponse.success(
+                AuthResponse.of(jwt, userMapper.toResponse(user)),
+                "Email vérifié — bienvenue sur LesCracks !"));
     }
 
     @PostMapping("/login")
@@ -152,6 +176,13 @@ public class AuthController {
             User user = userService.findByEmail(loginRequest.getEmail());
             if (user == null) {
                 throw new BadRequestException("User not found");
+            }
+
+            // Block LOCAL users who haven't verified their email yet
+            if (user.getProvider() != null
+                    && ProviderType.LOCAL.equals(user.getProvider().getProviderName())
+                    && !user.isEmailVerified()) {
+                throw new BadRequestException("Vérifie ton adresse email avant de te connecter. Consulte ta boîte mail.");
             }
 
             String token = jwtService.generateTokenForUser(user.getEmail());

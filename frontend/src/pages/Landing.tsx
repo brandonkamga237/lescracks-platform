@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
 import apiService, { Event, Learner } from '@/services/api';
 import Layout from '@/components/layout/Layout';
 import Testimonials from '@/components/landing/Testimonials';
@@ -31,8 +30,8 @@ import {
 const STATS = [
   { value: '+20', label: 'apprenants formés' },
   { value: '3', label: 'pays couverts' },
+  { value: '6-12', label: 'mois de suivi certifiant' },
   { value: '94%', label: 'taux de satisfaction' },
-  { value: '2', label: 'ans d\'existence' },
 ];
 
 const PAIN_POINTS = [
@@ -92,7 +91,6 @@ const SL = ({ children }: { children: React.ReactNode }) => (
 // ─── page ─────────────────────────────────────────────────────────────────────
 
 const Landing = () => {
-  const { isAuthenticated } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [showcasedLearners, setShowcasedLearners] = useState<Learner[]>([]);
   const heroRef = useRef<HTMLElement>(null);
@@ -106,7 +104,7 @@ const Landing = () => {
     apiService.getShowcasedLearners().then(setShowcasedLearners).catch(() => {});
   }, []);
 
-  const postulerHref = isAuthenticated ? '/postuler' : '/inscription';
+  const postulerHref = '/postuler';
 
   return (
     <Layout>
@@ -226,7 +224,7 @@ const Landing = () => {
                 L'<span className="text-gold">Accompagnement 360</span>
               </h2>
               <p className="text-white/55 text-sm leading-relaxed mb-8">
-                Un suivi humain et structuré qui t'emmène de "je ne sais pas par où commencer" jusqu'à ton premier poste, ta première mission freelance ou le lancement de ton projet. Avec un mentor dédié, des projets concrets et une communauté qui avance avec toi.
+                Un suivi humain et structuré de <strong className="text-white">6 à 12 mois</strong> qui t'emmène de "je ne sais pas par où commencer" jusqu'à ton premier poste, ta première mission freelance ou le lancement de ton projet. Avec un mentor dédié, des projets concrets et une attestation de complétion.
               </p>
 
               {/* For who */}

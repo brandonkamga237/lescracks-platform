@@ -93,3 +93,8 @@ app:
     title: "LesCracks API"
     version: "1.0.0"
     description: "API pour la plateforme de formation LesCracks - Gestion des utilisateurs, événements, ressources et formations"
+
+management:
+  health:
+    mail:
+      enabled: false   # Mail server unreachable doesn't mean the app is down

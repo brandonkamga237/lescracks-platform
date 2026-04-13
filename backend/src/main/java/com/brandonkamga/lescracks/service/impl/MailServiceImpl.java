@@ -432,6 +432,63 @@ public class MailServiceImpl {
         send(to, "Ton accès PREMIUM a expiré — LesCracks", html);
     }
 
+    @Async
+    public void sendEmailVerification(String to, String username, String token) {
+        String verifyLink = frontendUrl + "/verify-email?token=" + token;
+        String html = """
+            <!DOCTYPE html>
+            <html lang="fr">
+            <head><meta charset="UTF-8"></head>
+            <body style="margin:0;padding:0;background:#0a0a0a;font-family:'Segoe UI',Arial,sans-serif;">
+              <table width="100%%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 0;">
+                <tr><td align="center">
+                  <table width="560" cellpadding="0" cellspacing="0" style="background:#111;border:1px solid #222;border-radius:16px;overflow:hidden;">
+                    <tr>
+                      <td style="background:#0a0a0a;padding:32px 40px;border-bottom:1px solid #222;">
+                        <span style="color:#C9A84C;font-size:22px;font-weight:700;letter-spacing:1px;">Les<span style="color:#fff;">Cracks</span></span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:40px;">
+                        <h1 style="color:#fff;font-size:24px;font-weight:700;margin:0 0 12px;">Confirme ton adresse email</h1>
+                        <p style="color:#aaa;font-size:15px;line-height:1.6;margin:0 0 8px;">
+                          Salut <strong style="color:#fff;">%s</strong> 👋
+                        </p>
+                        <p style="color:#aaa;font-size:15px;line-height:1.6;margin:0 0 28px;">
+                          Une dernière étape — clique sur le bouton ci-dessous pour confirmer ton adresse et activer ton compte LesCracks.
+                          Ce lien est valable <strong style="color:#fff;">24 heures</strong>.
+                        </p>
+                        <table cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
+                          <tr>
+                            <td style="background:#C9A84C;border-radius:10px;">
+                              <a href="%s" style="display:inline-block;padding:14px 32px;color:#000;font-size:15px;font-weight:700;text-decoration:none;">
+                                Confirmer mon email
+                              </a>
+                            </td>
+                          </tr>
+                        </table>
+                        <p style="color:#555;font-size:13px;line-height:1.6;margin:0;">
+                          Si tu n'as pas créé de compte, ignore cet email.
+                        </p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="background:#0a0a0a;padding:24px 40px;border-top:1px solid #222;">
+                        <p style="color:#555;font-size:12px;margin:0;">
+                          © 2026 LesCracks · <a href="%s" style="color:#C9A84C;text-decoration:none;">lescracks.com</a>
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td></tr>
+              </table>
+            </body>
+            </html>
+            """.formatted(username, verifyLink, frontendUrl);
+
+        send(to, "Confirme ton adresse email — LesCracks", html);
+    }
+
     private void send(String to, String subject, String html) {
         try {
             MimeMessage message = mailSender.createMimeMessage();

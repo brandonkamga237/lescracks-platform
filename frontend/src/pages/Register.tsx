@@ -1,14 +1,13 @@
 // src/pages/Register.tsx
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Mail, Lock, User, Github, Loader2 } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, User, Github, Loader2, CheckCircle } from 'lucide-react';
 
 const Register = () => {
-  const navigate = useNavigate();
   const { register, loginWithGoogle, loginWithGitHub, isLoading } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -18,6 +17,7 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -36,13 +36,13 @@ const Register = () => {
 
     try {
       const response = await register(
-        formData.email, 
-        formData.password, 
-        formData.firstName, 
+        formData.email,
+        formData.password,
+        formData.firstName,
         formData.lastName
       );
       if (response.success) {
-        navigate('/profil');
+        setEmailSent(true);
       } else {
         setError(response.message || 'Erreur d\'inscription');
       }
@@ -60,6 +60,33 @@ const Register = () => {
       loginWithGitHub();
     }
   };
+
+  if (emailSent) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center px-4 py-20">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(212,175,55,0.1)_0%,_transparent_50%)]" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative w-full max-w-md text-center"
+        >
+          <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-8 h-8 text-gold" />
+          </div>
+          <h1 className="text-2xl font-display font-bold text-white mb-3">Vérifie ta boîte mail</h1>
+          <p className="text-white/50 mb-2">
+            Un email de confirmation a été envoyé à <strong className="text-white">{formData.email}</strong>.
+          </p>
+          <p className="text-white/40 text-sm mb-8">
+            Clique sur le lien dans l'email pour activer ton compte. Vérifie aussi tes spams.
+          </p>
+          <Link to="/connexion" className="inline-flex items-center gap-2 text-gold hover:text-gold/80 transition-colors text-sm">
+            Retour à la connexion
+          </Link>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4 py-20">

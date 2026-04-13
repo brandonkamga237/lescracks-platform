@@ -76,6 +76,49 @@ const Postuler = () => {
     }
   };
 
+  // Gate — non-authenticated users see a prompt to create account or login
+  if (!user) {
+    return (
+      <Layout>
+        <div className="min-h-[80vh] flex items-center justify-center px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-md w-full text-center"
+          >
+            <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-6">
+              <User className="w-7 h-7 text-gold" />
+            </div>
+            <h1 className="text-2xl font-display font-bold text-white mb-3">
+              Crée ton compte pour postuler
+            </h1>
+            <p className="text-white/50 mb-2 leading-relaxed">
+              L'<strong className="text-gold">Accompagnement 360</strong> est un parcours certifiant de <strong className="text-white">6 à 12 mois</strong> avec un mentor dédié.
+            </p>
+            <p className="text-white/35 text-sm mb-8">
+              Un compte est nécessaire pour soumettre ta candidature et suivre son avancement.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                to="/inscription?redirect=/postuler"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-black font-bold rounded-sm hover:bg-gold/90 transition-colors"
+              >
+                Créer un compte
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                to="/connexion?redirect=/postuler"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-white/20 text-white/70 hover:border-white/40 hover:text-white transition-colors rounded-sm text-sm"
+              >
+                J'ai déjà un compte
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </Layout>
+    );
+  }
+
   if (submitted) {
     return (
       <Layout>
