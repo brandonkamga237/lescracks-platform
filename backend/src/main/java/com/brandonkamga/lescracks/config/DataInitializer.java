@@ -10,6 +10,7 @@ import com.brandonkamga.lescracks.repository.ApplicationTypeRepository;
 import com.brandonkamga.lescracks.repository.ProviderRepository;
 import com.brandonkamga.lescracks.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ public class DataInitializer implements CommandLineRunner {
     private final ProviderRepository providerRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JdbcTemplate jdbcTemplate;
 
     public DataInitializer(
             RoleRepository roleRepository,
@@ -36,7 +38,8 @@ public class DataInitializer implements CommandLineRunner {
             ApplicationTypeRepository applicationTypeRepository,
             ProviderRepository providerRepository,
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            JdbcTemplate jdbcTemplate) {
         this.roleRepository = roleRepository;
         this.categoryRepository = categoryRepository;
         this.tagRepository = tagRepository;
@@ -46,11 +49,24 @@ public class DataInitializer implements CommandLineRunner {
         this.providerRepository = providerRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     @Transactional
     public void run(String... args) throws Exception {
+        // Migration: drop the old roles_name_check constraint (missing 'learner')
+        // so Hibernate's ddl-auto:update can work on existing databases.
+        // On a fresh DB, columnDefinition="varchar(50)" on Role.name prevents
+        // Hibernate 6 from generating a check constraint at all.
+        try {
+            jdbcTemplate.execute(
+                "ALTER TABLE roles DROP CONSTRAINT IF EXISTS roles_name_check"
+            );
+        } catch (Exception ignored) {
+            // Constraint didn't exist or DB doesn't support IF EXISTS — safe to ignore
+        }
+
         // Initialize Roles — idempotent: insert only missing roles
         if (roleRepository.findByName(RoleName.user).isEmpty())
             roleRepository.save(Role.builder().name(RoleName.user).build());
