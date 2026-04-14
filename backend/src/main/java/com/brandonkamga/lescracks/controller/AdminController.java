@@ -475,14 +475,12 @@ public class AdminController {
         map.put("id", event.getId());
         map.put("title", event.getTitle());
         map.put("description", event.getDescription());
-        map.put("startDate", event.getEventDate() != null ? event.getEventDate().toString() : "");
-        map.put("endDate", event.getEventDate() != null ? event.getEventDate().toString() : "");
-        if (event.getEventType() != null) {
-            map.put("type", event.getEventType().getName());
-        }
-        if (event.getEventStatus() != null) {
-            map.put("status", event.getEventStatus().getName().name());
-        }
+        map.put("startDate", event.getEventDate() != null ? event.getEventDate().toString() : null);
+        map.put("endDate", event.getEndDate() != null ? event.getEndDate().toString() : null);
+        map.put("location", event.getLocation());
+        map.put("coverImageUrl", event.getCoverImageUrl());
+        map.put("type", event.getEventType() != null ? event.getEventType().getName() : null);
+        map.put("status", event.getEventStatus() != null ? event.getEventStatus().getName().name() : null);
         return map;
     }
 }

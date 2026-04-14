@@ -136,10 +136,10 @@ const Evenements = () => {
                   className="card card-hover overflow-hidden"
                 >
                   {/* Image */}
-                  <div className="h-48 bg-gradient-to-br from-gold/20 to-transparent rounded-lg mb-4 flex items-center justify-center">
-                    {event.imageUrl ? (
+                  <div className="h-48 bg-gradient-to-br from-gold/20 to-transparent rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                    {event.coverImageUrl ? (
                       <img
-                        src={event.imageUrl}
+                        src={event.coverImageUrl}
                         alt={event.title}
                         className="w-full h-full object-cover rounded-lg"
                       />
@@ -154,17 +154,16 @@ const Evenements = () => {
                       {event.type}
                     </span>
                     <span className={`px-2 py-1 text-xs rounded-full ${
-                      event.status === 'OUVERT'
+                      event.status === 'open'
                         ? 'bg-green-500/20 text-green-400'
-                        : event.status === 'EN_COURS'
+                        : event.status === 'upcoming'
                         ? 'bg-blue-500/20 text-blue-400'
                         : 'bg-red-500/20 text-red-400'
                     }`}>
-                      {event.status === 'OUVERT' ? 'Ouvert' :
-                       event.status === 'EN_COURS' ? 'En cours' : 'Fermé'}
+                      {event.status === 'open' ? 'Ouvert' :
+                       event.status === 'upcoming' ? 'À venir' : 'Fermé'}
                     </span>
-                    {/* Countdown badge */}
-                    {event.status === 'OUVERT' && getDaysUntil(event.startDate) && (
+                    {event.status === 'open' && event.startDate && getDaysUntil(event.startDate) && (
                       <span className="flex items-center gap-1 px-2 py-1 text-xs rounded-full bg-gold/10 text-gold">
                         <Clock className="w-3 h-3" />
                         {getDaysUntil(event.startDate)}
@@ -182,14 +181,15 @@ const Evenements = () => {
 
                   {/* Meta */}
                   <div className="space-y-2 text-white/40 text-sm mb-4">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      {new Date(event.startDate).toLocaleDateString('fr-FR', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                      })}
-                    </div>
+                    {event.startDate && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        {new Date(event.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        {event.endDate && (
+                          <> → {new Date(event.endDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</>
+                        )}
+                      </div>
+                    )}
                     {event.location && (
                       <div className="flex items-center gap-2">
                         <MapPin className="w-4 h-4" />

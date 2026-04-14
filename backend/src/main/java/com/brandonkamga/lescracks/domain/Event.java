@@ -28,6 +28,15 @@ public class Event {
     @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
 
+    @Column(name = "end_date")
+    private LocalDateTime endDate;
+
+    @Column
+    private String location;
+
+    @Column(name = "cover_image_url")
+    private String coverImageUrl;
+
     @Column(name = "application_required", nullable = false)
     private Boolean applicationRequired;
 

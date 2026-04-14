@@ -72,14 +72,14 @@ export interface AdminPremiumRequest {
 export interface AdminEvent {
   id: number;
   title: string;
-  description: string;
-  startDate: string;
-  endDate: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
   location?: string;
+  coverImageUrl?: string;
   type: string;
   status: string;
-  maxParticipants?: number;
-  currentParticipants?: number;
+  applicationRequired?: boolean;
 }
 
 export interface DashboardStats {

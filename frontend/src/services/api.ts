@@ -9,13 +9,13 @@ export interface Event {
   id: string;
   title: string;
   description: string;
-  shortDescription?: string;
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   location?: string;
-  type: 'BOOTCAMP' | 'HACKATHON' | 'MEETUP' | 'WORKSHOP' | 'FORMATION';
-  status: 'OUVERT' | 'EN_COURS' | 'FERME';
-  imageUrl?: string;
+  type: string;
+  status: string;  // open | upcoming | closed
+  coverImageUrl?: string;
+  applicationRequired?: boolean;
   maxParticipants?: number;
   currentParticipants?: number;
 }
