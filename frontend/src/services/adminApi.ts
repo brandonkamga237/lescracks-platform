@@ -373,6 +373,28 @@ class AdminApiService {
     return this.request<PaginatedResponse<AdminEvent>>(`/admin/events?page=${page}&size=${size}`);
   }
 
+  async createEvent(data: {
+    title: string; description?: string; eventDate: string;
+    applicationRequired: boolean; eventTypeId: number; eventStatusId: number; tagIds?: number[];
+  }): Promise<any> {
+    return this.request<any>('/events', { method: 'POST', body: JSON.stringify(data) });
+  }
+
+  async updateEvent(id: number, data: {
+    title: string; description?: string; eventDate: string;
+    applicationRequired: boolean; eventTypeId: number; eventStatusId: number; tagIds?: number[];
+  }): Promise<any> {
+    return this.request<any>(`/events/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+  }
+
+  async getEventTypes(): Promise<{ id: number; name: string }[]> {
+    return this.request<{ id: number; name: string }[]>('/events/types');
+  }
+
+  async getEventStatuses(): Promise<{ id: number; name: string }[]> {
+    return this.request<{ id: number; name: string }[]>('/events/statuses');
+  }
+
   async deleteEvent(id: number): Promise<void> {
     await this.request<void>(`/admin/events/${id}`, { method: 'DELETE' });
   }

@@ -6,6 +6,7 @@ import com.brandonkamga.lescracks.repository.CategoryRepository;
 import com.brandonkamga.lescracks.repository.TagRepository;
 import com.brandonkamga.lescracks.repository.ResourceTypeRepository;
 import com.brandonkamga.lescracks.repository.EventStatusRepository;
+import com.brandonkamga.lescracks.repository.EventTypeRepository;
 import com.brandonkamga.lescracks.repository.ApplicationTypeRepository;
 import com.brandonkamga.lescracks.repository.ProviderRepository;
 import com.brandonkamga.lescracks.repository.UserRepository;
@@ -23,6 +24,7 @@ public class DataInitializer implements CommandLineRunner {
     private final TagRepository tagRepository;
     private final ResourceTypeRepository resourceTypeRepository;
     private final EventStatusRepository eventStatusRepository;
+    private final EventTypeRepository eventTypeRepository;
     private final ApplicationTypeRepository applicationTypeRepository;
     private final ProviderRepository providerRepository;
     private final UserRepository userRepository;
@@ -35,6 +37,7 @@ public class DataInitializer implements CommandLineRunner {
             TagRepository tagRepository,
             ResourceTypeRepository resourceTypeRepository,
             EventStatusRepository eventStatusRepository,
+            EventTypeRepository eventTypeRepository,
             ApplicationTypeRepository applicationTypeRepository,
             ProviderRepository providerRepository,
             UserRepository userRepository,
@@ -45,6 +48,7 @@ public class DataInitializer implements CommandLineRunner {
         this.tagRepository = tagRepository;
         this.resourceTypeRepository = resourceTypeRepository;
         this.eventStatusRepository = eventStatusRepository;
+        this.eventTypeRepository = eventTypeRepository;
         this.applicationTypeRepository = applicationTypeRepository;
         this.providerRepository = providerRepository;
         this.userRepository = userRepository;
@@ -197,6 +201,13 @@ public class DataInitializer implements CommandLineRunner {
             eventStatusRepository.save(EventStatus.builder().name(EventStatusEnum.open).build());
             eventStatusRepository.save(EventStatus.builder().name(EventStatusEnum.closed).build());
             eventStatusRepository.save(EventStatus.builder().name(EventStatusEnum.upcoming).build());
+        }
+
+        // Initialize Event Types
+        if (eventTypeRepository.count() == 0) {
+            for (String typeName : new String[]{"BOOTCAMP", "HACKATHON", "MEETUP", "WORKSHOP", "FORMATION"}) {
+                eventTypeRepository.save(EventType.builder().name(typeName).build());
+            }
         }
 
         // Initialize Application Types

@@ -102,6 +102,24 @@ public class EventController {
         return ResponseEntity.ok(ApiResponse.success(events));
     }
 
+    @GetMapping("/types")
+    @Operation(summary = "Liste les types d'événements")
+    public ResponseEntity<ApiResponse<List<java.util.Map<String, Object>>>> getEventTypes() {
+        List<java.util.Map<String, Object>> types = eventTypeRepository.findAll().stream()
+                .map(t -> { var m = new java.util.HashMap<String, Object>(); m.put("id", t.getId()); m.put("name", t.getName()); return (java.util.Map<String, Object>) m; })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(types));
+    }
+
+    @GetMapping("/statuses")
+    @Operation(summary = "Liste les statuts d'événements")
+    public ResponseEntity<ApiResponse<List<java.util.Map<String, Object>>>> getEventStatuses() {
+        List<java.util.Map<String, Object>> statuses = eventStatusRepository.findAll().stream()
+                .map(s -> { var m = new java.util.HashMap<String, Object>(); m.put("id", s.getId()); m.put("name", s.getName().name()); return (java.util.Map<String, Object>) m; })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(statuses));
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Créer un nouvel événement", 
