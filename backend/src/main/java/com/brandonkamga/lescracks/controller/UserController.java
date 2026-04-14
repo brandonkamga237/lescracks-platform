@@ -54,9 +54,17 @@ public class UserController {
     @Value("${app.uploads.dir:uploads/resources}")
     private String uploadsDir;
 
+    @Value("${app.uploads.avatar-dir:uploads/avatars}")
+    private String avatarDirPath;
+
     public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
         this.userMapper = userMapper;
+    }
+
+    private Path resolvedAvatarDir() {
+        Path p = Paths.get(avatarDirPath);
+        return p.isAbsolute() ? p : p.toAbsolutePath();
     }
 
     @GetMapping
@@ -324,8 +332,8 @@ public class UserController {
             throw new BadRequestException("Format non supporté. Utilisez JPEG, PNG, WebP ou GIF.");
         }
 
-        // Store file under uploads/avatars/
-        Path avatarDir = Paths.get(uploadsDir).getParent().resolve("avatars");
+        // Store file under the configured avatar directory
+        Path avatarDir = resolvedAvatarDir();
         Files.createDirectories(avatarDir);
 
         String ext = "";
@@ -347,7 +355,7 @@ public class UserController {
                description = "Sert les photos de profil uploadées.")
     public ResponseEntity<org.springframework.core.io.Resource> serveAvatar(
             @PathVariable String filename) throws MalformedURLException {
-        Path filePath = Paths.get(uploadsDir).getParent().resolve("avatars").resolve(filename).normalize();
+        Path filePath = resolvedAvatarDir().resolve(filename).normalize();
         org.springframework.core.io.Resource resource = new UrlResource(filePath.toUri());
         if (!resource.exists()) {
             throw new ResourceNotFoundException("Avatar", "filename", filename);

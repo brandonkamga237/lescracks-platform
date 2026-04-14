@@ -73,6 +73,7 @@ app:
 
   uploads:
     dir: ${UPLOADS_DIR:uploads/resources}
+    avatar-dir: ${AVATAR_DIR:uploads/avatars}
 
   mail:
     from: ${MAIL_FROM:LesCracks <contact@lescracks.com>}
