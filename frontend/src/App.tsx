@@ -31,6 +31,7 @@ import AdminContributors from './pages/admin/AdminContributors';
 import AdminApprenants from './pages/admin/AdminApprenants';
 import Apprenants from './pages/Apprenants';
 import ApprennantProfile from './pages/ApprennantProfile';
+import MonProfilApprenant from './pages/MonProfilApprenant';
 import Premium from './pages/Premium';
 import Postuler from './pages/Postuler';
 import VerifyEmail from './pages/VerifyEmail';
@@ -133,6 +134,7 @@ function AppContent() {
           <Route path="/ressources" element={<Ressources />} />
           <Route path="/apprenants" element={<Apprenants />} />
           <Route path="/apprenants/:slug" element={<ApprennantProfile />} />
+          <Route path="/mon-profil-apprenant" element={<MonProfilApprenant />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={

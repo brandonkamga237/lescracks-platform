@@ -321,6 +321,18 @@ class ApiService {
     return this.request<Learner>(`/learners/${slug}`);
   }
 
+  async getMyLearnerProfile(): Promise<Learner> {
+    return this.request<Learner>('/learners/me', { headers: this.getHeaders(true) });
+  }
+
+  async updateMyLearnerProfile(data: { bio?: string; linkedinUrl?: string; portfolioUrl?: string }): Promise<Learner> {
+    return this.request<Learner>('/learners/me', {
+      method: 'PUT',
+      headers: this.getHeaders(true),
+      body: JSON.stringify(data),
+    });
+  }
+
   async getMyApplications(): Promise<any[]> {
     const user = authService.getUser();
     if (!user) return [];

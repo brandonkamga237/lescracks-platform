@@ -4,6 +4,7 @@ import { Users, Award, BookOpen, Search } from 'lucide-react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import LearnerCard from '@/components/LearnerCard';
+import SEO from '@/components/common/SEO';
 import apiService, { Learner, LearnerStatus } from '@/services/api';
 
 const FILTERS: { label: string; value: LearnerStatus | '' }[] = [
@@ -42,6 +43,11 @@ export default function Apprenants() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <SEO
+        title="Les apprenants LesCracks — cracks de la tech"
+        description="Découvrez les apprenants qui ont rejoint l'aventure LesCracks — certifiés, diplômés ou en cours de parcours. Rejoignez la communauté tech d'Afrique francophone."
+        url="/apprenants"
+      />
       <Header />
 
       {/* Hero */}

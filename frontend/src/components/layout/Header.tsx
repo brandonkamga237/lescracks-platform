@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Menu, X, ArrowRight, BookOpen, Video, Code2, ChevronRight,
-  User, LogOut, Shield, Crown,
+  User, LogOut, Shield, Crown, Award,
   Compass, Users,
 } from 'lucide-react';
 import LesCracksLogo from '@/components/common/LesCracksLogo';
@@ -262,8 +262,14 @@ const Header = () => {
                       <div className="p-1.5">
                         <Link to="/profil" onClick={() => setProfileDropdownOpen(false)}
                           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-foreground/60 hover:bg-secondary hover:text-foreground transition-colors text-sm">
-                          <User className="w-4 h-4" />Mon Profil
+                          <User className="w-4 h-4" />Mon compte
                         </Link>
+                        {isLearner && (
+                          <Link to="/mon-profil-apprenant" onClick={() => setProfileDropdownOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gold/80 hover:bg-gold/8 hover:text-gold transition-colors text-sm font-medium">
+                            <Award className="w-4 h-4" />Mon profil apprenant
+                          </Link>
+                        )}
                         {!isPremium && (
                           <Link to="/premium" onClick={() => setProfileDropdownOpen(false)}
                             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gold hover:bg-gold/8 transition-colors text-sm font-medium">
