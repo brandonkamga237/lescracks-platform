@@ -132,7 +132,7 @@ const MegaMenu = ({
 // ─── header ───────────────────────────────────────────────────────────────────
 
 const Header = () => {
-  const { isAuthenticated, isAdmin, isPremium, user, logout } = useAuth();
+  const { isAuthenticated, isAdmin, isPremium, isLearner, user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);

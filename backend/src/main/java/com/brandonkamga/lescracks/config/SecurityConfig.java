@@ -49,6 +49,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs.yaml", "/swagger-resources/**", "/webjars/**").permitAll()
                 // Endpoints publics apprenants (landing, page vitrine)
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/avatars/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/resources/files/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/learners", "/api/learners/showcased", "/api/learners/*").permitAll()
                 // Endpoints publics open-source (projets et contributeurs)
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/open-source/projects", "/api/open-source/projects/featured", "/api/open-source/contributors").permitAll()
