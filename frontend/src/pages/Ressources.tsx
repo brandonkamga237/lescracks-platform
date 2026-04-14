@@ -1,5 +1,6 @@
 // src/pages/Ressources.tsx
 import { useState, useEffect, useCallback } from 'react';
+import SEO from '@/components/common/SEO';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { apiService, Resource, Tag, Category, PaginatedResponse } from '@/services/api';
@@ -205,6 +206,11 @@ const Ressources = () => {
 
   return (
     <Layout>
+      <SEO
+        title="Ressources tech — vidéos et documents"
+        description="Accède à la bibliothèque de ressources LesCracks : tutoriels vidéo, guides techniques, articles et formations exclusives pour les apprenants."
+        url="/ressources"
+      />
       <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
 

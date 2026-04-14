@@ -2,6 +2,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Layout from '@/components/layout/Layout';
+import SEO from '@/components/common/SEO';
 import {
   ArrowRight,
   MapPin,
@@ -60,6 +61,11 @@ const fadeUp = {
 const About = () => {
   return (
     <Layout>
+      <SEO
+        title="À propos de LesCracks"
+        description="LesCracks est une agence edtech née au Cameroun, convaincue que le talent tech ne manque pas en Afrique. Découvrez notre mission et notre équipe."
+        url="/about"
+      />
       <div className="pb-24">
 
         {/* ── Breadcrumb ─────────────────────────────────────────── */}

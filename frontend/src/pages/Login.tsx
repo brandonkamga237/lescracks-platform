@@ -1,6 +1,7 @@
 // src/pages/Login.tsx
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import SEO from '@/components/common/SEO';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { ArrowLeft, Mail, Lock, Github, Loader2 } from 'lucide-react';
@@ -37,7 +38,7 @@ const Login = () => {
 
   const handleOAuth = (provider: 'google' | 'github') => {
     if (provider === 'google') {
-      loginWithGoogle();
+      navigate(`/provider-unavailable?provider=google&from=/connexion`);
     } else {
       loginWithGitHub();
     }
@@ -45,6 +46,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4 py-20">
+      <SEO title="Connexion" description="Connecte-toi à ton compte LesCracks." url="/connexion" />
       {/* Background */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(212,175,55,0.1)_0%,_transparent_50%)]" />
 

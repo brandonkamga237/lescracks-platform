@@ -34,6 +34,7 @@ import ApprennantProfile from './pages/ApprennantProfile';
 import Premium from './pages/Premium';
 import Postuler from './pages/Postuler';
 import VerifyEmail from './pages/VerifyEmail';
+import ProviderUnavailable from './pages/ProviderUnavailable';
 import About from './pages/About';
 import OpenSource from './pages/OpenSource';
 
@@ -115,6 +116,7 @@ function AppContent() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/oauth/callback" element={<OAuthCallback />} />
+          <Route path="/provider-unavailable" element={<ProviderUnavailable />} />
 
           {/* Protected Routes — authenticated users only */}
           <Route path="/profil" element={<UserRoute><Profile /></UserRoute>} />

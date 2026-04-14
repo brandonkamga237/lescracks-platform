@@ -6,13 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="index, follow" />
 
-    <!-- Favicon 💡 -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💡</text></svg>" />
-    
-    <meta name="theme-color" content="#1d4ed8" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/images/lescracks-logo.svg" />
+    <link rel="apple-touch-icon" href="/images/og-image.png" />
+
+    <meta name="theme-color" content="#C9A84C" />
     <meta name="language" content="fr, en" />
     <meta http-equiv="Content-Language" content="fr, en" />
-    <link rel="canonical" href="https://les-cracks.vercel.app/" />
+    <link rel="canonical" href="https://lescracks.com/" />
 
     <title>LesCracks – Former • Innover • Impacter | Agence Tech Éducative Cameroun</title>
     <meta name="description" content="L'agence tech éducative qui transforme les jeunes passionnés en professionnels accomplis. Bootcamps intensifs, workshops pratiques et accompagnement personnalisé pour réussir votre insertion dans la tech." />
@@ -26,22 +27,24 @@
 
     <!-- Open Graph (WhatsApp, Facebook, LinkedIn, Discord, Messenger) -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://les-cracks.vercel.app/" />
+    <meta property="og:url" content="https://lescracks.com/" />
     <meta property="og:site_name" content="LesCracks" />
-    <meta property="og:title" content="LesCracks – Coaching pour jeunes qui veulent faire la différence" />
-    <meta property="og:description" content="LesCracks t’accompagne pour t’apprendre à te démarquer, clarifier ta trajectoire et affirmer qui tu es." />
-    <meta property="og:image" content="https://les-cracks.vercel.app/og-image.png" />
+    <meta property="og:title" content="LesCracks – Devenez un crack de la tech" />
+    <meta property="og:description" content="Un accompagnement structuré pour passer de débutant à profil employable — avec un mentor, des projets réels et une communauté." />
+    <meta property="og:image" content="https://lescracks.com/og-image.png" />
+    <meta property="og:image:secure_url" content="https://lescracks.com/og-image.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="LesCracks — Devenez un crack de la tech" />
     <meta property="og:locale" content="fr_FR" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://les-cracks.vercel.app/" />
-    <meta name="twitter:title" content="LesCracks – Coaching structurant et concret" />
-    <meta name="twitter:description" content="Coaching de haut niveau pour jeunes qui veulent structurer leur vision, lancer leurs projets et gagner en visibilité." />
-    <meta name="twitter:image" content="https://les-cracks.vercel.app/og-image.png" />
+    <meta name="twitter:url" content="https://lescracks.com/" />
+    <meta name="twitter:title" content="LesCracks – Devenez un crack de la tech" />
+    <meta name="twitter:description" content="Un accompagnement structuré pour passer de débutant à profil employable — avec un mentor, des projets réels et une communauté." />
+    <meta name="twitter:image" content="https://lescracks.com/og-image.png" />
     <meta name="twitter:site" content="@lescracks" />
     <meta name="twitter:creator" content="@lescracks" />
 
@@ -49,11 +52,20 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Organization",
+      "@type": "EducationalOrganization",
       "name": "LesCracks",
-      "url": "https://les-cracks.vercel.app/",
-      "logo": "https://les-cracks.vercel.app/logo.png",
-      "description": "Programme de coaching concret pour jeunes qui veulent faire la différence. Exécution, structure, impact, réseau.",
+      "alternateName": "Les Cracks Academy",
+      "url": "https://lescracks.com",
+      "logo": "https://lescracks.com/images/lescracks-logo.svg",
+      "image": "https://lescracks.com/og-image.png",
+      "description": "Agence edtech africaine spécialisée dans l'accompagnement tech de 6 à 12 mois pour jeunes professionnels en Afrique francophone. Bootcamps, mentoring, projets open source.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "CM",
+        "addressLocality": "Yaoundé"
+      },
+      "areaServed": ["CM", "CI", "SN", "FR", "BE"],
+      "knowsLanguage": "fr",
       "sameAs": [
         "https://www.linkedin.com/company/lescracks",
         "https://twitter.com/lescracks",
@@ -61,7 +73,25 @@
       ],
       "founder": {
         "@type": "Person",
-        "name": "Brandoniscoding"
+        "name": "Brandon Kamga"
+      },
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Accompagnement Tech",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "EducationalOccupationalProgram",
+              "name": "Accompagnement 360",
+              "description": "Suivi personnalisé de 6 à 12 mois avec mentor dédié, projets réels et attestation de complétion",
+              "provider": { "@type": "EducationalOrganization", "name": "LesCracks" },
+              "timeToComplete": "P6M",
+              "programType": "Mentoring",
+              "educationalProgramMode": "online"
+            }
+          }
+        ]
       }
     }
     </script>
