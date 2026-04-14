@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   Menu, X, ArrowRight, BookOpen, Video, Code2, ChevronRight,
   User, LogOut, Shield, Crown, Award,
-  Compass, Users,
+  Users,
 } from 'lucide-react';
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 
@@ -180,12 +180,14 @@ const Header = () => {
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-0.5">
-            <Link
-              to={isAuthenticated ? '/ressources' : '/'}
-              className="px-3.5 py-2 text-sm text-foreground/50 hover:text-foreground transition-colors rounded-lg hover:bg-secondary/40"
-            >
-              {isAuthenticated ? 'Ressources' : 'Accueil'}
-            </Link>
+            {!isAuthenticated && (
+              <Link
+                to="/"
+                className="px-3.5 py-2 text-sm text-foreground/50 hover:text-foreground transition-colors rounded-lg hover:bg-secondary/40"
+              >
+                Accueil
+              </Link>
+            )}
 
             {menuItems.map((item) => (
               <div
@@ -326,10 +328,12 @@ const Header = () => {
             className="fixed top-[72px] left-0 right-0 z-40 bg-background/97 backdrop-blur-xl lg:hidden border-b border-border overflow-hidden"
           >
             <div className="p-5 space-y-1">
-              <Link to={isAuthenticated ? '/ressources' : '/'} onClick={() => setMobileMenuOpen(false)}
-                className="block py-2.5 px-4 text-foreground/60 hover:text-foreground hover:bg-secondary rounded-xl text-sm">
-                {isAuthenticated ? 'Ressources' : 'Accueil'}
-              </Link>
+              {!isAuthenticated && (
+                <Link to="/" onClick={() => setMobileMenuOpen(false)}
+                  className="block py-2.5 px-4 text-foreground/60 hover:text-foreground hover:bg-secondary rounded-xl text-sm">
+                  Accueil
+                </Link>
+              )}
 
               {/* Accompagnement */}
               <div className="pt-2 pb-1 border-t border-border/50">
