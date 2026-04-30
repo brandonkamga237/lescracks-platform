@@ -42,7 +42,7 @@ public class User {
     @Column(name = "picture_url", length = 512)
     private String pictureUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 

@@ -57,6 +57,8 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/learners", "/api/learners/showcased", "/api/learners/*").permitAll()
                 // Endpoints publics open-source (projets et contributeurs)
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/open-source/projects", "/api/open-source/projects/featured", "/api/open-source/contributors").permitAll()
+                // Candidature publique Accompagnement 360 — aucun compte requis
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/applications").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()

@@ -1,15 +1,10 @@
 // src/pages/admin/AdminApplications.tsx
 import { useState, useEffect } from 'react';
-import { ClipboardList, Loader2, Trash2, CheckCircle, XCircle, Clock, Eye, ChevronDown } from 'lucide-react';
+import {
+  ClipboardList, Loader2, Trash2, CheckCircle, XCircle, Clock,
+  Eye, X, Phone, Mail, User, Calendar, MessageSquare,
+} from 'lucide-react';
 import adminApi, { AdminApplication } from '@/services/adminApi';
-
-const TYPE_LABELS: Record<string, string> = {
-  accompagnement_360: 'Accompagnement 360°',
-  formation_classique: 'Formation Classique',
-  apply: 'Candidature',
-  register: 'Inscription',
-  participate: 'Participation',
-};
 
 const STATUS_CONFIG = {
   pending: {
@@ -33,9 +28,8 @@ const AdminApplications = () => {
   const [applications, setApplications] = useState<AdminApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [detailApp, setDetailApp] = useState<AdminApplication | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterType, setFilterType] = useState<string>('all');
 
   useEffect(() => {
     fetchApplications();
@@ -59,6 +53,7 @@ const AdminApplications = () => {
     try {
       const updated = await adminApi.updateApplicationStatus(id, newStatus);
       setApplications(prev => prev.map(a => a.id === id ? { ...a, status: updated.status } : a));
+      if (detailApp?.id === id) setDetailApp(prev => prev ? { ...prev, status: updated.status } : null);
     } catch (err) {
       console.error('Error updating status:', err);
       alert('Erreur lors de la mise à jour du statut');
@@ -67,18 +62,19 @@ const AdminApplications = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number, status: string) => {
+    if (status === 'accepted') return;
     if (!confirm('Supprimer cette candidature ?')) return;
     try {
       await adminApi.deleteApplication(id);
       setApplications(prev => prev.filter(a => a.id !== id));
+      if (detailApp?.id === id) setDetailApp(null);
     } catch (err) {
       console.error('Error deleting application:', err);
       alert('Erreur lors de la suppression');
     }
   };
 
-  // Stats
   const stats = {
     total: applications.length,
     pending: applications.filter(a => a.status === 'pending').length,
@@ -86,15 +82,15 @@ const AdminApplications = () => {
     rejected: applications.filter(a => a.status === 'rejected').length,
   };
 
-  // Unique types
-  const types = [...new Set(applications.map(a => a.applicationTypeName))];
+  const filtered = applications.filter(a =>
+    filterStatus === 'all' || a.status === filterStatus
+  );
 
-  // Filtered
-  const filtered = applications.filter(a => {
-    const matchStatus = filterStatus === 'all' || a.status === filterStatus;
-    const matchType = filterType === 'all' || a.applicationTypeName === filterType;
-    return matchStatus && matchType;
-  });
+  const displayName = (app: AdminApplication) =>
+    app.fullName || app.username || `Candidat #${app.id}`;
+
+  const displayEmail = (app: AdminApplication) =>
+    app.emailAddress || '—';
 
   return (
     <div className="space-y-6">
@@ -105,7 +101,9 @@ const AdminApplications = () => {
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Candidatures</h2>
-          <p className="text-sm text-gray-500">{stats.total} candidature{stats.total !== 1 ? 's' : ''} reçue{stats.total !== 1 ? 's' : ''}</p>
+          <p className="text-sm text-gray-500">
+            {stats.total} candidature{stats.total !== 1 ? 's' : ''} — Accompagnement 360
+          </p>
         </div>
       </div>
 
@@ -125,33 +123,20 @@ const AdminApplications = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="flex gap-2">
-          {['all', 'pending', 'accepted', 'rejected'].map(s => (
-            <button
-              key={s}
-              onClick={() => setFilterStatus(s)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                filterStatus === s ? 'bg-gold text-black' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              {s === 'all' ? 'Tous' : STATUS_CONFIG[s as keyof typeof STATUS_CONFIG]?.label}
-            </button>
-          ))}
-        </div>
-
-        {types.length > 1 && (
-          <select
-            value={filterType}
-            onChange={e => setFilterType(e.target.value)}
-            className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-gold/50"
+      <div className="flex gap-2">
+        {['all', 'pending', 'accepted', 'rejected'].map(s => (
+          <button
+            key={s}
+            onClick={() => setFilterStatus(s)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              filterStatus === s
+                ? 'bg-gold text-black'
+                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
           >
-            <option value="all">Tous les types</option>
-            {types.map(t => (
-              <option key={t} value={t}>{TYPE_LABELS[t] || t}</option>
-            ))}
-          </select>
-        )}
+            {s === 'all' ? 'Tous' : STATUS_CONFIG[s as keyof typeof STATUS_CONFIG]?.label}
+          </button>
+        ))}
       </div>
 
       {/* Table */}
@@ -170,10 +155,9 @@ const AdminApplications = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Candidat</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Programme</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Événement</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Niveau</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Nom</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Email</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">WhatsApp</th>
                   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Statut</th>
                   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Date</th>
                   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Actions</th>
@@ -182,97 +166,77 @@ const AdminApplications = () => {
               <tbody className="divide-y divide-gray-200">
                 {filtered.map(app => {
                   const statusInfo = STATUS_CONFIG[app.status];
-                  const isExpanded = expandedId === app.id;
+                  const canDelete = app.status !== 'accepted';
 
                   return (
-                    <>
-                      <tr key={app.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4">
-                          <p className="font-medium text-gray-900 text-sm">{app.username}</p>
-                          <p className="text-xs text-gray-400">ID: {app.userId}</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded-full font-medium">
-                            {TYPE_LABELS[app.applicationTypeName] || app.applicationTypeName}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-600">
-                          {app.eventTitle || <span className="text-gray-300 italic">—</span>}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-600">
-                          {app.technicalLevel || <span className="text-gray-300 italic">—</span>}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${statusInfo.color}`}>
-                            {statusInfo.icon}
-                            {statusInfo.label}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                          {new Date(app.createdAt).toLocaleDateString('fr-FR')}
-                        </td>
-                        <td className="px-6 py-4">
-                          {updatingId === app.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin text-gold" />
-                          ) : (
-                            <div className="flex items-center gap-1">
-                              {/* Voir motivation */}
-                              {app.motivationText && (
-                                <button
-                                  onClick={() => setExpandedId(isExpanded ? null : app.id)}
-                                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
-                                  title="Voir la lettre de motivation"
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </button>
-                              )}
-                              {/* Accept */}
-                              {app.status !== 'accepted' && (
-                                <button
-                                  onClick={() => handleStatusUpdate(app.id, 'accepted')}
-                                  className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg"
-                                  title="Accepter"
-                                >
-                                  <CheckCircle className="w-4 h-4" />
-                                </button>
-                              )}
-                              {/* Reject */}
-                              {app.status !== 'rejected' && (
-                                <button
-                                  onClick={() => handleStatusUpdate(app.id, 'rejected')}
-                                  className="p-1.5 text-orange-600 hover:bg-orange-50 rounded-lg"
-                                  title="Refuser"
-                                >
-                                  <XCircle className="w-4 h-4" />
-                                </button>
-                              )}
-                              {/* Delete */}
+                    <tr key={app.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4">
+                        <p className="font-medium text-gray-900 text-sm">{displayName(app)}</p>
+                        {app.age && <p className="text-xs text-gray-400">{app.age} ans</p>}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{displayEmail(app)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {app.whatsappNumber || <span className="text-gray-300 italic">—</span>}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${statusInfo.color}`}>
+                          {statusInfo.icon}
+                          {statusInfo.label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                        {new Date(app.createdAt).toLocaleDateString('fr-FR')}
+                      </td>
+                      <td className="px-6 py-4">
+                        {updatingId === app.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-gold" />
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            {/* Voir détail */}
+                            <button
+                              onClick={() => setDetailApp(app)}
+                              className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
+                              title="Voir la candidature"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            {/* Accepter */}
+                            {app.status !== 'accepted' && (
                               <button
-                                onClick={() => handleDelete(app.id)}
-                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
-                                title="Supprimer"
+                                onClick={() => handleStatusUpdate(app.id, 'accepted')}
+                                className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg"
+                                title="Accepter"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <CheckCircle className="w-4 h-4" />
                               </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                      {/* Expanded motivation */}
-                      {isExpanded && app.motivationText && (
-                        <tr key={`${app.id}-expanded`} className="bg-blue-50">
-                          <td colSpan={7} className="px-6 py-4">
-                            <div className="flex items-start gap-3">
-                              <ChevronDown className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                              <div>
-                                <p className="text-xs font-semibold text-blue-700 mb-1 uppercase tracking-wide">Lettre de motivation</p>
-                                <p className="text-sm text-gray-700 whitespace-pre-wrap">{app.motivationText}</p>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </>
+                            )}
+                            {/* Refuser */}
+                            {app.status !== 'rejected' && (
+                              <button
+                                onClick={() => handleStatusUpdate(app.id, 'rejected')}
+                                className="p-1.5 text-orange-600 hover:bg-orange-50 rounded-lg"
+                                title="Refuser"
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </button>
+                            )}
+                            {/* Supprimer — désactivé si accepté */}
+                            <button
+                              onClick={() => handleDelete(app.id, app.status)}
+                              disabled={!canDelete}
+                              className={`p-1.5 rounded-lg transition-colors ${
+                                canDelete
+                                  ? 'text-red-600 hover:bg-red-50'
+                                  : 'text-gray-300 cursor-not-allowed'
+                              }`}
+                              title={canDelete ? 'Supprimer' : 'Impossible de supprimer une candidature acceptée'}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
                   );
                 })}
               </tbody>
@@ -280,6 +244,102 @@ const AdminApplications = () => {
           </div>
         )}
       </div>
+
+      {/* Modal détail */}
+      {detailApp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+            {/* Header modal */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <div>
+                <h3 className="font-bold text-gray-900 text-lg">{displayName(detailApp)}</h3>
+                <p className="text-xs text-gray-400">
+                  Candidature du {new Date(detailApp.createdAt).toLocaleDateString('fr-FR', {
+                    day: 'numeric', month: 'long', year: 'numeric',
+                  })}
+                </p>
+              </div>
+              <button onClick={() => setDetailApp(null)} className="p-2 rounded-lg hover:bg-gray-100">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Contenu */}
+            <div className="px-6 py-5 space-y-4">
+              {/* Statut */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500">Statut</span>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-medium ${STATUS_CONFIG[detailApp.status].color}`}>
+                  {STATUS_CONFIG[detailApp.status].icon}
+                  {STATUS_CONFIG[detailApp.status].label}
+                </span>
+              </div>
+
+              <div className="divide-y divide-gray-100">
+                {[
+                  { icon: <User className="w-4 h-4" />, label: 'Nom complet', value: detailApp.fullName },
+                  { icon: <Mail className="w-4 h-4" />, label: 'Email', value: detailApp.emailAddress },
+                  { icon: <Phone className="w-4 h-4" />, label: 'WhatsApp', value: detailApp.whatsappNumber },
+                  { icon: <Calendar className="w-4 h-4" />, label: 'Âge', value: detailApp.age ? `${detailApp.age} ans` : null },
+                ].filter(r => r.value).map(row => (
+                  <div key={row.label} className="flex items-center gap-3 py-3">
+                    <span className="text-gray-400 flex-shrink-0">{row.icon}</span>
+                    <span className="text-sm text-gray-500 w-28 flex-shrink-0">{row.label}</span>
+                    <span className="text-sm text-gray-900 font-medium">{row.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Motivation */}
+              {detailApp.motivationText && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <MessageSquare className="w-4 h-4 text-gray-400" />
+                    <p className="text-sm font-semibold text-gray-700">Motivation</p>
+                  </div>
+                  <p className="text-sm text-gray-600 leading-relaxed bg-gray-50 rounded-lg p-4 whitespace-pre-wrap">
+                    {detailApp.motivationText}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Actions modal */}
+            <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
+              {detailApp.status !== 'accepted' && (
+                <button
+                  onClick={() => handleStatusUpdate(detailApp.id, 'accepted')}
+                  disabled={updatingId === detailApp.id}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
+                >
+                  {updatingId === detailApp.id
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <CheckCircle className="w-4 h-4" />}
+                  Accepter
+                </button>
+              )}
+              {detailApp.status !== 'rejected' && (
+                <button
+                  onClick={() => handleStatusUpdate(detailApp.id, 'rejected')}
+                  disabled={updatingId === detailApp.id}
+                  className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50"
+                >
+                  {updatingId === detailApp.id
+                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                    : <XCircle className="w-4 h-4" />}
+                  Refuser
+                </button>
+              )}
+              <button
+                onClick={() => setDetailApp(null)}
+                className="px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50 transition-colors"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

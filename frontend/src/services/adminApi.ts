@@ -45,13 +45,17 @@ export interface AdminResource {
 
 export interface AdminApplication {
   id: number;
-  userId: number;
-  username: string;
+  userId?: number;
+  username?: string;
   eventId?: number;
   eventTitle?: string;
   applicationTypeId: number;
   applicationTypeName: string;
   status: 'pending' | 'accepted' | 'rejected';
+  fullName?: string;
+  emailAddress?: string;
+  whatsappNumber?: string;
+  age?: number;
   motivationText?: string;
   technicalLevel?: string;
   createdAt: string;

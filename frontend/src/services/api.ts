@@ -218,26 +218,20 @@ class ApiService {
   /** Submit a service application (Accompagnement 360 or Formation pratique) */
   async submitServiceApplication(payload: {
     applicationTypeId: number;
+    fullName: string;
+    emailAddress: string;
+    whatsappNumber: string;
     motivationText: string;
-    technicalLevel: string;
-    whatsappNumber?: string;
-    country?: string;
+    age?: number;
+    technicalLevel?: string;
   }): Promise<{ id: number; status: string }> {
-    const user = authService.getUser();
-    if (!user) throw new Error('Utilisateur non connecté');
-
     return this.request<{ id: number; status: string }>(
       '/applications',
       {
         method: 'POST',
-        body: JSON.stringify({
-          userId: user.id,
-          applicationTypeId: payload.applicationTypeId,
-          motivationText: payload.motivationText,
-          technicalLevel: payload.technicalLevel,
-        }),
+        body: JSON.stringify(payload),
       },
-      true
+      false  // endpoint public — pas de token requis
     );
   }
 

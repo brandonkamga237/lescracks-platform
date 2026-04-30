@@ -12,13 +12,13 @@ import com.brandonkamga.lescracks.exception.ResourceNotFoundException;
 import com.brandonkamga.lescracks.repository.ApplicationTypeRepository;
 import com.brandonkamga.lescracks.repository.EventRepository;
 import com.brandonkamga.lescracks.repository.UserRepository;
+import com.brandonkamga.lescracks.service.impl.MailServiceImpl;
 import com.brandonkamga.lescracks.service.interfaces.ApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,36 +30,32 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/applications")
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Candidatures", description = "API de gestion des candidatures aux événements")
-@SecurityRequirement(name = "bearerAuth")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Candidatures", description = "API de gestion des candidatures")
 public class ApplicationController {
 
     private final ApplicationService applicationService;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final ApplicationTypeRepository applicationTypeRepository;
+    private final MailServiceImpl mailService;
 
     public ApplicationController(
             ApplicationService applicationService,
             UserRepository userRepository,
             EventRepository eventRepository,
-            ApplicationTypeRepository applicationTypeRepository) {
+            ApplicationTypeRepository applicationTypeRepository,
+            MailServiceImpl mailService) {
         this.applicationService = applicationService;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
         this.applicationTypeRepository = applicationTypeRepository;
+        this.mailService = mailService;
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Liste toutes les candidatures", 
-               description = "Retourne la liste de toutes les candidatures. Réservé aux administrateurs.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Liste des candidatures"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", 
-            description = "Accès interdit - Réservé aux administrateurs")
-    })
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Liste toutes les candidatures — admin uniquement")
     public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getAllApplications() {
         List<ApplicationResponse> applications = applicationService.findAll().stream()
                 .map(this::toResponse)
@@ -68,26 +64,22 @@ public class ApplicationController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Récupérer une candidature par ID", 
-               description = "Retourne les détails d'une candidature spécifique.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Candidature trouvée"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
-            description = "Candidature non trouvée")
-    })
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Récupérer une candidature par ID — admin uniquement")
     public ResponseEntity<ApiResponse<ApplicationResponse>> getApplicationById(
-            @Parameter(description = "ID de la candidature", required = true) @PathVariable Long id) {
+            @Parameter(description = "ID de la candidature") @PathVariable Long id) {
         return applicationService.findByIdOptional(id)
-                .map(application -> ResponseEntity.ok(ApiResponse.success(toResponse(application))))
+                .map(app -> ResponseEntity.ok(ApiResponse.success(toResponse(app))))
                 .orElseThrow(() -> new ResourceNotFoundException("Application", "id", id));
     }
 
     @GetMapping("/user/{userId}")
-    @Operation(summary = "Récupérer les candidatures d'un utilisateur", 
-               description = "Retourne toutes les candidatures soumises par un utilisateur spécifique.")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Récupérer les candidatures d'un utilisateur — admin uniquement")
     public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getApplicationsByUser(
-            @Parameter(description = "ID de l'utilisateur", required = true) @PathVariable Long userId) {
+            @PathVariable Long userId) {
         List<ApplicationResponse> applications = applicationService.findByUserId(userId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -95,96 +87,76 @@ public class ApplicationController {
     }
 
     @GetMapping("/event/{eventId}")
-    @Operation(summary = "Récupérer les candidatures d'un événement", 
-               description = "Retourne toutes les candidatures pour un événement spécifique.")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Récupérer les candidatures d'un événement — admin uniquement")
     public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getApplicationsByEvent(
-            @Parameter(description = "ID de l'événement", required = true) @PathVariable Long eventId) {
+            @PathVariable Long eventId) {
         List<ApplicationResponse> applications = applicationService.findByEventId(eventId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(ApiResponse.success(applications));
     }
 
+    // POST public — aucun token requis (candidature publique Accompagnement 360)
     @PostMapping
-    @Operation(summary = "Soumettre une candidature", 
-               description = "Permet à un utilisateur de soumettre une candidature à un événement.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Candidature soumise"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", 
-            description = "Données invalides")
-    })
-    public ResponseEntity<ApiResponse<ApplicationResponse>> createApplication(@Valid @RequestBody ApplicationRequest request) {
-        Application application = toEntity(request);
-        Application savedApplication = applicationService.save(application);
-        return ResponseEntity.ok(ApiResponse.success(toResponse(savedApplication), "Application submitted successfully"));
-    }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Mettre à jour une candidature", 
-               description = "Met à jour une candidature (statut, etc.). Réservé aux administrateurs.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Candidature mise à jour"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", 
-            description = "Accès interdit - Réservé aux administrateurs"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
-            description = "Candidature non trouvée")
-    })
-    public ResponseEntity<ApiResponse<ApplicationResponse>> updateApplication(
-            @Parameter(description = "ID de la candidature", required = true) @PathVariable Long id,
+    @Operation(summary = "Soumettre une candidature publique")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> createApplication(
             @Valid @RequestBody ApplicationRequest request) {
-        
-        if (!applicationService.findByIdOptional(id).isPresent()) {
-            throw new ResourceNotFoundException("Application", "id", id);
-        }
-
         Application application = toEntity(request);
-        application.setId(id);
-        Application savedApplication = applicationService.save(application);
-        return ResponseEntity.ok(ApiResponse.success(toResponse(savedApplication), "Application updated successfully"));
+        Application saved = applicationService.save(application);
+        return ResponseEntity.ok(ApiResponse.success(toResponse(saved), "Candidature soumise avec succès"));
     }
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Changer le statut d'une candidature",
-               description = "Met à jour uniquement le statut d'une candidature. Réservé aux administrateurs.")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Changer le statut d'une candidature — admin uniquement")
     public ResponseEntity<ApiResponse<ApplicationResponse>> updateApplicationStatus(
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {
         Application application = applicationService.findByIdOptional(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Application", "id", id));
+
         ApplicationStatus newStatus = ApplicationStatus.valueOf(body.get("status").toLowerCase());
         application.setStatus(newStatus);
         Application saved = applicationService.save(application);
-        return ResponseEntity.ok(ApiResponse.success(toResponse(saved), "Status updated successfully"));
+
+        // Email automatique quand accepté
+        if (newStatus == ApplicationStatus.accepted && saved.getEmailAddress() != null) {
+            mailService.sendApplicationAccepted(
+                    saved.getEmailAddress(),
+                    saved.getFullName() != null ? saved.getFullName() : "Candidat",
+                    saved.getWhatsappNumber()
+            );
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(toResponse(saved), "Statut mis à jour"));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Supprimer une candidature", 
-               description = "Supprime une candidature. Réservé aux administrateurs.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Candidature supprimée"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", 
-            description = "Accès interdit - Réservé aux administrateurs"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
-            description = "Candidature non trouvée")
-    })
-    public ResponseEntity<ApiResponse<Void>> deleteApplication(
-            @Parameter(description = "ID de la candidature", required = true) @PathVariable Long id) {
-        if (!applicationService.findByIdOptional(id).isPresent()) {
-            throw new ResourceNotFoundException("Application", "id", id);
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Supprimer une candidature — admin uniquement")
+    public ResponseEntity<ApiResponse<Void>> deleteApplication(@PathVariable Long id) {
+        Application application = applicationService.findByIdOptional(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Application", "id", id));
+
+        if (application.getStatus() == ApplicationStatus.accepted) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.error("Une candidature acceptée ne peut pas être supprimée"));
         }
+
         applicationService.deleteById(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "Application deleted successfully"));
+        return ResponseEntity.ok(ApiResponse.success(null, "Candidature supprimée"));
     }
 
     private Application toEntity(ApplicationRequest request) {
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", request.getUserId()));
+        User user = null;
+        if (request.getUserId() != null) {
+            user = userRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new ResourceNotFoundException("User", "id", request.getUserId()));
+        }
 
         Event event = null;
         if (request.getEventId() != null) {
@@ -200,25 +172,33 @@ public class ApplicationController {
                 .event(event)
                 .applicationType(applicationType)
                 .status(ApplicationStatus.pending)
+                .fullName(request.getFullName())
+                .emailAddress(request.getEmailAddress())
+                .whatsappNumber(request.getWhatsappNumber())
+                .age(request.getAge())
                 .motivationText(request.getMotivationText())
                 .technicalLevel(request.getTechnicalLevel())
                 .createdAt(LocalDateTime.now())
                 .build();
     }
 
-    private ApplicationResponse toResponse(Application application) {
+    private ApplicationResponse toResponse(Application app) {
         return ApplicationResponse.builder()
-                .id(application.getId())
-                .userId(application.getUser().getId())
-                .username(application.getUser().getUsername())
-                .eventId(application.getEvent() != null ? application.getEvent().getId() : null)
-                .eventTitle(application.getEvent() != null ? application.getEvent().getTitle() : null)
-                .applicationTypeId(application.getApplicationType().getId())
-                .applicationTypeName(application.getApplicationType().getName().name())
-                .status(application.getStatus())
-                .motivationText(application.getMotivationText())
-                .technicalLevel(application.getTechnicalLevel())
-                .createdAt(application.getCreatedAt())
+                .id(app.getId())
+                .userId(app.getUser() != null ? app.getUser().getId() : null)
+                .username(app.getUser() != null ? app.getUser().getUsername() : null)
+                .eventId(app.getEvent() != null ? app.getEvent().getId() : null)
+                .eventTitle(app.getEvent() != null ? app.getEvent().getTitle() : null)
+                .applicationTypeId(app.getApplicationType().getId())
+                .applicationTypeName(app.getApplicationType().getName().name())
+                .status(app.getStatus())
+                .fullName(app.getFullName())
+                .emailAddress(app.getEmailAddress())
+                .whatsappNumber(app.getWhatsappNumber())
+                .age(app.getAge())
+                .motivationText(app.getMotivationText())
+                .technicalLevel(app.getTechnicalLevel())
+                .createdAt(app.getCreatedAt())
                 .build();
     }
 }
