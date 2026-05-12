@@ -7,7 +7,7 @@ const NAV = [
   {
     title: 'Accompagnement',
     links: [
-      { label: 'Accompagnement 360', href: '/postuler', icon: Compass },
+      { label: 'Le programme', href: '/programme', icon: Compass },
       { label: 'Postuler maintenant', href: '/postuler', icon: ArrowUpRight, highlight: true },
     ],
   },
@@ -25,7 +25,7 @@ const NAV = [
     links: [
       { label: 'À propos', href: '/about', icon: Info },
       { label: 'Communauté', href: '/open-source#contributors', icon: Users },
-      { label: 'WhatsApp', href: 'https://wa.me/237690000000', icon: null, isWhatsApp: true, external: true },
+      { label: 'WhatsApp', href: 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK', icon: null, isWhatsApp: true, external: true },
       { label: 'contact@lescracks.com', href: 'mailto:contact@lescracks.com', icon: Mail, external: true },
     ],
   },
@@ -61,7 +61,7 @@ const Footer = () => {
               />
             </Link>
             <p className="text-sm text-white/40 leading-relaxed mb-6 max-w-[220px]">
-              Agence edtech au service des talents tech d'Afrique francophone.
+              Accélérateur de carrière tech au service des talents de l'Afrique francophone.
             </p>
 
             {/* Socials */}

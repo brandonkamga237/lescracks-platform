@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   Menu, X, ArrowRight, BookOpen, Video, Code2, ChevronRight,
   User, LogOut, Shield, Crown, Award,
-  Users,
+  Users, Compass, FileText,
 } from 'lucide-react';
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 
@@ -14,10 +14,24 @@ import LesCracksLogo from '@/components/common/LesCracksLogo';
 const menuItems = [
   {
     title: 'Accompagnement',
-    href: '/postuler',
+    href: '/programme',
     pulse: true,
     alignRight: false,
-    hasMegaMenu: false,
+    hasMegaMenu: true,
+    columns: [
+      {
+        title: 'Le programme',
+        description: 'Tout ce que tu dois savoir sur l\'Accompagnement 360',
+        href: '/programme',
+        icon: Compass,
+      },
+      {
+        title: 'Postuler',
+        description: 'Soumettre ta candidature — réponse sous 48h',
+        href: '/postuler',
+        icon: FileText,
+      },
+    ],
   },
   {
     title: 'Ressources',
@@ -337,13 +351,18 @@ const Header = () => {
 
               {/* Accompagnement */}
               <div className="pt-2 pb-1 border-t border-border/50">
-                <Link to="/postuler" onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 py-2.5 px-4 text-gold hover:bg-gold/8 rounded-xl text-sm font-medium">
+                <p className="text-[10px] text-foreground/35 uppercase tracking-widest px-4 mb-1">Accompagnement</p>
+                <Link to="/programme" onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 py-2.5 px-4 pl-7 text-gold hover:bg-gold/8 rounded-xl text-sm font-medium">
                   <span className="relative flex h-1.5 w-1.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75" />
                     <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-gold" />
                   </span>
-                  Accompagnement 360
+                  Le programme
+                </Link>
+                <Link to="/postuler" onClick={() => setMobileMenuOpen(false)}
+                  className="block py-2.5 px-4 pl-7 text-foreground/60 hover:text-foreground hover:bg-secondary rounded-xl text-sm">
+                  Postuler
                 </Link>
               </div>
 

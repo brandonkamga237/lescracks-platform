@@ -37,6 +37,7 @@ export interface Resource {
   viewCount: number;
   downloadCount: number;
   tags: { id: number; name: string }[];
+  slug?: string;
   metadata?: {
     fileSize?: number;
     mimeType?: string;
@@ -199,6 +200,10 @@ class ApiService {
   async getResource(id: string): Promise<Resource> {
     const data = await this.request<Resource>(`/resources/${id}`);
     return data;
+  }
+
+  async getResourceBySlug(slug: string): Promise<Resource> {
+    return this.request<Resource>(`/resources/slug/${slug}`);
   }
 
   // === TAGS ===

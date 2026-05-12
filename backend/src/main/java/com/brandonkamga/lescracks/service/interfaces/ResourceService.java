@@ -127,6 +127,14 @@ public interface ResourceService {
     Page<Resource> searchWithFilters(String typeName, Long categoryId, List<Long> tagIds, String searchTerm, Pageable page);
 
     /**
+     * Find a resource by its SEO slug.
+     *
+     * @param slug the slug
+     * @return Optional containing the resource if found
+     */
+    Optional<Resource> findBySlug(String slug);
+
+    /**
      * Save a resource.
      *
      * @param resource the resource to save
