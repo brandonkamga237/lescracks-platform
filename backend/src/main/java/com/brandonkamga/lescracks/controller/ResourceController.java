@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/resources")
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Ressources", description = "API de gestion des ressources pédagogiques")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Resources", description = "Learning resource management API")
 @SecurityRequirement(name = "bearerAuth")
 public class ResourceController {
 
@@ -82,33 +82,33 @@ public class ResourceController {
      * - sort: sorting criteria (e.g., createdAt,desc)
      */
     @GetMapping
-    @Operation(summary = "Liste toutes les ressources avec pagination et filtres", 
-               description = "Retourne la liste des ressources pédagogiques avec support de pagination et filtres. " +
-               "Paramètres: type (VIDEO|DOCUMENT), categoryId, tagIds (comma-separated), search, page, size, sort")
+    @Operation(summary = "List all resources with pagination and filters",
+               description = "Returns the list of learning resources with pagination and filter support. " +
+               "Parameters: type (VIDEO|DOCUMENT), categoryId, tagIds (comma-separated), search, page, size, sort")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Liste des ressources avec pagination")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Paginated resource list")
     })
     public ResponseEntity<ApiResponse<PaginatedResourceResponse>> getAllResources(
-            @Parameter(description = "Type de ressource (VIDEO ou DOCUMENT)")
+            @Parameter(description = "Resource type (VIDEO or DOCUMENT)")
             @RequestParam(required = false) String type,
 
-            @Parameter(description = "ID de la catégorie")
+            @Parameter(description = "Category ID")
             @RequestParam(required = false) Long categoryId,
 
-            @Parameter(description = "IDs des tags séparés par des virgules (filtre OU)")
+            @Parameter(description = "Comma-separated tag IDs (OR filter)")
             @RequestParam(required = false) String tagIds,
 
-            @Parameter(description = "Terme de recherche dans le titre ou la description")
+            @Parameter(description = "Search term in title or description")
             @RequestParam(required = false) String search,
 
-            @Parameter(description = "Numéro de page (0-based)")
+            @Parameter(description = "Page number (0-based)")
             @RequestParam(defaultValue = "0") int page,
 
-            @Parameter(description = "Taille de la page")
+            @Parameter(description = "Page size")
             @RequestParam(defaultValue = "12") int size,
 
-            @Parameter(description = "Tri (ex: createdAt,desc ou title,asc)")
+            @Parameter(description = "Sort criteria (e.g. createdAt,desc or title,asc)")
             @RequestParam(defaultValue = "createdAt,desc") String sort,
 
             Authentication authentication) {
@@ -156,34 +156,34 @@ public class ResourceController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Récupérer une ressource par ID",
-               description = "Retourne les détails d'une ressource spécifique. Les ressources PREMIUM nécessitent un compte actif.")
+    @Operation(summary = "Get resource by ID",
+               description = "Returns the details of a specific resource. PREMIUM resources require an active account.")
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
-            description = "Ressource trouvée"),
+            description = "Resource found"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
-            description = "Accès refusé — ressource PREMIUM"),
+            description = "Access denied — PREMIUM resource"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
-            description = "Ressource non trouvée")
+            description = "Resource not found")
     })
     public ResponseEntity<ApiResponse<ResourceResponse>> getResourceById(
-            @Parameter(description = "ID de la ressource", required = true) @PathVariable Long id,
+            @Parameter(description = "Resource ID", required = true) @PathVariable Long id,
             Authentication authentication) {
         Resource resource = resourceService.findByIdOptional(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource", "id", id));
         if (resource.isPremium() && !hasPremiumAccess(authentication)) {
-            throw new com.brandonkamga.lescracks.exception.ForbiddenException("Cette ressource est réservée aux membres PREMIUM");
+            throw new com.brandonkamga.lescracks.exception.ForbiddenException("This resource is reserved for PREMIUM members");
         }
         return ResponseEntity.ok(ApiResponse.success(toResponse(resource)));
     }
 
     @GetMapping("/category/{categoryId}")
-    @Operation(summary = "Récupérer les ressources par catégorie avec pagination", 
-               description = "Filtre les ressources par catégorie avec support de pagination.")
+    @Operation(summary = "Get resources by category with pagination",
+               description = "Filters resources by category with pagination support.")
     public ResponseEntity<ApiResponse<PaginatedResourceResponse>> getResourcesByCategory(
-            @Parameter(description = "ID de la catégorie", required = true) @PathVariable Long categoryId,
-            @Parameter(description = "Numéro de page (0-based)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Taille de la page") @RequestParam(defaultValue = "12") int size,
+            @Parameter(description = "Category ID", required = true) @PathVariable Long categoryId,
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "12") int size,
             Authentication authentication) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -204,13 +204,13 @@ public class ResourceController {
     }
 
     @GetMapping("/type/{resourceTypeName}")
-    @Operation(summary = "Récupérer les ressources par type avec pagination", 
-               description = "Filtre les ressources par type (VIDEO ou DOCUMENT) avec support de pagination.")
+    @Operation(summary = "Get resources by type with pagination",
+               description = "Filters resources by type (VIDEO or DOCUMENT) with pagination support.")
     public ResponseEntity<ApiResponse<PaginatedResourceResponse>> getResourcesByType(
-            @Parameter(description = "Type de ressource (VIDEO ou DOCUMENT)", required = true)
+            @Parameter(description = "Resource type (VIDEO or DOCUMENT)", required = true)
             @PathVariable String resourceTypeName,
-            @Parameter(description = "Numéro de page (0-based)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Taille de la page") @RequestParam(defaultValue = "12") int size,
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "12") int size,
             Authentication authentication) {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -231,13 +231,13 @@ public class ResourceController {
     }
 
     @GetMapping("/tags")
-    @Operation(summary = "Récupérer les ressources par tags avec pagination", 
-               description = "Filtre les ressources par tags (ressources ayant AU MOINS UN des tags) avec pagination.")
+    @Operation(summary = "Get resources by tags with pagination",
+               description = "Filters resources by tags (resources having AT LEAST ONE of the tags) with pagination.")
     public ResponseEntity<ApiResponse<PaginatedResourceResponse>> getResourcesByTags(
-            @Parameter(description = "IDs des tags séparés par des virgules", required = true)
+            @Parameter(description = "Comma-separated tag IDs", required = true)
             @RequestParam String tagIds,
-            @Parameter(description = "Numéro de page (0-based)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Taille de la page") @RequestParam(defaultValue = "12") int size,
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "12") int size,
             Authentication authentication) {
 
         List<Long> tagIdList = List.of(tagIds.split(",")).stream()
@@ -264,13 +264,13 @@ public class ResourceController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Créer une nouvelle ressource", 
-               description = "Crée une nouvelle ressource pédagogique. Réservé aux administrateurs.")
+    @Operation(summary = "Create a new resource",
+               description = "Creates a new learning resource. Reserved for administrators.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Ressource créée"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", 
-            description = "Accès interdit - Réservé aux administrateurs")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Resource created"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
+            description = "Forbidden - reserved for administrators")
     })
     public ResponseEntity<ApiResponse<ResourceResponse>> createResource(@Valid @RequestBody ResourceRequest request) {
         Resource resource = toEntity(request);
@@ -280,18 +280,18 @@ public class ResourceController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Mettre à jour une ressource", 
-               description = "Met à jour une ressource existante. Réservé aux administrateurs.")
+    @Operation(summary = "Update a resource",
+               description = "Updates an existing resource. Reserved for administrators.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Ressource mise à jour"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", 
-            description = "Accès interdit - Réservé aux administrateurs"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
-            description = "Ressource non trouvée")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Resource updated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
+            description = "Forbidden - reserved for administrators"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+            description = "Resource not found")
     })
     public ResponseEntity<ApiResponse<ResourceResponse>> updateResource(
-            @Parameter(description = "ID de la ressource", required = true) @PathVariable Long id,
+            @Parameter(description = "Resource ID", required = true) @PathVariable Long id,
             @Valid @RequestBody ResourceRequest request) {
         
         if (!resourceService.findByIdOptional(id).isPresent()) {
@@ -308,25 +308,25 @@ public class ResourceController {
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Uploader un fichier ressource",
-               description = "Stocke le fichier sur la plateforme et retourne son URL publique. Réservé aux administrateurs.")
+    @Operation(summary = "Upload a resource file",
+               description = "Stores the file on the platform and returns its public URL. Reserved for administrators.")
     public ResponseEntity<ApiResponse<String>> uploadFile(
             @RequestParam("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
-            throw new com.brandonkamga.lescracks.exception.BadRequestException("Le fichier est vide");
+            throw new com.brandonkamga.lescracks.exception.BadRequestException("File is empty");
         }
         String url = resourceService.storeFile(
                 file.getOriginalFilename(),
                 file.getBytes(),
                 file.getContentType());
-        return ResponseEntity.ok(ApiResponse.success(url, "Fichier uploadé avec succès"));
+        return ResponseEntity.ok(ApiResponse.success(url, "File uploaded successfully"));
     }
 
     // ── Serve uploaded files ─────────────────────────────────────────────────────
 
     @GetMapping("/files/{filename:.+}")
-    @Operation(summary = "Télécharger / visualiser un fichier uploadé",
-               description = "Sert les fichiers stockés localement sur la plateforme.")
+    @Operation(summary = "Download / view an uploaded file",
+               description = "Serves files stored locally on the platform.")
     public ResponseEntity<org.springframework.core.io.Resource> serveFile(
             @PathVariable String filename) throws MalformedURLException {
         Path filePath = Paths.get(uploadDirectory).resolve(filename).normalize();

@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/events")
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Événements", description = "API de gestion des événements et formations")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Events", description = "Event and training management API")
 @SecurityRequirement(name = "bearerAuth")
 public class EventController {
 
@@ -51,11 +51,11 @@ public class EventController {
     }
 
     @GetMapping
-    @Operation(summary = "Liste tous les événements", 
-               description = "Retourne la liste de tous les événements disponibles.")
+    @Operation(summary = "List all events",
+               description = "Returns the list of all available events.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Liste des événements")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Event list")
     })
     public ResponseEntity<ApiResponse<List<EventResponse>>> getAllEvents() {
         List<EventResponse> events = eventService.findAll().stream()
@@ -65,26 +65,26 @@ public class EventController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Récupérer un événement par ID", 
-               description = "Retourne les détails d'un événement spécifique.")
+    @Operation(summary = "Get event by ID",
+               description = "Returns the details of a specific event.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Événement trouvé"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
-            description = "Événement non trouvé")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Event found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+            description = "Event not found")
     })
     public ResponseEntity<ApiResponse<EventResponse>> getEventById(
-            @Parameter(description = "ID de l'événement", required = true) @PathVariable Long id) {
+            @Parameter(description = "Event ID", required = true) @PathVariable Long id) {
         return eventService.findByIdOptional(id)
                 .map(event -> ResponseEntity.ok(ApiResponse.success(toResponse(event))))
                 .orElseThrow(() -> new ResourceNotFoundException("Event", "id", id));
     }
 
     @GetMapping("/type/{eventTypeId}")
-    @Operation(summary = "Récupérer les événements par type", 
-               description = "Filtre les événements par type (formation, workshop, etc.)")
+    @Operation(summary = "Get events by type",
+               description = "Filters events by type (training, workshop, etc.)")
     public ResponseEntity<ApiResponse<List<EventResponse>>> getEventsByType(
-            @Parameter(description = "ID du type d'événement", required = true) @PathVariable Long eventTypeId) {
+            @Parameter(description = "Event type ID", required = true) @PathVariable Long eventTypeId) {
         List<EventResponse> events = eventService.findByEventTypeId(eventTypeId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -92,10 +92,10 @@ public class EventController {
     }
 
     @GetMapping("/status/{eventStatusId}")
-    @Operation(summary = "Récupérer les événements par statut", 
-               description = "Filtre les événements par statut (actif, terminé, etc.)")
+    @Operation(summary = "Get events by status",
+               description = "Filters events by status (active, ended, etc.)")
     public ResponseEntity<ApiResponse<List<EventResponse>>> getEventsByStatus(
-            @Parameter(description = "ID du statut d'événement", required = true) @PathVariable Long eventStatusId) {
+            @Parameter(description = "Event status ID", required = true) @PathVariable Long eventStatusId) {
         List<EventResponse> events = eventService.findByEventStatusId(eventStatusId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -104,13 +104,13 @@ public class EventController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Créer un nouvel événement", 
-               description = "Crée un nouvel événement. Réservé aux administrateurs.")
+    @Operation(summary = "Create a new event",
+               description = "Creates a new event. Reserved for administrators.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Événement créé"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", 
-            description = "Accès interdit - Réservé aux administrateurs")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Event created"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
+            description = "Forbidden - reserved for administrators")
     })
     public ResponseEntity<ApiResponse<EventResponse>> createEvent(@Valid @RequestBody EventRequest request) {
         Event event = toEntity(request);
@@ -120,18 +120,18 @@ public class EventController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Mettre à jour un événement", 
-               description = "Met à jour un événement existant. Réservé aux administrateurs.")
+    @Operation(summary = "Update an event",
+               description = "Updates an existing event. Reserved for administrators.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Événement mis à jour"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", 
-            description = "Accès interdit - Réservé aux administrateurs"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
-            description = "Événement non trouvé")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Event updated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
+            description = "Forbidden - reserved for administrators"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+            description = "Event not found")
     })
     public ResponseEntity<ApiResponse<EventResponse>> updateEvent(
-            @Parameter(description = "ID de l'événement", required = true) @PathVariable Long id,
+            @Parameter(description = "Event ID", required = true) @PathVariable Long id,
             @Valid @RequestBody EventRequest request) {
         
         if (!eventService.findByIdOptional(id).isPresent()) {
@@ -146,18 +146,18 @@ public class EventController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Supprimer un événement", 
-               description = "Supprime un événement. Réservé aux administrateurs.")
+    @Operation(summary = "Delete an event",
+               description = "Deletes an event. Reserved for administrators.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Événement supprimé"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", 
-            description = "Accès interdit - Réservé aux administrateurs"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
-            description = "Événement non trouvé")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Event deleted"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
+            description = "Forbidden - reserved for administrators"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+            description = "Event not found")
     })
     public ResponseEntity<ApiResponse<Void>> deleteEvent(
-            @Parameter(description = "ID de l'événement", required = true) @PathVariable Long id) {
+            @Parameter(description = "Event ID", required = true) @PathVariable Long id) {
         if (!eventService.findByIdOptional(id).isPresent()) {
             throw new ResourceNotFoundException("Event", "id", id);
         }

@@ -18,17 +18,20 @@ import com.brandonkamga.lescracks.repository.PasswordResetTokenRepository;
 import com.brandonkamga.lescracks.repository.ProviderRepository;
 import com.brandonkamga.lescracks.repository.RoleRepository;
 import com.brandonkamga.lescracks.repository.UserRepository;
+import com.brandonkamga.lescracks.security.RateLimiterService;
 import com.brandonkamga.lescracks.security.jwt.JwtService;
+import com.brandonkamga.lescracks.security.jwt.JwtTokenBlacklist;
 import com.brandonkamga.lescracks.service.impl.MailServiceImpl;
 import com.brandonkamga.lescracks.service.interfaces.UserService;
+import com.brandonkamga.lescracks.util.PasswordValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -45,12 +48,14 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
-@Tag(name = "Authentication", description = "API d'authentification - Connexion, inscription et gestion de session")
+@Tag(name = "Authentication", description = "Authentication API — login, registration, and session management")
 public class AuthController {
 
     private final UserService userService;
     private final UserMapper userMapper;
     private final JwtService jwtService;
+    private final JwtTokenBlacklist tokenBlacklist;
+    private final RateLimiterService rateLimiter;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
@@ -59,10 +64,18 @@ public class AuthController {
     private final UserRepository userRepository;
     private final MailServiceImpl mailService;
 
+    @Value("${app.mail.reset-token-expiry-minutes:30}")
+    private int resetTokenExpiryMinutes;
+
+    /** Expiry in hours for email verification tokens. */
+    private static final int VERIFICATION_TOKEN_EXPIRY_HOURS = 24;
+
     public AuthController(
             UserService userService,
             UserMapper userMapper,
             JwtService jwtService,
+            JwtTokenBlacklist tokenBlacklist,
+            RateLimiterService rateLimiter,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
             RoleRepository roleRepository,
@@ -70,45 +83,53 @@ public class AuthController {
             PasswordResetTokenRepository passwordResetTokenRepository,
             UserRepository userRepository,
             MailServiceImpl mailService) {
-        this.userService = userService;
-        this.userMapper = userMapper;
-        this.jwtService = jwtService;
-        this.authenticationManager = authenticationManager;
-        this.passwordEncoder = passwordEncoder;
-        this.roleRepository = roleRepository;
-        this.providerRepository = providerRepository;
+        this.userService                  = userService;
+        this.userMapper                   = userMapper;
+        this.jwtService                   = jwtService;
+        this.tokenBlacklist               = tokenBlacklist;
+        this.rateLimiter                  = rateLimiter;
+        this.authenticationManager        = authenticationManager;
+        this.passwordEncoder              = passwordEncoder;
+        this.roleRepository               = roleRepository;
+        this.providerRepository           = providerRepository;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
-        this.userRepository = userRepository;
-        this.mailService = mailService;
+        this.userRepository               = userRepository;
+        this.mailService                  = mailService;
     }
 
     @PostMapping("/register")
-    @Operation(summary = "Inscription d'un nouvel utilisateur", 
-               description = "Crée un nouveau compte utilisateur avec email, username et mot de passe. " +
-                           "Retourne un token JWT pour l'authentification immédiate.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", 
-            description = "Utilisateur créé avec succès",
-            content = @Content(mediaType = "application/json", 
+    @Operation(summary = "Register a new user",
+               description = "Create a new user account with email, username, and password. "
+                           + "A verification email is sent before the account becomes active.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201",
+            description = "Account created — verification email sent",
+            content = @Content(mediaType = "application/json",
                 schema = @Schema(implementation = ApiResponse.class))),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", 
-            description = "Données invalides ou email/username déjà utilisé",
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400",
+            description = "Invalid data or email/username already in use",
+            content = @Content(mediaType = "application/json")),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "429",
+            description = "Too many registration attempts",
             content = @Content(mediaType = "application/json"))
     })
-    public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody UserRequest userRequest) {
+    public ResponseEntity<ApiResponse<Void>> register(
+            @Valid @RequestBody UserRequest userRequest,
+            HttpServletRequest request) {
+
+        enforceRateLimit(request, RateLimiterService.Limit.REGISTER);
+
         if (userRequest.getEmail() == null || userService.existsByEmail(userRequest.getEmail())) {
-            throw new BadRequestException("Email already exists or is required");
+            throw new BadRequestException("Email is required or already in use");
         }
         if (userRequest.getUsername() == null || userService.existsByUsername(userRequest.getUsername())) {
-            throw new BadRequestException("Username already exists or is required");
+            throw new BadRequestException("Username is required or already taken");
         }
-        if (userRequest.getPassword() == null || userRequest.getPassword().length() < 6) {
-            throw new BadRequestException("Password is required and must be at least 6 characters");
-        }
+
+        PasswordValidator.validate(userRequest.getPassword());
 
         Role role = roleRepository.findByName(RoleName.user)
-                .orElseThrow(() -> new RuntimeException("Role not found"));
-
+                .orElseThrow(() -> new RuntimeException("Role 'user' not found"));
         Provider localProvider = providerRepository.findByProviderName(ProviderType.LOCAL)
                 .orElseThrow(() -> new RuntimeException("LOCAL provider not found"));
 
@@ -125,25 +146,38 @@ public class AuthController {
         user.setProviderUserId(null);
         user.setEmailVerified(false);
         user.setVerificationToken(verificationToken);
+        user.setVerificationTokenExpiresAt(
+                LocalDateTime.now().plusHours(VERIFICATION_TOKEN_EXPIRY_HOURS));
 
         User savedUser = userService.save(user);
-        mailService.sendEmailVerification(savedUser.getEmail(), savedUser.getUsername(), verificationToken);
+        mailService.sendEmailVerification(
+                savedUser.getEmail(), savedUser.getUsername(), verificationToken);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(null, "Compte créé — vérifie ta boîte mail pour activer ton compte."));
+                .body(ApiResponse.success(null,
+                        "Account created. Please check your inbox to verify your email."));
     }
 
     @PostMapping("/verify-email")
     @Transactional
-    @Operation(summary = "Vérification de l'adresse email",
-               description = "Active le compte en vérifiant le token reçu par email.")
+    @Operation(summary = "Verify email address",
+               description = "Activate the account using the token received by email. "
+                           + "The verification link expires after 24 hours.")
     public ResponseEntity<ApiResponse<AuthResponse>> verifyEmail(@RequestParam String token) {
         User user = userRepository.findByVerificationToken(token)
-                .orElseThrow(() -> new BadRequestException("Lien de vérification invalide ou déjà utilisé."));
+                .orElseThrow(() -> new BadRequestException(
+                        "Invalid or already used verification link."));
+
+        if (user.getVerificationTokenExpiresAt() != null
+                && user.getVerificationTokenExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException(
+                    "This verification link has expired. Please register again.");
+        }
 
         user.setEmailVerified(true);
         user.setVerificationToken(null);
+        user.setVerificationTokenExpiresAt(null);
         userService.save(user);
 
         mailService.sendWelcome(user.getEmail(), user.getUsername());
@@ -151,43 +185,58 @@ public class AuthController {
         String jwt = jwtService.generateTokenForUser(user.getEmail());
         return ResponseEntity.ok(ApiResponse.success(
                 AuthResponse.of(jwt, userMapper.toResponse(user)),
-                "Email vérifié — bienvenue sur LesCracks !"));
+                "Email verified — welcome to LesCracks!"));
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Connexion utilisateur", 
-               description = "Authentifie un utilisateur avec son email et mot de passe. " +
-                           "Retourne un token JWT à utiliser pour les requêtes authentifiées.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Connexion réussie",
-            content = @Content(mediaType = "application/json", 
+    @Operation(summary = "User login",
+               description = "Authenticate with email and password. Returns a JWT token "
+                           + "to be sent as a Bearer token in subsequent requests.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Login successful",
+            content = @Content(mediaType = "application/json",
                 schema = @Schema(implementation = ApiResponse.class))),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", 
-            description = "Email ou mot de passe invalide",
-            content = @Content(mediaType = "application/json"))
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400",
+            description = "Invalid email or password"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "429",
+            description = "Too many login attempts")
     })
-    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ApiResponse<AuthResponse>> login(
+            @Valid @RequestBody LoginRequest loginRequest,
+            HttpServletRequest request) {
+
+        String rateLimitKey = "LOGIN:" + getClientIp(request);
+        if (!rateLimiter.isAllowed(rateLimitKey, RateLimiterService.Limit.LOGIN)) {
+            throw new BadRequestException(
+                    "Too many login attempts. Please try again in a few minutes.");
+        }
+
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
-            );
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getEmail(), loginRequest.getPassword()));
 
             User user = userService.findByEmail(loginRequest.getEmail());
             if (user == null) {
                 throw new BadRequestException("User not found");
             }
 
-            // Block LOCAL users who haven't verified their email yet
             if (user.getProvider() != null
                     && ProviderType.LOCAL.equals(user.getProvider().getProviderName())
                     && !user.isEmailVerified()) {
-                throw new BadRequestException("Vérifie ton adresse email avant de te connecter. Consulte ta boîte mail.");
+                throw new BadRequestException(
+                        "Please verify your email address before logging in. Check your inbox.");
             }
 
-            String token = jwtService.generateTokenForUser(user.getEmail());
+            // Reset rate-limit counter on successful login
+            rateLimiter.reset(rateLimitKey);
 
-            return ResponseEntity.ok(ApiResponse.success(AuthResponse.of(token, userMapper.toResponse(user)), "Login successful"));
+            String token = jwtService.generateTokenForUser(user.getEmail());
+            return ResponseEntity.ok(
+                    ApiResponse.success(AuthResponse.of(token, userMapper.toResponse(user)),
+                            "Login successful"));
+
         } catch (BadCredentialsException e) {
             throw new BadRequestException("Invalid email or password");
         }
@@ -195,68 +244,109 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     @Transactional
-    @Operation(summary = "Demande de réinitialisation de mot de passe",
-               description = "Envoie un email avec un lien de réinitialisation valable 30 minutes. " +
-                           "Retourne toujours 200 pour ne pas révéler si l'email existe.")
-    public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+    @Operation(summary = "Request a password reset",
+               description = "Send a password-reset email valid for 30 minutes. "
+                           + "Always returns 200 to avoid revealing whether the email exists.")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request,
+            HttpServletRequest httpRequest) {
+
+        enforceRateLimit(httpRequest, RateLimiterService.Limit.FORGOT_PASSWORD);
+
         User user = userService.findByEmail(request.getEmail());
         if (user != null) {
-            // Delete any existing tokens for this email
             passwordResetTokenRepository.deleteByEmail(request.getEmail());
 
             String token = UUID.randomUUID().toString();
             PasswordResetToken resetToken = PasswordResetToken.builder()
                     .token(token)
                     .email(request.getEmail())
-                    .expiresAt(LocalDateTime.now().plusMinutes(30))
+                    .expiresAt(LocalDateTime.now().plusMinutes(resetTokenExpiryMinutes))
                     .used(false)
                     .build();
             passwordResetTokenRepository.save(resetToken);
             mailService.sendPasswordReset(request.getEmail(), token);
         }
-        // Always 200 — don't reveal if email exists
-        return ResponseEntity.ok(ApiResponse.success(null, "Si cet email est enregistré, un lien de réinitialisation a été envoyé."));
+
+        return ResponseEntity.ok(ApiResponse.success(null,
+                "If this email is registered, a password reset link has been sent."));
     }
 
     @PostMapping("/reset-password")
     @Transactional
-    @Operation(summary = "Réinitialisation du mot de passe",
-               description = "Réinitialise le mot de passe avec le token reçu par email.")
-    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+    @Operation(summary = "Reset password",
+               description = "Reset the password using the token received by email.")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+
         PasswordResetToken resetToken = passwordResetTokenRepository
                 .findByTokenAndUsedFalse(request.getToken())
-                .orElseThrow(() -> new BadRequestException("Token invalide ou déjà utilisé"));
+                .orElseThrow(() -> new BadRequestException("Invalid or already used reset token"));
 
         if (resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("Ce lien de réinitialisation a expiré");
+            throw new BadRequestException("This password reset link has expired");
         }
 
         User user = userService.findByEmail(resetToken.getEmail());
         if (user == null) {
-            throw new BadRequestException("Utilisateur introuvable");
+            throw new BadRequestException("User not found");
         }
+
+        PasswordValidator.validate(request.getNewPassword());
 
         userService.updatePassword(user, request.getNewPassword());
         resetToken.setUsed(true);
         passwordResetTokenRepository.save(resetToken);
 
-        return ResponseEntity.ok(ApiResponse.success(null, "Mot de passe réinitialisé avec succès"));
+        return ResponseEntity.ok(ApiResponse.success(null, "Password reset successfully"));
     }
 
     @PostMapping("/logout")
-    @Operation(summary = "Déconnexion",
-               description = "Déconnecte l'utilisateur en cours et invalide la session HTTP.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Déconnexion réussie",
-            content = @Content(mediaType = "application/json"))
+    @Operation(summary = "Logout",
+               description = "Revoke the current JWT so it cannot be reused, even before it expires.")
+    @ApiResponses({
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Logged out successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401",
+            description = "No valid token provided")
     })
     public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String jwt = authHeader.substring(7);
+            try {
+                String jti            = jwtService.extractJti(jwt);
+                long   expirationMs   = jwtService.extractExpiration(jwt).getTime();
+                if (jti != null) {
+                    tokenBlacklist.revoke(jti, expirationMs);
+                }
+            } catch (Exception ignored) {
+                // Token is already invalid — logout succeeds anyway
+            }
         }
+
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(ApiResponse.success(null, "Logged out successfully"));
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private void enforceRateLimit(HttpServletRequest request, RateLimiterService.Limit limit) {
+        String key = limit.name() + ":" + getClientIp(request);
+        if (!rateLimiter.isAllowed(key, limit)) {
+            throw new BadRequestException(
+                    "Too many requests. Please try again later.");
+        }
+    }
+
+    private String getClientIp(HttpServletRequest request) {
+        String forwarded = request.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
     }
 }

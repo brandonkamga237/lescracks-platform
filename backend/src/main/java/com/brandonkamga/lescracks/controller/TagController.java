@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tags")
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Tags", description = "API de gestion des tags")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Tags", description = "Tag management API")
 @SecurityRequirement(name = "bearerAuth")
 public class TagController {
 
@@ -28,9 +28,9 @@ public class TagController {
     }
 
     @GetMapping
-    @Operation(summary = "Liste tous les tags", description = "Retourne la liste de tous les tags disponibles.")
+    @Operation(summary = "List all tags", description = "Returns the list of all available tags.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Liste des tags")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tag list")
     })
     public ResponseEntity<ApiResponse<List<TagResponse>>> getAllTags() {
         List<TagResponse> tags = tagService.findAll().stream()
@@ -40,31 +40,31 @@ public class TagController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Récupérer un tag par ID")
+    @Operation(summary = "Get tag by ID")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tag trouvé"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Tag non trouvé")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tag found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Tag not found")
     })
     public ResponseEntity<ApiResponse<TagResponse>> getTagById(
-            @Parameter(description = "ID du tag", required = true) @PathVariable Long id) {
+            @Parameter(description = "Tag ID", required = true) @PathVariable Long id) {
         return tagService.findByIdOptional(id)
                 .map(tag -> ResponseEntity.ok(ApiResponse.success(toResponse(tag))))
                 .orElseThrow(() -> new ResourceNotFoundException("Tag", "id", id));
     }
 
     @GetMapping("/name/{name}")
-    @Operation(summary = "Récupérer un tag par nom")
+    @Operation(summary = "Get tag by name")
     public ResponseEntity<ApiResponse<TagResponse>> getTagByName(
-            @Parameter(description = "Nom du tag", required = true) @PathVariable String name) {
+            @Parameter(description = "Tag name", required = true) @PathVariable String name) {
         return tagService.findByName(name)
                 .map(tag -> ResponseEntity.ok(ApiResponse.success(toResponse(tag))))
                 .orElseThrow(() -> new ResourceNotFoundException("Tag", "name", name));
     }
 
     @GetMapping("/category/{categoryId}")
-    @Operation(summary = "Récupérer les tags par catégorie")
+    @Operation(summary = "Get tags by category")
     public ResponseEntity<ApiResponse<List<TagResponse>>> getTagsByCategory(
-            @Parameter(description = "ID de la catégorie", required = true) @PathVariable Long categoryId) {
+            @Parameter(description = "Category ID", required = true) @PathVariable Long categoryId) {
         List<TagResponse> tags = tagService.findByCategoryId(categoryId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -73,13 +73,13 @@ public class TagController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Supprimer un tag")
+    @Operation(summary = "Delete a tag")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tag supprimé"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Accès interdit")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Tag deleted"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Forbidden")
     })
     public ResponseEntity<ApiResponse<Void>> deleteTag(
-            @Parameter(description = "ID du tag", required = true) @PathVariable Long id) {
+            @Parameter(description = "Tag ID", required = true) @PathVariable Long id) {
         if (!tagService.findByIdOptional(id).isPresent()) {
             throw new ResourceNotFoundException("Tag", "id", id);
         }

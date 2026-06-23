@@ -92,7 +92,13 @@ app:
     enabled: ${SWAGGER_ENABLED:true}
     title: "LesCracks API"
     version: "1.0.0"
-    description: "API pour la plateforme de formation LesCracks - Gestion des utilisateurs, événements, ressources et formations"
+    description: "REST API for the LesCracks training platform — users, events, resources and programmes"
+
+  # Admin bootstrap credentials — override via environment variables in all environments.
+  # Never commit real credentials here; these defaults are intentionally weak placeholders.
+  admin:
+    email: ${ADMIN_EMAIL:admin@lescracks.local}
+    initial-password: ${ADMIN_INITIAL_PASSWORD:ChangeMe@1234}
 
 management:
   health:

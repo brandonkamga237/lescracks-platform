@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/image-assets")
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Images", description = "API de gestion des assets images")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Images", description = "Image asset management API")
 @SecurityRequirement(name = "bearerAuth")
 public class ImageAssetController {
 
@@ -38,13 +38,13 @@ public class ImageAssetController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Liste tous les assets images", 
-               description = "Retourne la liste de tous les assets images. Réservé aux administrateurs.")
+    @Operation(summary = "List all image assets",
+               description = "Returns the list of all image assets. Reserved for administrators.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Liste des images"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", 
-            description = "Accès interdit")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Image list"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
+            description = "Forbidden")
     })
     public ResponseEntity<ApiResponse<List<ImageAssetResponse>>> getAllImageAssets() {
         List<ImageAssetResponse> imageAssets = imageAssetService.findAll().stream()
@@ -54,31 +54,31 @@ public class ImageAssetController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Récupérer une image par ID", description = "Retourne les détails d'une image.")
+    @Operation(summary = "Get image asset by ID", description = "Returns the details of an image.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Image trouvée"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Image non trouvée")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Image found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Image not found")
     })
     public ResponseEntity<ApiResponse<ImageAssetResponse>> getImageAssetById(
-            @Parameter(description = "ID de l'image", required = true) @PathVariable Long id) {
+            @Parameter(description = "Image ID", required = true) @PathVariable Long id) {
         return imageAssetService.findByIdOptional(id)
                 .map(imageAsset -> ResponseEntity.ok(ApiResponse.success(toResponse(imageAsset))))
                 .orElseThrow(() -> new ResourceNotFoundException("ImageAsset", "id", id));
     }
 
     @GetMapping("/user/{userId}")
-    @Operation(summary = "Récupérer l'image de profil d'un utilisateur")
+    @Operation(summary = "Get user profile image")
     public ResponseEntity<ApiResponse<ImageAssetResponse>> getImageAssetByUser(
-            @Parameter(description = "ID de l'utilisateur", required = true) @PathVariable Long userId) {
+            @Parameter(description = "User ID", required = true) @PathVariable Long userId) {
         return imageAssetService.findByUserId(userId)
                 .map(imageAsset -> ResponseEntity.ok(ApiResponse.success(toResponse(imageAsset))))
                 .orElseThrow(() -> new ResourceNotFoundException("ImageAsset", "userId", userId));
     }
 
     @GetMapping("/type/{imageType}")
-    @Operation(summary = "Récupérer les images par type", description = "Filtre les images par type.")
+    @Operation(summary = "Get image assets by type", description = "Filters images by type.")
     public ResponseEntity<ApiResponse<List<ImageAssetResponse>>> getImageAssetsByType(
-            @Parameter(description = "Type d'image", required = true) @PathVariable String imageType) {
+            @Parameter(description = "Image type", required = true) @PathVariable String imageType) {
         List<ImageAssetResponse> imageAssets = imageAssetService.findByImageType(imageType).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -87,9 +87,9 @@ public class ImageAssetController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Créer un nouveau asset image")
+    @Operation(summary = "Create a new image asset")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Image créée")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Image created")
     })
     public ResponseEntity<ApiResponse<ImageAssetResponse>> createImageAsset(@Valid @RequestBody ImageAssetRequest request) {
         ImageAsset imageAsset = toEntity(request);
@@ -99,9 +99,9 @@ public class ImageAssetController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Mettre à jour une image")
+    @Operation(summary = "Update an image asset")
     public ResponseEntity<ApiResponse<ImageAssetResponse>> updateImageAsset(
-            @Parameter(description = "ID de l'image", required = true) @PathVariable Long id,
+            @Parameter(description = "Image ID", required = true) @PathVariable Long id,
             @Valid @RequestBody ImageAssetRequest request) {
         
         if (!imageAssetService.findByIdOptional(id).isPresent()) {
@@ -116,9 +116,9 @@ public class ImageAssetController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Supprimer une image")
+    @Operation(summary = "Delete an image asset")
     public ResponseEntity<ApiResponse<Void>> deleteImageAsset(
-            @Parameter(description = "ID de l'image", required = true) @PathVariable Long id) {
+            @Parameter(description = "Image ID", required = true) @PathVariable Long id) {
         if (!imageAssetService.findByIdOptional(id).isPresent()) {
             throw new ResourceNotFoundException("ImageAsset", "id", id);
         }

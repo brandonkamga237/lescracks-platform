@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/applications")
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Candidatures", description = "API de gestion des candidatures aux événements")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Applications", description = "Event application management API")
 @SecurityRequirement(name = "bearerAuth")
 public class ApplicationController {
 
@@ -52,13 +52,13 @@ public class ApplicationController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Liste toutes les candidatures", 
-               description = "Retourne la liste de toutes les candidatures. Réservé aux administrateurs.")
+    @Operation(summary = "List all applications",
+               description = "Returns the list of all applications. Reserved for administrators.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Liste des candidatures"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", 
-            description = "Accès interdit - Réservé aux administrateurs")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Application list"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
+            description = "Forbidden - reserved for administrators")
     })
     public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getAllApplications() {
         List<ApplicationResponse> applications = applicationService.findAll().stream()
@@ -68,26 +68,26 @@ public class ApplicationController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Récupérer une candidature par ID", 
-               description = "Retourne les détails d'une candidature spécifique.")
+    @Operation(summary = "Get application by ID",
+               description = "Returns the details of a specific application.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Candidature trouvée"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
-            description = "Candidature non trouvée")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Application found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+            description = "Application not found")
     })
     public ResponseEntity<ApiResponse<ApplicationResponse>> getApplicationById(
-            @Parameter(description = "ID de la candidature", required = true) @PathVariable Long id) {
+            @Parameter(description = "Application ID", required = true) @PathVariable Long id) {
         return applicationService.findByIdOptional(id)
                 .map(application -> ResponseEntity.ok(ApiResponse.success(toResponse(application))))
                 .orElseThrow(() -> new ResourceNotFoundException("Application", "id", id));
     }
 
     @GetMapping("/user/{userId}")
-    @Operation(summary = "Récupérer les candidatures d'un utilisateur", 
-               description = "Retourne toutes les candidatures soumises par un utilisateur spécifique.")
+    @Operation(summary = "Get applications by user",
+               description = "Returns all applications submitted by a specific user.")
     public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getApplicationsByUser(
-            @Parameter(description = "ID de l'utilisateur", required = true) @PathVariable Long userId) {
+            @Parameter(description = "User ID", required = true) @PathVariable Long userId) {
         List<ApplicationResponse> applications = applicationService.findByUserId(userId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -95,10 +95,10 @@ public class ApplicationController {
     }
 
     @GetMapping("/event/{eventId}")
-    @Operation(summary = "Récupérer les candidatures d'un événement", 
-               description = "Retourne toutes les candidatures pour un événement spécifique.")
+    @Operation(summary = "Get applications by event",
+               description = "Returns all applications for a specific event.")
     public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getApplicationsByEvent(
-            @Parameter(description = "ID de l'événement", required = true) @PathVariable Long eventId) {
+            @Parameter(description = "Event ID", required = true) @PathVariable Long eventId) {
         List<ApplicationResponse> applications = applicationService.findByEventId(eventId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -106,13 +106,13 @@ public class ApplicationController {
     }
 
     @PostMapping
-    @Operation(summary = "Soumettre une candidature", 
-               description = "Permet à un utilisateur de soumettre une candidature à un événement.")
+    @Operation(summary = "Submit an application",
+               description = "Allows a user to submit an application for an event.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Candidature soumise"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", 
-            description = "Données invalides")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Application submitted"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400",
+            description = "Invalid data")
     })
     public ResponseEntity<ApiResponse<ApplicationResponse>> createApplication(@Valid @RequestBody ApplicationRequest request) {
         Application application = toEntity(request);
@@ -122,18 +122,18 @@ public class ApplicationController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Mettre à jour une candidature", 
-               description = "Met à jour une candidature (statut, etc.). Réservé aux administrateurs.")
+    @Operation(summary = "Update an application",
+               description = "Updates an application (status, etc.). Reserved for administrators.")
     @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Candidature mise à jour"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", 
-            description = "Accès interdit - Réservé aux administrateurs"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
-            description = "Candidature non trouvée")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Application updated"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
+            description = "Forbidden - reserved for administrators"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+            description = "Application not found")
     })
     public ResponseEntity<ApiResponse<ApplicationResponse>> updateApplication(
-            @Parameter(description = "ID de la candidature", required = true) @PathVariable Long id,
+            @Parameter(description = "Application ID", required = true) @PathVariable Long id,
             @Valid @RequestBody ApplicationRequest request) {
         
         if (!applicationService.findByIdOptional(id).isPresent()) {
@@ -148,8 +148,8 @@ public class ApplicationController {
 
     @PatchMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Changer le statut d'une candidature",
-               description = "Met à jour uniquement le statut d'une candidature. Réservé aux administrateurs.")
+    @Operation(summary = "Update application status",
+               description = "Updates only the status of an application. Reserved for administrators.")
     public ResponseEntity<ApiResponse<ApplicationResponse>> updateApplicationStatus(
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {

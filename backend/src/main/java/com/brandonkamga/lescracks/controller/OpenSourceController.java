@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/open-source")
-@Tag(name = "Open Source", description = "Gestion des projets open source et des contributeurs")
+@Tag(name = "Open Source", description = "Open-source project and contributor management")
 @SecurityRequirement(name = "bearerAuth")
 public class OpenSourceController {
 
@@ -41,7 +41,7 @@ public class OpenSourceController {
     // ─────────────────────────────────────────────────────────────
 
     @GetMapping("/projects")
-    @Operation(summary = "Liste tous les projets open source visibles")
+    @Operation(summary = "List all visible open-source projects")
     public ResponseEntity<ApiResponse<List<OpenSourceProjectResponse>>> getAllProjects() {
         List<OpenSourceProjectResponse> projects = projectRepository
                 .findByVisibleTrueOrderByFeaturedOrderAsc()
@@ -50,7 +50,7 @@ public class OpenSourceController {
     }
 
     @GetMapping("/projects/featured")
-    @Operation(summary = "Liste les projets open source mis en avant (homepage)")
+    @Operation(summary = "List featured open-source projects (homepage)")
     public ResponseEntity<ApiResponse<List<OpenSourceProjectResponse>>> getFeaturedProjects() {
         List<OpenSourceProjectResponse> projects = projectRepository
                 .findByFeaturedTrueAndVisibleTrueOrderByFeaturedOrderAsc()
@@ -59,7 +59,7 @@ public class OpenSourceController {
     }
 
     @GetMapping("/contributors")
-    @Operation(summary = "Liste tous les contributeurs visibles")
+    @Operation(summary = "List all visible contributors")
     public ResponseEntity<ApiResponse<List<ContributorResponse>>> getAllContributors() {
         List<ContributorResponse> contributors = contributorRepository
                 .findByVisibleTrueOrderByDisplayOrderAsc()
@@ -73,7 +73,7 @@ public class OpenSourceController {
 
     @GetMapping("/admin/projects")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "[Admin] Liste tous les projets")
+    @Operation(summary = "[Admin] List all projects")
     public ResponseEntity<ApiResponse<List<OpenSourceProjectResponse>>> adminGetAllProjects() {
         List<OpenSourceProjectResponse> projects = projectRepository.findAll()
                 .stream().map(this::toProjectResponse).collect(Collectors.toList());
@@ -82,7 +82,7 @@ public class OpenSourceController {
 
     @PostMapping("/admin/projects")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "[Admin] Créer un projet open source")
+    @Operation(summary = "[Admin] Create an open-source project")
     public ResponseEntity<ApiResponse<OpenSourceProjectResponse>> createProject(
             @Valid @RequestBody OpenSourceProjectRequest request) {
         OpenSourceProject project = OpenSourceProject.builder()
@@ -99,12 +99,12 @@ public class OpenSourceController {
                 .visible(request.isVisible())
                 .build();
         return ResponseEntity.ok(ApiResponse.success(toProjectResponse(projectRepository.save(project)),
-                "Projet créé avec succès"));
+                "Project created successfully"));
     }
 
     @PutMapping("/admin/projects/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "[Admin] Modifier un projet open source")
+    @Operation(summary = "[Admin] Update an open-source project")
     public ResponseEntity<ApiResponse<OpenSourceProjectResponse>> updateProject(
             @PathVariable Long id, @Valid @RequestBody OpenSourceProjectRequest request) {
         OpenSourceProject project = projectRepository.findById(id)
@@ -121,17 +121,17 @@ public class OpenSourceController {
         project.setFeaturedOrder(request.getFeaturedOrder());
         project.setVisible(request.isVisible());
         return ResponseEntity.ok(ApiResponse.success(toProjectResponse(projectRepository.save(project)),
-                "Projet mis à jour"));
+                "Project updated"));
     }
 
     @DeleteMapping("/admin/projects/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "[Admin] Supprimer un projet open source")
+    @Operation(summary = "[Admin] Delete an open-source project")
     public ResponseEntity<ApiResponse<Void>> deleteProject(@PathVariable Long id) {
         if (!projectRepository.existsById(id))
             throw new ResourceNotFoundException("OpenSourceProject", "id", id);
         projectRepository.deleteById(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "Projet supprimé"));
+        return ResponseEntity.ok(ApiResponse.success(null, "Project deleted"));
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -140,7 +140,7 @@ public class OpenSourceController {
 
     @GetMapping("/admin/contributors")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "[Admin] Liste tous les contributeurs")
+    @Operation(summary = "[Admin] List all contributors")
     public ResponseEntity<ApiResponse<List<ContributorResponse>>> adminGetAllContributors() {
         List<ContributorResponse> contributors = contributorRepository.findAll()
                 .stream().map(this::toContributorResponse).collect(Collectors.toList());
@@ -149,7 +149,7 @@ public class OpenSourceController {
 
     @PostMapping("/admin/contributors")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "[Admin] Créer un profil contributeur")
+    @Operation(summary = "[Admin] Create a contributor profile")
     public ResponseEntity<ApiResponse<ContributorResponse>> createContributor(
             @Valid @RequestBody ContributorRequest request) {
         Contributor contributor = Contributor.builder()
@@ -165,12 +165,12 @@ public class OpenSourceController {
                 .visible(request.isVisible())
                 .build();
         return ResponseEntity.ok(ApiResponse.success(toContributorResponse(contributorRepository.save(contributor)),
-                "Contributeur créé avec succès"));
+                "Contributor created successfully"));
     }
 
     @PutMapping("/admin/contributors/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "[Admin] Modifier un profil contributeur")
+    @Operation(summary = "[Admin] Update a contributor profile")
     public ResponseEntity<ApiResponse<ContributorResponse>> updateContributor(
             @PathVariable Long id, @Valid @RequestBody ContributorRequest request) {
         Contributor contributor = contributorRepository.findById(id)
@@ -186,17 +186,17 @@ public class OpenSourceController {
         contributor.setDisplayOrder(request.getDisplayOrder());
         contributor.setVisible(request.isVisible());
         return ResponseEntity.ok(ApiResponse.success(toContributorResponse(contributorRepository.save(contributor)),
-                "Contributeur mis à jour"));
+                "Contributor updated"));
     }
 
     @DeleteMapping("/admin/contributors/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "[Admin] Supprimer un contributeur")
+    @Operation(summary = "[Admin] Delete a contributor")
     public ResponseEntity<ApiResponse<Void>> deleteContributor(@PathVariable Long id) {
         if (!contributorRepository.existsById(id))
             throw new ResourceNotFoundException("Contributor", "id", id);
         contributorRepository.deleteById(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "Contributeur supprimé"));
+        return ResponseEntity.ok(ApiResponse.success(null, "Contributor deleted"));
     }
 
     // ─────────────────────────────────────────────────────────────

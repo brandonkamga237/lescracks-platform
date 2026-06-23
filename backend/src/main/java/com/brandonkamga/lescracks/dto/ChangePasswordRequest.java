@@ -16,11 +16,11 @@ import lombok.NoArgsConstructor;
 public class ChangePasswordRequest {
 
     @NotBlank(message = "Current password is required")
-    @Schema(description = "Mot de passe actuel", example = "oldPassword123")
+    @Schema(description = "Current password", example = "oldPassword123")
     private String currentPassword;
 
     @NotBlank(message = "New password is required")
-    @Size(min = 6, message = "New password must be at least 6 characters")
-    @Schema(description = "Nouveau mot de passe", example = "newPassword456")
+    @Size(min = 8, message = "New password must be at least 8 characters")
+    @Schema(description = "New password (min 8 chars, must include uppercase, lowercase, digit and special character)", example = "NewPass@456")
     private String newPassword;
 }

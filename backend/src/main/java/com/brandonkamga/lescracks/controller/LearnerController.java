@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/learners")
-@Tag(name = "Apprenants", description = "Gestion des apprenants et de leur vitrine publique")
+@Tag(name = "Learners", description = "Learner management and public showcase")
 public class LearnerController {
 
     private final LearnerRepository learnerRepository;
@@ -51,7 +51,7 @@ public class LearnerController {
     // ─────────────────────────────────────────────────────────────
 
     @GetMapping
-    @Operation(summary = "Liste les apprenants visibles (filtre optionnel par status)")
+    @Operation(summary = "List visible learners (optional filter by status)")
     public ResponseEntity<ApiResponse<List<LearnerResponse>>> getVisibleLearners(
             @RequestParam(required = false) String status) {
         List<Learner> learners;
@@ -66,7 +66,7 @@ public class LearnerController {
     }
 
     @GetMapping("/showcased")
-    @Operation(summary = "Liste les apprenants mis en avant (landing page)")
+    @Operation(summary = "List featured learners (landing page)")
     public ResponseEntity<ApiResponse<List<LearnerResponse>>> getShowcasedLearners() {
         List<LearnerResponse> result = learnerRepository
                 .findByShowcasedTrueAndVisibleTrueOrderByDisplayOrderAsc()
@@ -75,7 +75,7 @@ public class LearnerController {
     }
 
     @GetMapping("/{slug}")
-    @Operation(summary = "Profil public d'un apprenant via son slug")
+    @Operation(summary = "Public learner profile by slug")
     public ResponseEntity<ApiResponse<LearnerResponse>> getLearnerBySlug(@PathVariable String slug) {
         Learner learner = learnerRepository.findBySlug(slug)
                 .filter(Learner::isVisible)
@@ -90,7 +90,7 @@ public class LearnerController {
     @GetMapping("/me")
     @PreAuthorize("hasRole('learner')")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Mon profil apprenant")
+    @Operation(summary = "My learner profile")
     public ResponseEntity<ApiResponse<LearnerResponse>> getMyProfile(Authentication authentication) {
         User user = resolveUser(authentication);
         Learner learner = learnerRepository.findByUserId(user.getId())
@@ -102,7 +102,7 @@ public class LearnerController {
     @PreAuthorize("hasRole('learner')")
     @SecurityRequirement(name = "bearerAuth")
     @Transactional
-    @Operation(summary = "Mettre à jour mon profil apprenant (bio, LinkedIn, portfolio)")
+    @Operation(summary = "Update my learner profile (bio, LinkedIn, portfolio)")
     public ResponseEntity<ApiResponse<LearnerResponse>> updateMyProfile(
             @RequestBody LearnerSelfUpdateRequest request,
             Authentication authentication) {
@@ -115,7 +115,7 @@ public class LearnerController {
         if (request.getPortfolioUrl() != null) learner.setPortfolioUrl(request.getPortfolioUrl());
 
         return ResponseEntity.ok(ApiResponse.success(
-                toResponse(learnerRepository.save(learner)), "Profil mis à jour"));
+                toResponse(learnerRepository.save(learner)), "Profile updated"));
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -125,7 +125,7 @@ public class LearnerController {
     @GetMapping("/admin/all")
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "[Admin] Liste tous les apprenants (incluant non visibles)")
+    @Operation(summary = "[Admin] List all learners (including hidden)")
     public ResponseEntity<ApiResponse<List<LearnerResponse>>> adminGetAll() {
         List<LearnerResponse> result = learnerRepository.findAll()
                 .stream().map(this::toResponse).collect(Collectors.toList());
@@ -140,8 +140,8 @@ public class LearnerController {
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @Transactional
-    @Operation(summary = "[Admin] Attribuer le rôle apprenant à un utilisateur existant",
-               description = "Donne le rôle learner à l'utilisateur et crée automatiquement son profil apprenant lié.")
+    @Operation(summary = "[Admin] Assign the learner role to an existing user",
+               description = "Grants the learner role to the user and automatically creates their linked learner profile.")
     public ResponseEntity<ApiResponse<LearnerResponse>> assignLearnerToUser(
             @PathVariable Long userId,
             @RequestBody(required = false) LearnerAssignRequest request) {
@@ -150,12 +150,12 @@ public class LearnerController {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         if (learnerRepository.existsByUserId(userId)) {
-            throw new BadRequestException("Cet utilisateur a déjà un profil apprenant");
+            throw new BadRequestException("This user already has a learner profile");
         }
 
         // Assign role
         var learnerRole = roleRepository.findByName(RoleName.learner)
-                .orElseThrow(() -> new RuntimeException("Rôle LEARNER introuvable en base"));
+                .orElseThrow(() -> new RuntimeException("LEARNER role not found in database"));
         user.setRole(learnerRole);
         userRepository.save(user);
 
@@ -184,13 +184,13 @@ public class LearnerController {
                 .build();
 
         return ResponseEntity.ok(ApiResponse.success(
-                toResponse(learnerRepository.save(learner)), "Rôle apprenant attribué et profil créé"));
+                toResponse(learnerRepository.save(learner)), "Learner role assigned and profile created"));
     }
 
     @PostMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "[Admin] Créer un apprenant manuellement (sans compte lié)")
+    @Operation(summary = "[Admin] Create a learner manually (without linked account)")
     public ResponseEntity<ApiResponse<LearnerResponse>> create(@Valid @RequestBody LearnerRequest request) {
         String slug = generateUniqueSlug(request.getFirstName(), request.getLastName());
         Learner learner = Learner.builder()
@@ -209,14 +209,14 @@ public class LearnerController {
                 .displayOrder(request.getDisplayOrder())
                 .createdAt(LocalDateTime.now())
                 .build();
-        return ResponseEntity.ok(ApiResponse.success(toResponse(learnerRepository.save(learner)), "Apprenant créé"));
+        return ResponseEntity.ok(ApiResponse.success(toResponse(learnerRepository.save(learner)), "Learner created"));
     }
 
     @PutMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @Transactional
-    @Operation(summary = "[Admin] Modifier un apprenant (curation : showcase, visible, status, cohort...)")
+    @Operation(summary = "[Admin] Update a learner (curation: showcase, visible, status, cohort...)")
     public ResponseEntity<ApiResponse<LearnerResponse>> update(
             @PathVariable Long id, @Valid @RequestBody LearnerRequest request) {
         Learner learner = learnerRepository.findById(id)
@@ -244,14 +244,14 @@ public class LearnerController {
         learner.setVisible(request.isVisible());
         learner.setDisplayOrder(request.getDisplayOrder());
 
-        return ResponseEntity.ok(ApiResponse.success(toResponse(learnerRepository.save(learner)), "Apprenant mis à jour"));
+        return ResponseEntity.ok(ApiResponse.success(toResponse(learnerRepository.save(learner)), "Learner updated"));
     }
 
     @DeleteMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @Transactional
-    @Operation(summary = "[Admin] Supprimer un apprenant")
+    @Operation(summary = "[Admin] Delete a learner")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         Learner learner = learnerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Learner", "id", id));
@@ -260,13 +260,13 @@ public class LearnerController {
         if (learner.getUser() != null) {
             User user = learner.getUser();
             var userRole = roleRepository.findByName(RoleName.user)
-                    .orElseThrow(() -> new RuntimeException("Rôle USER introuvable en base"));
+                    .orElseThrow(() -> new RuntimeException("USER role not found in database"));
             user.setRole(userRole);
             userRepository.save(user);
         }
 
         learnerRepository.deleteById(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "Apprenant supprimé"));
+        return ResponseEntity.ok(ApiResponse.success(null, "Learner deleted"));
     }
 
     // ─────────────────────────────────────────────────────────────

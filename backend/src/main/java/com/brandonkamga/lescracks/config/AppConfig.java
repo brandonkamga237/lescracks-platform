@@ -12,16 +12,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.Base64;
-import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Configuration class for managing environment variables securely.
- * Supports environment variable rotation without application restart.
+ * Configuration helper for reading environment variables and .env file values.
+ * Supports live reloading of the .env file without an application restart.
  */
 @Configuration
 @EnableAsync
@@ -30,8 +28,7 @@ import java.util.concurrent.TimeUnit;
 public class AppConfig {
 
     private static final String ENV_FILE_PATH = System.getProperty("user.dir") + "/.env";
-    
-    private final Map<String, String> encryptedValues = new ConcurrentHashMap<>();
+
     private final ScheduledExecutorService rotationExecutor = Executors.newSingleThreadScheduledExecutor();
     private Properties envProperties;
     private long lastModifiedTime = 0;
@@ -102,29 +99,18 @@ public class AppConfig {
     }
 
     /**
-     * Encrypt a sensitive value
+     * Compute a SHA-256 hex digest of the given value.
+     * This is a one-way hash — NOT encryption. Use it only for non-reversible fingerprinting.
+     * For reversible encryption use a dedicated symmetric-key library (e.g. AES-GCM).
      */
-    public String encryptValue(String value) {
+    public String hashValue(String value) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(value.getBytes());
-            String encrypted = Base64.getEncoder().encodeToString(hash);
-            encryptedValues.put(encrypted, value);
-            return encrypted;
+            return Base64.getEncoder().encodeToString(hash);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to encrypt value", e);
+            throw new RuntimeException("Failed to hash value", e);
         }
-    }
-
-    /**
-     * Decrypt an encrypted value
-     */
-    public String decryptValue(String encryptedValue) {
-        String original = encryptedValues.get(encryptedValue);
-        if (original != null) {
-            return original;
-        }
-        throw new IllegalArgumentException("Encrypted value not found in cache");
     }
 
     /**

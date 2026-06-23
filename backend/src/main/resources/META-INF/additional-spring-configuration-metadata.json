@@ -1,0 +1,25 @@
+{
+  "properties": [
+    {
+      "name": "app.admin.email",
+      "type": "java.lang.String",
+      "description": "Email address for the bootstrap admin account. Set via ADMIN_EMAIL environment variable."
+    },
+    {
+      "name": "app.admin.initial-password",
+      "type": "java.lang.String",
+      "description": "Initial password for the bootstrap admin account. Set via ADMIN_INITIAL_PASSWORD environment variable. Only used on first creation."
+    },
+    {
+      "name": "app.swagger.enabled",
+      "type": "java.lang.Boolean",
+      "description": "When false, Swagger UI requires ADMIN authentication. Set to false in production.",
+      "defaultValue": true
+    },
+    {
+      "name": "app.cors.allowed-origins",
+      "type": "java.lang.String",
+      "description": "Comma-separated list of allowed CORS origins. Set via CORS_ORIGINS environment variable."
+    }
+  ]
+}

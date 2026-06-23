@@ -5,14 +5,13 @@ import com.brandonkamga.lescracks.domain.ProviderType;
 import com.brandonkamga.lescracks.domain.Role;
 import com.brandonkamga.lescracks.domain.RoleName;
 import com.brandonkamga.lescracks.domain.User;
+import com.brandonkamga.lescracks.exception.OAuthProviderConflictException;
 import com.brandonkamga.lescracks.repository.ProviderRepository;
 import com.brandonkamga.lescracks.repository.RoleRepository;
 import com.brandonkamga.lescracks.repository.UserRepository;
 import com.brandonkamga.lescracks.security.oauth.OAuthUserInfoExtractor;
 import com.brandonkamga.lescracks.security.oauth.OAuthUserInfoExtractorFactory;
 import com.brandonkamga.lescracks.service.interfaces.UserService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,10 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Implementation of UserService.
- * Follows Single Responsibility Principle.
- */
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
@@ -41,33 +36,31 @@ public class UserServiceImpl implements UserService {
             ProviderRepository providerRepository,
             OAuthUserInfoExtractorFactory extractorFactory,
             PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
+        this.userRepository    = userRepository;
+        this.roleRepository    = roleRepository;
         this.providerRepository = providerRepository;
-        this.extractorFactory = extractorFactory;
-        this.passwordEncoder = passwordEncoder;
+        this.extractorFactory  = extractorFactory;
+        this.passwordEncoder   = passwordEncoder;
     }
 
     /**
-     * Process OAuth2 login by extracting user info and creating/finding user.
-     * Uses Strategy Pattern via OAuthUserInfoExtractor.
-     * 
-     * @param oauthUser the OAuth2 user from the provider
-     * @param provider the OAuth provider name (google, github, etc.)
-     * @return the existing or newly created User
+     * Process an OAuth2 login: create a new user or update an existing one.
+     *
+     * Security: if an account already exists with the same email but was created via a
+     * different provider (e.g. LOCAL), the login is rejected with
+     * {@link OAuthProviderConflictException} to prevent provider-based account takeover.
      */
     @Override
     public User processOAuthPostLogin(OAuth2User oauthUser, String provider) {
         OAuthUserInfoExtractor extractor = extractorFactory.getExtractor(provider);
-        
+
         String email = extractor.extractEmail(oauthUser);
         if (email == null) {
-            throw new RuntimeException("Email not provided by " + provider);
+            throw new RuntimeException("Email not provided by OAuth provider: " + provider);
         }
 
-        // Get or create provider entity
         ProviderType providerType = extractor.getProviderType();
-        Provider providerEntity = providerRepository.findByProviderName(providerType)
+        Provider providerEntity   = providerRepository.findByProviderName(providerType)
                 .orElseGet(() -> providerRepository.save(Provider.builder()
                         .providerName(providerType)
                         .description(providerType.name() + " OAuth authentication")
@@ -75,32 +68,45 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.findByEmail(email)
                 .map(existingUser -> {
-                    // Update existing user's data from provider
+                    // Reject logins that would merge accounts from different providers
+                    if (existingUser.getProvider() != null
+                            && existingUser.getProvider().getProviderName() != providerType) {
+                        throw new OAuthProviderConflictException(
+                                "An account with this email already exists. "
+                                + "Please sign in using "
+                                + existingUser.getProvider().getProviderName().name()
+                                + ".");
+                    }
                     updateOAuthUserFromProvider(existingUser, oauthUser, extractor);
                     return userRepository.save(existingUser);
                 })
                 .orElseGet(() -> {
                     Role userRole = roleRepository.findByName(RoleName.user)
-                            .orElseThrow(() -> new RuntimeException("USER ROLE not found"));
-                    User newUser = extractor.buildUser(oauthUser, userRole, providerEntity);
+                            .orElseThrow(() -> new RuntimeException("Role 'user' not found"));
+                    User newUser  = extractor.buildUser(oauthUser, userRole, providerEntity);
                     return userRepository.save(newUser);
                 });
     }
 
     /**
-     * Update existing OAuth user's data from the provider.
-     * This ensures user info stays synced with the OAuth provider.
-     * 
-     * @param existingUser the existing user in the database
-     * @param oauthUser the OAuth2 user from the provider
-     * @param extractor the OAuth user info extractor
+     * Sync mutable fields from the OAuth provider on each login.
+     * Username is only updated when the new value is not already taken by another account.
      */
-    private void updateOAuthUserFromProvider(User existingUser, OAuth2User oauthUser, OAuthUserInfoExtractor extractor) {
-        String username = extractor.extractUsername(oauthUser);
-        if (username != null && !username.isEmpty()) {
-            existingUser.setUsername(username);
+    private void updateOAuthUserFromProvider(
+            User existingUser, OAuth2User oauthUser, OAuthUserInfoExtractor extractor) {
+
+        String newUsername = extractor.extractUsername(oauthUser);
+        if (newUsername != null && !newUsername.isEmpty()
+                && !newUsername.equals(existingUser.getUsername())) {
+            // Only update if the new username is available
+            boolean taken = userRepository.findByUsername(newUsername)
+                    .map(u -> !u.getId().equals(existingUser.getId()))
+                    .orElse(false);
+            if (!taken) {
+                existingUser.setUsername(newUsername);
+            }
         }
-        // Refresh the OAuth picture URL on every login
+
         String pictureUrl = extractor.extractPictureUrl(oauthUser);
         if (pictureUrl != null && !pictureUrl.isEmpty()) {
             existingUser.setPictureUrl(pictureUrl);

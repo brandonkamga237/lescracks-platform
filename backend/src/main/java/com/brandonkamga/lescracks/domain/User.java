@@ -71,6 +71,10 @@ public class User {
     @Column(name = "verification_token", length = 100)
     private String verificationToken;
 
+    /** Expiry for the email verification token. Null once the token has been used. */
+    @Column(name = "verification_token_expires_at")
+    private LocalDateTime verificationTokenExpiresAt;
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
