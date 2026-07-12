@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 public class LoginRequest {
 
     @Schema(description = "Adresse email de l'utilisateur", example = "user@exemple.com", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @NotBlank(message = "L'adresse email est obligatoire.")
+    @Email(message = "Format d'adresse email invalide.")
     private String email;
 
     @Schema(description = "Mot de passe de l'utilisateur", example = "password123", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "Le mot de passe est obligatoire.")
     private String password;
 }

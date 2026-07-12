@@ -136,7 +136,7 @@ class AuthService {
 
     return {
       success: false,
-      message: json.message || 'Login failed'
+      message: json.message || 'Email ou mot de passe incorrect.'
     };
   }
 
@@ -150,28 +150,26 @@ class AuthService {
     });
 
     const json = await response.json();
-    
-    // Handle backend response format: { success: true, data: { accessToken, tokenType, user } }
-    if (json.success && json.data) {
+
+    // A successful registration returns no token: the account must be activated
+    // via the email verification link first. Treat success-without-token as success
+    // so the UI can show the "check your inbox" screen instead of an error.
+    if (json.success) {
       const authData = json.data;
-      const token = authData.accessToken || authData.token;
+      const token = authData?.accessToken || authData?.token;
       if (token) {
+        // Immediate login path (used only if email verification is disabled)
         this.setToken(token);
-        // Map backend user to frontend format
         const mappedUser = this.mapBackendUserToFrontend(authData.user);
         this.setUser(mappedUser);
+        return { success: true, token, user: mappedUser, message: json.message };
       }
-      return {
-        success: true,
-        token,
-        user: this.mapBackendUserToFrontend(authData.user),
-        message: json.message
-      };
+      return { success: true, message: json.message };
     }
 
     return {
       success: false,
-      message: json.message || 'Registration failed'
+      message: json.message || 'Inscription impossible. Merci de réessayer.'
     };
   }
 
@@ -262,7 +260,7 @@ class AuthService {
   async updateProfile(data: UpdateProfileRequest): Promise<AuthResponse> {
     const token = this.getToken();
     if (!token) {
-      return { success: false, message: 'Not authenticated' };
+      return { success: false, message: 'Session expirée. Merci de te reconnecter.' };
     }
 
     const response = await fetch(`${API_BASE_URL}/users/me`, {
@@ -288,7 +286,7 @@ class AuthService {
 
     return {
       success: false,
-      message: json.message || 'Update failed'
+      message: json.message || 'La mise à jour a échoué. Merci de réessayer.'
     };
   }
 
@@ -296,7 +294,7 @@ class AuthService {
   async changePassword(currentPassword: string, newPassword: string): Promise<AuthResponse> {
     const token = this.getToken();
     if (!token) {
-      return { success: false, message: 'Not authenticated' };
+      return { success: false, message: 'Session expirée. Merci de te reconnecter.' };
     }
 
     const response = await fetch(`${API_BASE_URL}/users/me/change-password`, {
@@ -320,7 +318,7 @@ class AuthService {
 
     return {
       success: false,
-      message: json.message || 'Password change failed'
+      message: json.message || 'Le changement de mot de passe a échoué.'
     };
   }
 
@@ -328,7 +326,7 @@ class AuthService {
   async deleteAccount(): Promise<AuthResponse> {
     const token = this.getToken();
     if (!token) {
-      return { success: false, message: 'Not authenticated' };
+      return { success: false, message: 'Session expirée. Merci de te reconnecter.' };
     }
 
     const response = await fetch(`${API_BASE_URL}/users/me`, {
@@ -348,7 +346,7 @@ class AuthService {
 
     return {
       success: false,
-      message: json.message || 'Account deletion failed'
+      message: json.message || 'La suppression du compte a échoué.'
     };
   }
 
@@ -356,7 +354,7 @@ class AuthService {
   async upgradeToPremium(): Promise<AuthResponse> {
     const token = this.getToken();
     if (!token) {
-      return { success: false, message: 'Not authenticated' };
+      return { success: false, message: 'Session expirée. Merci de te reconnecter.' };
     }
 
     const response = await fetch(`${API_BASE_URL}/users/upgrade-premium`, {
@@ -381,7 +379,7 @@ class AuthService {
 
     return {
       success: false,
-      message: json.message || 'Upgrade failed'
+      message: json.message || 'La demande a échoué. Merci de réessayer.'
     };
   }
 
@@ -393,7 +391,7 @@ class AuthService {
     message?: string;
   }): Promise<{ success: boolean; message?: string; data?: PremiumRequestResponse }> {
     const token = this.getToken();
-    if (!token) return { success: false, message: 'Non authentifié' };
+    if (!token) return { success: false, message: 'Session expirée. Merci de te reconnecter.' };
 
     const response = await fetch(`${API_BASE_URL}/premium/request`, {
       method: 'POST',
@@ -408,7 +406,7 @@ class AuthService {
     if (json.success) {
       return { success: true, message: json.message, data: json.data };
     }
-    return { success: false, message: json.message || 'Erreur lors de la soumission' };
+    return { success: false, message: json.message || 'La demande n\'a pas pu être envoyée. Merci de réessayer.' };
   }
 
   async getMyPremiumRequest(): Promise<{ success: boolean; data?: PremiumRequestResponse | null }> {
@@ -429,7 +427,7 @@ class AuthService {
   // === AVATAR UPLOAD ===
   async uploadAvatar(file: File): Promise<{ success: boolean; message?: string; user?: User }> {
     const token = this.getToken();
-    if (!token) return { success: false, message: 'Non authentifié' };
+    if (!token) return { success: false, message: 'Session expirée. Merci de te reconnecter.' };
 
     const formData = new FormData();
     formData.append('file', file);
@@ -446,7 +444,7 @@ class AuthService {
       this.setUser(user);
       return { success: true, user, message: json.message };
     }
-    return { success: false, message: json.message || 'Échec de l\'upload' };
+    return { success: false, message: json.message || 'L\'envoi du fichier a échoué. Merci de réessayer.' };
   }
 
   // === PASSWORD RESET ===

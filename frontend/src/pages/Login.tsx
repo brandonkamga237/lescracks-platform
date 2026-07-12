@@ -27,10 +27,10 @@ const Login = () => {
       if (response.success) {
         navigate(redirectTo, { replace: true });
       } else {
-        setError(response.message || 'Erreur de connexion');
+        setError(response.message || 'La connexion a échoué. Merci de réessayer.');
       }
     } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue');
+      setError(err?.message || 'Une erreur est survenue. Merci de réessayer plus tard.');
     } finally {
       setSubmitting(false);
     }
@@ -61,7 +61,7 @@ const Login = () => {
           className="inline-flex items-center gap-2 text-white/40 hover:text-gold transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
-          Retour a l'accueil
+          Retour à l'accueil
         </Link>
 
         <div className="card p-8">
@@ -70,7 +70,7 @@ const Login = () => {
               Bon retour parmi <span className="text-gold">nous</span>
             </h1>
             <p className="text-white/40">
-              Connectez-vous pour acceder a votre espace
+              Connectez-vous pour accéder à votre espace
             </p>
           </div>
 

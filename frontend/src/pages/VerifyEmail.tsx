@@ -31,22 +31,23 @@ const VerifyEmail = () => {
         const json = await res.json();
 
         if (res.ok && json.success) {
-          // Auto-login: store JWT and refresh the auth context
-          if (json.data?.token) {
-            authService.setToken(json.data.token);
+          // Auto-login after verification: the backend returns the JWT as `accessToken`.
+          const token = json.data?.accessToken || json.data?.token;
+          if (token) {
+            authService.setToken(token);
             await refreshUser();
           }
           setStatus('success');
-          setMessage(json.message || 'Email confirmé !');
+          setMessage(json.message || 'Adresse email confirmée !');
           // Redirect to resources after 2s
           setTimeout(() => navigate('/ressources', { replace: true }), 2000);
         } else {
           setStatus('error');
-          setMessage(json.message || 'Lien invalide ou déjà utilisé.');
+          setMessage(json.message || 'Ce lien est invalide ou a déjà été utilisé.');
         }
       } catch {
         setStatus('error');
-        setMessage('Une erreur est survenue. Réessaie plus tard.');
+        setMessage('Une erreur est survenue. Merci de réessayer plus tard.');
       }
     };
 

@@ -44,7 +44,7 @@ spring:
             scope: profile, email
 
   mail:
-    host: ${MAIL_HOST:mail.privateemail.com}
+    host: ${MAIL_HOST:mail.spacemail.com}
     port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME:contact@lescracks.com}
     password: ${MAIL_PASSWORD:}
@@ -55,6 +55,10 @@ spring:
           starttls:
             enable: true
             required: true
+          # Fail fast instead of hanging if the SMTP server is unreachable
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
         debug: false
 
   servlet:
@@ -64,7 +68,10 @@ spring:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:lescracks-secret-key-minimum-256-bits-long-for-hs256}
+    # DEV-ONLY fallback. Production (application-prod.yml) requires JWT_SECRET from the
+    # environment with no default, so this value can never sign production tokens.
+    # Provide a real secret via the JWT_SECRET env var (openssl rand -hex 48) for local runs too.
+    secret: ${JWT_SECRET:dev-only-insecure-secret-do-not-use-in-production-3f9a1c8b7e2d}
     expiration: ${JWT_EXPIRATION:86400000}
   frontend:
     url: ${FRONTEND_URL:http://localhost:5173}

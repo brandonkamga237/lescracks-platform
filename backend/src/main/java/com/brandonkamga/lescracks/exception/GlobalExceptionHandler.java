@@ -2,6 +2,8 @@ package com.brandonkamga.lescracks.exception;
 
 import com.brandonkamga.lescracks.dto.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -14,6 +16,8 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(OAuthProviderConflictException.class)
     public ResponseEntity<ApiResponse<Void>> handleOAuthProviderConflict(
@@ -49,9 +53,16 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
+        // Surface a real, user-facing message (the first field error) instead of a
+        // generic "Validation failed" so the frontend can display something meaningful.
+        String topMessage = ex.getBindingResult().getFieldErrors().stream()
+                .map(FieldError::getDefaultMessage)
+                .findFirst()
+                .orElse("Certains champs sont invalides.");
+
         ApiResponse<Map<String, String>> response = ApiResponse.<Map<String, String>>builder()
                 .success(false)
-                .message("Validation failed")
+                .message(topMessage)
                 .data(errors)
                 .path(request.getRequestURI())
                 .build();
@@ -78,9 +89,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGenericException(
             Exception ex, HttpServletRequest request) {
+        // Log the real cause server-side; never leak internal details to the client.
+        log.error("Unhandled exception on {}: {}", request.getRequestURI(), ex.getMessage(), ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("An unexpected error occurred: " + ex.getMessage(), 
+                .body(ApiResponse.error(
+                        "Une erreur inattendue est survenue. Merci de réessayer plus tard.",
                         request.getRequestURI()));
     }
 }

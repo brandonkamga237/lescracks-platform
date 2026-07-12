@@ -32,23 +32,23 @@ public final class PasswordValidator {
     public static void validate(String password) {
         if (password == null || password.length() < MIN_LENGTH) {
             throw new BadRequestException(
-                    "Password must be at least " + MIN_LENGTH + " characters long");
+                    "Le mot de passe doit contenir au moins " + MIN_LENGTH + " caractères.");
         }
         if (!UPPERCASE.matcher(password).find()) {
             throw new BadRequestException(
-                    "Password must contain at least one uppercase letter");
+                    "Le mot de passe doit contenir au moins une majuscule.");
         }
         if (!LOWERCASE.matcher(password).find()) {
             throw new BadRequestException(
-                    "Password must contain at least one lowercase letter");
+                    "Le mot de passe doit contenir au moins une minuscule.");
         }
         if (!DIGIT.matcher(password).find()) {
             throw new BadRequestException(
-                    "Password must contain at least one digit");
+                    "Le mot de passe doit contenir au moins un chiffre.");
         }
         if (!SPECIAL.matcher(password).find()) {
             throw new BadRequestException(
-                    "Password must contain at least one special character");
+                    "Le mot de passe doit contenir au moins un caractère spécial.");
         }
     }
 }

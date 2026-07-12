@@ -17,11 +17,11 @@ import lombok.NoArgsConstructor;
 public class UserRequest {
 
     @Schema(description = "Nom d'utilisateur unique", example = "johndoe", minLength = 3, maxLength = 50)
-    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    @Size(min = 3, max = 50, message = "Le nom d'utilisateur doit contenir entre 3 et 50 caractères.")
     private String username;
 
     @Schema(description = "Adresse email unique", example = "johndoe@exemple.com", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    @Email(message = "Email should be valid")
+    @Email(message = "L'adresse email doit être valide.")
     private String email;
 
     @Schema(description = "Mot de passe (minimum 6 caractères)", example = "password123", minLength = 6)
@@ -34,7 +34,7 @@ public class UserRequest {
     private String phone;
 
     @Schema(description = "Pays de l'utilisateur", example = "France", maxLength = 100)
-    @Size(max = 100, message = "Country must not exceed 100 characters")
+    @Size(max = 100, message = "Le pays ne doit pas dépasser 100 caractères.")
     private String country;
 
     @Schema(description = "Nom du provider d'authentification", example = "LOCAL")

@@ -84,8 +84,10 @@ public class ApplicationController {
     }
 
     @GetMapping("/user/{userId}")
+    @PreAuthorize("@userSecurity.isSelf(#userId) or hasRole('ADMIN')")
     @Operation(summary = "Get applications by user",
-               description = "Returns all applications submitted by a specific user.")
+               description = "Returns all applications submitted by a specific user. "
+                           + "Only the owner of the account or an administrator may call this.")
     public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getApplicationsByUser(
             @Parameter(description = "User ID", required = true) @PathVariable Long userId) {
         List<ApplicationResponse> applications = applicationService.findByUserId(userId).stream()

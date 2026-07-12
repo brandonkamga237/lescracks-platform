@@ -30,7 +30,12 @@ const Register = () => {
     setError('');
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+      setError('Les mots de passe ne correspondent pas.');
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères.');
       return;
     }
 
@@ -46,10 +51,10 @@ const Register = () => {
       if (response.success) {
         setEmailSent(true);
       } else {
-        setError(response.message || 'Erreur d\'inscription');
+        setError(response.message || 'L\'inscription a échoué. Merci de réessayer.');
       }
     } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue');
+      setError(err?.message || 'Une erreur est survenue. Merci de réessayer plus tard.');
     } finally {
       setSubmitting(false);
     }
@@ -107,7 +112,7 @@ const Register = () => {
           className="inline-flex items-center gap-2 text-white/40 hover:text-gold transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
-          Retour a l'accueil
+          Retour à l'accueil
         </Link>
 
         <div className="card p-8">
@@ -178,7 +183,7 @@ const Register = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-white/60 mb-2">Prenom</label>
+                <label className="block text-sm text-white/60 mb-2">Prénom</label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
                   <input
@@ -232,9 +237,12 @@ const Register = () => {
                   className="input pl-10"
                   placeholder="********"
                   required
-                  minLength={6}
+                  minLength={8}
                 />
               </div>
+              <p className="text-white/30 text-xs mt-1.5">
+                Au moins 8 caractères, avec une majuscule, une minuscule, un chiffre et un caractère spécial.
+              </p>
             </div>
 
             <div>
@@ -261,13 +269,13 @@ const Register = () => {
               {submitting ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                'Creer mon compte'
+                'Créer mon compte'
               )}
             </button>
           </form>
 
           <div className="mt-6 text-center text-white/40">
-            Deja un compte ?{' '}
+            Déjà un compte ?{' '}
             <Link to="/connexion" className="text-gold hover:text-gold-light">
               Se connecter
             </Link>

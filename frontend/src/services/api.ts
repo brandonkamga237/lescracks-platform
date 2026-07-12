@@ -224,7 +224,7 @@ class ApiService {
     country?: string;
   }): Promise<{ id: number; status: string }> {
     const user = authService.getUser();
-    if (!user) throw new Error('Utilisateur non connecté');
+    if (!user) throw new Error('Session expirée. Merci de te reconnecter.');
 
     return this.request<{ id: number; status: string }>(
       '/applications',

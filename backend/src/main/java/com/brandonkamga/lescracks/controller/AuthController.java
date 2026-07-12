@@ -119,11 +119,17 @@ public class AuthController {
 
         enforceRateLimit(request, RateLimiterService.Limit.REGISTER);
 
-        if (userRequest.getEmail() == null || userService.existsByEmail(userRequest.getEmail())) {
-            throw new BadRequestException("Email is required or already in use");
+        if (userRequest.getEmail() == null || userRequest.getEmail().isBlank()) {
+            throw new BadRequestException("L'adresse email est obligatoire.");
         }
-        if (userRequest.getUsername() == null || userService.existsByUsername(userRequest.getUsername())) {
-            throw new BadRequestException("Username is required or already taken");
+        if (userService.existsByEmail(userRequest.getEmail())) {
+            throw new BadRequestException("Un compte existe déjà avec cette adresse email.");
+        }
+        if (userRequest.getUsername() == null || userRequest.getUsername().isBlank()) {
+            throw new BadRequestException("Le nom d'utilisateur est obligatoire.");
+        }
+        if (userService.existsByUsername(userRequest.getUsername())) {
+            throw new BadRequestException("Ce nom d'utilisateur est déjà utilisé.");
         }
 
         PasswordValidator.validate(userRequest.getPassword());
@@ -156,7 +162,7 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(null,
-                        "Account created. Please check your inbox to verify your email."));
+                        "Compte créé ! Vérifie ta boîte mail pour activer ton compte."));
     }
 
     @PostMapping("/verify-email")
@@ -167,12 +173,12 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponse>> verifyEmail(@RequestParam String token) {
         User user = userRepository.findByVerificationToken(token)
                 .orElseThrow(() -> new BadRequestException(
-                        "Invalid or already used verification link."));
+                        "Ce lien de vérification est invalide ou a déjà été utilisé."));
 
         if (user.getVerificationTokenExpiresAt() != null
                 && user.getVerificationTokenExpiresAt().isBefore(LocalDateTime.now())) {
             throw new BadRequestException(
-                    "This verification link has expired. Please register again.");
+                    "Ce lien de vérification a expiré. Merci de recommencer l'inscription.");
         }
 
         user.setEmailVerified(true);
@@ -185,7 +191,7 @@ public class AuthController {
         String jwt = jwtService.generateTokenForUser(user.getEmail());
         return ResponseEntity.ok(ApiResponse.success(
                 AuthResponse.of(jwt, userMapper.toResponse(user)),
-                "Email verified — welcome to LesCracks!"));
+                "Adresse email confirmée — bienvenue chez LesCracks !"));
     }
 
     @PostMapping("/login")
@@ -209,7 +215,7 @@ public class AuthController {
         String rateLimitKey = "LOGIN:" + getClientIp(request);
         if (!rateLimiter.isAllowed(rateLimitKey, RateLimiterService.Limit.LOGIN)) {
             throw new BadRequestException(
-                    "Too many login attempts. Please try again in a few minutes.");
+                    "Trop de tentatives de connexion. Réessaie dans quelques minutes.");
         }
 
         try {
@@ -219,14 +225,16 @@ public class AuthController {
 
             User user = userService.findByEmail(loginRequest.getEmail());
             if (user == null) {
-                throw new BadRequestException("User not found");
+                // Keep the message generic to avoid revealing which accounts exist.
+                throw new BadRequestException("Email ou mot de passe incorrect.");
             }
 
             if (user.getProvider() != null
                     && ProviderType.LOCAL.equals(user.getProvider().getProviderName())
                     && !user.isEmailVerified()) {
                 throw new BadRequestException(
-                        "Please verify your email address before logging in. Check your inbox.");
+                        "Ton adresse email n'est pas encore confirmée. "
+                        + "Vérifie ta boîte mail (pense à regarder tes spams) pour activer ton compte.");
             }
 
             // Reset rate-limit counter on successful login
@@ -235,10 +243,10 @@ public class AuthController {
             String token = jwtService.generateTokenForUser(user.getEmail());
             return ResponseEntity.ok(
                     ApiResponse.success(AuthResponse.of(token, userMapper.toResponse(user)),
-                            "Login successful"));
+                            "Connexion réussie."));
 
         } catch (BadCredentialsException e) {
-            throw new BadRequestException("Invalid email or password");
+            throw new BadRequestException("Email ou mot de passe incorrect.");
         }
     }
 
@@ -269,7 +277,7 @@ public class AuthController {
         }
 
         return ResponseEntity.ok(ApiResponse.success(null,
-                "If this email is registered, a password reset link has been sent."));
+                "Si cette adresse est enregistrée, un lien de réinitialisation vient de t'être envoyé."));
     }
 
     @PostMapping("/reset-password")
@@ -281,15 +289,17 @@ public class AuthController {
 
         PasswordResetToken resetToken = passwordResetTokenRepository
                 .findByTokenAndUsedFalse(request.getToken())
-                .orElseThrow(() -> new BadRequestException("Invalid or already used reset token"));
+                .orElseThrow(() -> new BadRequestException(
+                        "Ce lien de réinitialisation est invalide ou a déjà été utilisé."));
 
         if (resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("This password reset link has expired");
+            throw new BadRequestException(
+                    "Ce lien de réinitialisation a expiré. Merci d'en demander un nouveau.");
         }
 
         User user = userService.findByEmail(resetToken.getEmail());
         if (user == null) {
-            throw new BadRequestException("User not found");
+            throw new BadRequestException("Compte introuvable.");
         }
 
         PasswordValidator.validate(request.getNewPassword());
@@ -298,7 +308,7 @@ public class AuthController {
         resetToken.setUsed(true);
         passwordResetTokenRepository.save(resetToken);
 
-        return ResponseEntity.ok(ApiResponse.success(null, "Password reset successfully"));
+        return ResponseEntity.ok(ApiResponse.success(null, "Mot de passe réinitialisé avec succès."));
     }
 
     @PostMapping("/logout")
@@ -327,7 +337,7 @@ public class AuthController {
         }
 
         SecurityContextHolder.clearContext();
-        return ResponseEntity.ok(ApiResponse.success(null, "Logged out successfully"));
+        return ResponseEntity.ok(ApiResponse.success(null, "Déconnexion réussie."));
     }
 
     // -------------------------------------------------------------------------
@@ -338,7 +348,7 @@ public class AuthController {
         String key = limit.name() + ":" + getClientIp(request);
         if (!rateLimiter.isAllowed(key, limit)) {
             throw new BadRequestException(
-                    "Too many requests. Please try again later.");
+                    "Trop de requêtes. Réessaie dans quelques minutes.");
         }
     }
 
