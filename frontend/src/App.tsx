@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import GlobalLoader from './components/common/GlobalLoader';
 
 // Pages
 import Landing from './pages/Landing';
@@ -206,31 +205,13 @@ function AppContent() {
 }
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Simuler le chargement initial
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <ThemeProvider>
       <AuthProvider>
         <Router>
-          <GlobalLoader
-            isLoading={isLoading}
-            message="Chargement de LesCracks..."
-          />
-          
-          {!isLoading && (
-            <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-              <AppContent />
-            </div>
-          )}
+          <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+            <AppContent />
+          </div>
         </Router>
       </AuthProvider>
     </ThemeProvider>
