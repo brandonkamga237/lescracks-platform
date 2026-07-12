@@ -102,6 +102,24 @@ public class EventController {
         return ResponseEntity.ok(ApiResponse.success(events));
     }
 
+    @GetMapping("/types")
+    @Operation(summary = "Liste les types d'événements")
+    public ResponseEntity<ApiResponse<List<java.util.Map<String, Object>>>> getEventTypes() {
+        List<java.util.Map<String, Object>> types = eventTypeRepository.findAll().stream()
+                .map(t -> { var m = new java.util.HashMap<String, Object>(); m.put("id", t.getId()); m.put("name", t.getName()); return (java.util.Map<String, Object>) m; })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(types));
+    }
+
+    @GetMapping("/statuses")
+    @Operation(summary = "Liste les statuts d'événements")
+    public ResponseEntity<ApiResponse<List<java.util.Map<String, Object>>>> getEventStatuses() {
+        List<java.util.Map<String, Object>> statuses = eventStatusRepository.findAll().stream()
+                .map(s -> { var m = new java.util.HashMap<String, Object>(); m.put("id", s.getId()); m.put("name", s.getName().name()); return (java.util.Map<String, Object>) m; })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(statuses));
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a new event",
@@ -181,6 +199,9 @@ public class EventController {
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .eventDate(request.getEventDate())
+                .endDate(request.getEndDate())
+                .location(request.getLocation())
+                .coverImageUrl(request.getCoverImageUrl())
                 .applicationRequired(request.getApplicationRequired())
                 .eventType(eventType)
                 .eventStatus(eventStatus)
@@ -201,13 +222,16 @@ public class EventController {
                 .id(event.getId())
                 .title(event.getTitle())
                 .description(event.getDescription())
-                .eventDate(event.getEventDate())
+                .startDate(event.getEventDate() != null ? event.getEventDate().toString() : null)
+                .endDate(event.getEndDate() != null ? event.getEndDate().toString() : null)
+                .location(event.getLocation())
+                .coverImageUrl(event.getCoverImageUrl())
+                .type(event.getEventType().getName())
+                .status(event.getEventStatus().getName().name())
                 .applicationRequired(event.getApplicationRequired())
                 .createdAt(event.getCreatedAt())
                 .eventTypeId(event.getEventType().getId())
-                .eventTypeName(event.getEventType().getName())
                 .eventStatusId(event.getEventStatus().getId())
-                .eventStatusName(event.getEventStatus().getName().name())
                 .tags(tags)
                 .build();
     }

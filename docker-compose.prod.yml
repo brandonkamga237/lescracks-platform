@@ -91,6 +91,9 @@ services:
     environment:
       # Override ddl-auto (update = safe for first deploy, change to validate after)
       SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_DDL_AUTO:-update}
+      # Explicit absolute paths inside the mounted volume to prevent fragile relative path resolution
+      UPLOADS_DIR: /app/uploads/resources
+      AVATAR_DIR: /app/uploads/avatars
     depends_on:
       postgres:
         condition: service_healthy

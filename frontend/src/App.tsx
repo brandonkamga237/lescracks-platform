@@ -31,12 +31,15 @@ import AdminContributors from './pages/admin/AdminContributors';
 import AdminApprenants from './pages/admin/AdminApprenants';
 import Apprenants from './pages/Apprenants';
 import ApprennantProfile from './pages/ApprennantProfile';
+import MonProfilApprenant from './pages/MonProfilApprenant';
 import Premium from './pages/Premium';
 import Postuler from './pages/Postuler';
 import VerifyEmail from './pages/VerifyEmail';
 import ProviderUnavailable from './pages/ProviderUnavailable';
 import About from './pages/About';
 import OpenSource from './pages/OpenSource';
+import Programme from './pages/Programme';
+import RessourceDetail from './pages/RessourceDetail';
 
 // Home route — landing for guests, /ressources for logged-in users
 const HomeRoute = () => {
@@ -122,8 +125,9 @@ function AppContent() {
           <Route path="/profil" element={<UserRoute><Profile /></UserRoute>} />
           <Route path="/premium" element={<UserRoute><Premium /></UserRoute>} />
 
-          {/* Public — Postuler accessible sans compte */}
+          {/* Public — Postuler + Programme accessibles sans compte */}
           <Route path="/postuler" element={<Postuler />} />
+          <Route path="/programme" element={<Programme />} />
           
           {/* Public Routes */}
           <Route path="/about" element={<About />} />
@@ -131,8 +135,10 @@ function AppContent() {
           <Route path="/evenements" element={<Evenements />} />
           <Route path="/evenements/:id" element={<Evenements />} />
           <Route path="/ressources" element={<Ressources />} />
+          <Route path="/ressources/:slug" element={<RessourceDetail />} />
           <Route path="/apprenants" element={<Apprenants />} />
           <Route path="/apprenants/:slug" element={<ApprennantProfile />} />
+          <Route path="/mon-profil-apprenant" element={<MonProfilApprenant />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={

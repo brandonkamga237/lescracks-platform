@@ -25,9 +25,18 @@ public class EventRequest {
     @Schema(description = "Description de l'événement")
     private String description;
 
-    @Schema(description = "Date et heure de l'événement", example = "2024-12-01T10:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Date (et heure optionnelle) de début", example = "2024-12-01T10:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "Event date is required")
     private LocalDateTime eventDate;
+
+    @Schema(description = "Date (et heure optionnelle) de fin — optionnelle")
+    private LocalDateTime endDate;
+
+    @Schema(description = "Lieu de l'événement")
+    private String location;
+
+    @Schema(description = "URL de l'image de couverture")
+    private String coverImageUrl;
 
     @Schema(description = "Indique si une candidature est requise", example = "true", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "Application required flag is required")

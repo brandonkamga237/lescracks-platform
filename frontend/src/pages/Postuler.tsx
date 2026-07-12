@@ -1,9 +1,8 @@
 // src/pages/Postuler.tsx
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import SEO from '@/components/common/SEO';
 import { motion } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
 import { apiService } from '@/services/api';
 import Layout from '@/components/layout/Layout';
 import {
@@ -13,15 +12,13 @@ import {
   ArrowRight,
   ChevronRight,
   User,
+  Mail,
+  Phone,
   MessageSquare,
-  BarChart3,
+  Calendar,
 } from 'lucide-react';
 
-// ApplicationTypeId as defined in the seeded DB — accompagnement_360 = 4
-const ACCOMPAGNEMENT = {
-  typeId: 4,
-  label: 'Accompagnement 360',
-};
+const ACCOMPAGNEMENT_TYPE_ID = 4;
 
 const FEATURES = [
   'Bilan de profil approfondi',
@@ -32,19 +29,12 @@ const FEATURES = [
   'Attestation de complétion',
 ];
 
-const LEVELS = [
-  { value: 'Débutant complet', label: 'Débutant complet — Jamais touché au code' },
-  { value: 'Débutant', label: 'Débutant — Quelques notions de base' },
-  { value: 'Intermédiaire', label: 'Intermédiaire — Je code mais j\'ai des lacunes' },
-  { value: 'Avancé', label: 'Avancé — Je cherche à me spécialiser' },
-];
-
 const Postuler = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
-  const [level, setLevel] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
   const [motivation, setMotivation] = useState('');
+  const [age, setAge] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -53,8 +43,16 @@ const Postuler = () => {
     e.preventDefault();
     setError('');
 
-    if (!level) {
-      setError('Veuillez sélectionner votre niveau technique.');
+    if (!fullName.trim()) {
+      setError('Le nom complet est requis.');
+      return;
+    }
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError('Veuillez saisir une adresse email valide.');
+      return;
+    }
+    if (!whatsapp.trim()) {
+      setError('Le numéro WhatsApp est requis.');
       return;
     }
     if (motivation.trim().length < 50) {
@@ -65,9 +63,12 @@ const Postuler = () => {
     setSubmitting(true);
     try {
       await apiService.submitServiceApplication({
-        applicationTypeId: ACCOMPAGNEMENT.typeId,
+        applicationTypeId: ACCOMPAGNEMENT_TYPE_ID,
+        fullName: fullName.trim(),
+        emailAddress: email.trim(),
+        whatsappNumber: whatsapp.trim(),
         motivationText: motivation.trim(),
-        technicalLevel: level,
+        age: age ? parseInt(age, 10) : undefined,
       });
       setSubmitted(true);
     } catch (err: any) {
@@ -76,49 +77,6 @@ const Postuler = () => {
       setSubmitting(false);
     }
   };
-
-  // Gate — non-authenticated users see a prompt to create account or login
-  if (!user) {
-    return (
-      <Layout>
-        <div className="min-h-[80vh] flex items-center justify-center px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-md w-full text-center"
-          >
-            <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-6">
-              <User className="w-7 h-7 text-gold" />
-            </div>
-            <h1 className="text-2xl font-display font-bold text-white mb-3">
-              Crée ton compte pour postuler
-            </h1>
-            <p className="text-white/50 mb-2 leading-relaxed">
-              L'<strong className="text-gold">Accompagnement 360</strong> est un parcours certifiant de <strong className="text-white">6 à 12 mois</strong> avec un mentor dédié.
-            </p>
-            <p className="text-white/35 text-sm mb-8">
-              Un compte est nécessaire pour soumettre ta candidature et suivre son avancement.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link
-                to="/inscription?redirect=/postuler"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gold text-black font-bold rounded-sm hover:bg-gold/90 transition-colors"
-              >
-                Créer un compte
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                to="/connexion?redirect=/postuler"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-white/20 text-white/70 hover:border-white/40 hover:text-white transition-colors rounded-sm text-sm"
-              >
-                J'ai déjà un compte
-              </Link>
-            </div>
-          </motion.div>
-        </div>
-      </Layout>
-    );
-  }
 
   if (submitted) {
     return (
@@ -134,15 +92,15 @@ const Postuler = () => {
             </div>
             <h1 className="text-2xl font-display font-bold mb-3">Candidature reçue !</h1>
             <p className="text-white/60 leading-relaxed mb-2">
-              Merci <strong className="text-white">{user?.firstName || user?.username}</strong>. Ta demande d'<strong className="text-gold">Accompagnement 360</strong> a bien été enregistrée.
+              Merci <strong className="text-white">{fullName}</strong>. Ta demande d'<strong className="text-gold">Accompagnement 360</strong> a bien été enregistrée.
+            </p>
+            <p className="text-white/40 text-sm mb-2">
+              Un email de confirmation a été envoyé à <strong className="text-white/60">{email}</strong>.
             </p>
             <p className="text-white/40 text-sm mb-8">
-              Notre équipe te contactera sous 48h pour la suite du processus.
+              Notre équipe te contactera prochainement sur WhatsApp au <strong className="text-white/60">{whatsapp}</strong>.
             </p>
-            <div className="flex gap-3 justify-center">
-              <Link to="/profil" className="btn-secondary">Voir mon profil</Link>
-              <Link to="/" className="btn-primary">Retour à l'accueil</Link>
-            </div>
+            <Link to="/" className="btn-primary">Retour à l'accueil</Link>
           </motion.div>
         </div>
       </Layout>
@@ -218,33 +176,68 @@ const Postuler = () => {
               </div>
             </div>
 
-            {/* Level */}
+            {/* Nom complet */}
             <div>
-              <label className="flex items-center gap-2 text-sm text-white/60 mb-3">
-                <BarChart3 className="w-4 h-4 text-gold" />
-                Ton niveau technique actuel <span className="text-red-400">*</span>
+              <label className="flex items-center gap-2 text-sm text-white/60 mb-2">
+                <User className="w-4 h-4 text-gold" />
+                Nom complet <span className="text-red-400">*</span>
               </label>
-              <div className="space-y-2">
-                {LEVELS.map((l) => (
-                  <label
-                    key={l.value}
-                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                      level === l.value
-                        ? 'border-gold/50 bg-gold/5'
-                        : 'border-white/10 hover:border-white/20'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="level"
-                      value={l.value}
-                      checked={level === l.value}
-                      onChange={() => setLevel(l.value)}
-                      className="accent-gold"
-                    />
-                    <span className="text-sm text-white/80">{l.label}</span>
-                  </label>
-                ))}
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
+                placeholder="Jean Dupont"
+                required
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <label className="flex items-center gap-2 text-sm text-white/60 mb-2">
+                <Mail className="w-4 h-4 text-gold" />
+                Adresse email <span className="text-red-400">*</span>
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
+                placeholder="jean@example.com"
+                required
+              />
+            </div>
+
+            {/* WhatsApp + Âge en ligne */}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="flex items-center gap-2 text-sm text-white/60 mb-2">
+                  <Phone className="w-4 h-4 text-gold" />
+                  Numéro WhatsApp <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="tel"
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
+                  placeholder="+237 6XX XXX XXX"
+                  required
+                />
+              </div>
+              <div>
+                <label className="flex items-center gap-2 text-sm text-white/60 mb-2">
+                  <Calendar className="w-4 h-4 text-gold" />
+                  Âge <span className="text-white/30 text-xs">(optionnel)</span>
+                </label>
+                <input
+                  type="number"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  min={12}
+                  max={99}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
+                  placeholder="ex : 22"
+                />
               </div>
             </div>
 
@@ -252,7 +245,7 @@ const Postuler = () => {
             <div>
               <label className="flex items-center gap-2 text-sm text-white/60 mb-2">
                 <MessageSquare className="w-4 h-4 text-gold" />
-                Ta motivation <span className="text-red-400">*</span>
+                Motivation / présentation <span className="text-red-400">*</span>
               </label>
               <textarea
                 value={motivation}
@@ -288,7 +281,7 @@ const Postuler = () => {
               )}
             </button>
             <p className="text-center text-white/20 text-xs">
-              Notre équipe te contactera sous 48h par email ou WhatsApp.
+              Notre équipe te contactera prochainement sur WhatsApp.
             </p>
           </motion.form>
 

@@ -67,6 +67,9 @@ public class ResourceResponse {
     @Schema(description = "Nombre total de téléchargements")
     private long downloadCount;
 
+    @Schema(description = "Slug SEO de la ressource")
+    private String slug;
+
     @Data
     @Builder
     @NoArgsConstructor

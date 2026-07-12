@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Menu, X, ArrowRight, BookOpen, Video, Code2, ChevronRight,
-  User, LogOut, Shield, Crown,
-  Compass, Users,
+  User, LogOut, Shield, Crown, Award,
+  Users, Compass, FileText,
 } from 'lucide-react';
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 
@@ -14,10 +14,24 @@ import LesCracksLogo from '@/components/common/LesCracksLogo';
 const menuItems = [
   {
     title: 'Accompagnement',
-    href: '/postuler',
+    href: '/programme',
     pulse: true,
     alignRight: false,
-    hasMegaMenu: false,
+    hasMegaMenu: true,
+    columns: [
+      {
+        title: 'Le programme',
+        description: 'Tout ce que tu dois savoir sur l\'Accompagnement 360',
+        href: '/programme',
+        icon: Compass,
+      },
+      {
+        title: 'Postuler',
+        description: 'Soumettre ta candidature — réponse sous 48h',
+        href: '/postuler',
+        icon: FileText,
+      },
+    ],
   },
   {
     title: 'Ressources',
@@ -132,7 +146,7 @@ const MegaMenu = ({
 // ─── header ───────────────────────────────────────────────────────────────────
 
 const Header = () => {
-  const { isAuthenticated, isAdmin, isPremium, user, logout } = useAuth();
+  const { isAuthenticated, isAdmin, isPremium, isLearner, user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -180,12 +194,14 @@ const Header = () => {
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-0.5">
-            <Link
-              to={isAuthenticated ? '/ressources' : '/'}
-              className="px-3.5 py-2 text-sm text-foreground/50 hover:text-foreground transition-colors rounded-lg hover:bg-secondary/40"
-            >
-              {isAuthenticated ? 'Ressources' : 'Accueil'}
-            </Link>
+            {!isAuthenticated && (
+              <Link
+                to="/"
+                className="px-3.5 py-2 text-sm text-foreground/50 hover:text-foreground transition-colors rounded-lg hover:bg-secondary/40"
+              >
+                Accueil
+              </Link>
+            )}
 
             {menuItems.map((item) => (
               <div
@@ -262,8 +278,14 @@ const Header = () => {
                       <div className="p-1.5">
                         <Link to="/profil" onClick={() => setProfileDropdownOpen(false)}
                           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-foreground/60 hover:bg-secondary hover:text-foreground transition-colors text-sm">
-                          <User className="w-4 h-4" />Mon Profil
+                          <User className="w-4 h-4" />Mon compte
                         </Link>
+                        {isLearner && (
+                          <Link to="/mon-profil-apprenant" onClick={() => setProfileDropdownOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gold/80 hover:bg-gold/8 hover:text-gold transition-colors text-sm font-medium">
+                            <Award className="w-4 h-4" />Mon profil apprenant
+                          </Link>
+                        )}
                         {!isPremium && (
                           <Link to="/premium" onClick={() => setProfileDropdownOpen(false)}
                             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gold hover:bg-gold/8 transition-colors text-sm font-medium">
@@ -320,20 +342,27 @@ const Header = () => {
             className="fixed top-[72px] left-0 right-0 z-40 bg-background/97 backdrop-blur-xl lg:hidden border-b border-border overflow-hidden"
           >
             <div className="p-5 space-y-1">
-              <Link to={isAuthenticated ? '/ressources' : '/'} onClick={() => setMobileMenuOpen(false)}
-                className="block py-2.5 px-4 text-foreground/60 hover:text-foreground hover:bg-secondary rounded-xl text-sm">
-                {isAuthenticated ? 'Ressources' : 'Accueil'}
-              </Link>
+              {!isAuthenticated && (
+                <Link to="/" onClick={() => setMobileMenuOpen(false)}
+                  className="block py-2.5 px-4 text-foreground/60 hover:text-foreground hover:bg-secondary rounded-xl text-sm">
+                  Accueil
+                </Link>
+              )}
 
               {/* Accompagnement */}
               <div className="pt-2 pb-1 border-t border-border/50">
-                <Link to="/postuler" onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 py-2.5 px-4 text-gold hover:bg-gold/8 rounded-xl text-sm font-medium">
+                <p className="text-[10px] text-foreground/35 uppercase tracking-widest px-4 mb-1">Accompagnement</p>
+                <Link to="/programme" onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 py-2.5 px-4 pl-7 text-gold hover:bg-gold/8 rounded-xl text-sm font-medium">
                   <span className="relative flex h-1.5 w-1.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75" />
                     <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-gold" />
                   </span>
-                  Accompagnement 360
+                  Le programme
+                </Link>
+                <Link to="/postuler" onClick={() => setMobileMenuOpen(false)}
+                  className="block py-2.5 px-4 pl-7 text-foreground/60 hover:text-foreground hover:bg-secondary rounded-xl text-sm">
+                  Postuler
                 </Link>
               </div>
 

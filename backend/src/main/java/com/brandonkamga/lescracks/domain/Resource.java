@@ -71,6 +71,9 @@ public class Resource {
     @Column(name = "preview_image_url")
     private String previewImageUrl;
 
+    @Column(name = "slug", unique = true)
+    private String slug;
+
     @ManyToMany
     @JoinTable(
         name = "resource_tags",

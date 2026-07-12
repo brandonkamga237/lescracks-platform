@@ -9,13 +9,13 @@ export interface Event {
   id: string;
   title: string;
   description: string;
-  shortDescription?: string;
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   location?: string;
-  type: 'BOOTCAMP' | 'HACKATHON' | 'MEETUP' | 'WORKSHOP' | 'FORMATION';
-  status: 'OUVERT' | 'EN_COURS' | 'FERME';
-  imageUrl?: string;
+  type: string;
+  status: string;  // open | upcoming | closed
+  coverImageUrl?: string;
+  applicationRequired?: boolean;
   maxParticipants?: number;
   currentParticipants?: number;
 }
@@ -37,6 +37,7 @@ export interface Resource {
   viewCount: number;
   downloadCount: number;
   tags: { id: number; name: string }[];
+  slug?: string;
   metadata?: {
     fileSize?: number;
     mimeType?: string;
@@ -201,6 +202,10 @@ class ApiService {
     return data;
   }
 
+  async getResourceBySlug(slug: string): Promise<Resource> {
+    return this.request<Resource>(`/resources/slug/${slug}`);
+  }
+
   // === TAGS ===
   async getTags(): Promise<Tag[]> {
     const data = await this.request<Tag[]>('/tags');
@@ -218,26 +223,20 @@ class ApiService {
   /** Submit a service application (Accompagnement 360 or Formation pratique) */
   async submitServiceApplication(payload: {
     applicationTypeId: number;
+    fullName: string;
+    emailAddress: string;
+    whatsappNumber: string;
     motivationText: string;
-    technicalLevel: string;
-    whatsappNumber?: string;
-    country?: string;
+    age?: number;
+    technicalLevel?: string;
   }): Promise<{ id: number; status: string }> {
-    const user = authService.getUser();
-    if (!user) throw new Error('Session expirée. Merci de te reconnecter.');
-
     return this.request<{ id: number; status: string }>(
       '/applications',
       {
         method: 'POST',
-        body: JSON.stringify({
-          userId: user.id,
-          applicationTypeId: payload.applicationTypeId,
-          motivationText: payload.motivationText,
-          technicalLevel: payload.technicalLevel,
-        }),
+        body: JSON.stringify(payload),
       },
-      true
+      false  // endpoint public — pas de token requis
     );
   }
 
@@ -319,6 +318,18 @@ class ApiService {
 
   async getLearnerBySlug(slug: string): Promise<Learner> {
     return this.request<Learner>(`/learners/${slug}`);
+  }
+
+  async getMyLearnerProfile(): Promise<Learner> {
+    return this.request<Learner>('/learners/me', { headers: this.getHeaders(true) });
+  }
+
+  async updateMyLearnerProfile(data: { bio?: string; linkedinUrl?: string; portfolioUrl?: string }): Promise<Learner> {
+    return this.request<Learner>('/learners/me', {
+      method: 'PUT',
+      headers: this.getHeaders(true),
+      body: JSON.stringify(data),
+    });
   }
 
   async getMyApplications(): Promise<any[]> {

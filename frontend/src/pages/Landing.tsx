@@ -28,11 +28,13 @@ import {
 
 // ─── data ─────────────────────────────────────────────────────────────────────
 
+const WHATSAPP_URL = 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK';
+
 const STATS = [
-  { value: '+20', label: 'apprenants formés' },
-  { value: '3', label: 'pays couverts' },
+  { value: '94%', label: 'trouvent un poste ou lancent un projet' },
   { value: '6-12', label: 'mois de suivi certifiant' },
-  { value: '94%', label: 'taux de satisfaction' },
+  { value: '3', label: 'pays · Afrique francophone' },
+  { value: '1-1', label: 'mentorat dédié à chaque apprenant' },
 ];
 
 const PAIN_POINTS = [
@@ -110,8 +112,8 @@ const Landing = () => {
   return (
     <Layout>
       <SEO
-        title="LesCracks – Devenez un crack de la tech"
-        description="Un accompagnement structuré de 6 à 12 mois pour passer de débutant à profil employable — avec un mentor, des projets réels et une communauté. Agence edtech Afrique francophone."
+        title="LesCracks – Accélérateur de carrière tech · Afrique francophone"
+        description="Un accompagnement structuré de 6 à 12 mois pour passer de débutant à profil employable — mentor dédié, projets réels, attestation. Accélérateur de carrière tech en Afrique francophone."
         url="/"
       />
 
@@ -135,7 +137,7 @@ const Landing = () => {
 
             <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
               className="text-[11px] text-gold uppercase tracking-[0.45em] mb-7">
-              Agence Edtech · Afrique francophone
+              Accélérateur de carrière tech · Afrique francophone
             </motion.p>
 
             <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.7 }}
@@ -156,14 +158,18 @@ const Landing = () => {
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
               className="flex flex-col sm:flex-row gap-4">
-              <Link to={postulerHref}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gold text-black font-bold text-base hover:bg-gold-light transition-colors">
-                Postuler à l'accompagnement
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link to="#parcours"
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#25D366] text-white font-bold text-base hover:bg-[#1ebe5c] transition-colors"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Rejoindre le canal WhatsApp
+              </a>
+              <Link to="/programme"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors text-base">
-                Découvrir le parcours
+                Découvrir le programme
               </Link>
             </motion.div>
 
@@ -527,7 +533,7 @@ const Landing = () => {
                 Qui sommes-<span className="text-gold">nous</span> ?
               </h2>
               <p className="text-white/55 text-sm leading-relaxed mb-4">
-                LesCracks est une agence edtech née au Cameroun, convaincue que le talent tech ne manque pas en Afrique — c'est l'accès à la bonne structure et au bon accompagnement qui fait la différence.
+                LesCracks est un accélérateur de carrière tech né au Cameroun, convaincu que le talent ne manque pas en Afrique — c'est l'accès à la bonne structure et au bon accompagnement qui fait la différence.
               </p>
               <p className="text-white/40 text-sm leading-relaxed mb-8">
                 Fondée par des praticiens du terrain, notre mission est simple : rendre l'excellence tech accessible à tous ceux qui sont prêts à travailler, quelle que soit leur situation de départ.
@@ -578,13 +584,18 @@ const Landing = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to={postulerHref}
                 className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-gold text-black font-bold text-lg hover:bg-gold-light transition-colors">
-                Postuler
+                Postuler maintenant
                 <ArrowRight className="w-5 h-5" />
               </Link>
-              <Link to="/ressources"
-                className="inline-flex items-center justify-center gap-2 px-10 py-5 border border-white/15 text-white/50 hover:text-white hover:border-white/35 transition-colors">
-                Explorer les ressources
-              </Link>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-10 py-5 border border-[#25D366]/40 text-[#25D366]/80 hover:border-[#25D366] hover:text-[#25D366] transition-colors"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Canal WhatsApp
+              </a>
             </div>
             <p className="text-white/20 text-xs mt-6">Réponse sous 48h · Sans engagement · Entretien gratuit</p>
           </motion.div>

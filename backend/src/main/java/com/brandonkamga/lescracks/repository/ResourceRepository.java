@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.Optional;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -16,7 +18,9 @@ import java.util.List;
 
 @Repository
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
-    
+
+    Optional<Resource> findBySlug(String slug);
+
     // Basic finders
     List<Resource> findByCategoryId(Long categoryId);
     List<Resource> findByResourceTypeId(Long resourceTypeId);

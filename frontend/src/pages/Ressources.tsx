@@ -20,6 +20,7 @@ import {
   Filter,
   X,
   ExternalLink,
+  ArrowRight,
 } from 'lucide-react';
 
 type ResourceType = 'all' | 'VIDEO' | 'DOCUMENT';
@@ -512,16 +513,29 @@ const Ressources = () => {
                     {/* CTA */}
                     {canAccess(resource) ? (
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => handleOpen(resource)}
-                          className="flex-1 btn-secondary text-center flex items-center justify-center gap-2 text-sm py-2"
-                        >
-                          {resource.resourceTypeName === 'VIDEO' ? (
-                            <><PlayCircle className="w-4 h-4" />Regarder</>
-                          ) : (
-                            <><ExternalLink className="w-4 h-4" />Consulter</>
-                          )}
-                        </button>
+                        {resource.slug ? (
+                          <Link
+                            to={`/ressources/${resource.slug}`}
+                            className="flex-1 btn-secondary text-center flex items-center justify-center gap-2 text-sm py-2"
+                          >
+                            {resource.resourceTypeName === 'VIDEO' ? (
+                              <><PlayCircle className="w-4 h-4" />Regarder</>
+                            ) : (
+                              <><ArrowRight className="w-4 h-4" />Voir</>
+                            )}
+                          </Link>
+                        ) : (
+                          <button
+                            onClick={() => handleOpen(resource)}
+                            className="flex-1 btn-secondary text-center flex items-center justify-center gap-2 text-sm py-2"
+                          >
+                            {resource.resourceTypeName === 'VIDEO' ? (
+                              <><PlayCircle className="w-4 h-4" />Regarder</>
+                            ) : (
+                              <><ExternalLink className="w-4 h-4" />Consulter</>
+                            )}
+                          </button>
+                        )}
                         {resource.downloadable && resource.resourceTypeName !== 'VIDEO' && (
                           <button
                             onClick={() => handleDownload(resource)}

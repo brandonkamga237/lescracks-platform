@@ -155,6 +155,20 @@ public class ResourceController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @GetMapping("/slug/{slug}")
+    @Operation(summary = "Récupérer une ressource par slug SEO",
+               description = "Retourne les détails d'une ressource via son slug. Accès public pour les ressources non-premium.")
+    public ResponseEntity<ApiResponse<ResourceResponse>> getResourceBySlug(
+            @Parameter(description = "Slug SEO de la ressource", required = true) @PathVariable String slug,
+            Authentication authentication) {
+        Resource resource = resourceService.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Resource", "slug", slug));
+        if (resource.isPremium() && !hasPremiumAccess(authentication)) {
+            throw new com.brandonkamga.lescracks.exception.ForbiddenException("Cette ressource est réservée aux membres PREMIUM");
+        }
+        return ResponseEntity.ok(ApiResponse.success(toResponse(resource)));
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get resource by ID",
                description = "Returns the details of a specific resource. PREMIUM resources require an active account.")
@@ -492,6 +506,7 @@ public class ResourceController {
                 .resourceTypeName(resource.getResourceType().getName().name().toUpperCase())
                 .tags(tags)
                 .metadata(metadataDto)
+                .slug(resource.getSlug())
                 .build();
     }
 

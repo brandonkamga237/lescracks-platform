@@ -17,8 +17,9 @@ public class Application {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Nullable — candidature publique sans compte
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,6 +33,19 @@ public class Application {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ApplicationStatus status;
+
+    // Champs du formulaire public Accompagnement 360
+    @Column(name = "full_name")
+    private String fullName;
+
+    @Column(name = "email_address")
+    private String emailAddress;
+
+    @Column(name = "whatsapp_number")
+    private String whatsappNumber;
+
+    @Column(name = "age")
+    private Integer age;
 
     @Column(name = "motivation_text", columnDefinition = "TEXT")
     private String motivationText;

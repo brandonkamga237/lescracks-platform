@@ -16,13 +16,14 @@ import java.time.LocalDateTime;
 @Schema(description = "Réponse contenant les informations d'une candidature")
 public class ApplicationResponse {
 
-    @Schema(description = "ID unique de la candidature", example = "1")
+    @Schema(description = "ID unique de la candidature")
     private Long id;
 
-    @Schema(description = "ID de l'utilisateur")
+    // Champs utilisateur (peut être null si candidature publique)
+    @Schema(description = "ID de l'utilisateur (null si candidature publique)")
     private Long userId;
 
-    @Schema(description = "Nom d'utilisateur")
+    @Schema(description = "Nom d'utilisateur du compte (null si candidature publique)")
     private String username;
 
     @Schema(description = "ID de l'événement")
@@ -39,6 +40,19 @@ public class ApplicationResponse {
 
     @Schema(description = "Statut de la candidature")
     private ApplicationStatus status;
+
+    // Champs du formulaire public
+    @Schema(description = "Nom complet du candidat")
+    private String fullName;
+
+    @Schema(description = "Email du candidat")
+    private String emailAddress;
+
+    @Schema(description = "Numéro WhatsApp")
+    private String whatsappNumber;
+
+    @Schema(description = "Âge (optionnel)")
+    private Integer age;
 
     @Schema(description = "Texte de motivation")
     private String motivationText;

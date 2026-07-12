@@ -150,8 +150,34 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Optional<Resource> findBySlug(String slug) {
+        return resourceRepository.findBySlug(slug);
+    }
+
+    @Override
     public Resource save(Resource resource) {
-        return resourceRepository.save(resource);
+        Resource saved = resourceRepository.save(resource);
+        if (saved.getSlug() == null || saved.getSlug().isEmpty()) {
+            saved.setSlug(generateSlug(saved.getTitle(), saved.getId()));
+            saved = resourceRepository.save(saved);
+        }
+        return saved;
+    }
+
+    private String generateSlug(String title, Long id) {
+        String base = title.toLowerCase()
+            .replaceAll("[àáâãäå]", "a")
+            .replaceAll("[èéêë]", "e")
+            .replaceAll("[ìíîï]", "i")
+            .replaceAll("[òóôõö]", "o")
+            .replaceAll("[ùúûü]", "u")
+            .replaceAll("[ç]", "c")
+            .replaceAll("[^a-z0-9\\s-]", "")
+            .trim()
+            .replaceAll("[\\s]+", "-")
+            .replaceAll("-+", "-");
+        return base + "-" + id;
     }
 
     @Override
