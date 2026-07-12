@@ -14,7 +14,6 @@ interface AuthContextType {
   logout: () => Promise<void>;
   loginWithGoogle: () => void;
   loginWithGitHub: () => void;
-  upgradeToPremium: () => Promise<AuthResponse>;
   refreshUser: () => Promise<void>;
 }
 
@@ -36,28 +35,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initAuth = async () => {
       const savedUser = authService.getUser();
-      const token = authService.getToken();
-      
-      if (savedUser && token) {
-        setUser(savedUser);
-        // Verify token is still valid
-        try {
-          const currentUser = await authService.getCurrentUser();
-          if (currentUser) {
-            setUser(currentUser);
-          } else {
-            // Token invalid, clear auth
-            authService.removeToken();
-            authService.removeUser();
-            setUser(null);
-          }
-        } catch {
-          authService.removeToken();
+
+      // The auth cookie is HttpOnly, so JS cannot see whether a session exists. We use
+      // the cached profile as the hint: no cached profile means anonymous, so render
+      // immediately rather than paying a round trip on every visit.
+      if (!savedUser) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Paint from cache, then let the server confirm the session is still valid.
+      // (The cached profile is untrusted — the server response overwrites it.)
+      setUser(savedUser);
+      try {
+        const currentUser = await authService.getCurrentUser();
+        if (currentUser) {
+          setUser(currentUser);
+        } else {
           authService.removeUser();
           setUser(null);
         }
+      } catch {
+        authService.removeUser();
+        setUser(null);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     initAuth();
@@ -84,7 +87,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ): Promise<AuthResponse> => {
     setIsLoading(true);
     try {
-      const response = await authService.register(email, password, firstName);
+      // Combine first + last name into the display username so lastName isn't dropped.
+      const username = [firstName, lastName]
+        .map((s) => s?.trim())
+        .filter(Boolean)
+        .join(' ') || undefined;
+      const response = await authService.register(email, password, username);
       if (response.success && response.user) {
         setUser(response.user);
       }
@@ -107,14 +115,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     authService.loginWithGitHub();
   }, []);
 
-  const upgradeToPremium = useCallback(async (): Promise<AuthResponse> => {
-    const response = await authService.upgradeToPremium();
-    if (response.success && response.user) {
-      setUser(response.user);
-    }
-    return response;
-  }, []);
-
   const refreshUser = useCallback(async () => {
     const currentUser = await authService.getCurrentUser();
     if (currentUser) {
@@ -134,7 +134,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     loginWithGoogle,
     loginWithGitHub,
-    upgradeToPremium,
     refreshUser,
   };
 

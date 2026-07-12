@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.security.jwt;
 
+import com.brandonkamga.lescracks.security.AuthCookieService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,14 +32,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
     private final JwtTokenBlacklist tokenBlacklist;
+    private final AuthCookieService authCookieService;
 
     public JwtAuthenticationFilter(
             JwtService jwtService,
             UserDetailsService userDetailsService,
-            JwtTokenBlacklist tokenBlacklist) {
-        this.jwtService       = jwtService;
+            JwtTokenBlacklist tokenBlacklist,
+            AuthCookieService authCookieService) {
+        this.jwtService         = jwtService;
         this.userDetailsService = userDetailsService;
-        this.tokenBlacklist   = tokenBlacklist;
+        this.tokenBlacklist     = tokenBlacklist;
+        this.authCookieService  = authCookieService;
     }
 
     @Override
@@ -47,14 +51,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
+        final String jwt = resolveToken(request);
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (jwt == null || jwt.isBlank()) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        final String jwt = authHeader.substring(7);
 
         try {
             if (!jwtService.validateToken(jwt)) {
@@ -86,5 +88,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    /**
+     * The browser app authenticates with the HttpOnly cookie; API clients (Swagger,
+     * scripts) may still send a Bearer token. The header wins when both are present.
+     */
+    private String resolveToken(HttpServletRequest request) {
+        final String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return authCookieService.read(request);
     }
 }

@@ -1,25 +1,16 @@
 // src/pages/OAuthCallback.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '@/services/auth';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, XCircle } from 'lucide-react';
 
 /**
- * Reads a value from either the URL fragment (#token=...) or the query string
- * (?token=...). The backend redirects with the token in the fragment so it is
- * never sent to the server or logged, but we also accept the query string for
- * backward compatibility.
+ * Landing page for the OAuth redirect.
+ *
+ * The backend has already issued the JWT as an HttpOnly cookie, so there is no token
+ * in the URL to read — we simply ask the server who we are. If the session is valid,
+ * the user is logged in.
  */
-const readCallbackParam = (key: string): string | null => {
-  const hash = window.location.hash.startsWith('#')
-    ? window.location.hash.substring(1)
-    : window.location.hash;
-  const fromHash = new URLSearchParams(hash).get(key);
-  if (fromHash) return fromHash;
-  return new URLSearchParams(window.location.search).get(key);
-};
-
 const OAuthCallback = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
@@ -27,28 +18,16 @@ const OAuthCallback = () => {
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
-      const token = readCallbackParam('token');
-      const errorParam = readCallbackParam('error');
-
-      // Remove the token from the address bar and browser history immediately.
-      window.history.replaceState(null, '', window.location.pathname);
+      const errorParam = new URLSearchParams(window.location.search).get('error');
 
       if (errorParam) {
         setError('La connexion a échoué. Merci de réessayer ou d\'utiliser ton adresse email.');
         return;
       }
 
-      if (!token) {
-        setError('La connexion n\'a pas pu être finalisée. Merci de réessayer.');
-        return;
-      }
-
       try {
-        authService.setToken(token);
-
-        // Load the user and update the auth context so isAuthenticated becomes true.
+        // The auth cookie is already set — load the profile it identifies.
         await refreshUser();
-
         navigate('/ressources', { replace: true });
       } catch (err) {
         console.error('OAuth callback error:', err);

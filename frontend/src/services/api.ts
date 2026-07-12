@@ -99,19 +99,13 @@ export interface ResourceFilters {
 }
 
 class ApiService {
-  private getHeaders(includeAuth = false): Record<string, string> {
-    const headers: Record<string, string> = {
+  // Authentication rides on the HttpOnly cookie the backend sets, which the browser
+  // attaches automatically — there is no token in JS to put in a header.
+  // `includeAuth` is kept only to document which endpoints require a session.
+  private getHeaders(_includeAuth = false): Record<string, string> {
+    return {
       'Content-Type': 'application/json',
     };
-    
-    if (includeAuth) {
-      const token = authService.getToken();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-    }
-    
-    return headers;
   }
 
   private async request<T>(
@@ -122,6 +116,7 @@ class ApiService {
     const url = `${API_BASE_URL}${endpoint}`;
     const config: RequestInit = {
       ...options,
+      credentials: 'include',
       headers: {
         ...this.getHeaders(includeAuth),
         ...options.headers,
@@ -240,21 +235,6 @@ class ApiService {
     );
   }
 
-  async applyToEvent(eventId: string, motivation: string, portfolioUrl?: string): Promise<void> {
-    await this.request<{ success: boolean }>(
-      '/applications',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          eventId,
-          motivation,
-          portfolioUrl,
-        }),
-      },
-      true
-    );
-  }
-
   // === RESOURCE TRACKING ===
 
   /** Fire-and-forget view tracking — never throws to avoid blocking UI. */
@@ -270,15 +250,14 @@ class ApiService {
     return data;
   }
 
-  /** Upload an image file and get back its public URL. Reuses the resource upload endpoint. */
-  async uploadImage(file: File): Promise<string> {
-    const token = authService.getToken();
+  /** Upload a file to the resource upload endpoint and return its public URL. */
+  private async uploadFile(file: File): Promise<string> {
     const formData = new FormData();
     formData.append('file', file);
 
     const response = await fetch(`${API_BASE_URL}/resources/upload`, {
       method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: 'include',
       body: formData,
     });
     const json = await response.json();
@@ -287,21 +266,14 @@ class ApiService {
     throw new Error(json.message || 'Upload failed');
   }
 
-  /** Upload a file (PDF, video, etc.) and get back its public URL. */
-  async uploadResourceFile(file: File): Promise<string> {
-    const token = authService.getToken();
-    const formData = new FormData();
-    formData.append('file', file);
+  /** Upload an image and get back its public URL. */
+  async uploadImage(file: File): Promise<string> {
+    return this.uploadFile(file);
+  }
 
-    const response = await fetch(`${API_BASE_URL}/resources/upload`, {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: formData,
-    });
-    const json = await response.json();
-    if (!response.ok) throw new Error(json.message || 'Upload failed');
-    if (json.success && json.data !== undefined) return json.data as string;
-    throw new Error(json.message || 'Upload failed');
+  /** Upload a resource file (PDF, video, etc.) and get back its public URL. */
+  async uploadResourceFile(file: File): Promise<string> {
+    return this.uploadFile(file);
   }
 
   // === LEARNERS (public) ===

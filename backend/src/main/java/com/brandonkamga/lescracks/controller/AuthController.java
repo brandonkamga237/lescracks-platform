@@ -18,6 +18,7 @@ import com.brandonkamga.lescracks.repository.PasswordResetTokenRepository;
 import com.brandonkamga.lescracks.repository.ProviderRepository;
 import com.brandonkamga.lescracks.repository.RoleRepository;
 import com.brandonkamga.lescracks.repository.UserRepository;
+import com.brandonkamga.lescracks.security.AuthCookieService;
 import com.brandonkamga.lescracks.security.RateLimiterService;
 import com.brandonkamga.lescracks.security.jwt.JwtService;
 import com.brandonkamga.lescracks.security.jwt.JwtTokenBlacklist;
@@ -30,6 +31,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -63,6 +65,7 @@ public class AuthController {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final UserRepository userRepository;
     private final MailServiceImpl mailService;
+    private final AuthCookieService authCookieService;
 
     @Value("${app.mail.reset-token-expiry-minutes:30}")
     private int resetTokenExpiryMinutes;
@@ -82,7 +85,8 @@ public class AuthController {
             ProviderRepository providerRepository,
             PasswordResetTokenRepository passwordResetTokenRepository,
             UserRepository userRepository,
-            MailServiceImpl mailService) {
+            MailServiceImpl mailService,
+            AuthCookieService authCookieService) {
         this.userService                  = userService;
         this.userMapper                   = userMapper;
         this.jwtService                   = jwtService;
@@ -95,6 +99,7 @@ public class AuthController {
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.userRepository               = userRepository;
         this.mailService                  = mailService;
+        this.authCookieService            = authCookieService;
     }
 
     @PostMapping("/register")
@@ -170,7 +175,9 @@ public class AuthController {
     @Operation(summary = "Verify email address",
                description = "Activate the account using the token received by email. "
                            + "The verification link expires after 24 hours.")
-    public ResponseEntity<ApiResponse<AuthResponse>> verifyEmail(@RequestParam String token) {
+    public ResponseEntity<ApiResponse<AuthResponse>> verifyEmail(
+            @RequestParam String token,
+            HttpServletResponse httpResponse) {
         User user = userRepository.findByVerificationToken(token)
                 .orElseThrow(() -> new BadRequestException(
                         "Ce lien de vérification est invalide ou a déjà été utilisé."));
@@ -189,6 +196,10 @@ public class AuthController {
         mailService.sendWelcome(user.getEmail(), user.getUsername());
 
         String jwt = jwtService.generateTokenForUser(user.getEmail());
+
+        // Log the user straight in via the HttpOnly cookie.
+        authCookieService.write(httpResponse, jwt);
+
         return ResponseEntity.ok(ApiResponse.success(
                 AuthResponse.of(jwt, userMapper.toResponse(user)),
                 "Adresse email confirmée — bienvenue chez LesCracks !"));
@@ -210,10 +221,17 @@ public class AuthController {
     })
     public ResponseEntity<ApiResponse<AuthResponse>> login(
             @Valid @RequestBody LoginRequest loginRequest,
-            HttpServletRequest request) {
+            HttpServletRequest request,
+            HttpServletResponse httpResponse) {
 
-        String rateLimitKey = "LOGIN:" + getClientIp(request);
-        if (!rateLimiter.isAllowed(rateLimitKey, RateLimiterService.Limit.LOGIN)) {
+        // Rate-limit on BOTH the client IP and the target email. The IP dimension can be
+        // bypassed by spoofing X-Forwarded-For, so the per-email limit is what actually caps
+        // a brute-force attempt against a specific account (SEC-6).
+        String ipKey    = "LOGIN_IP:" + getClientIp(request);
+        String emailKey = "LOGIN_EMAIL:" + normalizeEmail(loginRequest.getEmail());
+        boolean ipOk    = rateLimiter.isAllowed(ipKey, RateLimiterService.Limit.LOGIN);
+        boolean emailOk = rateLimiter.isAllowed(emailKey, RateLimiterService.Limit.LOGIN);
+        if (!ipOk || !emailOk) {
             throw new BadRequestException(
                     "Trop de tentatives de connexion. Réessaie dans quelques minutes.");
         }
@@ -237,10 +255,16 @@ public class AuthController {
                         + "Vérifie ta boîte mail (pense à regarder tes spams) pour activer ton compte.");
             }
 
-            // Reset rate-limit counter on successful login
-            rateLimiter.reset(rateLimitKey);
+            // Reset both rate-limit counters on successful login
+            rateLimiter.reset(ipKey);
+            rateLimiter.reset(emailKey);
 
             String token = jwtService.generateTokenForUser(user.getEmail());
+
+            // The browser app authenticates with this HttpOnly cookie; the token is also
+            // returned in the body for non-browser API clients.
+            authCookieService.write(httpResponse, token);
+
             return ResponseEntity.ok(
                     ApiResponse.success(AuthResponse.of(token, userMapper.toResponse(user)),
                             "Connexion réussie."));
@@ -260,6 +284,13 @@ public class AuthController {
             HttpServletRequest httpRequest) {
 
         enforceRateLimit(httpRequest, RateLimiterService.Limit.FORGOT_PASSWORD);
+
+        // Also cap per target email so a spoofed X-Forwarded-For cannot be used to
+        // email-bomb a specific address by rotating the apparent client IP (SEC-6).
+        if (!rateLimiter.isAllowed("FORGOT_EMAIL:" + normalizeEmail(request.getEmail()),
+                RateLimiterService.Limit.FORGOT_PASSWORD)) {
+            throw new BadRequestException("Trop de requêtes. Réessaie dans quelques minutes.");
+        }
 
         User user = userService.findByEmail(request.getEmail());
         if (user != null) {
@@ -320,14 +351,21 @@ public class AuthController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401",
             description = "No valid token provided")
     })
-    public ResponseEntity<ApiResponse<Void>> logout(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
+    public ResponseEntity<ApiResponse<Void>> logout(
+            HttpServletRequest request,
+            HttpServletResponse httpResponse) {
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String jwt = authHeader.substring(7);
+        // The token may arrive in the Authorization header (API clients) or the
+        // HttpOnly cookie (browser app). Revoke whichever one was used.
+        String authHeader = request.getHeader("Authorization");
+        String jwt = (authHeader != null && authHeader.startsWith("Bearer "))
+                ? authHeader.substring(7)
+                : authCookieService.read(request);
+
+        if (jwt != null && !jwt.isBlank()) {
             try {
-                String jti            = jwtService.extractJti(jwt);
-                long   expirationMs   = jwtService.extractExpiration(jwt).getTime();
+                String jti          = jwtService.extractJti(jwt);
+                long   expirationMs = jwtService.extractExpiration(jwt).getTime();
                 if (jti != null) {
                     tokenBlacklist.revoke(jti, expirationMs);
                 }
@@ -336,6 +374,7 @@ public class AuthController {
             }
         }
 
+        authCookieService.clear(httpResponse);
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok(ApiResponse.success(null, "Déconnexion réussie."));
     }
@@ -350,6 +389,11 @@ public class AuthController {
             throw new BadRequestException(
                     "Trop de requêtes. Réessaie dans quelques minutes.");
         }
+    }
+
+    /** Normalize an email for use as a stable rate-limit key. */
+    private String normalizeEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase();
     }
 
     private String getClientIp(HttpServletRequest request) {

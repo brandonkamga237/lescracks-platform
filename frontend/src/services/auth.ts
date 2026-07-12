@@ -54,21 +54,12 @@ export interface UpdateProfileRequest {
 }
 
 class AuthService {
-  private tokenKey = 'lescracks_auth_token';
   private userKey = 'lescracks_user';
 
-  // === TOKEN MANAGEMENT ===
-  getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
-  }
-
-  setToken(token: string): void {
-    localStorage.setItem(this.tokenKey, token);
-  }
-
-  removeToken(): void {
-    localStorage.removeItem(this.tokenKey);
-  }
+  // The JWT lives in an HttpOnly cookie issued by the backend. It is deliberately NOT
+  // readable from JavaScript, so an XSS flaw anywhere in the app cannot steal it. The
+  // browser attaches it to API calls automatically; we only cache the (non-secret)
+  // user profile locally so the UI can render instantly on load.
 
   // === USER MANAGEMENT ===
   getUser(): User | null {
@@ -90,8 +81,10 @@ class AuthService {
   }
 
   // === AUTH STATE ===
+  // The cookie is not visible to JS, so the server is the source of truth:
+  // AuthContext confirms the session on load via getCurrentUser().
   isAuthenticated(): boolean {
-    return !!this.getToken() && !!this.getUser();
+    return !!this.getUser();
   }
 
   // === OAUTH REDIRECT ===
@@ -111,25 +104,19 @@ class AuthService {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify({ email, password }),
     });
 
     const json = await response.json();
-    
-    // Handle backend response format: { success: true, data: { accessToken, tokenType, user } }
+
+    // The backend set the auth cookie on this response — we only cache the profile.
     if (json.success && json.data) {
-      const authData = json.data;
-      const token = authData.accessToken || authData.token;
-      if (token) {
-        this.setToken(token);
-        // Map backend user to frontend format
-        const mappedUser = this.mapBackendUserToFrontend(authData.user);
-        this.setUser(mappedUser);
-      }
+      const mappedUser = this.mapBackendUserToFrontend(json.data.user);
+      this.setUser(mappedUser);
       return {
         success: true,
-        token,
-        user: this.mapBackendUserToFrontend(authData.user),
+        user: mappedUser,
         message: json.message
       };
     }
@@ -146,23 +133,21 @@ class AuthService {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify({ email, password, username }),
     });
 
     const json = await response.json();
 
-    // A successful registration returns no token: the account must be activated
-    // via the email verification link first. Treat success-without-token as success
-    // so the UI can show the "check your inbox" screen instead of an error.
+    // A successful registration returns no session: the account must be activated via
+    // the email verification link first. Treat success-without-user as success so the
+    // UI shows the "check your inbox" screen instead of an error.
     if (json.success) {
-      const authData = json.data;
-      const token = authData?.accessToken || authData?.token;
-      if (token) {
-        // Immediate login path (used only if email verification is disabled)
-        this.setToken(token);
-        const mappedUser = this.mapBackendUserToFrontend(authData.user);
+      if (json.data?.user) {
+        // Immediate-login path (only if email verification is ever disabled)
+        const mappedUser = this.mapBackendUserToFrontend(json.data.user);
         this.setUser(mappedUser);
-        return { success: true, token, user: mappedUser, message: json.message };
+        return { success: true, user: mappedUser, message: json.message };
       }
       return { success: true, message: json.message };
     }
@@ -175,30 +160,24 @@ class AuthService {
 
   async logout(): Promise<void> {
     try {
+      // The cookie rides along automatically; the backend revokes it and clears it.
       await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.getToken()}`,
-        },
+        credentials: 'include',
       });
     } catch (error) {
       console.warn('Logout API error (non-blocking):', error);
     } finally {
-      this.removeToken();
       this.removeUser();
     }
   }
 
   // === USER PROFILE ===
   async getCurrentUser(): Promise<User | null> {
-    const token = this.getToken();
-    if (!token) return null;
-
     try {
+      // Authenticated by the HttpOnly cookie. A 401 simply means no valid session.
       const response = await fetch(`${API_BASE_URL}/users/me`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
       });
 
       const json = await response.json();
@@ -258,17 +237,12 @@ class AuthService {
 
   // === UPDATE PROFILE ===
   async updateProfile(data: UpdateProfileRequest): Promise<AuthResponse> {
-    const token = this.getToken();
-    if (!token) {
-      return { success: false, message: 'Session expirée. Merci de te reconnecter.' };
-    }
-
     const response = await fetch(`${API_BASE_URL}/users/me`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
 
@@ -292,17 +266,12 @@ class AuthService {
 
   // === CHANGE PASSWORD ===
   async changePassword(currentPassword: string, newPassword: string): Promise<AuthResponse> {
-    const token = this.getToken();
-    if (!token) {
-      return { success: false, message: 'Session expirée. Merci de te reconnecter.' };
-    }
-
     const response = await fetch(`${API_BASE_URL}/users/me/change-password`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify({ currentPassword, newPassword }),
     });
 
@@ -324,62 +293,21 @@ class AuthService {
 
   // === DELETE ACCOUNT ===
   async deleteAccount(): Promise<AuthResponse> {
-    const token = this.getToken();
-    if (!token) {
-      return { success: false, message: 'Session expirée. Merci de te reconnecter.' };
-    }
-
     const response = await fetch(`${API_BASE_URL}/users/me`, {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
+      credentials: 'include',
     });
 
     const json = await response.json();
-    
+
     if (json.success) {
-      this.removeToken();
       this.removeUser();
-      return { success: true, message: json.message || 'Account deleted successfully' };
+      return { success: true, message: json.message || 'Compte supprimé avec succès.' };
     }
 
     return {
       success: false,
       message: json.message || 'La suppression du compte a échoué.'
-    };
-  }
-
-  // === UPGRADE TO PREMIUM ===
-  async upgradeToPremium(): Promise<AuthResponse> {
-    const token = this.getToken();
-    if (!token) {
-      return { success: false, message: 'Session expirée. Merci de te reconnecter.' };
-    }
-
-    const response = await fetch(`${API_BASE_URL}/users/upgrade-premium`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const json = await response.json();
-
-    // Handle backend response format: { success: true, data: { ... } }
-    if (json.success && json.data) {
-      this.setUser(json.data);
-      return {
-        success: true,
-        user: json.data,
-        message: json.message
-      };
-    }
-
-    return {
-      success: false,
-      message: json.message || 'La demande a échoué. Merci de réessayer.'
     };
   }
 
@@ -390,15 +318,12 @@ class AuthService {
     country: string;
     message?: string;
   }): Promise<{ success: boolean; message?: string; data?: PremiumRequestResponse }> {
-    const token = this.getToken();
-    if (!token) return { success: false, message: 'Session expirée. Merci de te reconnecter.' };
-
     const response = await fetch(`${API_BASE_URL}/premium/request`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(data),
     });
 
@@ -410,11 +335,8 @@ class AuthService {
   }
 
   async getMyPremiumRequest(): Promise<{ success: boolean; data?: PremiumRequestResponse | null }> {
-    const token = this.getToken();
-    if (!token) return { success: false };
-
     const response = await fetch(`${API_BASE_URL}/premium/my-request`, {
-      headers: { 'Authorization': `Bearer ${token}` },
+      credentials: 'include',
     });
 
     const json = await response.json();
@@ -426,15 +348,12 @@ class AuthService {
 
   // === AVATAR UPLOAD ===
   async uploadAvatar(file: File): Promise<{ success: boolean; message?: string; user?: User }> {
-    const token = this.getToken();
-    if (!token) return { success: false, message: 'Session expirée. Merci de te reconnecter.' };
-
     const formData = new FormData();
     formData.append('file', file);
 
     const response = await fetch(`${API_BASE_URL}/users/me/avatar`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
+      credentials: 'include',
       body: formData,
     });
 
@@ -469,13 +388,12 @@ class AuthService {
   }
 
   // === CHECK OAUTH CALLBACK ===
+  // After the OAuth redirect the backend has already set the auth cookie, so we just
+  // ask the server who we are.
   async handleOAuthCallback(): Promise<AuthResponse> {
-    const token = this.getToken();
-    if (token) {
-      const user = await this.getCurrentUser();
-      if (user) {
-        return { success: true, user };
-      }
+    const user = await this.getCurrentUser();
+    if (user) {
+      return { success: true, user };
     }
     
     return { success: false, message: 'Authentication failed' };

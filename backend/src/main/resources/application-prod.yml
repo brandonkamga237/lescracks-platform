@@ -42,9 +42,15 @@ spring:
     public-url: ${MINIO_PUBLIC_URL}
 
 app:
+  auth:
+    cookie:
+      # Production is https-only: the auth cookie must never travel over plain http.
+      secure: true
   jwt:
     secret: ${JWT_SECRET}
-    expiration: ${JWT_EXPIRATION:3600000}
+    # Access-token lifetime, 24h by default to match dev (no refresh-token flow yet).
+    # Override with JWT_EXPIRATION (ms) if a shorter prod session is required.
+    expiration: ${JWT_EXPIRATION:86400000}
   frontend:
     url: ${APP_URL}
   cors:

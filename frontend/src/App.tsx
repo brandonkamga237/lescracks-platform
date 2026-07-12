@@ -35,6 +35,7 @@ import Premium from './pages/Premium';
 import Postuler from './pages/Postuler';
 import VerifyEmail from './pages/VerifyEmail';
 import ProviderUnavailable from './pages/ProviderUnavailable';
+import NotFound from './pages/NotFound';
 import About from './pages/About';
 import OpenSource from './pages/OpenSource';
 import Programme from './pages/Programme';
@@ -197,7 +198,7 @@ function AppContent() {
           } />
 
           {/* 404 */}
-          <Route path="*" element={<HomeRoute />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

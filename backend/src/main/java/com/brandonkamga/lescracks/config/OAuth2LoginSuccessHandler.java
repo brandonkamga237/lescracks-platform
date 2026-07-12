@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.config;
 
+import com.brandonkamga.lescracks.security.AuthCookieService;
 import com.brandonkamga.lescracks.security.jwt.JwtService;
 import com.brandonkamga.lescracks.service.interfaces.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,24 +15,27 @@ import org.springframework.stereotype.Component;
 /**
  * Handles successful OAuth2 authentication.
  *
- * Generates a JWT token and redirects the user to the frontend using a URL
- * fragment (#token=...) so the token is never sent to the server in logs or
- * in the Referer header of subsequent navigations.
+ * Issues the JWT as an HttpOnly cookie and redirects to the frontend callback with
+ * no token in the URL at all, so it never lands in browser history, access logs or
+ * Referer headers — and JS (including any XSS payload) cannot read it.
  */
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final UserService userService;
     private final JwtService jwtService;
+    private final AuthCookieService authCookieService;
     private final String frontendUrl;
 
     public OAuth2LoginSuccessHandler(
             UserService userService,
             JwtService jwtService,
+            AuthCookieService authCookieService,
             @Value("${app.frontend.url}") String frontendUrl) {
-        this.userService  = userService;
-        this.jwtService   = jwtService;
-        this.frontendUrl  = frontendUrl;
+        this.userService       = userService;
+        this.jwtService        = jwtService;
+        this.authCookieService = authCookieService;
+        this.frontendUrl       = frontendUrl;
     }
 
     public UserService getUserService() {
@@ -52,9 +56,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         String token = jwtService.generateTokenForUser(user.getEmail());
 
-        // Use URL fragment (#) so the token is never included in server access logs
-        // or forwarded in Referer headers when the user navigates to other pages.
-        sendRedirect(response, token);
+        // Hand the token to the browser as an HttpOnly cookie rather than in the URL.
+        authCookieService.write(response, token);
+
+        sendRedirect(response);
     }
 
     protected OAuth2User extractOAuthUser(Authentication authentication) {
@@ -71,10 +76,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         return authentication.getName();
     }
 
-    protected void sendRedirect(HttpServletResponse response, String token) {
+    protected void sendRedirect(HttpServletResponse response) {
         try {
-            // Fragment (#) is never sent to the server and never appears in logs
-            response.sendRedirect(frontendUrl + "/oauth/callback#token=" + token);
+            // No token in the URL — the browser already holds it in the HttpOnly cookie.
+            response.sendRedirect(frontendUrl + "/oauth/callback");
         } catch (Exception e) {
             throw new RuntimeException("Failed to redirect after OAuth login", e);
         }

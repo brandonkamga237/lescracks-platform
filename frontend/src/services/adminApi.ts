@@ -1,6 +1,5 @@
 // src/services/adminApi.ts
 import { ENV } from '@/config/env';
-import authService from './auth';
 
 const API_BASE_URL = ENV.API_BASE_URL;
 
@@ -162,19 +161,12 @@ export interface PaginatedResponse<T> {
 }
 
 class AdminApiService {
-  private getHeaders(includeAuth = true): Record<string, string> {
-    const headers: Record<string, string> = {
+  // Auth rides on the HttpOnly cookie the browser attaches automatically — there is
+  // no token in JS to put in a header.
+  private getHeaders(_includeAuth = true): Record<string, string> {
+    return {
       'Content-Type': 'application/json',
     };
-    
-    if (includeAuth) {
-      const token = authService.getToken();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-    }
-    
-    return headers;
   }
 
   private async request<T>(
@@ -183,6 +175,7 @@ class AdminApiService {
   ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
     const config: RequestInit = {
+      credentials: 'include',
       ...options,
       headers: {
         ...this.getHeaders(),

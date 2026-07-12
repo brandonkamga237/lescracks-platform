@@ -67,6 +67,11 @@ spring:
       max-request-size: 10MB
 
 app:
+  auth:
+    cookie:
+      # Local dev runs over plain http, so the auth cookie cannot be Secure-only.
+      # Production (application-prod.yml) overrides this to true.
+      secure: ${COOKIE_SECURE:false}
   jwt:
     # DEV-ONLY fallback. Production (application-prod.yml) requires JWT_SECRET from the
     # environment with no default, so this value can never sign production tokens.

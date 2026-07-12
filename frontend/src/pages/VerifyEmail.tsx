@@ -4,7 +4,6 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { authService } from '@/services/auth';
 import { ENV } from '@/config/env';
 
 const VerifyEmail = () => {
@@ -27,16 +26,14 @@ const VerifyEmail = () => {
       try {
         const res = await fetch(`${ENV.API_BASE_URL}/auth/verify-email?token=${encodeURIComponent(token)}`, {
           method: 'POST',
+          credentials: 'include',
         });
         const json = await res.json();
 
         if (res.ok && json.success) {
-          // Auto-login after verification: the backend returns the JWT as `accessToken`.
-          const token = json.data?.accessToken || json.data?.token;
-          if (token) {
-            authService.setToken(token);
-            await refreshUser();
-          }
+          // The backend set the auth cookie on this response, logging the user straight
+          // in — just load the profile it identifies.
+          await refreshUser();
           setStatus('success');
           setMessage(json.message || 'Adresse email confirmée !');
           // Redirect to resources after 2s

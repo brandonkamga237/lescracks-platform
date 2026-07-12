@@ -81,7 +81,7 @@ const Profile = () => {
     if (!isLearner) return;
     setLoadingLearner(true);
     fetch('/api/learners/me', {
-      headers: { Authorization: `Bearer ${authService.getToken()}` },
+      credentials: 'include',
     })
       .then((r) => r.json())
       .then((json) => {
@@ -107,9 +107,9 @@ const Profile = () => {
       const res = await fetch('/api/learners/me', {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${authService.getToken()}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(learnerData),
       });
       const json = await res.json();
