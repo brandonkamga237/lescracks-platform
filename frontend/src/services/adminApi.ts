@@ -1,4 +1,5 @@
 // src/services/adminApi.ts
+import type { ApplicationStage } from '@/lib/applicationPipeline';
 import { ENV } from '@/config/env';
 
 const API_BASE_URL = ENV.API_BASE_URL;
@@ -50,7 +51,7 @@ export interface AdminApplication {
   eventTitle?: string;
   applicationTypeId: number;
   applicationTypeName: string;
-  status: 'pending' | 'accepted' | 'rejected';
+  status: ApplicationStage;
   fullName?: string;
   emailAddress?: string;
   whatsappNumber?: string;

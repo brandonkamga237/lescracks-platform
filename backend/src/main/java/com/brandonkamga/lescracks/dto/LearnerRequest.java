@@ -3,6 +3,10 @@ package com.brandonkamga.lescracks.dto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -34,4 +38,34 @@ public class LearnerRequest {
 
     @Builder.Default
     private int displayOrder = 0;
+
+    // ── Evidence ────────────────────────────────────────────────────────────
+
+    /** Real dates. These are what let us publish a MEASURED duration. */
+    private LocalDate startedAt;
+    private LocalDate completedAt;
+
+    private String testimonial;
+    private String githubUrl;
+
+    /** Shipped work, replaced wholesale on update. */
+    @Builder.Default
+    private List<LearnerProjectRequest> projects = new ArrayList<>();
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LearnerProjectRequest {
+        @NotBlank(message = "Le titre du projet est obligatoire")
+        private String title;
+
+        private String description;
+        private String repoUrl;
+        private String liveUrl;
+        private String imageUrl;
+
+        @Builder.Default
+        private int displayOrder = 0;
+    }
 }

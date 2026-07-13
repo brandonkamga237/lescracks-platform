@@ -1,28 +1,11 @@
 // src/pages/admin/AdminApplications.tsx
 import { useState, useEffect } from 'react';
 import {
-  ClipboardList, Loader2, Trash2, CheckCircle, XCircle, Clock,
+  ClipboardList, Loader2, Trash2, CheckCircle, XCircle,
   Eye, X, Phone, Mail, User, Calendar, MessageSquare,
 } from 'lucide-react';
 import adminApi, { AdminApplication } from '@/services/adminApi';
-
-const STATUS_CONFIG = {
-  pending: {
-    label: 'En attente',
-    color: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-    icon: <Clock className="w-3 h-3" />,
-  },
-  accepted: {
-    label: 'Accepté',
-    color: 'bg-green-100 text-green-700 border-green-200',
-    icon: <CheckCircle className="w-3 h-3" />,
-  },
-  rejected: {
-    label: 'Refusé',
-    color: 'bg-red-100 text-red-700 border-red-200',
-    icon: <XCircle className="w-3 h-3" />,
-  },
-};
+import { FUNNEL, ALL_STAGES, stageMeta, nextStage } from '@/lib/applicationPipeline';
 
 const AdminApplications = () => {
   const [applications, setApplications] = useState<AdminApplication[]>([]);
@@ -63,7 +46,7 @@ const AdminApplications = () => {
   };
 
   const handleDelete = async (id: number, status: string) => {
-    if (status === 'accepted') return;
+    if (status === 'ACCEPTED') return;
     if (!confirm('Supprimer cette candidature ?')) return;
     try {
       await adminApi.deleteApplication(id);
@@ -75,12 +58,21 @@ const AdminApplications = () => {
     }
   };
 
-  const stats = {
-    total: applications.length,
-    pending: applications.filter(a => a.status === 'pending').length,
-    accepted: applications.filter(a => a.status === 'accepted').length,
-    rejected: applications.filter(a => a.status === 'rejected').length,
-  };
+  const total = applications.length;
+  const countAt = (key: string) => applications.filter(a => a.status === key).length;
+
+  /**
+   * The funnel is cumulative, not a headcount per box: someone who has STARTED has,
+   * by definition, also been received, reviewed and accepted. Counting only the
+   * people sitting in each stage right now would make every rate look catastrophic.
+   */
+  const reachedStage = (index: number) =>
+    applications.filter(a => {
+      const i = FUNNEL.findIndex(s => s.key === a.status);
+      return i >= index; // REJECTED gives -1, so it never counts as "reached"
+    }).length;
+
+  const rejected = countAt('REJECTED');
 
   const filtered = applications.filter(a =>
     filterStatus === 'all' || a.status === filterStatus
@@ -102,39 +94,84 @@ const AdminApplications = () => {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Candidatures</h2>
           <p className="text-sm text-gray-500">
-            {stats.total} candidature{stats.total !== 1 ? 's' : ''} — Accompagnement 360
+            {total} candidature{total !== 1 ? 's' : ''} — Accompagnement 360
           </p>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: 'Total', value: stats.total, color: 'text-gray-700', bg: 'bg-gray-50 border border-gray-200' },
-          { label: 'En attente', value: stats.pending, color: 'text-yellow-600', bg: 'bg-yellow-50 border border-yellow-100' },
-          { label: 'Acceptés', value: stats.accepted, color: 'text-green-600', bg: 'bg-green-50 border border-green-100' },
-          { label: 'Refusés', value: stats.rejected, color: 'text-red-600', bg: 'bg-red-50 border border-red-100' },
-        ].map(s => (
-          <div key={s.label} className={`p-4 rounded-xl ${s.bg}`}>
-            <p className={`text-3xl font-bold ${s.color}`}>{s.value}</p>
-            <p className="text-sm text-gray-600 mt-1">{s.label}</p>
+      {/* ── Funnel ───────────────────────────────────────────────────────────
+          Cumulative: each bar is everyone who reached that stage OR went past it.
+          The conversion rate under each step is where you actually lose people. */}
+      <div className="bg-white rounded-xl border border-gray-200 p-5">
+        <div className="flex items-baseline justify-between mb-4">
+          <h3 className="font-semibold text-gray-900">Entonnoir de recrutement</h3>
+          <p className="text-sm text-gray-500">
+            {total} candidature{total !== 1 ? 's' : ''}
+            {rejected > 0 && <> · <span className="text-rose-600">{rejected} refusée{rejected !== 1 ? 's' : ''}</span></>}
+          </p>
+        </div>
+
+        {total === 0 ? (
+          <p className="text-sm text-gray-400 py-6 text-center">
+            Aucune candidature pour l'instant. L'entonnoir se remplira dès la première.
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {FUNNEL.map((stage, i) => {
+              const reached = reachedStage(i);
+              const pctOfTotal = total > 0 ? Math.round((reached / total) * 100) : 0;
+              const prev = i === 0 ? total : reachedStage(i - 1);
+              const conv = prev > 0 ? Math.round((reached / prev) * 100) : 0;
+
+              return (
+                <button
+                  key={stage.key}
+                  onClick={() => setFilterStatus(stage.key)}
+                  title={stage.hint}
+                  className={`text-left p-3 rounded-lg border transition-colors ${
+                    filterStatus === stage.key
+                      ? 'border-gold bg-gold/5'
+                      : 'border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className={`w-2 h-2 rounded-full ${stage.dot}`} />
+                    <span className="text-xs font-medium text-gray-600 truncate">{stage.label}</span>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900 tabular-nums">{reached}</p>
+
+                  {/* volume bar */}
+                  <div className="mt-2 h-1 rounded bg-gray-100 overflow-hidden">
+                    <div className={`h-full ${stage.dot}`} style={{ width: `${pctOfTotal}%` }} />
+                  </div>
+
+                  {/* the number that matters: how many survived the PREVIOUS step */}
+                  <p className="mt-1.5 text-[11px] text-gray-400 tabular-nums">
+                    {i === 0 ? `${pctOfTotal}% du total` : `${conv}% depuis ${FUNNEL[i - 1].label.toLowerCase()}`}
+                  </p>
+                </button>
+              );
+            })}
           </div>
-        ))}
+        )}
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-2">
-        {['all', 'pending', 'accepted', 'rejected'].map(s => (
+      {/* Filters — every stage, generated from the pipeline definition */}
+      <div className="flex gap-2 flex-wrap">
+        {[{ key: 'all', label: 'Toutes' }, ...ALL_STAGES.map(s => ({ key: s.key, label: s.label }))].map(s => (
           <button
-            key={s}
-            onClick={() => setFilterStatus(s)}
+            key={s.key}
+            onClick={() => setFilterStatus(s.key)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              filterStatus === s
+              filterStatus === s.key
                 ? 'bg-gold text-black'
                 : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
             }`}
           >
-            {s === 'all' ? 'Tous' : STATUS_CONFIG[s as keyof typeof STATUS_CONFIG]?.label}
+            {s.label}
+            {s.key !== 'all' && (
+              <span className="ml-1.5 text-xs opacity-60 tabular-nums">{countAt(s.key)}</span>
+            )}
           </button>
         ))}
       </div>
@@ -165,8 +202,9 @@ const AdminApplications = () => {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filtered.map(app => {
-                  const statusInfo = STATUS_CONFIG[app.status];
-                  const canDelete = app.status !== 'accepted';
+                  const statusInfo = stageMeta(app.status);
+                  const next = nextStage(app.status);
+                  const canDelete = app.status !== 'ACCEPTED';
 
                   return (
                     <tr key={app.id} className="hover:bg-gray-50 transition-colors">
@@ -179,8 +217,8 @@ const AdminApplications = () => {
                         {app.whatsappNumber || <span className="text-gray-300 italic">—</span>}
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${statusInfo.color}`}>
-                          {statusInfo.icon}
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${statusInfo.chip}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot}`} />
                           {statusInfo.label}
                         </span>
                       </td>
@@ -192,7 +230,6 @@ const AdminApplications = () => {
                           <Loader2 className="w-4 h-4 animate-spin text-gold" />
                         ) : (
                           <div className="flex items-center gap-1">
-                            {/* Voir détail */}
                             <button
                               onClick={() => setDetailApp(app)}
                               className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"
@@ -200,27 +237,31 @@ const AdminApplications = () => {
                             >
                               <Eye className="w-4 h-4" />
                             </button>
-                            {/* Accepter */}
-                            {app.status !== 'accepted' && (
+
+                            {/* Advance ONE step. Jumping straight to "accepted" is what
+                                destroyed the funnel before: nothing was ever recorded in
+                                between, so drop-off was invisible. */}
+                            {next && (
                               <button
-                                onClick={() => handleStatusUpdate(app.id, 'accepted')}
-                                className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg"
-                                title="Accepter"
+                                onClick={() => handleStatusUpdate(app.id, next.key)}
+                                className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50 rounded-lg"
+                                title={`Faire avancer : ${next.label} — ${next.hint}`}
                               >
-                                <CheckCircle className="w-4 h-4" />
+                                <CheckCircle className="w-3.5 h-3.5" />
+                                {next.label}
                               </button>
                             )}
-                            {/* Refuser */}
-                            {app.status !== 'rejected' && (
+
+                            {app.status !== 'REJECTED' && (
                               <button
-                                onClick={() => handleStatusUpdate(app.id, 'rejected')}
+                                onClick={() => handleStatusUpdate(app.id, 'REJECTED')}
                                 className="p-1.5 text-orange-600 hover:bg-orange-50 rounded-lg"
                                 title="Refuser"
                               >
                                 <XCircle className="w-4 h-4" />
                               </button>
                             )}
-                            {/* Supprimer — désactivé si accepté */}
+
                             <button
                               onClick={() => handleDelete(app.id, app.status)}
                               disabled={!canDelete}
@@ -269,9 +310,9 @@ const AdminApplications = () => {
               {/* Statut */}
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-500">Statut</span>
-                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-medium ${STATUS_CONFIG[detailApp.status].color}`}>
-                  {STATUS_CONFIG[detailApp.status].icon}
-                  {STATUS_CONFIG[detailApp.status].label}
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-medium ${stageMeta(detailApp.status).chip}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${stageMeta(detailApp.status).dot}`} />
+                  {stageMeta(detailApp.status).label}
                 </span>
               </div>
 
@@ -306,21 +347,23 @@ const AdminApplications = () => {
 
             {/* Actions modal */}
             <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
-              {detailApp.status !== 'accepted' && (
+              {/* Advance one stage, so the funnel records where the candidate actually is. */}
+              {nextStage(detailApp.status) && (
                 <button
-                  onClick={() => handleStatusUpdate(detailApp.id, 'accepted')}
+                  onClick={() => handleStatusUpdate(detailApp.id, nextStage(detailApp.status)!.key)}
                   disabled={updatingId === detailApp.id}
+                  title={nextStage(detailApp.status)!.hint}
                   className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
                 >
                   {updatingId === detailApp.id
                     ? <Loader2 className="w-4 h-4 animate-spin" />
                     : <CheckCircle className="w-4 h-4" />}
-                  Accepter
+                  Passer à « {nextStage(detailApp.status)!.label} »
                 </button>
               )}
-              {detailApp.status !== 'rejected' && (
+              {detailApp.status !== 'REJECTED' && (
                 <button
-                  onClick={() => handleStatusUpdate(detailApp.id, 'rejected')}
+                  onClick={() => handleStatusUpdate(detailApp.id, 'REJECTED')}
                   disabled={updatingId === detailApp.id}
                   className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors disabled:opacity-50"
                 >

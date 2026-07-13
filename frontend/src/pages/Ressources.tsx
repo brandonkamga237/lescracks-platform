@@ -12,7 +12,6 @@ import {
   PlayCircle,
   Lock,
   Download,
-  Loader2,
   Search,
   Crown,
   Eye,

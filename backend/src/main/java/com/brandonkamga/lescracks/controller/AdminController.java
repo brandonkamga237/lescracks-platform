@@ -133,9 +133,9 @@ public class AdminController {
         stats.put("premiumConversionRate", premiumRate);
 
         // Application funnel
-        long appPending = applicationRepository.countByStatus(ApplicationStatus.pending);
-        long appAccepted = applicationRepository.countByStatus(ApplicationStatus.accepted);
-        long appRejected = applicationRepository.countByStatus(ApplicationStatus.rejected);
+        long appPending = applicationRepository.countByStatus(ApplicationStatus.RECEIVED);
+        long appAccepted = applicationRepository.countByStatus(ApplicationStatus.ACCEPTED);
+        long appRejected = applicationRepository.countByStatus(ApplicationStatus.REJECTED);
         stats.put("applicationsByStatus", Map.of(
                 "En attente", appPending,
                 "Accepté", appAccepted,

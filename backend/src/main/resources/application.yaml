@@ -21,9 +21,21 @@ spring:
       idle-timeout: 300000
       max-lifetime: 1200000
 
+  # Flyway owns the schema in every environment. Hibernate only validates that the
+  # entities match it. Production already runs ddl-auto:validate, so without this a
+  # new entity field would simply refuse to start.
+  #
+  # baseline-on-migrate adopts the schema that already exists (V1 is the dump of it)
+  # and marks it as applied, so V1 never re-runs against a live database.
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 1
+    locations: classpath:db/migration
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:

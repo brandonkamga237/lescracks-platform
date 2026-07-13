@@ -3,7 +3,12 @@ package com.brandonkamga.lescracks.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Table(name = "learners")
@@ -66,4 +71,38 @@ public class Learner {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    // ── Evidence ────────────────────────────────────────────────────────────
+    // A photo and a bio prove nothing. These are the fields that let a stranger
+    // check the claim instead of taking our word for it.
+
+    /** Real start of the accompaniment. With completedAt, gives a MEASURED duration. */
+    @Column(name = "started_at")
+    private LocalDate startedAt;
+
+    /** Real end. Null while still in progress. */
+    @Column(name = "completed_at")
+    private LocalDate completedAt;
+
+    /** The learner's own words. Only credible because it sits next to their real name and face. */
+    @Column(columnDefinition = "TEXT")
+    private String testimonial;
+
+    @Column(name = "github_url")
+    private String githubUrl;
+
+    /**
+     * What they actually shipped. This is the only part a reader can verify without
+     * trusting us, which makes it the most valuable thing on the profile.
+     */
+    @OneToMany(mappedBy = "learner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy("displayOrder ASC, id ASC")
+    @Builder.Default
+    private List<LearnerProject> projects = new ArrayList<>();
+
+    /** Measured duration in months, or empty while the journey is still running. */
+    public Optional<Integer> durationInMonths() {
+        if (startedAt == null || completedAt == null) return Optional.empty();
+        return Optional.of((int) ChronoUnit.MONTHS.between(startedAt, completedAt));
+    }
 }

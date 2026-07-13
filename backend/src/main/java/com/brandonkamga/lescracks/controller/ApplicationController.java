@@ -8,6 +8,7 @@ import com.brandonkamga.lescracks.domain.User;
 import com.brandonkamga.lescracks.dto.ApiResponse;
 import com.brandonkamga.lescracks.dto.ApplicationRequest;
 import com.brandonkamga.lescracks.dto.ApplicationResponse;
+import com.brandonkamga.lescracks.exception.BadRequestException;
 import com.brandonkamga.lescracks.exception.ResourceNotFoundException;
 import com.brandonkamga.lescracks.repository.ApplicationTypeRepository;
 import com.brandonkamga.lescracks.repository.EventRepository;
@@ -118,12 +119,24 @@ public class ApplicationController {
         Application application = applicationService.findByIdOptional(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Application", "id", id));
 
-        ApplicationStatus newStatus = ApplicationStatus.valueOf(body.get("status").toLowerCase());
+        String raw = body.get("status");
+        if (raw == null || raw.isBlank()) {
+            throw new BadRequestException("Le statut est obligatoire.");
+        }
+
+        final ApplicationStatus newStatus;
+        try {
+            newStatus = ApplicationStatus.valueOf(raw.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Statut de candidature inconnu : " + raw);
+        }
+
         application.setStatus(newStatus);
+        application.setStatusChangedAt(LocalDateTime.now());
         Application saved = applicationService.save(application);
 
         // Email automatique quand accepté
-        if (newStatus == ApplicationStatus.accepted && saved.getEmailAddress() != null) {
+        if (newStatus == ApplicationStatus.ACCEPTED && saved.getEmailAddress() != null) {
             mailService.sendApplicationAccepted(
                     saved.getEmailAddress(),
                     saved.getFullName() != null ? saved.getFullName() : "Candidat",
@@ -142,7 +155,7 @@ public class ApplicationController {
         Application application = applicationService.findByIdOptional(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Application", "id", id));
 
-        if (application.getStatus() == ApplicationStatus.accepted) {
+        if (application.getStatus() == ApplicationStatus.ACCEPTED) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(ApiResponse.error("Une candidature acceptée ne peut pas être supprimée"));
         }
@@ -171,7 +184,7 @@ public class ApplicationController {
                 .user(user)
                 .event(event)
                 .applicationType(applicationType)
-                .status(ApplicationStatus.pending)
+                .status(ApplicationStatus.RECEIVED)
                 .fullName(request.getFullName())
                 .emailAddress(request.getEmailAddress())
                 .whatsappNumber(request.getWhatsappNumber())

@@ -41,7 +41,6 @@ const TYPE_COLORS: Record<string, string> = {
   HACKATHON: 'bg-pink-100 text-pink-700',
   MEETUP:    'bg-blue-100 text-blue-700',
   WORKSHOP:  'bg-yellow-100 text-yellow-700',
-  FORMATION: 'bg-green-100 text-green-700',
 };
 
 /** Combine a date string + optional time into a LocalDateTime string */

@@ -97,6 +97,18 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Flyway — owns the schema. Production runs ddl-auto:validate, so Hibernate
+		     will refuse to start if a new entity field has no matching column. Every
+		     schema change must therefore ship as a versioned migration. -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
+
 		<!-- ✅ Lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>

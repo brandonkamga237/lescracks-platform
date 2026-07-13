@@ -55,4 +55,12 @@ public class Application {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    /** When the candidate last moved stage — lets the funnel show velocity, not just counts. */
+    @Column(name = "status_changed_at")
+    private LocalDateTime statusChangedAt;
+
+    /** Private note for the team (why we advanced or declined). Never exposed publicly. */
+    @Column(name = "admin_note", columnDefinition = "TEXT")
+    private String adminNote;
 }

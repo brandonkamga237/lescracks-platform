@@ -205,7 +205,7 @@ public class DataInitializer implements CommandLineRunner {
 
         // Initialize Event Types
         if (eventTypeRepository.count() == 0) {
-            for (String typeName : new String[]{"BOOTCAMP", "HACKATHON", "MEETUP", "WORKSHOP", "FORMATION"}) {
+            for (String typeName : new String[]{"BOOTCAMP", "HACKATHON", "MEETUP", "WORKSHOP"}) {
                 eventTypeRepository.save(EventType.builder().name(typeName).build());
             }
         }

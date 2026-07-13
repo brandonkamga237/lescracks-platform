@@ -61,7 +61,7 @@ const Evenements = () => {
     return matchesSearch && matchesType;
   });
 
-  const eventTypes = ['BOOTCAMP', 'HACKATHON', 'MEETUP', 'WORKSHOP', 'FORMATION'];
+  const eventTypes = ['BOOTCAMP', 'HACKATHON', 'MEETUP', 'WORKSHOP'];
 
   return (
     <Layout>
