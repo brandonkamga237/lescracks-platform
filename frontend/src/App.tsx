@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, MotionConfig } from 'framer-motion';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
@@ -207,15 +207,22 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-            <AppContent />
-          </div>
-        </Router>
-      </AuthProvider>
-    </ThemeProvider>
+    /*
+      reducedMotion="user" makes every framer-motion animation in the app honour the
+      OS "reduce motion" setting. The CSS media query alone cannot do this: framer
+      animates via JS-driven inline styles, so it ignores CSS transition overrides.
+    */
+    <MotionConfig reducedMotion="user">
+      <ThemeProvider>
+        <AuthProvider>
+          <Router>
+            <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
+              <AppContent />
+            </div>
+          </Router>
+        </AuthProvider>
+      </ThemeProvider>
+    </MotionConfig>
   );
 }
 

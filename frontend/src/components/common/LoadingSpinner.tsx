@@ -29,7 +29,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       transition: {
         duration: 1,
         repeat: Infinity,
-        delay: i * 0.2,
+        delay: 0,
         ease: "easeInOut"
       }
     })

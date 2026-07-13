@@ -76,7 +76,7 @@ const AsymmetricHero = () => {
               <span>de la Tech</span>
             </h1>
 
-            <p className={`text-xl max-w-xl mx-auto mb-10 ${isDark ? 'text-white/50' : 'text-white/70'}`}>
+            <p className={`text-xl max-w-xl mx-auto mb-10 ${isDark ? 'text-t3' : 'text-t1'}`}>
               Programme intensif pour transformer votre potentiel en expertise concrete.
             </p>
 
@@ -92,7 +92,7 @@ const AsymmetricHero = () => {
                 to="/evenements"
                 className={`inline-flex items-center justify-center gap-2 px-10 py-5 border hover:border-gold/30 transition-colors text-lg ${
                   isDark 
-                    ? 'border-white/10 text-white/60 hover:text-white' 
+                    ? 'border-line text-t2 hover:text-white' 
                     : 'border-black/30 text-black/70 hover:text-black'
                 }`}
               >
@@ -110,7 +110,7 @@ const AsymmetricHero = () => {
         transition={{ delay: 1.5 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1"
       >
-        <span className={`text-[10px] tracking-widest ${isDark ? 'text-white/30' : 'text-black/40'}`}>SCROLL</span>
+        <span className={`text-[11px] tracking-widest ${isDark ? 'text-t4' : 'text-black/40'}`}>SCROLL</span>
         <motion.div
           animate={{ y: [0, 6, 0] }}
           transition={{ repeat: Infinity, duration: 1.5 }}

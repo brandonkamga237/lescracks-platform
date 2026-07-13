@@ -125,7 +125,7 @@ const Premium = () => {
         </div>
         <div>
           <h2 className="text-xl font-display font-semibold">Demande en cours</h2>
-          <p className="text-white/40 text-sm">Notre équipe va vous contacter sur WhatsApp</p>
+          <p className="text-t3 text-sm">Notre équipe va vous contacter sur WhatsApp</p>
         </div>
       </div>
 
@@ -136,19 +136,19 @@ const Premium = () => {
 
       <div className="grid md:grid-cols-2 gap-4 text-sm">
         <div>
-          <span className="text-white/40">WhatsApp</span>
+          <span className="text-t3">WhatsApp</span>
           <p className="text-white mt-1">{req.whatsappNumber}</p>
         </div>
         <div>
-          <span className="text-white/40">Email de contact</span>
+          <span className="text-t3">Email de contact</span>
           <p className="text-white mt-1">{req.contactEmail}</p>
         </div>
         <div>
-          <span className="text-white/40">Pays</span>
+          <span className="text-t3">Pays</span>
           <p className="text-white mt-1">{req.country}</p>
         </div>
         <div>
-          <span className="text-white/40">Soumise le</span>
+          <span className="text-t3">Soumise le</span>
           <p className="text-white mt-1">
             {new Date(req.createdAt).toLocaleDateString('fr-FR', {
               day: '2-digit', month: 'long', year: 'numeric',
@@ -157,7 +157,7 @@ const Premium = () => {
         </div>
         {req.message && (
           <div className="md:col-span-2">
-            <span className="text-white/40">Message</span>
+            <span className="text-t3">Message</span>
             <p className="text-white mt-1">{req.message}</p>
           </div>
         )}
@@ -187,7 +187,7 @@ const Premium = () => {
             <h1 className="text-3xl sm:text-4xl font-display font-bold mb-3">
               {isPremium ? 'Compte PREMIUM actif' : 'Passer au compte PREMIUM'}
             </h1>
-            <p className="text-white/60 text-lg max-w-xl mx-auto">
+            <p className="text-t2 text-lg max-w-xl mx-auto">
               {isPremium
                 ? 'Vous bénéficiez de tous les avantages PREMIUM.'
                 : 'Accédez à tous les contenus exclusifs et boostez votre apprentissage.'}
@@ -199,12 +199,12 @@ const Premium = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 p-6 rounded-2xl bg-white/5 border border-white/10"
+            className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 p-6 rounded-2xl bg-white/5 border border-line"
           >
             {SOCIAL_PROOF_STATS.map((stat, i) => (
               <div key={i} className="text-center">
                 <p className="text-2xl font-display font-bold text-gold">{stat.value}</p>
-                <p className="text-xs text-white/50 mt-1">{stat.label}</p>
+                <p className="text-xs text-t3 mt-1">{stat.label}</p>
               </div>
             ))}
           </motion.div>
@@ -216,7 +216,7 @@ const Premium = () => {
             transition={{ delay: 0.08 }}
             className="mb-10 px-6 py-4 border-l-2 border-gold/60 bg-gold/5 rounded-r-xl"
           >
-            <p className="text-white/70 text-sm italic leading-relaxed">
+            <p className="text-t1 text-sm italic leading-relaxed">
               "LesCracks Premium m'a donné accès à des ressources que je n'aurais jamais trouvées seul. En 3 mois j'ai décroché mon premier job tech."
             </p>
             <footer className="mt-2 text-xs text-gold font-medium">— Joël K., Développeur Full-Stack · Yaoundé</footer>
@@ -230,11 +230,11 @@ const Premium = () => {
             className="grid sm:grid-cols-2 gap-4 mb-10"
           >
             {PREMIUM_BENEFITS.map((benefit, i) => (
-              <div key={i} className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10">
+              <div key={i} className="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-line">
                 <div className="w-9 h-9 rounded-lg bg-gold/20 flex items-center justify-center text-gold flex-shrink-0">
                   {benefit.icon}
                 </div>
-                <span className="text-white/80 text-sm">{benefit.text}</span>
+                <span className="text-t1 text-sm">{benefit.text}</span>
               </div>
             ))}
           </motion.div>
@@ -252,7 +252,7 @@ const Premium = () => {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold">Vous êtes PREMIUM</h2>
-                  <p className="text-white/50 text-sm">Profitez de tous les avantages exclusifs</p>
+                  <p className="text-t3 text-sm">Profitez de tous les avantages exclusifs</p>
                 </div>
               </div>
 
@@ -318,7 +318,7 @@ const Premium = () => {
                 <CheckCircle className="w-8 h-8 text-green-400" />
               </div>
               <h2 className="text-2xl font-display font-bold mb-3">Demande envoyée !</h2>
-              <p className="text-white/70 text-lg leading-relaxed max-w-md mx-auto">
+              <p className="text-t1 text-lg leading-relaxed max-w-md mx-auto">
                 Votre demande a été enregistrée.<br />
                 Notre équipe vous contactera sur WhatsApp pour finaliser votre abonnement.
                 Un email de confirmation a été envoyé à <strong className="text-white">{existingRequest?.contactEmail}</strong>.
@@ -343,7 +343,7 @@ const Premium = () => {
                 </div>
                 <div>
                   <h2 className="text-xl font-display font-semibold">Faire une demande</h2>
-                  <p className="text-white/40 text-sm">
+                  <p className="text-t3 text-sm">
                     Notre équipe vous contactera sur WhatsApp pour finaliser
                   </p>
                 </div>
@@ -351,7 +351,7 @@ const Premium = () => {
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-sm text-white/60 mb-2">
+                  <label className="block text-sm text-t2 mb-2">
                     <MessageCircle className="w-4 h-4 inline mr-1" />
                     Numéro WhatsApp <span className="text-red-400">*</span>
                   </label>
@@ -359,15 +359,15 @@ const Premium = () => {
                     type="tel"
                     value={whatsappNumber}
                     onChange={(e) => setWhatsappNumber(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
+                    className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
                     placeholder="+237 600 000 000"
                     required
                   />
-                  <p className="text-white/30 text-xs mt-1">Incluez l'indicatif pays (ex: +237 pour le Cameroun)</p>
+                  <p className="text-t4 text-xs mt-1">Incluez l'indicatif pays (ex: +237 pour le Cameroun)</p>
                 </div>
 
                 <div>
-                  <label className="block text-sm text-white/60 mb-2">
+                  <label className="block text-sm text-t2 mb-2">
                     <Mail className="w-4 h-4 inline mr-1" />
                     Email de contact <span className="text-red-400">*</span>
                   </label>
@@ -375,17 +375,17 @@ const Premium = () => {
                     type="email"
                     value={contactEmail}
                     onChange={(e) => setContactEmail(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
+                    className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
                     placeholder="votre@email.com"
                     required
                   />
-                  <p className="text-white/30 text-xs mt-1">
+                  <p className="text-t4 text-xs mt-1">
                     Email sur lequel recevoir la confirmation d'activation et les rappels d'expiration
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm text-white/60 mb-2">
+                  <label className="block text-sm text-t2 mb-2">
                     <MapPin className="w-4 h-4 inline mr-1" />
                     Pays <span className="text-red-400">*</span>
                   </label>
@@ -393,14 +393,14 @@ const Premium = () => {
                     type="text"
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
+                    className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
                     placeholder="Cameroun"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm text-white/60 mb-2">
+                  <label className="block text-sm text-t2 mb-2">
                     <MessageSquare className="w-4 h-4 inline mr-1" />
                     Message (optionnel)
                   </label>
@@ -408,7 +408,7 @@ const Premium = () => {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     rows={3}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold resize-none"
+                    className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold resize-none"
                     placeholder="Partagez vos motivations ou posez vos questions..."
                   />
                 </div>
@@ -434,7 +434,7 @@ const Premium = () => {
                       </>
                     )}
                   </button>
-                  <p className="text-white/30 text-xs text-center mt-3">
+                  <p className="text-t4 text-xs text-center mt-3">
                     Aucun paiement immédiat. Notre équipe vous contactera pour finaliser.
                   </p>
                 </div>

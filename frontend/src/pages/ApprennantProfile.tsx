@@ -26,8 +26,8 @@ const STATUS_CONFIG: Record<LearnerStatus, { label: string; icon: React.ElementT
   TERMINE_SANS_CERTIFICAT: {
     label: 'Diplômé LesCracks',
     icon: BookOpen,
-    color: 'text-white/70',
-    bg: 'bg-white/5 border-white/10',
+    color: 'text-t1',
+    bg: 'bg-white/5 border-line',
     accent: 'from-white/4',
   },
 };
@@ -60,7 +60,7 @@ export default function ApprennantProfile() {
         <div className="flex flex-col items-center justify-center py-40 px-4 text-center">
           <p className="text-5xl mb-4">🤷</p>
           <h1 className="text-2xl font-bold text-white mb-2">Profil introuvable</h1>
-          <p className="text-white/40 mb-8">Cet apprenant n'existe pas ou n'est plus visible.</p>
+          <p className="text-t3 mb-8">Cet apprenant n'existe pas ou n'est plus visible.</p>
           <Link to="/apprenants" className="flex items-center gap-2 text-gold hover:text-gold/80 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Voir tous les apprenants
           </Link>
@@ -91,7 +91,7 @@ export default function ApprennantProfile() {
         <div className="relative max-w-3xl mx-auto px-4 pt-8 pb-10">
           <Link
             to="/apprenants"
-            className="inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors mb-8"
+            className="inline-flex items-center gap-2 text-sm text-t3 hover:text-white transition-colors mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
             Success Stories
@@ -106,11 +106,11 @@ export default function ApprennantProfile() {
               <img
                 src={learner.photoUrl}
                 alt={learner.fullName}
-                className={`w-24 h-24 rounded-2xl object-cover border-2 flex-shrink-0 ${isCertified ? 'border-gold/40' : 'border-white/15'}`}
+                className={`w-24 h-24 rounded-2xl object-cover border-2 flex-shrink-0 ${isCertified ? 'border-gold/40' : 'border-line'}`}
               />
             ) : (
               <div className={`w-24 h-24 rounded-2xl flex items-center justify-center text-3xl font-bold flex-shrink-0 ${
-                isCertified ? 'bg-gold/15 border border-gold/30 text-gold' : 'bg-white/8 border border-white/15 text-white/60'
+                isCertified ? 'bg-gold/15 border border-gold/30 text-gold' : 'bg-white/8 border border-line text-t2'
               }`}>
                 {learner.firstName[0]}{learner.lastName[0]}
               </div>
@@ -118,7 +118,7 @@ export default function ApprennantProfile() {
 
             <div>
               {learner.cohort && (
-                <p className="text-xs text-white/35 uppercase tracking-widest mb-1">Cohorte {learner.cohort}</p>
+                <p className="text-xs text-t4 uppercase tracking-widest mb-1">Cohorte {learner.cohort}</p>
               )}
               <h1 className="text-3xl md:text-4xl font-display font-bold text-white">{learner.fullName}</h1>
 
@@ -143,10 +143,10 @@ export default function ApprennantProfile() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-white/4 border border-white/8 rounded-2xl p-6"
+                className="bg-white/4 border border-line-soft rounded-2xl p-6"
               >
                 <p className="text-4xl text-gold/20 font-serif leading-none mb-3 select-none">"</p>
-                <p className="text-white/70 leading-relaxed text-sm italic">{learner.bio}</p>
+                <p className="text-t1 leading-relaxed text-sm italic">{learner.bio}</p>
               </motion.div>
             )}
 
@@ -156,9 +156,9 @@ export default function ApprennantProfile() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white/4 border border-white/8 rounded-2xl p-6"
+                className="bg-white/4 border border-line-soft rounded-2xl p-6"
               >
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-white/30 mb-4">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-t4 mb-4">
                   Retrouver {learner.firstName}
                 </h2>
                 <div className="flex flex-wrap gap-3">
@@ -185,7 +185,7 @@ export default function ApprennantProfile() {
                   {learner.email && (
                     <a
                       href={`mailto:${learner.email}`}
-                      className="flex items-center gap-2 bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 transition-colors px-4 py-2 rounded-xl text-sm font-medium"
+                      className="flex items-center gap-2 bg-white/5 border border-line text-t2 hover:bg-white/10 transition-colors px-4 py-2 rounded-xl text-sm font-medium"
                     >
                       <Mail className="w-4 h-4" /> Email
                     </a>
@@ -207,7 +207,7 @@ export default function ApprennantProfile() {
               >
                 <Award className="w-8 h-8 text-gold mx-auto mb-2" />
                 <p className="text-gold font-bold text-sm">Certifié LesCracks</p>
-                <p className="text-white/40 text-xs mt-1 leading-relaxed">
+                <p className="text-t3 text-xs mt-1 leading-relaxed">
                   A complété l'Accompagnement 360 avec succès
                 </p>
               </motion.div>
@@ -218,9 +218,9 @@ export default function ApprennantProfile() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="bg-white/4 border border-white/8 rounded-2xl p-5 space-y-3"
+              className="bg-white/4 border border-line-soft rounded-2xl p-5 space-y-3"
             >
-              <p className="text-white/50 text-xs leading-relaxed">
+              <p className="text-t3 text-xs leading-relaxed">
                 Inspiré par {learner.firstName} ? Commence ta transformation dès maintenant.
               </p>
               <a
@@ -243,7 +243,7 @@ export default function ApprennantProfile() {
             {/* Back */}
             <Link
               to="/apprenants"
-              className="flex items-center gap-2 text-xs text-white/30 hover:text-white/60 transition-colors px-1"
+              className="flex items-center gap-2 text-xs text-t4 hover:text-t2 transition-colors px-1"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Toutes les success stories

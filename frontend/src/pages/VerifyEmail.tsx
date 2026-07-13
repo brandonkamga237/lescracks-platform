@@ -64,7 +64,7 @@ const VerifyEmail = () => {
           <>
             <Loader2 className="w-12 h-12 text-gold animate-spin mx-auto mb-6" />
             <h1 className="text-xl font-display font-bold text-white mb-2">Vérification en cours…</h1>
-            <p className="text-white/40 text-sm">Patiente quelques secondes.</p>
+            <p className="text-t3 text-sm">Patiente quelques secondes.</p>
           </>
         )}
 
@@ -74,8 +74,8 @@ const VerifyEmail = () => {
               <CheckCircle className="w-8 h-8 text-gold" />
             </div>
             <h1 className="text-2xl font-display font-bold text-white mb-3">Email confirmé !</h1>
-            <p className="text-white/50 mb-2">{message}</p>
-            <p className="text-white/30 text-sm">Redirection vers la plateforme…</p>
+            <p className="text-t3 mb-2">{message}</p>
+            <p className="text-t4 text-sm">Redirection vers la plateforme…</p>
           </>
         )}
 
@@ -85,7 +85,7 @@ const VerifyEmail = () => {
               <XCircle className="w-8 h-8 text-red-400" />
             </div>
             <h1 className="text-2xl font-display font-bold text-white mb-3">Lien invalide</h1>
-            <p className="text-white/50 mb-8">{message}</p>
+            <p className="text-t3 mb-8">{message}</p>
             <Link to="/inscription" className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-black font-semibold rounded-sm hover:bg-gold/90 transition-colors text-sm">
               Recommencer l'inscription
             </Link>

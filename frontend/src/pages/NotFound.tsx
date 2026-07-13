@@ -15,13 +15,13 @@ const NotFound = () => {
         animate={{ opacity: 1, y: 0 }}
         className="relative w-full max-w-md text-center"
       >
-        <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
+        <div className="w-16 h-16 rounded-2xl bg-white/5 border border-line flex items-center justify-center mx-auto mb-6">
           <Compass className="w-7 h-7 text-gold" />
         </div>
 
         <p className="text-gold font-display text-5xl font-bold mb-3">404</p>
         <h1 className="text-2xl font-display font-bold text-white mb-3">Page introuvable</h1>
-        <p className="text-white/45 text-sm leading-relaxed mb-8">
+        <p className="text-t3 text-sm leading-relaxed mb-8">
           La page que tu cherches n'existe pas ou a été déplacée.
           Vérifie l'adresse ou reviens à l'accueil.
         </p>

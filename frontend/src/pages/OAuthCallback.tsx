@@ -48,7 +48,7 @@ const OAuthCallback = () => {
             <XCircle className="w-8 h-8 text-red-400" />
           </div>
           <h1 className="text-2xl font-display font-bold text-white mb-3">Connexion impossible</h1>
-          <p className="text-white/50 mb-8">{error}</p>
+          <p className="text-t3 mb-8">{error}</p>
           <button
             onClick={() => navigate('/connexion', { replace: true })}
             className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-black font-semibold rounded-sm hover:bg-gold/90 transition-colors text-sm"
@@ -64,7 +64,7 @@ const OAuthCallback = () => {
     <div className="min-h-screen flex items-center justify-center bg-black">
       <div className="text-center">
         <Loader2 className="w-8 h-8 animate-spin text-gold mx-auto mb-4" />
-        <p className="text-white/60">Connexion en cours…</p>
+        <p className="text-t2">Connexion en cours…</p>
       </div>
     </div>
   );

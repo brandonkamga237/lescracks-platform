@@ -46,7 +46,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, index, onAnalytics }) => {
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
+      transition={{ duration: 0.6, delay: 0 }}
       className={`p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ${
         isDark ? 'bg-gray-900' : 'bg-white'
       }`}

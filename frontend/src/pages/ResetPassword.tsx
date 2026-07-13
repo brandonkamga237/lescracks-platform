@@ -62,7 +62,7 @@ const ResetPassword = () => {
       >
         <Link
           to="/connexion"
-          className="inline-flex items-center gap-2 text-white/40 hover:text-gold transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-t3 hover:text-gold transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Retour à la connexion
@@ -75,7 +75,7 @@ const ResetPassword = () => {
               <h1 className="text-2xl font-display font-bold mb-3 text-white">
                 Mot de passe mis à jour !
               </h1>
-              <p className="text-white/50 text-sm mb-6">
+              <p className="text-t3 text-sm mb-6">
                 Tu vas être redirigé vers la connexion dans quelques secondes…
               </p>
               <Link to="/connexion" className="btn-primary py-2.5 px-6 inline-block">
@@ -86,7 +86,7 @@ const ResetPassword = () => {
             <div className="text-center">
               <AlertCircle className="w-14 h-14 text-red-400 mx-auto mb-4" />
               <h1 className="text-xl font-display font-bold mb-3 text-white">Lien invalide</h1>
-              <p className="text-white/50 text-sm mb-6">
+              <p className="text-t3 text-sm mb-6">
                 Ce lien de réinitialisation est invalide ou a expiré.
               </p>
               <Link to="/mot-de-passe-oublie" className="btn-primary py-2.5 px-6 inline-block">
@@ -99,7 +99,7 @@ const ResetPassword = () => {
                 <h1 className="text-2xl font-display font-bold mb-2 text-white">
                   Nouveau <span className="text-gold">mot de passe</span>
                 </h1>
-                <p className="text-white/40 text-sm">
+                <p className="text-t3 text-sm">
                   Choisis un mot de passe d'au moins 6 caractères.
                 </p>
               </div>
@@ -112,9 +112,9 @@ const ResetPassword = () => {
                 )}
 
                 <div>
-                  <label className="block text-sm text-white/60 mb-2">Nouveau mot de passe</label>
+                  <label className="block text-sm text-t2 mb-2">Nouveau mot de passe</label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
                     <input
                       type="password"
                       value={newPassword}
@@ -128,9 +128,9 @@ const ResetPassword = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm text-white/60 mb-2">Confirmer le mot de passe</label>
+                  <label className="block text-sm text-t2 mb-2">Confirmer le mot de passe</label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
                     <input
                       type="password"
                       value={confirm}

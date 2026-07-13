@@ -78,10 +78,10 @@ const Testimonials = () => {
                   scale: 0.9,
                   transition: { duration: 0.3 }
                 }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
+                transition={{ delay: 0, duration: 0.5 }}
                 className={`p-8 border transition-colors theme-transition ${
                   isDark 
-                    ? 'bg-black border-white/5 hover:border-gold/20' 
+                    ? 'bg-black border-line-soft hover:border-gold/20' 
                     : 'bg-white border-gray-200 hover:border-gold/30'
                 }`}
               >
@@ -93,10 +93,10 @@ const Testimonials = () => {
                   </div>
                   <div>
                     <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{testimonial.name}</p>
-                    <p className={`text-xs ${isDark ? 'text-white/40' : 'text-gray-500'}`}>{testimonial.role}</p>
+                    <p className={`text-xs ${isDark ? 'text-t3' : 'text-gray-500'}`}>{testimonial.role}</p>
                   </div>
                 </div>
-                <p className={`leading-relaxed mb-4 ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
+                <p className={`leading-relaxed mb-4 ${isDark ? 'text-t3' : 'text-gray-600'}`}>
                   "{testimonial.quote}"
                 </p>
                 <p className="text-xs text-gold">{testimonial.company}</p>
@@ -136,7 +136,7 @@ const Testimonials = () => {
               onClick={() => setShowAll(false)}
               className={`inline-flex items-center gap-2 px-6 py-3 border transition-colors ${
                 isDark 
-                  ? 'border-white/10 text-white/60 hover:text-white hover:border-gold/30' 
+                  ? 'border-line text-t2 hover:text-white hover:border-gold/30' 
                   : 'border-gray-300 text-gray-600 hover:text-gray-900 hover:border-gold/30'
               }`}
             >

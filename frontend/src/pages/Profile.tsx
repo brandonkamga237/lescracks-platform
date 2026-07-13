@@ -274,7 +274,7 @@ const Profile = () => {
                   className="hidden"
                   onChange={handleAvatarChange}
                 />
-                <p className="text-center text-xs text-white/30 mt-2">Cliquer pour changer</p>
+                <p className="text-center text-xs text-t4 mt-2">Cliquer pour changer</p>
               </div>
 
               {/* Info */}
@@ -296,11 +296,11 @@ const Profile = () => {
                     </span>
                   )}
                 </div>
-                <div className="flex items-center justify-center sm:justify-start gap-2 text-white/40">
+                <div className="flex items-center justify-center sm:justify-start gap-2 text-t3">
                   <Mail className="w-4 h-4" />
                   {user?.email}
                 </div>
-                <div className="flex items-center justify-center sm:justify-start gap-2 text-white/40 mt-1">
+                <div className="flex items-center justify-center sm:justify-start gap-2 text-t3 mt-1">
                   <span className="text-sm">
                     Connecte via {user?.provider === 'google' ? 'Google' : user?.provider === 'github' ? 'GitHub' : 'Email'}
                   </span>
@@ -327,7 +327,7 @@ const Profile = () => {
                     <h3 className="font-semibold text-gold mb-1">
                       Devenez Premium
                     </h3>
-                    <p className="text-white/60 text-sm">
+                    <p className="text-t2 text-sm">
                       Accedez a tous les contenus, telechargements et Ressources exclusives.
                     </p>
                   </div>
@@ -350,7 +350,7 @@ const Profile = () => {
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'profile'
                   ? 'bg-gold text-black'
-                  : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
+                  : 'bg-white/5 text-t2 hover:text-white hover:bg-white/10'
               }`}
             >
               <User className="w-4 h-4 inline mr-2" />
@@ -362,7 +362,7 @@ const Profile = () => {
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                   activeTab === 'learner'
                     ? 'bg-purple-500 text-white'
-                    : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
+                    : 'bg-white/5 text-t2 hover:text-white hover:bg-white/10'
                 }`}
               >
                 <GraduationCap className="w-4 h-4 inline mr-2" />
@@ -374,7 +374,7 @@ const Profile = () => {
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'settings'
                   ? 'bg-gold text-black'
-                  : 'bg-white/5 text-white/60 hover:text-white hover:bg-white/10'
+                  : 'bg-white/5 text-t2 hover:text-white hover:bg-white/10'
               }`}
             >
               <Settings className="w-4 h-4 inline mr-2" />
@@ -404,7 +404,7 @@ const Profile = () => {
                       <h2 className="text-xl font-display font-semibold">
                         Changer le mot de passe
                       </h2>
-                      <p className="text-white/40 text-sm">
+                      <p className="text-t3 text-sm">
                         Modifiez votre mot de passe de connexion
                       </p>
                     </div>
@@ -412,7 +412,7 @@ const Profile = () => {
 
                   <form onSubmit={handleChangePassword} className="space-y-4">
                     <div>
-                      <label className="block text-sm text-white/60 mb-2">
+                      <label className="block text-sm text-t2 mb-2">
                         Mot de passe actuel
                       </label>
                       <div className="relative">
@@ -420,14 +420,14 @@ const Profile = () => {
                           type={showPassword ? 'text' : 'password'}
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
-                          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-12 text-white placeholder-white/30 focus:outline-none focus:border-gold"
+                          className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 pr-12 text-white placeholder-white/30 focus:outline-none focus:border-gold"
                           placeholder="Entrez votre mot de passe actuel"
                           required
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-t3 hover:text-white"
                         >
                           {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
@@ -436,27 +436,27 @@ const Profile = () => {
 
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm text-white/60 mb-2">
+                        <label className="block text-sm text-t2 mb-2">
                           Nouveau mot de passe
                         </label>
                         <input
                           type={showPassword ? 'text' : 'password'}
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
-                          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
+                          className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
                           placeholder="Nouveau mot de passe"
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-white/60 mb-2">
+                        <label className="block text-sm text-t2 mb-2">
                           Confirmer le mot de passe
                         </label>
                         <input
                           type={showPassword ? 'text' : 'password'}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
+                          className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
                           placeholder="Confirmer le mot de passe"
                           required
                         />
@@ -503,12 +503,12 @@ const Profile = () => {
                       <h2 className="text-xl font-display font-semibold">
                         Mot de passe
                       </h2>
-                      <p className="text-white/40 text-sm">
+                      <p className="text-t3 text-sm">
                         Gestion du mot de passe
                       </p>
                     </div>
                   </div>
-                  <div className="p-4 rounded-lg bg-white/5 text-white/60">
+                  <div className="p-4 rounded-lg bg-white/5 text-t2">
                     <p className="text-sm">
                       Vous etes connecte via <strong className="text-gold">{user?.provider === 'google' ? 'Google' : 'GitHub'}</strong>. 
                       Votre mot de passe est gere par ce provider. Vous ne pouvez pas modifier votre mot de passe ici.
@@ -532,7 +532,7 @@ const Profile = () => {
                     <h2 className="text-xl font-display font-semibold text-red-400">
                       Supprimer le compte
                     </h2>
-                    <p className="text-white/40 text-sm">
+                    <p className="text-t3 text-sm">
                       Cette action est irreversible
                     </p>
                   </div>
@@ -552,7 +552,7 @@ const Profile = () => {
                         <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5" />
                         <div>
                           <p className="text-red-400 font-medium mb-1">Etes-vous sur ?</p>
-                          <p className="text-white/60 text-sm">
+                          <p className="text-t2 text-sm">
                             Entrez <strong>{user?.email}</strong> pour confirmer la suppression definitive de votre compte.
                           </p>
                         </div>
@@ -564,7 +564,7 @@ const Profile = () => {
                         type="text"
                         value={deleteConfirmText}
                         onChange={(e) => setDeleteConfirmText(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-red-500"
+                        className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-red-500"
                         placeholder="Entrez votre email pour confirmer"
                       />
                     </div>
@@ -582,7 +582,7 @@ const Profile = () => {
                           setDeleteConfirmText('');
                           setPasswordError('');
                         }}
-                        className="px-4 py-2 rounded-lg bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-colors text-sm"
+                        className="px-4 py-2 rounded-lg bg-white/5 text-t2 hover:text-white hover:bg-white/10 transition-colors text-sm"
                       >
                         Annuler
                       </button>
@@ -611,7 +611,7 @@ const Profile = () => {
               {loadingLearner ? (
                 <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 text-gold animate-spin" /></div>
               ) : !learnerProfile ? (
-                <div className="card p-8 text-center text-white/50">Profil apprenant non disponible.</div>
+                <div className="card p-8 text-center text-t3">Profil apprenant non disponible.</div>
               ) : (
                 <div className="card p-8">
                   <div className="flex items-center justify-between mb-6">
@@ -621,7 +621,7 @@ const Profile = () => {
                       </div>
                       <div>
                         <h2 className="text-xl font-display font-semibold">Mon parcours apprenant</h2>
-                        <p className="text-white/40 text-sm">Ces informations apparaissent sur votre profil public</p>
+                        <p className="text-t3 text-sm">Ces informations apparaissent sur votre profil public</p>
                       </div>
                     </div>
                     {!editingLearner && (
@@ -637,20 +637,20 @@ const Profile = () => {
                   {/* Status + cohort (read-only — admin manages these) */}
                   <div className="grid grid-cols-2 gap-4 mb-6 p-4 rounded-xl bg-white/5">
                     <div>
-                      <p className="text-white/40 text-xs mb-1">Statut</p>
+                      <p className="text-t3 text-xs mb-1">Statut</p>
                       <p className="text-white text-sm font-medium">
                         {STATUS_LABELS[learnerProfile.status] || learnerProfile.status}
                       </p>
                     </div>
                     {learnerProfile.cohort && (
                       <div>
-                        <p className="text-white/40 text-xs mb-1">Cohorte</p>
+                        <p className="text-t3 text-xs mb-1">Cohorte</p>
                         <p className="text-white text-sm font-medium">{learnerProfile.cohort}</p>
                       </div>
                     )}
                     {learnerProfile.slug && (
                       <div className="col-span-2">
-                        <p className="text-white/40 text-xs mb-1">Profil public</p>
+                        <p className="text-t3 text-xs mb-1">Profil public</p>
                         <a
                           href={`/apprenants/${learnerProfile.slug}`}
                           target="_blank"
@@ -667,7 +667,7 @@ const Profile = () => {
                   {editingLearner ? (
                     <form onSubmit={handleSaveLearnerProfile} className="space-y-4">
                       <div>
-                        <label className="block text-sm text-white/60 mb-2">
+                        <label className="block text-sm text-t2 mb-2">
                           <FileText className="w-4 h-4 inline mr-1" />
                           Bio
                         </label>
@@ -675,12 +675,12 @@ const Profile = () => {
                           value={learnerData.bio}
                           onChange={(e) => setLearnerData({ ...learnerData, bio: e.target.value })}
                           rows={4}
-                          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold resize-none"
+                          className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold resize-none"
                           placeholder="Parlez de vous, votre parcours, vos projets..."
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-white/60 mb-2">
+                        <label className="block text-sm text-t2 mb-2">
                           <Linkedin className="w-4 h-4 inline mr-1" />
                           LinkedIn
                         </label>
@@ -688,12 +688,12 @@ const Profile = () => {
                           type="url"
                           value={learnerData.linkedinUrl}
                           onChange={(e) => setLearnerData({ ...learnerData, linkedinUrl: e.target.value })}
-                          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
+                          className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
                           placeholder="https://linkedin.com/in/votre-profil"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-white/60 mb-2">
+                        <label className="block text-sm text-t2 mb-2">
                           <Globe className="w-4 h-4 inline mr-1" />
                           Portfolio / GitHub
                         </label>
@@ -701,7 +701,7 @@ const Profile = () => {
                           type="url"
                           value={learnerData.portfolioUrl}
                           onChange={(e) => setLearnerData({ ...learnerData, portfolioUrl: e.target.value })}
-                          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
+                          className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
                           placeholder="https://github.com/votre-profil"
                         />
                       </div>
@@ -723,7 +723,7 @@ const Profile = () => {
                             setLearnerData({ bio: learnerProfile.bio || '', linkedinUrl: learnerProfile.linkedinUrl || '', portfolioUrl: learnerProfile.portfolioUrl || '' });
                             setLearnerError(''); setLearnerSuccess('');
                           }}
-                          className="px-4 py-2 rounded-lg bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-colors text-sm"
+                          className="px-4 py-2 rounded-lg bg-white/5 text-t2 hover:text-white hover:bg-white/10 transition-colors text-sm"
                         >
                           Annuler
                         </button>
@@ -735,9 +735,9 @@ const Profile = () => {
                   ) : (
                     <div className="space-y-4">
                       <div>
-                        <p className="text-white/40 text-xs mb-2">Bio</p>
-                        <p className="text-white/80 text-sm leading-relaxed">
-                          {learnerProfile.bio || <span className="italic text-white/30">Aucune bio renseignée</span>}
+                        <p className="text-t3 text-xs mb-2">Bio</p>
+                        <p className="text-t1 text-sm leading-relaxed">
+                          {learnerProfile.bio || <span className="italic text-t4">Aucune bio renseignée</span>}
                         </p>
                       </div>
                       <div className="flex gap-4 pt-2">
@@ -754,7 +754,7 @@ const Profile = () => {
                           </a>
                         )}
                         {!learnerProfile.linkedinUrl && !learnerProfile.portfolioUrl && (
-                          <span className="text-white/30 text-sm italic">Aucun lien renseigné</span>
+                          <span className="text-t4 text-sm italic">Aucun lien renseigné</span>
                         )}
                       </div>
                     </div>
@@ -782,7 +782,7 @@ const Profile = () => {
                       <h2 className="text-xl font-display font-semibold">
                         Informations du profil
                       </h2>
-                      <p className="text-white/40 text-sm">
+                      <p className="text-t3 text-sm">
                         Gerez vos informations personnelles
                       </p>
                     </div>
@@ -800,40 +800,40 @@ const Profile = () => {
                 {editingProfile ? (
                   <form onSubmit={handleSaveProfile} className="space-y-4">
                     <div>
-                      <label className="block text-sm text-white/60 mb-2">
+                      <label className="block text-sm text-t2 mb-2">
                         Nom d'utilisateur
                       </label>
                       <input
                         type="text"
                         value={profileData.username}
                         onChange={(e) => setProfileData({ ...profileData, username: e.target.value })}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
+                        className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
                         placeholder="Votre nom d'utilisateur"
                       />
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm text-white/60 mb-2">
+                        <label className="block text-sm text-t2 mb-2">
                           Telephone
                         </label>
                         <input
                           type="tel"
                           value={profileData.phone}
                           onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
-                          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
+                          className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
                           placeholder="Votre numero de telephone"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-white/60 mb-2">
+                        <label className="block text-sm text-t2 mb-2">
                           Pays
                         </label>
                         <input
                           type="text"
                           value={profileData.country}
                           onChange={(e) => setProfileData({ ...profileData, country: e.target.value })}
-                          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
+                          className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-gold"
                           placeholder="Votre pays"
                         />
                       </div>
@@ -865,7 +865,7 @@ const Profile = () => {
                           setProfileError('');
                           setProfileSuccess('');
                         }}
-                        className="px-4 py-2 rounded-lg bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-colors text-sm"
+                        className="px-4 py-2 rounded-lg bg-white/5 text-t2 hover:text-white hover:bg-white/10 transition-colors text-sm"
                       >
                         Annuler
                       </button>
@@ -885,22 +885,22 @@ const Profile = () => {
                 ) : (
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm text-white/40 mb-1">Email</label>
+                      <label className="block text-sm text-t3 mb-1">Email</label>
                       <div className="flex items-center gap-2 text-white">
-                        <Mail className="w-4 h-4 text-white/40" />
+                        <Mail className="w-4 h-4 text-t3" />
                         {user?.email}
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm text-white/40 mb-1">Nom d'utilisateur</label>
+                      <label className="block text-sm text-t3 mb-1">Nom d'utilisateur</label>
                       <div className="text-white">{user?.username || '-'}</div>
                     </div>
                     <div>
-                      <label className="block text-sm text-white/40 mb-1">Telephone</label>
+                      <label className="block text-sm text-t3 mb-1">Telephone</label>
                       <div className="text-white">{user?.phone || '-'}</div>
                     </div>
                     <div>
-                      <label className="block text-sm text-white/40 mb-1">Pays</label>
+                      <label className="block text-sm text-t3 mb-1">Pays</label>
                       <div className="text-white">{user?.country || '-'}</div>
                     </div>
                   </div>

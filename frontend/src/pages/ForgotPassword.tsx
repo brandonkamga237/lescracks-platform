@@ -40,7 +40,7 @@ const ForgotPassword = () => {
       >
         <Link
           to="/connexion"
-          className="inline-flex items-center gap-2 text-white/40 hover:text-gold transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-t3 hover:text-gold transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Retour à la connexion
@@ -51,11 +51,11 @@ const ForgotPassword = () => {
             <div className="text-center">
               <CheckCircle className="w-14 h-14 text-gold mx-auto mb-4" />
               <h1 className="text-2xl font-display font-bold mb-3 text-white">Email envoyé !</h1>
-              <p className="text-white/50 text-sm leading-relaxed mb-6">
-                Si <span className="text-white/80">{email}</span> est associé à un compte, tu recevras
+              <p className="text-t3 text-sm leading-relaxed mb-6">
+                Si <span className="text-t1">{email}</span> est associé à un compte, tu recevras
                 un lien de réinitialisation valable <strong className="text-white">30 minutes</strong>.
               </p>
-              <p className="text-white/30 text-xs mb-6">
+              <p className="text-t4 text-xs mb-6">
                 Vérifie aussi ton dossier spam.
               </p>
               <Link to="/connexion" className="btn-primary py-2.5 px-6 inline-block">
@@ -68,7 +68,7 @@ const ForgotPassword = () => {
                 <h1 className="text-2xl font-display font-bold mb-2 text-white">
                   Mot de passe <span className="text-gold">oublié ?</span>
                 </h1>
-                <p className="text-white/40 text-sm">
+                <p className="text-t3 text-sm">
                   Saisis ton adresse email et on t'envoie un lien de réinitialisation.
                 </p>
               </div>
@@ -81,9 +81,9 @@ const ForgotPassword = () => {
                 )}
 
                 <div>
-                  <label className="block text-sm text-white/60 mb-2">Email</label>
+                  <label className="block text-sm text-t2 mb-2">Email</label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
                     <input
                       type="email"
                       value={email}

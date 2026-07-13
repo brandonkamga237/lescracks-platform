@@ -58,7 +58,7 @@ const Login = () => {
         {/* Back Link */}
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-white/40 hover:text-gold transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-t3 hover:text-gold transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Retour à l'accueil
@@ -69,7 +69,7 @@ const Login = () => {
             <h1 className="text-2xl font-display font-bold mb-2 text-white">
               Bon retour parmi <span className="text-gold">nous</span>
             </h1>
-            <p className="text-white/40">
+            <p className="text-t3">
               Connectez-vous pour accéder à votre espace
             </p>
           </div>
@@ -105,7 +105,7 @@ const Login = () => {
             <button
               onClick={() => handleOAuth('github')}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg bg-white/10 border border-white/10 text-white font-medium hover:bg-white/20 transition-colors"
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg bg-white/10 border border-line text-white font-medium hover:bg-white/20 transition-colors"
             >
               <Github className="w-5 h-5" />
               Continuer avec GitHub
@@ -115,10 +115,10 @@ const Login = () => {
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10" />
+              <div className="w-full border-t border-line" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-card text-white/40">ou</span>
+              <span className="px-4 bg-card text-t3">ou</span>
             </div>
           </div>
 
@@ -131,9 +131,9 @@ const Login = () => {
             )}
 
             <div>
-              <label className="block text-sm text-white/60 mb-2">Email</label>
+              <label className="block text-sm text-t2 mb-2">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
                 <input
                   type="email"
                   value={email}
@@ -147,13 +147,13 @@ const Login = () => {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm text-white/60">Mot de passe</label>
+                <label className="block text-sm text-t2">Mot de passe</label>
                 <Link to="/mot-de-passe-oublie" className="text-xs text-gold/70 hover:text-gold transition-colors">
                   Mot de passe oublié ?
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
                 <input
                   type="password"
                   value={password}
@@ -178,7 +178,7 @@ const Login = () => {
             </button>
           </form>
 
-          <div className="mt-6 text-center text-white/40">
+          <div className="mt-6 text-center text-t3">
             Pas encore de compte ?{' '}
             <Link to="/inscription" className="text-gold hover:text-gold-light">
               S'inscrire

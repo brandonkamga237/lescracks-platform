@@ -56,13 +56,13 @@ const FAQ = () => {
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1, duration: 0.4 }}
+              transition={{ delay: 0, duration: 0.4 }}
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
                 className={`w-full flex items-center justify-between p-6 border transition-colors text-left group theme-transition ${
                   isDark 
-                    ? 'bg-black border-white/5 hover:border-gold/30' 
+                    ? 'bg-black border-line-soft hover:border-gold/30' 
                     : 'bg-white border-gray-200 hover:border-gold/30'
                 }`}
               >
@@ -84,7 +84,7 @@ const FAQ = () => {
                     transition={{ duration: 0.3, ease: 'easeInOut' }}
                     className="overflow-hidden"
                   >
-                    <div className={`p-6 pt-0 leading-relaxed ${isDark ? 'text-white/50' : 'text-gray-600'}`}>
+                    <div className={`p-6 pt-0 leading-relaxed ${isDark ? 'text-t3' : 'text-gray-600'}`}>
                       {faq.answer}
                     </div>
                   </motion.div>

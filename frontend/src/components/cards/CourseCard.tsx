@@ -49,7 +49,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, index, onAnalytics }) =
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
+      transition={{ duration: 0.6, delay: 0 }}
       className={`rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
         isDark ? 'bg-gray-800' : 'bg-white'
       }`}

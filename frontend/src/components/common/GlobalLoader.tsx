@@ -21,7 +21,7 @@ const GlobalLoader: React.FC<GlobalLoaderProps> = ({
       transition: {
         duration: 1.2,
         repeat: Infinity,
-        delay: i * 0.15,
+        delay: 0,
         ease: "easeInOut"
       }
     })
@@ -68,7 +68,7 @@ const GlobalLoader: React.FC<GlobalLoaderProps> = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="text-white/60 text-sm"
+          className="text-t2 text-sm"
         >
           {message}
         </motion.p>

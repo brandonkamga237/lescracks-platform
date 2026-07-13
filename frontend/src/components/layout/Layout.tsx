@@ -68,7 +68,7 @@ const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutPro
             pointerEvents: showScrollToTop ? 'auto' : 'none'
           }}
           onClick={scrollToTop}
-          className="fixed bottom-28 right-8 z-50 w-10 h-10 rounded-full bg-white/10 border border-white/20 text-white/60 flex items-center justify-center shadow-lg hover:bg-white/20 hover:text-white transition-colors"
+          className="fixed bottom-28 right-8 z-50 w-10 h-10 rounded-full bg-white/10 border border-line-strong text-t2 flex items-center justify-center shadow-lg hover:bg-white/20 hover:text-white transition-colors"
           aria-label="Remonter en haut"
         >
           <ArrowUp className="w-4 h-4" />

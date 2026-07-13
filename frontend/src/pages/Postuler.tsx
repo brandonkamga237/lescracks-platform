@@ -91,14 +91,14 @@ const Postuler = () => {
               <CheckCircle className="w-10 h-10 text-green-400" />
             </div>
             <h1 className="text-2xl font-display font-bold mb-3">Candidature reçue !</h1>
-            <p className="text-white/60 leading-relaxed mb-2">
+            <p className="text-t2 leading-relaxed mb-2">
               Merci <strong className="text-white">{fullName}</strong>. Ta demande d'<strong className="text-gold">Accompagnement 360</strong> a bien été enregistrée.
             </p>
-            <p className="text-white/40 text-sm mb-2">
-              Un email de confirmation a été envoyé à <strong className="text-white/60">{email}</strong>.
+            <p className="text-t3 text-sm mb-2">
+              Un email de confirmation a été envoyé à <strong className="text-t2">{email}</strong>.
             </p>
-            <p className="text-white/40 text-sm mb-8">
-              Notre équipe te contactera prochainement sur WhatsApp au <strong className="text-white/60">{whatsapp}</strong>.
+            <p className="text-t3 text-sm mb-8">
+              Notre équipe te contactera prochainement sur WhatsApp au <strong className="text-t2">{whatsapp}</strong>.
             </p>
             <Link to="/" className="btn-primary">Retour à l'accueil</Link>
           </motion.div>
@@ -118,10 +118,10 @@ const Postuler = () => {
         <div className="max-w-3xl mx-auto">
 
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-white/30 mb-8">
+          <div className="flex items-center gap-2 text-sm text-t4 mb-8">
             <Link to="/" className="hover:text-gold transition-colors">Accueil</Link>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-white/60">Postuler</span>
+            <span className="text-t2">Postuler</span>
           </div>
 
           {/* Header */}
@@ -130,7 +130,7 @@ const Postuler = () => {
             <h1 className="text-3xl sm:text-4xl font-display font-bold mb-3">
               Rejoindre <span className="text-gold">LesCracks</span>
             </h1>
-            <p className="text-white/50 text-lg max-w-xl">
+            <p className="text-t3 text-lg max-w-xl">
               Un suivi humain et structuré pour passer de débutant à profil employable dans la tech.
             </p>
           </motion.div>
@@ -150,7 +150,7 @@ const Postuler = () => {
             </div>
             <ul className="grid sm:grid-cols-2 gap-2.5">
               {FEATURES.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm text-white/60">
+                <li key={f} className="flex items-start gap-2 text-sm text-t2">
                   <CheckCircle className="w-4 h-4 text-gold/60 mt-0.5 flex-shrink-0" />
                   {f}
                 </li>
@@ -172,13 +172,13 @@ const Postuler = () => {
               </div>
               <div>
                 <h2 className="font-display font-semibold text-lg">Ta candidature</h2>
-                <p className="text-white/40 text-sm">pour l'<span className="text-gold">Accompagnement 360</span></p>
+                <p className="text-t3 text-sm">pour l'<span className="text-gold">Accompagnement 360</span></p>
               </div>
             </div>
 
             {/* Nom complet */}
             <div>
-              <label className="flex items-center gap-2 text-sm text-white/60 mb-2">
+              <label className="flex items-center gap-2 text-sm text-t2 mb-2">
                 <User className="w-4 h-4 text-gold" />
                 Nom complet <span className="text-red-400">*</span>
               </label>
@@ -186,7 +186,7 @@ const Postuler = () => {
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
+                className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
                 placeholder="Jean Dupont"
                 required
               />
@@ -194,7 +194,7 @@ const Postuler = () => {
 
             {/* Email */}
             <div>
-              <label className="flex items-center gap-2 text-sm text-white/60 mb-2">
+              <label className="flex items-center gap-2 text-sm text-t2 mb-2">
                 <Mail className="w-4 h-4 text-gold" />
                 Adresse email <span className="text-red-400">*</span>
               </label>
@@ -202,7 +202,7 @@ const Postuler = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
+                className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
                 placeholder="jean@example.com"
                 required
               />
@@ -211,7 +211,7 @@ const Postuler = () => {
             {/* WhatsApp + Âge en ligne */}
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="flex items-center gap-2 text-sm text-white/60 mb-2">
+                <label className="flex items-center gap-2 text-sm text-t2 mb-2">
                   <Phone className="w-4 h-4 text-gold" />
                   Numéro WhatsApp <span className="text-red-400">*</span>
                 </label>
@@ -219,15 +219,15 @@ const Postuler = () => {
                   type="tel"
                   value={whatsapp}
                   onChange={(e) => setWhatsapp(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
+                  className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
                   placeholder="+237 6XX XXX XXX"
                   required
                 />
               </div>
               <div>
-                <label className="flex items-center gap-2 text-sm text-white/60 mb-2">
+                <label className="flex items-center gap-2 text-sm text-t2 mb-2">
                   <Calendar className="w-4 h-4 text-gold" />
-                  Âge <span className="text-white/30 text-xs">(optionnel)</span>
+                  Âge <span className="text-t4 text-xs">(optionnel)</span>
                 </label>
                 <input
                   type="number"
@@ -235,7 +235,7 @@ const Postuler = () => {
                   onChange={(e) => setAge(e.target.value)}
                   min={12}
                   max={99}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
+                  className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
                   placeholder="ex : 22"
                 />
               </div>
@@ -243,7 +243,7 @@ const Postuler = () => {
 
             {/* Motivation */}
             <div>
-              <label className="flex items-center gap-2 text-sm text-white/60 mb-2">
+              <label className="flex items-center gap-2 text-sm text-t2 mb-2">
                 <MessageSquare className="w-4 h-4 text-gold" />
                 Motivation / présentation <span className="text-red-400">*</span>
               </label>
@@ -251,11 +251,11 @@ const Postuler = () => {
                 value={motivation}
                 onChange={(e) => setMotivation(e.target.value)}
                 rows={5}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold resize-none text-sm"
+                className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold resize-none text-sm"
                 placeholder="Où en es-tu ? Quel est ton objectif concret ? Pourquoi tu veux rejoindre LesCracks ? (min. 50 caractères)"
                 required
               />
-              <p className={`text-xs mt-1 ${motivation.length >= 50 ? 'text-green-400' : 'text-white/30'}`}>
+              <p className={`text-xs mt-1 ${motivation.length >= 50 ? 'text-green-400' : 'text-t4'}`}>
                 {motivation.length}/50 caractères minimum
               </p>
             </div>
@@ -280,7 +280,7 @@ const Postuler = () => {
                 </>
               )}
             </button>
-            <p className="text-center text-white/20 text-xs">
+            <p className="text-center text-t4 text-xs">
               Notre équipe te contactera prochainement sur WhatsApp.
             </p>
           </motion.form>

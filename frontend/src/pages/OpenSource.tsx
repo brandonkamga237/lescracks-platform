@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Layout from '@/components/layout/Layout';
 import SEO from '@/components/common/SEO';
+import { CardSkeletonGrid, PersonSkeletonGrid } from "@/components/common/Skeleton";
 import { Github, Linkedin, Globe, Twitter, Star, GitFork, ExternalLink, Users, Code2, Loader2 } from 'lucide-react';
 import { ENV } from '@/config/env';
 
@@ -139,9 +140,7 @@ const OpenSource = () => {
           </motion.div>
 
           {loadingProjects ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-gold" />
-            </div>
+            <CardSkeletonGrid count={3} />
           ) : projects.length === 0 ? (
             <div className="text-center py-20 text-zinc-500">
               <Code2 className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -155,7 +154,7 @@ const OpenSource = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
+                  transition={{ delay: 0 }}
                   className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-gold/30 transition-colors group flex flex-col"
                 >
                   <div className="flex items-start justify-between mb-4">
@@ -241,9 +240,7 @@ const OpenSource = () => {
           </motion.div>
 
           {loadingContributors ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-gold" />
-            </div>
+            <PersonSkeletonGrid count={6} />
           ) : contributors.length === 0 ? (
             <div className="text-center py-20 text-zinc-500">
               <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
@@ -257,7 +254,7 @@ const OpenSource = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
+                  transition={{ delay: 0 }}
                   className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-gold/30 transition-colors text-center group"
                 >
                   {c.photoUrl ? (

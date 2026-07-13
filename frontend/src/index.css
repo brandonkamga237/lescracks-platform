@@ -41,20 +41,63 @@
     --success: #22c55e;
     --warning: #f59e0b;
     --error: #ef4444;
+
+    /* ========== TEXT RAMP — 4 levels, all WCAG AA on #000 ==========
+       The ONLY tints allowed for text. Anything fainter than --text-4 is
+       reserved for borders and separators, which don't need to be legible.
+       Contrast on pure black:  t1 21:1 · t2 12.5:1 · t3 7.4:1 · t4 5.3:1     */
+    --text-1: #ffffff;                      /* headings, key figures      */
+    --text-2: rgba(255, 255, 255, 0.78);    /* body copy, descriptions    */
+    --text-3: rgba(255, 255, 255, 0.60);    /* secondary, metadata        */
+    --text-4: rgba(255, 255, 255, 0.50);    /* captions — the AA floor    */
+
+    /* ========== BORDER RAMP — 3 levels, decorative only ========== */
+    --line-soft:   rgba(255, 255, 255, 0.08);
+    --line:        rgba(255, 255, 255, 0.12);
+    --line-strong: rgba(255, 255, 255, 0.20);
   }
 
   /* ========== BASE STYLES ========== */
   * {
     @apply border-border;
   }
-  
+
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* ========== KEYBOARD FOCUS — one rule, every interactive element ==========
+     Previously only 4 of 154 buttons had any focus style, which made keyboard
+     navigation effectively blind. This restores it globally.                  */
+  :focus-visible {
+    outline: 2px solid #d4af37;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Don't show the ring for mouse users who click a focusable element. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* ========== REDUCED MOTION ==========
+     Respects the OS setting. Also kills smooth-scroll, which is motion too.   */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   /* ========== CUSTOM SCROLLBAR - GOLD RECTANGULAR ========== */
@@ -152,7 +195,7 @@
   
   .btn-secondary {
     @apply inline-flex items-center justify-center px-6 py-3 
-           bg-transparent border border-white/20 text-white font-medium rounded-lg
+           bg-transparent border border-line-strong text-white font-medium rounded-lg
            transition-all duration-300
            hover:border-gold/50 hover:text-gold
            focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 focus:ring-offset-black
@@ -161,7 +204,7 @@
 
   /* ========== CARDS ========== */
   .card {
-    @apply bg-card rounded-xl border border-white/5 p-6 
+    @apply bg-card rounded-xl border border-line-soft p-6 
            transition-all duration-300;
   }
   
@@ -173,7 +216,7 @@
   /* ========== INPUTS ========== */
   .input {
     @apply w-full px-4 py-3 bg-secondary text-foreground
-           border border-white/10 rounded-lg
+           border border-line rounded-lg
            placeholder:text-muted-foreground
            focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent
            transition-all duration-200;

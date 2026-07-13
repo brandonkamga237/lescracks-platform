@@ -36,6 +36,20 @@ export default {
   ]
 },
   colors: {
+    // ── TEXT RAMP — the only tints allowed for text. All WCAG AA on #000.
+    //    t1 21:1 · t2 12.5:1 · t3 7.4:1 · t4 5.3:1 (floor)
+    t1: '#ffffff',
+    t2: 'rgba(255, 255, 255, 0.78)',
+    t3: 'rgba(255, 255, 255, 0.60)',
+    t4: 'rgba(255, 255, 255, 0.50)',
+
+    // ── BORDER RAMP — decorative only, never used for text.
+    line: {
+      soft: 'rgba(255, 255, 255, 0.08)',
+      DEFAULT: 'rgba(255, 255, 255, 0.12)',
+      strong: 'rgba(255, 255, 255, 0.20)',
+    },
+
     // Jaune Or / Hirki (Accent principal)
     gold: {
       50: '#fdf8e7',

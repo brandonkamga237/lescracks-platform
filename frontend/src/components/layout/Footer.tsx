@@ -41,7 +41,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-black border-t border-white/8">
+    <footer className="bg-black border-t border-line-soft">
 
       {/* Gold accent line */}
       <div className="h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
@@ -60,7 +60,7 @@ const Footer = () => {
                 className="w-auto opacity-90"
               />
             </Link>
-            <p className="text-sm text-white/40 leading-relaxed mb-6 max-w-[220px]">
+            <p className="text-sm text-t3 leading-relaxed mb-6 max-w-[220px]">
               Accélérateur de carrière tech au service des talents de l'Afrique francophone.
             </p>
 
@@ -73,7 +73,7 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="w-8 h-8 rounded-lg bg-white/5 border border-white/8 flex items-center justify-center text-white/40 hover:text-gold hover:border-gold/30 hover:bg-gold/8 transition-all"
+                  className="w-8 h-8 rounded-lg bg-white/5 border border-line-soft flex items-center justify-center text-t3 hover:text-gold hover:border-gold/30 hover:bg-gold/8 transition-all"
                 >
                   <Icon className="w-4 h-4" />
                 </a>
@@ -84,7 +84,7 @@ const Footer = () => {
           {/* Nav columns */}
           {NAV.map((col) => (
             <div key={col.title}>
-              <p className="text-[11px] font-semibold text-white/25 uppercase tracking-[0.12em] mb-4">
+              <p className="text-[11px] font-semibold text-t4 uppercase tracking-[0.12em] mb-4">
                 {col.title}
               </p>
               <ul className="space-y-3">
@@ -93,7 +93,7 @@ const Footer = () => {
                     <span className={`flex items-center gap-2 text-sm transition-colors ${
                       (link as any).highlight
                         ? 'text-gold hover:text-gold-light font-medium'
-                        : 'text-white/45 hover:text-white/80'
+                        : 'text-t3 hover:text-t1'
                     }`}>
                       {(link as any).isWhatsApp ? (
                         <WhatsAppIcon className="w-3.5 h-3.5 flex-shrink-0" />
@@ -122,11 +122,11 @@ const Footer = () => {
         </div>
 
         {/* ── Bottom bar ─────────────────────────────────────────── */}
-        <div className="mt-12 pt-6 border-t border-white/6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-white/25">
+        <div className="mt-12 pt-6 border-t border-line-soft flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-t4">
             © {currentYear} LesCracks. Tous droits réservés.
           </p>
-          <p className="text-xs text-white/20">
+          <p className="text-xs text-t4">
             Conçu &amp; développé avec <span className="text-gold/70">♥</span> depuis Yaoundé, Cameroun
           </p>
         </div>

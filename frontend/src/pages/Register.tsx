@@ -81,10 +81,10 @@ const Register = () => {
             <CheckCircle className="w-8 h-8 text-gold" />
           </div>
           <h1 className="text-2xl font-display font-bold text-white mb-3">Vérifie ta boîte mail</h1>
-          <p className="text-white/50 mb-2">
+          <p className="text-t3 mb-2">
             Un email de confirmation a été envoyé à <strong className="text-white">{formData.email}</strong>.
           </p>
-          <p className="text-white/40 text-sm mb-8">
+          <p className="text-t3 text-sm mb-8">
             Clique sur le lien dans l'email pour activer ton compte. Vérifie aussi tes spams.
           </p>
           <Link to="/connexion" className="inline-flex items-center gap-2 text-gold hover:text-gold/80 transition-colors text-sm">
@@ -109,7 +109,7 @@ const Register = () => {
         {/* Back Link */}
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-white/40 hover:text-gold transition-colors mb-8"
+          className="inline-flex items-center gap-2 text-t3 hover:text-gold transition-colors mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Retour à l'accueil
@@ -120,7 +120,7 @@ const Register = () => {
             <h1 className="text-2xl font-display font-bold mb-2">
               Rejoignez <span className="text-gold">LesCracks</span>
             </h1>
-            <p className="text-white/40">
+            <p className="text-t3">
               Commencez votre transformation professionnelle
             </p>
           </div>
@@ -156,7 +156,7 @@ const Register = () => {
             <button
               onClick={() => handleOAuth('github')}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg bg-white/10 border border-white/10 text-white font-medium hover:bg-white/20 transition-colors"
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-lg bg-white/10 border border-line text-white font-medium hover:bg-white/20 transition-colors"
             >
               <Github className="w-5 h-5" />
               S'inscrire avec GitHub
@@ -166,10 +166,10 @@ const Register = () => {
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10" />
+              <div className="w-full border-t border-line" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-card text-white/40">ou</span>
+              <span className="px-4 bg-card text-t3">ou</span>
             </div>
           </div>
 
@@ -183,9 +183,9 @@ const Register = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-white/60 mb-2">Prénom</label>
+                <label className="block text-sm text-t2 mb-2">Prénom</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
                   <input
                     type="text"
                     name="firstName"
@@ -197,7 +197,7 @@ const Register = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm text-white/60 mb-2">Nom</label>
+                <label className="block text-sm text-t2 mb-2">Nom</label>
                 <input
                   type="text"
                   name="lastName"
@@ -210,9 +210,9 @@ const Register = () => {
             </div>
 
             <div>
-              <label className="block text-sm text-white/60 mb-2">Email</label>
+              <label className="block text-sm text-t2 mb-2">Email</label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
                 <input
                   type="email"
                   name="email"
@@ -226,9 +226,9 @@ const Register = () => {
             </div>
 
             <div>
-              <label className="block text-sm text-white/60 mb-2">Mot de passe</label>
+              <label className="block text-sm text-t2 mb-2">Mot de passe</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
                 <input
                   type="password"
                   name="password"
@@ -240,15 +240,15 @@ const Register = () => {
                   minLength={8}
                 />
               </div>
-              <p className="text-white/30 text-xs mt-1.5">
+              <p className="text-t4 text-xs mt-1.5">
                 Au moins 8 caractères, avec une majuscule, une minuscule, un chiffre et un caractère spécial.
               </p>
             </div>
 
             <div>
-              <label className="block text-sm text-white/60 mb-2">Confirmer le mot de passe</label>
+              <label className="block text-sm text-t2 mb-2">Confirmer le mot de passe</label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
                 <input
                   type="password"
                   name="confirmPassword"
@@ -274,7 +274,7 @@ const Register = () => {
             </button>
           </form>
 
-          <div className="mt-6 text-center text-white/40">
+          <div className="mt-6 text-center text-t3">
             Déjà un compte ?{' '}
             <Link to="/connexion" className="text-gold hover:text-gold-light">
               Se connecter

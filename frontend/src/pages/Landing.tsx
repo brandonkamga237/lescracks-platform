@@ -123,10 +123,13 @@ const Landing = () => {
         className="relative flex flex-col justify-center min-h-screen overflow-hidden"
         style={{ backgroundImage: 'url(/images/hero.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}
       >
-        {/* Dark overlay — multi-layer for reliable text legibility on any image */}
-        <div className="absolute inset-0 bg-black/70" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/80" />
-        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-black to-transparent" />
+        {/*
+          One directional mask instead of three stacked black scrims. The copy sits in
+          the left column, so we darken the left and let the photograph actually exist
+          on the right — rather than paying to download an image we then erase.
+        */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-black/30" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black to-transparent" />
         <motion.div
           className="absolute left-8 top-1/4 w-px h-[35vh] bg-gradient-to-b from-gold/50 via-gold/20 to-transparent hidden lg:block"
           style={{ scaleY: scrollYProgress, transformOrigin: 'top' }}
@@ -152,45 +155,67 @@ const Landing = () => {
             </motion.h1>
 
             <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-              className="text-lg text-white/55 max-w-lg mb-10">
+              className="text-lg text-t2 max-w-lg mb-10">
               Un accompagnement structuré pour passer de débutant à profil employable — avec un mentor, des projets réels et une communauté.
             </motion.p>
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
               className="flex flex-col sm:flex-row gap-4">
+              {/*
+                The primary action belongs to the product. It used to be the WhatsApp
+                button — an off-palette green that sent the most qualified traffic to a
+                channel we neither control nor measure. WhatsApp is now the secondary,
+                on-brand action, offered after the product path.
+              */}
+              <Link
+                to={postulerHref}
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gold text-black font-bold text-base hover:bg-gold-light transition-colors"
+              >
+                Postuler — réponse sous 48h
+                <ArrowRight className="w-5 h-5" aria-hidden="true" />
+              </Link>
+
+              <Link
+                to="/programme"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-line-strong text-t2 hover:text-t1 hover:border-gold/50 transition-colors text-base"
+              >
+                Découvrir le programme
+              </Link>
+            </motion.div>
+
+            {/* WhatsApp — a community link, not the headline conversion. */}
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
+              className="mt-6 text-sm text-t3">
+              Ou{' '}
               <a
                 href={WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#25D366] text-white font-bold text-base hover:bg-[#1ebe5c] transition-colors"
+                className="inline-flex items-center gap-1.5 text-gold hover:text-gold-light underline underline-offset-4 transition-colors"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                Rejoindre le canal WhatsApp
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                rejoindre la communauté WhatsApp
               </a>
-              <Link to="/programme"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors text-base">
-                Découvrir le programme
-              </Link>
-            </motion.div>
+            </motion.p>
 
           </motion.div>
         </div>
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
-          <span className="text-[9px] tracking-widest text-white/20">SCROLL</span>
+          <span className="text-[11px] tracking-widest text-t4">SCROLL</span>
           <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}
             className="w-px h-5 bg-gradient-to-b from-gold to-transparent" />
         </motion.div>
       </section>
 
       {/* ── STATS ───────────────────────────────────────────────────── */}
-      <div className="border-y border-white/6">
+      <div className="border-y border-line-soft">
         <div className="max-w-7xl mx-auto px-4 py-7 grid grid-cols-2 md:grid-cols-4 gap-6">
           {STATS.map((s) => (
             <div key={s.label} className="text-center">
               <p className="text-2xl font-display font-bold text-gold">{s.value}</p>
-              <p className="text-xs text-white/35 mt-1">{s.label}</p>
+              <p className="text-xs text-t4 mt-1">{s.label}</p>
             </div>
           ))}
         </div>
@@ -210,13 +235,13 @@ const Landing = () => {
               const Icon = p.icon;
               return (
                 <motion.div key={p.title}
-                  initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                  className="p-6 rounded-2xl border border-white/7 hover:border-white/15 transition-colors">
+                  initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
+                  className="p-6 rounded-2xl border border-line-soft hover:border-line transition-colors">
                   <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-5">
                     <Icon className="w-5 h-5 text-gold/70" />
                   </div>
                   <h3 className="font-semibold text-white mb-2">{p.title}</h3>
-                  <p className="text-sm text-white/40 leading-relaxed">{p.desc}</p>
+                  <p className="text-sm text-t3 leading-relaxed">{p.desc}</p>
                 </motion.div>
               );
             })}
@@ -235,14 +260,14 @@ const Landing = () => {
               <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-5">
                 L'<span className="text-gold">Accompagnement 360</span>
               </h2>
-              <p className="text-white/55 text-sm leading-relaxed mb-8">
+              <p className="text-t2 text-sm leading-relaxed mb-8">
                 Un suivi humain et structuré de <strong className="text-white">6 à 12 mois</strong> qui t'emmène de "je ne sais pas par où commencer" jusqu'à ton premier poste, ta première mission freelance ou le lancement de ton projet. Avec un mentor dédié, des projets concrets et une attestation de complétion.
               </p>
 
               {/* For who */}
-              <div className="p-4 rounded-xl bg-white/4 border border-white/8 mb-8">
+              <div className="p-4 rounded-xl bg-white/4 border border-line-soft mb-8">
                 <p className="text-[11px] text-gold/60 uppercase tracking-widest mb-2">Pour qui</p>
-                <p className="text-sm text-white/55 leading-relaxed">
+                <p className="text-sm text-t2 leading-relaxed">
                   Débutants, personnes en reconversion, profils qui tournent en rond depuis des mois sans résultats concrets.
                 </p>
               </div>
@@ -252,7 +277,7 @@ const Landing = () => {
                 Postuler maintenant
                 <ArrowRight className="w-5 h-5" />
               </Link>
-              <p className="text-white/20 text-xs mt-3">Réponse sous 48h · Sans engagement immédiat</p>
+              <p className="text-t4 text-xs mt-3">Réponse sous 48h · Sans engagement immédiat</p>
             </motion.div>
 
             {/* Right — feature list */}
@@ -264,19 +289,19 @@ const Landing = () => {
                 </div>
                 <div>
                   <p className="font-display font-bold text-white">Ce que tu obtiens</p>
-                  <p className="text-xs text-white/35">Accompagnement 360 · Suivi personnalisé</p>
+                  <p className="text-xs text-t4">Accompagnement 360 · Suivi personnalisé</p>
                 </div>
               </div>
               <ul className="space-y-3.5">
                 {ACC_FEATURES.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm text-white/70">
+                  <li key={item} className="flex items-start gap-3 text-sm text-t1">
                     <CheckCircle className="w-4 h-4 text-gold/70 mt-0.5 flex-shrink-0" />
                     {item}
                   </li>
                 ))}
               </ul>
-              <div className="mt-6 pt-6 border-t border-white/8">
-                <p className="text-xs text-white/25 mb-1">Résultat attendu</p>
+              <div className="mt-6 pt-6 border-t border-line-soft">
+                <p className="text-xs text-t4 mb-1">Résultat attendu</p>
                 <p className="text-sm font-medium text-gold">Emploi · Freelance · Projet personnel lancé</p>
               </div>
             </motion.div>
@@ -300,17 +325,17 @@ const Landing = () => {
             <div className="space-y-5">
               {PROCESS_STEPS.map((step, i) => (
                 <motion.div key={step.num}
-                  initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.09 }}
+                  initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
                   className="flex gap-6">
-                  <div className="hidden md:flex w-11 h-11 rounded-full bg-background border border-white/15 items-center justify-center flex-shrink-0 mt-1">
+                  <div className="hidden md:flex w-11 h-11 rounded-full bg-background border border-line items-center justify-center flex-shrink-0 mt-1">
                     <span className="text-gold text-xs font-bold">{step.num}</span>
                   </div>
-                  <div className="flex-1 p-5 rounded-xl border border-white/7 hover:border-gold/15 transition-colors">
+                  <div className="flex-1 p-5 rounded-xl border border-line-soft hover:border-gold/15 transition-colors">
                     <div className="flex items-center gap-2 mb-1.5">
                       <span className="text-xs font-bold text-gold md:hidden">{step.num}</span>
                       <h3 className="font-semibold text-white">{step.title}</h3>
                     </div>
-                    <p className="text-sm text-white/45 leading-relaxed">{step.desc}</p>
+                    <p className="text-sm text-t3 leading-relaxed">{step.desc}</p>
                   </div>
                 </motion.div>
               ))}
@@ -323,7 +348,7 @@ const Landing = () => {
               Postuler maintenant
               <ArrowRight className="w-5 h-5" />
             </Link>
-            <p className="text-white/25 text-xs mt-3">Réponse sous 48h · Sans engagement immédiat</p>
+            <p className="text-t4 text-xs mt-3">Réponse sous 48h · Sans engagement immédiat</p>
           </motion.div>
         </div>
       </section>
@@ -340,7 +365,7 @@ const Landing = () => {
               <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-5">
                 Contribue à des projets <span className="text-gold">qui existent vraiment</span>
               </h2>
-              <p className="text-white/50 leading-relaxed mb-8 text-sm">
+              <p className="text-t3 leading-relaxed mb-8 text-sm">
                 Chez LesCracks, l'open source n'est pas un exercice. C'est une façon de construire un portfolio solide, de collaborer en équipe et de se rendre visible sur la scène tech internationale.
               </p>
               <div className="space-y-5">
@@ -348,12 +373,12 @@ const Landing = () => {
                   const Icon = item.icon;
                   return (
                     <div key={item.title} className="flex items-start gap-4">
-                      <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/8 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <div className="w-9 h-9 rounded-lg bg-white/5 border border-line-soft flex items-center justify-center flex-shrink-0 mt-0.5">
                         <Icon className="w-4 h-4 text-gold/70" />
                       </div>
                       <div>
                         <p className="font-medium text-white text-sm mb-0.5">{item.title}</p>
-                        <p className="text-xs text-white/40 leading-relaxed">{item.desc}</p>
+                        <p className="text-xs text-t3 leading-relaxed">{item.desc}</p>
                       </div>
                     </div>
                   );
@@ -366,7 +391,7 @@ const Landing = () => {
 
             {/* Visual illustration */}
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
-              className="rounded-2xl overflow-hidden border border-white/8">
+              className="rounded-2xl overflow-hidden border border-line-soft">
               <img
                 src="/images/community-2.jpg"
                 alt="Communauté LesCracks"
@@ -385,7 +410,7 @@ const Landing = () => {
             <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
               Nos <span className="text-gold">activités</span> complémentaires
             </h2>
-            <p className="text-white/40 mt-3 max-w-xl text-sm leading-relaxed">
+            <p className="text-t3 mt-3 max-w-xl text-sm leading-relaxed">
               En plus des parcours principaux, LesCracks organise régulièrement des événements communautaires pour renforcer vos compétences et élargir votre réseau.
             </p>
           </motion.div>
@@ -393,11 +418,11 @@ const Landing = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
             {ACTIVITIES.map((a, i) => (
               <motion.div key={a.type}
-                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                className="p-5 rounded-2xl border border-white/7 hover:border-gold/20 transition-colors">
-                <span className="text-[10px] font-bold text-gold/60 uppercase tracking-widest">{a.type}</span>
+                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
+                className="p-5 rounded-2xl border border-line-soft hover:border-gold/20 transition-colors">
+                <span className="text-[11px] font-bold text-gold/60 uppercase tracking-widest">{a.type}</span>
                 <h3 className="font-semibold text-white mt-2 mb-2">{a.label}</h3>
-                <p className="text-xs text-white/40 leading-relaxed">{a.desc}</p>
+                <p className="text-xs text-t3 leading-relaxed">{a.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -405,15 +430,15 @@ const Landing = () => {
           {/* Events preview */}
           {events.length > 0 && (
             <>
-              <p className="text-xs text-white/25 uppercase tracking-widest mb-5">Prochains événements</p>
+              <p className="text-xs text-t4 uppercase tracking-widest mb-5">Prochains événements</p>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {events.map((event, i) => (
                   <motion.div key={event.id}
-                    initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}
-                    className="p-4 border border-white/7 rounded-xl hover:border-white/15 transition-colors">
-                    <span className="text-[10px] text-gold/70 uppercase tracking-wider">{event.type}</span>
-                    <h4 className="font-medium text-sm mt-1.5 mb-2 text-white/80">{event.title}</h4>
-                    <div className="flex items-center gap-1.5 text-xs text-white/30">
+                    initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
+                    className="p-4 border border-line-soft rounded-xl hover:border-line transition-colors">
+                    <span className="text-[11px] text-gold/70 uppercase tracking-wider">{event.type}</span>
+                    <h4 className="font-medium text-sm mt-1.5 mb-2 text-t1">{event.title}</h4>
+                    <div className="flex items-center gap-1.5 text-xs text-t4">
                       <Calendar className="w-3 h-3" />
                       {new Date(event.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
                       {event.location && <><span>·</span><MapPin className="w-3 h-3" />{event.location}</>}
@@ -422,7 +447,7 @@ const Landing = () => {
                 ))}
               </div>
               <div className="mt-7 text-center">
-                <Link to="/evenements" className="inline-flex items-center gap-2 text-white/40 hover:text-gold transition-colors text-sm">
+                <Link to="/evenements" className="inline-flex items-center gap-2 text-t3 hover:text-gold transition-colors text-sm">
                   Voir tous les événements <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -441,7 +466,7 @@ const Landing = () => {
                 <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
                   Ils sont <span className="text-gold">devenus des cracks</span>
                 </h2>
-                <p className="text-white/40 mt-3 max-w-xl text-sm leading-relaxed">
+                <p className="text-t3 mt-3 max-w-xl text-sm leading-relaxed">
                   Rencontrez quelques-uns des apprenants qui ont suivi notre accompagnement et qui construisent aujourd'hui leur carrière tech.
                 </p>
               </div>
@@ -454,15 +479,15 @@ const Landing = () => {
               {showcasedLearners.slice(0, 8).map((l, i) => (
                 <motion.div
                   key={l.id}
-                  initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}
+                  initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
                 >
                   <Link
                     to={`/apprenants/${l.slug}`}
-                    className="group block bg-white/3 border border-white/8 rounded-2xl p-5 hover:border-gold/25 hover:bg-white/6 transition-all duration-300"
+                    className="group block bg-white/3 border border-line-soft rounded-2xl p-5 hover:border-gold/25 hover:bg-white/6 transition-all duration-300"
                   >
                     <div className="flex items-center gap-3 mb-3">
                       {l.photoUrl ? (
-                        <img src={l.photoUrl} alt={l.fullName} className="w-11 h-11 rounded-full object-cover border border-white/10 group-hover:border-gold/30 transition-colors flex-shrink-0" />
+                        <img src={l.photoUrl} alt={l.fullName} className="w-11 h-11 rounded-full object-cover border border-line group-hover:border-gold/30 transition-colors flex-shrink-0" />
                       ) : (
                         <div className="w-11 h-11 rounded-full bg-gold/10 border border-gold/15 flex items-center justify-center text-gold font-bold text-sm flex-shrink-0">
                           {l.firstName[0]}{l.lastName[0]}
@@ -470,23 +495,23 @@ const Landing = () => {
                       )}
                       <div className="min-w-0">
                         <p className="font-semibold text-white text-sm truncate">{l.fullName}</p>
-                        {l.cohort && <p className="text-xs text-white/35">Cohorte {l.cohort}</p>}
+                        {l.cohort && <p className="text-xs text-t4">Cohorte {l.cohort}</p>}
                       </div>
                     </div>
-                    {l.bio && <p className="text-xs text-white/45 line-clamp-2 mb-3">{l.bio}</p>}
+                    {l.bio && <p className="text-xs text-t3 line-clamp-2 mb-3">{l.bio}</p>}
                     <div className="flex items-center justify-between">
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                         l.status === 'TERMINE_AVEC_CERTIFICAT'
                           ? 'bg-gold/10 text-gold border border-gold/20'
                           : l.status === 'EN_COURS'
                           ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                          : 'bg-white/5 text-white/40 border border-white/10'
+                          : 'bg-white/5 text-t3 border border-line'
                       }`}>
                         {l.status === 'TERMINE_AVEC_CERTIFICAT' && <Award className="w-3 h-3 inline mr-1 -mt-0.5" />}
                         {l.status === 'TERMINE_AVEC_CERTIFICAT' ? 'Certifié' : l.status === 'EN_COURS' ? 'En cours' : 'Diplômé'}
                       </span>
                       {l.linkedinUrl && (
-                        <a href={l.linkedinUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="text-white/25 hover:text-blue-400 transition-colors">
+                        <a href={l.linkedinUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="text-t4 hover:text-blue-400 transition-colors">
                           <Linkedin className="w-3.5 h-3.5" />
                         </a>
                       )}
@@ -499,7 +524,7 @@ const Landing = () => {
             <div className="mt-10 text-center">
               <Link
                 to="/apprenants"
-                className="inline-flex items-center gap-2 border border-white/10 text-white/60 hover:border-gold/30 hover:text-gold transition-colors px-6 py-3 rounded-xl text-sm"
+                className="inline-flex items-center gap-2 border border-line text-t2 hover:border-gold/30 hover:text-gold transition-colors px-6 py-3 rounded-xl text-sm"
               >
                 <Users className="w-4 h-4" />
                 Découvrir toute la communauté
@@ -515,7 +540,7 @@ const Landing = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Image */}
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
-              className="relative rounded-2xl overflow-hidden border border-white/8 order-2 md:order-1">
+              className="relative rounded-2xl overflow-hidden border border-line-soft order-2 md:order-1">
               <img
                 src="/images/about.jpg"
                 alt="Apprenants LesCracks — Afrique francophone"
@@ -532,10 +557,10 @@ const Landing = () => {
               <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-5">
                 Qui sommes-<span className="text-gold">nous</span> ?
               </h2>
-              <p className="text-white/55 text-sm leading-relaxed mb-4">
+              <p className="text-t2 text-sm leading-relaxed mb-4">
                 LesCracks est un accélérateur de carrière tech né au Cameroun, convaincu que le talent ne manque pas en Afrique — c'est l'accès à la bonne structure et au bon accompagnement qui fait la différence.
               </p>
-              <p className="text-white/40 text-sm leading-relaxed mb-8">
+              <p className="text-t3 text-sm leading-relaxed mb-8">
                 Fondée par des praticiens du terrain, notre mission est simple : rendre l'excellence tech accessible à tous ceux qui sont prêts à travailler, quelle que soit leur situation de départ.
               </p>
 
@@ -547,9 +572,9 @@ const Landing = () => {
                 ].map((v) => {
                   const Icon = v.icon;
                   return (
-                    <div key={v.label} className="text-center p-3 rounded-xl border border-white/7">
+                    <div key={v.label} className="text-center p-3 rounded-xl border border-line-soft">
                       <Icon className="w-5 h-5 text-gold/60 mx-auto mb-2" />
-                      <p className="text-[11px] text-white/40 leading-tight">{v.label}</p>
+                      <p className="text-[11px] text-t3 leading-tight">{v.label}</p>
                     </div>
                   );
                 })}
@@ -578,7 +603,7 @@ const Landing = () => {
             <h2 className="text-4xl md:text-5xl font-display font-bold mb-5 text-white">
               Prêt à changer<br />de <span className="text-gold">trajectoire</span> ?
             </h2>
-            <p className="text-white/45 mb-10 max-w-lg mx-auto text-sm leading-relaxed">
+            <p className="text-t3 mb-10 max-w-lg mx-auto text-sm leading-relaxed">
               Rejoins une communauté qui avance vraiment. Ton parcours commence par une candidature.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -597,7 +622,7 @@ const Landing = () => {
                 Canal WhatsApp
               </a>
             </div>
-            <p className="text-white/20 text-xs mt-6">Réponse sous 48h · Sans engagement · Entretien gratuit</p>
+            <p className="text-t4 text-xs mt-6">Réponse sous 48h · Sans engagement · Entretien gratuit</p>
           </motion.div>
         </div>
       </section>

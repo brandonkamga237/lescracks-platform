@@ -127,10 +127,10 @@ const Programme = () => {
         <div className="max-w-4xl mx-auto text-center relative z-10">
 
           {/* Breadcrumb */}
-          <div className="flex items-center justify-center gap-2 text-sm text-white/30 mb-10">
+          <div className="flex items-center justify-center gap-2 text-sm text-t4 mb-10">
             <Link to="/" className="hover:text-gold transition-colors">Accueil</Link>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-white/60">Le programme</span>
+            <span className="text-t2">Le programme</span>
           </div>
 
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
@@ -144,7 +144,7 @@ const Programme = () => {
                 </svg>
               </span>
             </h1>
-            <p className="text-lg text-white/50 max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p className="text-lg text-t3 max-w-2xl mx-auto mb-10 leading-relaxed">
               Un suivi humain et structuré de <strong className="text-white">6 à 12 mois</strong> avec un mentor dédié,
               des projets concrets et un réseau. Pas une formation — un accompagnement qui va jusqu'au résultat.
             </p>
@@ -161,13 +161,13 @@ const Programme = () => {
                 href={WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-line-strong text-t2 hover:text-white hover:border-line-strong transition-colors"
               >
                 <MessageCircle className="w-5 h-5" />
                 Poser une question sur WhatsApp
               </a>
             </div>
-            <p className="text-white/20 text-xs mt-4">Réponse sous 48h · Sans engagement · Entretien gratuit</p>
+            <p className="text-t4 text-xs mt-4">Réponse sous 48h · Sans engagement · Entretien gratuit</p>
           </motion.div>
         </div>
       </section>
@@ -187,14 +187,14 @@ const Programme = () => {
               return (
                 <motion.div
                   key={item.title}
-                  initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                  className="p-6 rounded-2xl border border-white/7 hover:border-gold/20 transition-colors"
+                  initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
+                  className="p-6 rounded-2xl border border-line-soft hover:border-gold/20 transition-colors"
                 >
                   <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center mb-4">
                     <Icon className="w-5 h-5 text-gold" />
                   </div>
                   <h3 className="font-semibold text-white mb-2 text-sm">{item.title}</h3>
-                  <p className="text-xs text-white/45 leading-relaxed">{item.desc}</p>
+                  <p className="text-xs text-t3 leading-relaxed">{item.desc}</p>
                 </motion.div>
               );
             })}
@@ -210,7 +210,7 @@ const Programme = () => {
             <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
               Ce que tu <span className="text-gold">obtiens</span>
             </h2>
-            <p className="text-white/40 mt-3 max-w-xl text-sm leading-relaxed">
+            <p className="text-t3 mt-3 max-w-xl text-sm leading-relaxed">
               L'Accompagnement 360 n'est pas un cours. C'est un pack complet qui combine cinq leviers indissociables.
             </p>
           </motion.div>
@@ -218,13 +218,13 @@ const Programme = () => {
             {WHAT_YOU_GET.map((item, i) => (
               <motion.div
                 key={item.title}
-                initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}
-                className="flex gap-4 p-5 rounded-xl border border-white/7 hover:border-gold/15 transition-colors"
+                initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
+                className="flex gap-4 p-5 rounded-xl border border-line-soft hover:border-gold/15 transition-colors"
               >
                 <CheckCircle className="w-5 h-5 text-gold/70 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-semibold text-white text-sm mb-1">{item.title}</p>
-                  <p className="text-xs text-white/40 leading-relaxed">{item.desc}</p>
+                  <p className="text-xs text-t3 leading-relaxed">{item.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -233,7 +233,7 @@ const Programme = () => {
       </section>
 
       {/* ── RÉSULTATS ATTENDUS ────────────────────────────────────── */}
-      <section className="py-12 px-4 border-y border-white/6">
+      <section className="py-12 px-4 border-y border-line-soft">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {RESULTS.map((r, i) => {
@@ -241,13 +241,13 @@ const Programme = () => {
               return (
                 <motion.div
                   key={r.label}
-                  initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+                  initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
                   className="flex flex-col items-center text-center gap-3"
                 >
                   <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center">
                     <Icon className="w-5 h-5 text-gold" />
                   </div>
-                  <p className="text-sm text-white/60 leading-tight">{r.label}</p>
+                  <p className="text-sm text-t2 leading-tight">{r.label}</p>
                 </motion.div>
               );
             })}
@@ -270,23 +270,23 @@ const Programme = () => {
               {STEPS.map((step, i) => (
                 <motion.div
                   key={step.num}
-                  initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                  initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
                   className="flex gap-6"
                 >
-                  <div className="hidden md:flex w-11 h-11 rounded-full bg-background border border-white/15 items-center justify-center flex-shrink-0 mt-1">
+                  <div className="hidden md:flex w-11 h-11 rounded-full bg-background border border-line items-center justify-center flex-shrink-0 mt-1">
                     <span className="text-gold text-xs font-bold">{step.num}</span>
                   </div>
-                  <div className="flex-1 p-5 rounded-xl border border-white/7 hover:border-gold/15 transition-colors">
+                  <div className="flex-1 p-5 rounded-xl border border-line-soft hover:border-gold/15 transition-colors">
                     <div className="flex items-start justify-between gap-3 mb-1.5">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-gold md:hidden">{step.num}</span>
                         <h3 className="font-semibold text-white">{step.title}</h3>
                       </div>
-                      <span className="text-[10px] text-gold/50 bg-gold/8 border border-gold/15 px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
+                      <span className="text-[11px] text-gold/50 bg-gold/8 border border-gold/15 px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
                         {step.duration}
                       </span>
                     </div>
-                    <p className="text-sm text-white/45 leading-relaxed">{step.desc}</p>
+                    <p className="text-sm text-t3 leading-relaxed">{step.desc}</p>
                   </div>
                 </motion.div>
               ))}
@@ -314,14 +314,14 @@ const Programme = () => {
               return (
                 <motion.div
                   key={item.title}
-                  initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                  className="p-6 rounded-2xl border border-white/7 text-center"
+                  initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
+                  className="p-6 rounded-2xl border border-line-soft text-center"
                 >
                   <div className="w-12 h-12 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-4">
                     <Icon className="w-5 h-5 text-gold" />
                   </div>
                   <h3 className="font-display font-bold text-white mb-2">{item.title}</h3>
-                  <p className="text-sm text-white/40 leading-relaxed">{item.desc}</p>
+                  <p className="text-sm text-t3 leading-relaxed">{item.desc}</p>
                 </motion.div>
               );
             })}
@@ -342,11 +342,11 @@ const Programme = () => {
             {FAQ_ITEMS.map((item, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}
-                className="p-5 rounded-xl border border-white/7"
+                initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
+                className="p-5 rounded-xl border border-line-soft"
               >
                 <p className="font-semibold text-white text-sm mb-2">{item.q}</p>
-                <p className="text-sm text-white/45 leading-relaxed">{item.a}</p>
+                <p className="text-sm text-t3 leading-relaxed">{item.a}</p>
               </motion.div>
             ))}
           </div>
@@ -364,7 +364,7 @@ const Programme = () => {
           <h2 className="text-4xl font-display font-bold text-white mb-4">
             Prêt à changer de <span className="text-gold">trajectoire</span> ?
           </h2>
-          <p className="text-white/45 mb-8 text-sm leading-relaxed">
+          <p className="text-t3 mb-8 text-sm leading-relaxed">
             Postule maintenant. Notre équipe étudie ton profil et te répond sous 48h. Sans engagement immédiat.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -379,7 +379,7 @@ const Programme = () => {
               href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-10 py-4 border border-white/15 text-white/50 hover:text-white hover:border-white/35 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-10 py-4 border border-line text-t3 hover:text-white hover:border-line-strong transition-colors"
             >
               <MessageCircle className="w-5 h-5" />
               Contacter sur WhatsApp

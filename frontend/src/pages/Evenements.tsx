@@ -1,6 +1,7 @@
 // src/pages/Evenements.tsx
 import { useState, useEffect } from 'react';
 import SEO from '@/components/common/SEO';
+import { CardSkeletonGrid } from "@/components/common/Skeleton";
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { apiService, Event } from '@/services/api';
@@ -20,7 +21,7 @@ const getCapacityInfo = (current: number, max: number) => {
   const pct = current / max;
   if (pct >= 0.9) return { label: 'Presque complet', color: 'text-red-400 bg-red-400/10', urgent: true };
   if (pct >= 0.7) return { label: `${max - current} places restantes`, color: 'text-orange-400 bg-orange-400/10', urgent: true };
-  return { label: `${current}/${max} places`, color: 'text-white/40 bg-white/5', urgent: false };
+  return { label: `${current}/${max} places`, color: 'text-t3 bg-white/5', urgent: false };
 };
 
 const getDaysUntil = (dateStr: string) => {
@@ -76,7 +77,7 @@ const Evenements = () => {
             <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
               Nos <span className="text-gold">Evenements</span>
             </h1>
-            <p className="text-white/60 max-w-2xl">
+            <p className="text-t2 max-w-2xl">
               Rejoignez nos bootcamps, hackathons et meetups pour accelerer votre transformation professionnelle.
             </p>
           </div>
@@ -84,7 +85,7 @@ const Evenements = () => {
           {/* Filters */}
           <div className="flex flex-col md:flex-row gap-4 mb-8">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
               <input
                 type="text"
                 placeholder="Rechercher un evenement..."
@@ -99,7 +100,7 @@ const Evenements = () => {
                 className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                   !selectedType 
                     ? 'bg-gold text-black' 
-                    : 'bg-white/5 text-white/60 hover:text-white'
+                    : 'bg-white/5 text-t2 hover:text-white'
                 }`}
               >
                 Tous
@@ -111,7 +112,7 @@ const Evenements = () => {
                   className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
                     selectedType === type 
                       ? 'bg-gold text-black' 
-                      : 'bg-white/5 text-white/60 hover:text-white'
+                      : 'bg-white/5 text-t2 hover:text-white'
                   }`}
                 >
                   {type}
@@ -122,9 +123,7 @@ const Evenements = () => {
 
           {/* Events Grid */}
           {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-gold" />
-            </div>
+            <CardSkeletonGrid count={6} />
           ) : filteredEvents.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredEvents.map((event, index) => (
@@ -132,7 +131,7 @@ const Evenements = () => {
                   key={event.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: 0 }}
                   className="card card-hover overflow-hidden"
                 >
                   {/* Image */}
@@ -175,12 +174,12 @@ const Evenements = () => {
                   <h3 className="text-lg font-semibold mb-2">{event.title}</h3>
 
                   {/* Description */}
-                  <p className="text-white/60 text-sm mb-4 line-clamp-2">
+                  <p className="text-t2 text-sm mb-4 line-clamp-2">
                     {event.description}
                   </p>
 
                   {/* Meta */}
-                  <div className="space-y-2 text-white/40 text-sm mb-4">
+                  <div className="space-y-2 text-t3 text-sm mb-4">
                     {event.startDate && (
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
@@ -224,11 +223,11 @@ const Evenements = () => {
               animate={{ opacity: 1, y: 0 }}
               className="flex flex-col items-center text-center py-24"
             >
-              <div className="w-24 h-24 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6">
-                <Trophy className="w-12 h-12 text-white/20" />
+              <div className="w-24 h-24 rounded-2xl bg-white/5 border border-line flex items-center justify-center mb-6">
+                <Trophy className="w-12 h-12 text-t4" />
               </div>
-              <h3 className="text-lg font-semibold text-white/60 mb-2">Aucun evenement trouve</h3>
-              <p className="text-white/30 text-sm max-w-xs mb-6">
+              <h3 className="text-lg font-semibold text-t2 mb-2">Aucun evenement trouve</h3>
+              <p className="text-t4 text-sm max-w-xs mb-6">
                 Essayez un autre filtre ou revenez bientôt — de nouveaux événements sont ajoutés régulièrement.
               </p>
               <button
