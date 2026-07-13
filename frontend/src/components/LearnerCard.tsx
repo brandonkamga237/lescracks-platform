@@ -37,7 +37,7 @@ export default function LearnerCard({ learner, featured = false }: LearnerCardPr
     return (
       <Link
         to={`/apprenants/${learner.slug}`}
-        className="group relative block bg-white/4 border border-line rounded-2xl overflow-hidden hover:border-gold/35 transition-all duration-300 hover:-translate-y-0.5"
+        className="group relative block card card-hover !p-0 overflow-hidden h-full hover:-translate-y-0.5"
       >
         {isCertified && (
           <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-transparent pointer-events-none" />
@@ -99,7 +99,7 @@ export default function LearnerCard({ learner, featured = false }: LearnerCardPr
   return (
     <Link
       to={`/apprenants/${learner.slug}`}
-      className="group block bg-white/4 border border-line rounded-2xl overflow-hidden hover:border-gold/30 hover:bg-white/6 transition-all duration-300 hover:-translate-y-0.5"
+      className="group block card card-hover !p-0 overflow-hidden h-full hover:-translate-y-0.5"
     >
       <div className="p-5">
         {/* Avatar + nom */}

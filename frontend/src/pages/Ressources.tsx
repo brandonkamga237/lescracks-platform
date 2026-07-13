@@ -26,7 +26,7 @@ import {
 type ResourceType = 'all' | 'VIDEO' | 'DOCUMENT';
 
 const Ressources = () => {
-  const { isAuthenticated, isPremium, user } = useAuth();
+  const { isAuthenticated, isPremium } = useAuth();
   const [searchParams] = useSearchParams();
 
   // Initialise l'onglet actif depuis ?type=VIDEO|DOCUMENT (liens du sous-menu)
@@ -197,13 +197,6 @@ const Ressources = () => {
   // Check if any filters are active
   const hasActiveFilters = selectedCategory !== null || selectedTags.length > 0 || searchTerm !== '';
 
-  // Filter tags by selected category (tags belong to a category)
-  const filteredTags = selectedCategory 
-    ? tags.filter(tag => {
-        // Tags in frontend don't have categoryId, so we show all tags when category is selected
-        return true;
-      })
-    : tags;
 
   return (
     <Layout>
@@ -428,13 +421,13 @@ const Ressources = () => {
           ) : resources.length > 0 ? (
             <>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {resources.map((resource, index) => (
+                {resources.map((resource) => (
                   <motion.div
                     key={resource.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0 }}
-                    className="card card-hover overflow-hidden"
+                    className="card card-hover overflow-hidden h-full flex flex-col"
                   >
                     {/* Thumbnail */}
                     <div className="h-36 bg-gradient-to-br from-gold/10 to-white/3 rounded-xl mb-4 flex items-center justify-center relative overflow-hidden">
@@ -510,7 +503,7 @@ const Ressources = () => {
 
                     {/* CTA */}
                     {canAccess(resource) ? (
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 mt-auto pt-2">
                         {resource.slug ? (
                           <Link
                             to={`/ressources/${resource.slug}`}

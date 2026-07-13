@@ -11,7 +11,6 @@ import {
   MapPin,
   Users,
   Trophy,
-  Loader2,
   Search,
   Flame,
   Clock,
@@ -126,13 +125,13 @@ const Evenements = () => {
             <CardSkeletonGrid count={6} />
           ) : filteredEvents.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredEvents.map((event, index) => (
+              {filteredEvents.map((event) => (
                 <motion.div
                   key={event.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0 }}
-                  className="card card-hover overflow-hidden"
+                  className="card card-hover overflow-hidden h-full flex flex-col"
                 >
                   {/* Image */}
                   <div className="h-48 bg-gradient-to-br from-gold/20 to-transparent rounded-lg mb-4 flex items-center justify-center overflow-hidden">
@@ -210,7 +209,7 @@ const Evenements = () => {
                   {/* CTA */}
                   <Link
                     to={`/evenements/${event.id}`}
-                    className="block w-full btn-secondary text-center"
+                    className="block w-full btn-secondary text-center mt-auto"
                   >
                     Voir les details
                   </Link>
