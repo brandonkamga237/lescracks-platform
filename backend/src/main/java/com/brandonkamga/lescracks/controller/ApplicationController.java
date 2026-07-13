@@ -1,5 +1,9 @@
 package com.brandonkamga.lescracks.controller;
 
+import com.brandonkamga.lescracks.domain.EventStatusEnum;
+import com.brandonkamga.lescracks.exception.ForbiddenException;
+import com.brandonkamga.lescracks.repository.ApplicationRepository;
+import org.springframework.security.core.Authentication;
 import com.brandonkamga.lescracks.domain.Application;
 import com.brandonkamga.lescracks.domain.ApplicationStatus;
 import com.brandonkamga.lescracks.domain.ApplicationType;
@@ -35,6 +39,7 @@ import java.util.stream.Collectors;
 public class ApplicationController {
 
     private final ApplicationService applicationService;
+    private final ApplicationRepository applicationRepository;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final ApplicationTypeRepository applicationTypeRepository;
@@ -42,11 +47,13 @@ public class ApplicationController {
 
     public ApplicationController(
             ApplicationService applicationService,
+            ApplicationRepository applicationRepository,
             UserRepository userRepository,
             EventRepository eventRepository,
             ApplicationTypeRepository applicationTypeRepository,
             MailServiceImpl mailService) {
         this.applicationService = applicationService;
+        this.applicationRepository = applicationRepository;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
         this.applicationTypeRepository = applicationTypeRepository;
@@ -115,14 +122,99 @@ public class ApplicationController {
         return ResponseEntity.ok(ApiResponse.success(types));
     }
 
-    // POST public — aucun token requis (candidature publique Accompagnement 360)
+    /**
+     * Two different things come through here, with deliberately different rules:
+     *
+     *  - An Accompagnement 360 application (no eventId) stays fully public. Asking a
+     *    stranger to create an account before they can even apply is how you lose them.
+     *
+     *  - Signing up for an event (eventId present) REQUIRES an account. We need to know
+     *    who is actually coming, be able to reach them, and stop the same person from
+     *    taking three of the twenty seats.
+     */
     @PostMapping
-    @Operation(summary = "Soumettre une candidature publique")
+    @Operation(summary = "Soumettre une candidature (publique) ou s'inscrire à un événement (compte requis)")
     public ResponseEntity<ApiResponse<ApplicationResponse>> createApplication(
-            @Valid @RequestBody ApplicationRequest request) {
+            @Valid @RequestBody ApplicationRequest request,
+            Authentication authentication) {
+
+        if (request.getEventId() != null) {
+            return ResponseEntity.ok(registerForEvent(request, authentication));
+        }
+
+        // Bean validation can't express "required here, optional there", so the public
+        // path checks its own required fields. Without this, dropping @NotBlank from the
+        // DTO would let a nameless, unreachable application through.
+        requireField(request.getFullName(), "Le nom complet est obligatoire.");
+        requireField(request.getEmailAddress(), "L'adresse email est obligatoire.");
+        requireField(request.getWhatsappNumber(), "Le numéro WhatsApp est obligatoire.");
+
         Application application = toEntity(request);
         Application saved = applicationService.save(application);
         return ResponseEntity.ok(ApiResponse.success(toResponse(saved), "Candidature soumise avec succès"));
+    }
+
+    private void requireField(String value, String message) {
+        if (value == null || value.isBlank()) {
+            throw new BadRequestException(message);
+        }
+    }
+
+    /** Event sign-up: account required, one seat per person, and only while there is room. */
+    private ApiResponse<ApplicationResponse> registerForEvent(
+            ApplicationRequest request, Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            throw new ForbiddenException(
+                    "Tu dois créer un compte ou te connecter pour t'inscrire à un événement.");
+        }
+
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new ForbiddenException("Compte introuvable. Reconnecte-toi."));
+
+        Event event = eventRepository.findById(request.getEventId())
+                .orElseThrow(() -> new ResourceNotFoundException("Event", "id", request.getEventId()));
+
+        EventStatusEnum status = event.deriveStatus();
+        if (status == EventStatusEnum.closed) {
+            throw new BadRequestException("Cet événement est terminé, les inscriptions sont closes.");
+        }
+
+        if (applicationRepository.existsByUser_IdAndEvent_Id(user.getId(), event.getId())) {
+            throw new BadRequestException("Tu es déjà inscrit à cet événement.");
+        }
+
+        // Capacity is derived, so this check reads the live number of seats taken.
+        Integer max = event.getMaxParticipants();
+        if (max != null && applicationRepository.countByEvent_Id(event.getId()) >= max) {
+            throw new BadRequestException("Cet événement est complet.");
+        }
+
+        ApplicationType type = applicationTypeRepository.findById(request.getApplicationTypeId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "ApplicationType", "id", request.getApplicationTypeId()));
+
+        Application application = Application.builder()
+                .user(user)
+                .event(event)
+                .applicationType(type)
+                .status(ApplicationStatus.RECEIVED)
+                .statusChangedAt(LocalDateTime.now())
+                // Fall back to the account details, so the form doesn't re-ask for what we know.
+                .fullName(request.getFullName() != null && !request.getFullName().isBlank()
+                        ? request.getFullName() : user.getUsername())
+                .emailAddress(request.getEmailAddress() != null && !request.getEmailAddress().isBlank()
+                        ? request.getEmailAddress() : user.getEmail())
+                .whatsappNumber(request.getWhatsappNumber())
+                .motivationText(request.getMotivationText())
+                .technicalLevel(request.getTechnicalLevel())
+                .age(request.getAge())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        Application saved = applicationService.save(application);
+        return ApiResponse.success(toResponse(saved), "Inscription confirmée !");
     }
 
     @PatchMapping("/{id}/status")

@@ -2,6 +2,7 @@ package com.brandonkamga.lescracks.controller;
 
 import com.brandonkamga.lescracks.domain.Event;
 import com.brandonkamga.lescracks.domain.EventStatus;
+import com.brandonkamga.lescracks.domain.EventStatusEnum;
 import com.brandonkamga.lescracks.domain.EventType;
 import com.brandonkamga.lescracks.domain.Tag;
 import com.brandonkamga.lescracks.dto.ApiResponse;
@@ -187,12 +188,26 @@ public class EventController {
         return ResponseEntity.ok(ApiResponse.success(null, "Event deleted successfully"));
     }
 
+    /** Look up the EventStatus row matching what the dates say the event currently is. */
+    private EventStatus resolveStatusFromDates(LocalDateTime start, LocalDateTime end) {
+        EventStatusEnum derived = Event.builder()
+                .eventDate(start)
+                .endDate(end)
+                .build()
+                .deriveStatus();
+
+        return eventStatusRepository.findByName(derived)
+                .orElseThrow(() -> new ResourceNotFoundException("EventStatus", "name", derived.name()));
+    }
+
     private Event toEntity(EventRequest request) {
         EventType eventType = eventTypeRepository.findById(request.getEventTypeId())
                 .orElseThrow(() -> new ResourceNotFoundException("EventType", "id", request.getEventTypeId()));
-        
-        EventStatus eventStatus = eventStatusRepository.findById(request.getEventStatusId())
-                .orElseThrow(() -> new ResourceNotFoundException("EventStatus", "id", request.getEventStatusId()));
+
+        // The status is no longer chosen by hand — it follows the dates. The column is
+        // still NOT NULL, so we persist whatever the dates say at save time; reads always
+        // re-derive it, so a stale row can never surface as a wrong status.
+        EventStatus eventStatus = resolveStatusFromDates(request.getEventDate(), request.getEndDate());
 
         Set<Tag> tags = new HashSet<>();
         if (request.getTagIds() != null) {
@@ -232,7 +247,9 @@ public class EventController {
                 .location(event.getLocation())
                 .coverImageUrl(event.getCoverImageUrl())
                 .type(event.getEventType().getName())
-                .status(event.getEventStatus().getName().name())
+                // Derived from the dates, never read from the stored column: a status
+                // someone typed in is correct the day they set it and wrong the next.
+                .status(event.deriveStatus().name())
                 .applicationRequired(event.getApplicationRequired())
                 .maxParticipants(event.getMaxParticipants())
                 .currentParticipants(applicationRepository.countByEvent_Id(event.getId()))

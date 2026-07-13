@@ -13,7 +13,7 @@ import { Skeleton } from '@/components/common/Skeleton';
 import apiService, { Event } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  ArrowLeft, Calendar, MapPin, Users, CheckCircle, Loader2, AlertCircle, Tag as TagIcon,
+  ArrowLeft, Calendar, MapPin, Users, CheckCircle, Loader2, AlertCircle, Tag as TagIcon, LogIn,
 } from 'lucide-react';
 
 const STATUS_LABEL: Record<string, { label: string; chip: string }> = {
@@ -195,6 +195,36 @@ const EvenementDetail = () => {
                     : 'Toutes les places ont été prises. Suis-nous pour le prochain.'}
                 </p>
               </div>
+            ) : !isAuthenticated ? (
+              /* An event seat is nominative: we need to know who is coming, be able to
+                 reach them, and stop one person taking three of the twenty places.
+                 Show this instead of a form that the server would reject anyway. */
+              <div className="text-center py-4">
+                <div className="w-14 h-14 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-4">
+                  <LogIn className="w-6 h-6 text-gold" aria-hidden="true" />
+                </div>
+                <h2 className="text-xl font-display font-bold text-white mb-2">
+                  Connecte-toi pour t'inscrire
+                </h2>
+                <p className="text-t3 text-sm mb-6 max-w-sm mx-auto">
+                  Les places sont nominatives. Crée ton compte en une minute — on te ramène
+                  directement ici après.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Link
+                    to={`/connexion?redirect=${encodeURIComponent(`/evenements/${id}`)}`}
+                    className="btn-primary py-3 px-6"
+                  >
+                    Se connecter
+                  </Link>
+                  <Link
+                    to={`/inscription?redirect=${encodeURIComponent(`/evenements/${id}`)}`}
+                    className="btn-secondary py-3 px-6"
+                  >
+                    Créer un compte
+                  </Link>
+                </div>
+              </div>
             ) : (
               <>
                 <h2 className="text-xl font-display font-bold text-white mb-1">
@@ -204,7 +234,6 @@ const EvenementDetail = () => {
                   {event.applicationRequired
                     ? 'Les places sont limitées : parle-nous de toi, on étudie chaque candidature.'
                     : 'Laisse-nous tes coordonnées, on te recontacte avec les détails.'}
-                  {!isAuthenticated && ' Aucun compte requis.'}
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-4">

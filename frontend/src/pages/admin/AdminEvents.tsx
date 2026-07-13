@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Plus, Loader2, Trash2, Pencil, ChevronLeft, ChevronRight, X, Save, Image } from 'lucide-react';
 import adminApi, { AdminEvent, PaginatedResponse } from '@/services/adminApi';
+import { deriveEventStatus } from '@/lib/eventStatus';
 import apiService from '@/services/api';
 
 interface EventType   { id: number; name: string; }
@@ -70,6 +71,12 @@ const AdminEvents = () => {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing]     = useState<AdminEvent | null>(null);
   const [form, setForm]           = useState<EventForm>(EMPTY);
+
+  // Preview the status the API will compute, using the SAME rule as the backend.
+  const derivedStatus = deriveEventStatus(
+    form.startDate ? toDateTime(form.startDate, form.startTime) : null,
+    form.endDate ? toDateTime(form.endDate, form.endTime) : null,
+  );
   const [saving, setSaving]       = useState(false);
   const [error, setError]         = useState('');
   const [uploading, setUploading] = useState(false);
@@ -137,7 +144,6 @@ const AdminEvents = () => {
     if (!form.title.trim())       { setError('Le titre est obligatoire.'); return; }
     if (!form.startDate)          { setError('La date de début est obligatoire.'); return; }
     if (form.eventTypeId === '')  { setError('Le type est obligatoire.'); return; }
-    if (form.eventStatusId === '') { setError('Le statut est obligatoire.'); return; }
 
     setSaving(true); setError('');
     try {
@@ -152,7 +158,7 @@ const AdminEvents = () => {
         // Empty means "no limit" — send null rather than 0, which would read as "full".
         maxParticipants:     form.maxParticipants === '' ? null : Number(form.maxParticipants),
         eventTypeId:         form.eventTypeId as number,
-        eventStatusId:       form.eventStatusId as number,
+        // eventStatusId is deliberately not sent: the API derives the status from the dates.
       };
       if (editing) {
         await adminApi.updateEvent(editing.id, payload);
@@ -388,7 +394,7 @@ const AdminEvents = () => {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none" />
               </div>
 
-              {/* Type + Statut */}
+              {/* Type + Statut (calculé) */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
@@ -399,14 +405,19 @@ const AdminEvents = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Statut *</label>
-                  <select value={form.eventStatusId} onChange={set('eventStatusId')} disabled={!metaLoaded}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none">
-                    <option value="">— Choisir —</option>
-                    {eventStatuses.map(s => (
-                      <option key={s.id} value={s.id}>{STATUS_LABELS[s.name] ?? s.name}</option>
-                    ))}
-                  </select>
+                  {/* The status used to be picked by hand, which meant it was right on the day
+                      you set it and wrong the morning after. It now follows the dates. */}
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+                  <div className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-sm text-gray-600 flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${
+                      derivedStatus === 'open' ? 'bg-emerald-500'
+                      : derivedStatus === 'upcoming' ? 'bg-sky-500' : 'bg-gray-400'}`} />
+                    {STATUS_LABELS[derivedStatus] ?? derivedStatus}
+                    <span className="ml-auto text-xs text-gray-400">automatique</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Déduit des dates. L'événement s'ouvre et se ferme tout seul.
+                  </p>
                 </div>
               </div>
 

@@ -26,15 +26,14 @@ public class ApplicationRequest {
     private Long applicationTypeId;
 
     @Schema(description = "Nom complet du candidat", example = "Jean Dupont")
-    @NotBlank(message = "Full name is required")
+    // Validated in the controller, not here: a public application must supply these,
+    // but an event sign-up is authenticated, so we already know the person.
     private String fullName;
 
     @Schema(description = "Email du candidat", example = "jean@example.com")
-    @NotBlank(message = "Email is required")
     private String emailAddress;
 
     @Schema(description = "Numéro WhatsApp", example = "+237600000000")
-    @NotBlank(message = "WhatsApp number is required")
     private String whatsappNumber;
 
     @Schema(description = "Âge (optionnel)", example = "22")

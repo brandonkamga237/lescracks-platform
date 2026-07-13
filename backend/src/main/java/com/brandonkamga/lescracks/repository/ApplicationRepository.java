@@ -18,5 +18,8 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
     /** How many people have registered for an event. Used to derive live capacity. */
     long countByEvent_Id(Long eventId);
+
+    /** One seat per person: stops the same account registering twice for an event. */
+    boolean existsByUser_IdAndEvent_Id(Long userId, Long eventId);
     Page<Application> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

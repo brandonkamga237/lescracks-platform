@@ -50,7 +50,7 @@ public class EventRequest {
     private Long eventTypeId;
 
     @Schema(description = "ID du statut de l'événement", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "Event status ID is required")
+    /** Ignored: the status is derived from the dates. Kept for backward compatibility. */
     private Long eventStatusId;
 
     @Schema(description = "Liste des IDs des tags associés")

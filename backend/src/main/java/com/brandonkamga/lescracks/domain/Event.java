@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -54,6 +55,39 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_status_id", nullable = false)
     private EventStatus eventStatus;
+
+    /**
+     * The status an event is actually in, worked out from its dates.
+     *
+     * A hand-picked status is a lie waiting to happen: it is correct on the day
+     * someone sets it and wrong the morning after. Deriving it means an event opens
+     * and closes on its own, with nothing to maintain and no scheduled job.
+     *
+     * {@code eventDate} (the start) is mandatory; {@code endDate} is not:
+     *   - before the start                    → upcoming
+     *   - between start and end               → open
+     *   - after the end                       → closed
+     *   - no end date: open for the start DAY, closed once that day is over
+     *     (a one-day event is over when the day is over, not the instant it began)
+     */
+    public EventStatusEnum deriveStatus() {
+        LocalDateTime now = LocalDateTime.now();
+
+        if (eventDate == null) {
+            // Should be impossible (the column is NOT NULL), but never guess a status.
+            return eventStatus != null ? eventStatus.getName() : EventStatusEnum.upcoming;
+        }
+
+        if (now.isBefore(eventDate)) {
+            return EventStatusEnum.upcoming;
+        }
+
+        LocalDateTime closesAt = (endDate != null)
+                ? endDate
+                : eventDate.toLocalDate().atTime(LocalTime.MAX); // end of the start day
+
+        return now.isAfter(closesAt) ? EventStatusEnum.closed : EventStatusEnum.open;
+    }
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
