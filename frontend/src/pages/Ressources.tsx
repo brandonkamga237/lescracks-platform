@@ -21,9 +21,21 @@ import {
   X,
   ExternalLink,
   ArrowRight,
+  ArrowUpDown,
 } from 'lucide-react';
 
 type ResourceType = 'all' | 'VIDEO' | 'DOCUMENT';
+
+/** Sort keys the backend understands (field,direction). */
+type SortKey = 'createdAt,desc' | 'createdAt,asc' | 'viewCount,desc' | 'downloadCount,desc' | 'title,asc';
+
+const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: 'createdAt,desc',     label: 'Plus récentes' },
+  { key: 'createdAt,asc',      label: 'Plus anciennes' },
+  { key: 'viewCount,desc',     label: 'Les plus vues' },
+  { key: 'downloadCount,desc', label: 'Les plus téléchargées' },
+  { key: 'title,asc',          label: 'Titre (A-Z)' },
+];
 
 const Ressources = () => {
   const { isAuthenticated, isPremium } = useAuth();
@@ -48,9 +60,18 @@ const Ressources = () => {
   // Filter state
   const [activeTab, setActiveTab] = useState<ResourceType>(initialTab);
   const [searchTerm, setSearchTerm] = useState('');
+  /** What the user typed, settled. Firing a request per keystroke hammers the API and
+   *  makes the list flicker; we only search once they stop typing. */
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
+  const [sortBy, setSortBy] = useState<SortKey>('createdAt,desc');
   const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 350);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(0);
@@ -97,12 +118,12 @@ const Ressources = () => {
         type: typeFilter,
         categoryId: selectedCategory || undefined,
         tagIds: selectedTags.length > 0 ? selectedTags : undefined,
-        search: searchTerm || undefined,
+        search: debouncedSearch || undefined,
         page: currentPage,
         size: pageSize,
-        sort: 'createdAt,desc'
+        sort: sortBy,
       });
-      
+
       setResources(response.content);
       setTotalPages(response.totalPages);
       setTotalElements(response.totalElements);
@@ -111,7 +132,7 @@ const Ressources = () => {
     } finally {
       setLoading(false);
     }
-  }, [activeTab, selectedCategory, selectedTags, searchTerm, currentPage]);
+  }, [activeTab, selectedCategory, selectedTags, debouncedSearch, sortBy, currentPage]);
 
   // Initial load and when filters change
   useEffect(() => {
@@ -121,22 +142,40 @@ const Ressources = () => {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(0);
-  }, [activeTab, selectedCategory, selectedTags, searchTerm]);
+  }, [activeTab, selectedCategory, selectedTags, debouncedSearch, sortBy]);
 
   // Handle tab change
   const handleTabChange = (tab: ResourceType) => {
     setActiveTab(tab);
   };
 
-  // Handle category filter
+  /**
+   * Tags belong to a category. Picking a category narrows the tag list to that
+   * category's tags — the whole point of having both filters.
+   *
+   * This is what the old code claimed to do and never did: its callback was literally
+   * `return true`, because the client had dropped the tag's categoryId. Selecting a
+   * category left every tag on screen, including ones that could not possibly match.
+   */
+  const visibleTags = selectedCategory === null
+    ? tags
+    : tags.filter(tag => tag.categoryId === selectedCategory);
+
+  // Changing category can strand a selected tag that no longer belongs — drop those,
+  // otherwise the query keeps filtering on an invisible tag and returns nothing.
   const handleCategoryChange = (categoryId: number | null) => {
     setSelectedCategory(categoryId);
+    if (categoryId !== null) {
+      setSelectedTags(prev =>
+        prev.filter(id => tags.find(t => t.id === id)?.categoryId === categoryId)
+      );
+    }
   };
 
   // Handle tag toggle
   const handleTagToggle = (tagId: number) => {
-    setSelectedTags(prev => 
-      prev.includes(tagId) 
+    setSelectedTags(prev =>
+      prev.includes(tagId)
         ? prev.filter(id => id !== tagId)
         : [...prev, tagId]
     );
@@ -147,6 +186,7 @@ const Ressources = () => {
     setSelectedCategory(null);
     setSelectedTags([]);
     setSearchTerm('');
+    setSortBy('createdAt,desc');
   };
 
   // Handle search submit
@@ -162,10 +202,15 @@ const Ressources = () => {
     }
   };
 
-  /** A resource is accessible if it's free, or if the user has premium access. */
+  /**
+   * Browsing the catalogue is public; opening the CONTENT is not.
+   *
+   * This used to return true for any free resource, even to a signed-out visitor —
+   * matching a server that also left the file endpoint wide open. Both are closed now.
+   */
   const canAccess = (resource: Resource) => {
-    if (!resource.premium) return true;
-    return isAuthenticated && isPremium;
+    if (!isAuthenticated) return false;
+    return !resource.premium || isPremium;
   };
 
   const handleOpen = async (resource: Resource) => {
@@ -195,7 +240,11 @@ const Ressources = () => {
   };
 
   // Check if any filters are active
-  const hasActiveFilters = selectedCategory !== null || selectedTags.length > 0 || searchTerm !== '';
+  const activeFilterCount =
+    (selectedCategory ? 1 : 0) + selectedTags.length + (searchTerm ? 1 : 0);
+
+  const hasActiveFilters =
+    selectedCategory !== null || selectedTags.length > 0 || searchTerm !== '' || sortBy !== 'createdAt,desc';
 
 
   return (
@@ -292,6 +341,23 @@ const Ressources = () => {
               />
             </form>
 
+            {/* Sort — the backend has always supported it; the client hard-coded
+                'createdAt,desc' and never let anyone change it. */}
+            <div className="relative">
+              <label htmlFor="sort" className="sr-only">Trier les ressources</label>
+              <select
+                id="sort"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortKey)}
+                className="input pr-8 appearance-none cursor-pointer"
+              >
+                {SORT_OPTIONS.map(o => (
+                  <option key={o.key} value={o.key}>{o.label}</option>
+                ))}
+              </select>
+              <ArrowUpDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-t4 pointer-events-none" />
+            </div>
+
             {/* Filter Toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -299,9 +365,9 @@ const Ressources = () => {
             >
               <Filter className="w-4 h-4" />
               Filtres
-              {hasActiveFilters && (
+              {activeFilterCount > 0 && (
                 <span className="ml-1 px-2 py-0.5 text-xs bg-gold text-black rounded-full">
-                  {(selectedCategory ? 1 : 0) + selectedTags.length + (searchTerm ? 1 : 0)}
+                  {activeFilterCount}
                 </span>
               )}
             </button>
@@ -365,7 +431,7 @@ const Ressources = () => {
                     Tags (selection multiple - OU logique)
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    {tags.map(tag => (
+                    {visibleTags.map(tag => (
                       <button
                         key={tag.id}
                         onClick={() => handleTagToggle(tag.id)}

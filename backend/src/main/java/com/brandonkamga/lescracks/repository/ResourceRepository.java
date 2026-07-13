@@ -19,6 +19,10 @@ import java.util.List;
 @Repository
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
 
+    /** Uploaded files are served as /api/resources/files/<name>, so the name identifies the row. */
+    Optional<Resource> findFirstByUrlContaining(String filename);
+
+
     Optional<Resource> findBySlug(String slug);
 
     // Basic finders

@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
+import ResourceEngagement from '@/components/resources/ResourceEngagement';
 import SEO from '@/components/common/SEO';
 import { apiService, Resource } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -73,7 +74,15 @@ export default function RessourceDetail() {
   }
 
   const isVideo = resource.resourceTypeName === 'VIDEO';
-  const canAccess = !resource.premium || (isAuthenticated && isPremium);
+
+  /**
+   * Browsing the catalogue is public. Opening or downloading the CONTENT is not.
+   *
+   * The server now enforces this (the file endpoint used to be permitAll, so anyone
+   * with the URL could pull down any file, premium included). We mirror the rule here
+   * so the button says "connecte-toi" instead of firing a request that would 401.
+   */
+  const canAccess = isAuthenticated && (!resource.premium || isPremium);
   const fileSize = formatSize(resource.metadata?.fileSize);
 
   const seoDescription = resource.description
@@ -282,10 +291,15 @@ export default function RessourceDetail() {
                   <div className="w-10 h-10 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto">
                     <Lock className="w-5 h-5 text-gold" />
                   </div>
+                  {/* Three different reasons to be blocked — say which one it is, rather
+                      than telling a logged-out visitor about Premium when all they need
+                      is an account. */}
                   <p className="text-sm text-t2 leading-relaxed">
-                    {isAuthenticated
-                      ? 'Cette ressource est réservée aux membres Premium.'
-                      : 'Crée un compte pour accéder à cette ressource premium.'}
+                    {!isAuthenticated
+                      ? (resource.premium
+                          ? 'Cette ressource est réservée aux membres Premium. Connecte-toi pour continuer.'
+                          : 'Connecte-toi pour ouvrir cette ressource. La consultation du catalogue reste libre.')
+                      : 'Cette ressource est réservée aux membres Premium.'}
                   </p>
                   {isAuthenticated ? (
                     <Link
@@ -315,6 +329,14 @@ export default function RessourceDetail() {
               Toutes les ressources
             </Link>
           </div>
+        </div>
+
+        {/* Likes & comments — readable by anyone, writable only with an account. */}
+        <div className="md:max-w-2xl">
+          <ResourceEngagement
+            resourceId={resource.id}
+            returnTo={`/ressources/${resource.slug || resource.id}`}
+          />
         </div>
       </div>
     </Layout>

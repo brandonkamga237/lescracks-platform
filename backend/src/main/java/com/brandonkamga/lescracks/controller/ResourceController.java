@@ -11,6 +11,7 @@ import com.brandonkamga.lescracks.dto.ResourceRequest;
 import com.brandonkamga.lescracks.dto.ResourceResponse;
 import com.brandonkamga.lescracks.exception.ResourceNotFoundException;
 import com.brandonkamga.lescracks.repository.CategoryRepository;
+import com.brandonkamga.lescracks.repository.ResourceRepository;
 import com.brandonkamga.lescracks.repository.ResourceTypeRepository;
 import com.brandonkamga.lescracks.repository.TagRepository;
 import com.brandonkamga.lescracks.service.interfaces.ResourceService;
@@ -35,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -53,6 +55,7 @@ public class ResourceController {
     private final CategoryRepository categoryRepository;
     private final ResourceTypeRepository resourceTypeRepository;
     private final TagRepository tagRepository;
+    private final ResourceRepository resourceRepository;
 
     @Value("${app.uploads.dir:uploads/resources}")
     private String uploadDirectory;
@@ -61,11 +64,13 @@ public class ResourceController {
             ResourceService resourceService,
             CategoryRepository categoryRepository,
             ResourceTypeRepository resourceTypeRepository,
-            TagRepository tagRepository) {
+            TagRepository tagRepository,
+            ResourceRepository resourceRepository) {
         this.resourceService = resourceService;
         this.categoryRepository = categoryRepository;
         this.resourceTypeRepository = resourceTypeRepository;
         this.tagRepository = tagRepository;
+        this.resourceRepository = resourceRepository;
     }
 
     /**
@@ -338,17 +343,52 @@ public class ResourceController {
 
     // ── Serve uploaded files ─────────────────────────────────────────────────────
 
+    /**
+     * Serve the bytes of an uploaded file.
+     *
+     * Browsing the catalogue is public, but the CONTENT is not: this endpoint used to be
+     * permitAll, so anyone holding the URL could pull down any file — premium ones
+     * included — without ever creating an account. The paywall was a painted door.
+     *
+     * Authentication is enforced by SecurityConfig; premium is checked here because only
+     * this layer knows which resource the file belongs to.
+     */
     @GetMapping("/files/{filename:.+}")
-    @Operation(summary = "Download / view an uploaded file",
-               description = "Serves files stored locally on the platform.")
+    @Operation(summary = "Download / view an uploaded file (compte requis)",
+               description = "Serves files stored locally on the platform. Requires an account.")
     public ResponseEntity<org.springframework.core.io.Resource> serveFile(
-            @PathVariable String filename) throws MalformedURLException {
-        Path filePath = Paths.get(uploadDirectory).resolve(filename).normalize();
-        org.springframework.core.io.Resource fileResource = new org.springframework.core.io.UrlResource(filePath.toUri());
+            @PathVariable String filename,
+            Authentication authentication) throws MalformedURLException {
+
+        Path baseDir  = Paths.get(uploadDirectory).toAbsolutePath().normalize();
+        Path filePath = baseDir.resolve(filename).normalize();
+
+        // Prevent path traversal: the resolved path must stay inside the upload directory.
+        // Without this, "../../etc/passwd" walks straight out of it.
+        if (!filePath.startsWith(baseDir)) {
+            throw new com.brandonkamga.lescracks.exception.BadRequestException("Chemin de fichier invalide");
+        }
+
+        // A premium file must not be reachable just because someone guessed its filename.
+        resourceRepository.findFirstByUrlContaining(filename).ifPresent(resource -> {
+            if (resource.isPremium() && !hasPremiumAccess(authentication)) {
+                throw new com.brandonkamga.lescracks.exception.ForbiddenException(
+                        "Cette ressource est réservée aux membres PREMIUM");
+            }
+        });
+
+        org.springframework.core.io.Resource fileResource =
+                new org.springframework.core.io.UrlResource(filePath.toUri());
         if (!fileResource.exists()) {
             throw new com.brandonkamga.lescracks.exception.ResourceNotFoundException("File", "name", filename);
         }
+
         String contentType = "application/octet-stream";
+        try {
+            String probed = Files.probeContentType(filePath);
+            if (probed != null) contentType = probed;
+        } catch (java.io.IOException ignored) { /* fall back to octet-stream */ }
+
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
                 .contentType(MediaType.parseMediaType(contentType))

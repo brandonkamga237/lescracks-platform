@@ -70,6 +70,26 @@ export interface Learner {
 export interface Tag {
   id: number;
   name: string;
+  /** The API has always sent this; the client used to drop it, which is why
+   *  filtering tags by category was impossible and the filter silently did nothing. */
+  categoryId?: number;
+  categoryName?: string;
+}
+
+
+export interface ResourceLikes {
+  count: number;
+  likedByMe: boolean;
+}
+
+export interface ResourceComment {
+  id: number;
+  content: string;
+  createdAt: string;
+  authorName: string;
+  authorPictureUrl?: string;
+  /** True when the comment belongs to the caller — the server decides, not the client. */
+  mine: boolean;
 }
 
 export interface Category {
@@ -200,6 +220,40 @@ class ApiService {
 
   async getResourceBySlug(slug: string): Promise<Resource> {
     return this.request<Resource>(`/resources/slug/${slug}`);
+  }
+
+
+  // === RESOURCE ENGAGEMENT (likes & comments) ===
+  // Reading is public; liking and commenting require an account (enforced server-side).
+
+  async getResourceLikes(resourceId: string | number): Promise<ResourceLikes> {
+    return this.request<ResourceLikes>(`/resources/${resourceId}/likes`);
+  }
+
+  /** Toggle: likes if not liked, unlikes if already liked. Returns the new state. */
+  async toggleResourceLike(resourceId: string | number): Promise<ResourceLikes> {
+    return this.request<ResourceLikes>(`/resources/${resourceId}/likes`, { method: 'POST' }, true);
+  }
+
+  async getResourceComments(resourceId: string | number): Promise<ResourceComment[]> {
+    const data = await this.request<ResourceComment[]>(`/resources/${resourceId}/comments`);
+    return Array.isArray(data) ? data : [];
+  }
+
+  async addResourceComment(resourceId: string | number, content: string): Promise<ResourceComment> {
+    return this.request<ResourceComment>(
+      `/resources/${resourceId}/comments`,
+      { method: 'POST', body: JSON.stringify({ content }) },
+      true,
+    );
+  }
+
+  async deleteResourceComment(resourceId: string | number, commentId: number): Promise<void> {
+    await this.request<void>(
+      `/resources/${resourceId}/comments/${commentId}`,
+      { method: 'DELETE' },
+      true,
+    );
   }
 
   // === TAGS ===

@@ -49,8 +49,8 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs.yaml", "/swagger-resources/**", "/webjars/**").permitAll()
                 // Endpoints publics — lecture seule sans compte
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/avatars/**").permitAll()
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/resources/files/**").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/resources", "/api/resources/*", "/api/resources/slug/*").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/resources/*/likes", "/api/resources/*/comments").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/categories", "/api/categories/*").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/tags", "/api/tags/*").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/events", "/api/events/*", "/api/events/types", "/api/events/statuses").permitAll()
