@@ -37,6 +37,10 @@ public class Event {
     @Column(name = "cover_image_url")
     private String coverImageUrl;
 
+    /** Ceiling on registrations. Null means no limit. */
+    @Column(name = "max_participants")
+    private Integer maxParticipants;
+
     @Column(name = "application_required", nullable = false)
     private Boolean applicationRequired;
 

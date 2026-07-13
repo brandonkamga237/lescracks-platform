@@ -296,8 +296,8 @@ const Header = () => {
               </div>
             ) : (
               <div className="hidden md:flex items-center gap-3">
-                <Link to="/inscription" className="text-t3 hover:text-t1 text-sm transition-colors">
-                  S'inscrire
+                <Link to="/connexion" className="text-t3 hover:text-t1 text-sm transition-colors">
+                  Se connecter
                 </Link>
                 <Link
                   to="/postuler"
@@ -378,9 +378,9 @@ const Header = () => {
                 </div>
               ) : (
                 <div className="border-t border-line-soft mt-2 pt-3 space-y-2">
-                  <Link to="/inscription" onClick={() => setMobileMenuOpen(false)}
+                  <Link to="/connexion" onClick={() => setMobileMenuOpen(false)}
                     className="block py-2.5 px-4 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-sm">
-                    S'inscrire
+                    Se connecter
                   </Link>
                   <Link to="/postuler" onClick={() => setMobileMenuOpen(false)}
                     className="block py-3 px-4 bg-gold text-black font-semibold rounded-xl text-sm text-center">

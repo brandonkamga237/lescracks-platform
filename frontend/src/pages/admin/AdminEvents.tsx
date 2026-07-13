@@ -17,6 +17,7 @@ interface EventForm {
   location: string;
   coverImageUrl: string;
   applicationRequired: boolean;
+  maxParticipants: number | '';
   eventTypeId: number | '';
   eventStatusId: number | '';
 }
@@ -27,6 +28,7 @@ const EMPTY: EventForm = {
   endDate: '',  endTime: '',
   location: '', coverImageUrl: '',
   applicationRequired: false,
+  maxParticipants: '',
   eventTypeId: '', eventStatusId: '',
 };
 
@@ -112,6 +114,7 @@ const AdminEvents = () => {
       location:  ev.location || '',
       coverImageUrl: ev.coverImageUrl || '',
       applicationRequired: ev.applicationRequired ?? false,
+      maxParticipants: ev.maxParticipants ?? '',
       eventTypeId:   eventTypes.find(t => t.name === ev.type)?.id   ?? '',
       eventStatusId: eventStatuses.find(s => s.name === ev.status)?.id ?? '',
     });
@@ -146,6 +149,8 @@ const AdminEvents = () => {
         location:            form.location || undefined,
         coverImageUrl:       form.coverImageUrl || undefined,
         applicationRequired: form.applicationRequired,
+        // Empty means "no limit" — send null rather than 0, which would read as "full".
+        maxParticipants:     form.maxParticipants === '' ? null : Number(form.maxParticipants),
         eventTypeId:         form.eventTypeId as number,
         eventStatusId:       form.eventStatusId as number,
       };
@@ -403,6 +408,28 @@ const AdminEvents = () => {
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* Places */}
+              <div>
+                <label htmlFor="ev-max" className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Nombre de places
+                </label>
+                <input
+                  id="ev-max"
+                  type="number"
+                  min={1}
+                  value={form.maxParticipants}
+                  onChange={e => setForm(f => ({
+                    ...f,
+                    maxParticipants: e.target.value === '' ? '' : Number(e.target.value),
+                  }))}
+                  placeholder="Laisser vide = illimité"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Quand les places sont prises, la page affiche « Complet » et l'inscription se ferme.
+                </p>
               </div>
 
               {/* Candidature */}

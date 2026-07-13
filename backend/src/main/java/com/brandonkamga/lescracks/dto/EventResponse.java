@@ -46,6 +46,11 @@ public class EventResponse {
     @Schema(description = "Indique si une candidature est requise")
     private Boolean applicationRequired;
 
+    private Integer maxParticipants;
+
+    /** Derived from the applications table — never stored, so it cannot drift. */
+    private Long currentParticipants;
+
     @Schema(description = "Date de création")
     private LocalDateTime createdAt;
 

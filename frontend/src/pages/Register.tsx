@@ -4,10 +4,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import SEO from '@/components/common/SEO';
-import { ArrowLeft, Mail, Lock, User, Github, Loader2, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Mail, User, Github, Loader2, CheckCircle } from 'lucide-react';
+import PasswordInput from '@/components/common/PasswordInput';
 
 const Register = () => {
-  const { register, loginWithGoogle, loginWithGitHub, isLoading } = useAuth();
+  const { register, loginWithGitHub, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -225,41 +226,24 @@ const Register = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm text-t2 mb-2">Mot de passe</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="input pl-10"
-                  placeholder="********"
-                  required
-                  minLength={8}
-                />
-              </div>
-              <p className="text-t4 text-xs mt-1.5">
-                Au moins 8 caractères, avec une majuscule, une minuscule, un chiffre et un caractère spécial.
-              </p>
-            </div>
+            <PasswordInput
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              minLength={8}
+              autoComplete="new-password"
+              hint="Au moins 8 caractères, avec une majuscule, une minuscule, un chiffre et un caractère spécial."
+            />
 
-            <div>
-              <label className="block text-sm text-t2 mb-2">Confirmer le mot de passe</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="input pl-10"
-                  placeholder="********"
-                  required
-                />
-              </div>
-            </div>
+            <PasswordInput
+              name="confirmPassword"
+              label="Confirmer le mot de passe"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              autoComplete="new-password"
+            />
 
             <button
               type="submit"

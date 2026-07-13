@@ -18,6 +18,7 @@ export interface Event {
   applicationRequired?: boolean;
   maxParticipants?: number;
   currentParticipants?: number;
+  tags?: { id: number; name: string }[];
 }
 
 export interface Resource {
@@ -232,6 +233,51 @@ class ApiService {
         body: JSON.stringify(payload),
       },
       false  // endpoint public — pas de token requis
+    );
+  }
+
+  /** Application types, so the client can resolve an id by name instead of hard-coding it. */
+  async getApplicationTypes(): Promise<{ id: number; name: string }[]> {
+    const data = await this.request<{ id: number; name: string }[]>('/applications/types');
+    return Array.isArray(data) ? data : [];
+  }
+
+  /**
+   * Sign someone up for an event.
+   *
+   * This replaces EventRegistrationForm, which POSTed to a hard-coded
+   * `http://localhost:5000/api/evenements/{id}/inscription` — an endpoint that has
+   * never existed. Registration goes through the normal application pipeline, so a
+   * sign-up shows up in the admin funnel like any other candidate.
+   */
+  async registerToEvent(
+    eventId: string,
+    payload: {
+      fullName: string;
+      emailAddress: string;
+      whatsappNumber: string;
+      motivationText?: string;
+      technicalLevel?: string;
+      age?: number;
+    },
+  ): Promise<{ id: number; status: string }> {
+    const types = await this.getApplicationTypes();
+    const registerType = types.find(t => t.name === 'register') ?? types.find(t => t.name === 'participate');
+    if (!registerType) {
+      throw new Error("L'inscription aux événements n'est pas configurée. Contacte l'équipe.");
+    }
+
+    return this.request<{ id: number; status: string }>(
+      '/applications',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          eventId: Number(eventId),
+          applicationTypeId: registerType.id,
+          ...payload,
+        }),
+      },
+      false, // public — signing up for an event does not require an account
     );
   }
 

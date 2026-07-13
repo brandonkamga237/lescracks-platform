@@ -84,6 +84,8 @@ export interface AdminEvent {
   type: string;
   status: string;
   applicationRequired?: boolean;
+  maxParticipants?: number;
+  currentParticipants?: number;
 }
 
 export interface DashboardStats {
@@ -373,14 +375,14 @@ class AdminApiService {
 
   async createEvent(data: {
     title: string; description?: string; eventDate: string;
-    applicationRequired: boolean; eventTypeId: number; eventStatusId: number; tagIds?: number[];
+    applicationRequired: boolean; maxParticipants?: number | null; eventTypeId: number; eventStatusId: number; tagIds?: number[];
   }): Promise<any> {
     return this.request<any>('/events', { method: 'POST', body: JSON.stringify(data) });
   }
 
   async updateEvent(id: number, data: {
     title: string; description?: string; eventDate: string;
-    applicationRequired: boolean; eventTypeId: number; eventStatusId: number; tagIds?: number[];
+    applicationRequired: boolean; maxParticipants?: number | null; eventTypeId: number; eventStatusId: number; tagIds?: number[];
   }): Promise<any> {
     return this.request<any>(`/events/${id}`, { method: 'PUT', body: JSON.stringify(data) });
   }

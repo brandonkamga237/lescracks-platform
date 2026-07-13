@@ -15,5 +15,8 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     List<Application> findByEventId(Long eventId);
     List<Application> findByApplicationTypeId(Long applicationTypeId);
     long countByStatus(ApplicationStatus status);
+
+    /** How many people have registered for an event. Used to derive live capacity. */
+    long countByEvent_Id(Long eventId);
     Page<Application> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

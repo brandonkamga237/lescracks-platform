@@ -59,6 +59,9 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/open-source/projects", "/api/open-source/projects/featured", "/api/open-source/contributors").permitAll()
                 // Candidature publique Accompagnement 360 — aucun compte requis
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/applications").permitAll()
+                // Types de candidature — nécessaires au formulaire public pour résoudre
+                // l'id du type par son nom plutôt que de le coder en dur côté client.
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/applications/types").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()

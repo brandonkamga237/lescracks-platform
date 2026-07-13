@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Lock, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import PasswordInput from '@/components/common/PasswordInput';
 import authService from '@/services/auth';
 
 const ResetPassword = () => {
@@ -26,8 +27,8 @@ const ResetPassword = () => {
     e.preventDefault();
     setError('');
 
-    if (newPassword.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères.');
+    if (newPassword.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères.');
       return;
     }
     if (newPassword !== confirm) {
@@ -100,7 +101,7 @@ const ResetPassword = () => {
                   Nouveau <span className="text-gold">mot de passe</span>
                 </h1>
                 <p className="text-t3 text-sm">
-                  Choisis un mot de passe d'au moins 6 caractères.
+                  Choisis un mot de passe d'au moins 8 caractères.
                 </p>
               </div>
 
@@ -111,36 +112,25 @@ const ResetPassword = () => {
                   </div>
                 )}
 
-                <div>
-                  <label className="block text-sm text-t2 mb-2">Nouveau mot de passe</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
-                    <input
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="input pl-10"
-                      placeholder="Au moins 6 caractères"
-                      required
-                      autoFocus
-                    />
-                  </div>
-                </div>
+                <PasswordInput
+                  label="Nouveau mot de passe"
+                  name="newPassword"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  hint="Au moins 8 caractères, avec une majuscule, une minuscule, un chiffre et un caractère spécial."
+                />
 
-                <div>
-                  <label className="block text-sm text-t2 mb-2">Confirmer le mot de passe</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
-                    <input
-                      type="password"
-                      value={confirm}
-                      onChange={(e) => setConfirm(e.target.value)}
-                      className="input pl-10"
-                      placeholder="Répète le mot de passe"
-                      required
-                    />
-                  </div>
-                </div>
+                <PasswordInput
+                  label="Confirmer le mot de passe"
+                  name="confirmPassword"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  required
+                  autoComplete="new-password"
+                />
 
                 <button
                   type="submit"

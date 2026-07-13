@@ -42,6 +42,9 @@ public class EventRequest {
     @NotNull(message = "Application required flag is required")
     private Boolean applicationRequired;
 
+    @Schema(description = "Nombre maximum de participants (vide = illimité)", example = "20")
+    private Integer maxParticipants;
+
     @Schema(description = "ID du type d'événement", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "Event type ID is required")
     private Long eventTypeId;

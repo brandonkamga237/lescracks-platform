@@ -8,6 +8,7 @@ import com.brandonkamga.lescracks.dto.ApiResponse;
 import com.brandonkamga.lescracks.dto.EventRequest;
 import com.brandonkamga.lescracks.dto.EventResponse;
 import com.brandonkamga.lescracks.exception.ResourceNotFoundException;
+import com.brandonkamga.lescracks.repository.ApplicationRepository;
 import com.brandonkamga.lescracks.repository.EventStatusRepository;
 import com.brandonkamga.lescracks.repository.EventTypeRepository;
 import com.brandonkamga.lescracks.repository.TagRepository;
@@ -38,16 +39,19 @@ public class EventController {
     private final EventTypeRepository eventTypeRepository;
     private final EventStatusRepository eventStatusRepository;
     private final TagRepository tagRepository;
+    private final ApplicationRepository applicationRepository;
 
     public EventController(
             EventService eventService,
             EventTypeRepository eventTypeRepository,
             EventStatusRepository eventStatusRepository,
-            TagRepository tagRepository) {
+            TagRepository tagRepository,
+            ApplicationRepository applicationRepository) {
         this.eventService = eventService;
         this.eventTypeRepository = eventTypeRepository;
         this.eventStatusRepository = eventStatusRepository;
         this.tagRepository = tagRepository;
+        this.applicationRepository = applicationRepository;
     }
 
     @GetMapping
@@ -203,6 +207,7 @@ public class EventController {
                 .location(request.getLocation())
                 .coverImageUrl(request.getCoverImageUrl())
                 .applicationRequired(request.getApplicationRequired())
+                .maxParticipants(request.getMaxParticipants())
                 .eventType(eventType)
                 .eventStatus(eventStatus)
                 .tags(tags)
@@ -229,6 +234,8 @@ public class EventController {
                 .type(event.getEventType().getName())
                 .status(event.getEventStatus().getName().name())
                 .applicationRequired(event.getApplicationRequired())
+                .maxParticipants(event.getMaxParticipants())
+                .currentParticipants(applicationRepository.countByEvent_Id(event.getId()))
                 .createdAt(event.getCreatedAt())
                 .eventTypeId(event.getEventType().getId())
                 .eventStatusId(event.getEventStatus().getId())

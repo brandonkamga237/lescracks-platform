@@ -99,6 +99,22 @@ public class ApplicationController {
         return ResponseEntity.ok(ApiResponse.success(applications));
     }
 
+    /**
+     * Public list of application types.
+     *
+     * The frontend needs the id of the "register" type to sign someone up for an
+     * event. Hard-coding that id in the client would silently break the moment the
+     * ids differ between environments, so it is resolved by name instead.
+     */
+    @GetMapping("/types")
+    @Operation(summary = "Lister les types de candidature (public)")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getApplicationTypes() {
+        List<Map<String, Object>> types = applicationTypeRepository.findAll().stream()
+                .map(t -> Map.<String, Object>of("id", t.getId(), "name", t.getName().name()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(types));
+    }
+
     // POST public — aucun token requis (candidature publique Accompagnement 360)
     @PostMapping
     @Operation(summary = "Soumettre une candidature publique")

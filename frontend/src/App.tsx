@@ -12,6 +12,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
 import Evenements from './pages/Evenements';
+import EvenementDetail from './pages/EvenementDetail';
 import Ressources from './pages/Ressources';
 import OAuthCallback from './pages/OAuthCallback';
 
@@ -133,7 +134,7 @@ function AppContent() {
           <Route path="/about" element={<About />} />
           <Route path="/open-source" element={<OpenSource />} />
           <Route path="/evenements" element={<Evenements />} />
-          <Route path="/evenements/:id" element={<Evenements />} />
+          <Route path="/evenements/:id" element={<EvenementDetail />} />
           <Route path="/ressources" element={<Ressources />} />
           <Route path="/ressources/:slug" element={<RessourceDetail />} />
           <Route path="/apprenants" element={<Apprenants />} />

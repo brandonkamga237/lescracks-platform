@@ -4,13 +4,14 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import SEO from '@/components/common/SEO';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Mail, Lock, Github, Loader2 } from 'lucide-react';
+import { ArrowLeft, Mail, Github, Loader2 } from 'lucide-react';
+import PasswordInput from '@/components/common/PasswordInput';
 
 const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/profil';
-  const { login, loginWithGoogle, loginWithGitHub, isLoading } = useAuth();
+  const { login, loginWithGitHub, isLoading } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -145,25 +146,17 @@ const Login = () => {
               </div>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm text-t2">Mot de passe</label>
+            <PasswordInput
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              labelAction={
                 <Link to="/mot-de-passe-oublie" className="text-xs text-gold/70 hover:text-gold transition-colors">
                   Mot de passe oublié ?
                 </Link>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="input pl-10"
-                  placeholder="********"
-                  required
-                />
-              </div>
-            </div>
+              }
+            />
 
             <button
               type="submit"
