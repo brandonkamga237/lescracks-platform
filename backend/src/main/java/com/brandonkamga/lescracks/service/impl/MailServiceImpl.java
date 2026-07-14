@@ -1,5 +1,7 @@
 package com.brandonkamga.lescracks.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -10,6 +12,8 @@ import jakarta.mail.internet.MimeMessage;
 
 @Service
 public class MailServiceImpl {
+
+    private static final Logger log = LoggerFactory.getLogger(MailServiceImpl.class);
 
     private final JavaMailSender mailSender;
     private final String from;
@@ -543,6 +547,19 @@ public class MailServiceImpl {
         send(to, "Ta candidature Accompagnement 360 est acceptée ! 🎉 — LesCracks", html);
     }
 
+    /**
+     * Send, and make a failure impossible to miss.
+     *
+     * These calls are @Async, so throwing here would only kill a pool thread — the caller
+     * has already returned "Compte créé ! Vérifie ta boîte mail". That is the trap: when
+     * SMTP is down we tell someone to go and check an inbox that will never receive
+     * anything, and (until the resend endpoint existed) they were then locked out for good.
+     *
+     * We still don't throw — a broken mail server must not take registration down with it —
+     * but the failure now lands in the real logs at ERROR with the stack trace, instead of
+     * a System.err line nobody reads. If verification mails stop arriving, this is where it
+     * says so.
+     */
     private void send(String to, String subject, String html) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -552,9 +569,11 @@ public class MailServiceImpl {
             helper.setSubject(subject);
             helper.setText(html, true);
             mailSender.send(message);
+            log.info("Mail envoyé à {} — sujet: {}", to, subject);
         } catch (Exception e) {
-            // Log but don't throw — email failure must not break the auth flow
-            System.err.println("[MailService] Failed to send email to " + to + ": " + e.getMessage());
+            log.error("ÉCHEC d'envoi du mail à {} — sujet: {}. "
+                    + "L'utilisateur a pu recevoir une confirmation sans jamais recevoir le mail.",
+                    to, subject, e);
         }
     }
 }

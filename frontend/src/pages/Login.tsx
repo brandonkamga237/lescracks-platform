@@ -4,8 +4,9 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import SEO from '@/components/common/SEO';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Mail, Github, Loader2 } from 'lucide-react';
+import { ArrowLeft, Mail, Github, Loader2, RefreshCw } from 'lucide-react';
 import PasswordInput from '@/components/common/PasswordInput';
+import authService from '@/services/auth';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,6 +18,10 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  /** The login was refused because the address is not confirmed — offer the way out. */
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,12 +33,27 @@ const Login = () => {
       if (response.success) {
         navigate(redirectTo, { replace: true });
       } else {
-        setError(response.message || 'La connexion a échoué. Merci de réessayer.');
+        const msg = response.message || 'La connexion a échoué. Merci de réessayer.';
+        setError(msg);
+        // Telling someone "check your inbox" and giving them nothing to click is a dead
+        // end: the mail may be in spam, or the 24h link may already have expired.
+        setNeedsVerification(msg.toLowerCase().includes('confirm'));
       }
     } catch (err: any) {
       setError(err?.message || 'Une erreur est survenue. Merci de réessayer plus tard.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email || resending) return;
+    setResending(true);
+    try {
+      await authService.resendVerification(email);
+      setResent(true);   // same answer whatever happens — we never reveal who exists
+    } finally {
+      setResending(false);
     }
   };
 
@@ -127,7 +147,30 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-                {error}
+                <p>{error}</p>
+
+                {needsVerification && (
+                  <div className="mt-3 pt-3 border-t border-red-500/20">
+                    {resent ? (
+                      <p className="text-t2">
+                        Si un compte non vérifié existe pour cette adresse, un nouveau lien
+                        vient d'être envoyé. Pense à regarder tes spams.
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleResend}
+                        disabled={resending || !email}
+                        className="inline-flex items-center gap-2 text-gold hover:text-gold-light font-medium disabled:opacity-50"
+                      >
+                        {resending
+                          ? <Loader2 className="w-4 h-4 animate-spin" />
+                          : <RefreshCw className="w-4 h-4" />}
+                        Renvoyer l'email de vérification
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

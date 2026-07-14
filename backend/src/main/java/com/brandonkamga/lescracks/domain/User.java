@@ -49,6 +49,16 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
     private ImageAsset imageAsset;
 
+    /**
+     * When the password last changed. Any JWT issued BEFORE this instant is rejected.
+     *
+     * This is how "reset my password" ends every session, including the attacker's:
+     * tokens are stateless and we hold no list of them, but each one carries its issue
+     * time, so a single cut-off invalidates them all at once.
+     */
+    @Column(name = "credentials_changed_at")
+    private LocalDateTime credentialsChangedAt;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

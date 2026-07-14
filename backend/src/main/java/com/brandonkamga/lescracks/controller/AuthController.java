@@ -205,6 +205,60 @@ public class AuthController {
                 "Adresse email confirmée — bienvenue chez LesCracks !"));
     }
 
+    /**
+     * Send the verification email again.
+     *
+     * Without this, an unverified account is a tombstone. The mail lands in spam, or the
+     * 24h token quietly expires, and the person is stuck for good: they cannot log in
+     * ("verify your email"), and they cannot register again ("that email is taken").
+     * Every dead end has to have an exit.
+     *
+     * Three things this must not become:
+     *   - an ACCOUNT ORACLE: it answers identically whether the address exists or not,
+     *     otherwise anyone can farm it to discover who has an account here;
+     *   - an EMAIL BOMB: rate-limited per IP and per address, so it cannot be pointed at
+     *     someone else's inbox;
+     *   - a TOKEN FARM: the previous token is replaced, so only the newest link works.
+     */
+    @PostMapping("/resend-verification")
+    @Transactional
+    @Operation(summary = "Renvoyer l'email de vérification",
+               description = "Réponse identique que l'adresse existe ou non, pour ne pas révéler qui a un compte.")
+    public ResponseEntity<ApiResponse<Void>> resendVerification(
+            @Valid @RequestBody ForgotPasswordRequest request,
+            HttpServletRequest httpRequest) {
+
+        enforceRateLimit(httpRequest, RateLimiterService.Limit.FORGOT_PASSWORD);
+        String email = normalizeEmail(request.getEmail());
+        if (!rateLimiter.isAllowed("RESEND_EMAIL:" + email, RateLimiterService.Limit.FORGOT_PASSWORD)) {
+            throw new BadRequestException("Trop de demandes. Réessaie dans quelques minutes.");
+        }
+
+        User user = userService.findByEmail(request.getEmail());
+
+        // Only a local, still-unverified account has anything to resend. An OAuth user has
+        // no email to confirm, and a verified user would just be confused by another link.
+        boolean shouldSend = user != null
+                && user.getProvider() != null
+                && ProviderType.LOCAL.equals(user.getProvider().getProviderName())
+                && !user.isEmailVerified();
+
+        if (shouldSend) {
+            // Rotate: the old link stops working, so an intercepted one is worthless.
+            String token = UUID.randomUUID().toString();
+            user.setVerificationToken(token);
+            user.setVerificationTokenExpiresAt(
+                    LocalDateTime.now().plusHours(VERIFICATION_TOKEN_EXPIRY_HOURS));
+            userService.save(user);
+
+            mailService.sendEmailVerification(user.getEmail(), user.getUsername(), token);
+        }
+
+        // Same answer in every case — the caller learns nothing about who exists.
+        return ResponseEntity.ok(ApiResponse.success(null,
+                "Si un compte non vérifié existe pour cette adresse, un nouveau lien vient d'être envoyé."));
+    }
+
     @PostMapping("/login")
     @Operation(summary = "User login",
                description = "Authenticate with email and password. Returns a JWT token "
@@ -293,7 +347,17 @@ public class AuthController {
         }
 
         User user = userService.findByEmail(request.getEmail());
-        if (user != null) {
+
+        // A GitHub/Google account has no password to reset. Sending the link anyway would
+        // let someone set a password on an account they reached through OAuth, and would
+        // just confuse the owner. We stay silent — but the response below is unchanged, so
+        // the caller still cannot tell whether the address exists.
+        boolean isLocalAccount = user != null
+                && user.getProvider() != null
+                && ProviderType.LOCAL.equals(user.getProvider().getProviderName());
+
+        if (isLocalAccount) {
+            // One live reset link at a time: issuing a new one kills the previous.
             passwordResetTokenRepository.deleteByEmail(request.getEmail());
 
             String token = UUID.randomUUID().toString();

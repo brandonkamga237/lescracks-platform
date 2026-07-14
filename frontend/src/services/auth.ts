@@ -366,6 +366,24 @@ class AuthService {
     return { success: false, message: json.message || 'L\'envoi du fichier a échoué. Merci de réessayer.' };
   }
 
+
+  /**
+   * Ask for the verification email again.
+   *
+   * The server answers the same way whether the address exists or not, so this can never
+   * be used to discover who has an account here.
+   */
+  async resendVerification(email: string): Promise<{ success: boolean; message?: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email }),
+    });
+    const json = await response.json();
+    return { success: !!json.success, message: json.message };
+  }
+
   // === PASSWORD RESET ===
   async forgotPassword(email: string): Promise<{ success: boolean; message?: string }> {
     const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {

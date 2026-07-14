@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.service.impl;
 
+import java.time.LocalDateTime;
 import com.brandonkamga.lescracks.domain.Provider;
 import com.brandonkamga.lescracks.domain.ProviderType;
 import com.brandonkamga.lescracks.domain.Role;
@@ -181,9 +182,23 @@ public class UserServiceImpl implements UserService {
         return passwordEncoder.matches(currentPassword, user.getPassword());
     }
 
+    /**
+     * Change the password AND end every session that was open with the old one.
+     *
+     * The cut-off is stamped here rather than in the controllers because both the
+     * "forgot password" reset and the "change my password" screen funnel through this
+     * one method. Put it in the callers and the next person to add a third path forgets,
+     * and the hole comes back silently.
+     *
+     * Why a timestamp and not a token purge: JWTs are stateless, we hold no list of the
+     * ones we've handed out. But each carries its issue time, so recording WHEN the
+     * password changed lets the filter reject everything older — every session dies on a
+     * single write, including the one an attacker is sitting on.
+     */
     @Override
     public User updatePassword(User user, String newPassword) {
         user.setPassword(passwordEncoder.encode(newPassword));
+        user.setCredentialsChangedAt(LocalDateTime.now());
         return userRepository.save(user);
     }
 }

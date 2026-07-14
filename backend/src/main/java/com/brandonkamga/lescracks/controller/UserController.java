@@ -423,7 +423,7 @@ public class UserController {
         // Update password
         userService.updatePassword(currentUser, request.getNewPassword());
 
-        return ResponseEntity.ok(ApiResponse.success(null, "Password changed successfully"));
+        return ResponseEntity.ok(ApiResponse.success(null, "Mot de passe modifié. Toutes tes autres sessions ont été déconnectées."));
     }
 
     private UserRequest validateUpdateRequest(Long id, UserRequest request) {

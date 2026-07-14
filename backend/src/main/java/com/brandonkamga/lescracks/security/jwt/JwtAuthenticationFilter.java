@@ -14,6 +14,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import com.brandonkamga.lescracks.domain.User;
+import com.brandonkamga.lescracks.repository.UserRepository;
 
 import java.io.IOException;
 
@@ -32,17 +34,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
     private final JwtTokenBlacklist tokenBlacklist;
+    private final UserRepository userRepository;
     private final AuthCookieService authCookieService;
 
     public JwtAuthenticationFilter(
             JwtService jwtService,
             UserDetailsService userDetailsService,
             JwtTokenBlacklist tokenBlacklist,
-            AuthCookieService authCookieService) {
+            AuthCookieService authCookieService,
+            UserRepository userRepository) {
         this.jwtService         = jwtService;
         this.userDetailsService = userDetailsService;
         this.tokenBlacklist     = tokenBlacklist;
         this.authCookieService  = authCookieService;
+        this.userRepository     = userRepository;
     }
 
     @Override
@@ -73,6 +78,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             final String userEmail = jwtService.extractEmail(jwt);
 
+            // A password change must end EVERY session, including one an attacker is
+            // holding. Tokens are stateless and we keep no list of them, so instead of
+            // hunting them down we compare this token's issue time against the moment the
+            // user last changed their credentials: anything older is dead.
+            if (userEmail != null && isIssuedBeforeCredentialsChange(jwt, userEmail)) {
+                log.debug("Rejected token issued before the password was changed for {}", userEmail);
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
@@ -100,5 +115,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return authHeader.substring(7);
         }
         return authCookieService.read(request);
+    }
+
+    /**
+     * True when this token predates the user's last credential change.
+     *
+     * A missing cut-off (null) means the user has never changed their password, so
+     * nothing is revoked — deploying this must not log the whole platform out.
+     */
+    private boolean isIssuedBeforeCredentialsChange(String jwt, String email) {
+        return userRepository.findByEmail(email)
+                .map(User::getCredentialsChangedAt)
+                .map(changedAt -> {
+                    java.util.Date issuedAt = jwtService.extractIssuedAt(jwt);
+                    if (issuedAt == null) return false;
+                    java.time.LocalDateTime issued = java.time.LocalDateTime.ofInstant(
+                            issuedAt.toInstant(), java.time.ZoneId.systemDefault());
+                    // JWT iat has second precision; truncate so a token minted in the same
+                    // second as the change isn't killed by sub-second rounding.
+                    return issued.isBefore(changedAt.truncatedTo(java.time.temporal.ChronoUnit.SECONDS));
+                })
+                .orElse(false);
     }
 }

@@ -85,6 +85,11 @@ public class JwtService {
         return extractAllClaims(token).getId();
     }
 
+    /** When this token was issued. Compared against the user's credentials cut-off. */
+    public Date extractIssuedAt(String token) {
+        return extractAllClaims(token).getIssuedAt();
+    }
+
     /** Extract the absolute expiration date of a token. */
     public Date extractExpiration(String token) {
         return extractAllClaims(token).getExpiration();
