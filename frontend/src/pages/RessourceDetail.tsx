@@ -241,7 +241,7 @@ export default function RessourceDetail() {
                 <Eye className="w-3.5 h-3.5" />
                 {resource.viewCount ?? 0} vue{(resource.viewCount ?? 0) !== 1 ? 's' : ''}
               </span>
-              {resource.downloadable && (
+              {resource.downloadable && !isVideo && (
                 <span className="flex items-center gap-1.5">
                   <Download className="w-3.5 h-3.5" />
                   {resource.downloadCount ?? 0} téléchargement{(resource.downloadCount ?? 0) !== 1 ? 's' : ''}

@@ -13,6 +13,11 @@ const AdminApplications = () => {
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [detailApp, setDetailApp] = useState<AdminApplication | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  // Two populations were being poured into one list: people applying to the
+  // Accompagnement 360 (no event) and people signing up for an event. They have
+  // nothing to do with each other, so the admin picks one stream at a time.
+  const [stream, setStream] = useState<'360' | 'events'>('360');
+  const [eventFilter, setEventFilter] = useState<number | 'all'>('all');
 
   useEffect(() => {
     fetchApplications();
@@ -58,8 +63,28 @@ const AdminApplications = () => {
     }
   };
 
-  const total = applications.length;
-  const countAt = (key: string) => applications.filter(a => a.status === key).length;
+  // Split the two populations. An event registration always carries an eventId; a
+  // 360 application never does.
+  const is360 = (a: AdminApplication) => a.eventId == null;
+  const events360 = applications.filter(is360);
+  const eventApps = applications.filter(a => a.eventId != null);
+
+  // Everything below counts only the stream currently on screen, so the 360 funnel
+  // is never inflated by event sign-ups and vice-versa.
+  const streamApps = stream === '360' ? events360 : eventApps;
+
+  // Distinct events present, for the per-event filter in the events stream.
+  const eventsInStream = Array.from(
+    new Map(eventApps.filter(a => a.eventId != null)
+      .map(a => [a.eventId!, a.eventTitle || `Événement #${a.eventId}`])).entries()
+  );
+
+  const scopedApps = stream === 'events' && eventFilter !== 'all'
+    ? streamApps.filter(a => a.eventId === eventFilter)
+    : streamApps;
+
+  const total = scopedApps.length;
+  const countAt = (key: string) => scopedApps.filter(a => a.status === key).length;
 
   /**
    * The funnel is cumulative, not a headcount per box: someone who has STARTED has,
@@ -67,14 +92,14 @@ const AdminApplications = () => {
    * people sitting in each stage right now would make every rate look catastrophic.
    */
   const reachedStage = (index: number) =>
-    applications.filter(a => {
+    scopedApps.filter(a => {
       const i = FUNNEL.findIndex(s => s.key === a.status);
       return i >= index; // REJECTED gives -1, so it never counts as "reached"
     }).length;
 
   const rejected = countAt('REJECTED');
 
-  const filtered = applications.filter(a =>
+  const filtered = scopedApps.filter(a =>
     filterStatus === 'all' || a.status === filterStatus
   );
 
@@ -94,9 +119,46 @@ const AdminApplications = () => {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Candidatures</h2>
           <p className="text-sm text-gray-500">
-            {total} candidature{total !== 1 ? 's' : ''} — Accompagnement 360
+            {stream === '360'
+              ? `${events360.length} candidature${events360.length !== 1 ? 's' : ''} — Accompagnement 360`
+              : `${eventApps.length} inscription${eventApps.length !== 1 ? 's' : ''} aux événements`}
           </p>
         </div>
+      </div>
+
+      {/* Stream switch — 360 candidates and event registrants are separate worlds. */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1">
+          {([
+            { key: '360' as const,    label: 'Accompagnement 360', n: events360.length },
+            { key: 'events' as const, label: 'Inscriptions événements', n: eventApps.length },
+          ]).map(t => (
+            <button
+              key={t.key}
+              onClick={() => { setStream(t.key); setFilterStatus('all'); setEventFilter('all'); }}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                stream === t.key ? 'bg-gold text-black' : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {t.label}
+              <span className="ml-1.5 text-xs opacity-70 tabular-nums">{t.n}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Which event, when looking at event sign-ups. */}
+        {stream === 'events' && eventsInStream.length > 0 && (
+          <select
+            value={String(eventFilter)}
+            onChange={e => setEventFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
+          >
+            <option value="all">Tous les événements</option>
+            {eventsInStream.map(([id, title]) => (
+              <option key={id} value={id}>{title}</option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* ── Funnel ───────────────────────────────────────────────────────────
@@ -193,6 +255,9 @@ const AdminApplications = () => {
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
                   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Nom</th>
+                  {stream === 'events' && (
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Événement</th>
+                  )}
                   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Email</th>
                   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">WhatsApp</th>
                   <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Statut</th>
@@ -212,6 +277,11 @@ const AdminApplications = () => {
                         <p className="font-medium text-gray-900 text-sm">{displayName(app)}</p>
                         {app.age && <p className="text-xs text-gray-400">{app.age} ans</p>}
                       </td>
+                      {stream === 'events' && (
+                        <td className="px-6 py-4 text-sm text-gray-700">
+                          {app.eventTitle || <span className="text-gray-300 italic">—</span>}
+                        </td>
+                      )}
                       <td className="px-6 py-4 text-sm text-gray-600">{displayEmail(app)}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">
                         {app.whatsappNumber || <span className="text-gray-300 italic">—</span>}

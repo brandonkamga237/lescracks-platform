@@ -1,6 +1,6 @@
 // src/pages/admin/AdminResources.tsx
 import { useState, useEffect, useRef } from 'react';
-import { FileText, Plus, Loader2, Trash2, Eye, Video, File, ChevronLeft, ChevronRight, Search, Filter, X, Save, Youtube, Upload, Crown, Download, Lock, Pencil } from 'lucide-react';
+import { FileText, Plus, Loader2, Trash2, Eye, Video, File, ChevronLeft, ChevronRight, Search, Filter, X, Save, Youtube, Upload, Crown, Download, Pencil } from 'lucide-react';
 import adminApi, { AdminResource, AdminCategory, PaginatedResponse } from '@/services/adminApi';
 import apiService from '@/services/api';
 
@@ -590,18 +590,23 @@ const AdminResources = () => {
                     onChange={(e) => setFormData({ ...formData, isPremium: e.target.checked })}
                     className="w-4 h-4 accent-yellow-500" />
                 </label>
-                <label className="flex items-center justify-between p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                  <div className="flex items-center gap-2">
-                    <Download className="w-4 h-4 text-blue-500" />
-                    <div>
-                      <p className="text-sm font-medium">Téléchargement autorisé</p>
-                      <p className="text-xs text-gray-400">Les utilisateurs pourront télécharger ce fichier</p>
+                {/* Downloading only makes sense for a document. A video is watched, not
+                    downloaded — the backend forces it non-downloadable regardless, so we
+                    hide the toggle rather than offer a switch that does nothing. */}
+                {formData.resourceTypeId !== '1' && (
+                  <label className="flex items-center justify-between p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <div className="flex items-center gap-2">
+                      <Download className="w-4 h-4 text-blue-500" />
+                      <div>
+                        <p className="text-sm font-medium">Téléchargement autorisé</p>
+                        <p className="text-xs text-gray-400">Les utilisateurs pourront télécharger ce fichier</p>
+                      </div>
                     </div>
-                  </div>
-                  <input type="checkbox" checked={formData.isDownloadable}
-                    onChange={(e) => setFormData({ ...formData, isDownloadable: e.target.checked })}
-                    className="w-4 h-4 accent-blue-500" />
-                </label>
+                    <input type="checkbox" checked={formData.isDownloadable}
+                      onChange={(e) => setFormData({ ...formData, isDownloadable: e.target.checked })}
+                      className="w-4 h-4 accent-blue-500" />
+                  </label>
+                )}
               </div>
 
               <div className="flex gap-3 justify-end pt-4">

@@ -559,7 +559,7 @@ const Ressources = () => {
                         <Eye className="w-3 h-3" />
                         {resource.viewCount ?? 0}
                       </span>
-                      {resource.downloadable && (
+                      {resource.downloadable && resource.resourceTypeName !== 'VIDEO' && (
                         <span className="flex items-center gap-1">
                           <Download className="w-3 h-3" />
                           {resource.downloadCount ?? 0}

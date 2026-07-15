@@ -5,6 +5,7 @@ import com.brandonkamga.lescracks.domain.Resource;
 import com.brandonkamga.lescracks.domain.ResourceMetadata;
 import com.brandonkamga.lescracks.domain.ResourceSourceType;
 import com.brandonkamga.lescracks.domain.ResourceType;
+import com.brandonkamga.lescracks.domain.ResourceTypeName;
 import com.brandonkamga.lescracks.domain.Tag;
 import com.brandonkamga.lescracks.dto.ApiResponse;
 import com.brandonkamga.lescracks.dto.ResourceRequest;
@@ -478,6 +479,12 @@ public class ResourceController {
             catch (IllegalArgumentException ignored) {}
         }
 
+        // A video is a link to watch, not a file to download. Force it non-downloadable at
+        // the source so no client — form, script, or API caller — can mark a video as
+        // downloadable and make a download button (or a "downloads" stat) appear on it.
+        boolean isVideo = resourceType.getName() == ResourceTypeName.video;
+        boolean downloadable = !isVideo && request.isDownloadable();
+
         Resource resource = Resource.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
@@ -485,7 +492,7 @@ public class ResourceController {
                 .previewImageUrl(request.getPreviewImageUrl())
                 .sourceType(sourceType)
                 .premium(request.isPremium())
-                .downloadable(request.isDownloadable())
+                .downloadable(downloadable)
                 .category(category)
                 .resourceType(resourceType)
                 .tags(tags)
