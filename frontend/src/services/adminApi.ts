@@ -1,5 +1,4 @@
 // src/services/adminApi.ts
-import type { ApplicationStage } from '@/lib/applicationPipeline';
 import { ENV } from '@/config/env';
 
 const API_BASE_URL = ENV.API_BASE_URL;
@@ -51,7 +50,10 @@ export interface AdminApplication {
   eventTitle?: string;
   applicationTypeId: number;
   applicationTypeName: string;
-  status: ApplicationStage;
+  /** True for an event sign-up, false for an Accompagnement 360 application. */
+  eventRegistration: boolean;
+  archived: boolean;
+  archivedAt?: string;
   fullName?: string;
   emailAddress?: string;
   whatsappNumber?: string;
@@ -327,11 +329,12 @@ class AdminApiService {
     return this.request<AdminApplication[]>('/applications');
   }
 
-  async updateApplicationStatus(id: number, status: string): Promise<AdminApplication> {
-    return this.request<AdminApplication>(`/applications/${id}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    });
+  async archiveApplication(id: number): Promise<AdminApplication> {
+    return this.request<AdminApplication>(`/applications/${id}/archive`, { method: 'PATCH' });
+  }
+
+  async unarchiveApplication(id: number): Promise<AdminApplication> {
+    return this.request<AdminApplication>(`/applications/${id}/unarchive`, { method: 'PATCH' });
   }
 
   async deleteApplication(id: number): Promise<void> {

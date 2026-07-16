@@ -5,7 +5,6 @@ import com.brandonkamga.lescracks.exception.ForbiddenException;
 import com.brandonkamga.lescracks.repository.ApplicationRepository;
 import org.springframework.security.core.Authentication;
 import com.brandonkamga.lescracks.domain.Application;
-import com.brandonkamga.lescracks.domain.ApplicationStatus;
 import com.brandonkamga.lescracks.domain.ApplicationType;
 import com.brandonkamga.lescracks.domain.Event;
 import com.brandonkamga.lescracks.domain.User;
@@ -199,8 +198,6 @@ public class ApplicationController {
                 .user(user)
                 .event(event)
                 .applicationType(type)
-                .status(ApplicationStatus.RECEIVED)
-                .statusChangedAt(LocalDateTime.now())
                 // Fall back to the account details, so the form doesn't re-ask for what we know.
                 .fullName(request.getFullName() != null && !request.getFullName().isBlank()
                         ? request.getFullName() : user.getUsername())
@@ -217,42 +214,32 @@ public class ApplicationController {
         return ApiResponse.success(toResponse(saved), "Inscription confirmée !");
     }
 
-    @PatchMapping("/{id}/status")
+    /**
+     * Archive or un-archive. This is the whole lifecycle now — set aside, or bring back.
+     * The old seven-stage funnel and its auto-email on "accepted" are gone: a candidate
+     * list needs a way to tidy itself, not a CRM.
+     */
+    @PatchMapping("/{id}/archive")
     @PreAuthorize("hasRole('ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Changer le statut d'une candidature — admin uniquement")
-    public ResponseEntity<ApiResponse<ApplicationResponse>> updateApplicationStatus(
-            @PathVariable Long id,
-            @RequestBody Map<String, String> body) {
+    @Operation(summary = "Archiver une candidature — admin uniquement")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> archive(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(setArchived(id, true), "Candidature archivée"));
+    }
+
+    @PatchMapping("/{id}/unarchive")
+    @PreAuthorize("hasRole('ADMIN')")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Désarchiver une candidature — admin uniquement")
+    public ResponseEntity<ApiResponse<ApplicationResponse>> unarchive(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(setArchived(id, false), "Candidature désarchivée"));
+    }
+
+    private ApplicationResponse setArchived(Long id, boolean archived) {
         Application application = applicationService.findByIdOptional(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Application", "id", id));
-
-        String raw = body.get("status");
-        if (raw == null || raw.isBlank()) {
-            throw new BadRequestException("Le statut est obligatoire.");
-        }
-
-        final ApplicationStatus newStatus;
-        try {
-            newStatus = ApplicationStatus.valueOf(raw.trim().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Statut de candidature inconnu : " + raw);
-        }
-
-        application.setStatus(newStatus);
-        application.setStatusChangedAt(LocalDateTime.now());
-        Application saved = applicationService.save(application);
-
-        // Email automatique quand accepté
-        if (newStatus == ApplicationStatus.ACCEPTED && saved.getEmailAddress() != null) {
-            mailService.sendApplicationAccepted(
-                    saved.getEmailAddress(),
-                    saved.getFullName() != null ? saved.getFullName() : "Candidat",
-                    saved.getWhatsappNumber()
-            );
-        }
-
-        return ResponseEntity.ok(ApiResponse.success(toResponse(saved), "Statut mis à jour"));
+        application.setArchivedAt(archived ? LocalDateTime.now() : null);
+        return toResponse(applicationService.save(application));
     }
 
     @DeleteMapping("/{id}")
@@ -260,14 +247,9 @@ public class ApplicationController {
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Supprimer une candidature — admin uniquement")
     public ResponseEntity<ApiResponse<Void>> deleteApplication(@PathVariable Long id) {
-        Application application = applicationService.findByIdOptional(id)
+        // The admin is free to delete any application — there is no protected state anymore.
+        applicationService.findByIdOptional(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Application", "id", id));
-
-        if (application.getStatus() == ApplicationStatus.ACCEPTED) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ApiResponse.error("Une candidature acceptée ne peut pas être supprimée"));
-        }
-
         applicationService.deleteById(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Candidature supprimée"));
     }
@@ -292,7 +274,6 @@ public class ApplicationController {
                 .user(user)
                 .event(event)
                 .applicationType(applicationType)
-                .status(ApplicationStatus.RECEIVED)
                 .fullName(request.getFullName())
                 .emailAddress(request.getEmailAddress())
                 .whatsappNumber(request.getWhatsappNumber())
@@ -312,7 +293,9 @@ public class ApplicationController {
                 .eventTitle(app.getEvent() != null ? app.getEvent().getTitle() : null)
                 .applicationTypeId(app.getApplicationType().getId())
                 .applicationTypeName(app.getApplicationType().getName().name())
-                .status(app.getStatus())
+                .eventRegistration(app.isEventRegistration())
+                .archived(app.isArchived())
+                .archivedAt(app.getArchivedAt())
                 .fullName(app.getFullName())
                 .emailAddress(app.getEmailAddress())
                 .whatsappNumber(app.getWhatsappNumber())

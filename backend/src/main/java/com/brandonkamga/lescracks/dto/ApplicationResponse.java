@@ -1,6 +1,5 @@
 package com.brandonkamga.lescracks.dto;
 
-import com.brandonkamga.lescracks.domain.ApplicationStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,8 +37,14 @@ public class ApplicationResponse {
     @Schema(description = "Nom du type de candidature")
     private String applicationTypeName;
 
-    @Schema(description = "Statut de la candidature")
-    private ApplicationStatus status;
+    @Schema(description = "True s'il s'agit d'une inscription à un événement, false pour l'Accompagnement 360")
+    private boolean eventRegistration;
+
+    @Schema(description = "Archivée ou active")
+    private boolean archived;
+
+    @Schema(description = "Date d'archivage (null si active)")
+    private LocalDateTime archivedAt;
 
     // Champs du formulaire public
     @Schema(description = "Nom complet du candidat")

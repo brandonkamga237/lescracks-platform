@@ -132,14 +132,14 @@ public class AdminController {
                 : 0.0;
         stats.put("premiumConversionRate", premiumRate);
 
-        // Application funnel
-        long appPending = applicationRepository.countByStatus(ApplicationStatus.RECEIVED);
-        long appAccepted = applicationRepository.countByStatus(ApplicationStatus.ACCEPTED);
-        long appRejected = applicationRepository.countByStatus(ApplicationStatus.REJECTED);
+        // Applications — a registry now, not a funnel: active vs archived, split by kind.
+        long active360   = applicationRepository.countByArchivedAtIsNullAndEventIsNull();
+        long activeEvents = applicationRepository.countByArchivedAtIsNullAndEventIsNotNull();
+        long archived    = applicationRepository.countByArchivedAtIsNotNull();
         stats.put("applicationsByStatus", Map.of(
-                "En attente", appPending,
-                "Accepté", appAccepted,
-                "Rejeté", appRejected
+                "Accompagnement 360", active360,
+                "Événements", activeEvents,
+                "Archivées", archived
         ));
 
         // Premium requests — all requests are pending by definition (no status field anymore)
