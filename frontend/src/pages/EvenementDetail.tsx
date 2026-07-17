@@ -127,9 +127,29 @@ const EvenementDetail = () => {
     (event.currentParticipants ?? 0) >= event.maxParticipants;
   const canRegister = !isClosed && !full;
 
+  // schema.org Event — helps Google (JS-rendered) and generative engines cite the event.
+  const eventJsonLd: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: event.title,
+    ...(event.description ? { description: event.description.slice(0, 500) } : {}),
+    ...(event.startDate ? { startDate: event.startDate } : {}),
+    ...(event.endDate ? { endDate: event.endDate } : {}),
+    ...(event.coverImageUrl ? { image: event.coverImageUrl } : {}),
+    url: `https://lescracks.com/evenements/${event.slug ?? event.id}`,
+    eventStatus: isClosed ? 'https://schema.org/EventCancelled' : 'https://schema.org/EventScheduled',
+    ...(event.location
+      ? { location: { '@type': 'Place', name: event.location } }
+      : {
+          eventAttendanceMode: 'https://schema.org/OnlineEventAttendanceMode',
+          location: { '@type': 'VirtualLocation', url: 'https://lescracks.com/evenements' },
+        }),
+    organizer: { '@type': 'Organization', name: 'LesCracks', url: 'https://lescracks.com' },
+  };
+
   return (
     <Layout>
-      <SEO title={event.title} description={event.description?.slice(0, 155)} url={`/evenements/${event.slug ?? event.id}`} />
+      <SEO title={event.title} description={event.description?.slice(0, 155)} url={`/evenements/${event.slug ?? event.id}`} jsonLd={eventJsonLd} />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         <Link to="/evenements" className="inline-flex items-center gap-2 text-t3 hover:text-gold transition-colors mb-8">

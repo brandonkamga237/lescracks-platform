@@ -5,6 +5,8 @@ interface SEOProps {
   description?: string;
   image?: string;
   url?: string;
+  /** Optional schema.org object injected as a per-page JSON-LD block. */
+  jsonLd?: Record<string, unknown>;
 }
 
 const SITE = 'https://lescracks.com';
@@ -22,6 +24,7 @@ const SEO = ({
   description = DEFAULT_DESC,
   image = DEFAULT_IMAGE,
   url,
+  jsonLd,
 }: SEOProps) => {
   const fullTitle = title ? `${title} — LesCracks` : DEFAULT_TITLE;
   const canonicalUrl = url ? `${SITE}${url}` : SITE;
@@ -45,6 +48,18 @@ const SEO = ({
       document.title = DEFAULT_TITLE;
     };
   }, [fullTitle, description, image, canonicalUrl]);
+
+  // Per-page structured data (schema.org). Injected as its own tagged block so it
+  // never clobbers the static Organization JSON-LD in index.html.
+  useEffect(() => {
+    if (!jsonLd) return;
+    const el = document.createElement('script');
+    el.type = 'application/ld+json';
+    el.setAttribute('data-seo-jsonld', '');
+    el.textContent = JSON.stringify(jsonLd);
+    document.head.appendChild(el);
+    return () => { el.remove(); };
+  }, [jsonLd]);
 
   return null;
 };

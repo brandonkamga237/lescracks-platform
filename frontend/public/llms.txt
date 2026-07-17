@@ -1,0 +1,28 @@
+# LesCracks
+
+> Agence edtech d'Afrique francophone qui accompagne les jeunes passionnés de tech, du niveau débutant jusqu'à un profil employable, via un suivi structuré de 6 à 12 mois avec mentor dédié, projets réels et communauté.
+
+LesCracks (aussi appelée « Les Cracks Academy ») est basée à Yaoundé, au Cameroun, et sert principalement l'Afrique francophone (Cameroun, Côte d'Ivoire, Sénégal) ainsi que la France et la Belgique. Le contenu est en français. Fondateur : Brandon Kamga.
+
+L'offre principale, l'« Accompagnement 360 », est un programme de mentoring en ligne de 6 à 12 mois : mentor dédié, projets concrets, montée en compétences progressive et attestation de complétion. LesCracks propose aussi des ressources pédagogiques (documents et vidéos), des événements (workshops, bootcamps), une vitrine d'apprenants accompagnés et des projets open source.
+
+## Pages principales
+
+- [Accueil](https://lescracks.com/) : présentation de l'agence, de la mission et de l'approche d'accompagnement.
+- [Postuler à l'Accompagnement 360](https://lescracks.com/postuler) : candidature au programme de suivi personnalisé de 6 à 12 mois.
+- [Ressources](https://lescracks.com/ressources) : catalogue de ressources pédagogiques tech (documents, vidéos), consultables publiquement.
+- [Événements](https://lescracks.com/evenements) : workshops, bootcamps et rencontres, avec inscription en ligne.
+- [Apprenants](https://lescracks.com/apprenants) : vitrine des apprenants accompagnés et de leurs parcours.
+- [Open Source](https://lescracks.com/open-source) : projets open source portés par la communauté LesCracks.
+- [À propos](https://lescracks.com/about) : histoire, valeurs et équipe de LesCracks.
+
+## En bref
+
+- Type : agence / organisation éducative (edtech).
+- Localisation : Yaoundé, Cameroun.
+- Zones servies : Cameroun, Côte d'Ivoire, Sénégal, France, Belgique.
+- Langue : français.
+- Programme phare : Accompagnement 360 (mentoring en ligne, 6 à 12 mois).
+- Fondateur : Brandon Kamga.
+- Site : https://lescracks.com
+- Plan du site : https://lescracks.com/sitemap.xml
