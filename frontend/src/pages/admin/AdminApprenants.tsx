@@ -1,6 +1,7 @@
 // src/pages/admin/AdminApprenants.tsx
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Eye, EyeOff, Star, StarOff, Linkedin, Globe, Mail } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, EyeOff, Star, Linkedin, Globe, Mail, GraduationCap } from 'lucide-react';
+import { PageHeader } from '@/components/admin/viz';
 import adminApi, { AdminLearner, AdminLearnerRequest, LearnerStatus } from '@/services/adminApi';
 import apiService from '@/services/api';
 
@@ -136,19 +137,18 @@ export default function AdminApprenants() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Apprenants</h1>
-          <p className="text-sm text-gray-500 mt-1">{learners.length} apprenant(s) enregistré(s)</p>
-        </div>
-        <button
-          onClick={openCreate}
-          className="flex items-center gap-2 bg-gold text-black px-4 py-2 rounded-lg font-semibold hover:bg-gold/80 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Ajouter un apprenant
-        </button>
-      </div>
+      <PageHeader icon={GraduationCap} title="Apprenants"
+        subtitle={`${learners.length} apprenant(s) enregistré(s)`}
+        actions={
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 bg-gold text-black px-4 py-2 rounded-lg font-medium text-sm hover:bg-gold/80 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Ajouter un apprenant</span>
+            <span className="sm:hidden">Ajouter</span>
+          </button>
+        } />
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
@@ -175,7 +175,7 @@ export default function AdminApprenants() {
       {loading ? (
         <div className="text-center py-16 text-gray-400">Chargement...</div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

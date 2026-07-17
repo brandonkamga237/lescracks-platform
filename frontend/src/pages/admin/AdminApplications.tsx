@@ -14,6 +14,7 @@ import {
   MessageSquare, Archive, ArchiveRestore, Ticket, Compass,
 } from 'lucide-react';
 import adminApi, { AdminApplication } from '@/services/adminApi';
+import { PageHeader } from '@/components/admin/viz';
 
 type Stream = '360' | 'events';
 
@@ -100,19 +101,10 @@ const AdminApplications = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-          <ClipboardList className="w-5 h-5 text-purple-600" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Candidatures</h2>
-          <p className="text-sm text-gray-500">
-            {stream === '360'
-              ? `${activeCount(stream360)} candidature${activeCount(stream360) !== 1 ? 's' : ''} active${activeCount(stream360) !== 1 ? 's' : ''} — Accompagnement 360`
-              : `${activeCount(streamEvents)} inscription${activeCount(streamEvents) !== 1 ? 's' : ''} active${activeCount(streamEvents) !== 1 ? 's' : ''} aux événements`}
-          </p>
-        </div>
-      </div>
+      <PageHeader icon={ClipboardList} title="Candidatures"
+        subtitle={stream === '360'
+          ? `${activeCount(stream360)} candidature${activeCount(stream360) !== 1 ? 's' : ''} active${activeCount(stream360) !== 1 ? 's' : ''} — Accompagnement 360`
+          : `${activeCount(streamEvents)} inscription${activeCount(streamEvents) !== 1 ? 's' : ''} active${activeCount(streamEvents) !== 1 ? 's' : ''} aux événements`} />
 
       {/* Stream switch — 360 and events are separate registries. */}
       <div className="flex flex-wrap items-center gap-3">
@@ -162,7 +154,7 @@ const AdminApplications = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-8 h-8 text-gold animate-spin" />

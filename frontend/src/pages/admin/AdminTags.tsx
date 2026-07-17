@@ -1,7 +1,8 @@
 // src/pages/admin/AdminTags.tsx
 import { useState, useEffect } from 'react';
 import { Tags, Plus, Loader2, Trash2, Edit, Check, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import adminApi, { AdminTag, AdminCategory, PaginatedResponse } from '@/services/adminApi';
+import { PageHeader } from '@/components/admin/viz';
+import adminApi, { AdminTag, AdminCategory } from '@/services/adminApi';
 
 const AdminTags = () => {
   const [tags, setTags] = useState<AdminTag[]>([]);
@@ -101,19 +102,18 @@ const AdminTags = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Tags</h2>
-          <p className="text-gray-500 text-sm">{totalElements} tag{totalElements !== 1 ? 's' : ''} au total</p>
-        </div>
-        <button
-          onClick={() => { setShowForm(true); setEditingId(null); }}
-          className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 transition-colors font-medium"
-        >
-          <Plus className="w-4 h-4" />
-          Nouveau Tag
-        </button>
-      </div>
+      <PageHeader icon={Tags} title="Tags"
+        subtitle={`${totalElements} tag${totalElements !== 1 ? 's' : ''} au total`}
+        actions={
+          <button
+            onClick={() => { setShowForm(true); setEditingId(null); }}
+            className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 transition-colors font-medium text-sm"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Nouveau tag</span>
+            <span className="sm:hidden">Ajouter</span>
+          </button>
+        } />
 
       {/* Create Form */}
       {showForm && (

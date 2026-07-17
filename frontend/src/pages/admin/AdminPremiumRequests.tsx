@@ -5,6 +5,7 @@ import {
   CheckCircle, Trash2, MessageCircle, Mail, X,
 } from 'lucide-react';
 import adminApi, { AdminPremiumRequest, PaginatedResponse } from '@/services/adminApi';
+import { PageHeader } from '@/components/admin/viz';
 
 const DURATION_OPTIONS = [1, 2, 3, 6, 12, 24];
 
@@ -84,15 +85,8 @@ const AdminPremiumRequests = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center">
-          <Crown className="w-5 h-5 text-gold" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Demandes Premium</h2>
-          <p className="text-sm text-gray-500">{totalElements} demande{totalElements !== 1 ? 's' : ''} en attente</p>
-        </div>
-      </div>
+      <PageHeader icon={Crown} title="Demandes Premium"
+        subtitle={`${totalElements} demande${totalElements !== 1 ? 's' : ''} en attente`} />
 
       {/* Stats */}
       {stats && (
@@ -105,7 +99,7 @@ const AdminPremiumRequests = () => {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-8 h-8 text-gold animate-spin" />

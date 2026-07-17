@@ -1,6 +1,7 @@
 // src/pages/admin/AdminEvents.tsx
 import { useState, useEffect } from 'react';
 import { Calendar, Plus, Loader2, Trash2, Pencil, ChevronLeft, ChevronRight, X, Save, Image } from 'lucide-react';
+import { PageHeader } from '@/components/admin/viz';
 import adminApi, { AdminEvent, PaginatedResponse } from '@/services/adminApi';
 import { deriveEventStatus } from '@/lib/eventStatus';
 import apiService from '@/services/api';
@@ -195,19 +196,19 @@ const AdminEvents = () => {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Événements</h2>
-          <p className="text-gray-500 text-sm">{totalElements} événement{totalElements !== 1 ? 's' : ''}</p>
-        </div>
-        <button onClick={openCreate}
-          className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 transition-colors font-semibold">
-          <Plus className="w-4 h-4" /> Nouvel événement
-        </button>
-      </div>
+      <PageHeader icon={Calendar} title="Événements"
+        subtitle={`${totalElements} événement${totalElements !== 1 ? 's' : ''}`}
+        actions={
+          <button onClick={openCreate}
+            className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 transition-colors font-medium text-sm">
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Nouvel événement</span>
+            <span className="sm:hidden">Ajouter</span>
+          </button>
+        } />
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="w-8 h-8 animate-spin text-gold" />

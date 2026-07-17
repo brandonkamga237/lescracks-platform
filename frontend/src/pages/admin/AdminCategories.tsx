@@ -1,6 +1,7 @@
 // src/pages/admin/AdminCategories.tsx
 import { useState, useEffect } from 'react';
 import { FolderOpen, Plus, Loader2, Trash2, Edit, Check, X } from 'lucide-react';
+import { PageHeader } from '@/components/admin/viz';
 import adminApi, { AdminCategory } from '@/services/adminApi';
 
 const AdminCategories = () => {
@@ -83,19 +84,18 @@ const AdminCategories = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Catégories</h2>
-          <p className="text-gray-500 text-sm">{categories.length} catégorie{categories.length !== 1 ? 's' : ''}</p>
-        </div>
-        <button
-          onClick={() => { setShowForm(true); setEditingId(null); }}
-          className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 transition-colors font-medium"
-        >
-          <Plus className="w-4 h-4" />
-          Nouvelle Catégorie
-        </button>
-      </div>
+      <PageHeader icon={FolderOpen} title="Catégories"
+        subtitle={`${categories.length} catégorie${categories.length !== 1 ? 's' : ''}`}
+        actions={
+          <button
+            onClick={() => { setShowForm(true); setEditingId(null); }}
+            className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 transition-colors font-medium text-sm"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Nouvelle catégorie</span>
+            <span className="sm:hidden">Ajouter</span>
+          </button>
+        } />
 
       {/* Create Form */}
       {showForm && (
