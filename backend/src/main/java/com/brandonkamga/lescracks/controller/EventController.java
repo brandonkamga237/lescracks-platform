@@ -10,6 +10,7 @@ import com.brandonkamga.lescracks.dto.EventRequest;
 import com.brandonkamga.lescracks.dto.EventResponse;
 import com.brandonkamga.lescracks.exception.ResourceNotFoundException;
 import com.brandonkamga.lescracks.repository.ApplicationRepository;
+import com.brandonkamga.lescracks.repository.EventRepository;
 import com.brandonkamga.lescracks.repository.EventStatusRepository;
 import com.brandonkamga.lescracks.repository.EventTypeRepository;
 import com.brandonkamga.lescracks.repository.TagRepository;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 public class EventController {
 
     private final EventService eventService;
+    private final EventRepository eventRepository;
     private final EventTypeRepository eventTypeRepository;
     private final EventStatusRepository eventStatusRepository;
     private final TagRepository tagRepository;
@@ -44,11 +46,13 @@ public class EventController {
 
     public EventController(
             EventService eventService,
+            EventRepository eventRepository,
             EventTypeRepository eventTypeRepository,
             EventStatusRepository eventStatusRepository,
             TagRepository tagRepository,
             ApplicationRepository applicationRepository) {
         this.eventService = eventService;
+        this.eventRepository = eventRepository;
         this.eventTypeRepository = eventTypeRepository;
         this.eventStatusRepository = eventStatusRepository;
         this.tagRepository = tagRepository;
@@ -83,6 +87,22 @@ public class EventController {
         return eventService.findByIdOptional(id)
                 .map(event -> ResponseEntity.ok(ApiResponse.success(toResponse(event))))
                 .orElseThrow(() -> new ResourceNotFoundException("Event", "id", id));
+    }
+
+    @GetMapping("/slug/{slug}")
+    @Operation(summary = "Get event by SEO slug",
+               description = "Returns an event by its public slug. This is the public URL identifier; the numeric id stays internal.")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
+            description = "Event found"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
+            description = "Event not found")
+    })
+    public ResponseEntity<ApiResponse<EventResponse>> getEventBySlug(
+            @Parameter(description = "Event slug", required = true) @PathVariable String slug) {
+        return eventRepository.findBySlug(slug)
+                .map(event -> ResponseEntity.ok(ApiResponse.success(toResponse(event))))
+                .orElseThrow(() -> new ResourceNotFoundException("Event", "slug", slug));
     }
 
     @GetMapping("/type/{eventTypeId}")
@@ -137,6 +157,7 @@ public class EventController {
     })
     public ResponseEntity<ApiResponse<EventResponse>> createEvent(@Valid @RequestBody EventRequest request) {
         Event event = toEntity(request);
+        event.setSlug(generateUniqueSlug(event.getTitle()));
         Event savedEvent = eventService.save(event);
         return ResponseEntity.ok(ApiResponse.success(toResponse(savedEvent), "Event created successfully"));
     }
@@ -157,12 +178,14 @@ public class EventController {
             @Parameter(description = "Event ID", required = true) @PathVariable Long id,
             @Valid @RequestBody EventRequest request) {
         
-        if (!eventService.findByIdOptional(id).isPresent()) {
-            throw new ResourceNotFoundException("Event", "id", id);
-        }
+        Event existing = eventService.findByIdOptional(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Event", "id", id));
 
         Event event = toEntity(request);
         event.setId(id);
+        // The slug is generated once, at creation, and kept stable across edits so a
+        // shared or indexed link never breaks — even if the title changes.
+        event.setSlug(existing.getSlug());
         Event savedEvent = eventService.save(event);
         return ResponseEntity.ok(ApiResponse.success(toResponse(savedEvent), "Event updated successfully"));
     }
@@ -240,6 +263,7 @@ public class EventController {
 
         return EventResponse.builder()
                 .id(event.getId())
+                .slug(event.getSlug())
                 .title(event.getTitle())
                 .description(event.getDescription())
                 .startDate(event.getEventDate() != null ? event.getEventDate().toString() : null)
@@ -258,5 +282,37 @@ public class EventController {
                 .eventStatusId(event.getEventStatus().getId())
                 .tags(tags)
                 .build();
+    }
+
+    /**
+     * Slugify a title the same way the rest of the app does (see ResourceServiceImpl):
+     * lowercase, strip accents to ascii, drop anything non-alphanumeric, collapse spaces
+     * into single dashes, trim. Empty/edge titles fall back to "evenement".
+     */
+    private String slugify(String title) {
+        if (title == null) return "evenement";
+        String base = title.toLowerCase()
+                .replaceAll("[àáâãäå]", "a")
+                .replaceAll("[èéêë]", "e")
+                .replaceAll("[ìíîï]", "i")
+                .replaceAll("[òóôõö]", "o")
+                .replaceAll("[ùúûü]", "u")
+                .replaceAll("[ç]", "c")
+                .replaceAll("[^a-z0-9\\s-]", "")
+                .replaceAll("\\s+", "-")
+                .replaceAll("-+", "-")
+                .replaceAll("^-|-$", "");
+        return base.isBlank() ? "evenement" : base;
+    }
+
+    /** Slugify + guarantee uniqueness with a numeric suffix (-2, -3, …), like learners. */
+    private String generateUniqueSlug(String title) {
+        String base = slugify(title);
+        String slug = base;
+        int counter = 2;
+        while (eventRepository.existsBySlug(slug)) {
+            slug = base + "-" + counter++;
+        }
+        return slug;
     }
 }

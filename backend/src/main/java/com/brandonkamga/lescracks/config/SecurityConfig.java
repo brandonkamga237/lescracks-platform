@@ -54,7 +54,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/resources/*/view").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/categories", "/api/categories/*").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/tags", "/api/tags/*").permitAll()
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/events", "/api/events/*", "/api/events/types", "/api/events/statuses").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/events", "/api/events/*", "/api/events/slug/*", "/api/events/types", "/api/events/statuses").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/learners", "/api/learners/showcased", "/api/learners/*").permitAll()
                 // Endpoints publics open-source (projets et contributeurs)
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/open-source/projects", "/api/open-source/projects/featured", "/api/open-source/contributors").permitAll()

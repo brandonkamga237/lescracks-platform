@@ -208,7 +208,7 @@ const Evenements = () => {
 
                   {/* CTA */}
                   <Link
-                    to={`/evenements/${event.id}`}
+                    to={`/evenements/${event.slug ?? event.id}`}
                     className="block w-full btn-secondary text-center mt-auto"
                   >
                     Voir les details

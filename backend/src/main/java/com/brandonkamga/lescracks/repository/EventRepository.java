@@ -8,11 +8,15 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByEventTypeId(Long eventTypeId);
     List<Event> findByEventStatusId(Long eventStatusId);
+
+    Optional<Event> findBySlug(String slug);
+    boolean existsBySlug(String slug);
 
     // Dashboard analytics methods
     @Query("SELECT COUNT(e) FROM Event e WHERE e.eventStatus.name = :statusName")
