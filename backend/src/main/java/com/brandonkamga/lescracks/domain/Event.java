@@ -23,6 +23,15 @@ public class Event {
     @Column(nullable = false)
     private String title;
 
+    /**
+     * SEO-friendly public identifier, derived from the title at creation time and
+     * kept stable across edits so shared/indexed links never break. The numeric id
+     * stays internal (PK/FK) and is never exposed in a public URL. Nullable + unique
+     * mirrors the existing Resource.slug convention.
+     */
+    @Column(name = "slug", unique = true)
+    private String slug;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 

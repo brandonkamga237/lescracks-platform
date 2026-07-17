@@ -134,7 +134,7 @@ function AppContent() {
           <Route path="/about" element={<About />} />
           <Route path="/open-source" element={<OpenSource />} />
           <Route path="/evenements" element={<Evenements />} />
-          <Route path="/evenements/:id" element={<EvenementDetail />} />
+          <Route path="/evenements/:slug" element={<EvenementDetail />} />
           <Route path="/ressources" element={<Ressources />} />
           <Route path="/ressources/:slug" element={<RessourceDetail />} />
           <Route path="/apprenants" element={<Apprenants />} />

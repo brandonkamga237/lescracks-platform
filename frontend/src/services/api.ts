@@ -7,6 +7,7 @@ const API_BASE_URL = ENV.API_BASE_URL;
 // Types
 export interface Event {
   id: string;
+  slug?: string;
   title: string;
   description: string;
   startDate?: string;
@@ -177,6 +178,12 @@ class ApiService {
 
   async getEvent(id: string): Promise<Event> {
     const data = await this.request<Event>(`/events/${id}`);
+    return data;
+  }
+
+  // Public event pages resolve by slug; the numeric id stays internal.
+  async getEventBySlug(slug: string): Promise<Event> {
+    const data = await this.request<Event>(`/events/slug/${slug}`);
     return data;
   }
 

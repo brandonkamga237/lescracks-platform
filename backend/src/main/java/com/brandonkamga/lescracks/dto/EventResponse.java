@@ -19,6 +19,9 @@ public class EventResponse {
     @Schema(description = "ID unique de l'événement", example = "1")
     private Long id;
 
+    @Schema(description = "Slug public SEO de l'événement", example = "formation-spring-boot")
+    private String slug;
+
     @Schema(description = "Titre de l'événement", example = "Formation Spring Boot")
     private String title;
 

@@ -5,7 +5,7 @@
 // way to sign up. Every event the admin created was a dead end.
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Layout from '@/components/layout/Layout';
 import SEO from '@/components/common/SEO';
@@ -26,7 +26,8 @@ const fmtDate = (d?: string) =>
   d ? new Date(d).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : null;
 
 const EvenementDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
 
   const [event, setEvent] = useState<Event | null>(null);
@@ -40,16 +41,27 @@ const EvenementDetail = () => {
   const [error, setError] = useState('');
 
   const load = useCallback(async () => {
-    if (!id) return;
+    if (!slug) return;
     setLoading(true);
     try {
-      setEvent(await apiService.getEvent(id));
+      // Old links used the numeric id (/evenements/3). Resolve by id, then redirect
+      // (replace) to the canonical slug URL so shared/indexed links keep working.
+      if (/^\d+$/.test(slug)) {
+        const ev = await apiService.getEvent(slug);
+        if (ev.slug) {
+          navigate(`/evenements/${ev.slug}`, { replace: true });
+          return;
+        }
+        setEvent(ev);
+      } else {
+        setEvent(await apiService.getEventBySlug(slug));
+      }
     } catch {
       setNotFound(true);
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [slug, navigate]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -66,11 +78,12 @@ const EvenementDetail = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id) return;
+    if (!event) return;
     setError('');
     setSubmitting(true);
     try {
-      await apiService.registerToEvent(id, form);
+      // Registration keys on the internal numeric id, never the public slug.
+      await apiService.registerToEvent(String(event.id), form);
       setRegistered(true);
     } catch (err: any) {
       setError(err?.message || "L'inscription a échoué. Merci de réessayer.");
@@ -116,7 +129,7 @@ const EvenementDetail = () => {
 
   return (
     <Layout>
-      <SEO title={event.title} description={event.description?.slice(0, 155)} url={`/evenements/${event.id}`} />
+      <SEO title={event.title} description={event.description?.slice(0, 155)} url={`/evenements/${event.slug ?? event.id}`} />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         <Link to="/evenements" className="inline-flex items-center gap-2 text-t3 hover:text-gold transition-colors mb-8">
@@ -212,13 +225,13 @@ const EvenementDetail = () => {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Link
-                    to={`/connexion?redirect=${encodeURIComponent(`/evenements/${id}`)}`}
+                    to={`/connexion?redirect=${encodeURIComponent(`/evenements/${event.slug ?? slug}`)}`}
                     className="btn-primary py-3 px-6"
                   >
                     Se connecter
                   </Link>
                   <Link
-                    to={`/inscription?redirect=${encodeURIComponent(`/evenements/${id}`)}`}
+                    to={`/inscription?redirect=${encodeURIComponent(`/evenements/${event.slug ?? slug}`)}`}
                     className="btn-secondary py-3 px-6"
                   >
                     Créer un compte
