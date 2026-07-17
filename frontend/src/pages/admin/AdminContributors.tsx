@@ -1,6 +1,7 @@
 // src/pages/admin/AdminContributors.tsx
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Save, X, Loader2, Github, Linkedin, Globe, Twitter, Upload, Eye, EyeOff, Users } from 'lucide-react';
+import { PageHeader } from '@/components/admin/viz';
 import adminApi from '@/services/adminApi';
 import apiService from '@/services/api';
 
@@ -118,16 +119,16 @@ const AdminContributors = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Contributeurs Open Source</h2>
-          <p className="text-gray-500 text-sm">{contributors.length} contributeur{contributors.length !== 1 ? 's' : ''}</p>
-        </div>
-        <button onClick={openCreate}
-          className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90">
-          <Plus className="w-4 h-4" />Nouveau contributeur
-        </button>
-      </div>
+      <PageHeader icon={Users} title="Contributeurs Open Source"
+        subtitle={`${contributors.length} contributeur${contributors.length !== 1 ? 's' : ''}`}
+        actions={
+          <button onClick={openCreate}
+            className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 font-medium text-sm">
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Nouveau contributeur</span>
+            <span className="sm:hidden">Ajouter</span>
+          </button>
+        } />
 
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-gold" /></div>

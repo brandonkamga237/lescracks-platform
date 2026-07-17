@@ -180,9 +180,9 @@ public class AdminController {
                 }).toList();
         stats.put("topDownloadedResources", topDownloaded);
 
-        // Daily new users — last 7 days (sparkline data)
+        // Daily new users — last 30 days (growth trend + sparkline data)
         List<Map<String, Object>> dailyUsers = new ArrayList<>();
-        for (int i = 6; i >= 0; i--) {
+        for (int i = 29; i >= 0; i--) {
             LocalDateTime dayStart = LocalDate.now().minusDays(i).atStartOfDay();
             LocalDateTime dayEnd = dayStart.plusDays(1);
             long count = userRepository.countByCreatedAtAfter(dayStart)

@@ -1,8 +1,8 @@
 // src/pages/admin/AdminUsers.tsx
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { Users, ChevronLeft, ChevronRight, Loader2, Trash2, Edit, Crown, Shield, X, Save } from 'lucide-react';
 import adminApi, { AdminUser, PaginatedResponse } from '@/services/adminApi';
+import { PageHeader } from '@/components/admin/viz';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -87,15 +87,11 @@ const AdminUsers = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Utilisateurs</h2>
-          <p className="text-gray-500 text-sm">{totalElements} utilisateur{totalElements !== 1 ? 's' : ''} au total</p>
-        </div>
-      </div>
+      <PageHeader icon={Users} title="Utilisateurs"
+        subtitle={`${totalElements} utilisateur${totalElements !== 1 ? 's' : ''} au total`} />
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="w-8 h-8 animate-spin text-gold" />
@@ -105,25 +101,25 @@ const AdminUsers = () => {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Provider</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">ID</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Username</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rôle</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">Provider</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden sm:table-cell">Date</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {users.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm text-gray-900">{user.id}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{user.email}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{user.username || '-'}</td>
-                    <td className="px-6 py-4">{getRoleBadge(user.roleName)}</td>
-                    <td className="px-6 py-4">{getProviderBadge(user.providerName)}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{user.createdAt}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 hidden md:table-cell">{user.id}</td>
+                    <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 max-w-[14rem] truncate">{user.email}</td>
+                    <td className="px-4 sm:px-6 py-4 text-sm text-gray-600 hidden lg:table-cell">{user.username || '-'}</td>
+                    <td className="px-4 sm:px-6 py-4">{getRoleBadge(user.roleName)}</td>
+                    <td className="px-4 sm:px-6 py-4 hidden md:table-cell">{getProviderBadge(user.providerName)}</td>
+                    <td className="px-4 sm:px-6 py-4 text-sm text-gray-500 hidden sm:table-cell whitespace-nowrap">{user.createdAt}</td>
+                    <td className="px-4 sm:px-6 py-4">
                       <div className="flex items-center gap-2">
                         <button 
                           onClick={() => handleEditClick(user)} 

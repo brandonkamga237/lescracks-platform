@@ -1,5 +1,5 @@
 // src/components/layout/AdminLayout.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -19,6 +19,8 @@ import {
   Code2,
   UserCheck,
   GraduationCap,
+  Menu,
+  X,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -39,63 +41,88 @@ const menuItems = [
   { path: '/admin/apprenants', label: 'Apprenants', icon: GraduationCap, group: 'apprenants' },
 ];
 
+const groupLabel = (g: string) =>
+  g === 'content' ? 'Contenu' : g === 'opensource' ? 'Open Source' : g === 'apprenants' ? 'Communauté' : '';
+
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Desktop-only visual collapse (w-64 ↔ w-16). Persisted so it survives reloads.
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('admin.sidebar.collapsed') === '1');
+  // Mobile off-canvas drawer.
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('admin.sidebar.collapsed', collapsed ? '1' : '0');
+  }, [collapsed]);
+
+  // Close the mobile drawer whenever the route changes.
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
+
+  // Lock body scroll while the mobile drawer is open.
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
   };
 
-  const isActive = (path: string) => {
-    if (path === '/admin') {
-      return location.pathname === '/admin';
-    }
-    return location.pathname.startsWith(path);
-  };
+  const isActive = (path: string) =>
+    path === '/admin' ? location.pathname === '/admin' : location.pathname.startsWith(path);
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <aside 
-        className={`fixed left-0 top-0 h-full bg-gray-900 text-white transition-all duration-300 z-40 ${
-          sidebarCollapsed ? 'w-16' : 'w-64'
-        }`}
+      {/* ── Mobile backdrop ── */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* ── Sidebar ── */}
+      <aside
+        className={`fixed left-0 top-0 h-full bg-gray-900 text-white flex flex-col z-50
+          transform transition-transform duration-300 ease-out
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
+          w-64 ${collapsed ? 'lg:w-16' : 'lg:w-64'}`}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-800">
-          {!sidebarCollapsed && (
-            <Link to="/admin" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gold flex items-center justify-center">
-                <span className="text-black font-bold text-lg">L</span>
-              </div>
-              <span className="font-display font-bold">LesCracks</span>
-            </Link>
-          )}
-          {sidebarCollapsed && (
-            <div className="w-8 h-8 bg-gold flex items-center justify-center mx-auto">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-800 flex-shrink-0">
+          <Link to="/admin" className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 bg-gold flex items-center justify-center flex-shrink-0 rounded-md">
               <span className="text-black font-bold text-lg">L</span>
             </div>
-          )}
+            <span className={`font-display font-bold truncate ${collapsed ? 'lg:hidden' : ''}`}>LesCracks</span>
+          </Link>
+          {/* Close button (mobile only) */}
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="lg:hidden p-1.5 -mr-1.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+            aria-label="Fermer le menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Toggle Button */}
+        {/* Desktop collapse toggle */}
         <button
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="absolute -right-3 top-20 w-6 h-6 bg-gold text-black rounded-full flex items-center justify-center shadow-lg hover:bg-gold/80 transition-colors"
+          onClick={() => setCollapsed(!collapsed)}
+          className="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-gold text-black rounded-full items-center justify-center shadow-lg hover:bg-gold/80 transition-colors z-10"
+          aria-label={collapsed ? 'Déplier le menu' : 'Replier le menu'}
         >
-          {sidebarCollapsed ? (
-            <ChevronRight className="w-4 h-4" />
-          ) : (
-            <ChevronLeft className="w-4 h-4" />
-          )}
+          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
 
         {/* Menu */}
-        <nav className="p-2 space-y-1 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 10rem)' }}>
+        <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
           {menuItems.map((item, idx) => {
             const Icon = item.icon;
             const active = isActive(item.path);
@@ -104,27 +131,25 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
             return (
               <div key={item.path}>
-                {showSeparator && !sidebarCollapsed && (
-                  <div className="px-3 pt-3 pb-1">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-gray-600">
-                      {item.group === 'content' ? 'Contenu' : item.group === 'opensource' ? 'Open Source' : item.group === 'apprenants' ? 'Communauté' : ''}
-                    </p>
-                  </div>
-                )}
-                {showSeparator && sidebarCollapsed && (
-                  <div className="mx-3 my-2 border-t border-gray-800" />
+                {showSeparator && (
+                  <>
+                    <div className={`px-3 pt-3 pb-1 ${collapsed ? 'lg:hidden' : ''}`}>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-600">
+                        {groupLabel(item.group)}
+                      </p>
+                    </div>
+                    {collapsed && <div className="hidden lg:block mx-3 my-2 border-t border-gray-800" />}
+                  </>
                 )}
                 <Link
                   to={item.path}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                    active
-                      ? 'bg-gold text-black'
-                      : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                    active ? 'bg-gold text-black font-medium' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                   }`}
-                  title={sidebarCollapsed ? item.label : undefined}
+                  title={collapsed ? item.label : undefined}
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
-                  {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
+                  <span className={`text-sm ${collapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
                 </Link>
               </div>
             );
@@ -132,59 +157,61 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         </nav>
 
         {/* Bottom section */}
-        <div className="absolute bottom-0 left-0 right-0 p-2 border-t border-gray-800">
-          {/* Return to user site */}
+        <div className="p-2 border-t border-gray-800 flex-shrink-0">
           <Link
             to="/"
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
-            title={sidebarCollapsed ? 'Retour au site' : undefined}
+            title={collapsed ? 'Retour au site' : undefined}
           >
             <ArrowLeft className="w-5 h-5 flex-shrink-0" />
-            {!sidebarCollapsed && <span className="text-sm font-medium">Retour au site</span>}
+            <span className={`text-sm font-medium ${collapsed ? 'lg:hidden' : ''}`}>Retour au site</span>
           </Link>
-
-          {/* Logout */}
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-400 hover:bg-red-500/10 transition-colors w-full"
-            title={sidebarCollapsed ? 'Deconnexion' : undefined}
+            title={collapsed ? 'Déconnexion' : undefined}
           >
             <LogOut className="w-5 h-5 flex-shrink-0" />
-            {!sidebarCollapsed && <span className="text-sm font-medium">Deconnexion</span>}
+            <span className={`text-sm font-medium ${collapsed ? 'lg:hidden' : ''}`}>Déconnexion</span>
           </button>
         </div>
       </aside>
 
-      {/* Main content */}
-      <main
-        className={`transition-all duration-300 text-gray-900 ${
-          sidebarCollapsed ? 'ml-16' : 'ml-64'
-        }`}
-      >
+      {/* ── Main content ── */}
+      <main className={`transition-all duration-300 text-gray-900 ${collapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         {/* Top header */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <Shield className="w-5 h-5 text-gold" />
-            <h1 className="text-lg font-semibold text-gray-800">Panneau d'Administration</h1>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <Link
-              to="/profil"
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+        <header className="sticky top-0 z-30 h-16 bg-white/95 backdrop-blur border-b border-gray-200 flex items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Hamburger (mobile only) */}
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="lg:hidden p-2 -ml-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+              aria-label="Ouvrir le menu"
             >
-              <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center">
-                <span className="text-gold text-sm font-semibold">
-                  {user?.firstName?.[0] || user?.email?.[0] || 'U'}
-                </span>
-              </div>
-              <span>{user?.firstName || user?.email}</span>
-            </Link>
+              <Menu className="w-5 h-5" />
+            </button>
+            <Shield className="w-5 h-5 text-gold flex-shrink-0 hidden sm:block" />
+            <h1 className="text-base sm:text-lg font-semibold text-gray-800 truncate">
+              <span className="hidden sm:inline">Panneau d'Administration</span>
+              <span className="sm:hidden">Admin</span>
+            </h1>
           </div>
+
+          <Link
+            to="/profil"
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 min-w-0"
+          >
+            <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0">
+              <span className="text-gold text-sm font-semibold">
+                {user?.firstName?.[0] || user?.email?.[0] || 'U'}
+              </span>
+            </div>
+            <span className="hidden sm:inline truncate max-w-[10rem]">{user?.firstName || user?.email}</span>
+          </Link>
         </header>
 
         {/* Page content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {children || <Outlet />}
         </div>
       </main>

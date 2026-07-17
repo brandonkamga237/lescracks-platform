@@ -1,6 +1,7 @@
 // src/pages/admin/AdminResources.tsx
 import { useState, useEffect, useRef } from 'react';
 import { FileText, Plus, Loader2, Trash2, Eye, Video, File, ChevronLeft, ChevronRight, Search, Filter, X, Save, Youtube, Upload, Crown, Download, Pencil } from 'lucide-react';
+import { PageHeader } from '@/components/admin/viz';
 import adminApi, { AdminResource, AdminCategory, PaginatedResponse } from '@/services/adminApi';
 import apiService from '@/services/api';
 
@@ -228,22 +229,21 @@ const AdminResources = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Ressources</h2>
-          <p className="text-gray-500 text-sm">{totalElements} ressource{totalElements !== 1 ? 's' : ''}</p>
-        </div>
-        <button
-          onClick={openCreateModal}
-          className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Nouvelle Ressource
-        </button>
-      </div>
+      <PageHeader icon={FileText} title="Ressources"
+        subtitle={`${totalElements} ressource${totalElements !== 1 ? 's' : ''}`}
+        actions={
+          <button
+            onClick={openCreateModal}
+            className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 transition-colors font-medium text-sm"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Nouvelle ressource</span>
+            <span className="sm:hidden">Ajouter</span>
+          </button>
+        } />
 
       {/* Search and Filters */}
-      <div className="mb-6 p-4 bg-white rounded-xl border border-gray-200">
+      <div className="mb-6 p-4 bg-white rounded-2xl border border-gray-200/80 shadow-sm">
         <form onSubmit={handleSearch} className="flex flex-wrap gap-3 items-end">
           <div className="flex-1 min-w-[200px]">
             <label className="block text-xs text-gray-500 mb-1">Rechercher</label>
@@ -304,7 +304,7 @@ const AdminResources = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="w-8 h-8 animate-spin text-gold" />

@@ -112,7 +112,7 @@ export interface DashboardStats {
   totalDownloads: number;
   topViewedResources: any[];
   topDownloadedResources: any[];
-  dailyUsers: { date: string; count: number }[];
+  dailyNewUsers: { date: string; count: number }[];
   recentUsers: AdminUser[];
   recentResources: AdminResource[];
 }
