@@ -1,11 +1,58 @@
+# robots.txt — LesCracks (https://lescracks.com)
+# Public content is open to everyone, including AI / generative engines (GEO):
+# we WANT to be crawled and cited. Only auth/admin/API surfaces are off-limits.
+
 User-agent: *
 Allow: /
-
-# Admin et API — ne pas indexer
 Disallow: /admin
-Disallow: /admin/
 Disallow: /api/
-Disallow: /oauth/
+Disallow: /oauth2/
+Disallow: /login/
+Disallow: /connexion
+Disallow: /inscription
+Disallow: /profil
 
-# Sitemap
+# AI / GEO crawlers — explicitly welcome (groups don't inherit, so rules repeated).
+User-agent: GPTBot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /profil
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /profil
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /profil
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /profil
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /profil
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /profil
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /profil
+
 Sitemap: https://lescracks.com/sitemap.xml
