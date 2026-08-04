@@ -15,10 +15,14 @@ import {
   Mail,
   Phone,
   MessageSquare,
+  MessageCircle,
+  Clock,
   Calendar,
 } from 'lucide-react';
+import { useProgrammeStatus } from '@/hooks/useProgrammeStatus';
 
 const ACCOMPAGNEMENT_TYPE_ID = 4;
+const WHATSAPP_URL = 'https://wa.me/237691788026';
 
 const FEATURES = [
   'Bilan de profil approfondi',
@@ -30,6 +34,7 @@ const FEATURES = [
 ];
 
 const Postuler = () => {
+  const { open: programmeOpen, message: closedMessage } = useProgrammeStatus();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
@@ -101,6 +106,52 @@ const Postuler = () => {
               Notre équipe te contactera prochainement sur WhatsApp au <strong className="text-t2">{whatsapp}</strong>.
             </p>
             <Link to="/" className="btn-primary">Retour à l'accueil</Link>
+          </motion.div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Programme closed: no form at all — a clear message and a way to stay in touch.
+  if (!programmeOpen) {
+    return (
+      <Layout>
+        <SEO
+          title="Accompagnement 360 — candidatures fermées"
+          description="Les candidatures à l'Accompagnement 360 de LesCracks sont momentanément fermées. De nouvelles sessions ouvriront prochainement."
+          url="/postuler"
+        />
+        <div className="min-h-[70vh] flex items-center justify-center px-4 py-16">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-lg w-full text-center"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-6">
+              <Clock className="w-7 h-7 text-gold" />
+            </div>
+            <p className="text-[11px] text-gold uppercase tracking-[0.4em] mb-4">Accompagnement 360</p>
+            <h1 className="text-2xl sm:text-3xl font-display font-bold text-white mb-4">
+              Candidatures momentanément fermées
+            </h1>
+            <p className="text-t3 leading-relaxed mb-8">{closedMessage}</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gold text-black font-semibold hover:bg-gold-light transition-colors rounded-sm"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Nous contacter sur WhatsApp
+              </a>
+              <Link
+                to="/programme"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 border border-line-strong text-t2 hover:text-white transition-colors rounded-sm"
+              >
+                Découvrir le programme
+              </Link>
+            </div>
           </motion.div>
         </div>
       </Layout>

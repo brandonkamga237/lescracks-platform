@@ -303,6 +303,28 @@ class ApiService {
     return Array.isArray(data) ? data : [];
   }
 
+  // === PROGRAMME (Accompagnement 360 availability) ===
+
+  /** Public: is the Accompagnement 360 open? `message` is the raw admin text (may be null). */
+  async getProgrammeStatus(): Promise<{ open: boolean; message: string | null }> {
+    try {
+      return await this.request<{ open: boolean; message: string | null }>('/programme/status');
+    } catch {
+      // Availability must never block the UI — assume open if the check fails.
+      return { open: true, message: null };
+    }
+  }
+
+  /** Admin: open/close the 360 and set the closed message. */
+  async updateProgrammeStatus(payload: { open?: boolean; message?: string | null }):
+    Promise<{ open: boolean; message: string | null }> {
+    return this.request<{ open: boolean; message: string | null }>(
+      '/programme/status',
+      { method: 'PATCH', body: JSON.stringify(payload) },
+      true,
+    );
+  }
+
   /**
    * Sign someone up for an event.
    *

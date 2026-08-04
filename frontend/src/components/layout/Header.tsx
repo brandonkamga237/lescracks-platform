@@ -3,57 +3,43 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import {
-  Menu, X, ArrowRight, BookOpen, Video, Code2, ChevronDown,
+  Menu, X, ArrowRight, BookOpen, Video, ChevronDown,
   User, LogOut, Shield, Crown, Award,
-  Users, Compass, FileText,
+  Compass, FileText,
 } from 'lucide-react';
 import LesCracksLogo from '@/components/common/LesCracksLogo';
+import { useProgrammeStatus } from '@/hooks/useProgrammeStatus';
 
 // ─── menu config — single source of truth for desktop AND mobile ─────────────
+// Order reflects what LesCracks actually does day to day: Événements and Ressources
+// lead. Accompagnement 360 is a paid, occasional offering — present, but last of the
+// dropdowns, no decorative emphasis. Open Source is a plain link (no sub-menu).
 
 const menuItems = [
-  {
-    title: 'Accompagnement',
-    href: '/programme',
-    pulse: true,
-    alignRight: false,
-    columns: [
-      { title: 'Le programme', description: 'Tout ce que tu dois savoir sur l\'Accompagnement 360', href: '/programme', icon: Compass },
-      { title: 'Postuler', description: 'Soumettre ta candidature — réponse sous 48h', href: '/postuler', icon: FileText },
-    ],
-  },
+  { title: 'Événements', href: '/evenements', alignRight: false, columns: undefined },
   {
     title: 'Ressources',
     href: '/ressources',
-    pulse: false,
     alignRight: false,
     columns: [
       { title: 'Bibliothèque', description: 'Livres, articles et guides techniques', href: '/ressources?type=DOCUMENT', icon: BookOpen },
       { title: 'Vidéothèque', description: 'Tutoriels vidéo et formations exclusives', href: '/ressources?type=VIDEO', icon: Video },
     ],
   },
-  { title: 'Événements', href: '/evenements', pulse: false, alignRight: false, columns: undefined },
+  { title: 'Open Source', href: '/open-source', alignRight: false, columns: undefined },
   {
-    title: 'Open Source',
-    href: '/open-source',
-    pulse: false,
+    title: 'Accompagnement',
+    href: '/programme',
     alignRight: true,
     columns: [
-      { title: 'Nos Solutions', description: 'Projets open source développés par LesCracks', href: '/open-source#solutions', icon: Code2 },
-      { title: 'Contributeurs', description: 'La communauté qui construit avec nous', href: '/open-source#contributors', icon: Users },
+      { title: 'Le programme', description: 'Tout ce que tu dois savoir sur l\'Accompagnement 360', href: '/programme', icon: Compass },
+      { title: 'Postuler', description: 'Soumettre ta candidature', href: '/postuler', icon: FileText },
     ],
   },
-  { title: 'À propos', href: '/about', pulse: false, alignRight: false, columns: undefined },
+  { title: 'À propos', href: '/about', alignRight: false, columns: undefined },
 ] as const;
 
 type MenuItem = (typeof menuItems)[number];
-
-const GoldPulse = () => (
-  <span className="relative flex h-1.5 w-1.5" aria-hidden="true">
-    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75" />
-    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-gold" />
-  </span>
-);
 
 // ─── desktop dropdown ─────────────────────────────────────────────────────────
 
@@ -102,6 +88,7 @@ const MegaMenu = ({ item, id, onNavigate }: { item: MenuItem; id: string; onNavi
 
 const Header = () => {
   const { isAuthenticated, isAdmin, isPremium, isLearner, user, logout } = useAuth();
+  const { open: programmeOpen } = useProgrammeStatus();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -208,7 +195,6 @@ const Header = () => {
                     }`}
                   >
                     {item.title}
-                    {item.pulse && <GoldPulse />}
                     <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
                   </button>
 
@@ -299,13 +285,16 @@ const Header = () => {
                 <Link to="/connexion" className="text-t3 hover:text-t1 text-sm transition-colors">
                   Se connecter
                 </Link>
-                <Link
-                  to="/postuler"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-gold text-black text-sm font-semibold hover:bg-gold-light transition-colors rounded-sm"
-                >
-                  Postuler
-                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-                </Link>
+                {/* Postuler leads to the 360 funnel — hidden while the programme is closed. */}
+                {programmeOpen && (
+                  <Link
+                    to="/postuler"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-gold text-black text-sm font-semibold hover:bg-gold-light transition-colors rounded-sm"
+                  >
+                    Postuler
+                    <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                  </Link>
+                )}
               </div>
             )}
 
@@ -355,7 +344,6 @@ const Header = () => {
                           onClick={() => setMobileMenuOpen(false)}
                           className="flex items-center gap-2 py-2.5 px-4 pl-7 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-sm"
                         >
-                          {item.pulse && col.href === item.href && <GoldPulse />}
                           {col.title}
                         </Link>
                       ))}
@@ -382,10 +370,12 @@ const Header = () => {
                     className="block py-2.5 px-4 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-sm">
                     Se connecter
                   </Link>
-                  <Link to="/postuler" onClick={() => setMobileMenuOpen(false)}
-                    className="block py-3 px-4 bg-gold text-black font-semibold rounded-xl text-sm text-center">
-                    Postuler
-                  </Link>
+                  {programmeOpen && (
+                    <Link to="/postuler" onClick={() => setMobileMenuOpen(false)}
+                      className="block py-3 px-4 bg-gold text-black font-semibold rounded-xl text-sm text-center">
+                      Postuler
+                    </Link>
+                  )}
                 </div>
               )}
             </nav>

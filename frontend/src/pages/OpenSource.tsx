@@ -34,15 +34,16 @@ interface Contributor {
   contributedProjects?: string[];
 }
 
+// Dark-theme chips: the page sits on black, so light *-100 backgrounds looked pasted-on.
 const LANG_COLORS: Record<string, string> = {
-  Java: 'bg-orange-100 text-orange-700',
-  Python: 'bg-blue-100 text-blue-700',
-  JavaScript: 'bg-yellow-100 text-yellow-700',
-  TypeScript: 'bg-blue-100 text-blue-800',
-  Go: 'bg-cyan-100 text-cyan-700',
-  Rust: 'bg-red-100 text-red-700',
-  React: 'bg-sky-100 text-sky-700',
-  default: 'bg-gray-100 text-gray-700',
+  Java: 'bg-orange-500/10 text-orange-300 border border-orange-500/20',
+  Python: 'bg-blue-500/10 text-blue-300 border border-blue-500/20',
+  JavaScript: 'bg-yellow-500/10 text-yellow-300 border border-yellow-500/20',
+  TypeScript: 'bg-sky-500/10 text-sky-300 border border-sky-500/20',
+  Go: 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20',
+  Rust: 'bg-red-500/10 text-red-300 border border-red-500/20',
+  React: 'bg-sky-500/10 text-sky-300 border border-sky-500/20',
+  default: 'bg-white/5 text-zinc-300 border border-white/10',
 };
 
 const langColor = (lang?: string) =>
@@ -179,7 +180,7 @@ const OpenSource = () => {
                     </div>
                     {project.featured && (
                       <span className="text-xs px-2 py-1 rounded-full bg-gold/10 text-gold border border-gold/20 font-medium">
-                        Featured
+                        À la une
                       </span>
                     )}
                   </div>
@@ -343,7 +344,7 @@ const OpenSource = () => {
               contributeurs reconnus par LesCracks.
             </p>
             <a
-              href="https://github.com"
+              href="https://github.com/lescracks"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-8 py-3 bg-gold text-black font-semibold rounded-xl hover:bg-gold/90 transition-colors"

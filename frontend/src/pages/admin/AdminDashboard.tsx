@@ -5,12 +5,15 @@ import {
   Users, FileText, Calendar, TrendingUp, Loader2, Activity,
   UserPlus, FilePlus, ArrowUpRight, ArrowDownRight, Eye,
   Download, Crown, ClipboardList, Zap, Code2, Minus,
+  Compass, Save, Check,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  Cell, AreaChart, Area,
+  AreaChart, Area,
 } from 'recharts';
 import adminApi from '@/services/adminApi';
+import { apiService } from '@/services/api';
+import { DEFAULT_360_CLOSED_MESSAGE } from '@/hooks/useProgrammeStatus';
 import { catColor, SEQUENTIAL, GRID, AXIS_TICK, ChartTooltip, Card } from '@/components/admin/viz';
 
 // ── helpers ─────────────────────────────────────────────────────────────────
@@ -113,6 +116,114 @@ const TopRow = ({ rank, title, type, count, icon: Icon, tint }: {
   </div>
 );
 
+// ── Accompagnement 360 availability control ────────────────────────────────────
+// The 360 is a paid, occasional offering. This lets an admin open or close it (and
+// author the message shown while closed) straight from the dashboard.
+const Programme360Control = () => {
+  const [open, setOpen] = useState(true);
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    apiService.getProgrammeStatus()
+      .then((s) => { setOpen(s.open); setMessage(s.message ?? ''); })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const save = async () => {
+    setSaving(true);
+    setSaved(false);
+    try {
+      const res = await apiService.updateProgrammeStatus({ open, message: message.trim() || null });
+      setOpen(res.open);
+      setMessage(res.message ?? '');
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card className="p-4 sm:p-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex items-start gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0">
+            <Compass className="w-5 h-5 text-gold" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-semibold text-gray-900 leading-tight">Accompagnement 360</h3>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Ouvrir ou fermer les candidatures. Fermé, les pages publiques masquent « Postuler ».
+            </p>
+          </div>
+        </div>
+
+        {/* Status + toggle */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          {!loading && (
+            <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${
+              open ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${open ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+              {open ? 'Ouvert' : 'Fermé'}
+            </span>
+          )}
+          <button
+            type="button"
+            role="switch"
+            aria-checked={open}
+            aria-label="Basculer la disponibilité de l'Accompagnement 360"
+            disabled={loading}
+            onClick={() => setOpen((v) => !v)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${
+              open ? 'bg-emerald-500' : 'bg-gray-300'
+            }`}
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${open ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
+        </div>
+      </div>
+
+      {/* Closed message editor — only relevant while closed */}
+      {!loading && !open && (
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <label htmlFor="closed-msg" className="block text-xs font-medium text-gray-500 mb-1.5">
+            Message affiché aux visiteurs (facultatif)
+          </label>
+          <textarea
+            id="closed-msg"
+            rows={2}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder={DEFAULT_360_CLOSED_MESSAGE}
+            className="w-full text-sm rounded-xl border border-gray-200 px-3 py-2 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold/40 resize-none"
+          />
+          <p className="text-[11px] text-gray-400 mt-1">Laissé vide, un message par défaut est utilisé.</p>
+        </div>
+      )}
+
+      <div className="mt-4 flex justify-end">
+        <button
+          type="button"
+          onClick={save}
+          disabled={saving || loading}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
+        >
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" />
+            : saved ? <Check className="w-4 h-4 text-emerald-400" />
+            : <Save className="w-4 h-4" />}
+          {saved ? 'Enregistré' : 'Enregistrer'}
+        </button>
+      </div>
+    </Card>
+  );
+};
+
 // ── Main ─────────────────────────────────────────────────────────────────────────
 const AdminDashboard = () => {
   const [stats, setStats] = useState<any>(null);
@@ -180,17 +291,19 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* ── KPI ROW ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
-        <Kpi title="Utilisateurs" value={totalUsers} icon={Users} tint="bg-blue-100 text-blue-600"
+      {/* ── KPI ROW — four figures that matter, one accent (not a six-colour rainbow) ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <Kpi title="Utilisateurs" value={totalUsers} icon={Users} tint="bg-gold/10 text-gold"
           link="/admin/users" trend={userTrend} hint={`+${stats?.newUsersLast30Days || 0} sur 30 j`} spark={dailyUsers} />
-        <Kpi title="Ressources" value={stats?.totalResources || 0} icon={FileText} tint="bg-amber-100 text-amber-600"
+        <Kpi title="Ressources" value={stats?.totalResources || 0} icon={FileText} tint="bg-gold/10 text-gold"
           link="/admin/resources" hint={`+${stats?.newResourcesLast30Days || 0} sur 30 j`} />
-        <Kpi title="Événements" value={stats?.totalEvents || 0} icon={Calendar} tint="bg-emerald-100 text-emerald-600" link="/admin/events" />
-        <Kpi title="Conversion Premium" value={`${stats?.premiumConversionRate || 0}%`} icon={Crown} tint="bg-yellow-100 text-yellow-600" hint="Premium / total" />
-        <Kpi title="Vues cumulées" value={stats?.totalViews || 0} icon={Eye} tint="bg-sky-100 text-sky-600" hint="Toutes ressources" />
-        <Kpi title="Téléchargements" value={stats?.totalDownloads || 0} icon={Download} tint="bg-violet-100 text-violet-600" hint="Toutes ressources" />
+        <Kpi title="Événements" value={stats?.totalEvents || 0} icon={Calendar} tint="bg-gold/10 text-gold" link="/admin/events" />
+        <Kpi title="Candidatures" value={totalApps} icon={ClipboardList} tint="bg-gold/10 text-gold"
+          link="/admin/applications" hint="Toutes confondues" />
       </div>
+
+      {/* ── Accompagnement 360 availability ── */}
+      <Programme360Control />
 
       {/* ── ACQUISITION ── */}
       <Card className="p-4 sm:p-6">
@@ -218,29 +331,29 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Provider mix + role split */}
+          {/* Provider mix (a compact list — a 3-bar chart was noise, not insight) + role split */}
           <div className="flex flex-col gap-4">
             <div>
-              <p className="text-xs text-gray-500 mb-3">Par méthode de connexion</p>
-              <div className="h-28">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={usersByProvider} margin={{ top: 0, right: 8, bottom: 0, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={GRID} vertical={false} />
-                    <XAxis dataKey="name" tickLine={false} axisLine={false} tick={AXIS_TICK} />
-                    <YAxis hide allowDecimals={false} />
-                    <Tooltip cursor={{ fill: '#00000008' }} content={<ChartTooltip />} />
-                    <Bar dataKey="value" name="Utilisateurs" radius={[4, 4, 0, 0]} maxBarSize={48}>
-                      {usersByProvider.map((_, i) => <Cell key={i} fill={catColor(i)} />)}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+              <p className="text-xs text-gray-500 mb-2">Par méthode de connexion</p>
+              <div className="space-y-1.5">
+                {usersByProvider.length ? usersByProvider.map((item) => (
+                  <div key={item.name} className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600">{item.name}</span>
+                    <span className="font-semibold text-gray-900">
+                      {fr(item.value)}
+                      <span className="text-gray-400 font-normal ml-1.5">
+                        {totalUsers > 0 ? `${Math.round((item.value / totalUsers) * 100)}%` : '0%'}
+                      </span>
+                    </span>
+                  </div>
+                )) : <p className="text-sm text-gray-400">Aucune donnée</p>}
               </div>
             </div>
             <div className="grid grid-cols-3 gap-2 pt-3 border-t border-gray-100">
-              {usersByRole.map((item, i) => (
-                <div key={item.name} className="p-2.5 rounded-xl" style={{ background: `${catColor(i)}12` }}>
+              {usersByRole.map((item) => (
+                <div key={item.name} className="p-2.5 rounded-xl bg-gray-50">
                   <p className="text-[11px] text-gray-500 truncate">{item.name}</p>
-                  <p className="text-lg font-bold mt-0.5" style={{ color: catColor(i) }}>{fr(item.value)}</p>
+                  <p className="text-lg font-bold mt-0.5 text-gray-900">{fr(item.value)}</p>
                   <p className="text-[11px] text-gray-400">{totalUsers > 0 ? Math.round((item.value / totalUsers) * 100) : 0}%</p>
                 </div>
               ))}
@@ -334,8 +447,8 @@ const AdminDashboard = () => {
           <PanelHead icon={ClipboardList} title="Candidatures" subtitle="Accompagnement 360, événements & archives" tint="text-blue-500"
             action={<Link to="/admin/applications" className="text-xs text-gold hover:text-gold/80 flex items-center gap-1 flex-shrink-0">Voir <ArrowUpRight className="w-3 h-3" /></Link>} />
           <div className="space-y-3 mt-1">
-            {applicationsByStatus.length ? applicationsByStatus.map((item, i) => (
-              <Meter key={item.name} label={item.name} value={item.value} total={totalApps} color={catColor(i)} />
+            {applicationsByStatus.length ? applicationsByStatus.map((item) => (
+              <Meter key={item.name} label={item.name} value={item.value} total={totalApps} color={SEQUENTIAL} />
             )) : <p className="text-sm text-gray-400 text-center py-6">Aucune candidature</p>}
           </div>
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
@@ -348,8 +461,8 @@ const AdminDashboard = () => {
           <PanelHead icon={Crown} title="Demandes Premium" subtitle="Suivi des demandes d'abonnement" tint="text-amber-500"
             action={<Link to="/admin/premium-requests" className="text-xs text-gold hover:text-gold/80 flex items-center gap-1 flex-shrink-0">Gérer <ArrowUpRight className="w-3 h-3" /></Link>} />
           <div className="space-y-3 mt-1">
-            {premiumByStatus.length ? premiumByStatus.map((item, i) => (
-              <Meter key={item.name} label={item.name} value={item.value} total={totalPremiumReqs} color={catColor(i)} />
+            {premiumByStatus.length ? premiumByStatus.map((item) => (
+              <Meter key={item.name} label={item.name} value={item.value} total={totalPremiumReqs} color={SEQUENTIAL} />
             )) : <p className="text-sm text-gray-400 text-center py-6">Aucune demande premium</p>}
           </div>
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
