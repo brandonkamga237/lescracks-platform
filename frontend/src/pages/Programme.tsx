@@ -8,8 +8,17 @@ import {
   Clock, Award, Briefcase, Code, MessageCircle, Target,
   Star, Zap, Heart,
 } from 'lucide-react';
+import { useProgrammeStatus } from '@/hooks/useProgrammeStatus';
 
 const WHATSAPP_URL = 'https://wa.me/237691788026';
+
+/** Shown in place of a "Postuler" button when the 360 is closed. */
+const ClosedPill = () => (
+  <span className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-gold/30 bg-gold/5 text-gold font-semibold cursor-default select-none">
+    <Clock className="w-5 h-5" />
+    Candidatures fermées
+  </span>
+);
 
 const SL = ({ children }: { children: React.ReactNode }) => (
   <p className="text-[11px] text-gold uppercase tracking-[0.4em] mb-4">{children}</p>
@@ -113,6 +122,7 @@ const FAQ_ITEMS = [
 ];
 
 const Programme = () => {
+  const { open: programmeOpen, message: closedMessage } = useProgrammeStatus();
   return (
     <Layout>
       <SEO
@@ -150,13 +160,17 @@ const Programme = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to="/postuler"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gold text-black font-bold text-base hover:bg-gold-light transition-colors"
-              >
-                Postuler maintenant
-                <ArrowRight className="w-5 h-5" />
-              </Link>
+              {programmeOpen ? (
+                <Link
+                  to="/postuler"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gold text-black font-bold text-base hover:bg-gold-light transition-colors"
+                >
+                  Postuler maintenant
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              ) : (
+                <ClosedPill />
+              )}
               <a
                 href={WHATSAPP_URL}
                 target="_blank"
@@ -167,7 +181,11 @@ const Programme = () => {
                 Poser une question sur WhatsApp
               </a>
             </div>
-            <p className="text-t4 text-xs mt-4">Réponse sous 48h · Sans engagement · Entretien gratuit</p>
+            {programmeOpen ? (
+              <p className="text-t4 text-xs mt-4">Réponse sous 48h · Sans engagement · Entretien gratuit</p>
+            ) : (
+              <p className="text-t3 text-sm mt-4 max-w-xl mx-auto">{closedMessage}</p>
+            )}
           </motion.div>
         </div>
       </section>
@@ -365,16 +383,22 @@ const Programme = () => {
             Prêt à changer de <span className="text-gold">trajectoire</span> ?
           </h2>
           <p className="text-t3 mb-8 text-sm leading-relaxed">
-            Postule maintenant. Notre équipe étudie ton profil et te répond sous 48h. Sans engagement immédiat.
+            {programmeOpen
+              ? 'Postule maintenant. Notre équipe étudie ton profil et te répond sous 48h. Sans engagement immédiat.'
+              : closedMessage}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/postuler"
-              className="inline-flex items-center justify-center gap-2 px-10 py-4 bg-gold text-black font-bold text-base hover:bg-gold-light transition-colors"
-            >
-              Postuler maintenant
-              <ArrowRight className="w-5 h-5" />
-            </Link>
+            {programmeOpen ? (
+              <Link
+                to="/postuler"
+                className="inline-flex items-center justify-center gap-2 px-10 py-4 bg-gold text-black font-bold text-base hover:bg-gold-light transition-colors"
+              >
+                Postuler maintenant
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            ) : (
+              <ClosedPill />
+            )}
             <a
               href={WHATSAPP_URL}
               target="_blank"
