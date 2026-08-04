@@ -18,4 +18,13 @@ public class ApplicationType {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)
     private ApplicationTypeName name;
+
+    /** When false, new applications of this type are refused and the public pages show closedMessage. */
+    @Builder.Default
+    @Column(name = "is_open", nullable = false)
+    private boolean open = true;
+
+    /** Optional admin-authored message shown to visitors while this type is closed. */
+    @Column(name = "closed_message")
+    private String closedMessage;
 }
