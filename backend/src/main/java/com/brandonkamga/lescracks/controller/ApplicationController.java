@@ -6,6 +6,7 @@ import com.brandonkamga.lescracks.repository.ApplicationRepository;
 import org.springframework.security.core.Authentication;
 import com.brandonkamga.lescracks.domain.Application;
 import com.brandonkamga.lescracks.domain.ApplicationType;
+import com.brandonkamga.lescracks.domain.ApplicationTypeName;
 import com.brandonkamga.lescracks.domain.Event;
 import com.brandonkamga.lescracks.domain.User;
 import com.brandonkamga.lescracks.dto.ApiResponse;
@@ -148,6 +149,15 @@ public class ApplicationController {
         requireField(request.getEmailAddress(), "L'adresse email est obligatoire.");
         requireField(request.getWhatsappNumber(), "Le numéro WhatsApp est obligatoire.");
 
+        // A closed Accompagnement 360 refuses new applications — the public pages already
+        // show this, but the guard here stops a hand-crafted request from slipping through.
+        ApplicationType type = applicationTypeRepository.findById(request.getApplicationTypeId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "ApplicationType", "id", request.getApplicationTypeId()));
+        if (type.getName() == ApplicationTypeName.accompagnement_360 && !type.isOpen()) {
+            throw new BadRequestException(closedMessageFor(type));
+        }
+
         Application application = toEntity(request);
         Application saved = applicationService.save(application);
         return ResponseEntity.ok(ApiResponse.success(toResponse(saved), "Candidature soumise avec succès"));
@@ -157,6 +167,14 @@ public class ApplicationController {
         if (value == null || value.isBlank()) {
             throw new BadRequestException(message);
         }
+    }
+
+    /** Admin-authored closed message, or a sensible default. Kept in one place so the guard
+        and the public /api/programme/status endpoint stay consistent. */
+    static String closedMessageFor(ApplicationType type) {
+        return type.getClosedMessage() != null && !type.getClosedMessage().isBlank()
+                ? type.getClosedMessage()
+                : "Les Accompagnements 360 ne sont pas ouverts actuellement.";
     }
 
     /** Event sign-up: account required, one seat per person, and only while there is room. */

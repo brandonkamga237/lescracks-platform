@@ -65,6 +65,7 @@ public class SecurityConfig {
                 // Types de candidature — nécessaires au formulaire public pour résoudre
                 // l'id du type par son nom plutôt que de le coder en dur côté client.
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/applications/types").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/programme/status").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
