@@ -148,6 +148,108 @@ public class SeoController {
             .orElseGet(() -> notFound("Apprenant introuvable"));
     }
 
+    // ── Static marketing pages ────────────────────────────────────────────────────
+    // The SPA renders these client-side, so JS-less crawlers (AI engines especially)
+    // see an empty shell. nginx routes bots on /, /about, /programme, /postuler and
+    // /open-source here; the content is authored (these pages are hardcoded in React,
+    // and the CI build has no backend to prerender against) and kept factual for GEO.
+
+    private static final String ORG_JSONLD =
+            "{\"@context\":\"https://schema.org\",\"@type\":\"EducationalOrganization\","
+            + "\"name\":\"LesCracks\",\"alternateName\":\"Les Cracks Academy\","
+            + "\"url\":\"" + SITE + "\",\"logo\":\"" + SITE + "/images/lescracks-logo.svg\","
+            + "\"image\":\"" + DEFAULT_IMAGE + "\","
+            + "\"description\":\"Agence edtech d'Afrique francophone : événements, ressources, communauté et open source, plus un programme de mentoring premium (Accompagnement 360) de 6 à 12 mois.\","
+            + "\"address\":{\"@type\":\"PostalAddress\",\"addressCountry\":\"CM\",\"addressLocality\":\"Yaoundé\"},"
+            + "\"areaServed\":[\"CM\",\"CI\",\"SN\",\"FR\",\"BE\"],\"knowsLanguage\":\"fr\","
+            + "\"sameAs\":[\"https://www.linkedin.com/company/lescracks\",\"https://twitter.com/lescracks\",\"https://instagram.com/lescracks\"],"
+            + "\"founder\":{\"@type\":\"Person\",\"name\":\"Brandon Kamga\"}}";
+
+    @GetMapping(value = "/pages/{page}", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<String> page(@PathVariable String page) {
+        switch (page) {
+            case "home": return home();
+            case "about": return about();
+            case "programme": return programme();
+            case "postuler": return postuler();
+            case "open-source": return openSource();
+            default: return notFound("Page introuvable");
+        }
+    }
+
+    private ResponseEntity<String> home() {
+        String body = "<h1>LesCracks — accompagnement tech en Afrique francophone</h1>"
+                + "<p>LesCracks (Les Cracks Academy) est une agence edtech basée à Yaoundé, au Cameroun, qui aide les"
+                + " jeunes passionnés de tech à passer du niveau débutant à un profil employable. Son activité s'articule"
+                + " autour d'<strong>événements</strong> (workshops, bootcamps), de <strong>ressources pédagogiques</strong>,"
+                + " d'une <strong>communauté d'apprenants</strong> et de <strong>projets open source</strong>.</p>"
+                + "<p>Pour aller plus loin, LesCracks propose l'<strong>Accompagnement 360</strong> : un programme de"
+                + " mentoring en ligne de 6 à 12 mois avec mentor dédié, projets concrets et attestation de complétion.</p>"
+                + "<ul><li>Zones servies : Cameroun, Côte d'Ivoire, Sénégal, France, Belgique.</li>"
+                + "<li>Langue : français. Fondateur : Brandon Kamga.</li></ul>";
+        return html("LesCracks — accompagnement tech en Afrique francophone",
+                "Agence edtech d'Afrique francophone : événements, ressources, communauté et open source, plus l'Accompagnement 360, un mentoring de 6 à 12 mois.",
+                SITE + "/", null, ORG_JSONLD, body);
+    }
+
+    private ResponseEntity<String> about() {
+        String body = "<h1>À propos de LesCracks</h1>"
+                + "<p>LesCracks est une agence edtech d'Afrique francophone dont la mission est d'accompagner les jeunes"
+                + " passionnés de tech jusqu'à un profil employable, par un suivi humain, des projets réels et une communauté.</p>"
+                + "<p>Fondée par <strong>Brandon Kamga</strong>, basée à Yaoundé (Cameroun), LesCracks sert principalement"
+                + " le Cameroun, la Côte d'Ivoire, le Sénégal, ainsi que la France et la Belgique. Le contenu est en français.</p>";
+        return html("À propos — LesCracks",
+                "L'histoire, la mission et les valeurs de LesCracks, agence edtech d'Afrique francophone fondée par Brandon Kamga, basée à Yaoundé.",
+                SITE + "/about", null, ORG_JSONLD, body);
+    }
+
+    private ResponseEntity<String> programme() {
+        String body = "<h1>Accompagnement 360 — le programme</h1>"
+                + "<p>L'Accompagnement 360 est le programme de mentoring premium de LesCracks : un suivi humain et structuré"
+                + " de <strong>6 à 12 mois</strong> pour passer de débutant à profil employable, entièrement en ligne.</p>"
+                + "<p><strong>Ce que tu obtiens :</strong> bilan de profil, plan de progression personnalisé, mentor dédié,"
+                + " projets réels, accès aux ressources et à la communauté, préparation à l'insertion (emploi, freelance ou"
+                + " projet) et attestation de complétion.</p>"
+                + "<p><strong>Comment ça marche :</strong> candidature → bilan initial (45 min) → plan personnalisé →"
+                + " accompagnement actif (6 à 12 mois) → mise en situation.</p>";
+        String ld = "{\"@context\":\"https://schema.org\",\"@type\":\"EducationalOccupationalProgram\","
+                + "\"name\":\"Accompagnement 360\","
+                + "\"description\":\"Programme de mentoring en ligne de 6 à 12 mois avec mentor dédié, projets réels et attestation de complétion.\","
+                + "\"provider\":{\"@type\":\"EducationalOrganization\",\"name\":\"LesCracks\",\"url\":\"" + SITE + "\"},"
+                + "\"timeToComplete\":\"P6M\",\"programType\":\"Mentoring\",\"educationalProgramMode\":\"online\","
+                + "\"url\":\"" + SITE + "/programme\"}";
+        return html("Accompagnement 360 — le programme | LesCracks",
+                "Le programme de mentoring premium de LesCracks : suivi de 6 à 12 mois, mentor dédié, projets réels, attestation. Pour qui, comment ça marche.",
+                SITE + "/programme", null, ld, body);
+    }
+
+    private ResponseEntity<String> postuler() {
+        String body = "<h1>Postuler à l'Accompagnement 360</h1>"
+                + "<p>Rejoins l'Accompagnement 360 de LesCracks : un suivi personnalisé de 6 à 12 mois avec mentor dédié,"
+                + " projets réels et attestation. La candidature se fait en ligne — l'équipe étudie ton profil et te répond,"
+                + " puis un bilan initial permet de définir ta trajectoire.</p>";
+        String ld = "{\"@context\":\"https://schema.org\",\"@type\":\"WebPage\","
+                + "\"name\":\"Postuler à l'Accompagnement 360\",\"url\":\"" + SITE + "/postuler\","
+                + "\"about\":{\"@type\":\"EducationalOccupationalProgram\",\"name\":\"Accompagnement 360\","
+                + "\"provider\":{\"@type\":\"EducationalOrganization\",\"name\":\"LesCracks\"}}}";
+        return html("Postuler à l'Accompagnement 360 — LesCracks",
+                "Candidature à l'Accompagnement 360 de LesCracks : suivi de 6 à 12 mois avec mentor dédié, projets réels et attestation.",
+                SITE + "/postuler", null, ld, body);
+    }
+
+    private ResponseEntity<String> openSource() {
+        String body = "<h1>Projets open source LesCracks</h1>"
+                + "<p>LesCracks construit en open source et contribue à l'écosystème tech africain : outils, librairies et"
+                + " projets ouverts à tous, portés par la communauté. La page présente les projets maintenus par LesCracks"
+                + " et les contributeurs reconnus.</p>";
+        String ld = "{\"@context\":\"https://schema.org\",\"@type\":\"CollectionPage\","
+                + "\"name\":\"Projets open source LesCracks\",\"url\":\"" + SITE + "/open-source\","
+                + "\"isPartOf\":{\"@type\":\"EducationalOrganization\",\"name\":\"LesCracks\",\"url\":\"" + SITE + "\"}}";
+        return html("Projets open source — LesCracks",
+                "LesCracks construit en open source pour l'écosystème tech africain : projets, librairies et contributeurs de la communauté.",
+                SITE + "/open-source", null, ld, body);
+    }
+
     // ── HTML assembly ─────────────────────────────────────────────────────────────
     private static ResponseEntity<String> html(String title, String metaDesc, String canonical,
                                                 String image, String jsonLd, String bodyInner) {

@@ -1,10 +1,10 @@
 # LesCracks
 
-> Agence edtech d'Afrique francophone qui accompagne les jeunes passionnés de tech, du niveau débutant jusqu'à un profil employable, via un suivi structuré de 6 à 12 mois avec mentor dédié, projets réels et communauté.
+> Agence edtech d'Afrique francophone qui aide les jeunes passionnés de tech à devenir employables — à travers des événements, des ressources pédagogiques, une communauté d'apprenants et des projets open source, plus l'Accompagnement 360, un programme de mentoring premium de 6 à 12 mois avec mentor dédié.
 
 LesCracks (aussi appelée « Les Cracks Academy ») est basée à Yaoundé, au Cameroun, et sert principalement l'Afrique francophone (Cameroun, Côte d'Ivoire, Sénégal) ainsi que la France et la Belgique. Le contenu est en français. Fondateur : Brandon Kamga.
 
-L'offre principale, l'« Accompagnement 360 », est un programme de mentoring en ligne de 6 à 12 mois : mentor dédié, projets concrets, montée en compétences progressive et attestation de complétion. LesCracks propose aussi des ressources pédagogiques (documents et vidéos), des événements (workshops, bootcamps), une vitrine d'apprenants accompagnés et des projets open source.
+L'activité de LesCracks s'articule autour d'événements (workshops, bootcamps), de ressources pédagogiques (documents et vidéos), d'une communauté et d'une vitrine d'apprenants accompagnés, et de projets open source. Pour aller plus loin, l'« Accompagnement 360 » est son programme de mentoring premium en ligne de 6 à 12 mois : mentor dédié, projets concrets, montée en compétences progressive et attestation de complétion.
 
 ## Pages principales
 
@@ -22,7 +22,7 @@ L'offre principale, l'« Accompagnement 360 », est un programme de mentoring en
 - Localisation : Yaoundé, Cameroun.
 - Zones servies : Cameroun, Côte d'Ivoire, Sénégal, France, Belgique.
 - Langue : français.
-- Programme phare : Accompagnement 360 (mentoring en ligne, 6 à 12 mois).
+- Programme premium : Accompagnement 360 (mentoring en ligne, 6 à 12 mois).
 - Fondateur : Brandon Kamga.
 - Site : https://lescracks.com
 - Plan du site : https://lescracks.com/sitemap.xml
