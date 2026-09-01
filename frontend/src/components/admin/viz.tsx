@@ -47,17 +47,17 @@ type ChartTooltipProps = {
 export const ChartTooltip = ({ active, payload, label, labelFormatter, valueSuffix = '' }: ChartTooltipProps) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg text-xs">
+    <div className="rounded-lg border border-line bg-surface-2 px-3 py-2 shadow-lg text-data">
       {label != null && (
-        <p className="font-medium text-gray-700 mb-1">
+        <p className="font-medium text-t2 mb-1">
           {labelFormatter ? labelFormatter(label) : label}
         </p>
       )}
       {payload.map((p, i) => (
         <div key={i} className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: p.color || p.fill }} />
-          <span className="text-gray-500">{p.name}</span>
-          <span className="font-semibold text-gray-900 ml-auto">
+          <span className="text-t3">{p.name}</span>
+          <span className="font-semibold text-t1 ml-auto tabular-nums">
             {typeof p.value === 'number' ? p.value.toLocaleString('fr-FR') : p.value}{valueSuffix}
           </span>
         </div>
@@ -80,8 +80,8 @@ export const PageHeader = ({
         </div>
       )}
       <div className="min-w-0">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{title}</h1>
-        {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
+        <h1 className="text-xl sm:text-2xl font-bold text-t1 truncate">{title}</h1>
+        {subtitle && <p className="text-data text-t3 mt-0.5">{subtitle}</p>}
       </div>
     </div>
     {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
@@ -90,5 +90,5 @@ export const PageHeader = ({
 
 // ── Card wrapper ───────────────────────────────────────────────────────────────
 export const Card = ({ className = '', children }: { className?: string; children: React.ReactNode }) => (
-  <div className={`bg-white rounded-2xl border border-gray-200/80 shadow-sm ${className}`}>{children}</div>
+  <div className={`bg-surface-1 rounded-xl border border-line ${className}`}>{children}</div>
 );

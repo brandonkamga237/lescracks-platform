@@ -71,11 +71,11 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
     path === '/admin' ? location.pathname === '/admin' : location.pathname.startsWith(path);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-background">
       {/* ── Mobile backdrop ── */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setMobileOpen(false)}
           aria-hidden="true"
         />
@@ -83,13 +83,13 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
       {/* ── Sidebar ── */}
       <aside
-        className={`fixed left-0 top-0 h-full bg-gray-900 text-white flex flex-col z-50
+        className={`fixed left-0 top-0 h-full bg-surface-1 text-t1 flex flex-col z-50
           transform transition-transform duration-300 ease-out
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
           w-64 ${collapsed ? 'lg:w-16' : 'lg:w-64'}`}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-800 flex-shrink-0">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-line flex-shrink-0">
           <Link to="/admin" className="flex items-center gap-2 min-w-0">
             <div className="w-8 h-8 bg-gold flex items-center justify-center flex-shrink-0 rounded-md">
               <span className="text-black font-bold text-lg">L</span>
@@ -99,7 +99,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
           {/* Close button (mobile only) */}
           <button
             onClick={() => setMobileOpen(false)}
-            className="lg:hidden p-1.5 -mr-1.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+            className="lg:hidden p-1.5 -mr-1.5 rounded-lg text-t3 hover:bg-surface-2 hover:text-t1 transition-colors"
             aria-label="Fermer le menu"
           >
             <X className="w-5 h-5" />
@@ -128,17 +128,17 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                 {showSeparator && (
                   <>
                     <div className={`px-3 pt-3 pb-1 ${collapsed ? 'lg:hidden' : ''}`}>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-600">
+                      <p className="text-label font-semibold text-t4">
                         {groupLabel(item.group)}
                       </p>
                     </div>
-                    {collapsed && <div className="hidden lg:block mx-3 my-2 border-t border-gray-800" />}
+                    {collapsed && <div className="hidden lg:block mx-3 my-2 border-t border-line" />}
                   </>
                 )}
                 <Link
                   to={item.path}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                    active ? 'bg-gold text-black font-medium' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                    active ? 'bg-gold text-black font-medium' : 'text-t3 hover:bg-surface-2 hover:text-t1'
                   }`}
                   title={collapsed ? item.label : undefined}
                 >
@@ -151,10 +151,10 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         </nav>
 
         {/* Bottom section */}
-        <div className="p-2 border-t border-gray-800 flex-shrink-0">
+        <div className="p-2 border-t border-line flex-shrink-0">
           <Link
             to="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-t3 hover:bg-surface-2 hover:text-t1 transition-colors"
             title={collapsed ? 'Retour au site' : undefined}
           >
             <ArrowLeft className="w-5 h-5 flex-shrink-0" />
@@ -172,20 +172,20 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       </aside>
 
       {/* ── Main content ── */}
-      <main className={`transition-all duration-300 text-gray-900 ${collapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
+      <main className={`transition-all duration-300 text-t2 ${collapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         {/* Top header */}
-        <header className="sticky top-0 z-30 h-16 bg-white/95 backdrop-blur border-b border-gray-200 flex items-center justify-between px-4 sm:px-6">
+        <header className="sticky top-0 z-30 h-16 bg-background/90 backdrop-blur border-b border-line flex items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3 min-w-0">
             {/* Hamburger (mobile only) */}
             <button
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden p-2 -ml-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+              className="lg:hidden p-2 -ml-2 rounded-lg text-t3 hover:bg-surface-2 transition-colors"
               aria-label="Ouvrir le menu"
             >
               <Menu className="w-5 h-5" />
             </button>
             <Shield className="w-5 h-5 text-gold flex-shrink-0 hidden sm:block" />
-            <h1 className="text-base sm:text-lg font-semibold text-gray-800 truncate">
+            <h1 className="text-base sm:text-lg font-semibold text-t1 truncate">
               <span className="hidden sm:inline">Panneau d'Administration</span>
               <span className="sm:hidden">Admin</span>
             </h1>
@@ -193,7 +193,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
           <Link
             to="/profil"
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 min-w-0"
+            className="flex items-center gap-2 text-sm text-t3 hover:text-t1 min-w-0"
           >
             <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0">
               <span className="text-gold text-sm font-semibold">
