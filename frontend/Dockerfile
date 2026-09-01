@@ -4,7 +4,7 @@ COPY package*.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci
 
 COPY . .
-RUN npm run build   # Vite met le build dans /dist
+RUN npm run build   # Vite outputs the build to /dist
 
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html

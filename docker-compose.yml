@@ -1,0 +1,105 @@
+# =============================================================================
+# LesCracks Platform - Local development stack
+# =============================================================================
+#
+# Production lives in docker-compose.prod.yml (deployed by CI).
+# This file is for local development only.
+#
+# Dependencies only (backend run from the IDE / ./mvnw spring-boot:run):
+#   docker compose up -d
+#
+# Full stack (backend in a container):
+#   docker compose --profile app up -d --build
+#
+# No .env is required: every variable below has a development default.
+# A .env at the repo root, if present, overrides them.
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL - localhost:5432
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: lescracks-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB:       ${DB_NAME:-lescracks}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:         ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-lescracks}"]
+      interval:     10s
+      timeout:      5s
+      retries:      5
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # MinIO - API localhost:9000, console localhost:9001 (minioadmin/minioadmin)
+  # ---------------------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: lescracks-minio-dev
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER:     ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test:         ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval:     30s
+      timeout:      10s
+      retries:      3
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # Spring Boot backend - localhost:8080, compose profile "app" only
+  # ---------------------------------------------------------------------------
+  backend:
+    profiles: ["app"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: dev
+    container_name: lescracks-backend-dev
+    restart: unless-stopped
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_HOST:        postgres
+      DB_PORT:        5432
+      DB_NAME:        ${DB_NAME:-lescracks}
+      DB_USERNAME:    ${DB_USERNAME:-postgres}
+      DB_PASSWORD:    ${DB_PASSWORD:-postgres}
+      MINIO_HOST:     minio
+      MINIO_PORT:     9000
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_BUCKET:   ${MINIO_BUCKET:-lescracks}
+      FRONTEND_URL:   ${FRONTEND_URL:-http://localhost:5173}
+      # OAuth2: Spring requires these keys at startup, even empty ones locally
+      GITHUB_CLIENT_ID:     ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      GOOGLE_CLIENT_ID:     ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  minio_data:
