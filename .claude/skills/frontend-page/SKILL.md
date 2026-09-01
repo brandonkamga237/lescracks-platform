@@ -14,15 +14,17 @@ description: Create or change a page or component in the LesCracks frontend (Rea
 - Hook → `src/hooks/useXxx.ts`
 
 The route is declared in `src/App.tsx` (import plus `<Route>`). Admin pages sit under
-the admin layout and are guarded client-side by `useAdminAuth`.
+the admin layout and are guarded client-side by the `AdminRoute` wrapper in `App.tsx`,
+which reads `isAdmin` from `useAuth()`.
 
 ## Non-negotiable conventions
 
 - **Import through the `@/` alias** — never `../../..`.
 - **No `fetch` inside a component.** Every API call goes through `src/services/`:
-  - `publicApi.ts` → public endpoints, no token
-  - `api.ts` → authenticated endpoints (JWT)
+  - `api.ts` → public and authenticated endpoints alike
   - `adminApi.ts` → `/api/admin` endpoints
+  Both send the session cookie through `credentials: 'include'`; no token is handled in
+  JavaScript. (`publicApi.ts` also exists, but nothing imports it.)
   Add the method to the service with its exported TypeScript type, then call it from
   the page.
 - **Never hardcode an API URL**: the base comes from `ENV.API_BASE_URL`

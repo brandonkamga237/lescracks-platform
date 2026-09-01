@@ -55,8 +55,7 @@ mistake in this codebase.
 
 ## On the frontend side
 A new endpoint is called from `frontend/src/services/` only:
-- `publicApi.ts` if it is `permitAll`
-- `api.ts` if it needs a JWT
+- `api.ts` whether it is `permitAll` or authenticated — the session cookie goes out either way
 - `adminApi.ts` if it lives under `/api/admin`
 
 ## Verify

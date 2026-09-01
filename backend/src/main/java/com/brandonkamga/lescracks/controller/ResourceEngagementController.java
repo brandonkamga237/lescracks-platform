@@ -12,6 +12,7 @@ import com.brandonkamga.lescracks.repository.ResourceCommentRepository;
 import com.brandonkamga.lescracks.repository.ResourceLikeRepository;
 import com.brandonkamga.lescracks.repository.ResourceRepository;
 import com.brandonkamga.lescracks.repository.UserRepository;
+import com.brandonkamga.lescracks.security.Authorities;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -181,7 +182,7 @@ public class ResourceEngagementController {
 
         boolean isAuthor = comment.getUser().getId().equals(user.getId());
         boolean isAdmin  = authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(a -> a.getAuthority().equals(Authorities.ADMIN));
 
         if (!isAuthor && !isAdmin) {
             throw new ForbiddenException("Tu ne peux supprimer que tes propres commentaires.");

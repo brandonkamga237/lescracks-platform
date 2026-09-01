@@ -18,7 +18,7 @@ Monorepo: `frontend/` React + Vite (SPA), `backend/` Spring Boot + PostgreSQL + 
 - `frontend/src/`
   - `pages/` → public routes, `pages/admin/` → back office
   - `components/{landing,cards,resources,admin,layout,common,ui}/`
-  - `services/` → `api.ts` (authenticated), `publicApi.ts`, `adminApi.ts`, `auth.ts`
+  - `services/` → `api.ts` (public and authenticated calls), `adminApi.ts`, `auth.ts` (`publicApi.ts` exists but nothing imports it)
   - `contexts/` → AuthContext, ThemeContext; `hooks/` → `useXxx` hooks
   - `nginx.conf` → SEO bot routing + `/api` proxy (prod)
 - `docker-compose.yml` → local dev stack (postgres, minio + backend under profile `app`)
@@ -70,7 +70,7 @@ Before any commit or PR:
 
 ### Frontend
 - Import through the `@/...` alias (never deep relative paths)
-- API calls only inside `src/services/*`: `publicApi` (no token), `api` (JWT), `adminApi` (admin)
+- API calls only inside `src/services/*`: `api` for everything public and authenticated, `adminApi` for `/api/admin`. Auth rides on an HttpOnly cookie sent by `credentials: 'include'` — there is no token in JS to put in a header
 - Base URL through `ENV.API_BASE_URL` (`src/config/env.ts`), never a hardcoded URL
 - Tailwind for styling (no inline styles); Radix primitives live in `components/ui/`
 - Typed props: `interface {ComponentName}Props`

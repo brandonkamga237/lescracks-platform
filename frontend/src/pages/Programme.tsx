@@ -200,7 +200,7 @@ const Programme = () => {
             </h2>
           </motion.div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {FOR_WHO.map((item, i) => {
+            {FOR_WHO.map((item) => {
               const Icon = item.icon;
               return (
                 <motion.div
@@ -254,7 +254,7 @@ const Programme = () => {
       <section className="py-12 px-4 border-y border-line-soft">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {RESULTS.map((r, i) => {
+            {RESULTS.map((r) => {
               const Icon = r.icon;
               return (
                 <motion.div
@@ -285,7 +285,7 @@ const Programme = () => {
           <div className="relative">
             <div className="absolute left-[22px] top-8 bottom-8 w-px bg-gradient-to-b from-gold/40 via-gold/15 to-transparent hidden md:block" />
             <div className="space-y-4">
-              {STEPS.map((step, i) => (
+              {STEPS.map((step) => (
                 <motion.div
                   key={step.num}
                   initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
@@ -327,7 +327,7 @@ const Programme = () => {
               { icon: Clock,   title: '6 à 12 mois',     desc: 'Durée selon ton niveau de départ et tes objectifs. Le programme s\'adapte à toi.' },
               { icon: Users,   title: '100% en ligne',   desc: 'Sessions par visioconférence. Accessible depuis n\'importe quel pays d\'Afrique francophone.' },
               { icon: Heart,   title: 'Tarif personnalisé', desc: 'Le coût est défini avec toi selon ta situation. Contacte-nous sur WhatsApp pour en discuter.' },
-            ].map((item, i) => {
+            ].map((item) => {
               const Icon = item.icon;
               return (
                 <motion.div

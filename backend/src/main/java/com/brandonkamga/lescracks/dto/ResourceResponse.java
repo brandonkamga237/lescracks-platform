@@ -28,6 +28,9 @@ public class ResourceResponse {
     @Schema(description = "URL de la ressource")
     private String url;
 
+    @Schema(description = "Corps de l'article (ressources INLINE uniquement)")
+    private String content;
+
     @Schema(description = "Date de création")
     private LocalDateTime createdAt;
 
@@ -92,5 +95,9 @@ public class ResourceResponse {
         private Long fileSize;
         @Schema(description = "Type MIME du fichier")
         private String mimeType;
+        @Schema(description = "Temps de lecture estimé en minutes (articles)")
+        private Integer readingTimeMinutes;
+        @Schema(description = "Auteur de l'article")
+        private String author;
     }
 }

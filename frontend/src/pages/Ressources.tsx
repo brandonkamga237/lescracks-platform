@@ -214,8 +214,12 @@ const Ressources = () => {
   };
 
   const handleOpen = async (resource: Resource) => {
-    await apiService.trackResourceView(resource.id);
     window.open(resource.url, '_blank', 'noopener,noreferrer');
+    // Keep the figure on the card in step with the view we just recorded.
+    await apiService.trackResourceView(resource.id);
+    setResources(prev => prev.map(r =>
+      r.id === resource.id ? { ...r, viewCount: (r.viewCount ?? 0) + 1 } : r,
+    ));
   };
 
   const handleDownload = async (resource: Resource) => {

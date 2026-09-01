@@ -97,7 +97,10 @@ Reference data (roles, application types, resource types) is inserted at startup
 | POST | `/api/auth/reset-password` | Reset the password with a token |
 
 OAuth2: GitHub and Google, through `/oauth2/authorization/{provider}`.
-The JWT is stateless and sent as an `Authorization: Bearer <token>` header.
+
+The JWT is stateless and read from either an `Authorization: Bearer <token>` header or an
+HttpOnly cookie, the header winning when both are present. The frontend uses the cookie
+only, so no token is ever exposed to JavaScript.
 
 Roles (`RoleName`): `user`, `premium_user`, `learner`, `admin`.
 Routes under `/api/admin/**` require the `admin` role.

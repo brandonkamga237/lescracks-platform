@@ -51,6 +51,13 @@
 			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
 
+		<!-- H2 — in-memory database for the test profile -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<!-- ✅ JWT -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>

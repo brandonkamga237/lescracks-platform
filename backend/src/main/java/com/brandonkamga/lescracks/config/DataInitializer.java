@@ -190,10 +190,12 @@ public class DataInitializer implements CommandLineRunner {
             });
         }
 
-        // Initialize Resource Types
-        if (resourceTypeRepository.count() == 0) {
-            resourceTypeRepository.save(ResourceType.builder().name(ResourceTypeName.video).build());
-            resourceTypeRepository.save(ResourceType.builder().name(ResourceTypeName.document).build());
+        // Initialize Resource Types - idempotent: a count() guard would never seed a
+        // type added after the first run
+        for (ResourceTypeName typeName : ResourceTypeName.values()) {
+            if (resourceTypeRepository.findByName(typeName).isEmpty()) {
+                resourceTypeRepository.save(ResourceType.builder().name(typeName).build());
+            }
         }
 
         // Initialize Event Statuses

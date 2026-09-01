@@ -48,9 +48,18 @@ public class ResourceRequest {
     @Schema(description = "URL de l'image de prévisualisation")
     private String previewImageUrl;
 
-    @Schema(description = "Source de la ressource : EXTERNAL (lien YouTube, etc.) ou UPLOADED (fichier stocké sur la plateforme)", example = "EXTERNAL")
+    @Schema(description = "Source de la ressource : EXTERNAL (lien YouTube, etc.), UPLOADED (fichier stocké sur la plateforme) ou INLINE (article rédigé dans le back-office)", example = "EXTERNAL")
     @Builder.Default
     private String sourceType = "EXTERNAL";
+
+    @Schema(description = "Corps de l'article, en Markdown. Obligatoire pour les ressources INLINE, ignoré sinon.")
+    private String content;
+
+    @Schema(description = "Temps de lecture estimé en minutes (articles)", example = "8")
+    private Integer readingTimeMinutes;
+
+    @Schema(description = "Auteur de l'article", example = "Brandon Kamga")
+    private String author;
 
     @Schema(description = "Réservé aux utilisateurs premium uniquement", example = "false")
     @Builder.Default

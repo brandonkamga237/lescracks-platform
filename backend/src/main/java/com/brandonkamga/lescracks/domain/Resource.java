@@ -25,8 +25,12 @@ public class Resource {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
+    @Column
     private String url;
+
+    /** Body of an INLINE article; null for EXTERNAL and UPLOADED resources. */
+    @Column(columnDefinition = "TEXT")
+    private String content;
 
     /** Whether this resource requires a premium subscription to access. */
     @Column(name = "is_premium", nullable = false)

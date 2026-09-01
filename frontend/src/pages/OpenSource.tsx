@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import Layout from '@/components/layout/Layout';
 import SEO from '@/components/common/SEO';
 import { CardSkeletonGrid, PersonSkeletonGrid } from "@/components/common/Skeleton";
-import { Github, Linkedin, Globe, Twitter, Star, GitFork, ExternalLink, Users, Code2, Loader2 } from 'lucide-react';
+import { Github, Linkedin, Globe, Twitter, Star, GitFork, ExternalLink, Users, Code2 } from 'lucide-react';
 import { ENV } from '@/config/env';
 
 const API_BASE = ENV.API_BASE_URL;
@@ -149,7 +149,7 @@ const OpenSource = () => {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project, i) => (
+              {projects.map((project) => (
                 <motion.article
                   key={project.id}
                   initial={{ opacity: 0, y: 20 }}
@@ -249,7 +249,7 @@ const OpenSource = () => {
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {contributors.map((c, i) => (
+              {contributors.map((c) => (
                 <motion.div
                   key={c.id}
                   initial={{ opacity: 0, y: 20 }}
