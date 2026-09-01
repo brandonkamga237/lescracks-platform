@@ -32,6 +32,8 @@ services:
       - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Keycloak keeps its realm in a schema of its own, created on first boot.
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test:         ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-lescracks}"]
       interval:     10s
@@ -61,6 +63,37 @@ services:
       timeout:      10s
       retries:      3
       start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # Keycloak - localhost:8081, admin console at /admin (admin/admin)
+  #
+  # Identity lives here, not in the application: passwords, resets, login attempt
+  # limits and the Google and GitHub logins are all realm configuration rather than
+  # code we would have to keep correct ourselves.
+  # ---------------------------------------------------------------------------
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: lescracks-keycloak-dev
+    restart: unless-stopped
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      # Its own schema in the same server: one less container to run locally, and the
+      # separation that matters is the schema, not the process.
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${DB_USERNAME:-postgres}
+      KC_DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      KC_HTTP_PORT: 8080
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "${KEYCLOAK_PORT:-8081}:8080"
+    volumes:
+      - ./keycloak/realm:/opt/keycloak/data/import:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   # ---------------------------------------------------------------------------
   # Spring Boot backend - localhost:8080, compose profile "app" only

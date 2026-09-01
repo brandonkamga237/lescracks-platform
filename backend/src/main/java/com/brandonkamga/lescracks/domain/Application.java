@@ -1,75 +1,77 @@
 package com.brandonkamga.lescracks.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
+/**
+ * Someone asking to join: an event when {@code event} is set, the Accompagnement 360 when it
+ * is not. The applicant may have no account yet, which is why {@code user} is optional and
+ * the contact details are carried on the row.
+ */
 @Entity
 @Table(name = "applications")
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Application {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Nullable — candidature publique sans compte
+    /** Null means the Accompagnement 360. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = true)
-    private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "event_id", nullable = true)
+    @JoinColumn(name = "event_id")
     private Event event;
 
+    /** Set once the applicant has an account; a participation later requires one. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "application_type_id", nullable = false)
-    private ApplicationType applicationType;
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    // Champs du formulaire public Accompagnement 360
-    @Column(name = "full_name")
+    @Column(name = "full_name", nullable = false, length = 160)
     private String fullName;
 
-    @Column(name = "email_address")
-    private String emailAddress;
+    @Column(nullable = false, length = 255)
+    private String email;
 
-    @Column(name = "whatsapp_number")
-    private String whatsappNumber;
+    @Column(length = 40)
+    private String phone;
 
-    @Column(name = "age")
-    private Integer age;
+    @Column(columnDefinition = "TEXT")
+    private String motivation;
 
-    @Column(name = "motivation_text", columnDefinition = "TEXT")
-    private String motivationText;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private ApplicationStatus status = ApplicationStatus.PENDING;
 
-    @Column(name = "technical_level")
-    private String technicalLevel;
+    @Column(name = "decided_at")
+    private Instant decidedAt;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private Instant createdAt = Instant.now();
 
-    /**
-     * Null while the application is active; set when it's archived. That single field
-     * replaced the whole seven-stage funnel: the admin just wants to list candidates
-     * and, at will, set them aside or delete them.
-     */
-    @Column(name = "archived_at")
-    private LocalDateTime archivedAt;
-
-    /** Private note for the team. Never exposed publicly. */
-    @Column(name = "admin_note", columnDefinition = "TEXT")
-    private String adminNote;
-
-    /** An event registration always carries an event; a 360 application never does. */
-    public boolean isEventRegistration() {
+    public boolean isForEvent() {
         return event != null;
     }
 
-    public boolean isArchived() {
-        return archivedAt != null;
+    /**
+     * A decision records when it was taken. Keeping the pair together here means no caller can
+     * leave a decided application without a date, which the database refuses anyway.
+     */
+    public void decide(ApplicationStatus outcome) {
+        if (outcome == ApplicationStatus.PENDING) {
+            throw new IllegalArgumentException("A decision cannot be PENDING");
+        }
+        this.status = outcome;
+        this.decidedAt = Instant.now();
     }
 }

@@ -1,91 +1,50 @@
 package com.brandonkamga.lescracks.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.time.Instant;
 
+/**
+ * A local projection of a Keycloak subject.
+ *
+ * It holds no password, no provider and no role: those live in the realm. What it exists for
+ * is to give applications, participations and attestations something stable to point at, and
+ * to answer "who is this" without a round trip to Keycloak on every request.
+ */
 @Entity
 @Table(name = "users")
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String username;
+    /** The `sub` claim. Stable for the life of the account, and the only link to the token. */
+    @Column(nullable = false, unique = true, length = 64)
+    private String subject;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
+    @Column(name = "display_name", nullable = false, length = 120)
+    private String displayName;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "avatar_id")
+    private Media avatar;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
-    private String password = null;
+    private Instant createdAt = Instant.now();
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "provider_id", nullable = false)
-    private Provider provider;
-
-    @Column(name = "provider_user_id", length = 100)
-    private String providerUserId;
-
-    private String phone;
-
-    private String country;
-
-    @Column(name = "picture_url", length = 512)
-    private String pictureUrl;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
-
-
-    /**
-     * When the password last changed. Any JWT issued BEFORE this instant is rejected.
-     *
-     * This is how "reset my password" ends every session, including the attacker's:
-     * tokens are stateless and we hold no list of them, but each one carries its issue
-     * time, so a single cut-off invalidates them all at once.
-     */
-    @Column(name = "credentials_changed_at")
-    private LocalDateTime credentialsChangedAt;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    /** True once the user has clicked the verification link in their welcome email. */
-    @Column(name = "email_verified", nullable = false, columnDefinition = "boolean NOT NULL DEFAULT false")
-    @Builder.Default
-    private boolean emailVerified = false;
-
-    /** One-time token sent in the verification email. Cleared after use. */
-    @Column(name = "verification_token", length = 100)
-    private String verificationToken;
-
-    /** Expiry for the email verification token. Null once the token has been used. */
-    @Column(name = "verification_token_expires_at")
-    private LocalDateTime verificationTokenExpiresAt;
-
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-    }
-
-    @ManyToMany
-    @JoinTable(
-        name = "user_tags",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "tag_id")
-    )
-    @Builder.Default
-    private Set<Tag> tags = new HashSet<>();
+    @Column(name = "last_seen_at")
+    private Instant lastSeenAt;
 }

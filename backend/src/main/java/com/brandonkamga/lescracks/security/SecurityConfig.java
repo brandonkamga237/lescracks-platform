@@ -1,0 +1,73 @@
+package com.brandonkamga.lescracks.security;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+
+/**
+ * The API verifies tokens Keycloak signed and nothing more.
+ *
+ * There is no login endpoint here, no password hashing, no reset flow and no provider
+ * plumbing: all of that is realm configuration now. What remains is the decision of which
+ * routes are open, which is the only part that belongs to the application.
+ */
+@Configuration
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    private final String[] corsOrigins;
+
+    public SecurityConfig(@Value("${app.cors.allowed-origins:http://localhost:5173}") String origins) {
+        this.corsOrigins = origins.split(",");
+    }
+
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http, KeycloakRoleConverter roleConverter) throws Exception {
+        http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            // No cookie, no session: every request carries its own bearer token.
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/actuator/health", "/error").permitAll()
+                .requestMatchers("/seo/**", "/api/sitemap.xml").permitAll()
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+
+                // Anyone may read the catalogue and check an attestation. Reading is what
+                // brings people in; asking them to sign up first is what keeps them out.
+                .requestMatchers(HttpMethod.GET, "/api/events", "/api/events/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/resources", "/api/resources/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/categories", "/api/tags").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/attestations/*").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/resources/*/view").permitAll()
+                // Applying does not require an account: people apply first and register after.
+                .requestMatchers(HttpMethod.POST, "/api/applications").permitAll()
+
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated())
+            .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(roleConverter)));
+
+        return http.build();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of(corsOrigins));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+}
