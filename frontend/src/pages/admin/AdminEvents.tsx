@@ -1,7 +1,9 @@
 // src/pages/admin/AdminEvents.tsx
 import { useState, useEffect } from 'react';
-import { Calendar, Plus, Loader2, Trash2, Pencil, ChevronLeft, ChevronRight, X, Save, Image } from 'lucide-react';
+import { Calendar, Plus, Loader2, Trash2, Pencil, X, Save, Image } from 'lucide-react';
 import { PageHeader } from '@/components/admin/viz';
+import AsyncState from '@/components/ui/AsyncState';
+import Pagination from '@/components/ui/Pagination';
 import adminApi, { AdminEvent, PaginatedResponse, AdminEventPayload } from '@/services/adminApi';
 import { deriveEventStatus } from '@/lib/eventStatus';
 import apiService from '@/services/api';
@@ -43,7 +45,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 const TYPE_COLORS: Record<string, string> = {
   BOOTCAMP:  'bg-info-subtle text-info',
-  HACKATHON: 'bg-pink-100 text-pink-700',
+  HACKATHON: 'bg-info-subtle text-info',
   MEETUP:    'bg-info-subtle text-info',
   WORKSHOP:  'bg-yellow-100 text-yellow-700',
 };
@@ -210,16 +212,11 @@ const AdminEvents = () => {
 
       {/* Table */}
       <div className="bg-surface-1 rounded-2xl border border-line overflow-hidden">
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="w-8 h-8 animate-spin text-gold" />
-          </div>
-        ) : events.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-t4 gap-3">
-            <Calendar className="w-12 h-12 opacity-30" />
-            <p>Aucun événement. Créez-en un !</p>
-          </div>
-        ) : (
+        <AsyncState
+          loading={loading}
+          empty={events.length === 0}
+          emptyLabel="Aucun événement. Créez-en un pour commencer."
+        >
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-surface-2 border-b border-line">
@@ -277,23 +274,11 @@ const AdminEvents = () => {
               </tbody>
             </table>
           </div>
-        )}
+        </AsyncState>
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-4">
-          <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-            className="p-2 rounded-lg bg-surface-1 border border-line hover:bg-surface-2 disabled:opacity-50">
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <span className="text-sm text-t3">Page {page + 1} sur {totalPages}</span>
-          <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page === totalPages - 1}
-            className="p-2 rounded-lg bg-surface-1 border border-line hover:bg-surface-2 disabled:opacity-50">
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} onChange={setPage} />
 
       {/* Modal */}
       {showModal && (
@@ -412,8 +397,8 @@ const AdminEvents = () => {
                   <label className="block text-sm font-medium text-t2 mb-1">Statut</label>
                   <div className="w-full border border-line bg-surface-2 rounded-lg px-3 py-2 text-sm text-t3 flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full ${
-                      derivedStatus === 'open' ? 'bg-emerald-500'
-                      : derivedStatus === 'upcoming' ? 'bg-sky-500' : 'bg-t4'}`} />
+                      derivedStatus === 'open' ? 'bg-success'
+                      : derivedStatus === 'upcoming' ? 'bg-info' : 'bg-t4'}`} />
                     {STATUS_LABELS[derivedStatus] ?? derivedStatus}
                     <span className="ml-auto text-xs text-t4">automatique</span>
                   </div>

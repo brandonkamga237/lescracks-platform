@@ -1,7 +1,9 @@
 // src/pages/admin/AdminResources.tsx
 import { useState, useEffect, useRef } from 'react';
-import { FileText, Plus, Loader2, Trash2, Eye, Video, File, ChevronLeft, ChevronRight, Search, Filter, X, Save, Youtube, Upload, Download, Pencil } from 'lucide-react';
+import { FileText, Plus, Loader2, Trash2, Eye, Video, File, Search, Filter, X, Save, Youtube, Upload, Download, Pencil } from 'lucide-react';
 import { PageHeader } from '@/components/admin/viz';
+import AsyncState from '@/components/ui/AsyncState';
+import Pagination from '@/components/ui/Pagination';
 import adminApi, { AdminResource, AdminCategory, AdminResourcePayload, PaginatedResponse } from '@/services/adminApi';
 import apiService from '@/services/api';
 
@@ -345,11 +347,11 @@ const AdminResources = () => {
 
       {/* Table */}
       <div className="bg-surface-1 rounded-2xl border border-line overflow-hidden">
-        {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="w-8 h-8 animate-spin text-gold" />
-          </div>
-        ) : (
+        <AsyncState
+          loading={loading}
+          empty={resources.length === 0}
+          emptyLabel="Aucune ressource ne correspond à ces filtres."
+        >
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-surface-2 border-b border-line">
@@ -411,36 +413,11 @@ const AdminResources = () => {
               </tbody>
             </table>
           </div>
-        )}
+        </AsyncState>
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-4">
-          <button
-            onClick={() => setPage(p => Math.max(0, p - 1))}
-            disabled={page === 0}
-            className="p-2 rounded-lg bg-surface-1 border border-line hover:bg-surface-2 disabled:opacity-50"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <span className="text-sm text-t3">Page {page + 1} sur {totalPages}</span>
-          <button
-            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-            disabled={page === totalPages - 1}
-            className="p-2 rounded-lg bg-surface-1 border border-line hover:bg-surface-2 disabled:opacity-50"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      )}
-
-      {!loading && resources.length === 0 && (
-        <div className="text-center py-12 text-t3">
-          <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
-          <p>Aucune ressource trouvee</p>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} onChange={setPage} />
 
       {/* Create/Edit Modal */}
       {showModal && (

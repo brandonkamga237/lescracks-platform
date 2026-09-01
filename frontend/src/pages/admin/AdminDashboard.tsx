@@ -36,7 +36,7 @@ const Kpi = ({
         </div>
         {trend !== undefined && (
           <span className={`flex items-center gap-0.5 text-xs font-semibold px-2 py-1 rounded-full ${
-            trend > 0 ? 'bg-emerald-50 text-emerald-600'
+            trend > 0 ? 'bg-success-subtle text-success'
               : trend < 0 ? 'bg-error-subtle text-error' : 'bg-surface-2 text-t3'
           }`}>
             {trend > 0 ? <ArrowUpRight className="w-3 h-3" /> : trend < 0 ? <ArrowDownRight className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
@@ -167,9 +167,9 @@ const Programme360Control = () => {
         <div className="flex items-center gap-3 flex-shrink-0">
           {!loading && (
             <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${
-              open ? 'bg-emerald-50 text-emerald-600' : 'bg-warning-subtle text-warning'
+              open ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'
             }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${open ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${open ? 'bg-success' : 'bg-amber-500'}`} />
               {open ? 'Ouvert' : 'Fermé'}
             </span>
           )}
@@ -181,7 +181,7 @@ const Programme360Control = () => {
             disabled={loading}
             onClick={() => setOpen((v) => !v)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${
-              open ? 'bg-emerald-500' : 'bg-t4'
+              open ? 'bg-success' : 'bg-t4'
             }`}
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-surface-1 shadow transition-transform ${open ? 'translate-x-6' : 'translate-x-1'}`} />
@@ -215,7 +215,7 @@ const Programme360Control = () => {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-3 text-t1 text-sm font-medium hover:bg-surface-2 disabled:opacity-50 transition-colors"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" />
-            : saved ? <Check className="w-4 h-4 text-emerald-400" />
+            : saved ? <Check className="w-4 h-4 text-success" />
             : <Save className="w-4 h-4" />}
           {saved ? 'Enregistré' : 'Enregistrer'}
         </button>
@@ -284,7 +284,7 @@ const AdminDashboard = () => {
           <p className="text-t3 text-sm mt-1">Vue décisionnelle de la plateforme LesCracks</p>
         </div>
         <div className="flex items-center gap-2 text-sm text-t3 bg-surface-1 border border-line rounded-xl px-3 py-2 self-start sm:self-auto">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
           Actualisé le {new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
         </div>
       </div>
@@ -422,7 +422,7 @@ const AdminDashboard = () => {
         <div className="grid md:grid-cols-2 gap-6 mt-6 pt-5 border-t border-line-soft">
           <div>
             <p className="text-xs font-semibold text-t3 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-              <Eye className="w-3.5 h-3.5 text-sky-500" />Top — Plus vues
+              <Eye className="w-3.5 h-3.5 text-info" />Top — Plus vues
             </p>
             {topViewed.length ? topViewed.map((r, i) => (
               <TopRow key={r.id} rank={i + 1} title={r.title} type={r.type} count={r.viewCount} icon={Eye} tint="text-info" />
@@ -430,7 +430,7 @@ const AdminDashboard = () => {
           </div>
           <div>
             <p className="text-xs font-semibold text-t3 uppercase tracking-wide mb-2 flex items-center gap-1.5">
-              <Download className="w-3.5 h-3.5 text-violet-500" />Top — Plus téléchargées
+              <Download className="w-3.5 h-3.5 text-info" />Top — Plus téléchargées
             </p>
             {topDownloaded.length ? topDownloaded.map((r, i) => (
               <TopRow key={r.id} rank={i + 1} title={r.title} type={r.type} count={r.downloadCount} icon={Download} tint="text-info" />
@@ -460,7 +460,7 @@ const AdminDashboard = () => {
       {/* ── EVENTS / ACTIONS / HEALTH ── */}
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="p-4 sm:p-6">
-          <PanelHead icon={Calendar} title="Événements" subtitle="Répartition par statut" tint="text-emerald-500" />
+          <PanelHead icon={Calendar} title="Événements" subtitle="Répartition par statut" tint="text-success" />
           <div className="space-y-2 mt-1">
             {eventsByStatus.length ? eventsByStatus.map((item, i) => (
               <div key={item.name} className="flex items-center justify-between p-2.5 rounded-lg bg-surface-2">
@@ -479,7 +479,7 @@ const AdminDashboard = () => {
           <div className="space-y-2 mt-1">
             {[
               { to: '/admin/resources', icon: FileText, label: 'Nouvelle ressource', c: 'bg-warning-subtle text-warning hover:bg-amber-100' },
-              { to: '/admin/events', icon: Calendar, label: 'Nouvel événement', c: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' },
+              { to: '/admin/events', icon: Calendar, label: 'Nouvel événement', c: 'bg-success-subtle text-success hover:bg-success-subtle' },
               { to: '/admin/users', icon: Users, label: 'Gérer les utilisateurs', c: 'bg-info-subtle text-info hover:bg-blue-100' },
             ].map(({ to, icon: Icon, label, c }) => (
               <Link key={to} to={to} className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${c}`}>
@@ -499,7 +499,7 @@ const AdminDashboard = () => {
           <div className="pt-4 mt-4 border-t border-line">
             <p className="text-xs text-t4 mb-1">Taux de téléchargement</p>
             <div className="flex items-end gap-2">
-              <span className="text-2xl font-bold text-sky-400">{downloadRate}%</span>
+              <span className="text-2xl font-bold text-info">{downloadRate}%</span>
               <span className="text-xs text-t3 mb-1">des vues → téléchargement</span>
             </div>
           </div>
@@ -511,7 +511,7 @@ const AdminDashboard = () => {
             <p className="text-xs text-t4 mb-1">Croissance 30 j</p>
             <div className="flex items-center justify-between text-sm">
               <span className="text-t4">Nouveaux utilisateurs</span>
-              <span className="font-bold text-emerald-400">+{fr(stats?.newUsersLast30Days || 0)}</span>
+              <span className="font-bold text-success">+{fr(stats?.newUsersLast30Days || 0)}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-t4">Nouvelles ressources</span>

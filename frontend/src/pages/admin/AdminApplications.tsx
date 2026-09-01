@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import adminApi, { AdminApplication } from '@/services/adminApi';
 import { PageHeader } from '@/components/admin/viz';
+import AsyncState from '@/components/ui/AsyncState';
 
 type Stream = '360' | 'events';
 
@@ -155,18 +156,11 @@ const AdminApplications = () => {
 
       {/* Table */}
       <div className="bg-surface-1 rounded-2xl border border-line overflow-hidden">
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-8 h-8 text-gold animate-spin" />
-          </div>
-        ) : rows.length === 0 ? (
-          <div className="text-center py-16">
-            <ClipboardList className="w-12 h-12 mx-auto mb-3 text-t4" />
-            <p className="text-t3 font-medium">
-              {stream === '360' ? 'Aucune candidature' : 'Aucune inscription'} pour l'instant
-            </p>
-          </div>
-        ) : (
+        <AsyncState
+          loading={loading}
+          empty={rows.length === 0}
+          emptyLabel="Rien à afficher pour l'instant."
+        >
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
@@ -233,7 +227,7 @@ const AdminApplications = () => {
               </tbody>
             </table>
           </div>
-        )}
+        </AsyncState>
       </div>
 
       {/* Detail modal */}
