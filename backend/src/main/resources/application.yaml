@@ -44,16 +44,11 @@ spring:
 
   security:
     oauth2:
-      client:
-        registration:
-          github:
-            client-id: ${GITHUB_CLIENT_ID}
-            client-secret: ${GITHUB_CLIENT_SECRET}
-            scope: read:user, user:email
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            scope: profile, email
+      resourceserver:
+        jwt:
+          # Keycloak signs; this verifies. The keys are fetched from the realm, so nothing
+          # secret lives in this file and rotating them needs no deployment.
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/lescracks}
 
   mail:
     host: ${MAIL_HOST:mail.spacemail.com}
@@ -81,15 +76,6 @@ spring:
 app:
   auth:
     cookie:
-      # Local dev runs over plain http, so the auth cookie cannot be Secure-only.
-      # Production (application-prod.yml) overrides this to true.
-      secure: ${COOKIE_SECURE:false}
-  jwt:
-    # DEV-ONLY fallback. Production (application-prod.yml) requires JWT_SECRET from the
-    # environment with no default, so this value can never sign production tokens.
-    # Provide a real secret via the JWT_SECRET env var (openssl rand -hex 48) for local runs too.
-    secret: ${JWT_SECRET:dev-only-insecure-secret-do-not-use-in-production-3f9a1c8b7e2d}
-    expiration: ${JWT_EXPIRATION:86400000}
   frontend:
     url: ${FRONTEND_URL:http://localhost:5173}
   cors:

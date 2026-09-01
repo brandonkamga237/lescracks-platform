@@ -1,14 +1,7 @@
 package com.brandonkamga.lescracks.service.impl;
 
 import com.brandonkamga.lescracks.service.interfaces.StorageService;
-import io.minio.BucketExistsArgs;
-import io.minio.GetObjectArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.RemoveObjectArgs;
-import io.minio.StatObjectArgs;
-import io.minio.StatObjectResponse;
+import io.minio.*;
 import io.minio.errors.ErrorResponseException;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -17,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,51 +19,42 @@ public class MinioStorageService implements StorageService {
 
     private static final Logger log = LoggerFactory.getLogger(MinioStorageService.class);
 
-    private final String bucket;
     private final MinioClient client;
+    private final String bucket;
 
-    public MinioStorageService(
-            @Value("${app.minio.url}") String url,
-            @Value("${app.minio.access-key}") String accessKey,
-            @Value("${app.minio.secret-key}") String secretKey,
-            @Value("${app.minio.bucket}") String bucket) {
+    public MinioStorageService(@Value("${app.minio.url}") String url,
+                               @Value("${app.minio.access-key}") String accessKey,
+                               @Value("${app.minio.secret-key}") String secretKey,
+                               @Value("${app.minio.bucket}") String bucket) {
         this.bucket = bucket;
-        this.client = MinioClient.builder()
-                .endpoint(url)
-                .credentials(accessKey, secretKey)
-                .build();
+        this.client = MinioClient.builder().endpoint(url).credentials(accessKey, secretKey).build();
     }
 
-    /**
-     * A missing bucket makes every upload fail at the first attempt rather than at startup,
-     * which is a much harder failure to read from a support ticket.
-     */
+    /** A missing bucket should fail at boot, not at whichever upload happens to be first. */
     @PostConstruct
-    void ensureBucketExists() {
+    void ensureBucket() {
         try {
-            boolean exists = client.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
-            if (!exists) {
+            if (!client.bucketExists(BucketExistsArgs.builder().bucket(bucket).build())) {
                 client.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
-                log.info("Created MinIO bucket {}", bucket);
+                log.info("Created bucket {}", bucket);
             }
-        } catch (Exception e) {
-            log.error("MinIO is unreachable, uploads will fail: {}", e.getMessage());
+        } catch (Exception unreachable) {
+            log.error("Object storage is unreachable, uploads will fail: {}", unreachable.getMessage());
         }
     }
 
     @Override
-    public String store(String originalFileName, byte[] bytes, String contentType) {
-        String key = UUID.randomUUID() + extensionOf(originalFileName);
-        try (InputStream stream = new ByteArrayInputStream(bytes)) {
+    public String store(String originalName, byte[] content, String contentType) {
+        String key = UUID.randomUUID() + extensionOf(originalName);
+        try (var stream = new ByteArrayInputStream(content)) {
             client.putObject(PutObjectArgs.builder()
-                    .bucket(bucket)
-                    .object(key)
-                    .stream(stream, bytes.length, -1)
+                    .bucket(bucket).object(key)
+                    .stream(stream, content.length, -1)
                     .contentType(contentType != null ? contentType : "application/octet-stream")
                     .build());
             return key;
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to store " + originalFileName, e);
+        } catch (Exception failed) {
+            throw new IllegalStateException("Could not store " + originalName, failed);
         }
     }
 
@@ -80,14 +63,12 @@ public class MinioStorageService implements StorageService {
         try {
             StatObjectResponse stat = client.statObject(
                     StatObjectArgs.builder().bucket(bucket).object(key).build());
-            try (InputStream stream = client.getObject(
-                    GetObjectArgs.builder().bucket(bucket).object(key).build())) {
-                return Optional.of(new StoredObject(stream.readAllBytes(), stat.contentType(), stat.size()));
-            }
-        } catch (ErrorResponseException notFound) {
+            var content = client.getObject(GetObjectArgs.builder().bucket(bucket).object(key).build());
+            return Optional.of(new StoredObject(content, stat.contentType(), stat.size()));
+        } catch (ErrorResponseException missing) {
             return Optional.empty();
-        } catch (Exception e) {
-            log.error("Failed to read {} from MinIO: {}", key, e.getMessage());
+        } catch (Exception failed) {
+            log.error("Could not read {}: {}", key, failed.getMessage());
             return Optional.empty();
         }
     }
@@ -96,16 +77,13 @@ public class MinioStorageService implements StorageService {
     public void delete(String key) {
         try {
             client.removeObject(RemoveObjectArgs.builder().bucket(bucket).object(key).build());
-        } catch (Exception e) {
-            log.error("Failed to delete {} from MinIO: {}", key, e.getMessage());
+        } catch (Exception failed) {
+            log.error("Could not delete {}: {}", key, failed.getMessage());
         }
     }
 
-    private String extensionOf(String fileName) {
-        if (fileName == null) {
-            return "";
-        }
-        int dot = fileName.lastIndexOf('.');
-        return dot >= 0 ? fileName.substring(dot).toLowerCase(Locale.ROOT) : "";
+    private String extensionOf(String name) {
+        int dot = name == null ? -1 : name.lastIndexOf('.');
+        return dot >= 0 ? name.substring(dot).toLowerCase(Locale.ROOT) : "";
     }
 }

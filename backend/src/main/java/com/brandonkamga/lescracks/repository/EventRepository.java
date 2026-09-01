@@ -1,24 +1,35 @@
 package com.brandonkamga.lescracks.repository;
 
 import com.brandonkamga.lescracks.domain.Event;
-import com.brandonkamga.lescracks.domain.EventStatusEnum;
+import com.brandonkamga.lescracks.domain.EventKind;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.time.Instant;
 import java.util.Optional;
 
-@Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
-    List<Event> findByEventTypeId(Long eventTypeId);
-    List<Event> findByEventStatusId(Long eventStatusId);
 
     Optional<Event> findBySlug(String slug);
+
     boolean existsBySlug(String slug);
 
-    // Dashboard analytics methods
-    @Query("SELECT COUNT(e) FROM Event e WHERE e.eventStatus.name = :statusName")
-    long countByStatus_Name(@Param("statusName") EventStatusEnum statusName);
+    /** What the public sees: published, optionally narrowed to bootcamps or workshops. */
+    @Query("""
+            SELECT e FROM Event e
+            WHERE e.published = TRUE
+              AND (:kind IS NULL OR e.kind = :kind)
+            ORDER BY e.startsAt DESC
+            """)
+    Page<Event> findPublished(EventKind kind, Pageable pageable);
+
+    /** Still to come, for the handful shown on the landing page. */
+    @Query("""
+            SELECT e FROM Event e
+            WHERE e.published = TRUE AND e.startsAt > :now
+            ORDER BY e.startsAt ASC
+            """)
+    Page<Event> findUpcoming(Instant now, Pageable pageable);
 }

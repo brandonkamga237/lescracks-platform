@@ -2,6 +2,7 @@ package com.brandonkamga.lescracks.service.interfaces;
 
 import com.brandonkamga.lescracks.domain.Attestation;
 import com.brandonkamga.lescracks.domain.Participation;
+import com.brandonkamga.lescracks.domain.ParticipationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -11,41 +12,39 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Everything that happens to a person's link with a programme.
+ * Who followed what, and the attestation that proves it.
  *
- * The controller calls this and nothing else, so the rules about when an attestation may be
- * issued live in one place instead of being restated at each entry point.
+ * Nothing here happens automatically. An admin accepts an application, and later an admin
+ * says the person went through with it — signing up is not finishing, and only a human knows
+ * the difference.
  */
 public interface ParticipationService {
 
-    /**
-     * Turns an accepted application into a participation under way.
-     *
-     * @throws com.brandonkamga.lescracks.exception.BadRequestException
-     *         if the application was already accepted, or the person already follows that event
-     */
-    Participation acceptApplication(Long applicationId, String cohort, LocalDate startedAt);
+    /** Turns an accepted application into a participation under way. */
+    Participation fromApplication(Long applicationId, String cohort, LocalDate startedAt);
 
-    /** Records a participation an admin entered directly, outside any application. */
+    /** Records one an admin entered directly, with no application behind it. */
     Participation create(Long userId, Long eventId, String cohort, LocalDate startedAt);
 
     /**
-     * Confirms the person went through with it and issues the attestation that proves it.
-     * Completing twice returns the attestation already issued rather than minting a second.
+     * Confirms completion and issues the attestation. Completing again returns the one
+     * already issued rather than minting a second: the first may be printed on a CV.
      */
     Attestation complete(Long participationId, LocalDate completedOn);
 
     void abandon(Long participationId);
 
-    List<Participation> findByUser(Long userId);
+    List<Participation> forUser(Long userId);
 
-    Page<Participation> findAll(Pageable pageable);
+    Page<Participation> byStatus(ParticipationStatus status, Pageable pageable);
 
-    Optional<Participation> findById(Long id);
+    Page<Participation> all(Pageable pageable);
 
-    /** Looks an attestation up by the code printed on it. Public: this is the verification. */
+    Participation require(Long id);
+
+    /** The public check: someone holding a code asks whether it is real. */
     Optional<Attestation> verify(String code);
 
-    /** How many distinct people completed something, and the split by programme. */
+    /** How many people were helped, and on what. The count nobody can dispute. */
     Map<String, Object> proofOfWork();
 }

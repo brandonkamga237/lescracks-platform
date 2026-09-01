@@ -1,175 +1,60 @@
 package com.brandonkamga.lescracks.service.interfaces;
 
 import com.brandonkamga.lescracks.domain.Resource;
-
-import java.util.List;
-import java.util.Optional;
-
+import com.brandonkamga.lescracks.domain.ResourceKind;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Collection;
+import java.util.Set;
 
 /**
- * Service interface for Resource operations.
+ * The catalogue: videos we point at, ebooks we hold, articles we wrote.
+ *
+ * Each kind is created through its own method rather than one that takes everything and
+ * decides afterwards. A video has no body and an article has no file, so a single create
+ * would need parameters that are wrong two thirds of the time.
  */
 public interface ResourceService {
 
-    /**
-     * Find a resource by ID.
-     *
-     * @param id the resource ID
-     * @return the resource if found
-     */
-    Resource findById(Long id);
+    Page<Resource> search(ResourceKind kind, Long categoryId, Collection<Long> tagIds,
+                          String search, Pageable pageable);
 
-    /**
-     * Find a resource by ID as Optional.
-     *
-     * @param id the resource ID
-     * @return Optional containing the resource if found
-     */
-    Optional<Resource> findByIdOptional(Long id);
+    Page<Resource> all(Pageable pageable);
 
-    /**
-     * Find all resources with pagination.
-     *
-     * @param page the pagination parameters
-     * @return page of resources
-     */
-    Page<Resource> findAll(Pageable page);
+    Resource requireBySlug(String slug);
 
-    /**
-     * Find resources by category ID.
-     *
-     * @param categoryId the category ID
-     * @param page the pagination parameters
-     * @return page of resources in the specified category
-     */
-    Page<Resource> findByCategoryId(Long categoryId, Pageable page);
+    Resource require(Long id);
 
-    /**
-     * Find resources by resource type ID.
-     *
-     * @param resourceTypeId the resource type ID
-     * @param page the pagination parameters
-     * @return page of resources with the specified type
-     */
-    Page<Resource> findByResourceTypeId(Long resourceTypeId, Pageable page);
+    Resource createVideo(VideoDraft draft);
 
-    /**
-     * Find resources by resource type name (VIDEO or DOCUMENT).
-     *
-     * @param typeName the resource type name (VIDEO or DOCUMENT)
-     * @param page the pagination parameters
-     * @return page of resources with the specified type
-     */
-    Page<Resource> findByResourceTypeName(String typeName, Pageable page);
+    Resource createEbook(EbookDraft draft, MultipartFile file);
 
-    /**
-     * Find resources by tags (ANY of the specified tags).
-     *
-     * @param tagIds list of tag IDs
-     * @param page the pagination parameters
-     * @return page of resources having any of the specified tags
-     */
-    Page<Resource> findByTagsIn(List<Long> tagIds, Pageable page);
+    Resource createArticle(ArticleDraft draft);
 
-    /**
-     * Find resources by type and category.
-     *
-     * @param typeName the resource type name (VIDEO or DOCUMENT)
-     * @param categoryId the category ID
-     * @param page the pagination parameters
-     * @return page of resources matching the criteria
-     */
-    Page<Resource> findByTypeNameAndCategoryId(String typeName, Long categoryId, Pageable page);
+    Resource updateVideo(Long id, VideoDraft draft);
 
-    /**
-     * Find resources by type and tags.
-     *
-     * @param typeName the resource type name (VIDEO or DOCUMENT)
-     * @param tagIds list of tag IDs
-     * @param page the pagination parameters
-     * @return page of resources matching the criteria
-     */
-    Page<Resource> findByTypeNameAndTagsIn(String typeName, List<Long> tagIds, Pageable page);
+    Resource updateArticle(Long id, ArticleDraft draft);
 
-    /**
-     * Find resources by category and tags.
-     *
-     * @param categoryId the category ID
-     * @param tagIds list of tag IDs
-     * @param page the pagination parameters
-     * @return page of resources matching the criteria
-     */
-    Page<Resource> findByCategoryIdAndTagsIn(Long categoryId, List<Long> tagIds, Pageable page);
+    Resource setPublished(Long id, boolean published);
 
-    /**
-     * Find resources by type, category and tags.
-     *
-     * @param typeName the resource type name (VIDEO or DOCUMENT)
-     * @param categoryId the category ID
-     * @param tagIds list of tag IDs
-     * @param page the pagination parameters
-     * @return page of resources matching the criteria
-     */
-    Page<Resource> findByTypeNameAndCategoryIdAndTagsIn(String typeName, Long categoryId, List<Long> tagIds, Pageable page);
+    void delete(Long id);
 
-    /**
-     * Search resources with multiple filters and pagination.
-     *
-     * @param typeName the resource type name (VIDEO or DOCUMENT) - optional
-     * @param categoryId the category ID - optional
-     * @param tagIds list of tag IDs - optional
-     * @param searchTerm the search term for title/description - optional
-     * @param page the pagination parameters
-     * @return page of resources matching the criteria
-     */
-    Page<Resource> searchWithFilters(String typeName, Long categoryId, List<Long> tagIds, String searchTerm, Pageable page);
+    /** Counts a view. Fire and forget: a lost view matters less than a slowed page. */
+    void recordView(Long id);
 
-    /**
-     * Find a resource by its SEO slug.
-     *
-     * @param slug the slug
-     * @return Optional containing the resource if found
-     */
-    Optional<Resource> findBySlug(String slug);
+    /** What every kind carries, so the three drafts below say only what differs. */
+    record Common(String title, String summary, Long categoryId, Set<Long> tagIds, Long coverId) {
+    }
 
-    /**
-     * Save a resource.
-     *
-     * @param resource the resource to save
-     * @return the saved resource
-     */
-    Resource save(Resource resource);
+    record VideoDraft(Common common, String externalUrl, Integer durationSeconds) {
+    }
 
-    /**
-     * Delete a resource by ID.
-     *
-     * @param id the resource ID
-     */
-    void deleteById(Long id);
+    record EbookDraft(Common common, Integer pageCount) {
+    }
 
-    /**
-     * Atomically increment the view count for a resource.
-     *
-     * @param id the resource ID
-     */
-    void incrementViewCount(Long id);
-
-    /**
-     * Atomically increment the download count for a resource.
-     *
-     * @param id the resource ID
-     */
-    void incrementDownloadCount(Long id);
-
-    /**
-     * Store an uploaded file and return its public URL.
-     *
-     * @param originalFileName original filename from the client
-     * @param bytes            raw file bytes
-     * @param contentType      MIME type of the file
-     * @return public URL to access the stored file
-     */
-    String storeFile(String originalFileName, byte[] bytes, String contentType);
+    /** The body is the block document; its prose and reading time are derived, never supplied. */
+    record ArticleDraft(Common common, String body, String authorName) {
+    }
 }

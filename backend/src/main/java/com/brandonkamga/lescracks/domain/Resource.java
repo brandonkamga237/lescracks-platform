@@ -1,32 +1,34 @@
 package com.brandonkamga.lescracks.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
+import lombok.Setter;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
- * A video reference, an uploaded ebook, or an article written here.
+ * An entry in the catalogue, whatever it turns out to be.
  *
- * Exactly one of {@code externalUrl}, {@code fileKey} and {@code body} carries the substance,
- * decided by {@code kind}. A check constraint enforces the pairing in the database, so an
- * article with a YouTube link — which the old model allowed — cannot be stored.
+ * This holds only what a video, an ebook and an article genuinely share: a title, a place in
+ * the catalogue, a cover, a count of how often it was opened. What each kind alone has lives
+ * in its own table — {@link ResourceVideo}, {@link ResourceEbook}, {@link ResourceArticle} —
+ * so no row carries a column that means nothing to it.
+ *
+ * Joined inheritance rather than one wide table: the three are browsed together and filtered
+ * by kind, so they need a shared identity, but they are not the same shape.
  */
 @Entity
 @Table(name = "resources")
-@Data
-@Builder
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "kind", discriminatorType = DiscriminatorType.STRING, length = 20)
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class Resource {
+public abstract class Resource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,35 +43,6 @@ public class Resource {
     @Column(length = 500)
     private String summary;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private ResourceKind kind;
-
-    /** VIDEO only: where to watch it. */
-    @Column(name = "external_url", length = 1000)
-    private String externalUrl;
-
-    /** EBOOK only: the object key in storage. */
-    @Column(name = "file_key", length = 255)
-    private String fileKey;
-
-    /**
-     * ARTICLE only: the document, as an array of typed blocks — paragraph, heading, image,
-     * quote, code. Held as JSON so the editor can offer tools over structure, and so the
-     * rendering can change without rewriting what was written.
-     */
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private String body;
-
-    /**
-     * The same article flattened to prose. Written by the service whenever the body is, never
-     * by hand: search and the SEO snapshot need text, and walking a block tree for either
-     * would be absurd.
-     */
-    @Column(name = "body_text", columnDefinition = "TEXT")
-    private String bodyText;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cover_id")
     private Media cover;
@@ -78,48 +51,56 @@ public class Resource {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @Column(name = "author_name", length = 120)
-    private String authorName;
-
-    @Column(name = "reading_minutes")
-    private Integer readingMinutes;
-
-    /** How many times it was opened. Shown publicly: readers use it to judge what is worth their time. */
+    /**
+     * How many times it was opened. Shown publicly on purpose: with no likes and no comments,
+     * this is the only signal a reader has about whether something was worth other people's
+     * time.
+     */
     @Column(name = "view_count", nullable = false)
-    @Builder.Default
     private long viewCount = 0;
 
     @Column(nullable = false)
-    @Builder.Default
     private boolean published = false;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
     private Instant createdAt = Instant.now();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "resource_tags",
             joinColumns = @JoinColumn(name = "resource_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id"))
-    @Builder.Default
     private Set<Tag> tags = new HashSet<>();
 
-    @OneToOne(mappedBy = "resource", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private ResourceFile file;
-
     /**
-     * The images this resource actually shows. Kept in step when the body is saved, so an
-     * image in a published article cannot be deleted and orphans are a join away.
+     * The images this resource shows, kept in step whenever its content is saved. The link
+     * exists so an image inside a published article cannot be deleted from under it, and so
+     * images nothing references can be found.
      */
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "resource_media",
             joinColumns = @JoinColumn(name = "resource_id"),
             inverseJoinColumns = @JoinColumn(name = "media_id"))
-    @Builder.Default
     private Set<Media> media = new HashSet<>();
 
-    /** Only an ebook is a download; the other two are read or watched where they are. */
+    /** Which of the three this is, without needing an instanceof at the call site. */
+    public abstract ResourceKind kind();
+
+    /** Only an ebook is a file to take away; the other two are watched or read where they are. */
     public boolean isDownloadable() {
-        return kind == ResourceKind.EBOOK;
+        return kind() == ResourceKind.EBOOK;
+    }
+
+    // Identity is the database id alone. Lombok's generated equality would walk the whole
+    // hierarchy and the lazy associations with it.
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof Resource resource)) return false;
+        return id != null && id.equals(resource.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getClass().getSimpleName());
     }
 }

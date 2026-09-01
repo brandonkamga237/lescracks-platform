@@ -1,662 +1,168 @@
 package com.brandonkamga.lescracks.controller;
 
-import com.brandonkamga.lescracks.domain.Category;
-import com.brandonkamga.lescracks.domain.Resource;
-import com.brandonkamga.lescracks.domain.ResourceMetadata;
-import com.brandonkamga.lescracks.domain.ResourceSourceType;
-import com.brandonkamga.lescracks.domain.ResourceType;
-import com.brandonkamga.lescracks.domain.ResourceTypeName;
-import com.brandonkamga.lescracks.domain.Tag;
-import com.brandonkamga.lescracks.dto.ApiResponse;
-import com.brandonkamga.lescracks.dto.ResourceRequest;
-import com.brandonkamga.lescracks.dto.ResourceResponse;
-import com.brandonkamga.lescracks.exception.ResourceNotFoundException;
-import com.brandonkamga.lescracks.repository.CategoryRepository;
-import com.brandonkamga.lescracks.repository.ResourceRepository;
-import com.brandonkamga.lescracks.repository.ResourceTypeRepository;
-import com.brandonkamga.lescracks.repository.TagRepository;
+import com.brandonkamga.lescracks.domain.ResourceEbook;
+import com.brandonkamga.lescracks.domain.ResourceKind;
+import com.brandonkamga.lescracks.dto.common.PageResponse;
+import com.brandonkamga.lescracks.dto.resource.*;
+import com.brandonkamga.lescracks.exception.NotFoundException;
+import com.brandonkamga.lescracks.mapper.ResourceMapper;
 import com.brandonkamga.lescracks.service.interfaces.ResourceService;
-import com.brandonkamga.lescracks.security.Authorities;
-import com.brandonkamga.lescracks.exception.BadRequestException;
 import com.brandonkamga.lescracks.service.interfaces.StorageService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/resources")
-@io.swagger.v3.oas.annotations.tags.Tag(name = "Resources", description = "Learning resource management API")
-@SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Ressources")
 public class ResourceController {
 
-    private final ResourceService resourceService;
-    private final CategoryRepository categoryRepository;
-    private final ResourceTypeRepository resourceTypeRepository;
-    private final StorageService storageService;
-    private final TagRepository tagRepository;
-    private final ResourceRepository resourceRepository;
+    private final ResourceService resources;
+    private final StorageService storage;
+    private final ResourceMapper mapper;
 
-    @Value("${app.uploads.dir:uploads/resources}")
-    private String uploadDirectory;
-
-    public ResourceController(
-            ResourceService resourceService,
-            CategoryRepository categoryRepository,
-            ResourceTypeRepository resourceTypeRepository,
-            TagRepository tagRepository,
-            ResourceRepository resourceRepository,
-            StorageService storageService) {
-        this.resourceService = resourceService;
-        this.storageService = storageService;
-        this.categoryRepository = categoryRepository;
-        this.resourceTypeRepository = resourceTypeRepository;
-        this.tagRepository = tagRepository;
-        this.resourceRepository = resourceRepository;
+    public ResourceController(ResourceService resources, StorageService storage, ResourceMapper mapper) {
+        this.resources = resources;
+        this.storage = storage;
+        this.mapper = mapper;
     }
 
-    /**
-     * Get paginated and filtered resources.
-     * Supports filtering by:
-     * - type: resource type (VIDEO or DOCUMENT)
-     * - categoryId: category ID
-     * - tagIds: comma-separated list of tag IDs (filters resources having ANY of these tags)
-     * - search: search term for title/description
-     * 
-     * Pagination:
-     * - page: page number (0-based)
-     * - size: page size
-     * - sort: sorting criteria (e.g., createdAt,desc)
-     */
     @GetMapping
-    @Operation(summary = "List all resources with pagination and filters",
-               description = "Returns the list of learning resources with pagination and filter support. " +
-               "Parameters: type (VIDEO|DOCUMENT), categoryId, tagIds (comma-separated), search, page, size, sort")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
-            description = "Paginated resource list")
-    })
-    public ResponseEntity<ApiResponse<PaginatedResourceResponse>> getAllResources(
-            @Parameter(description = "Resource type (VIDEO or DOCUMENT)")
-            @RequestParam(required = false) String type,
-
-            @Parameter(description = "Category ID")
+    @Operation(summary = "Le catalogue, filtrable par type, catégorie, tags et recherche")
+    public PageResponse<ResourceSummary> search(
+            @RequestParam(required = false) ResourceKind kind,
             @RequestParam(required = false) Long categoryId,
-
-            @Parameter(description = "Comma-separated tag IDs (OR filter)")
-            @RequestParam(required = false) String tagIds,
-
-            @Parameter(description = "Search term in title or description")
+            @RequestParam(required = false) Set<Long> tagIds,
             @RequestParam(required = false) String search,
-
-            @Parameter(description = "Page number (0-based)")
-            @RequestParam(defaultValue = "0") int page,
-
-            @Parameter(description = "Page size")
-            @RequestParam(defaultValue = "12") int size,
-
-            @Parameter(description = "Sort criteria (e.g. createdAt,desc or title,asc)")
-            @RequestParam(defaultValue = "createdAt,desc") String sort,
-
-            Authentication authentication) {
-
-        // Parse tagIds
-        List<Long> tagIdList = null;
-        if (tagIds != null && !tagIds.isEmpty()) {
-            tagIdList = List.of(tagIds.split(",")).stream()
-                    .map(String::trim)
-                    .map(Long::parseLong)
-                    .collect(Collectors.toList());
-        }
-
-        // Parse sort
-        String[] sortParams = sort.split(",");
-        String sortField = sortParams[0];
-        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc")
-                ? Sort.Direction.ASC
-                : Sort.Direction.DESC;
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
-
-        // Use the unified search method — convert type to lowercase to match enum storage
-        Page<Resource> resourcePage = resourceService.searchWithFilters(
-                type != null ? type.toLowerCase() : null, categoryId, tagIdList, search, pageable);
-
-        List<ResourceResponse> content = resourcePage.getContent().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-        
-        PaginatedResourceResponse response = new PaginatedResourceResponse(
-                content,
-                resourcePage.getNumber(),
-                resourcePage.getSize(),
-                resourcePage.getTotalElements(),
-                resourcePage.getTotalPages(),
-                resourcePage.isFirst(),
-                resourcePage.isLast()
-        );
-        
-        return ResponseEntity.ok(ApiResponse.success(response));
+            @PageableDefault(size = 12) Pageable pageable) {
+        return PageResponse.of(
+                resources.search(kind, categoryId, tagIds, search, pageable), mapper::toSummary);
     }
 
-    @GetMapping("/slug/{slug}")
-    @Operation(summary = "Récupérer une ressource par slug SEO",
-               description = "Retourne les détails d'une ressource via son slug.")
-    public ResponseEntity<ApiResponse<ResourceResponse>> getResourceBySlug(
-            @Parameter(description = "Slug SEO de la ressource", required = true) @PathVariable String slug,
-            Authentication authentication) {
-        Resource resource = resourceService.findBySlug(slug)
-                .orElseThrow(() -> new ResourceNotFoundException("Resource", "slug", slug));
-        return ResponseEntity.ok(ApiResponse.success(toResponse(resource)));
+    @GetMapping("/{slug}")
+    @Operation(summary = "Une ressource")
+    public ResourceDetail bySlug(@PathVariable String slug) {
+        return mapper.toDetail(resources.requireBySlug(slug));
     }
-
-    @GetMapping("/{id}")
-    @Operation(summary = "Get resource by ID",
-               description = "Returns the details of a specific resource.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
-            description = "Resource found"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
-            description = "Resource not found")
-    })
-    public ResponseEntity<ApiResponse<ResourceResponse>> getResourceById(
-            @Parameter(description = "Resource ID", required = true) @PathVariable Long id,
-            Authentication authentication) {
-        Resource resource = resourceService.findByIdOptional(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Resource", "id", id));
-        return ResponseEntity.ok(ApiResponse.success(toResponse(resource)));
-    }
-
-    @GetMapping("/category/{categoryId}")
-    @Operation(summary = "Get resources by category with pagination",
-               description = "Filters resources by category with pagination support.")
-    public ResponseEntity<ApiResponse<PaginatedResourceResponse>> getResourcesByCategory(
-            @Parameter(description = "Category ID", required = true) @PathVariable Long categoryId,
-            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size") @RequestParam(defaultValue = "12") int size,
-            Authentication authentication) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Resource> resourcePage = resourceService.findByCategoryId(categoryId, pageable);
-
-        List<ResourceResponse> content = resourcePage.getContent().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-        
-        PaginatedResourceResponse response = new PaginatedResourceResponse(
-                content, resourcePage.getNumber(), resourcePage.getSize(),
-                resourcePage.getTotalElements(), resourcePage.getTotalPages(),
-                resourcePage.isFirst(), resourcePage.isLast()
-        );
-        
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
-    @GetMapping("/type/{resourceTypeName}")
-    @Operation(summary = "Get resources by type with pagination",
-               description = "Filters resources by type (VIDEO or DOCUMENT) with pagination support.")
-    public ResponseEntity<ApiResponse<PaginatedResourceResponse>> getResourcesByType(
-            @Parameter(description = "Resource type (VIDEO or DOCUMENT)", required = true)
-            @PathVariable String resourceTypeName,
-            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size") @RequestParam(defaultValue = "12") int size,
-            Authentication authentication) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Resource> resourcePage = resourceService.findByResourceTypeName(resourceTypeName.toLowerCase(), pageable);
-
-        List<ResourceResponse> content = resourcePage.getContent().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-        
-        PaginatedResourceResponse response = new PaginatedResourceResponse(
-                content, resourcePage.getNumber(), resourcePage.getSize(),
-                resourcePage.getTotalElements(), resourcePage.getTotalPages(),
-                resourcePage.isFirst(), resourcePage.isLast()
-        );
-        
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
-    @GetMapping("/tags")
-    @Operation(summary = "Get resources by tags with pagination",
-               description = "Filters resources by tags (resources having AT LEAST ONE of the tags) with pagination.")
-    public ResponseEntity<ApiResponse<PaginatedResourceResponse>> getResourcesByTags(
-            @Parameter(description = "Comma-separated tag IDs", required = true)
-            @RequestParam String tagIds,
-            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size") @RequestParam(defaultValue = "12") int size,
-            Authentication authentication) {
-
-        List<Long> tagIdList = List.of(tagIds.split(",")).stream()
-                .map(String::trim)
-                .map(Long::parseLong)
-                .collect(Collectors.toList());
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Resource> resourcePage = resourceService.findByTagsIn(tagIdList, pageable);
-
-        List<ResourceResponse> content = resourcePage.getContent().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-        
-        PaginatedResourceResponse response = new PaginatedResourceResponse(
-                content, resourcePage.getNumber(), resourcePage.getSize(),
-                resourcePage.getTotalElements(), resourcePage.getTotalPages(),
-                resourcePage.isFirst(), resourcePage.isLast()
-        );
-        
-        return ResponseEntity.ok(ApiResponse.success(response));
-    }
-
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Create a new resource",
-               description = "Creates a new learning resource. Reserved for administrators.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
-            description = "Resource created"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
-            description = "Forbidden - reserved for administrators")
-    })
-    public ResponseEntity<ApiResponse<ResourceResponse>> createResource(@Valid @RequestBody ResourceRequest request) {
-        Resource resource = toEntity(request);
-        Resource savedResource = resourceService.save(resource);
-        return ResponseEntity.ok(ApiResponse.success(toResponse(savedResource), "Resource created successfully"));
-    }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Update a resource",
-               description = "Updates an existing resource. Reserved for administrators.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
-            description = "Resource updated"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
-            description = "Forbidden - reserved for administrators"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
-            description = "Resource not found")
-    })
-    public ResponseEntity<ApiResponse<ResourceResponse>> updateResource(
-            @Parameter(description = "Resource ID", required = true) @PathVariable Long id,
-            @Valid @RequestBody ResourceRequest request) {
-        
-        if (!resourceService.findByIdOptional(id).isPresent()) {
-            throw new ResourceNotFoundException("Resource", "id", id);
-        }
-
-        Resource resource = toEntity(request);
-        resource.setId(id);
-        Resource savedResource = resourceService.save(resource);
-        return ResponseEntity.ok(ApiResponse.success(toResponse(savedResource), "Resource updated successfully"));
-    }
-
-    @GetMapping("/types")
-    @Operation(summary = "Liste les types de ressource",
-               description = "Renvoie les types disponibles et leurs identifiants, que le back-office utilise pour construire son formulaire.")
-    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getResourceTypes() {
-        List<Map<String, Object>> types = resourceTypeRepository.findAll().stream()
-                .map(type -> {
-                    Map<String, Object> entry = new HashMap<>();
-                    entry.put("id", type.getId());
-                    entry.put("name", type.getName().name().toUpperCase(Locale.ROOT));
-                    return entry;
-                })
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success(types));
-    }
-
-    // ── File upload ──────────────────────────────────────────────────────────────
-
-    @PostMapping(value = "/upload/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Upload an image",
-               description = "Stores a preview or cover image and returns its url. Reserved for administrators.")
-    public ResponseEntity<ApiResponse<String>> uploadImage(
-            @RequestParam("file") MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
-            throw new BadRequestException("File is empty");
-        }
-        requireExtensionIn(file.getOriginalFilename(), ALLOWED_IMAGE_EXTENSIONS,
-                "Format d'image non autorisé. Formats acceptés : JPEG, PNG, WebP, GIF.");
-        String url = resourceService.storeFile(
-                file.getOriginalFilename(),
-                file.getBytes(),
-                file.getContentType());
-        return ResponseEntity.ok(ApiResponse.success(url, "Image uploaded successfully"));
-    }
-
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Upload a resource file",
-               description = "Stores the file on the platform and returns its public URL. Reserved for administrators.")
-    public ResponseEntity<ApiResponse<String>> uploadFile(
-            @RequestParam("file") MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
-            throw new BadRequestException("File is empty");
-        }
-        requireExtensionIn(file.getOriginalFilename(), ALLOWED_DOCUMENT_EXTENSIONS,
-                "Format non autorisé. Formats acceptés : documents (PDF, Word, Excel, PowerPoint, texte) "
-                        + "et vidéos (MP4, WebM, MOV).");
-        String url = resourceService.storeFile(
-                file.getOriginalFilename(),
-                file.getBytes(),
-                file.getContentType());
-        return ResponseEntity.ok(ApiResponse.success(url, "File uploaded successfully"));
-    }
-
-    // ── Serve uploaded files ─────────────────────────────────────────────────────
 
     /**
-     * Serve the bytes of an uploaded file.
-     *
-     * Browsing the catalogue is public, but the CONTENT is not: this endpoint used to be
-     * permitAll, so anyone holding the URL could pull down any file
-     * included — without ever creating an account. The paywall was a painted door.
-     *
-     * Authentication is enforced by SecurityConfig.
+     * Counting a view. Open, and answered with no content: a reader's page should not wait on
+     * a statistic, and a lost view costs less than a slow page.
      */
-    @GetMapping("/files/{filename:.+}")
-    @Operation(summary = "Download / view an uploaded file (compte requis)",
-               description = "Serves files stored locally on the platform. Requires an account.")
-    public ResponseEntity<org.springframework.core.io.Resource> serveFile(
-            @PathVariable String filename,
-            Authentication authentication) throws MalformedURLException {
+    @PostMapping("/{id}/view")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Enregistrer une consultation")
+    public void recordView(@PathVariable Long id) {
+        resources.recordView(id);
+    }
 
-        Path baseDir  = Paths.get(uploadDirectory).toAbsolutePath().normalize();
-        Path filePath = baseDir.resolve(filename).normalize();
-
-        // Prevent path traversal: the resolved path must stay inside the upload directory.
-        // Without this, "../../etc/passwd" walks straight out of it.
-        if (!filePath.startsWith(baseDir)) {
-            throw new BadRequestException("Chemin de fichier invalide");
+    /**
+     * Serving an ebook through the API rather than from storage directly: the file keeps its
+     * original name on the way out, and the platform stays able to decide who may take it.
+     */
+    @GetMapping("/download/{id}")
+    @Operation(summary = "Télécharger un ebook")
+    public ResponseEntity<InputStreamResource> download(@PathVariable Long id) {
+        if (!(resources.require(id) instanceof ResourceEbook ebook)) {
+            throw new NotFoundException("Cette ressource n'est pas un ebook.");
         }
-
-        // New uploads live in MinIO. Files stored before that still sit on the mounted volume,
-        // so the disk is checked as a fallback rather than a primary location.
-        var stored = storageService.read(filename);
-        if (stored.isPresent()) {
-            String storedType = stored.get().contentType() != null
-                    ? stored.get().contentType()
-                    : "application/octet-stream";
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
-                    .contentType(MediaType.parseMediaType(storedType))
-                    .body(new org.springframework.core.io.ByteArrayResource(stored.get().content()));
-        }
-
-        org.springframework.core.io.Resource fileResource =
-                new org.springframework.core.io.UrlResource(filePath.toUri());
-        if (!fileResource.exists()) {
-            throw new com.brandonkamga.lescracks.exception.ResourceNotFoundException("File", "name", filename);
-        }
-
-        String contentType = "application/octet-stream";
-        try {
-            String probed = Files.probeContentType(filePath);
-            if (probed != null) contentType = probed;
-        } catch (java.io.IOException ignored) { /* fall back to octet-stream */ }
+        var stored = storage.read(ebook.getFileKey())
+                .orElseThrow(() -> new NotFoundException("Fichier", "id", id));
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(fileResource);
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + ebook.getOriginalName() + "\"")
+                .contentType(MediaType.parseMediaType(ebook.getContentType()))
+                .contentLength(stored.size())
+                .body(new InputStreamResource(stored.content()));
     }
 
-    // ── Tracking ────────────────────────────────────────────────────────────────
+    // ── Back office ───────────────────────────────────────────────────────────
 
-    @PostMapping("/{id}/view")
-    @Operation(summary = "Enregistrer une vue sur une ressource",
-               description = "Incrémente atomiquement le compteur de vues.")
-    public ResponseEntity<ApiResponse<Void>> trackView(@PathVariable Long id) {
-        if (!resourceService.findByIdOptional(id).isPresent()) {
-            throw new com.brandonkamga.lescracks.exception.ResourceNotFoundException("Resource", "id", id);
-        }
-        resourceService.incrementViewCount(id);
-        return ResponseEntity.ok(ApiResponse.success(null));
-    }
-
-    @PostMapping("/{id}/download")
-    @Operation(summary = "Enregistrer un téléchargement et récupérer l'URL",
-               description = "Incrémente le compteur de téléchargements et retourne l'URL de la ressource.")
-    public ResponseEntity<ApiResponse<String>> trackDownload(@PathVariable Long id, Authentication authentication) {
-        Resource resource = resourceService.findByIdOptional(id)
-                .orElseThrow(() -> new com.brandonkamga.lescracks.exception.ResourceNotFoundException("Resource", "id", id));
-        if (!resource.isDownloadable()) {
-            throw new BadRequestException("Le téléchargement n'est pas autorisé pour cette ressource");
-        }
-        resourceService.incrementDownloadCount(id);
-        return ResponseEntity.ok(ApiResponse.success(resource.getUrl(), "Téléchargement autorisé"));
-    }
-
-    @DeleteMapping("/{id}")
+    @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Supprimer une ressource", 
-               description = "Supprime une ressource. Réservé aux administrateurs.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Ressource supprimée"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", 
-            description = "Accès interdit - Réservé aux administrateurs"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
-            description = "Ressource non trouvée")
-    })
-    public ResponseEntity<ApiResponse<Void>> deleteResource(
-            @Parameter(description = "ID de la ressource", required = true) @PathVariable Long id) {
-        if (!resourceService.findByIdOptional(id).isPresent()) {
-            throw new ResourceNotFoundException("Resource", "id", id);
-        }
-        resourceService.deleteById(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "Resource deleted successfully"));
+    @Operation(summary = "Toutes les ressources, publiées ou non")
+    public PageResponse<ResourceSummary> all(@PageableDefault(size = 20) Pageable pageable) {
+        return PageResponse.of(resources.all(pageable), mapper::toSummary);
     }
 
-
-    /**
-     * Uploaded files are served back inline with a content type probed from their extension,
-     * so anything the browser renders as markup (html, svg, …) would run on the API origin.
-     * Only the document, video and image formats the catalogue actually uses are accepted.
-     */
-    private static final Set<String> ALLOWED_DOCUMENT_EXTENSIONS = Set.of(
-            "pdf", "doc", "docx", "odt", "rtf", "txt", "md",
-            "ppt", "pptx", "odp", "xls", "xlsx", "ods", "csv", "zip",
-            "mp4", "webm", "mov", "m4v");
-
-    private static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of(
-            "jpg", "jpeg", "png", "webp", "gif");
-
-    private void requireExtensionIn(String originalFileName, Set<String> allowed, String message) {
-        String name = originalFileName == null ? "" : originalFileName;
-        int dot = name.lastIndexOf('.');
-        String extension = dot >= 0 ? name.substring(dot + 1).toLowerCase(Locale.ROOT) : "";
-        if (!allowed.contains(extension)) {
-            throw new BadRequestException(message);
-        }
+    @PostMapping("/admin/videos")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResourceDetail createVideo(@Valid @RequestBody VideoRequest request) {
+        return mapper.toDetail(resources.createVideo(toDraft(request)));
     }
 
-    private Resource toEntity(ResourceRequest request) {
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
-        
-        ResourceType resourceType = resourceTypeRepository.findById(request.getResourceTypeId())
-                .orElseThrow(() -> new ResourceNotFoundException("ResourceType", "id", request.getResourceTypeId()));
-
-        Set<Tag> tags = new HashSet<>();
-        if (request.getTagIds() != null) {
-            tags = new HashSet<>(tagRepository.findAllById(request.getTagIds()));
-        }
-
-        ResourceSourceType sourceType = ResourceSourceType.EXTERNAL;
-        if (request.getSourceType() != null) {
-            try { sourceType = ResourceSourceType.valueOf(request.getSourceType().toUpperCase()); }
-            catch (IllegalArgumentException ignored) {}
-        }
-
-        ResourceTypeName typeName = resourceType.getName();
-        boolean isArticle = typeName == ResourceTypeName.article;
-        boolean isVideo = typeName == ResourceTypeName.video;
-
-        if (isArticle) {
-            sourceType = ResourceSourceType.INLINE;
-        }
-        if (sourceType == ResourceSourceType.INLINE && !isArticle) {
-            throw new BadRequestException("Seules les ressources de type article peuvent être rédigées sur la plateforme");
-        }
-        // Videos are links to an outside player, never files hosted here.
-        if (isVideo) {
-            sourceType = ResourceSourceType.EXTERNAL;
-        }
-        if (isArticle && (request.getContent() == null || request.getContent().isBlank())) {
-            throw new BadRequestException("Le contenu de l'article est obligatoire");
-        }
-        if (!isArticle && sourceType == ResourceSourceType.EXTERNAL
-                && (request.getUrl() == null || request.getUrl().isBlank())) {
-            throw new BadRequestException("L'URL est obligatoire pour une ressource externe");
-        }
-
-        // A video is a link to watch and an article is read in place, not files to download.
-        // Force them non-downloadable at the source so no client — form, script, or API
-        // caller — can make a download button (or a "downloads" stat) appear on them.
-        boolean downloadable = !isVideo && !isArticle && request.isDownloadable();
-
-
-        Resource resource = Resource.builder()
-                .title(request.getTitle())
-                .description(request.getDescription())
-                .url(isArticle ? null : (request.getUrl() != null ? request.getUrl() : ""))
-                .content(isArticle ? request.getContent() : null)
-                .previewImageUrl(request.getPreviewImageUrl())
-                .sourceType(sourceType)
-                .downloadable(downloadable)
-                .category(category)
-                .resourceType(resourceType)
-                .tags(tags)
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        boolean hasFileMetadata = request.getFileSize() != null || request.getMimeType() != null;
-        boolean hasArticleMetadata = isArticle
-                && (request.getReadingTimeMinutes() != null || request.getAuthor() != null);
-        if (hasFileMetadata || hasArticleMetadata) {
-            ResourceMetadata metadata = ResourceMetadata.builder()
-                    .fileSize(request.getFileSize())
-                    .mimeType(request.getMimeType())
-                    .readingTimeMinutes(isArticle ? request.getReadingTimeMinutes() : null)
-                    .author(isArticle ? request.getAuthor() : null)
-                    .resource(resource)
-                    .build();
-            resource.setMetadata(metadata);
-        }
-
-        return resource;
+    @PutMapping("/admin/videos/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResourceDetail updateVideo(@PathVariable Long id, @Valid @RequestBody VideoRequest request) {
+        return mapper.toDetail(resources.updateVideo(id, toDraft(request)));
     }
 
-    private ResourceResponse toResponse(Resource resource) {
-        Set<ResourceResponse.TagDto> tags = resource.getTags().stream()
-                .map(tag -> ResourceResponse.TagDto.builder()
-                        .id(tag.getId())
-                        .name(tag.getName())
-                        .build())
-                .collect(Collectors.toSet());
-
-        ResourceResponse.ResourceMetadataDto metadataDto = null;
-        if (resource.getMetadata() != null) {
-            metadataDto = ResourceResponse.ResourceMetadataDto.builder()
-                    .fileSize(resource.getMetadata().getFileSize())
-                    .mimeType(resource.getMetadata().getMimeType())
-                    .readingTimeMinutes(resource.getMetadata().getReadingTimeMinutes())
-                    .author(resource.getMetadata().getAuthor())
-                    .build();
-        }
-
-        String url = resource.getUrl();
-        String content = resource.getContent();
-
-        return ResourceResponse.builder()
-                .id(resource.getId())
-                .title(resource.getTitle())
-                .description(resource.getDescription())
-                .url(url)
-                .content(content)
-                .previewImageUrl(resource.getPreviewImageUrl())
-                .sourceType(resource.getSourceType() != null ? resource.getSourceType().name() : ResourceSourceType.EXTERNAL.name())
-                .downloadable(resource.isDownloadable())
-                .viewCount(resource.getViewCount())
-                .downloadCount(resource.getDownloadCount())
-                .createdAt(resource.getCreatedAt())
-                .categoryId(resource.getCategory().getId())
-                .categoryName(resource.getCategory().getName())
-                .resourceTypeId(resource.getResourceType().getId())
-                .resourceTypeName(resource.getResourceType().getName().name().toUpperCase())
-                .tags(tags)
-                .metadata(metadataDto)
-                .slug(resource.getSlug())
-                .build();
+    /** Multipart: the file travels beside the description rather than encoded inside it. */
+    @PostMapping(value = "/admin/ebooks", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResourceDetail createEbook(@Valid @RequestPart("data") EbookRequest request,
+                                      @RequestPart("file") MultipartFile file) {
+        return mapper.toDetail(resources.createEbook(
+                new ResourceService.EbookDraft(toCommon(request.common()), request.pageCount()), file));
     }
 
-    /**
-     * DTO for paginated resource responses
-     */
-    public static class PaginatedResourceResponse {
-        private List<ResourceResponse> content;
-        private int number;
-        private int size;
-        private long totalElements;
-        private int totalPages;
-        private boolean first;
-        private boolean last;
+    @PostMapping("/admin/articles")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResourceDetail createArticle(@Valid @RequestBody ArticleRequest request) {
+        return mapper.toDetail(resources.createArticle(toDraft(request)));
+    }
 
-        public PaginatedResourceResponse(List<ResourceResponse> content, int number, int size, 
-                long totalElements, int totalPages, boolean first, boolean last) {
-            this.content = content;
-            this.number = number;
-            this.size = size;
-            this.totalElements = totalElements;
-            this.totalPages = totalPages;
-            this.first = first;
-            this.last = last;
-        }
+    @PutMapping("/admin/articles/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResourceDetail updateArticle(@PathVariable Long id,
+                                        @Valid @RequestBody ArticleRequest request) {
+        return mapper.toDetail(resources.updateArticle(id, toDraft(request)));
+    }
 
-        public List<ResourceResponse> getContent() { return content; }
-        public void setContent(List<ResourceResponse> content) { this.content = content; }
-        public int getNumber() { return number; }
-        public void setNumber(int number) { this.number = number; }
-        public int getSize() { return size; }
-        public void setSize(int size) { this.size = size; }
-        public long getTotalElements() { return totalElements; }
-        public void setTotalElements(long totalElements) { this.totalElements = totalElements; }
-        public int getTotalPages() { return totalPages; }
-        public void setTotalPages(int totalPages) { this.totalPages = totalPages; }
-        public boolean isFirst() { return first; }
-        public void setFirst(boolean first) { this.first = first; }
-        public boolean isLast() { return last; }
-        public void setLast(boolean last) { this.last = last; }
+    @PutMapping("/admin/{id}/published")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResourceDetail setPublished(@PathVariable Long id, @RequestParam boolean published) {
+        return mapper.toDetail(resources.setPublished(id, published));
+    }
+
+    @DeleteMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        resources.delete(id);
+    }
+
+    // ── Request to draft ──────────────────────────────────────────────────────
+
+    private ResourceService.Common toCommon(ResourceCommonRequest common) {
+        return new ResourceService.Common(common.title(), common.summary(),
+                common.categoryId(), common.tagIds(), common.coverId());
+    }
+
+    private ResourceService.VideoDraft toDraft(VideoRequest request) {
+        return new ResourceService.VideoDraft(
+                toCommon(request.common()), request.externalUrl(), request.durationSeconds());
+    }
+
+    /** The body is serialised back to text here: the service stores a document, not a tree. */
+    private ResourceService.ArticleDraft toDraft(ArticleRequest request) {
+        return new ResourceService.ArticleDraft(
+                toCommon(request.common()), request.body().toString(), request.authorName());
     }
 }

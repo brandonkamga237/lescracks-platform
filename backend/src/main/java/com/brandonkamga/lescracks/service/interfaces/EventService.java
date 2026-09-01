@@ -1,66 +1,53 @@
 package com.brandonkamga.lescracks.service.interfaces;
 
 import com.brandonkamga.lescracks.domain.Event;
+import com.brandonkamga.lescracks.domain.EventKind;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.Optional;
+import java.time.Instant;
 
 /**
- * Service interface for Event operations.
+ * Bootcamps and workshops: created for a date, held, then past.
+ *
+ * Nothing here computes a status. An event's phase is read from its dates by the entity
+ * itself, so a stored status can never disagree with the date beside it.
  */
 public interface EventService {
 
-    /**
-     * Find an event by ID.
-     *
-     * @param id the event ID
-     * @return the event if found
-     */
-    Event findById(Long id);
+    /** What the public sees. A null kind means both. */
+    Page<Event> published(EventKind kind, Pageable pageable);
+
+    Page<Event> upcoming(Pageable pageable);
+
+    Page<Event> all(Pageable pageable);
+
+    Event requireBySlug(String slug);
+
+    Event require(Long id);
+
+    Event create(EventDraft draft);
+
+    Event update(Long id, EventDraft draft);
+
+    /** Publishing is what makes an event visible; it is deliberate, never a side effect. */
+    Event setPublished(Long id, boolean published);
+
+    void delete(Long id);
 
     /**
-     * Find an event by ID as Optional.
-     *
-     * @param id the event ID
-     * @return Optional containing the event if found
+     * Everything an event is described by. A record rather than eight parameters: a caller
+     * cannot transpose two of them by accident, and adding a field does not touch signatures.
      */
-    Optional<Event> findByIdOptional(Long id);
-
-    /**
-     * Find all events.
-     *
-     * @return list of all events
-     */
-    List<Event> findAll();
-
-    /**
-     * Find events by event type ID.
-     *
-     * @param eventTypeId the event type ID
-     * @return list of events with the specified type
-     */
-    List<Event> findByEventTypeId(Long eventTypeId);
-
-    /**
-     * Find events by event status ID.
-     *
-     * @param eventStatusId the event status ID
-     * @return list of events with the specified status
-     */
-    List<Event> findByEventStatusId(Long eventStatusId);
-
-    /**
-     * Save an event.
-     *
-     * @param event the event to save
-     * @return the saved event
-     */
-    Event save(Event event);
-
-    /**
-     * Delete an event by ID.
-     *
-     * @param id the event ID
-     */
-    void deleteById(Long id);
+    record EventDraft(
+            EventKind kind,
+            String title,
+            String summary,
+            String description,
+            Instant startsAt,
+            Instant endsAt,
+            String location,
+            Integer capacity,
+            Long coverId) {
+    }
 }

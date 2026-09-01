@@ -3,19 +3,28 @@ package com.brandonkamga.lescracks.domain;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.Instant;
 
 /**
- * Someone asking to join: an event when {@code event} is set, the Accompagnement 360 when it
- * is not. The applicant may have no account yet, which is why {@code user} is optional and
- * the contact details are carried on the row.
+ * Someone asking to join something.
+ *
+ * What they are asking for is stated by {@link #target}, not left to be worked out from
+ * which foreign key happens to be null. When the target is an event, {@link #event} is set;
+ * when it is the Accompagnement 360, there is nothing to point at, because the 360 is one
+ * permanent thing rather than a row among many.
+ *
+ * The contact details are carried here because an applicant need not have an account yet:
+ * people apply first and register afterwards, and refusing the application until they sign
+ * up loses the ones who would have.
  */
 @Entity
 @Table(name = "applications")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,12 +34,16 @@ public class Application {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Null means the Accompagnement 360. */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private EnrolmentTarget target;
+
+    /** Set if and only if the target is an event; the database enforces the pairing. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
     private Event event;
 
-    /** Set once the applicant has an account; a participation later requires one. */
+    /** Filled once the applicant has an account. A participation later requires one. */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -52,6 +65,7 @@ public class Application {
     @Builder.Default
     private ApplicationStatus status = ApplicationStatus.PENDING;
 
+    /** Set when a decision is taken, and only then. */
     @Column(name = "decided_at")
     private Instant decidedAt;
 
@@ -59,17 +73,18 @@ public class Application {
     @Builder.Default
     private Instant createdAt = Instant.now();
 
-    public boolean isForEvent() {
-        return event != null;
+    public boolean isPending() {
+        return status == ApplicationStatus.PENDING;
     }
 
     /**
-     * A decision records when it was taken. Keeping the pair together here means no caller can
-     * leave a decided application without a date, which the database refuses anyway.
+     * Records the decision and when it was taken, together. Keeping the pair here means no
+     * caller can leave a decided application undated — which the database would refuse, but
+     * refusing at the last moment is a poor way to learn a rule.
      */
     public void decide(ApplicationStatus outcome) {
-        if (outcome == ApplicationStatus.PENDING) {
-            throw new IllegalArgumentException("A decision cannot be PENDING");
+        if (outcome == null || outcome == ApplicationStatus.PENDING) {
+            throw new IllegalArgumentException("A decision is ACCEPTED or REJECTED, never PENDING");
         }
         this.status = outcome;
         this.decidedAt = Instant.now();

@@ -1,28 +1,32 @@
 package com.brandonkamga.lescracks.repository;
 
 import com.brandonkamga.lescracks.domain.Application;
+import com.brandonkamga.lescracks.domain.ApplicationStatus;
+import com.brandonkamga.lescracks.domain.EnrolmentTarget;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
 
-import java.util.List;
-
-@Repository
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
-    List<Application> findByUserId(Long userId);
-    List<Application> findByEventId(Long eventId);
-    List<Application> findByApplicationTypeId(Long applicationTypeId);
 
-    /** Active = not archived. Split by whether it targets an event (registration) or not (360). */
-    long countByArchivedAtIsNullAndEventIsNull();       // active 360 applications
-    long countByArchivedAtIsNullAndEventIsNotNull();    // active event registrations
-    long countByArchivedAtIsNotNull();                  // archived, either kind
+    Page<Application> findByStatusOrderByCreatedAtDesc(ApplicationStatus status, Pageable pageable);
 
-    /** How many people have registered for an event. Used to derive live capacity. */
-    long countByEvent_Id(Long eventId);
+    Page<Application> findByTargetOrderByCreatedAtDesc(EnrolmentTarget target, Pageable pageable);
 
-    /** One seat per person: stops the same account registering twice for an event. */
-    boolean existsByUser_IdAndEvent_Id(Long userId, Long eventId);
-    Page<Application> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    long countByStatus(ApplicationStatus status);
+
+    /**
+     * Whether this person already has a request open for the same thing. The database refuses
+     * the duplicate anyway; asking first is what turns a constraint violation into a sentence
+     * the applicant can act on.
+     */
+    @Query("""
+            SELECT COUNT(a) > 0 FROM Application a
+            WHERE LOWER(a.email) = LOWER(:email)
+              AND a.status = 'PENDING'
+              AND a.target = :target
+              AND (:eventId IS NULL OR a.event.id = :eventId)
+            """)
+    boolean hasPendingFor(String email, EnrolmentTarget target, Long eventId);
 }

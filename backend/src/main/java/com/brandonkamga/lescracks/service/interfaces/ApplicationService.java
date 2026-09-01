@@ -1,74 +1,39 @@
 package com.brandonkamga.lescracks.service.interfaces;
 
 import com.brandonkamga.lescracks.domain.Application;
-
-import java.util.List;
-import java.util.Optional;
+import com.brandonkamga.lescracks.domain.ApplicationStatus;
+import com.brandonkamga.lescracks.domain.EnrolmentTarget;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
- * Service interface for Application operations.
+ * Requests to join: the Accompagnement 360 when it is open, or a particular event.
+ *
+ * Applying needs no account. People apply first and register afterwards, and demanding a
+ * sign-up before the form loses exactly the people who would have filled it.
  */
 public interface ApplicationService {
 
-    /**
-     * Find an application by ID.
-     *
-     * @param id the application ID
-     * @return the application if found
-     */
-    Application findById(Long id);
+    /** Refuses when the 360 is closed, or the event is not taking anyone. */
+    Application apply(ApplicationDraft draft);
 
-    /**
-     * Find an application by ID as Optional.
-     *
-     * @param id the application ID
-     * @return Optional containing the application if found
-     */
-    Optional<Application> findByIdOptional(Long id);
+    Page<Application> byStatus(ApplicationStatus status, Pageable pageable);
 
-    /**
-     * Find all applications.
-     *
-     * @return list of all applications
-     */
-    List<Application> findAll();
+    Page<Application> byTarget(EnrolmentTarget target, Pageable pageable);
 
-    /**
-     * Find applications by user ID.
-     *
-     * @param userId the user ID
-     * @return list of applications for the specified user
-     */
-    List<Application> findByUserId(Long userId);
+    Application require(Long id);
 
-    /**
-     * Find applications by event ID.
-     *
-     * @param eventId the event ID
-     * @return list of applications for the specified event
-     */
-    List<Application> findByEventId(Long eventId);
+    /** Accepting is what {@code ParticipationService} turns into a participation. */
+    Application decide(Long id, ApplicationStatus outcome);
 
-    /**
-     * Find applications by application type ID.
-     *
-     * @param applicationTypeId the application type ID
-     * @return list of applications with the specified type
-     */
-    List<Application> findByApplicationTypeId(Long applicationTypeId);
+    long pendingCount();
 
-    /**
-     * Save an application.
-     *
-     * @param application the application to save
-     * @return the saved application
-     */
-    Application save(Application application);
-
-    /**
-     * Delete an application by ID.
-     *
-     * @param id the application ID
-     */
-    void deleteById(Long id);
+    record ApplicationDraft(
+            EnrolmentTarget target,
+            Long eventId,
+            String fullName,
+            String email,
+            String phone,
+            String motivation) {
+    }
 }

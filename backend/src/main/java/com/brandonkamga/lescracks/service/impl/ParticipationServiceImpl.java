@@ -2,9 +2,13 @@ package com.brandonkamga.lescracks.service.impl;
 
 import com.brandonkamga.lescracks.domain.*;
 import com.brandonkamga.lescracks.exception.BadRequestException;
-import com.brandonkamga.lescracks.exception.ResourceNotFoundException;
-import com.brandonkamga.lescracks.repository.*;
+import com.brandonkamga.lescracks.exception.NotFoundException;
+import com.brandonkamga.lescracks.repository.AttestationRepository;
+import com.brandonkamga.lescracks.repository.ParticipationRepository;
+import com.brandonkamga.lescracks.service.interfaces.ApplicationService;
+import com.brandonkamga.lescracks.service.interfaces.EventService;
 import com.brandonkamga.lescracks.service.interfaces.ParticipationService;
+import com.brandonkamga.lescracks.service.interfaces.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -22,62 +26,64 @@ public class ParticipationServiceImpl implements ParticipationService {
 
     private static final Logger log = LoggerFactory.getLogger(ParticipationServiceImpl.class);
 
-    private final ParticipationRepository participationRepository;
-    private final AttestationRepository attestationRepository;
-    private final ApplicationRepository applicationRepository;
-    private final UserRepository userRepository;
-    private final EventRepository eventRepository;
+    /** Long enough that codes do not collide, short enough to read off a printed page. */
+    private static final int CODE_LENGTH = 6;
 
-    public ParticipationServiceImpl(ParticipationRepository participationRepository,
-                                    AttestationRepository attestationRepository,
-                                    ApplicationRepository applicationRepository,
-                                    UserRepository userRepository,
-                                    EventRepository eventRepository) {
-        this.participationRepository = participationRepository;
-        this.attestationRepository = attestationRepository;
-        this.applicationRepository = applicationRepository;
-        this.userRepository = userRepository;
-        this.eventRepository = eventRepository;
+    private final ParticipationRepository participations;
+    private final AttestationRepository attestations;
+    private final ApplicationService applications;
+    private final UserService users;
+    private final EventService events;
+
+    public ParticipationServiceImpl(ParticipationRepository participations,
+                                    AttestationRepository attestations,
+                                    ApplicationService applications,
+                                    UserService users, EventService events) {
+        this.participations = participations;
+        this.attestations = attestations;
+        this.applications = applications;
+        this.users = users;
+        this.events = events;
     }
 
     @Override
-    public Participation acceptApplication(Long applicationId, String cohort, LocalDate startedAt) {
-        Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Application", "id", applicationId));
+    public Participation fromApplication(Long applicationId, String cohort, LocalDate startedAt) {
+        Application application = applications.require(applicationId);
 
-        participationRepository.findByApplicationId(applicationId).ifPresent(existing -> {
-            throw new BadRequestException("Cette candidature a déjà été acceptée.");
+        participations.findByApplicationId(applicationId).ifPresent(already -> {
+            throw new BadRequestException("Cette candidature a déjà donné lieu à une participation.");
         });
-
-        User user = application.getUser();
-        if (user == null) {
-            // Applications can be filed without an account; a participation cannot exist without one.
+        if (application.getUser() == null) {
+            // An attestation names a person, so it needs an account behind it.
             throw new BadRequestException(
                     "Cette candidature n'est rattachée à aucun compte. "
-                            + "La personne doit en créer un avant d'être inscrite au programme.");
+                            + "La personne doit en créer un avec l'adresse " + application.getEmail() + ".");
         }
 
-        Participation participation = build(user, application.getEvent(), cohort, startedAt);
+        Participation participation = start(
+                application.getUser(), application.getTarget(), application.getEvent(), cohort, startedAt);
         participation.setApplication(application);
-        return participationRepository.save(participation);
+        return participations.save(participation);
     }
 
     @Override
     public Participation create(Long userId, Long eventId, String cohort, LocalDate startedAt) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-        Event event = eventId == null ? null : eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResourceNotFoundException("Event", "id", eventId));
-
-        return participationRepository.save(build(user, event, cohort, startedAt));
+        User user = users.require(userId);
+        EnrolmentTarget target = eventId == null ? EnrolmentTarget.MENTORSHIP : EnrolmentTarget.EVENT;
+        Event event = eventId == null ? null : events.require(eventId);
+        return participations.save(start(user, target, event, cohort, startedAt));
     }
 
-    private Participation build(User user, Event event, String cohort, LocalDate startedAt) {
-        if (event != null && participationRepository.existsByUserIdAndEventId(user.getId(), event.getId())) {
-            throw new BadRequestException("Cette personne est déjà inscrite à ce programme.");
+    /** One place that opens a participation, so both routes into it enforce the same rules. */
+    private Participation start(User user, EnrolmentTarget target, Event event,
+                                String cohort, LocalDate startedAt) {
+        Long eventId = event == null ? null : event.getId();
+        if (participations.hasActiveFor(user.getId(), target, eventId)) {
+            throw new BadRequestException("Cette personne suit déjà ce programme.");
         }
         return Participation.builder()
                 .user(user)
+                .target(target)
                 .event(event)
                 .cohort(cohort)
                 .startedAt(startedAt != null ? startedAt : LocalDate.now())
@@ -87,95 +93,103 @@ public class ParticipationServiceImpl implements ParticipationService {
 
     @Override
     public Attestation complete(Long participationId, LocalDate completedOn) {
-        Participation participation = participationRepository.findById(participationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Participation", "id", participationId));
+        Participation participation = require(participationId);
 
-        // Validating twice must not mint a second code: the first one is already out there,
-        // possibly printed on a CV.
+        // Issuing twice would put a second code on the same achievement, and the first may
+        // already be on a CV. Returning what exists is the honest answer.
         if (participation.getAttestation() != null) {
             return participation.getAttestation();
         }
 
         participation.complete(completedOn);
-
         Attestation attestation = Attestation.builder()
                 .participation(participation)
-                .code(newCode())
+                .code(allocateCode())
                 .build();
         participation.setAttestation(attestation);
-        participationRepository.save(participation);
+        participations.save(participation);
 
         log.info("Attestation {} issued for participation {} ({})",
-                attestation.getCode(), participationId, participation.programmeLabel());
+                attestation.getCode(), participationId, participation.label());
         return attestation;
     }
 
     /**
-     * Readable enough to be typed from a printed page, random enough not to be guessed by
-     * walking from one code to the next.
+     * Readable when printed, not guessable in sequence. Retried rather than assumed unique,
+     * because a collision would overwrite somebody else's proof.
      */
-    private String newCode() {
+    private String allocateCode() {
         for (int attempt = 0; attempt < 5; attempt++) {
-            String candidate = "LC-" + Year.now().getValue() + "-"
-                    + UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase(Locale.ROOT);
-            if (!attestationRepository.existsByCode(candidate)) {
+            String candidate = "LC-" + Year.now() + "-" + randomBlock();
+            if (!attestations.existsByCode(candidate)) {
                 return candidate;
             }
         }
         throw new IllegalStateException("Could not allocate a free attestation code");
     }
 
+    private String randomBlock() {
+        return UUID.randomUUID().toString()
+                .replace("-", "")
+                .substring(0, CODE_LENGTH)
+                .toUpperCase(Locale.ROOT);
+    }
+
     @Override
     public void abandon(Long participationId) {
-        Participation participation = participationRepository.findById(participationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Participation", "id", participationId));
+        Participation participation = require(participationId);
         if (participation.getAttestation() != null) {
             throw new BadRequestException(
-                    "Une attestation a déjà été délivrée pour cette participation. "
-                            + "Elle ne peut plus être marquée comme abandonnée.");
+                    "Une attestation a été délivrée pour cette participation ; elle ne peut plus être abandonnée.");
         }
         participation.abandon();
-        participationRepository.save(participation);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Participation> findByUser(Long userId) {
-        return participationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    public List<Participation> forUser(Long userId) {
+        return participations.findByUserIdOrderByCreatedAtDesc(userId);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Participation> findAll(Pageable pageable) {
-        return participationRepository.findAll(pageable);
+    public Page<Participation> byStatus(ParticipationStatus status, Pageable pageable) {
+        return participations.findByStatusOrderByCreatedAtDesc(status, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Participation> findById(Long id) {
-        return participationRepository.findById(id);
+    public Page<Participation> all(Pageable pageable) {
+        return participations.findAll(pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Participation require(Long id) {
+        return participations.findById(id)
+                .orElseThrow(() -> new NotFoundException("Participation", "id", id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<Attestation> verify(String code) {
-        return code == null || code.isBlank()
-                ? Optional.empty()
-                : attestationRepository.findByCode(code.trim().toUpperCase(Locale.ROOT));
+        if (code == null || code.isBlank()) {
+            return Optional.empty();
+        }
+        return attestations.findByCode(code.strip().toUpperCase(Locale.ROOT));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Map<String, Object> proofOfWork() {
-        Map<String, Long> byProgramme = new LinkedHashMap<>();
-        for (Object[] row : participationRepository.countCompletedByProgramme()) {
-            byProgramme.put((String) row[0], (Long) row[1]);
-        }
-        Map<String, Object> stats = new LinkedHashMap<>();
-        stats.put("peopleHelped", participationRepository.countDistinctCompletedParticipants());
-        stats.put("completed", participationRepository.countByStatus(ParticipationStatus.COMPLETED));
-        stats.put("inProgress", participationRepository.countByStatus(ParticipationStatus.IN_PROGRESS));
-        stats.put("byProgramme", byProgramme);
-        return stats;
+        Map<String, Long> byTarget = new LinkedHashMap<>();
+        participations.countCompletedByTarget()
+                .forEach(row -> byTarget.put((String) row[0], (Long) row[1]));
+
+        return Map.of(
+                "peopleHelped", participations.countPeopleHelped(),
+                "completed", participations.countByStatus(ParticipationStatus.COMPLETED),
+                "inProgress", participations.countByStatus(ParticipationStatus.IN_PROGRESS),
+                "byProgramme", byTarget);
     }
 }

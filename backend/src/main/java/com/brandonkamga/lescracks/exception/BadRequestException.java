@@ -1,12 +1,11 @@
 package com.brandonkamga.lescracks.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class BadRequestException extends RuntimeException {
+/** The caller asked for something the rules do not allow, and can fix it. */
+public class BadRequestException extends AppException {
 
     public BadRequestException(String message) {
-        super(message);
+        super(message, ErrorCode.BAD_REQUEST, HttpStatus.BAD_REQUEST);
     }
 }

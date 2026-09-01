@@ -1,23 +1,24 @@
 package com.brandonkamga.lescracks.service.interfaces;
 
+import java.io.InputStream;
 import java.util.Optional;
 
 /**
- * Object storage for uploaded files.
+ * Object storage, behind a seam.
  *
- * Callers deal in opaque keys and never learn where the bytes live, so the backing store can
- * change without touching the resource or user code that uploads through it.
+ * Callers hand over bytes and get back a key. They never learn where the object lives, which
+ * is what lets the backing store change without touching anything that uploads.
  */
 public interface StorageService {
 
-    /** Stores the bytes under a generated key and returns that key. */
-    String store(String originalFileName, byte[] bytes, String contentType);
+    /** Stores the bytes under a generated key and returns it. */
+    String store(String originalName, byte[] content, String contentType);
 
-    /** Reads an object back, or empty when the key is unknown to this store. */
     Optional<StoredObject> read(String key);
 
     void delete(String key);
 
-    record StoredObject(byte[] content, String contentType, long size) {
+    /** A stored object and enough about it to serve it back honestly. */
+    record StoredObject(InputStream content, String contentType, long size) {
     }
 }

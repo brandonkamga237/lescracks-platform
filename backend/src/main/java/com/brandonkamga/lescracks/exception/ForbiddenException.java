@@ -1,11 +1,10 @@
 package com.brandonkamga.lescracks.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.FORBIDDEN)
-public class ForbiddenException extends RuntimeException {
+public class ForbiddenException extends AppException {
+
     public ForbiddenException(String message) {
-        super(message);
+        super(message, ErrorCode.FORBIDDEN, HttpStatus.FORBIDDEN);
     }
 }
