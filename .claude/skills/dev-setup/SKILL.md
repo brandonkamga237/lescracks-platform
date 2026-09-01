@@ -1,61 +1,71 @@
 ---
 name: dev-setup
-description: Démarrer l'environnement de dev LesCracks (postgres, minio, backend, frontend) ou diagnostiquer pourquoi il ne démarre pas. À utiliser quand on demande de lancer le projet, de le faire tourner en local, ou quand un service refuse de démarrer.
+description: Start the LesCracks development environment (postgres, minio, backend, frontend) or work out why it will not start. Use when asked to run the project locally, or when a service refuses to come up.
 ---
 
-# Démarrer LesCracks en local
+# Running LesCracks locally
 
-## Ordre de démarrage
+## Start order
 
-1. **Dépendances** (depuis la racine) :
+1. **Dependencies** (from the repo root):
    ```
    docker compose up -d
    ```
-   Aucun `.env` n'est nécessaire : tout a un défaut de dev. Attendre `healthy` :
+   No `.env` is needed: everything has a development default. Wait for `healthy`:
    ```
    docker compose ps
    ```
 
-2. **Backend** (depuis `backend/`) :
+2. **Backend** (from `backend/`):
    ```
    ./mvnw spring-boot:run
    ```
-   Écoute sur 8080, profil `dev`. Alternative conteneurisée : `docker compose --profile app up -d --build`.
+   Listens on 8080, `dev` profile. Containerised alternative:
+   `docker compose --profile app up -d --build`.
 
-3. **Frontend** (depuis `frontend/`) :
+3. **Frontend** (from `frontend/`):
    ```
    pnpm install && pnpm dev
    ```
-   Écoute sur 5173. `pnpm` uniquement — jamais `npm`.
+   Listens on 5173. `pnpm` only — never `npm`.
 
-Le proxy Vite renvoie `/api`, `/oauth2` et `/login/oauth2` vers `localhost:8080` : ne pas configurer `VITE_API_BASE_URL` en dev, le défaut `/api` suffit.
+The Vite proxy forwards `/api`, `/oauth2` and `/login/oauth2` to `localhost:8080`, so
+do not set `VITE_API_BASE_URL` in development; the `/api` default is enough.
 
-## Pannes courantes
+## Common failures
 
 **`port is already allocated` (5432 / 9000 / 9001)**
-Un autre projet occupe le port. Identifier :
+Another project holds the port. Find it:
 ```
 docker ps --filter "publish=5432" --filter "publish=9000"
 ```
-Puis relancer sur d'autres ports (les variables sont prévues pour ça) :
+Then start on different ports (the variables exist for this):
 ```
 DB_PORT=5433 MINIO_PORT=9002 MINIO_CONSOLE_PORT=9003 docker compose up -d
 ```
-Penser à passer les mêmes `DB_PORT`/`MINIO_PORT` au backend s'il tourne hors conteneur.
+Pass the same `DB_PORT` / `MINIO_PORT` to the backend if it runs outside a container.
 
-**Le backend s'arrête au démarrage sur une erreur de schéma**
-`ddl-auto: validate` en dev : Hibernate refuse de démarrer si les entités ne correspondent pas au schéma. C'est voulu. La cause est presque toujours une entité modifiée sans migration Flyway → voir le skill `db-migration`.
+**The backend dies at startup on a schema error**
+`ddl-auto: validate` is on in development too: Hibernate refuses to start when the
+entities do not match the schema. That is intended. The cause is almost always an
+entity changed without a Flyway migration → see the `db-migration` skill.
 
 **`Flyway ... checksum mismatch`**
-Une migration déjà appliquée a été modifiée. Ne jamais « réparer » en éditant le fichier : restaurer son contenu d'origine et créer une nouvelle migration. En dev seulement, on peut repartir de zéro :
+A migration that was already applied has been edited. Never "fix" it by editing the
+file further: restore its original content and add a new migration. In development
+only, you can start from scratch:
 ```
 docker compose down -v && docker compose up -d
 ```
-(`-v` supprime les volumes, donc les données locales — jamais en prod.)
+(`-v` drops the volumes, and therefore the local data — never in production.)
 
-**OAuth GitHub/Google en local**
-Les clés sont vides par défaut ; l'app démarre mais les boutons OAuth échouent. Renseigner `GITHUB_CLIENT_ID` / `GOOGLE_CLIENT_ID` (+ secrets) dans un `.env` à la racine pour les tester.
+**GitHub / Google OAuth locally**
+The keys are empty by default; the app starts but the OAuth buttons fail. Fill in
+`GITHUB_CLIENT_ID` / `GOOGLE_CLIENT_ID` and their secrets in a root `.env` to test them.
 
-## À ne pas faire
-- Ne pas lancer `docker-compose.prod.yml` en local : il attend le réseau Traefik, des images Docker Hub et un `.env` de production.
-- Ne pas recréer de `docker-compose.yml` dans `backend/` ou `frontend/` : un seul compose par environnement, à la racine.
+## Do not
+
+- Do not run `docker-compose.prod.yml` locally: it expects the Traefik network, the
+  Docker Hub images and a production `.env`.
+- Do not recreate a `docker-compose.yml` under `backend/` or `frontend/`: one compose
+  file per environment, at the root.

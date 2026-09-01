@@ -1,47 +1,54 @@
 ---
 name: frontend-page
-description: Créer ou modifier une page ou un composant du frontend LesCracks (React + Vite + Tailwind) en respectant le routage, la couche services et les conventions du projet. À utiliser pour toute nouvelle page, route ou écran admin.
+description: Create or change a page or component in the LesCracks frontend (React + Vite + Tailwind), following the routing, services layer and project conventions. Use for any new page, route or admin screen.
 ---
 
-# Ajouter une page
+# Adding a page
 
-## Emplacements
+## Where things go
 
-- Page publique → `src/pages/Xxx.tsx` (PascalCase)
-- Page admin → `src/pages/admin/AdminXxx.tsx`, rendue dans `AdminLayout`
-- Composant réutilisable → `src/components/{landing,cards,resources,admin,layout,common}/`
-- Primitive UI (Radix + Tailwind) → `src/components/ui/`
+- Public page → `src/pages/Xxx.tsx` (PascalCase)
+- Admin page → `src/pages/admin/AdminXxx.tsx`, rendered inside `AdminLayout`
+- Reusable component → `src/components/{landing,cards,resources,admin,layout,common}/`
+- UI primitive (Radix + Tailwind) → `src/components/ui/`
 - Hook → `src/hooks/useXxx.ts`
 
-La route se déclare dans `src/App.tsx` (import + `<Route>`). Les pages admin sont sous le layout admin et protégées côté client par `useAdminAuth`.
+The route is declared in `src/App.tsx` (import plus `<Route>`). Admin pages sit under
+the admin layout and are guarded client-side by `useAdminAuth`.
 
-## Conventions non négociables
+## Non-negotiable conventions
 
-- **Imports par alias `@/`** — jamais de `../../..`.
-- **Aucun `fetch` dans un composant.** Tout appel API passe par `src/services/` :
-  - `publicApi.ts` → endpoints publics, sans token
-  - `api.ts` → endpoints authentifiés (JWT)
-  - `adminApi.ts` → endpoints `/api/admin`
-  Ajouter la méthode dans le service, avec son type TypeScript exporté, puis l'appeler depuis la page.
-- **Jamais d'URL d'API en dur** : la base vient de `ENV.API_BASE_URL` (`src/config/env.ts`), déjà utilisée par les services.
-- **Tailwind uniquement**, pas de styles inline ni de CSS ad hoc.
-- **Props typées** : `interface XxxProps { ... }`.
-- **Textes en français** (le site est francophone).
-- Thème clair/sombre via `ThemeContext` : utiliser les classes `dark:` plutôt qu'une couleur figée.
-- État d'auth via `useAuth()` (`AuthContext`), jamais en lisant le token directement.
+- **Import through the `@/` alias** — never `../../..`.
+- **No `fetch` inside a component.** Every API call goes through `src/services/`:
+  - `publicApi.ts` → public endpoints, no token
+  - `api.ts` → authenticated endpoints (JWT)
+  - `adminApi.ts` → `/api/admin` endpoints
+  Add the method to the service with its exported TypeScript type, then call it from
+  the page.
+- **Never hardcode an API URL**: the base comes from `ENV.API_BASE_URL`
+  (`src/config/env.ts`), which the services already use.
+- **Tailwind only**, no inline styles and no ad-hoc CSS.
+- **Typed props**: `interface XxxProps { ... }`.
+- **Displayed text in French** (the site is francophone); identifiers, props and
+  comments in English.
+- Light and dark themes through `ThemeContext`: use `dark:` variants rather than a
+  fixed colour.
+- Auth state through `useAuth()` (`AuthContext`), never by reading the token directly.
 
-## SEO — obligatoire sur une page publique
+## SEO — required on a public page
 
-Monter le composant `SEO` (`@/components/common/SEO`) en haut de la page :
+Mount the `SEO` component (`@/components/common/SEO`) at the top of the page:
 ```tsx
-<SEO title="Titre de la page" description="..." url="/ma-page" />
+<SEO title="Page title" description="…" url="/my-page" />
 ```
-Il met à jour `document.title` et les balises meta/OG déjà présentes dans `index.html`.
+It updates `document.title` and the meta and OG tags already present in `index.html`.
 
-**Une page publique indexable ne s'arrête pas là** : le site est une SPA, les crawlers sans JS ne voient rien. Il faut aussi un snapshot serveur → voir le skill `seo-page`.
+**An indexable public page does not stop there**: the site is a SPA, so crawlers
+without JavaScript see nothing. It also needs a server snapshot → see the `seo-page`
+skill.
 
-## Vérification
+## Verify
 ```
 cd frontend && pnpm typecheck && pnpm lint
 ```
-`pnpm` uniquement, jamais `npm` (le lockfile du projet est `pnpm-lock.yaml`).
+`pnpm` only, never `npm` (the project lockfile is `pnpm-lock.yaml`).

@@ -1,94 +1,92 @@
 # LesCracks — Frontend
 
-SPA React de la plateforme LesCracks, servie par Nginx en production.
+React SPA for the LesCracks platform, served by Nginx in production.
 
-Stack : React, TypeScript, Vite, Tailwind CSS, Radix UI, React Router, Framer Motion,
-GSAP, Recharts. Les versions font foi dans `package.json`.
+Stack: React, TypeScript, Vite, Tailwind CSS, Radix UI, React Router, Framer Motion,
+GSAP, Recharts. `package.json` is the source of truth for versions.
 
-## Démarrer
+## Running it
 
-**pnpm uniquement** — le lockfile du projet est `pnpm-lock.yaml`.
+**pnpm only** — the project lockfile is `pnpm-lock.yaml`.
 
 ```bash
 pnpm install
 pnpm dev          # http://localhost:5173
 pnpm typecheck    # tsc -b
 pnpm lint         # eslint
-pnpm build        # sortie dans dist/
+pnpm build        # output in dist/
 ```
 
-L'API doit tourner sur `localhost:8080` : Vite proxifie `/api`, `/oauth2` et
-`/login/oauth2` vers le backend, donc aucune variable d'environnement n'est
-nécessaire en développement.
+The API must be running on `localhost:8080`: Vite proxies `/api`, `/oauth2` and
+`/login/oauth2` to the backend, so no environment variable is needed in development.
 
-## Structure
+## Layout
 
 ```
 src/
-├── pages/          pages publiques ; pages/admin/ pour le back-office
+├── pages/          public pages; pages/admin/ for the back office
 ├── components/
-│   ├── ui/         primitives Radix + Tailwind
-│   ├── layout/     layouts, dont AdminLayout
-│   ├── landing/    sections de la page d'accueil
-│   ├── cards/      cartes réutilisables
-│   ├── resources/  affichage des ressources
-│   ├── admin/      composants du back-office
-│   ├── common/     transverses, dont SEO
+│   ├── ui/         Radix + Tailwind primitives
+│   ├── layout/     layouts, including AdminLayout
+│   ├── landing/    landing page sections
+│   ├── cards/      reusable cards
+│   ├── resources/  resource rendering
+│   ├── admin/      back office components
+│   ├── common/     cross-cutting, including SEO
 │   └── icons/
 ├── services/       api.ts, publicApi.ts, adminApi.ts, auth.ts
 ├── contexts/       AuthContext, ThemeContext
 ├── hooks/          useXxx
-├── config/env.ts   lecture des variables Vite
-├── lib/            utilitaires
-├── data/           données statiques
+├── config/env.ts   reads the Vite variables
+├── lib/            helpers
+├── data/           static content
 └── utils/
 ```
 
 ## Conventions
 
-- **Imports par alias `@/`** — jamais de chemins relatifs profonds.
-- **Aucun `fetch` dans un composant.** Tout appel API passe par `src/services/` :
-  - `publicApi.ts` — endpoints publics, sans token
-  - `api.ts` — endpoints authentifiés (JWT)
-  - `adminApi.ts` — endpoints `/api/admin`
-- **Aucune URL d'API en dur** : la base vient de `ENV.API_BASE_URL` (`src/config/env.ts`).
-- Tailwind pour le style, pas de styles inline. Thème clair/sombre via `ThemeContext`
-  et les variantes `dark:`.
-- Props typées : `interface {ComponentName}Props`.
-- Pages en PascalCase, hooks en `useXxx`.
-- Code, identifiants et commentaires en anglais ; seuls les textes affichés sont
-  en français.
+- **Import through the `@/` alias** — never deep relative paths.
+- **No `fetch` inside a component.** Every API call goes through `src/services/`:
+  - `publicApi.ts` — public endpoints, no token
+  - `api.ts` — authenticated endpoints (JWT)
+  - `adminApi.ts` — `/api/admin` endpoints
+- **No hardcoded API URL**: the base comes from `ENV.API_BASE_URL` (`src/config/env.ts`).
+- Tailwind for styling, no inline styles. Light and dark themes through
+  `ThemeContext` and the `dark:` variants.
+- Typed props: `interface {ComponentName}Props`.
+- Pages in PascalCase, hooks named `useXxx`.
+- Code, identifiers and comments in English; only displayed text is in French.
 
 ## SEO
 
-Chaque page publique monte le composant `SEO` :
+Every public page mounts the `SEO` component:
 
 ```tsx
 import SEO from '@/components/common/SEO';
 
-<SEO title="Titre" description="…" url="/ma-page" />
+<SEO title="Title" description="…" url="/my-page" />
 ```
 
-Le site étant rendu côté client, les crawlers qui n'exécutent pas JavaScript ne
-voient rien. `nginx.conf` détecte les user-agents de bots et les redirige vers des
-snapshots HTML rendus par le backend, pendant que les humains reçoivent la SPA.
+Since the site is rendered client-side, crawlers that do not run JavaScript see
+nothing. `nginx.conf` detects bot user-agents and routes them to HTML snapshots
+rendered by the backend, while humans get the SPA.
 
-Ajouter une page publique indexable demande donc aussi une entrée dans la map
-`$seo_page` de `nginx.conf`, un rendu dans `SeoController` et une URL dans
-`SitemapController` côté backend.
+Adding an indexable public page therefore also means an entry in the `$seo_page` map
+of `nginx.conf`, a renderer in `SeoController` and a URL in `SitemapController` on
+the backend side.
 
-## Variables d'environnement
+## Environment variables
 
-| Variable | Défaut | Rôle |
+| Variable | Default | Purpose |
 |---|---|---|
-| `VITE_API_BASE_URL` | `/api` | Base des appels API |
+| `VITE_API_BASE_URL` | `/api` | Base path for API calls |
 
-En développement comme en production le défaut suffit : le proxy Vite d'un côté,
-Nginx de l'autre, servent l'API sous le même domaine.
+The default is enough in both development and production: the Vite proxy on one
+side and Nginx on the other serve the API from the same origin.
 
-## Build et production
+## Build and production
 
-`pnpm build` produit `dist/`. Le `Dockerfile` construit l'image et sert le résultat
-avec Nginx, en appliquant `nginx.conf` (routage SPA, proxy `/api`, redirection des
-bots vers les snapshots SEO). Le TLS, le domaine et la redirection `www` vers l'apex
-sont gérés en amont par Traefik, via les labels de `docker-compose.prod.yml`.
+`pnpm build` produces `dist/`. The `Dockerfile` builds the image and serves the
+result with Nginx, applying `nginx.conf` (SPA routing, `/api` proxy, bot routing to
+the SEO snapshots). TLS, the domain and the `www` to apex redirect are handled
+upstream by Traefik, through the labels in `docker-compose.prod.yml`.

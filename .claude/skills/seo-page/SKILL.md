@@ -1,52 +1,64 @@
 ---
 name: seo-page
-description: Rendre une page publique visible des crawlers et moteurs génératifs (Google, GPTBot, ClaudeBot…) via un snapshot HTML serveur. À utiliser dès qu'on ajoute une page publique indexable ou un nouveau type de contenu à slug.
+description: Make a public page visible to crawlers and generative engines (Google, GPTBot, ClaudeBot…) through a server-rendered HTML snapshot. Use whenever an indexable public page or a new slug-based content type is added.
 ---
 
-# Snapshot SEO pour les bots
+# SEO snapshot for bots
 
-## Pourquoi
+## Why
 
-Le site est une SPA rendue côté client : un crawler qui n'exécute pas JS reçoit une coquille vide sur toutes les routes internes. La parade en place : **nginx détecte les user-agents de bots et les renvoie vers un snapshot HTML rendu par le backend**, pendant que les humains reçoivent la SPA normale.
+The site is a client-rendered SPA: a crawler that does not execute JavaScript
+receives an empty shell on every internal route. The countermeasure in place:
+**nginx detects bot user-agents and routes them to an HTML snapshot rendered by the
+backend**, while humans get the normal SPA.
 
-Une page publique n'est donc réellement indexable que si les **trois** points ci-dessous sont faits. En oublier un donne une page invisible des moteurs, sans aucune erreur visible.
+A public page is therefore only really indexable once all **three** points below are
+done. Missing one leaves the page invisible to engines, with no visible error.
 
-## 1. Snapshot backend — `controller/SeoController.java`
+## 1. Backend snapshot — `controller/SeoController.java`
 
-- Route sous `/seo` (hors `/api`), déjà `permitAll` via `.requestMatchers(HttpMethod.GET, "/seo/**")`.
-- Retourner un document HTML complet : `<title>`, `<meta name="description">`, balises OG, contenu textuel réel, et un bloc JSON-LD schema.org adapté au type (`Event`, `Article`, `Person`, `Organization`…).
-- Le contenu vient de la base via les repositories, pas de texte figé.
-- Pages statiques marketing → `/seo/pages/{nom}` ; pages de détail → `/seo/{type}/{slug}`.
+- Route under `/seo` (outside `/api`), already `permitAll` through
+  `.requestMatchers(HttpMethod.GET, "/seo/**")`.
+- Return a complete HTML document: `<title>`, `<meta name="description">`, OG tags,
+  real textual content, and a schema.org JSON-LD block matching the type (`Event`,
+  `Article`, `Person`, `Organization`, …).
+- The content comes from the database through the repositories, never hardcoded text.
+- Static marketing pages → `/seo/pages/{name}`; detail pages → `/seo/{type}/{slug}`.
 
-## 2. Routage nginx — `frontend/nginx.conf`
+## 2. nginx routing — `frontend/nginx.conf`
 
-- **Page marketing statique** : ajouter une entrée dans la map `$seo_page` :
+- **Static marketing page**: add an entry to the `$seo_page` map:
   ```nginx
-  "1:/ma-page"  "ma-page";
+  "1:/my-page"  "my-page";
   ```
-  (la clé combine le flag bot et le chemin ; `location /` fait le `rewrite` vers `/_seo/pages/$seo_page`).
-- **Nouveau type de page de détail à slug** : l'ajouter au groupe nommé de la `location` regex existante (`evenements|ressources|apprenants`).
-- Le bloc `location ^~ /_seo/` est interne et proxifie vers le backend : ne pas y toucher.
+  (the key combines the bot flag and the path; `location /` does the `rewrite` to
+  `/_seo/pages/$seo_page`).
+- **New slug-based detail type**: add it to the named group of the existing regex
+  `location` (`evenements|ressources|apprenants`).
+- The `location ^~ /_seo/` block is internal and proxies to the backend: leave it alone.
 
 ## 3. Sitemap — `controller/SitemapController.java`
 
-Ajouter l'URL dans le sitemap, avec une `priority` cohérente avec les existantes. Les pages à slug sont générées en boucle depuis la base ; une page statique s'ajoute à la main.
+Add the URL to the sitemap with a `priority` consistent with the existing ones.
+Slug-based pages are generated in a loop from the database; a static page is added by
+hand.
 
-## Côté SPA
+## On the SPA side
 
-La page React garde son composant `SEO` (voir le skill `frontend-page`) : c'est ce que voient les humains et les crawlers qui exécutent JS.
+The React page keeps its `SEO` component (see the `frontend-page` skill): that is what
+humans and JavaScript-capable crawlers see.
 
-## Vérifier
+## Verify
 
-Simuler un bot en local (backend démarré) :
+Simulate a bot locally (backend running):
 ```
-curl -s http://localhost:8080/seo/pages/ma-page | head -40
+curl -s http://localhost:8080/seo/pages/my-page | head -40
 ```
-En prod, à travers nginx :
+In production, through nginx:
 ```
-curl -s -A "ClaudeBot" https://lescracks.com/ma-page | head -40
+curl -s -A "ClaudeBot" https://lescracks.com/my-page | head -40
 ```
-Un humain doit continuer à recevoir la SPA :
+A human must still get the SPA:
 ```
-curl -s https://lescracks.com/ma-page | grep -c "<div id=\"root\">"
+curl -s https://lescracks.com/my-page | grep -c "<div id=\"root\">"
 ```

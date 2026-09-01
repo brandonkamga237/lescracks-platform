@@ -1,53 +1,66 @@
 ---
 name: backend-endpoint
-description: Ajouter ou modifier un endpoint REST du backend LesCracks en respectant la chaîne controller → service interface/impl → DTO → SecurityConfig. À utiliser dès qu'on touche à l'API Spring Boot (nouvelle route, nouveau champ exposé, changement de droits).
+description: Add or change a REST endpoint in the LesCracks backend, following the controller → service interface/impl → DTO → SecurityConfig chain. Use whenever the Spring Boot API changes (new route, newly exposed field, changed permissions).
 ---
 
-# Ajouter un endpoint
+# Adding an endpoint
 
-## Chaîne complète à respecter
+## The full chain
 
-Un endpoint touche systématiquement **4 endroits**. En oublier un est la source d'erreur la plus fréquente ici.
+An endpoint always touches **four places**. Forgetting one is the most frequent
+mistake in this codebase.
 
 1. **DTO** — `dto/XxxRequest.java` / `dto/XxxResponse.java`
-   Ne jamais exposer une entité `domain/` directement. Lombok `@Data @Builder`, annotations `@Schema` pour OpenAPI, validation `@NotBlank` / `@NotNull` / `@Size` sur les requêtes.
+   Never expose a `domain/` entity directly. Lombok `@Data @Builder`, `@Schema`
+   annotations for OpenAPI, and `@NotBlank` / `@NotNull` / `@Size` validation on
+   request objects.
 
-2. **Service** — interface dans `service/interfaces/XxxService.java`, implémentation dans `service/impl/XxxServiceImpl.java`
-   Toute la logique métier vit ici, jamais dans le controller. Le mapping entité → DTO se fait dans l'impl.
+2. **Service** — interface in `service/interfaces/XxxService.java`, implementation in
+   `service/impl/XxxServiceImpl.java`
+   All business logic lives here, never in the controller. Entity to DTO mapping
+   happens in the implementation.
 
 3. **Controller** — `controller/XxxController.java`, `@RequestMapping("/api/...")`
-   Signature attendue :
+   Expected shape:
    ```java
    @PostMapping
    public ResponseEntity<ApiResponse<XxxResponse>> create(@Valid @RequestBody XxxRequest req) {
        return ResponseEntity.ok(ApiResponse.success(xxxService.create(req), "Créé"));
    }
    ```
-   Ne jamais construire un status d'erreur à la main : lever `ResourceNotFoundException`, `BadRequestException` ou `ForbiddenException`, `GlobalExceptionHandler` produit la réponse.
+   Never build an error status by hand: throw `ResourceNotFoundException`,
+   `BadRequestException` or `ForbiddenException` and let `GlobalExceptionHandler`
+   produce the response.
 
 4. **SecurityConfig** — `config/SecurityConfig.java`
-   La règle par défaut est `.requestMatchers("/api/**").authenticated()`. **Un nouvel endpoint est donc protégé tant qu'il n'est pas déclaré `permitAll()` au-dessus de cette ligne.** Les routes publiques sont listées méthode par méthode :
+   The default rule is `.requestMatchers("/api/**").authenticated()`. **A new endpoint
+   is therefore protected until it is declared `permitAll()` above that line.** Public
+   routes are listed method by method:
    ```java
    .requestMatchers(HttpMethod.GET, "/api/xxx", "/api/xxx/*").permitAll()
    ```
-   Les routes admin sont couvertes par `.requestMatchers("/api/admin/**").hasRole("ADMIN")`.
+   Admin routes are already covered by `.requestMatchers("/api/admin/**").hasRole("ADMIN")`.
 
 ## Conventions
 
-- Rôles : `user`, `premium_user`, `learner`, `admin` (enum `RoleName`). En Spring, `hasRole("ADMIN")` (majuscules, sans préfixe `ROLE_`).
-- Enveloppe de réponse : toujours `ApiResponse<T>` (`success`, `message`, `data`, `timestamp`, `path`).
-- Messages destinés à l'utilisateur : en français.
-- Logging : `slf4j`, INFO pour les actions métier, DEBUG pour le détail technique. Ne jamais logger de token, mot de passe ou contenu de mail.
-- Un endpoint qui lit/écrit un fichier passe par MinIO (`ImageAssetService`), pas par le disque local.
+- Roles: `user`, `premium_user`, `learner`, `admin` (the `RoleName` enum). In Spring,
+  `hasRole("ADMIN")` (uppercase, without the `ROLE_` prefix).
+- Response envelope: always `ApiResponse<T>` (`success`, `message`, `data`,
+  `timestamp`, `path`).
+- Text shown to users (emails, error messages) stays in French; everything else is English.
+- Logging: `slf4j`, INFO for business actions, DEBUG for technical detail. Never log a
+  token, a password or the body of an email.
+- An endpoint that reads or writes a file goes through MinIO (`ImageAssetService`),
+  never the local disk.
 
-## Côté frontend
-Un nouvel endpoint doit être appelé depuis `frontend/src/services/` uniquement :
-- `publicApi.ts` si `permitAll`
-- `api.ts` s'il exige un JWT
-- `adminApi.ts` s'il est sous `/api/admin`
+## On the frontend side
+A new endpoint is called from `frontend/src/services/` only:
+- `publicApi.ts` if it is `permitAll`
+- `api.ts` if it needs a JWT
+- `adminApi.ts` if it lives under `/api/admin`
 
-## Vérification
+## Verify
 ```
 cd backend && ./mvnw test
 ```
-Puis vérifier la route dans Swagger : `http://localhost:8080/swagger-ui.html`.
+Then check the route in Swagger: `http://localhost:8080/swagger-ui.html`.

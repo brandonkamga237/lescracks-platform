@@ -1,22 +1,22 @@
 # LesCracks Platform
 
-Plateforme de formation tech francophone : accompagnement 360, ressources pédagogiques,
-événements communautaires et vitrine des apprenants.
+French-language tech training platform: the Accompagnement 360 mentoring programme,
+learning resources, community events and a showcase of its learners.
 
-Monorepo : une API Spring Boot (`backend/`) et une SPA React (`frontend/`), déployées
-en conteneurs séparés derrière Traefik.
+Monorepo: a Spring Boot API (`backend/`) and a React SPA (`frontend/`), shipped as
+separate containers behind Traefik.
 
-| Partie | Stack | Détail |
+| Part | Stack | Notes |
 |---|---|---|
-| [backend/](backend/README.md) | Spring Boot, PostgreSQL, Flyway, MinIO, JWT + OAuth2 | API REST sous `/api` |
-| [frontend/](frontend/README.md) | React, Vite, TypeScript, Tailwind, Radix | SPA servie par Nginx |
+| [backend/](backend/README.md) | Spring Boot, PostgreSQL, Flyway, MinIO, JWT + OAuth2 | REST API under `/api` |
+| [frontend/](frontend/README.md) | React, Vite, TypeScript, Tailwind, Radix | SPA served by Nginx |
 
-## Démarrage rapide
+## Quick start
 
-Prérequis : Docker, JDK 21, Node 22 + pnpm.
+Requirements: Docker, JDK 21, Node 22 and pnpm.
 
 ```bash
-# 1. Dépendances (PostgreSQL + MinIO) — aucun .env requis
+# 1. Dependencies (PostgreSQL + MinIO) — no .env needed
 docker compose up -d
 
 # 2. API — http://localhost:8080
@@ -26,55 +26,54 @@ cd backend && ./mvnw spring-boot:run
 cd frontend && pnpm install && pnpm dev
 ```
 
-Vite proxifie `/api`, `/oauth2` et `/login/oauth2` vers `localhost:8080` : rien à
-configurer côté frontend en développement.
+Vite proxies `/api`, `/oauth2` and `/login/oauth2` to `localhost:8080`, so the
+frontend needs no configuration in development.
 
-Variante tout-en-conteneurs :
+Everything in containers instead:
 
 ```bash
 docker compose --profile app up -d --build
 ```
 
-Si les ports 5432 / 9000 / 9001 sont déjà pris sur ta machine :
+If ports 5432 / 9000 / 9001 are already taken on your machine:
 
 ```bash
 DB_PORT=5433 MINIO_PORT=9002 MINIO_CONSOLE_PORT=9003 docker compose up -d
 ```
 
-## Fichiers Docker
+## Docker files
 
-| Fichier | Usage |
+| File | Purpose |
 |---|---|
-| `docker-compose.yml` | Développement local (profil `app` pour inclure le backend) |
-| `docker-compose.prod.yml` | Production, déployé sur le VPS par la CI |
+| `docker-compose.yml` | Local development (profile `app` adds the backend) |
+| `docker-compose.prod.yml` | Production, deployed to the VPS by CI |
 
-Un seul compose par environnement, à la racine. Ne pas en recréer dans `backend/`
-ou `frontend/`, et ne pas renommer `docker-compose.prod.yml` : la CI le référence
-par son nom.
+One compose file per environment, at the root. Do not recreate one under `backend/`
+or `frontend/`, and do not rename `docker-compose.prod.yml`: CI refers to it by name.
 
-## Branches et déploiement
+## Branches and deployment
 
 ```
-feature/* | fix/* | docs/*  →  develop  →  (PR)  →  main  →  déploiement prod
+feature/* | fix/* | docs/*  →  develop  →  (PR)  →  main  →  production deploy
 hotfix/*                    →  main
 ```
 
-Tout push sur `main` déclenche la CI GitHub Actions : build des images, push sur
-Docker Hub, puis déploiement par SSH sur le VPS. Voir `.github/workflows/deploy.yml`.
+Every push to `main` runs the GitHub Actions pipeline: build the images, push them
+to Docker Hub, then deploy over SSH to the VPS. See `.github/workflows/deploy.yml`.
 
-Les variables de production sont décrites dans `.env.example` ; le `.env` réel vit
-sur le serveur (`/root/lescracks/.env`) et n'est jamais commité.
+Production variables are described in `.env.example`; the real `.env` lives on the
+server (`/root/lescracks/.env`) and is never committed.
 
 ## Conventions
 
-Tout le code est en anglais — identifiants, fichiers, commentaires, messages de
-commit. Le français est réservé aux textes lus par l'utilisateur : interface,
-contenus, messages d'erreur de l'API et corps des mails.
+All code is in English — identifiers, files, comments, commit messages. French is
+reserved for what users read: the interface, page content, API error messages and
+email bodies.
 
-Les règles détaillées (structure, style, workflow git, décisions d'architecture)
-sont dans [CLAUDE.md](CLAUDE.md). Les workflows sensibles — migration de schéma,
-ajout d'endpoint, snapshot SEO — sont documentés dans `.claude/skills/`.
+The detailed rules (structure, style, git workflow, architecture decisions) live in
+[CLAUDE.md](CLAUDE.md). The workflows where a wrong move is expensive — schema
+migration, new endpoint, SEO snapshot — are documented under `.claude/skills/`.
 
 ---
 
-Développé par **Brandon Kamga**
+Built by **Brandon Kamga**

@@ -1,82 +1,94 @@
 ---
 name: git-workflow
-description: Structurer les branches et les commits sur LesCracks — modèle main/develop/feature, commits progressifs pendant le développement, format des messages. À utiliser avant de commencer à coder, avant tout commit, et avant d'ouvrir une PR.
+description: Structure branches and commits on LesCracks — the main/develop/feature model, committing progressively while coding, and message format. Use before starting to code, before every commit, and before opening a PR.
 ---
 
-# Branches et commits
+# Branches and commits
 
-## Avant d'écrire la première ligne
+## Before writing the first line
 
-Vérifier où on est :
+Check where you are:
 ```
 git branch --show-current
 ```
 
-- Sur `main` ou `develop` → **créer une branche avant de modifier quoi que ce soit** :
+- On `main` or `develop` → **create a branch before changing anything**:
   ```
   git switch develop && git pull
   git switch -c feature/event-waitlist
   ```
-- Déjà sur une branche de travail cohérente avec la tâche → continuer dessus.
+- Already on a work branch that matches the task → keep going on it.
 
-Préfixes : `feature/` (nouveauté), `fix/` (correctif), `docs/` (documentation, README, CLAUDE.md), `hotfix/` (urgence prod, part de `main`). Nom court, en anglais, en kebab-case.
+Prefixes: `feature/` (new work), `fix/` (bug fix), `docs/` (documentation, README,
+CLAUDE.md), `hotfix/` (production emergency, branches off `main`). Short name, in
+English, kebab-case.
 
-Cible de la PR : `develop` — sauf `hotfix/`, qui vise `main`.
+PR target: `develop` — except `hotfix/`, which targets `main`.
 
-## Commiter progressivement
+## Commit progressively
 
-**Ne pas accumuler tout le travail dans un commit final.** Dès qu'un ensemble cohérent est terminé et vérifié, il est commité. Un découpage typique d'une feature backend + frontend :
+**Do not pile the whole task into one final commit.** As soon as a coherent chunk is
+finished and verified, commit it. A typical split for a backend plus frontend feature:
 
 ```
-feat(events): add waitlist columns          (migration Flyway + entité)
+feat(events): add waitlist columns          (Flyway migration + entity)
 feat(events): expose waitlist in API        (DTO + service + controller + SecurityConfig)
-feat(events): show waitlist state on detail (page + service front)
+feat(events): show waitlist state on detail (page + frontend service)
 test(events): cover waitlist service        (tests)
 ```
 
-Règles de découpage :
-- Un commit = **un changement logique**, qui compile et laisse le projet dans un état sain
-- Ne jamais mélanger dans un même commit : une feature et un refactoring, du code et du reformatage massif, deux sujets sans rapport
-- Un renommage ou déplacement de fichiers va dans son propre commit
-- Les modifications de dépendances (`pom.xml`, `package.json` + `pnpm-lock.yaml`) vont avec le code qui les utilise
+Splitting rules:
+- One commit = **one logical change** that compiles and leaves the project healthy
+- Never mix in a single commit: a feature and a refactor, code and a large reformat,
+  two unrelated subjects
+- A rename or file move gets its own commit
+- Dependency changes (`pom.xml`, `package.json` + `pnpm-lock.yaml`) travel with the
+  code that uses them
 
-Avant chaque commit, faire passer les checks de la partie touchée :
+Run the checks for the area you touched before each commit:
 ```
 cd backend  && ./mvnw test
 cd frontend && pnpm typecheck && pnpm lint
 ```
 
-Toujours regarder ce qu'on s'apprête à inclure :
+Always look at what you are about to include:
 ```
 git status --short
 git diff --staged
 ```
-Stager explicitement (`git add <fichiers>`), jamais `git add -A` à l'aveugle : c'est ainsi qu'un `.env`, un dump ou un fichier temporaire finit dans l'historique.
+Stage explicitly (`git add <files>`), never a blind `git add -A`: that is how a
+`.env`, a dump or a scratch file ends up in history.
 
-## Format du message
+## Message format
 
 ```
-type(scope): description à l'impératif, en anglais
+type(scope): imperative description, in English
 ```
 
 `type` ∈ `feat`, `fix`, `refactor`, `docs`, `chore`, `test`.
-`scope` = zone touchée (`events`, `seo`, `auth`, `admin`, `ci`…).
+`scope` = the area touched (`events`, `seo`, `auth`, `admin`, `ci`, …).
 
-Corps de message optionnel, réservé au **pourquoi** et aux conséquences non évidentes (migration à appliquer, variable d'env à ajouter, comportement modifié). Pas de liste exhaustive des fichiers : le diff la donne déjà.
+A body is optional and reserved for the **why** and for non-obvious consequences (a
+migration to apply, an environment variable to add, changed behaviour). No exhaustive
+file list: the diff already provides one.
 
-## Interdit dans les commits
+## Never in a commit
 
-- **Aucune mention de Claude, d'une IA ou d'un outil de génération.** Pas de trailer `Co-Authored-By: Claude ...`, pas de « Generated with … », pas d'allusion dans le corps ni dans la description de PR. L'auteur des commits est l'utilisateur.
-- Pas de secret ni de `.env` (voir `.gitignore`).
-- Pas de `git push --force`, pas de `git reset --hard` sur du travail partagé, pas de réécriture d'historique déjà poussé.
-- Pas de commit direct sur `main` (hors `hotfix/` assumé) : `main` déclenche le déploiement en production.
+- **No mention of Claude, of AI, or of any generation tool.** No
+  `Co-Authored-By: Claude ...` trailer, no "Generated with …", no hint in the body or
+  in the PR description. The author of the commits is the user.
+- No secrets and no `.env` (see `.gitignore`).
+- No `git push --force`, no `git reset --hard` on shared work, no rewriting of
+  history that has already been pushed.
+- No direct commit on `main` (outside a deliberate `hotfix/`): `main` triggers the
+  production deployment.
 
-## Avant la PR
+## Before the PR
 
 ```
 git fetch origin && git rebase origin/develop
 ```
-Relire l'ensemble de la branche pour vérifier qu'elle raconte une histoire lisible :
+Read the branch as a whole and check that it tells a legible story:
 ```
 git log --oneline origin/develop..HEAD
 ```
