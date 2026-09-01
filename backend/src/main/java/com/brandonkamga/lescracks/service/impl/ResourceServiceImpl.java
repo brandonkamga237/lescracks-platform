@@ -4,6 +4,7 @@ import com.brandonkamga.lescracks.domain.Resource;
 import com.brandonkamga.lescracks.repository.ResourceRepository;
 import com.brandonkamga.lescracks.service.interfaces.ResourceService;
 import com.brandonkamga.lescracks.domain.ResourceTypeName;
+import com.brandonkamga.lescracks.service.interfaces.StorageService;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -28,12 +29,14 @@ import java.util.UUID;
 public class ResourceServiceImpl implements ResourceService {
 
     private final ResourceRepository resourceRepository;
+    private final StorageService storageService;
 
     @Value("${app.uploads.dir:uploads/resources}")
     private String uploadDirectory;
 
-    public ResourceServiceImpl(ResourceRepository resourceRepository) {
+    public ResourceServiceImpl(ResourceRepository resourceRepository, StorageService storageService) {
         this.resourceRepository = resourceRepository;
+        this.storageService = storageService;
     }
 
     @Override
@@ -153,7 +156,22 @@ public class ResourceServiceImpl implements ResourceService {
         // When tags are involved or a text search is combined with tags, use the unified query
         // (tagIds is guaranteed non-null when hasTags=true, avoiding Hibernate null collection issue)
         if (hasTags) {
-            return resourceRepository.searchWithFilters(toTypeName(typeName), categoryId, searchTerm, tagIds, page);
+            // The combined query interpolates :searchTerm into LOWER(CONCAT(...)). PostgreSQL
+            // types an unbound null as bytea and lower(bytea) does not exist, so a tag filter
+            // without a search term failed outright. Without a term, use the tag-only queries.
+            if (hasSearch) {
+                return resourceRepository.searchWithFilters(toTypeName(typeName), categoryId, searchTerm, tagIds, page);
+            }
+            if (hasType && hasCategory) {
+                return resourceRepository.findByTypeNameAndCategoryIdAndTagsIn(toTypeName(typeName), categoryId, tagIds, page);
+            }
+            if (hasType) {
+                return resourceRepository.findByTypeNameAndTagsIn(toTypeName(typeName), tagIds, page);
+            }
+            if (hasCategory) {
+                return resourceRepository.findByCategoryIdAndTagsIn(categoryId, tagIds, page);
+            }
+            return resourceRepository.findByTagsIn(tagIds, page);
         }
 
         // Text search without tags — use a dedicated query that avoids the IN(:tagIds) problem
@@ -228,27 +246,14 @@ public class ResourceServiceImpl implements ResourceService {
      *
      * @param originalFileName original filename from the client
      * @param bytes            raw file bytes
-     * @param contentType      MIME type (not used for local storage but kept for MinIO migration)
-     * @return relative public URL, e.g. "/api/resources/files/uuid-report.pdf"
+     * @param contentType      MIME type stored alongside the object
+     * @return relative API url, e.g. "/api/resources/files/uuid-report.pdf"
      */
     @Override
     public String storeFile(String originalFileName, byte[] bytes, String contentType) {
-        try {
-            Path uploadDir = Paths.get(uploadDirectory);
-            Files.createDirectories(uploadDir);
-
-            String extension = "";
-            int dotIndex = originalFileName.lastIndexOf('.');
-            if (dotIndex >= 0) {
-                extension = originalFileName.substring(dotIndex);
-            }
-            String storedName = UUID.randomUUID() + extension;
-            Path target = uploadDir.resolve(storedName);
-            Files.write(target, bytes);
-
-            return "/api/resources/files/" + storedName;
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to store file: " + originalFileName, e);
-        }
+        String key = storageService.store(originalFileName, bytes, contentType);
+        // The url still points at the API rather than at MinIO directly: serving through the
+        // backend keeps the access rules in one place.
+        return "/api/resources/files/" + key;
     }
 }

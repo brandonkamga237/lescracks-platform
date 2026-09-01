@@ -8,7 +8,6 @@ import {
   Download,
   ExternalLink,
   Eye,
-  Crown,
   Lock,
   Tag,
   Calendar,
@@ -34,7 +33,7 @@ function formatSize(bytes?: number) {
 
 export default function RessourceDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const { isAuthenticated, isPremium } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [resource, setResource] = useState<Resource | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -84,10 +83,10 @@ export default function RessourceDetail() {
    * Browsing the catalogue is public. Opening or downloading the CONTENT is not.
    *
    * The server now enforces this (the file endpoint used to be permitAll, so anyone
-   * with the URL could pull down any file, premium included). We mirror the rule here
+   * with the URL could pull down any file). We mirror the rule here
    * so the button says "connecte-toi" instead of firing a request that would 401.
    */
-  const canAccess = isAuthenticated && (!resource.premium || isPremium);
+  const canAccess = isAuthenticated;
   const fileSize = formatSize(resource.metadata?.fileSize);
 
   const seoDescription = resource.description
@@ -170,11 +169,6 @@ export default function RessourceDetail() {
                 <PlayCircle className="w-16 h-16 text-gold/50 relative z-10" />
               ) : (
                 <FileText className="w-16 h-16 text-gold/50 relative z-10" />
-              )}
-              {resource.premium && (
-                <div className="absolute top-3 right-3 z-10 flex items-center gap-1 px-2.5 py-1 bg-gold text-black rounded-full text-xs font-bold">
-                  <Crown className="w-3 h-3" /> Premium
-                </div>
               )}
             </motion.div>
 
@@ -304,31 +298,15 @@ export default function RessourceDetail() {
                   <div className="w-10 h-10 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto">
                     <Lock className="w-5 h-5 text-gold" />
                   </div>
-                  {/* Three different reasons to be blocked — say which one it is, rather
-                      than telling a logged-out visitor about Premium when all they need
-                      is an account. */}
                   <p className="text-sm text-t2 leading-relaxed">
-                    {!isAuthenticated
-                      ? (resource.premium
-                          ? 'Cette ressource est réservée aux membres Premium. Connecte-toi pour continuer.'
-                          : 'Connecte-toi pour ouvrir cette ressource. La consultation du catalogue reste libre.')
-                      : 'Cette ressource est réservée aux membres Premium.'}
+                    Connecte-toi pour ouvrir cette ressource. La consultation du catalogue reste libre.
                   </p>
-                  {isAuthenticated ? (
-                    <Link
-                      to="/premium"
-                      className="w-full flex items-center justify-center gap-2 bg-gold text-black font-semibold px-4 py-2.5 rounded-xl hover:bg-gold/80 transition-colors text-sm"
-                    >
-                      <Crown className="w-4 h-4" /> Passer Premium
-                    </Link>
-                  ) : (
-                    <Link
-                      to={`/connexion?redirect=/ressources/${resource.slug || resource.id}`}
-                      className="w-full flex items-center justify-center gap-2 bg-gold text-black font-semibold px-4 py-2.5 rounded-xl hover:bg-gold/80 transition-colors text-sm"
-                    >
-                      Se connecter
-                    </Link>
-                  )}
+                  <Link
+                    to={`/connexion?redirect=/ressources/${resource.slug || resource.id}`}
+                    className="w-full flex items-center justify-center gap-2 bg-gold text-black font-semibold px-4 py-3 rounded-xl hover:bg-gold/80 transition-colors text-sm"
+                  >
+                    Se connecter
+                  </Link>
                 </div>
               )}
             </motion.div>

@@ -18,6 +18,7 @@ import com.brandonkamga.lescracks.repository.TagRepository;
 import com.brandonkamga.lescracks.service.interfaces.ResourceService;
 import com.brandonkamga.lescracks.security.Authorities;
 import com.brandonkamga.lescracks.exception.BadRequestException;
+import com.brandonkamga.lescracks.service.interfaces.StorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -60,6 +61,7 @@ public class ResourceController {
     private final ResourceService resourceService;
     private final CategoryRepository categoryRepository;
     private final ResourceTypeRepository resourceTypeRepository;
+    private final StorageService storageService;
     private final TagRepository tagRepository;
     private final ResourceRepository resourceRepository;
 
@@ -71,8 +73,10 @@ public class ResourceController {
             CategoryRepository categoryRepository,
             ResourceTypeRepository resourceTypeRepository,
             TagRepository tagRepository,
-            ResourceRepository resourceRepository) {
+            ResourceRepository resourceRepository,
+            StorageService storageService) {
         this.resourceService = resourceService;
+        this.storageService = storageService;
         this.categoryRepository = categoryRepository;
         this.resourceTypeRepository = resourceTypeRepository;
         this.tagRepository = tagRepository;
@@ -146,11 +150,8 @@ public class ResourceController {
         Page<Resource> resourcePage = resourceService.searchWithFilters(
                 type != null ? type.toLowerCase() : null, categoryId, tagIdList, search, pageable);
 
-        boolean canAccessPremium = hasPremiumAccess(authentication);
-
-        // Convert to response format — mask URL for premium resources if user has no access
         List<ResourceResponse> content = resourcePage.getContent().stream()
-                .map(r -> toResponse(r, canAccessPremium))
+                .map(this::toResponse)
                 .collect(Collectors.toList());
         
         PaginatedResourceResponse response = new PaginatedResourceResponse(
@@ -168,26 +169,21 @@ public class ResourceController {
 
     @GetMapping("/slug/{slug}")
     @Operation(summary = "Récupérer une ressource par slug SEO",
-               description = "Retourne les détails d'une ressource via son slug. Accès public pour les ressources non-premium.")
+               description = "Retourne les détails d'une ressource via son slug.")
     public ResponseEntity<ApiResponse<ResourceResponse>> getResourceBySlug(
             @Parameter(description = "Slug SEO de la ressource", required = true) @PathVariable String slug,
             Authentication authentication) {
         Resource resource = resourceService.findBySlug(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource", "slug", slug));
-        if (resource.isPremium() && !hasPremiumAccess(authentication)) {
-            throw new com.brandonkamga.lescracks.exception.ForbiddenException("Cette ressource est réservée aux membres PREMIUM");
-        }
         return ResponseEntity.ok(ApiResponse.success(toResponse(resource)));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get resource by ID",
-               description = "Returns the details of a specific resource. PREMIUM resources require an active account.")
+               description = "Returns the details of a specific resource.")
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200",
             description = "Resource found"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403",
-            description = "Access denied — PREMIUM resource"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404",
             description = "Resource not found")
     })
@@ -196,9 +192,6 @@ public class ResourceController {
             Authentication authentication) {
         Resource resource = resourceService.findByIdOptional(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource", "id", id));
-        if (resource.isPremium() && !hasPremiumAccess(authentication)) {
-            throw new com.brandonkamga.lescracks.exception.ForbiddenException("This resource is reserved for PREMIUM members");
-        }
         return ResponseEntity.ok(ApiResponse.success(toResponse(resource)));
     }
 
@@ -213,10 +206,9 @@ public class ResourceController {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Resource> resourcePage = resourceService.findByCategoryId(categoryId, pageable);
-        boolean canAccessPremium = hasPremiumAccess(authentication);
 
         List<ResourceResponse> content = resourcePage.getContent().stream()
-                .map(r -> toResponse(r, canAccessPremium))
+                .map(this::toResponse)
                 .collect(Collectors.toList());
         
         PaginatedResourceResponse response = new PaginatedResourceResponse(
@@ -240,10 +232,9 @@ public class ResourceController {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Resource> resourcePage = resourceService.findByResourceTypeName(resourceTypeName.toLowerCase(), pageable);
-        boolean canAccessPremium = hasPremiumAccess(authentication);
 
         List<ResourceResponse> content = resourcePage.getContent().stream()
-                .map(r -> toResponse(r, canAccessPremium))
+                .map(this::toResponse)
                 .collect(Collectors.toList());
         
         PaginatedResourceResponse response = new PaginatedResourceResponse(
@@ -272,10 +263,9 @@ public class ResourceController {
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Resource> resourcePage = resourceService.findByTagsIn(tagIdList, pageable);
-        boolean canAccessPremium = hasPremiumAccess(authentication);
 
         List<ResourceResponse> content = resourcePage.getContent().stream()
-                .map(r -> toResponse(r, canAccessPremium))
+                .map(this::toResponse)
                 .collect(Collectors.toList());
         
         PaginatedResourceResponse response = new PaginatedResourceResponse(
@@ -346,6 +336,24 @@ public class ResourceController {
 
     // ── File upload ──────────────────────────────────────────────────────────────
 
+    @PostMapping(value = "/upload/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Upload an image",
+               description = "Stores a preview or cover image and returns its url. Reserved for administrators.")
+    public ResponseEntity<ApiResponse<String>> uploadImage(
+            @RequestParam("file") MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new BadRequestException("File is empty");
+        }
+        requireExtensionIn(file.getOriginalFilename(), ALLOWED_IMAGE_EXTENSIONS,
+                "Format d'image non autorisé. Formats acceptés : JPEG, PNG, WebP, GIF.");
+        String url = resourceService.storeFile(
+                file.getOriginalFilename(),
+                file.getBytes(),
+                file.getContentType());
+        return ResponseEntity.ok(ApiResponse.success(url, "Image uploaded successfully"));
+    }
+
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Upload a resource file",
@@ -355,7 +363,9 @@ public class ResourceController {
         if (file.isEmpty()) {
             throw new BadRequestException("File is empty");
         }
-        requireAllowedExtension(file.getOriginalFilename());
+        requireExtensionIn(file.getOriginalFilename(), ALLOWED_DOCUMENT_EXTENSIONS,
+                "Format non autorisé. Formats acceptés : documents (PDF, Word, Excel, PowerPoint, texte) "
+                        + "et vidéos (MP4, WebM, MOV).");
         String url = resourceService.storeFile(
                 file.getOriginalFilename(),
                 file.getBytes(),
@@ -369,11 +379,10 @@ public class ResourceController {
      * Serve the bytes of an uploaded file.
      *
      * Browsing the catalogue is public, but the CONTENT is not: this endpoint used to be
-     * permitAll, so anyone holding the URL could pull down any file — premium ones
+     * permitAll, so anyone holding the URL could pull down any file
      * included — without ever creating an account. The paywall was a painted door.
      *
-     * Authentication is enforced by SecurityConfig; premium is checked here because only
-     * this layer knows which resource the file belongs to.
+     * Authentication is enforced by SecurityConfig.
      */
     @GetMapping("/files/{filename:.+}")
     @Operation(summary = "Download / view an uploaded file (compte requis)",
@@ -391,13 +400,18 @@ public class ResourceController {
             throw new BadRequestException("Chemin de fichier invalide");
         }
 
-        // A premium file must not be reachable just because someone guessed its filename.
-        resourceRepository.findFirstByUrlContaining(filename).ifPresent(resource -> {
-            if (resource.isPremium() && !hasPremiumAccess(authentication)) {
-                throw new com.brandonkamga.lescracks.exception.ForbiddenException(
-                        "Cette ressource est réservée aux membres PREMIUM");
-            }
-        });
+        // New uploads live in MinIO. Files stored before that still sit on the mounted volume,
+        // so the disk is checked as a fallback rather than a primary location.
+        var stored = storageService.read(filename);
+        if (stored.isPresent()) {
+            String storedType = stored.get().contentType() != null
+                    ? stored.get().contentType()
+                    : "application/octet-stream";
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                    .contentType(MediaType.parseMediaType(storedType))
+                    .body(new org.springframework.core.io.ByteArrayResource(stored.get().content()));
+        }
 
         org.springframework.core.io.Resource fileResource =
                 new org.springframework.core.io.UrlResource(filePath.toUri());
@@ -436,9 +450,6 @@ public class ResourceController {
     public ResponseEntity<ApiResponse<String>> trackDownload(@PathVariable Long id, Authentication authentication) {
         Resource resource = resourceService.findByIdOptional(id)
                 .orElseThrow(() -> new com.brandonkamga.lescracks.exception.ResourceNotFoundException("Resource", "id", id));
-        if (resource.isPremium() && !hasPremiumAccess(authentication)) {
-            throw new com.brandonkamga.lescracks.exception.ForbiddenException("Cette ressource est réservée aux membres PREMIUM");
-        }
         if (!resource.isDownloadable()) {
             throw new BadRequestException("Le téléchargement n'est pas autorisé pour cette ressource");
         }
@@ -467,38 +478,26 @@ public class ResourceController {
         return ResponseEntity.ok(ApiResponse.success(null, "Resource deleted successfully"));
     }
 
-    /**
-     * Returns true if the authenticated user has premium or admin access.
-     * Admins can always access premium resources.
-     * Premium users can access only if their premium has not expired (enforced by the scheduler at the role level).
-     */
-    private boolean hasPremiumAccess(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return false;
-        }
-        return Authorities.hasPremiumAccess(authentication);
-    }
 
     /**
      * Uploaded files are served back inline with a content type probed from their extension,
      * so anything the browser renders as markup (html, svg, …) would run on the API origin.
      * Only the document, video and image formats the catalogue actually uses are accepted.
      */
-    private static final Set<String> ALLOWED_UPLOAD_EXTENSIONS = Set.of(
+    private static final Set<String> ALLOWED_DOCUMENT_EXTENSIONS = Set.of(
             "pdf", "doc", "docx", "odt", "rtf", "txt", "md",
-            "ppt", "pptx", "odp", "xls", "xlsx", "ods", "csv",
-            "zip",
-            "mp4", "webm", "mov", "m4v",
+            "ppt", "pptx", "odp", "xls", "xlsx", "ods", "csv", "zip",
+            "mp4", "webm", "mov", "m4v");
+
+    private static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of(
             "jpg", "jpeg", "png", "webp", "gif");
 
-    private void requireAllowedExtension(String originalFileName) {
+    private void requireExtensionIn(String originalFileName, Set<String> allowed, String message) {
         String name = originalFileName == null ? "" : originalFileName;
         int dot = name.lastIndexOf('.');
         String extension = dot >= 0 ? name.substring(dot + 1).toLowerCase(Locale.ROOT) : "";
-        if (!ALLOWED_UPLOAD_EXTENSIONS.contains(extension)) {
-            throw new BadRequestException(
-                    "Format de fichier non autorisé. Formats acceptés : documents (PDF, Word, Excel, PowerPoint, texte), "
-                            + "vidéos (MP4, WebM, MOV) et images.");
+        if (!allowed.contains(extension)) {
+            throw new BadRequestException(message);
         }
     }
 
@@ -530,6 +529,10 @@ public class ResourceController {
         if (sourceType == ResourceSourceType.INLINE && !isArticle) {
             throw new BadRequestException("Seules les ressources de type article peuvent être rédigées sur la plateforme");
         }
+        // Videos are links to an outside player, never files hosted here.
+        if (isVideo) {
+            sourceType = ResourceSourceType.EXTERNAL;
+        }
         if (isArticle && (request.getContent() == null || request.getContent().isBlank())) {
             throw new BadRequestException("Le contenu de l'article est obligatoire");
         }
@@ -543,9 +546,6 @@ public class ResourceController {
         // caller — can make a download button (or a "downloads" stat) appear on them.
         boolean downloadable = !isVideo && !isArticle && request.isDownloadable();
 
-        // Videos hosted on the platform are the paid part of the catalogue: uploading one
-        // always makes it premium, whatever the request asked for.
-        boolean premium = request.isPremium() || (isVideo && sourceType == ResourceSourceType.UPLOADED);
 
         Resource resource = Resource.builder()
                 .title(request.getTitle())
@@ -554,7 +554,6 @@ public class ResourceController {
                 .content(isArticle ? request.getContent() : null)
                 .previewImageUrl(request.getPreviewImageUrl())
                 .sourceType(sourceType)
-                .premium(premium)
                 .downloadable(downloadable)
                 .category(category)
                 .resourceType(resourceType)
@@ -580,10 +579,6 @@ public class ResourceController {
     }
 
     private ResourceResponse toResponse(Resource resource) {
-        return toResponse(resource, true);
-    }
-
-    private ResourceResponse toResponse(Resource resource, boolean canAccessPremium) {
         Set<ResourceResponse.TagDto> tags = resource.getTags().stream()
                 .map(tag -> ResourceResponse.TagDto.builder()
                         .id(tag.getId())
@@ -601,10 +596,8 @@ public class ResourceController {
                     .build();
         }
 
-        // For premium resources, only expose the URL and the article body if the caller has access
-        boolean locked = resource.isPremium() && !canAccessPremium;
-        String url = locked ? null : resource.getUrl();
-        String content = locked ? null : resource.getContent();
+        String url = resource.getUrl();
+        String content = resource.getContent();
 
         return ResourceResponse.builder()
                 .id(resource.getId())
@@ -614,7 +607,6 @@ public class ResourceController {
                 .content(content)
                 .previewImageUrl(resource.getPreviewImageUrl())
                 .sourceType(resource.getSourceType() != null ? resource.getSourceType().name() : ResourceSourceType.EXTERNAL.name())
-                .premium(resource.isPremium())
                 .downloadable(resource.isDownloadable())
                 .viewCount(resource.getViewCount())
                 .downloadCount(resource.getDownloadCount())

@@ -49,14 +49,6 @@ public class OpenSourceController {
         return ResponseEntity.ok(ApiResponse.success(projects));
     }
 
-    @GetMapping("/projects/featured")
-    @Operation(summary = "List featured open-source projects (homepage)")
-    public ResponseEntity<ApiResponse<List<OpenSourceProjectResponse>>> getFeaturedProjects() {
-        List<OpenSourceProjectResponse> projects = projectRepository
-                .findByFeaturedTrueAndVisibleTrueOrderByFeaturedOrderAsc()
-                .stream().map(this::toProjectResponse).collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success(projects));
-    }
 
     @GetMapping("/contributors")
     @Operation(summary = "List all visible contributors")

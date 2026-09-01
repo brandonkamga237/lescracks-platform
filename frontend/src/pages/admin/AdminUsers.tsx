@@ -1,6 +1,6 @@
 // src/pages/admin/AdminUsers.tsx
 import { useState, useEffect } from 'react';
-import { Users, ChevronLeft, ChevronRight, Loader2, Trash2, Edit, Crown, Shield, X, Save } from 'lucide-react';
+import { Users, ChevronLeft, ChevronRight, Loader2, Trash2, Edit, Shield, X, Save } from 'lucide-react';
 import adminApi, { AdminUser, PaginatedResponse } from '@/services/adminApi';
 import { PageHeader } from '@/components/admin/viz';
 
@@ -41,9 +41,6 @@ const AdminUsers = () => {
     switch (role?.toUpperCase()) {
       case 'ADMIN':
         return <span className="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded-full flex items-center gap-1"><Shield className="w-3 h-3" /> Admin</span>;
-      case 'PREMIUM_USER':
-      case 'PREMIUM':
-        return <span className="px-2 py-1 text-xs bg-gold/20 text-gold rounded-full flex items-center gap-1"><Crown className="w-3 h-3" /> Premium</span>;
       case 'LEARNER':
         return <span className="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded-full flex items-center gap-1">🎓 Apprenant</span>;
       default:
@@ -65,7 +62,7 @@ const AdminUsers = () => {
     setSaving(true);
     try {
       await adminApi.updateUserRole(editingUser.id, newRole);
-      setUsers(users.map(u => u.id === editingUser.id ? { ...u, roleName: newRole as 'ADMIN' | 'PREMIUM' | 'FREE' } : u));
+      setUsers(users.map(u => u.id === editingUser.id ? { ...u, roleName: newRole as 'ADMIN' | 'LEARNER' | 'FREE' } : u));
       setEditingUser(null);
     } catch (err) {
       console.error('Error updating user role:', err);
@@ -198,7 +195,6 @@ const AdminUsers = () => {
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/50"
               >
                 <option value="USER">Free</option>
-                <option value="PREMIUM_USER">Premium</option>
                 <option value="LEARNER">Apprenant (Crack Accompagné)</option>
                 <option value="ADMIN">Admin</option>
               </select>

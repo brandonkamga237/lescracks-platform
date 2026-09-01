@@ -33,15 +33,14 @@ spring:
       include-message: never
       include-stacktrace: never
 
-  # MinIO Configuration for Production
+app:
+  # Object storage, read by MinioStorageService
   minio:
     url: ${MINIO_ENDPOINT}
     access-key: ${MINIO_ACCESS_KEY}
     secret-key: ${MINIO_SECRET_KEY}
     bucket: ${MINIO_BUCKET}
     public-url: ${MINIO_PUBLIC_URL}
-
-app:
   auth:
     cookie:
       # Production is https-only: the auth cookie must never travel over plain http.

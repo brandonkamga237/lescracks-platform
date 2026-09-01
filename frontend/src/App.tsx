@@ -24,7 +24,6 @@ import AdminCategories from './pages/admin/AdminCategories';
 import AdminTags from './pages/admin/AdminTags';
 import AdminResources from './pages/admin/AdminResources';
 import AdminEvents from './pages/admin/AdminEvents';
-import AdminPremiumRequests from './pages/admin/AdminPremiumRequests';
 import AdminApplications from './pages/admin/AdminApplications';
 import AdminOpenSource from './pages/admin/AdminOpenSource';
 import AdminContributors from './pages/admin/AdminContributors';
@@ -32,7 +31,6 @@ import AdminApprenants from './pages/admin/AdminApprenants';
 import Apprenants from './pages/Apprenants';
 import ApprennantProfile from './pages/ApprennantProfile';
 import MonProfilApprenant from './pages/MonProfilApprenant';
-import Premium from './pages/Premium';
 import Postuler from './pages/Postuler';
 import VerifyEmail from './pages/VerifyEmail';
 import ProviderUnavailable from './pages/ProviderUnavailable';
@@ -124,7 +122,6 @@ function AppContent() {
 
           {/* Protected Routes — authenticated users only */}
           <Route path="/profil" element={<UserRoute><Profile /></UserRoute>} />
-          <Route path="/premium" element={<UserRoute><Premium /></UserRoute>} />
 
           {/* Public — Postuler + Programme accessibles sans compte */}
           <Route path="/postuler" element={<Postuler />} />
@@ -175,11 +172,6 @@ function AppContent() {
           <Route path="/admin/applications" element={
             <AdminRoute>
               <AdminApplications />
-            </AdminRoute>
-          } />
-          <Route path="/admin/premium-requests" element={
-            <AdminRoute>
-              <AdminPremiumRequests />
             </AdminRoute>
           } />
           <Route path="/admin/open-source" element={

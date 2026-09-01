@@ -59,7 +59,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/events", "/api/events/*", "/api/events/slug/*", "/api/events/types", "/api/events/statuses").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/learners", "/api/learners/showcased", "/api/learners/*").permitAll()
                 // Endpoints publics open-source (projets et contributeurs)
-                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/open-source/projects", "/api/open-source/projects/featured", "/api/open-source/contributors").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/open-source/projects", "/api/open-source/contributors").permitAll()
                 // Candidature publique Accompagnement 360 — aucun compte requis
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/applications").permitAll()
                 // Types de candidature — nécessaires au formulaire public pour résoudre

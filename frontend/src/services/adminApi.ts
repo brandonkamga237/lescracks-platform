@@ -10,7 +10,7 @@ export interface AdminUser {
   username?: string;
   firstName?: string;
   lastName?: string;
-  roleName: 'FREE' | 'PREMIUM' | 'ADMIN';
+  roleName: 'FREE' | 'LEARNER' | 'ADMIN';
   providerName: string;
   createdAt: string;
   enabled: boolean;
@@ -44,7 +44,6 @@ export interface AdminResource {
   resourceTypeId: number;
   resourceTypeName: string;
   sourceType?: string;
-  premium?: boolean;
   downloadable?: boolean;
 }
 
@@ -124,7 +123,6 @@ export interface AdminResourcePayload {
   resourceTypeId: number;
   tagIds?: number[];
   sourceType?: 'EXTERNAL' | 'UPLOADED' | 'INLINE';
-  premium?: boolean;
   downloadable?: boolean;
   readingTimeMinutes?: number;
   author?: string;
@@ -148,18 +146,6 @@ export interface AdminApplication {
   age?: number;
   motivationText?: string;
   technicalLevel?: string;
-  createdAt: string;
-}
-
-export interface AdminPremiumRequest {
-  id: number;
-  userId: number;
-  username: string;
-  email: string;
-  whatsappNumber: string;
-  contactEmail: string;
-  country: string;
-  message?: string;
   createdAt: string;
 }
 
@@ -190,12 +176,9 @@ export interface DashboardStats {
   resourcesByCategory: { categoryName: string; count: number }[];
   eventsByStatus: { [key: string]: number };
   applicationsByStatus: { [key: string]: number };
-  premiumRequestsByStatus: { [key: string]: number };
-  totalPremiumRequests: number;
   newUsersLast30Days: number;
   newUsersPrev30Days: number;
   newResourcesLast30Days: number;
-  premiumConversionRate: number;
   totalViews: number;
   totalDownloads: number;
   topViewedResources: TopResource[];
@@ -302,10 +285,6 @@ class AdminApiService {
   // === USERS ===
   async getUsers(page = 0, size = 20): Promise<PaginatedResponse<AdminUser>> {
     return this.request<PaginatedResponse<AdminUser>>(`/admin/users?page=${page}&size=${size}`);
-  }
-
-  async getUser(id: number): Promise<AdminUser> {
-    return this.request<AdminUser>(`/admin/users/${id}`);
   }
 
   async updateUserRole(id: number, roleName: string): Promise<AdminUser> {
@@ -426,34 +405,12 @@ class AdminApiService {
     await this.request<void>(`/applications/${id}`, { method: 'DELETE' });
   }
 
-  // === PREMIUM REQUESTS ===
-  async getPremiumRequests(page = 0, size = 20): Promise<PaginatedResponse<AdminPremiumRequest>> {
-    const params = new URLSearchParams({ page: String(page), size: String(size) });
-    return this.request<PaginatedResponse<AdminPremiumRequest>>(`/premium/admin/requests?${params}`);
-  }
-
-  async acceptPremiumRequest(id: number, months: number): Promise<void> {
-    await this.request<void>(`/premium/admin/requests/${id}/accept?months=${months}`, {
-      method: 'POST',
-    });
-  }
-
   // === LEARNERS ===
   async assignLearnerRole(userId: number, cohort?: string): Promise<AdminLearner> {
     return this.request<AdminLearner>(`/learners/admin/assign/${userId}`, {
       method: 'POST',
       body: JSON.stringify({ cohort: cohort ?? null }),
     });
-  }
-
-  async rejectPremiumRequest(id: number): Promise<void> {
-    await this.request<void>(`/premium/admin/requests/${id}`, {
-      method: 'DELETE',
-    });
-  }
-
-  async getPremiumStats(): Promise<{ pending: number }> {
-    return this.request(`/premium/admin/stats`);
   }
 
   // === EVENTS ===

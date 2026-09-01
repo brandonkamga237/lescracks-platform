@@ -86,23 +86,6 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(users));
     }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Récupérer un utilisateur par ID", 
-               description = "Retourne les détails d'un utilisateur spécifique.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Utilisateur trouvé",
-            content = @Content(mediaType = "application/json")),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
-            description = "Utilisateur non trouvé",
-            content = @Content(mediaType = "application/json"))
-    })
-    public ResponseEntity<ApiResponse<UserResponse>> getUserById(
-            @Parameter(description = "ID de l'utilisateur", required = true) @PathVariable Long id) {
-        return userService.findByIdOptional(id)
-                .map(user -> ResponseEntity.ok(ApiResponse.success(userMapper.toResponse(user))))
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
-    }
 
     @GetMapping("/me")
     @Operation(summary = "Récupérer l'utilisateur connecté", 
@@ -203,109 +186,10 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(null, "Account deleted successfully"));
     }
 
-    @GetMapping("/email/{email}")
-    @Operation(summary = "Récupérer un utilisateur par email", 
-               description = "Recherche un utilisateur par son adresse email.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Utilisateur trouvé",
-            content = @Content(mediaType = "application/json")),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
-            description = "Utilisateur non trouvé",
-            content = @Content(mediaType = "application/json"))
-    })
-    public ResponseEntity<ApiResponse<UserResponse>> getUserByEmail(
-            @Parameter(description = "Email de l'utilisateur", required = true) @PathVariable String email) {
-        User user = userService.findByEmail(email);
-        if (user == null) {
-            throw new ResourceNotFoundException("User", "email", email);
-        }
-        return ResponseEntity.ok(ApiResponse.success(userMapper.toResponse(user)));
-    }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Mettre à jour un utilisateur", 
-               description = "Met à jour les informations d'un utilisateur. L'utilisateur peut uniquement modifier son propre compte.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Utilisateur mis à jour",
-            content = @Content(mediaType = "application/json")),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", 
-            description = "Données invalides",
-            content = @Content(mediaType = "application/json")),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
-            description = "Utilisateur non trouvé",
-            content = @Content(mediaType = "application/json"))
-    })
-    public ResponseEntity<ApiResponse<UserResponse>> updateUser(
-            @Parameter(description = "ID de l'utilisateur", required = true) @PathVariable Long id,
-            @Valid @RequestBody UserRequest userRequest) {
-        
-        // Users can only update their own account, admins cannot update users
-        if (!isCurrentUser(id)) {
-            throw new BadRequestException("You can only update your own account");
-        }
 
-        if (!userService.findByIdOptional(id).isPresent()) {
-            throw new ResourceNotFoundException("User", "id", id);
-        }
 
-        UserRequest validatedRequest = validateUpdateRequest(id, userRequest);
-        User existingUser = userService.findById(id);
-        User updatedUser = userMapper.updateEntity(existingUser, validatedRequest);
-        User savedUser = userService.save(updatedUser);
 
-        return ResponseEntity.ok(ApiResponse.success(userMapper.toResponse(savedUser), "User updated successfully"));
-    }
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Supprimer un utilisateur", 
-               description = "Supprime un utilisateur. L'utilisateur peut uniquement supprimer son propre compte.")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", 
-            description = "Utilisateur supprimé",
-            content = @Content(mediaType = "application/json")),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", 
-            description = "Impossible de supprimer ce compte",
-            content = @Content(mediaType = "application/json")),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", 
-            description = "Utilisateur non trouvé",
-            content = @Content(mediaType = "application/json"))
-    })
-    public ResponseEntity<ApiResponse<Void>> deleteUser(
-            @Parameter(description = "ID de l'utilisateur", required = true) @PathVariable Long id) {
-        if (!userService.findByIdOptional(id).isPresent()) {
-            throw new ResourceNotFoundException("User", "id", id);
-        }
-
-        // Admins can delete any user, users can only delete their own account
-        if (!isCurrentUser(id) && !isCurrentUserAdmin()) {
-            throw new BadRequestException("You can only delete your own account");
-        }
-
-        userService.deleteById(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully"));
-    }
-
-    private boolean isCurrentUser(Long userId) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return false;
-        }
-        
-        User currentUser = userService.findByEmail(authentication.getName());
-        return currentUser != null && currentUser.getId().equals(userId);
-    }
-
-    private boolean isCurrentUserAdmin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return false;
-        }
-        return Authorities.isAdmin(authentication);
-    }
 
     @PostMapping(value = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
@@ -425,13 +309,4 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(null, "Mot de passe modifié. Toutes tes autres sessions ont été déconnectées."));
     }
 
-    private UserRequest validateUpdateRequest(Long id, UserRequest request) {
-        if (request.getEmail() != null && userService.existsByEmailExcept(id, request.getEmail())) {
-            throw new BadRequestException("Email already exists");
-        }
-        if (request.getUsername() != null && userService.existsByUsernameExcept(id, request.getUsername())) {
-            throw new BadRequestException("Username already exists");
-        }
-        return request;
-    }
 }

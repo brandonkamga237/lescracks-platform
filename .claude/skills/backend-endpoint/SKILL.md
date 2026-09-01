@@ -43,7 +43,7 @@ mistake in this codebase.
 
 ## Conventions
 
-- Roles: `user`, `premium_user`, `learner`, `admin` (the `RoleName` enum). In Spring,
+- Roles: `user`, `learner`, `admin` (the `RoleName` enum). In Spring,
   `hasRole("ADMIN")` (uppercase, without the `ROLE_` prefix).
 - Response envelope: always `ApiResponse<T>` (`success`, `message`, `data`,
   `timestamp`, `path`).

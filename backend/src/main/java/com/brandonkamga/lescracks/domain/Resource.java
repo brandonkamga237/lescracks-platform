@@ -32,11 +32,6 @@ public class Resource {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    /** Whether this resource requires a premium subscription to access. */
-    @Column(name = "is_premium", nullable = false)
-    @Builder.Default
-    private boolean premium = false;
-
     /** Whether users are allowed to download this resource. */
     @Column(name = "is_downloadable", nullable = false)
     @Builder.Default

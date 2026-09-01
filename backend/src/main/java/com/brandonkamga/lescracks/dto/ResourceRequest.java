@@ -61,10 +61,6 @@ public class ResourceRequest {
     @Schema(description = "Auteur de l'article", example = "Brandon Kamga")
     private String author;
 
-    @Schema(description = "Réservé aux utilisateurs premium uniquement", example = "false")
-    @Builder.Default
-    private boolean premium = false;
-
     @Schema(description = "Autoriser le téléchargement de cette ressource", example = "true")
     @Builder.Default
     private boolean downloadable = true;

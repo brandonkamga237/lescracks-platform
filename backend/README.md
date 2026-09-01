@@ -102,7 +102,7 @@ The JWT is stateless and read from either an `Authorization: Bearer <token>` hea
 HttpOnly cookie, the header winning when both are present. The frontend uses the cookie
 only, so no token is ever exposed to JavaScript.
 
-Roles (`RoleName`): `user`, `premium_user`, `learner`, `admin`.
+Roles (`RoleName`): `user`, `learner`, `admin`.
 Routes under `/api/admin/**` require the `admin` role.
 
 ## Files and images
