@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Plus, Loader2, Trash2, Pencil, ChevronLeft, ChevronRight, X, Save, Image } from 'lucide-react';
 import { PageHeader } from '@/components/admin/viz';
-import adminApi, { AdminEvent, PaginatedResponse } from '@/services/adminApi';
+import adminApi, { AdminEvent, PaginatedResponse, AdminEventPayload } from '@/services/adminApi';
 import { deriveEventStatus } from '@/lib/eventStatus';
 import apiService from '@/services/api';
 
@@ -149,7 +149,7 @@ const AdminEvents = () => {
 
     setSaving(true); setError('');
     try {
-      const payload: any = {
+      const payload: AdminEventPayload = {
         title:               form.title,
         description:         form.description || undefined,
         eventDate:           toDateTime(form.startDate, form.startTime),
@@ -169,8 +169,8 @@ const AdminEvents = () => {
       }
       setShowModal(false);
       fetchEvents();
-    } catch (e: any) {
-      setError(e.message || 'Erreur lors de la sauvegarde.');
+    } catch (e) {
+      setError(errorMessage(e, 'Erreur lors de la sauvegarde.'));
     } finally { setSaving(false); }
   };
 

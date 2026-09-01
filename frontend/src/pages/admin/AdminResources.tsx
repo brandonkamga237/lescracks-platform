@@ -121,7 +121,8 @@ const AdminResources = () => {
       await adminApi.deleteResource(id);
       setResources(resources.filter(r => r.id !== id));
     } catch (err) {
-      setResources(resources.filter(r => r.id !== id));
+      // Dropping the row on failure too made a refused delete look like it worked.
+      alert(errorMessage(err, 'La suppression a échoué.'));
     }
   };
 
@@ -397,7 +398,7 @@ const AdminResources = () => {
                     <td className="px-4 py-3 text-sm text-gray-500">{resource.viewCount ?? 0}</td>
                     <td className="px-4 py-3 text-sm text-gray-500">{resource.downloadCount ?? 0}</td>
                     <td className="px-4 py-3">
-                      {(resource as any).premium ? (
+                      {resource.premium ? (
                         <span className="flex items-center gap-1 text-xs text-amber-600 font-medium">
                           <Crown className="w-3 h-3" />Premium
                         </span>

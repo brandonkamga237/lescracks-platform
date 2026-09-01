@@ -95,6 +95,25 @@ export interface TopResource {
   downloadCount: number;
 }
 
+/**
+ * What the event form actually sends. eventStatusId is optional because the API derives
+ * the status from the dates, and the location and cover fields were missing from the old
+ * inline shape although every call passed them.
+ */
+export interface AdminEventPayload {
+  title: string;
+  description?: string;
+  eventDate: string;
+  endDate?: string;
+  location?: string;
+  coverImageUrl?: string;
+  applicationRequired: boolean;
+  maxParticipants?: number | null;
+  eventTypeId: number;
+  eventStatusId?: number;
+  tagIds?: number[];
+}
+
 export interface AdminResourcePayload {
   title: string;
   description: string;
@@ -442,17 +461,11 @@ class AdminApiService {
     return this.request<PaginatedResponse<AdminEvent>>(`/admin/events?page=${page}&size=${size}`);
   }
 
-  async createEvent(data: {
-    title: string; description?: string; eventDate: string;
-    applicationRequired: boolean; maxParticipants?: number | null; eventTypeId: number; eventStatusId: number; tagIds?: number[];
-  }): Promise<AdminEvent> {
+  async createEvent(data: AdminEventPayload): Promise<AdminEvent> {
     return this.request<AdminEvent>('/events', { method: 'POST', body: JSON.stringify(data) });
   }
 
-  async updateEvent(id: number, data: {
-    title: string; description?: string; eventDate: string;
-    applicationRequired: boolean; maxParticipants?: number | null; eventTypeId: number; eventStatusId: number; tagIds?: number[];
-  }): Promise<AdminEvent> {
+  async updateEvent(id: number, data: AdminEventPayload): Promise<AdminEvent> {
     return this.request<AdminEvent>(`/events/${id}`, { method: 'PUT', body: JSON.stringify(data) });
   }
 

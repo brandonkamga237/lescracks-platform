@@ -55,6 +55,27 @@ export interface Resource {
   };
 }
 
+/** Mirrors ApplicationResponse: a 360 application, or an event sign-up when eventId is set. */
+export interface MyApplication {
+  id: number;
+  userId?: number;
+  username?: string;
+  eventId?: number;
+  eventTitle?: string;
+  applicationTypeId: number;
+  applicationTypeName: string;
+  eventRegistration: boolean;
+  archived: boolean;
+  archivedAt?: string;
+  fullName?: string;
+  emailAddress?: string;
+  whatsappNumber?: string;
+  age?: number;
+  motivationText?: string;
+  technicalLevel?: string;
+  createdAt: string;
+}
+
 export type LearnerStatus = 'EN_COURS' | 'TERMINE_AVEC_CERTIFICAT' | 'TERMINE_SANS_CERTIFICAT';
 
 export interface Learner {
@@ -435,11 +456,11 @@ class ApiService {
     });
   }
 
-  async getMyApplications(): Promise<any[]> {
+  async getMyApplications(): Promise<MyApplication[]> {
     const user = authService.getUser();
     if (!user) return [];
 
-    const data = await this.request<any[]>(
+    const data = await this.request<MyApplication[]>(
       `/applications/user/${user.id}`,
       {}
     );
