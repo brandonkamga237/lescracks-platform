@@ -196,7 +196,7 @@ export interface PaginatedResponse<T> {
 class AdminApiService {
   // Auth rides on the HttpOnly cookie the browser attaches automatically — there is
   // no token in JS to put in a header.
-  private getHeaders(_includeAuth = true): Record<string, string> {
+  private getHeaders(): Record<string, string> {
     return {
       'Content-Type': 'application/json',
     };

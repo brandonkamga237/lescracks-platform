@@ -126,7 +126,7 @@ export default function Apprenants() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {showcased.map((l, i) => (
+            {showcased.map((l) => (
               <motion.div
                 key={l.id}
                 initial={{ opacity: 0, y: 16 }}

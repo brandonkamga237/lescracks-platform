@@ -185,7 +185,7 @@ const About = () => {
               <h2 className="text-3xl sm:text-4xl font-display font-bold">Nos principes</h2>
             </motion.div>
             <div className="grid sm:grid-cols-2 gap-6">
-              {VALUES.map((v, i) => {
+              {VALUES.map((v) => {
                 const Icon = v.icon;
                 return (
                   <motion.div
@@ -218,7 +218,7 @@ const About = () => {
             {/* Vertical line */}
             <div className="absolute left-[22px] top-0 bottom-0 w-px bg-gradient-to-b from-gold/40 via-gold/15 to-transparent" />
             <div className="space-y-8">
-              {MILESTONES.map((m, i) => (
+              {MILESTONES.map((m) => (
                 <motion.div
                   key={m.year}
                   initial={{ opacity: 0, x: -20 }}

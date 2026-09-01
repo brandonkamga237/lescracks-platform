@@ -63,7 +63,7 @@ const Testimonials = () => {
 
         <div className="grid md:grid-cols-3 gap-6">
           <AnimatePresence mode="popLayout">
-            {(showAll ? testimonials : testimonials.slice(0, visibleCount)).map((testimonial, index) => (
+            {(showAll ? testimonials : testimonials.slice(0, visibleCount)).map((testimonial) => (
               <motion.div
                 key={testimonial.name}
                 layout
