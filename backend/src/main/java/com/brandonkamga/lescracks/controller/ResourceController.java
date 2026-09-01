@@ -18,6 +18,7 @@ import com.brandonkamga.lescracks.repository.TagRepository;
 import com.brandonkamga.lescracks.service.interfaces.ResourceService;
 import com.brandonkamga.lescracks.security.Authorities;
 import com.brandonkamga.lescracks.exception.BadRequestException;
+import com.brandonkamga.lescracks.service.interfaces.StorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -60,6 +61,7 @@ public class ResourceController {
     private final ResourceService resourceService;
     private final CategoryRepository categoryRepository;
     private final ResourceTypeRepository resourceTypeRepository;
+    private final StorageService storageService;
     private final TagRepository tagRepository;
     private final ResourceRepository resourceRepository;
 
@@ -71,8 +73,10 @@ public class ResourceController {
             CategoryRepository categoryRepository,
             ResourceTypeRepository resourceTypeRepository,
             TagRepository tagRepository,
-            ResourceRepository resourceRepository) {
+            ResourceRepository resourceRepository,
+            StorageService storageService) {
         this.resourceService = resourceService;
+        this.storageService = storageService;
         this.categoryRepository = categoryRepository;
         this.resourceTypeRepository = resourceTypeRepository;
         this.tagRepository = tagRepository;
@@ -398,6 +402,19 @@ public class ResourceController {
                         "Cette ressource est réservée aux membres PREMIUM");
             }
         });
+
+        // New uploads live in MinIO. Files stored before that still sit on the mounted volume,
+        // so the disk is checked as a fallback rather than a primary location.
+        var stored = storageService.read(filename);
+        if (stored.isPresent()) {
+            String storedType = stored.get().contentType() != null
+                    ? stored.get().contentType()
+                    : "application/octet-stream";
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                    .contentType(MediaType.parseMediaType(storedType))
+                    .body(new org.springframework.core.io.ByteArrayResource(stored.get().content()));
+        }
 
         org.springframework.core.io.Resource fileResource =
                 new org.springframework.core.io.UrlResource(filePath.toUri());

@@ -24,15 +24,14 @@ spring:
       max-file-size: 100MB
       max-request-size: 100MB
 
-  # MinIO Configuration for Development
+app:
+  # Object storage, read by MinioStorageService
   minio:
     url: http://${MINIO_HOST:localhost}:${MINIO_PORT:9000}
     access-key: ${MINIO_ACCESS_KEY:minioadmin}
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
     bucket: ${MINIO_BUCKET:lescracks}
     public-url: http://${MINIO_HOST:localhost}:${MINIO_PORT:9000}
-
-app:
   jwt:
     secret: ${JWT_SECRET:lescracks-dev-secret-key-minimum-256-bits-long-for-hs256}
     expiration: ${JWT_EXPIRATION:86400000}

@@ -51,6 +51,13 @@
 			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
 
+		<!-- MinIO — S3-compatible object storage for uploaded files -->
+		<dependency>
+			<groupId>io.minio</groupId>
+			<artifactId>minio</artifactId>
+			<version>8.5.17</version>
+		</dependency>
+
 		<!-- H2 — in-memory database for the test profile -->
 		<dependency>
 			<groupId>com.h2database</groupId>
