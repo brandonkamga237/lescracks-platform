@@ -17,6 +17,7 @@ import com.brandonkamga.lescracks.repository.ResourceTypeRepository;
 import com.brandonkamga.lescracks.repository.TagRepository;
 import com.brandonkamga.lescracks.service.interfaces.ResourceService;
 import com.brandonkamga.lescracks.security.Authorities;
+import com.brandonkamga.lescracks.exception.BadRequestException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -44,6 +45,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -334,8 +336,9 @@ public class ResourceController {
     public ResponseEntity<ApiResponse<String>> uploadFile(
             @RequestParam("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
-            throw new com.brandonkamga.lescracks.exception.BadRequestException("File is empty");
+            throw new BadRequestException("File is empty");
         }
+        requireAllowedExtension(file.getOriginalFilename());
         String url = resourceService.storeFile(
                 file.getOriginalFilename(),
                 file.getBytes(),
@@ -368,7 +371,7 @@ public class ResourceController {
         // Prevent path traversal: the resolved path must stay inside the upload directory.
         // Without this, "../../etc/passwd" walks straight out of it.
         if (!filePath.startsWith(baseDir)) {
-            throw new com.brandonkamga.lescracks.exception.BadRequestException("Chemin de fichier invalide");
+            throw new BadRequestException("Chemin de fichier invalide");
         }
 
         // A premium file must not be reachable just because someone guessed its filename.
@@ -420,7 +423,7 @@ public class ResourceController {
             throw new com.brandonkamga.lescracks.exception.ForbiddenException("Cette ressource est réservée aux membres PREMIUM");
         }
         if (!resource.isDownloadable()) {
-            throw new com.brandonkamga.lescracks.exception.BadRequestException("Le téléchargement n'est pas autorisé pour cette ressource");
+            throw new BadRequestException("Le téléchargement n'est pas autorisé pour cette ressource");
         }
         resourceService.incrementDownloadCount(id);
         return ResponseEntity.ok(ApiResponse.success(resource.getUrl(), "Téléchargement autorisé"));
@@ -459,6 +462,29 @@ public class ResourceController {
         return Authorities.hasPremiumAccess(authentication);
     }
 
+    /**
+     * Uploaded files are served back inline with a content type probed from their extension,
+     * so anything the browser renders as markup (html, svg, …) would run on the API origin.
+     * Only the document, video and image formats the catalogue actually uses are accepted.
+     */
+    private static final Set<String> ALLOWED_UPLOAD_EXTENSIONS = Set.of(
+            "pdf", "doc", "docx", "odt", "rtf", "txt", "md",
+            "ppt", "pptx", "odp", "xls", "xlsx", "ods", "csv",
+            "zip",
+            "mp4", "webm", "mov", "m4v",
+            "jpg", "jpeg", "png", "webp", "gif");
+
+    private void requireAllowedExtension(String originalFileName) {
+        String name = originalFileName == null ? "" : originalFileName;
+        int dot = name.lastIndexOf('.');
+        String extension = dot >= 0 ? name.substring(dot + 1).toLowerCase(Locale.ROOT) : "";
+        if (!ALLOWED_UPLOAD_EXTENSIONS.contains(extension)) {
+            throw new BadRequestException(
+                    "Format de fichier non autorisé. Formats acceptés : documents (PDF, Word, Excel, PowerPoint, texte), "
+                            + "vidéos (MP4, WebM, MOV) et images.");
+        }
+    }
+
     private Resource toEntity(ResourceRequest request) {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", request.getCategoryId()));
@@ -477,19 +503,41 @@ public class ResourceController {
             catch (IllegalArgumentException ignored) {}
         }
 
-        // A video is a link to watch, not a file to download. Force it non-downloadable at
-        // the source so no client — form, script, or API caller — can mark a video as
-        // downloadable and make a download button (or a "downloads" stat) appear on it.
-        boolean isVideo = resourceType.getName() == ResourceTypeName.video;
-        boolean downloadable = !isVideo && request.isDownloadable();
+        ResourceTypeName typeName = resourceType.getName();
+        boolean isArticle = typeName == ResourceTypeName.article;
+        boolean isVideo = typeName == ResourceTypeName.video;
+
+        if (isArticle) {
+            sourceType = ResourceSourceType.INLINE;
+        }
+        if (sourceType == ResourceSourceType.INLINE && !isArticle) {
+            throw new BadRequestException("Seules les ressources de type article peuvent être rédigées sur la plateforme");
+        }
+        if (isArticle && (request.getContent() == null || request.getContent().isBlank())) {
+            throw new BadRequestException("Le contenu de l'article est obligatoire");
+        }
+        if (!isArticle && sourceType == ResourceSourceType.EXTERNAL
+                && (request.getUrl() == null || request.getUrl().isBlank())) {
+            throw new BadRequestException("L'URL est obligatoire pour une ressource externe");
+        }
+
+        // A video is a link to watch and an article is read in place, not files to download.
+        // Force them non-downloadable at the source so no client — form, script, or API
+        // caller — can make a download button (or a "downloads" stat) appear on them.
+        boolean downloadable = !isVideo && !isArticle && request.isDownloadable();
+
+        // Videos hosted on the platform are the paid part of the catalogue: uploading one
+        // always makes it premium, whatever the request asked for.
+        boolean premium = request.isPremium() || (isVideo && sourceType == ResourceSourceType.UPLOADED);
 
         Resource resource = Resource.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
-                .url(request.getUrl() != null ? request.getUrl() : "")
+                .url(isArticle ? null : (request.getUrl() != null ? request.getUrl() : ""))
+                .content(isArticle ? request.getContent() : null)
                 .previewImageUrl(request.getPreviewImageUrl())
                 .sourceType(sourceType)
-                .premium(request.isPremium())
+                .premium(premium)
                 .downloadable(downloadable)
                 .category(category)
                 .resourceType(resourceType)
@@ -497,11 +545,15 @@ public class ResourceController {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        // Create metadata if provided
-        if (request.getFileSize() != null || request.getMimeType() != null) {
+        boolean hasFileMetadata = request.getFileSize() != null || request.getMimeType() != null;
+        boolean hasArticleMetadata = isArticle
+                && (request.getReadingTimeMinutes() != null || request.getAuthor() != null);
+        if (hasFileMetadata || hasArticleMetadata) {
             ResourceMetadata metadata = ResourceMetadata.builder()
                     .fileSize(request.getFileSize())
                     .mimeType(request.getMimeType())
+                    .readingTimeMinutes(isArticle ? request.getReadingTimeMinutes() : null)
+                    .author(isArticle ? request.getAuthor() : null)
                     .resource(resource)
                     .build();
             resource.setMetadata(metadata);
@@ -527,17 +579,22 @@ public class ResourceController {
             metadataDto = ResourceResponse.ResourceMetadataDto.builder()
                     .fileSize(resource.getMetadata().getFileSize())
                     .mimeType(resource.getMetadata().getMimeType())
+                    .readingTimeMinutes(resource.getMetadata().getReadingTimeMinutes())
+                    .author(resource.getMetadata().getAuthor())
                     .build();
         }
 
-        // For premium resources, only expose the URL if the caller has access
-        String url = (resource.isPremium() && !canAccessPremium) ? null : resource.getUrl();
+        // For premium resources, only expose the URL and the article body if the caller has access
+        boolean locked = resource.isPremium() && !canAccessPremium;
+        String url = locked ? null : resource.getUrl();
+        String content = locked ? null : resource.getContent();
 
         return ResourceResponse.builder()
                 .id(resource.getId())
                 .title(resource.getTitle())
                 .description(resource.getDescription())
                 .url(url)
+                .content(content)
                 .previewImageUrl(resource.getPreviewImageUrl())
                 .sourceType(resource.getSourceType() != null ? resource.getSourceType().name() : ResourceSourceType.EXTERNAL.name())
                 .premium(resource.isPremium())

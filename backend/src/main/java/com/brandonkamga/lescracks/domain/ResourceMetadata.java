@@ -36,4 +36,10 @@ public class ResourceMetadata {
     /** Duration in seconds — relevant for uploaded video files. */
     @Column(name = "duration_seconds")
     private Integer durationSeconds;
+
+    @Column(name = "reading_time_minutes")
+    private Integer readingTimeMinutes;
+
+    @Column(name = "author")
+    private String author;
 }
