@@ -131,7 +131,7 @@ export default function ApprennantProfile() {
         </div>
       </div>
 
-      <section className="max-w-3xl mx-auto px-4 py-10">
+      <section className="max-w-3xl mx-auto px-4 py-12">
         <div className="grid md:grid-cols-3 gap-6">
 
           {/* Main content */}

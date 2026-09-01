@@ -137,7 +137,7 @@ const Programme = () => {
         <div className="max-w-4xl mx-auto text-center relative z-10">
 
           {/* Breadcrumb */}
-          <div className="flex items-center justify-center gap-2 text-sm text-t4 mb-10">
+          <div className="flex items-center justify-center gap-2 text-sm text-t4 mb-8">
             <Link to="/" className="hover:text-gold transition-colors">Accueil</Link>
             <ChevronRight className="w-3 h-3" />
             <span className="text-t2">Le programme</span>
@@ -154,7 +154,7 @@ const Programme = () => {
                 </svg>
               </span>
             </h1>
-            <p className="text-lg text-t3 max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p className="text-lg text-t3 max-w-2xl mx-auto mb-8 leading-relaxed">
               Un suivi humain et structuré de <strong className="text-white">6 à 12 mois</strong> avec un mentor dédié,
               des projets concrets et un réseau. Pas une formation — un accompagnement qui va jusqu'au résultat.
             </p>

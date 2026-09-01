@@ -139,7 +139,7 @@ const Landing = () => {
           <motion.div style={{ y: heroY, opacity: heroOpacity }} className="max-w-2xl">
 
             <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-              className="text-eyebrow text-gold uppercase mb-7">
+              className="text-eyebrow text-gold uppercase mb-8">
               Accélérateur de carrière tech · Afrique francophone
             </motion.p>
 
@@ -155,7 +155,7 @@ const Landing = () => {
             </motion.h1>
 
             <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-              className="text-lg text-t2 max-w-lg mb-10">
+              className="text-lg text-t2 max-w-lg mb-8">
               Un accompagnement structuré pour passer de débutant à profil employable — avec un mentor, des projets réels et une communauté.
             </motion.p>
 
@@ -224,7 +224,7 @@ const Landing = () => {
       {/* ── PROBLÈME ────────────────────────────────────────────────── */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-14">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12">
             <SL>Le défi</SL>
             <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
               Apprendre la tech, c'est difficile<br />sans <span className="text-gold">la bonne structure</span>.
@@ -237,7 +237,7 @@ const Landing = () => {
                 <motion.div key={p.title}
                   initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
                   className="p-6 rounded-xl border border-line-soft hover:border-line transition-colors">
-                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-5">
+                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-4">
                     <Icon className="w-5 h-5 text-gold/70" />
                   </div>
                   <h3 className="font-semibold text-white mb-2">{p.title}</h3>
@@ -257,7 +257,7 @@ const Landing = () => {
             {/* Left — pitch */}
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
               <SL>Notre offre</SL>
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-5">
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
                 L'<span className="text-gold">Accompagnement 360</span>
               </h2>
               <p className="text-t2 text-sm leading-relaxed mb-8">
@@ -313,7 +313,7 @@ const Landing = () => {
       {/* ── PROCESSUS ACCOMPAGNEMENT 360 ────────────────────────────── */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-14">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12">
             <SL>Comment ça fonctionne</SL>
             <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
               Le processus <span className="text-gold">Accompagnement 360</span>
@@ -362,7 +362,7 @@ const Landing = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
               <SL>Open Source</SL>
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-5">
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
                 Contribue à des projets <span className="text-gold">qui existent vraiment</span>
               </h2>
               <p className="text-t3 leading-relaxed mb-8 text-sm">
@@ -402,7 +402,7 @@ const Landing = () => {
       {/* ── NOS ACTIVITÉS ────────────────────────────────────────────── */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-14">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12">
             <SL>Communauté</SL>
             <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
               Nos <span className="text-gold">activités</span> complémentaires
@@ -412,7 +412,7 @@ const Landing = () => {
             </p>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
             {ACTIVITIES.map((a) => (
               <motion.div key={a.type}
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
@@ -427,7 +427,7 @@ const Landing = () => {
           {/* Events preview */}
           {events.length > 0 && (
             <>
-              <p className="text-xs text-t4 uppercase tracking-widest mb-5">Prochains événements</p>
+              <p className="text-xs text-t4 uppercase tracking-widest mb-4">Prochains événements</p>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {events.map((event) => (
                   <motion.div key={event.id}
@@ -462,7 +462,7 @@ const Landing = () => {
       {showcasedLearners.length > 0 && (
         <section className="py-24 bg-secondary">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-14 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
                 <SL>Communauté</SL>
                 <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
@@ -556,7 +556,7 @@ const Landing = () => {
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
               className="order-1 md:order-2">
               <SL>Notre histoire</SL>
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-5">
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
                 Qui sommes-<span className="text-gold">nous</span> ?
               </h2>
               <p className="text-t2 text-sm leading-relaxed mb-4">
@@ -594,7 +594,7 @@ const Landing = () => {
       <FAQ />
 
       {/* ── CTA FINAL ────────────────────────────────────────────────── */}
-      <section className="py-28 relative overflow-hidden">
+      <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0">
           <img src="/images/community-1.jpg" alt="" className="w-full h-full object-cover opacity-50" />
           <div className="absolute inset-0 bg-black/65" />
@@ -602,10 +602,10 @@ const Landing = () => {
         <div className="relative z-10 max-w-2xl mx-auto px-4 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <SL>Passez à l'action</SL>
-            <h2 className="text-4xl md:text-5xl font-display font-bold mb-5 text-white">
+            <h2 className="text-4xl md:text-5xl font-display font-bold mb-4 text-white">
               Prêt à changer<br />de <span className="text-gold">trajectoire</span> ?
             </h2>
-            <p className="text-t3 mb-10 max-w-lg mx-auto text-sm leading-relaxed">
+            <p className="text-t3 mb-8 max-w-lg mx-auto text-sm leading-relaxed">
               Rejoins une communauté qui avance vraiment. Ton parcours commence par une candidature.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

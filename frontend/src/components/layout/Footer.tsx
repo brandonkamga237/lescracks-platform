@@ -62,7 +62,7 @@ const Footer = () => {
 
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link to="/" className="inline-block mb-5">
+            <Link to="/" className="inline-block mb-4">
               <LesCracksLogo
                 height={52}
                 lesColor="#000000"

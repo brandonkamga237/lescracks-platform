@@ -122,7 +122,7 @@ const Postuler = () => {
           description="Les candidatures à l'Accompagnement 360 de LesCracks sont momentanément fermées. De nouvelles sessions ouvriront prochainement."
           url="/postuler"
         />
-        <div className="min-h-[70vh] flex items-center justify-center px-4 py-16">
+        <div className="min-h-[70vh] flex items-center justify-center px-4 py-20">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -177,7 +177,7 @@ const Postuler = () => {
           </div>
 
           {/* Header */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
             <p className="text-eyebrow text-gold uppercase mb-4">Accompagnement 360</p>
             <h1 className="text-3xl sm:text-4xl font-display font-bold mb-3">
               Rejoindre <span className="text-gold">LesCracks</span>

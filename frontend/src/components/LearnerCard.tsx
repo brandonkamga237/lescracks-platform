@@ -51,7 +51,7 @@ export default function LearnerCard({ learner, featured = false }: LearnerCardPr
 
           {/* Bio as quote */}
           {learner.bio && (
-            <p className="text-sm text-t2 leading-relaxed line-clamp-3 mb-5 italic">
+            <p className="text-sm text-t2 leading-relaxed line-clamp-3 mb-4 italic">
               {learner.bio}
             </p>
           )}

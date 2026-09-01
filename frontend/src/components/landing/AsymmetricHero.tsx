@@ -76,7 +76,7 @@ const AsymmetricHero = () => {
               <span>de la Tech</span>
             </h1>
 
-            <p className={`text-xl max-w-xl mx-auto mb-10 ${isDark ? 'text-t3' : 'text-t1'}`}>
+            <p className={`text-xl max-w-xl mx-auto mb-8 ${isDark ? 'text-t3' : 'text-t1'}`}>
               Programme intensif pour transformer votre potentiel en expertise concrete.
             </p>
 

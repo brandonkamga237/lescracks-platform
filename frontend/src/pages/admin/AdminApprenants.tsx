@@ -173,7 +173,7 @@ export default function AdminApprenants() {
 
       {/* Table */}
       {loading ? (
-        <div className="text-center py-16 text-t4">Chargement...</div>
+        <div className="text-center py-20 text-t4">Chargement...</div>
       ) : (
         <div className="bg-surface-1 rounded-xl border border-line overflow-hidden">
           <div className="overflow-x-auto">
@@ -190,7 +190,7 @@ export default function AdminApprenants() {
               </thead>
               <tbody className="divide-y divide-line-soft">
                 {filtered.length === 0 && (
-                  <tr><td colSpan={6} className="text-center py-10 text-t4">Aucun apprenant trouvé.</td></tr>
+                  <tr><td colSpan={6} className="text-center py-12 text-t4">Aucun apprenant trouvé.</td></tr>
                 )}
                 {filtered.map(l => (
                   <tr key={l.id} className="hover:bg-surface-2 transition-colors">

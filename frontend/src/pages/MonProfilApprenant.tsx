@@ -64,7 +64,7 @@ export default function MonProfilApprenant() {
     return (
       <Layout>
         <SEO title="Mon profil apprenant" url="/mon-profil-apprenant" />
-        <div className="max-w-xl mx-auto px-4 py-32 text-center">
+        <div className="max-w-xl mx-auto px-4 py-24 text-center">
           <User className="w-12 h-12 text-t4 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-white mb-2">Pas encore de profil apprenant</h1>
           <p className="text-t3 text-sm leading-relaxed mb-8">
@@ -97,7 +97,7 @@ export default function MonProfilApprenant() {
 
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-          className="mb-10">
+          className="mb-8">
           <p className="text-eyebrow text-gold uppercase mb-3">Apprenant LesCracks</p>
           <h1 className="text-3xl font-display font-bold text-white">Mon profil public</h1>
           <p className="text-t3 text-sm mt-2">

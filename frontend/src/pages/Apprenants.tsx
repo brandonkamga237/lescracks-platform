@@ -218,7 +218,7 @@ export default function Apprenants() {
 
       {/* ── CTA final ────────────────────────────────────────────── */}
       {!loading && learners.length > 0 && (
-        <section className="max-w-3xl mx-auto px-4 py-16 text-center">
+        <section className="max-w-3xl mx-auto px-4 py-20 text-center">
           <div className="bg-white/4 border border-line rounded-xl p-10">
             <p className="text-xs font-semibold text-gold/70 uppercase tracking-widest mb-4">
               Ta prochaine étape

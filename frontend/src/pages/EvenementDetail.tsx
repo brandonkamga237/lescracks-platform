@@ -152,7 +152,7 @@ const EvenementDetail = () => {
     <Layout>
       <SEO title={event.title} description={event.description?.slice(0, 155)} url={`/evenements/${event.slug ?? event.id}`} jsonLd={eventJsonLd} />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12">
         <Link to="/evenements" className="inline-flex items-center gap-2 text-t3 hover:text-gold transition-colors mb-8">
           <ArrowLeft className="w-4 h-4" />
           Tous les événements
@@ -178,7 +178,7 @@ const EvenementDetail = () => {
             )}
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-5">{event.title}</h1>
+          <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">{event.title}</h1>
 
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-t3 mb-8">
             {event.startDate && (
@@ -202,7 +202,7 @@ const EvenementDetail = () => {
             )}
           </div>
 
-          <div className="prose prose-invert max-w-none text-t2 leading-relaxed whitespace-pre-line mb-10">
+          <div className="prose prose-invert max-w-none text-t2 leading-relaxed whitespace-pre-line mb-8">
             {event.description}
           </div>
 
