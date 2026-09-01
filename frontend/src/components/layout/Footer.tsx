@@ -1,9 +1,20 @@
 import { Link } from 'react-router-dom';
 import { Linkedin, Github, Youtube, Mail, BookOpen, Video, Code2, Users, Compass, Calendar, Info, ArrowUpRight } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 
-const NAV = [
+/** Not every link carries every flag; declaring them optional avoids casting at each read. */
+type FooterLink = {
+  label: string;
+  href: string;
+  icon: LucideIcon | null;
+  highlight?: boolean;
+  isWhatsApp?: boolean;
+  external?: boolean;
+};
+
+const NAV: { title: string; links: FooterLink[] }[] = [
   {
     title: 'Accompagnement',
     links: [
@@ -91,11 +102,11 @@ const Footer = () => {
                 {col.links.map((link) => {
                   const content = (
                     <span className={`flex items-center gap-2 text-sm transition-colors ${
-                      (link as any).highlight
+                      link.highlight
                         ? 'text-gold hover:text-gold-light font-medium'
                         : 'text-t3 hover:text-t1'
                     }`}>
-                      {(link as any).isWhatsApp ? (
+                      {link.isWhatsApp ? (
                         <WhatsAppIcon className="w-3.5 h-3.5 flex-shrink-0" />
                       ) : link.icon ? (
                         <link.icon className="w-3.5 h-3.5 flex-shrink-0 opacity-50" />
@@ -106,7 +117,7 @@ const Footer = () => {
 
                   return (
                     <li key={link.label}>
-                      {(link as any).external ? (
+                      {link.external ? (
                         <a href={link.href} target="_blank" rel="noopener noreferrer">
                           {content}
                         </a>
