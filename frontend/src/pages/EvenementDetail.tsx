@@ -111,7 +111,7 @@ const EvenementDetail = () => {
       <Layout>
         <div className="max-w-md mx-auto px-4 py-24 text-center">
           <AlertCircle className="w-12 h-12 text-t4 mx-auto mb-4" />
-          <h1 className="text-2xl font-display font-bold text-white mb-3">Événement introuvable</h1>
+          <h1 className="text-title font-display font-bold text-white mb-3">Événement introuvable</h1>
           <p className="text-t3 mb-8">Cet événement n'existe pas ou a été retiré.</p>
           <Link to="/evenements" className="btn-primary py-2.5 px-6 inline-block">
             Voir tous les événements
@@ -168,19 +168,19 @@ const EvenementDetail = () => {
           )}
 
           <div className="flex flex-wrap items-center gap-2 mb-4">
-            <span className={`px-2.5 py-1 rounded-full border text-xs font-medium ${status.chip}`}>
+            <span className={`px-2.5 py-1 rounded-full border text-label ${status.chip}`}>
               {status.label}
             </span>
             {event.type && (
-              <span className="px-2.5 py-1 rounded-full border border-line text-xs font-medium text-t3">
+              <span className="px-2.5 py-1 rounded-full border border-line text-label text-t3">
                 {event.type}
               </span>
             )}
           </div>
 
-          <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">{event.title}</h1>
+          <h1 className="text-section font-display font-bold text-white mb-4">{event.title}</h1>
 
-          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-t3 mb-8">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-body text-t3 mb-8">
             {event.startDate && (
               <span className="inline-flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-gold" aria-hidden="true" />
@@ -213,17 +213,17 @@ const EvenementDetail = () => {
                 <div className="w-14 h-14 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="w-7 h-7 text-gold" />
                 </div>
-                <h2 className="text-xl font-display font-bold text-white mb-2">Inscription enregistrée</h2>
-                <p className="text-t3 text-sm">
+                <h2 className="text-title font-display font-bold text-white mb-2">Inscription enregistrée</h2>
+                <p className="text-t3 text-body">
                   On revient vers toi sur WhatsApp avec les détails. Vérifie aussi tes emails.
                 </p>
               </div>
             ) : !canRegister ? (
               <div className="text-center py-4">
-                <h2 className="text-lg font-display font-bold text-white mb-2">
+                <h2 className="text-heading font-display font-bold text-white mb-2">
                   {isClosed ? 'Les inscriptions sont closes' : 'Complet'}
                 </h2>
-                <p className="text-t3 text-sm">
+                <p className="text-t3 text-body">
                   {isClosed
                     ? 'Cet événement est terminé.'
                     : 'Toutes les places ont été prises. Suis-nous pour le prochain.'}
@@ -237,10 +237,10 @@ const EvenementDetail = () => {
                 <div className="w-14 h-14 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-4">
                   <LogIn className="w-6 h-6 text-gold" aria-hidden="true" />
                 </div>
-                <h2 className="text-xl font-display font-bold text-white mb-2">
+                <h2 className="text-title font-display font-bold text-white mb-2">
                   Connecte-toi pour t'inscrire
                 </h2>
-                <p className="text-t3 text-sm mb-6 max-w-sm mx-auto">
+                <p className="text-t3 text-body mb-6 max-w-sm mx-auto">
                   Les places sont nominatives. Crée ton compte en une minute — on te ramène
                   directement ici après.
                 </p>
@@ -261,10 +261,10 @@ const EvenementDetail = () => {
               </div>
             ) : (
               <>
-                <h2 className="text-xl font-display font-bold text-white mb-1">
+                <h2 className="text-title font-display font-bold text-white mb-1">
                   {event.applicationRequired ? 'Postuler à cet événement' : 'S\'inscrire'}
                 </h2>
-                <p className="text-t3 text-sm mb-6">
+                <p className="text-t3 text-body mb-6">
                   {event.applicationRequired
                     ? 'Les places sont limitées : parle-nous de toi, on étudie chaque candidature.'
                     : 'Laisse-nous tes coordonnées, on te recontacte avec les détails.'}
@@ -272,14 +272,14 @@ const EvenementDetail = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {error && (
-                    <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
+                    <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-body">
                       {error}
                     </div>
                   )}
 
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="ev-name" className="block text-sm text-t2 mb-2">Nom complet</label>
+                      <label htmlFor="ev-name" className="block text-body text-t2 mb-2">Nom complet</label>
                       <input
                         id="ev-name"
                         className="input"
@@ -290,7 +290,7 @@ const EvenementDetail = () => {
                       />
                     </div>
                     <div>
-                      <label htmlFor="ev-email" className="block text-sm text-t2 mb-2">Email</label>
+                      <label htmlFor="ev-email" className="block text-body text-t2 mb-2">Email</label>
                       <input
                         id="ev-email"
                         type="email"
@@ -304,7 +304,7 @@ const EvenementDetail = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="ev-wa" className="block text-sm text-t2 mb-2">WhatsApp</label>
+                    <label htmlFor="ev-wa" className="block text-body text-t2 mb-2">WhatsApp</label>
                     <input
                       id="ev-wa"
                       className="input"
@@ -313,12 +313,12 @@ const EvenementDetail = () => {
                       placeholder="+237 6 00 00 00 00"
                       required
                     />
-                    <p className="text-t4 text-xs mt-1.5">C'est par là qu'on te transmettra les détails pratiques.</p>
+                    <p className="text-t4 text-label mt-1.5">C'est par là qu'on te transmettra les détails pratiques.</p>
                   </div>
 
                   {event.applicationRequired && (
                     <div>
-                      <label htmlFor="ev-motiv" className="block text-sm text-t2 mb-2">
+                      <label htmlFor="ev-motiv" className="block text-body text-t2 mb-2">
                         Pourquoi veux-tu participer ?
                       </label>
                       <textarea
@@ -345,7 +345,7 @@ const EvenementDetail = () => {
             <div className="flex flex-wrap items-center gap-2 mt-8">
               <TagIcon className="w-4 h-4 text-t4" aria-hidden="true" />
               {event.tags.map((t) => (
-                <span key={t.id} className="px-2.5 py-1 rounded-full bg-white/5 border border-line text-xs text-t3">
+                <span key={t.id} className="px-2.5 py-1 rounded-full bg-white/5 border border-line text-label text-t3">
                   {t.name}
                 </span>
               ))}

@@ -88,7 +88,7 @@ const Login = () => {
 
         <div className="card p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-display font-bold mb-2 text-white">
+            <h1 className="text-title font-display font-bold mb-2 text-white">
               Bon retour parmi <span className="text-gold">nous</span>
             </h1>
             <p className="text-t3">
@@ -139,7 +139,7 @@ const Login = () => {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-line" />
             </div>
-            <div className="relative flex justify-center text-sm">
+            <div className="relative flex justify-center text-body">
               <span className="px-4 bg-card text-t3">ou</span>
             </div>
           </div>
@@ -147,7 +147,7 @@ const Login = () => {
           {/* Email Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
+              <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-body">
                 <p>{error}</p>
 
                 {needsVerification && (
@@ -176,7 +176,7 @@ const Login = () => {
             )}
 
             <div>
-              <label className="block text-sm text-t2 mb-2">Email</label>
+              <label className="block text-body text-t2 mb-2">Email</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
                 <input
@@ -196,7 +196,7 @@ const Login = () => {
               required
               autoComplete="current-password"
               labelAction={
-                <Link to="/mot-de-passe-oublie" className="text-xs text-gold/70 hover:text-gold transition-colors">
+                <Link to="/mot-de-passe-oublie" className="text-label text-gold/70 hover:text-gold transition-colors">
                   Mot de passe oublié ?
                 </Link>
               }

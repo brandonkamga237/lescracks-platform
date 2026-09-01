@@ -22,7 +22,7 @@ const button = cva(
       /** compact belongs to the back office, comfortable to the reading pages. */
       density: {
         compact: 'h-row-compact px-3 text-data',
-        comfortable: 'h-row-comfortable px-6 text-sm',
+        comfortable: 'h-row-comfortable px-6 text-body',
       },
     },
     defaultVariants: { variant: 'primary', density: 'compact' },

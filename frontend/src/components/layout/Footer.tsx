@@ -69,7 +69,7 @@ const Footer = () => {
                 className="w-auto opacity-90"
               />
             </Link>
-            <p className="text-sm text-t3 leading-relaxed mb-6 max-w-[220px]">
+            <p className="text-body text-t3 leading-relaxed mb-6 max-w-[220px]">
               Accélérateur de carrière tech au service des talents de l'Afrique francophone.
             </p>
 
@@ -93,13 +93,13 @@ const Footer = () => {
           {/* Nav columns */}
           {NAV.map((col) => (
             <div key={col.title}>
-              <p className="text-label font-semibold text-t4 uppercase tracking-[0.12em] mb-4">
+              <p className="text-label text-t4 uppercase tracking-[0.12em] mb-4">
                 {col.title}
               </p>
               <ul className="space-y-3">
                 {col.links.map((link) => {
                   const content = (
-                    <span className={`flex items-center gap-2 text-sm transition-colors ${
+                    <span className={`flex items-center gap-2 text-body transition-colors ${
                       link.highlight
                         ? 'text-gold hover:text-gold-light font-medium'
                         : 'text-t3 hover:text-t1'
@@ -132,10 +132,10 @@ const Footer = () => {
 
         {/* ── Bottom bar ─────────────────────────────────────────── */}
         <div className="mt-12 pt-6 border-t border-line-soft flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-t4">
+          <p className="text-label text-t4">
             © {currentYear} LesCracks. Tous droits réservés.
           </p>
-          <p className="text-xs text-t4">
+          <p className="text-label text-t4">
             Conçu &amp; développé avec <span className="text-gold/70">♥</span> depuis Yaoundé, Cameroun
           </p>
         </div>

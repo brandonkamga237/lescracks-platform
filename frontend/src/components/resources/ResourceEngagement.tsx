@@ -135,7 +135,7 @@ const ResourceEngagement = ({ resourceId, returnTo }: Props) => {
           </Link>
         )}
 
-        <span className="inline-flex items-center gap-2 text-t3 text-sm">
+        <span className="inline-flex items-center gap-2 text-t3 text-body">
           <MessageSquare className="w-4 h-4" />
           <span className="tabular-nums">{comments.length}</span>
           {comments.length === 1 ? 'commentaire' : 'commentaires'}
@@ -156,13 +156,13 @@ const ResourceEngagement = ({ resourceId, returnTo }: Props) => {
               placeholder="Partage ce que tu en as pensé, ou pose une question…"
               className="input w-full resize-y"
             />
-            {error && <p className="text-error text-sm mt-2">{error}</p>}
+            {error && <p className="text-error text-body mt-2">{error}</p>}
             <div className="flex items-center justify-between mt-3">
-              <span className="text-t4 text-xs tabular-nums">{draft.length}/2000</span>
+              <span className="text-t4 text-label tabular-nums">{draft.length}/2000</span>
               <button
                 type="submit"
                 disabled={!draft.trim() || posting}
-                className="btn-primary py-2 px-5 text-sm disabled:opacity-50"
+                className="btn-primary py-2 px-5 text-body disabled:opacity-50"
               >
                 {posting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Publier'}
               </button>
@@ -174,7 +174,7 @@ const ResourceEngagement = ({ resourceId, returnTo }: Props) => {
             className="flex items-center gap-3 p-4 rounded-lg border border-line text-t3 hover:border-gold/40 hover:text-t2 transition-colors"
           >
             <LogIn className="w-4 h-4 text-gold flex-shrink-0" />
-            <span className="text-sm">
+            <span className="text-body">
               <span className="text-t2 font-medium">Connecte-toi pour commenter.</span>{' '}
               Tu peux lire la discussion sans compte.
             </span>
@@ -184,7 +184,7 @@ const ResourceEngagement = ({ resourceId, returnTo }: Props) => {
 
       {/* ── Thread ───────────────────────────────────────────────────────── */}
       {comments.length === 0 ? (
-        <p className="text-t4 text-sm py-6 text-center">
+        <p className="text-t4 text-body py-6 text-center">
           Aucun commentaire pour l'instant. Sois le premier.
         </p>
       ) : (
@@ -195,7 +195,7 @@ const ResourceEngagement = ({ resourceId, returnTo }: Props) => {
                 <img src={c.authorPictureUrl} alt="" className="w-9 h-9 rounded-full object-cover flex-shrink-0" />
               ) : (
                 <div className="w-9 h-9 rounded-full bg-gold/15 flex items-center justify-center flex-shrink-0">
-                  <span className="text-gold text-xs font-semibold">
+                  <span className="text-gold text-label">
                     {(c.authorName || '?').substring(0, 2).toUpperCase()}
                   </span>
                 </div>
@@ -203,8 +203,8 @@ const ResourceEngagement = ({ resourceId, returnTo }: Props) => {
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-t1 text-sm font-medium truncate">{c.authorName}</span>
-                  <span className="text-t4 text-xs flex-shrink-0">{timeAgo(c.createdAt)}</span>
+                  <span className="text-t1 text-body font-medium truncate">{c.authorName}</span>
+                  <span className="text-t4 text-label flex-shrink-0">{timeAgo(c.createdAt)}</span>
                   {c.mine && (
                     <button
                       onClick={() => handleDelete(c.id)}
@@ -215,7 +215,7 @@ const ResourceEngagement = ({ resourceId, returnTo }: Props) => {
                     </button>
                   )}
                 </div>
-                <p className="text-t2 text-sm mt-1 whitespace-pre-line break-words">{c.content}</p>
+                <p className="text-t2 text-body mt-1 whitespace-pre-line break-words">{c.content}</p>
               </div>
             </li>
           ))}

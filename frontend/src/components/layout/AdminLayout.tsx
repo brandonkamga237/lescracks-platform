@@ -92,7 +92,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         <div className="h-16 flex items-center justify-between px-4 border-b border-line flex-shrink-0">
           <Link to="/admin" className="flex items-center gap-2 min-w-0">
             <div className="w-8 h-8 bg-gold flex items-center justify-center flex-shrink-0 rounded-lg">
-              <span className="text-black font-bold text-lg">L</span>
+              <span className="text-black text-heading">L</span>
             </div>
             <span className={`font-display font-bold truncate ${collapsed ? 'lg:hidden' : ''}`}>LesCracks</span>
           </Link>
@@ -128,7 +128,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                 {showSeparator && (
                   <>
                     <div className={`px-3 pt-3 pb-1 ${collapsed ? 'lg:hidden' : ''}`}>
-                      <p className="text-label font-semibold text-t4">
+                      <p className="text-label text-t4">
                         {groupLabel(item.group)}
                       </p>
                     </div>
@@ -143,7 +143,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                   title={collapsed ? item.label : undefined}
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
-                  <span className={`text-sm ${collapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
+                  <span className={`text-body ${collapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
                 </Link>
               </div>
             );
@@ -158,7 +158,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             title={collapsed ? 'Retour au site' : undefined}
           >
             <ArrowLeft className="w-5 h-5 flex-shrink-0" />
-            <span className={`text-sm font-medium ${collapsed ? 'lg:hidden' : ''}`}>Retour au site</span>
+            <span className={`text-body font-medium ${collapsed ? 'lg:hidden' : ''}`}>Retour au site</span>
           </Link>
           <button
             onClick={handleLogout}
@@ -166,7 +166,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             title={collapsed ? 'Déconnexion' : undefined}
           >
             <LogOut className="w-5 h-5 flex-shrink-0" />
-            <span className={`text-sm font-medium ${collapsed ? 'lg:hidden' : ''}`}>Déconnexion</span>
+            <span className={`text-body font-medium ${collapsed ? 'lg:hidden' : ''}`}>Déconnexion</span>
           </button>
         </div>
       </aside>
@@ -185,7 +185,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               <Menu className="w-5 h-5" />
             </button>
             <Shield className="w-5 h-5 text-gold flex-shrink-0 hidden sm:block" />
-            <h1 className="text-base sm:text-lg font-semibold text-t1 truncate">
+            <h1 className="text-body sm:text-heading text-t1 truncate">
               <span className="hidden sm:inline">Panneau d'Administration</span>
               <span className="sm:hidden">Admin</span>
             </h1>
@@ -193,10 +193,10 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
           <Link
             to="/profil"
-            className="flex items-center gap-2 text-sm text-t3 hover:text-t1 min-w-0"
+            className="flex items-center gap-2 text-body text-t3 hover:text-t1 min-w-0"
           >
             <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-gold text-sm font-semibold">
+              <span className="text-gold text-body font-semibold">
                 {user?.firstName?.[0] || user?.email?.[0] || 'U'}
               </span>
             </div>

@@ -49,12 +49,12 @@ const AsymmetricHero = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="text-sm text-gold uppercase tracking-[0.5em] mt-4 mb-2"
+              className="text-body text-gold uppercase tracking-[0.5em] mt-4 mb-2"
             >
               Excellence en formation tech
             </motion.p>
 
-            <h1 className="text-6xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-bold leading-tight mb-4">
+            <h1 className="text-hero font-display font-bold leading-tight mb-4">
               <span>Devenez </span>
               <span className="relative inline-block text-gold">
   un crack
@@ -76,21 +76,21 @@ const AsymmetricHero = () => {
               <span>de la Tech</span>
             </h1>
 
-            <p className={`text-xl max-w-xl mx-auto mb-8 ${isDark ? 'text-t3' : 'text-t1'}`}>
+            <p className={`text-title max-w-xl mx-auto mb-8 ${isDark ? 'text-t3' : 'text-t1'}`}>
               Programme intensif pour transformer votre potentiel en expertise concrete.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
               <Link
                 to="/inscription"
-                className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-gold text-black font-semibold text-lg hover:bg-gold-light transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-gold text-black text-heading hover:bg-gold-light transition-colors"
               >
                 Postuler maintenant
                 <ArrowRight className="w-6 h-6" />
               </Link>
               <Link
                 to="/evenements"
-                className={`inline-flex items-center justify-center gap-2 px-10 py-5 border hover:border-gold/30 transition-colors text-lg ${
+                className={`inline-flex items-center justify-center gap-2 px-10 py-5 border hover:border-gold/30 transition-colors text-heading ${
                   isDark 
                     ? 'border-line text-t2 hover:text-white' 
                     : 'border-black/30 text-black/70 hover:text-black'

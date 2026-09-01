@@ -65,9 +65,9 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           className={`${
-            size === 'sm' ? 'text-sm' : 
-            size === 'md' ? 'text-base' : 
-            size === 'lg' ? 'text-lg' : 'text-xl'
+            size === 'sm' ? 'text-body' : 
+            size === 'md' ? 'text-body' : 
+            size === 'lg' ? 'text-heading' : 'text-title'
           } text-gold font-medium ${fullScreen ? 'mt-4' : ''}`}
         >
           {text}

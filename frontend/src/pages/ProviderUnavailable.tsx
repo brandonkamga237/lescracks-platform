@@ -18,10 +18,10 @@ const ProviderUnavailable = () => {
           <Wrench className="w-7 h-7 text-gold" />
         </div>
 
-        <h1 className="text-2xl font-display font-bold text-white mb-3">
+        <h1 className="text-title font-display font-bold text-white mb-3">
           Connexion {providerLabel} en maintenance
         </h1>
-        <p className="text-t3 text-sm leading-relaxed mb-8">
+        <p className="text-t3 text-body leading-relaxed mb-8">
           La connexion via <span className="text-t1 font-medium">{providerLabel}</span> est
           momentanément indisponible, le temps d'une maintenance. En attendant, tu peux te connecter
           avec ton adresse email ou avec GitHub — c'est tout aussi rapide.
@@ -36,7 +36,7 @@ const ProviderUnavailable = () => {
             Choisir une autre méthode
           </button>
 
-          <div className="flex items-center justify-center gap-6 pt-2 text-t4 text-xs">
+          <div className="flex items-center justify-center gap-6 pt-2 text-t4 text-label">
             <span className="inline-flex items-center gap-1.5">
               <Mail className="w-3.5 h-3.5" /> Email &amp; mot de passe
             </span>

@@ -19,9 +19,9 @@ const NotFound = () => {
           <Compass className="w-7 h-7 text-gold" />
         </div>
 
-        <p className="text-gold font-display text-5xl font-bold mb-3">404</p>
-        <h1 className="text-2xl font-display font-bold text-white mb-3">Page introuvable</h1>
-        <p className="text-t3 text-sm leading-relaxed mb-8">
+        <p className="text-gold font-display text-display mb-3">404</p>
+        <h1 className="text-title font-display font-bold text-white mb-3">Page introuvable</h1>
+        <p className="text-t3 text-body leading-relaxed mb-8">
           La page que tu cherches n'existe pas ou a été déplacée.
           Vérifie l'adresse ou reviens à l'accueil.
         </p>

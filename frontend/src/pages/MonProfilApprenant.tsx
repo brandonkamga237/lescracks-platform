@@ -66,8 +66,8 @@ export default function MonProfilApprenant() {
         <SEO title="Mon profil apprenant" url="/mon-profil-apprenant" />
         <div className="max-w-xl mx-auto px-4 py-24 text-center">
           <User className="w-12 h-12 text-t4 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">Pas encore de profil apprenant</h1>
-          <p className="text-t3 text-sm leading-relaxed mb-8">
+          <h1 className="text-title text-white mb-2">Pas encore de profil apprenant</h1>
+          <p className="text-t3 text-body leading-relaxed mb-8">
             Tu n'as pas encore de profil apprenant sur LesCracks.<br />
             Ton profil est créé par l'équipe une fois que tu rejoins l'Accompagnement 360.
           </p>
@@ -99,8 +99,8 @@ export default function MonProfilApprenant() {
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
           className="mb-8">
           <p className="text-eyebrow text-gold uppercase mb-3">Apprenant LesCracks</p>
-          <h1 className="text-3xl font-display font-bold text-white">Mon profil public</h1>
-          <p className="text-t3 text-sm mt-2">
+          <h1 className="text-section font-display font-bold text-white">Mon profil public</h1>
+          <p className="text-t3 text-body mt-2">
             Ces informations sont visibles par tous sur{' '}
             <Link to={`/apprenants/${learner.slug}`} className="text-gold hover:underline">
               ta page publique
@@ -113,35 +113,35 @@ export default function MonProfilApprenant() {
           {/* LEFT — preview carte */}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }} className="md:col-span-2">
-            <p className="text-xs text-t4 uppercase tracking-widest mb-3">Aperçu de ta carte</p>
+            <p className="text-label text-t4 uppercase tracking-widest mb-3">Aperçu de ta carte</p>
             <div className="bg-white/5 border border-line rounded-xl p-5 hover:border-gold/20 transition-colors">
               <div className="flex items-start gap-4 mb-4">
                 {learner.photoUrl ? (
                   <img src={learner.photoUrl} alt={learner.fullName}
                     className="w-14 h-14 rounded-xl object-cover border-2 border-line flex-shrink-0" />
                 ) : (
-                  <div className="w-14 h-14 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold text-xl font-bold flex-shrink-0">
+                  <div className="w-14 h-14 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold text-title flex-shrink-0">
                     {learner.firstName[0]}{learner.lastName[0]}
                   </div>
                 )}
                 <div>
                   <p className="font-semibold text-white">{learner.fullName}</p>
-                  {learner.cohort && <p className="text-xs text-t3 mt-0.5">Cohorte {learner.cohort}</p>}
-                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border mt-2 font-medium ${status.bg} ${status.color}`}>
+                  {learner.cohort && <p className="text-label text-t3 mt-0.5">Cohorte {learner.cohort}</p>}
+                  <span className={`inline-flex items-center gap-1 text-label px-2 py-0.5 rounded-full border mt-2 font-medium ${status.bg} ${status.color}`}>
                     <StatusIcon className="w-3 h-3" />
                     {status.label}
                   </span>
                 </div>
               </div>
-              {bio && <p className="text-xs text-t3 line-clamp-3 mb-3">{bio}</p>}
+              {bio && <p className="text-label text-t3 line-clamp-3 mb-3">{bio}</p>}
               <div className="flex gap-3">
                 {linkedinUrl && (
-                  <span className="flex items-center gap-1.5 text-xs text-info">
+                  <span className="flex items-center gap-1.5 text-label text-info">
                     <Linkedin className="w-3.5 h-3.5" /> LinkedIn
                   </span>
                 )}
                 {portfolioUrl && (
-                  <span className="flex items-center gap-1.5 text-xs text-gold">
+                  <span className="flex items-center gap-1.5 text-label text-gold">
                     <Globe className="w-3.5 h-3.5" /> Portfolio
                   </span>
                 )}
@@ -149,7 +149,7 @@ export default function MonProfilApprenant() {
             </div>
 
             <Link to={`/apprenants/${learner.slug}`}
-              className="mt-3 flex items-center gap-2 text-xs text-t3 hover:text-gold transition-colors">
+              className="mt-3 flex items-center gap-2 text-label text-t3 hover:text-gold transition-colors">
               <ExternalLink className="w-3.5 h-3.5" />
               Voir mon profil public
             </Link>
@@ -161,7 +161,7 @@ export default function MonProfilApprenant() {
 
             {/* Bio */}
             <div>
-              <label className="block text-xs text-t3 uppercase tracking-widest mb-2">
+              <label className="block text-label text-t3 uppercase tracking-widest mb-2">
                 À propos de toi
               </label>
               <textarea
@@ -169,14 +169,14 @@ export default function MonProfilApprenant() {
                 value={bio}
                 onChange={e => setBio(e.target.value)}
                 placeholder="Décris ton parcours, tes compétences, tes ambitions..."
-                className="w-full bg-white/5 border border-line rounded-xl px-4 py-3 text-sm text-white placeholder:text-t4 focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20 resize-none leading-relaxed"
+                className="w-full bg-white/5 border border-line rounded-xl px-4 py-3 text-body text-white placeholder:text-t4 focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20 resize-none leading-relaxed"
               />
-              <p className="text-xs text-t4 mt-1 text-right">{bio.length}/500</p>
+              <p className="text-label text-t4 mt-1 text-right">{bio.length}/500</p>
             </div>
 
             {/* LinkedIn */}
             <div>
-              <label className="block text-xs text-t3 uppercase tracking-widest mb-2">
+              <label className="block text-label text-t3 uppercase tracking-widest mb-2">
                 URL LinkedIn
               </label>
               <div className="relative">
@@ -186,14 +186,14 @@ export default function MonProfilApprenant() {
                   value={linkedinUrl}
                   onChange={e => setLinkedinUrl(e.target.value)}
                   placeholder="https://linkedin.com/in/ton-profil"
-                  className="w-full bg-white/5 border border-line rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-t4 focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20"
+                  className="w-full bg-white/5 border border-line rounded-xl pl-10 pr-4 py-3 text-body text-white placeholder:text-t4 focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20"
                 />
               </div>
             </div>
 
             {/* Portfolio */}
             <div>
-              <label className="block text-xs text-t3 uppercase tracking-widest mb-2">
+              <label className="block text-label text-t3 uppercase tracking-widest mb-2">
                 URL Portfolio / GitHub
               </label>
               <div className="relative">
@@ -203,27 +203,27 @@ export default function MonProfilApprenant() {
                   value={portfolioUrl}
                   onChange={e => setPortfolioUrl(e.target.value)}
                   placeholder="https://ton-portfolio.com"
-                  className="w-full bg-white/5 border border-line rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder:text-t4 focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20"
+                  className="w-full bg-white/5 border border-line rounded-xl pl-10 pr-4 py-3 text-body text-white placeholder:text-t4 focus:outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20"
                 />
               </div>
             </div>
 
             {/* Infos non modifiables */}
             <div className="p-4 rounded-xl bg-white/3 border border-line-soft">
-              <p className="text-xs text-t4 uppercase tracking-widest mb-3">Informations du programme</p>
-              <div className="grid grid-cols-2 gap-3 text-sm">
+              <p className="text-label text-t4 uppercase tracking-widest mb-3">Informations du programme</p>
+              <div className="grid grid-cols-2 gap-3 text-body">
                 <div>
-                  <p className="text-t4 text-xs mb-0.5">Statut</p>
-                  <p className={`font-medium text-sm ${status.color}`}>{status.label}</p>
+                  <p className="text-t4 text-label mb-0.5">Statut</p>
+                  <p className={`font-medium text-body ${status.color}`}>{status.label}</p>
                 </div>
                 {learner.cohort && (
                   <div>
-                    <p className="text-t4 text-xs mb-0.5">Cohorte</p>
+                    <p className="text-t4 text-label mb-0.5">Cohorte</p>
                     <p className="text-t1 font-medium">{learner.cohort}</p>
                   </div>
                 )}
               </div>
-              <p className="text-xs text-t4 mt-3">Ces informations sont gérées par l'équipe LesCracks.</p>
+              <p className="text-label text-t4 mt-3">Ces informations sont gérées par l'équipe LesCracks.</p>
             </div>
 
             {/* Save button */}
@@ -243,7 +243,7 @@ export default function MonProfilApprenant() {
                 {saved ? 'Sauvegardé !' : 'Enregistrer'}
               </button>
               {!hasChanges && !saved && (
-                <p className="text-xs text-t4">Aucune modification</p>
+                <p className="text-label text-t4">Aucune modification</p>
               )}
             </div>
           </motion.div>

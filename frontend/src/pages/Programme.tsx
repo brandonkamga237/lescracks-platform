@@ -137,7 +137,7 @@ const Programme = () => {
         <div className="max-w-4xl mx-auto text-center relative z-10">
 
           {/* Breadcrumb */}
-          <div className="flex items-center justify-center gap-2 text-sm text-t4 mb-8">
+          <div className="flex items-center justify-center gap-2 text-body text-t4 mb-8">
             <Link to="/" className="hover:text-gold transition-colors">Accueil</Link>
             <ChevronRight className="w-3 h-3" />
             <span className="text-t2">Le programme</span>
@@ -145,7 +145,7 @@ const Programme = () => {
 
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <SL>Accompagnement 360</SL>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold mb-6 leading-tight">
+            <h1 className="text-hero font-display font-bold mb-6 leading-tight">
               De débutant à{' '}
               <span className="relative inline-block text-gold">
                 profil employable
@@ -154,7 +154,7 @@ const Programme = () => {
                 </svg>
               </span>
             </h1>
-            <p className="text-lg text-t3 max-w-2xl mx-auto mb-8 leading-relaxed">
+            <p className="text-heading text-t3 max-w-2xl mx-auto mb-8 leading-relaxed">
               Un suivi humain et structuré de <strong className="text-white">6 à 12 mois</strong> avec un mentor dédié,
               des projets concrets et un réseau. Pas une formation — un accompagnement qui va jusqu'au résultat.
             </p>
@@ -163,7 +163,7 @@ const Programme = () => {
               {programmeOpen ? (
                 <Link
                   to="/postuler"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gold text-black font-bold text-base hover:bg-gold-light transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gold text-black font-bold text-body hover:bg-gold-light transition-colors"
                 >
                   Postuler maintenant
                   <ArrowRight className="w-5 h-5" />
@@ -182,9 +182,9 @@ const Programme = () => {
               </a>
             </div>
             {programmeOpen ? (
-              <p className="text-t4 text-xs mt-4">Réponse sous 48h · Sans engagement · Entretien gratuit</p>
+              <p className="text-t4 text-label mt-4">Réponse sous 48h · Sans engagement · Entretien gratuit</p>
             ) : (
-              <p className="text-t3 text-sm mt-4 max-w-xl mx-auto">{closedMessage}</p>
+              <p className="text-t3 text-body mt-4 max-w-xl mx-auto">{closedMessage}</p>
             )}
           </motion.div>
         </div>
@@ -195,7 +195,7 @@ const Programme = () => {
         <div className="max-w-6xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12 text-center">
             <SL>Public cible</SL>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
+            <h2 className="text-section font-display font-bold text-white">
               Ce programme est fait <span className="text-gold">pour toi si...</span>
             </h2>
           </motion.div>
@@ -211,8 +211,8 @@ const Programme = () => {
                   <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center mb-4">
                     <Icon className="w-5 h-5 text-gold" />
                   </div>
-                  <h3 className="font-semibold text-white mb-2 text-sm">{item.title}</h3>
-                  <p className="text-xs text-t3 leading-relaxed">{item.desc}</p>
+                  <h3 className="font-semibold text-white mb-2 text-body">{item.title}</h3>
+                  <p className="text-label text-t3 leading-relaxed">{item.desc}</p>
                 </motion.div>
               );
             })}
@@ -225,10 +225,10 @@ const Programme = () => {
         <div className="max-w-6xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12">
             <SL>Le programme</SL>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
+            <h2 className="text-section font-display font-bold text-white">
               Ce que tu <span className="text-gold">obtiens</span>
             </h2>
-            <p className="text-t3 mt-3 max-w-xl text-sm leading-relaxed">
+            <p className="text-t3 mt-3 max-w-xl text-body leading-relaxed">
               L'Accompagnement 360 n'est pas un cours. C'est un pack complet qui combine cinq leviers indissociables.
             </p>
           </motion.div>
@@ -241,8 +241,8 @@ const Programme = () => {
               >
                 <CheckCircle className="w-5 h-5 text-gold/70 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-semibold text-white text-sm mb-1">{item.title}</p>
-                  <p className="text-xs text-t3 leading-relaxed">{item.desc}</p>
+                  <p className="font-semibold text-white text-body mb-1">{item.title}</p>
+                  <p className="text-label text-t3 leading-relaxed">{item.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -265,7 +265,7 @@ const Programme = () => {
                   <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center">
                     <Icon className="w-5 h-5 text-gold" />
                   </div>
-                  <p className="text-sm text-t2 leading-tight">{r.label}</p>
+                  <p className="text-body text-t2 leading-tight">{r.label}</p>
                 </motion.div>
               );
             })}
@@ -278,7 +278,7 @@ const Programme = () => {
         <div className="max-w-3xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12">
             <SL>Comment ça fonctionne</SL>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
+            <h2 className="text-section font-display font-bold text-white">
               Les <span className="text-gold">5 étapes</span> du programme
             </h2>
           </motion.div>
@@ -292,19 +292,19 @@ const Programme = () => {
                   className="flex gap-6"
                 >
                   <div className="hidden md:flex w-11 h-11 rounded-full bg-background border border-line items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-gold text-xs font-bold">{step.num}</span>
+                    <span className="text-gold text-label">{step.num}</span>
                   </div>
                   <div className="flex-1 p-5 rounded-xl border border-line-soft hover:border-gold/15 transition-colors">
                     <div className="flex items-start justify-between gap-3 mb-1.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-gold md:hidden">{step.num}</span>
+                        <span className="text-label text-gold md:hidden">{step.num}</span>
                         <h3 className="font-semibold text-white">{step.title}</h3>
                       </div>
                       <span className="text-label text-gold/50 bg-gold/8 border border-gold/15 px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
                         {step.duration}
                       </span>
                     </div>
-                    <p className="text-sm text-t3 leading-relaxed">{step.desc}</p>
+                    <p className="text-body text-t3 leading-relaxed">{step.desc}</p>
                   </div>
                 </motion.div>
               ))}
@@ -318,7 +318,7 @@ const Programme = () => {
         <div className="max-w-6xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12 text-center">
             <SL>Modalités</SL>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
+            <h2 className="text-section font-display font-bold text-white">
               Comment <span className="text-gold">ça se passe</span>
             </h2>
           </motion.div>
@@ -339,7 +339,7 @@ const Programme = () => {
                     <Icon className="w-5 h-5 text-gold" />
                   </div>
                   <h3 className="font-display font-bold text-white mb-2">{item.title}</h3>
-                  <p className="text-sm text-t3 leading-relaxed">{item.desc}</p>
+                  <p className="text-body text-t3 leading-relaxed">{item.desc}</p>
                 </motion.div>
               );
             })}
@@ -352,7 +352,7 @@ const Programme = () => {
         <div className="max-w-3xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12">
             <SL>Questions fréquentes</SL>
-            <h2 className="text-3xl font-display font-bold text-white">
+            <h2 className="text-section font-display font-bold text-white">
               Tu as des <span className="text-gold">questions ?</span>
             </h2>
           </motion.div>
@@ -363,8 +363,8 @@ const Programme = () => {
                 initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
                 className="p-5 rounded-xl border border-line-soft"
               >
-                <p className="font-semibold text-white text-sm mb-2">{item.q}</p>
-                <p className="text-sm text-t3 leading-relaxed">{item.a}</p>
+                <p className="font-semibold text-white text-body mb-2">{item.q}</p>
+                <p className="text-body text-t3 leading-relaxed">{item.a}</p>
               </motion.div>
             ))}
           </div>
@@ -379,10 +379,10 @@ const Programme = () => {
             <Compass className="w-7 h-7 text-gold" />
           </div>
           <SL>Passer à l'action</SL>
-          <h2 className="text-4xl font-display font-bold text-white mb-4">
+          <h2 className="text-display font-display font-bold text-white mb-4">
             Prêt à changer de <span className="text-gold">trajectoire</span> ?
           </h2>
-          <p className="text-t3 mb-8 text-sm leading-relaxed">
+          <p className="text-t3 mb-8 text-body leading-relaxed">
             {programmeOpen
               ? 'Postule maintenant. Notre équipe étudie ton profil et te répond sous 48h. Sans engagement immédiat.'
               : closedMessage}
@@ -391,7 +391,7 @@ const Programme = () => {
             {programmeOpen ? (
               <Link
                 to="/postuler"
-                className="inline-flex items-center justify-center gap-2 px-10 py-4 bg-gold text-black font-bold text-base hover:bg-gold-light transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-10 py-4 bg-gold text-black font-bold text-body hover:bg-gold-light transition-colors"
               >
                 Postuler maintenant
                 <ArrowRight className="w-5 h-5" />

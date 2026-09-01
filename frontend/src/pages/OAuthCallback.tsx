@@ -47,11 +47,11 @@ const OAuthCallback = () => {
           <div className="w-16 h-16 rounded-full bg-error-subtle border border-error/30 flex items-center justify-center mx-auto mb-6">
             <XCircle className="w-8 h-8 text-error" />
           </div>
-          <h1 className="text-2xl font-display font-bold text-white mb-3">Connexion impossible</h1>
+          <h1 className="text-title font-display font-bold text-white mb-3">Connexion impossible</h1>
           <p className="text-t3 mb-8">{error}</p>
           <button
             onClick={() => navigate('/connexion', { replace: true })}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-black font-semibold rounded-sm hover:bg-gold/90 transition-colors text-sm"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-black font-semibold rounded-sm hover:bg-gold/90 transition-colors text-body"
           >
             Retour à la connexion
           </button>

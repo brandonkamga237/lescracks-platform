@@ -73,10 +73,10 @@ const ResetPassword = () => {
           {success ? (
             <div className="text-center">
               <CheckCircle className="w-14 h-14 text-gold mx-auto mb-4" />
-              <h1 className="text-2xl font-display font-bold mb-3 text-white">
+              <h1 className="text-title font-display font-bold mb-3 text-white">
                 Mot de passe mis à jour !
               </h1>
-              <p className="text-t3 text-sm mb-6">
+              <p className="text-t3 text-body mb-6">
                 Tu vas être redirigé vers la connexion dans quelques secondes…
               </p>
               <Link to="/connexion" className="btn-primary py-2.5 px-6 inline-block">
@@ -86,8 +86,8 @@ const ResetPassword = () => {
           ) : !token ? (
             <div className="text-center">
               <AlertCircle className="w-14 h-14 text-error mx-auto mb-4" />
-              <h1 className="text-xl font-display font-bold mb-3 text-white">Lien invalide</h1>
-              <p className="text-t3 text-sm mb-6">
+              <h1 className="text-title font-display font-bold mb-3 text-white">Lien invalide</h1>
+              <p className="text-t3 text-body mb-6">
                 Ce lien de réinitialisation est invalide ou a expiré.
               </p>
               <Link to="/mot-de-passe-oublie" className="btn-primary py-2.5 px-6 inline-block">
@@ -97,17 +97,17 @@ const ResetPassword = () => {
           ) : (
             <>
               <div className="text-center mb-8">
-                <h1 className="text-2xl font-display font-bold mb-2 text-white">
+                <h1 className="text-title font-display font-bold mb-2 text-white">
                   Nouveau <span className="text-gold">mot de passe</span>
                 </h1>
-                <p className="text-t3 text-sm">
+                <p className="text-t3 text-body">
                   Choisis un mot de passe d'au moins 8 caractères.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
-                  <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
+                  <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-body">
                     {error}
                   </div>
                 )}

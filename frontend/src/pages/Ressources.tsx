@@ -258,14 +258,14 @@ const Ressources = () => {
 
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
+            <h1 className="text-section font-display font-bold mb-4">
               Nos <span className="text-gold">Ressources</span>
             </h1>
             <p className="text-t2 max-w-2xl">
               Accedez a notre bibliotheque de documents et videos pour accelerer votre apprentissage.
             </p>
             {totalElements > 0 && (
-              <p className="text-t3 text-sm mt-2">
+              <p className="text-t3 text-body mt-2">
                 {totalElements} ressource{totalElements !== 1 ? 's' : ''} disponible{totalElements !== 1 ? 's' : ''}
               </p>
             )}
@@ -348,7 +348,7 @@ const Ressources = () => {
               <Filter className="w-4 h-4" />
               Filtres
               {activeFilterCount > 0 && (
-                <span className="ml-1 px-2 py-0.5 text-xs bg-gold text-black rounded-full">
+                <span className="ml-1 px-2 py-0.5 text-label bg-gold text-black rounded-full">
                   {activeFilterCount}
                 </span>
               )}
@@ -368,7 +368,7 @@ const Ressources = () => {
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="text-sm text-gold hover:text-gold/80 flex items-center gap-1"
+                    className="text-body text-gold hover:text-gold/80 flex items-center gap-1"
                   >
                     <X className="w-3 h-3" />
                     Effacer
@@ -378,11 +378,11 @@ const Ressources = () => {
 
               {/* Categories */}
               <div className="mb-4">
-                <label className="block text-sm text-t2 mb-2">Categorie</label>
+                <label className="block text-body text-t2 mb-2">Categorie</label>
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleCategoryChange(null)}
-                    className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+                    className={`px-3 py-1.5 text-body rounded-full transition-colors ${
                       selectedCategory === null
                         ? 'bg-gold text-black'
                         : 'bg-white/10 text-t2 hover:bg-white/20'
@@ -394,7 +394,7 @@ const Ressources = () => {
                     <button
                       key={category.id}
                       onClick={() => handleCategoryChange(category.id)}
-                      className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+                      className={`px-3 py-1.5 text-body rounded-full transition-colors ${
                         selectedCategory === category.id
                           ? 'bg-gold text-black'
                           : 'bg-white/10 text-t2 hover:bg-white/20'
@@ -409,7 +409,7 @@ const Ressources = () => {
               {/* Tags */}
               {!loadingFilters && tags.length > 0 && (
                 <div>
-                  <label className="block text-sm text-t2 mb-2">
+                  <label className="block text-body text-t2 mb-2">
                     Tags (selection multiple - OU logique)
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -417,7 +417,7 @@ const Ressources = () => {
                       <button
                         key={tag.id}
                         onClick={() => handleTagToggle(tag.id)}
-                        className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
+                        className={`px-3 py-1.5 text-body rounded-full transition-colors ${
                           selectedTags.includes(tag.id)
                             ? 'bg-info text-white'
                             : 'bg-white/10 text-t2 hover:bg-white/20'
@@ -435,9 +435,9 @@ const Ressources = () => {
           {/* Active Filters Display */}
           {hasActiveFilters && (
             <div className="flex flex-wrap items-center gap-2 mb-6">
-              <span className="text-sm text-t3">Filtres actifs:</span>
+              <span className="text-body text-t3">Filtres actifs:</span>
               {selectedCategory !== null && (
-                <span className="px-2 py-1 text-xs bg-white/10 rounded-full flex items-center gap-1">
+                <span className="px-2 py-1 text-label bg-white/10 rounded-full flex items-center gap-1">
                   Categorie: {categories.find(c => c.id === selectedCategory)?.name}
                   <button onClick={() => handleCategoryChange(null)} className="hover:text-gold">
                     <X className="w-3 h-3" />
@@ -445,7 +445,7 @@ const Ressources = () => {
                 </span>
               )}
               {selectedTags.map(tagId => (
-                <span key={tagId} className="px-2 py-1 text-xs bg-info-subtle text-info rounded-full flex items-center gap-1">
+                <span key={tagId} className="px-2 py-1 text-label bg-info-subtle text-info rounded-full flex items-center gap-1">
                   {tags.find(t => t.id === tagId)?.name}
                   <button onClick={() => handleTagToggle(tagId)} className="hover:text-white">
                     <X className="w-3 h-3" />
@@ -453,7 +453,7 @@ const Ressources = () => {
                 </span>
               ))}
               {searchTerm && (
-                <span className="px-2 py-1 text-xs bg-white/10 rounded-full flex items-center gap-1">
+                <span className="px-2 py-1 text-label bg-white/10 rounded-full flex items-center gap-1">
                   Recherche: "{searchTerm}"
                   <button onClick={() => setSearchTerm('')} className="hover:text-gold">
                     <X className="w-3 h-3" />
@@ -492,7 +492,7 @@ const Ressources = () => {
 
                     {/* Type, Category */}
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <span className={`px-2 py-0.5 text-xs rounded-full ${
+                      <span className={`px-2 py-0.5 text-label rounded-full ${
                         resource.resourceTypeName === 'VIDEO'
                           ? 'bg-info-subtle text-info'
                           : 'bg-gold/15 text-gold'
@@ -500,7 +500,7 @@ const Ressources = () => {
                         {getResourceTypeName(resource.resourceTypeName)}
                       </span>
                       {resource.categoryName && (
-                        <span className="px-2 py-0.5 text-xs rounded-full bg-white/5 text-t4">
+                        <span className="px-2 py-0.5 text-label rounded-full bg-white/5 text-t4">
                           {resource.categoryName}
                         </span>
                       )}
@@ -521,15 +521,15 @@ const Ressources = () => {
                     )}
 
                     {/* Title */}
-                    <h3 className="text-base font-semibold mb-1.5 leading-snug">{resource.title}</h3>
+                    <h3 className="text-body font-semibold mb-1.5 leading-snug">{resource.title}</h3>
 
                     {/* Description */}
-                    <p className="text-t3 text-sm mb-3 line-clamp-2 leading-relaxed flex-1">
+                    <p className="text-t3 text-body mb-3 line-clamp-2 leading-relaxed flex-1">
                       {resource.description}
                     </p>
 
                     {/* Indicators */}
-                    <div className="flex items-center gap-3 mb-3 text-xs text-t4">
+                    <div className="flex items-center gap-3 mb-3 text-label text-t4">
                       <span className="flex items-center gap-1">
                         <Eye className="w-3 h-3" />
                         {resource.viewCount ?? 0}
@@ -548,7 +548,7 @@ const Ressources = () => {
                         {resource.slug ? (
                           <Link
                             to={`/ressources/${resource.slug}`}
-                            className="flex-1 btn-secondary text-center flex items-center justify-center gap-2 text-sm py-2"
+                            className="flex-1 btn-secondary text-center flex items-center justify-center gap-2 text-body py-2"
                           >
                             {resource.resourceTypeName === 'VIDEO' ? (
                               <><PlayCircle className="w-4 h-4" />Regarder</>
@@ -559,7 +559,7 @@ const Ressources = () => {
                         ) : (
                           <button
                             onClick={() => handleOpen(resource)}
-                            className="flex-1 btn-secondary text-center flex items-center justify-center gap-2 text-sm py-2"
+                            className="flex-1 btn-secondary text-center flex items-center justify-center gap-2 text-body py-2"
                           >
                             {resource.resourceTypeName === 'VIDEO' ? (
                               <><PlayCircle className="w-4 h-4" />Regarder</>
@@ -579,7 +579,7 @@ const Ressources = () => {
                         )}
                       </div>
                     ) : (
-                      <div className="w-full flex items-center justify-center gap-2 py-2 border border-line rounded-lg text-t4 text-sm cursor-not-allowed">
+                      <div className="w-full flex items-center justify-center gap-2 py-2 border border-line rounded-lg text-t4 text-body cursor-not-allowed">
                         <Lock className="w-4 h-4" />
                         Connexion requise
                       </div>
@@ -648,8 +648,8 @@ const Ressources = () => {
               <div className="w-24 h-24 rounded-xl bg-white/5 border border-line flex items-center justify-center mb-6">
                 <FileText className="w-12 h-12 text-t4" />
               </div>
-              <h3 className="text-lg font-semibold text-t2 mb-2">Aucune ressource trouvée</h3>
-              <p className="text-t4 text-sm max-w-xs mb-6">
+              <h3 className="text-heading text-t2 mb-2">Aucune ressource trouvée</h3>
+              <p className="text-t4 text-body max-w-xs mb-6">
                 {hasActiveFilters
                   ? 'Modifiez vos filtres pour voir plus de contenu.'
                   : 'Les ressources arrivent bientôt. Créez un compte pour être notifié.'}

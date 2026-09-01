@@ -46,12 +46,12 @@ export default function LearnerCard({ learner, featured = false }: LearnerCardPr
         <div className="p-6">
           {/* Quote mark */}
           {learner.bio && (
-            <p className="text-3xl text-gold/20 font-serif leading-none mb-2 select-none">"</p>
+            <p className="text-section text-gold/20 font-serif leading-none mb-2 select-none">"</p>
           )}
 
           {/* Bio as quote */}
           {learner.bio && (
-            <p className="text-sm text-t2 leading-relaxed line-clamp-3 mb-4 italic">
+            <p className="text-body text-t2 leading-relaxed line-clamp-3 mb-4 italic">
               {learner.bio}
             </p>
           )}
@@ -67,7 +67,7 @@ export default function LearnerCard({ learner, featured = false }: LearnerCardPr
                 }`}
               />
             ) : (
-              <div className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-colors ${
+              <div className={`w-11 h-11 rounded-full flex items-center justify-center text-body font-bold flex-shrink-0 transition-colors ${
                 isCertified
                   ? 'bg-gold/15 border border-gold/30 text-gold group-hover:bg-gold/25'
                   : 'bg-white/8 border border-line text-t2'
@@ -77,12 +77,12 @@ export default function LearnerCard({ learner, featured = false }: LearnerCardPr
             )}
 
             <div className="min-w-0 flex-1">
-              <p className="font-semibold text-white text-sm truncate">{learner.fullName}</p>
+              <p className="font-semibold text-white text-body truncate">{learner.fullName}</p>
               <div className="flex items-center gap-2 mt-0.5">
                 {learner.cohort && (
-                  <span className="text-xs text-t4">Cohorte {learner.cohort}</span>
+                  <span className="text-label text-t4">Cohorte {learner.cohort}</span>
                 )}
-                <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium ${cfg.bg} ${cfg.color}`}>
+                <span className={`inline-flex items-center gap-1 text-label px-2 py-0.5 rounded-full border font-medium ${cfg.bg} ${cfg.color}`}>
                   <StatusIcon className="w-3 h-3" />
                   {cfg.label}
                 </span>
@@ -113,7 +113,7 @@ export default function LearnerCard({ learner, featured = false }: LearnerCardPr
               }`}
             />
           ) : (
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-base font-bold flex-shrink-0 ${
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-body font-bold flex-shrink-0 ${
               isCertified ? 'bg-gold/15 border border-gold/25 text-gold' : 'bg-white/8 border border-line text-t3'
             }`}>
               {learner.firstName[0]}{learner.lastName[0]}
@@ -121,11 +121,11 @@ export default function LearnerCard({ learner, featured = false }: LearnerCardPr
           )}
 
           <div className="min-w-0 flex-1">
-            <h3 className="font-semibold text-white text-sm truncate">{learner.fullName}</h3>
+            <h3 className="font-semibold text-white text-body truncate">{learner.fullName}</h3>
             {learner.cohort && (
-              <p className="text-xs text-t4 mt-0.5">Cohorte {learner.cohort}</p>
+              <p className="text-label text-t4 mt-0.5">Cohorte {learner.cohort}</p>
             )}
-            <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium mt-1.5 ${cfg.bg} ${cfg.color}`}>
+            <span className={`inline-flex items-center gap-1 text-label px-2 py-0.5 rounded-full border font-medium mt-1.5 ${cfg.bg} ${cfg.color}`}>
               <StatusIcon className="w-3 h-3" />
               {cfg.label}
             </span>
@@ -134,7 +134,7 @@ export default function LearnerCard({ learner, featured = false }: LearnerCardPr
 
         {/* Bio */}
         {learner.bio && (
-          <p className="text-xs text-t3 line-clamp-2 mb-3 leading-relaxed">{learner.bio}</p>
+          <p className="text-label text-t3 line-clamp-2 mb-3 leading-relaxed">{learner.bio}</p>
         )}
 
         {/* Liens */}
@@ -146,7 +146,7 @@ export default function LearnerCard({ learner, featured = false }: LearnerCardPr
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
-                className="flex items-center gap-1.5 text-xs text-t4 hover:text-info transition-colors"
+                className="flex items-center gap-1.5 text-label text-t4 hover:text-info transition-colors"
               >
                 <Linkedin className="w-3.5 h-3.5" />
                 LinkedIn
@@ -158,7 +158,7 @@ export default function LearnerCard({ learner, featured = false }: LearnerCardPr
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
-                className="flex items-center gap-1.5 text-xs text-t4 hover:text-gold transition-colors"
+                className="flex items-center gap-1.5 text-label text-t4 hover:text-gold transition-colors"
               >
                 <Globe className="w-3.5 h-3.5" />
                 Portfolio

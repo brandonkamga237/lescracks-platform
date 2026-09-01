@@ -59,7 +59,7 @@ const GlobalLoader: React.FC<GlobalLoaderProps> = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-2xl font-display font-bold text-gold mb-2"
+          className="text-title font-display font-bold text-gold mb-2"
         >
           LesCracks
         </motion.h2>
@@ -68,7 +68,7 @@ const GlobalLoader: React.FC<GlobalLoaderProps> = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="text-t2 text-sm"
+          className="text-t2 text-body"
         >
           {message}
         </motion.p>

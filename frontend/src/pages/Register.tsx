@@ -82,14 +82,14 @@ const Register = () => {
           <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="w-8 h-8 text-gold" />
           </div>
-          <h1 className="text-2xl font-display font-bold text-white mb-3">Vérifie ta boîte mail</h1>
+          <h1 className="text-title font-display font-bold text-white mb-3">Vérifie ta boîte mail</h1>
           <p className="text-t3 mb-2">
             Un email de confirmation a été envoyé à <strong className="text-white">{formData.email}</strong>.
           </p>
-          <p className="text-t3 text-sm mb-8">
+          <p className="text-t3 text-body mb-8">
             Clique sur le lien dans l'email pour activer ton compte. Vérifie aussi tes spams.
           </p>
-          <Link to="/connexion" className="inline-flex items-center gap-2 text-gold hover:text-gold/80 transition-colors text-sm">
+          <Link to="/connexion" className="inline-flex items-center gap-2 text-gold hover:text-gold/80 transition-colors text-body">
             Retour à la connexion
           </Link>
         </motion.div>
@@ -119,7 +119,7 @@ const Register = () => {
 
         <div className="card p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-display font-bold mb-2">
+            <h1 className="text-title font-display font-bold mb-2">
               Rejoignez <span className="text-gold">LesCracks</span>
             </h1>
             <p className="text-t3">
@@ -170,7 +170,7 @@ const Register = () => {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-line" />
             </div>
-            <div className="relative flex justify-center text-sm">
+            <div className="relative flex justify-center text-body">
               <span className="px-4 bg-card text-t3">ou</span>
             </div>
           </div>
@@ -178,14 +178,14 @@ const Register = () => {
           {/* Email Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
+              <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-body">
                 {error}
               </div>
             )}
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-t2 mb-2">Prénom</label>
+                <label className="block text-body text-t2 mb-2">Prénom</label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
                   <input
@@ -199,7 +199,7 @@ const Register = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm text-t2 mb-2">Nom</label>
+                <label className="block text-body text-t2 mb-2">Nom</label>
                 <input
                   type="text"
                   name="lastName"
@@ -212,7 +212,7 @@ const Register = () => {
             </div>
 
             <div>
-              <label className="block text-sm text-t2 mb-2">Email</label>
+              <label className="block text-body text-t2 mb-2">Email</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
                 <input

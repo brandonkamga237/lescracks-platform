@@ -45,7 +45,7 @@ const PasswordInput = ({
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <label htmlFor={id} className="block text-sm text-t2">
+        <label htmlFor={id} className="block text-body text-t2">
           {label}
         </label>
         {labelAction}
@@ -80,7 +80,7 @@ const PasswordInput = ({
         </button>
       </div>
 
-      {hint && <p className="text-t4 text-xs mt-1.5">{hint}</p>}
+      {hint && <p className="text-t4 text-label mt-1.5">{hint}</p>}
     </div>
   );
 };

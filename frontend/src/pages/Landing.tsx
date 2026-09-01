@@ -144,7 +144,7 @@ const Landing = () => {
             </motion.p>
 
             <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.7 }}
-              className="text-5xl sm:text-6xl lg:text-7xl font-display font-bold leading-tight mb-6">
+              className="text-hero font-display font-bold leading-tight mb-6">
               Devenez aussi{' '}
               <span className="relative inline-block text-gold">
                 un crack de la tech
@@ -155,7 +155,7 @@ const Landing = () => {
             </motion.h1>
 
             <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-              className="text-lg text-t2 max-w-lg mb-8">
+              className="text-heading text-t2 max-w-lg mb-8">
               Un accompagnement structuré pour passer de débutant à profil employable — avec un mentor, des projets réels et une communauté.
             </motion.p>
 
@@ -169,7 +169,7 @@ const Landing = () => {
               */}
               <Link
                 to={postulerHref}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gold text-black font-bold text-base hover:bg-gold-light transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gold text-black font-bold text-body hover:bg-gold-light transition-colors"
               >
                 Postuler — réponse sous 48h
                 <ArrowRight className="w-5 h-5" aria-hidden="true" />
@@ -177,7 +177,7 @@ const Landing = () => {
 
               <Link
                 to="/programme"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-line-strong text-t2 hover:text-t1 hover:border-gold/50 transition-colors text-base"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-line-strong text-t2 hover:text-t1 hover:border-gold/50 transition-colors text-body"
               >
                 Découvrir le programme
               </Link>
@@ -185,7 +185,7 @@ const Landing = () => {
 
             {/* WhatsApp — a community link, not the headline conversion. */}
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
-              className="mt-6 text-sm text-t3">
+              className="mt-6 text-body text-t3">
               Ou{' '}
               <a
                 href={WHATSAPP_URL}
@@ -214,8 +214,8 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 py-7 grid grid-cols-2 md:grid-cols-4 gap-6">
           {STATS.map((s) => (
             <div key={s.label} className="text-center">
-              <p className="text-2xl font-display font-bold text-gold">{s.value}</p>
-              <p className="text-xs text-t4 mt-1">{s.label}</p>
+              <p className="text-title font-display font-bold text-gold">{s.value}</p>
+              <p className="text-label text-t4 mt-1">{s.label}</p>
             </div>
           ))}
         </div>
@@ -226,7 +226,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12">
             <SL>Le défi</SL>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
+            <h2 className="text-section font-display font-bold text-white">
               Apprendre la tech, c'est difficile<br />sans <span className="text-gold">la bonne structure</span>.
             </h2>
           </motion.div>
@@ -241,7 +241,7 @@ const Landing = () => {
                     <Icon className="w-5 h-5 text-gold/70" />
                   </div>
                   <h3 className="font-semibold text-white mb-2">{p.title}</h3>
-                  <p className="text-sm text-t3 leading-relaxed">{p.desc}</p>
+                  <p className="text-body text-t3 leading-relaxed">{p.desc}</p>
                 </motion.div>
               );
             })}
@@ -257,17 +257,17 @@ const Landing = () => {
             {/* Left — pitch */}
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
               <SL>Notre offre</SL>
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
+              <h2 className="text-section font-display font-bold text-white mb-4">
                 L'<span className="text-gold">Accompagnement 360</span>
               </h2>
-              <p className="text-t2 text-sm leading-relaxed mb-8">
+              <p className="text-t2 text-body leading-relaxed mb-8">
                 Un suivi humain et structuré de <strong className="text-white">6 à 12 mois</strong> qui t'emmène de "je ne sais pas par où commencer" jusqu'à ton premier poste, ta première mission freelance ou le lancement de ton projet. Avec un mentor dédié, des projets concrets et une attestation de complétion.
               </p>
 
               {/* For who */}
               <div className="p-4 rounded-xl bg-white/4 border border-line-soft mb-8">
                 <p className="text-label text-gold/60 uppercase tracking-widest mb-2">Pour qui</p>
-                <p className="text-sm text-t2 leading-relaxed">
+                <p className="text-body text-t2 leading-relaxed">
                   Débutants, personnes en reconversion, profils qui tournent en rond depuis des mois sans résultats concrets.
                 </p>
               </div>
@@ -277,7 +277,7 @@ const Landing = () => {
                 Postuler maintenant
                 <ArrowRight className="w-5 h-5" />
               </Link>
-              <p className="text-t4 text-xs mt-3">Réponse sous 48h · Sans engagement immédiat</p>
+              <p className="text-t4 text-label mt-3">Réponse sous 48h · Sans engagement immédiat</p>
             </motion.div>
 
             {/* Right — feature list */}
@@ -289,20 +289,20 @@ const Landing = () => {
                 </div>
                 <div>
                   <p className="font-display font-bold text-white">Ce que tu obtiens</p>
-                  <p className="text-xs text-t4">Accompagnement 360 · Suivi personnalisé</p>
+                  <p className="text-label text-t4">Accompagnement 360 · Suivi personnalisé</p>
                 </div>
               </div>
               <ul className="space-y-3.5">
                 {ACC_FEATURES.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm text-t1">
+                  <li key={item} className="flex items-start gap-3 text-body text-t1">
                     <CheckCircle className="w-4 h-4 text-gold/70 mt-0.5 flex-shrink-0" />
                     {item}
                   </li>
                 ))}
               </ul>
               <div className="mt-6 pt-6 border-t border-line-soft">
-                <p className="text-xs text-t4 mb-1">Résultat attendu</p>
-                <p className="text-sm font-medium text-gold">Emploi · Freelance · Projet personnel lancé</p>
+                <p className="text-label text-t4 mb-1">Résultat attendu</p>
+                <p className="text-body font-medium text-gold">Emploi · Freelance · Projet personnel lancé</p>
               </div>
             </motion.div>
 
@@ -315,7 +315,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12">
             <SL>Comment ça fonctionne</SL>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
+            <h2 className="text-section font-display font-bold text-white">
               Le processus <span className="text-gold">Accompagnement 360</span>
             </h2>
           </motion.div>
@@ -328,14 +328,14 @@ const Landing = () => {
                   initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
                   className="flex gap-6">
                   <div className="hidden md:flex w-11 h-11 rounded-full bg-background border border-line items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-gold text-xs font-bold">{step.num}</span>
+                    <span className="text-gold text-label">{step.num}</span>
                   </div>
                   <div className="flex-1 p-5 rounded-xl border border-line-soft hover:border-gold/15 transition-colors">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-xs font-bold text-gold md:hidden">{step.num}</span>
+                      <span className="text-label text-gold md:hidden">{step.num}</span>
                       <h3 className="font-semibold text-white">{step.title}</h3>
                     </div>
-                    <p className="text-sm text-t3 leading-relaxed">{step.desc}</p>
+                    <p className="text-body text-t3 leading-relaxed">{step.desc}</p>
                   </div>
                 </motion.div>
               ))}
@@ -348,7 +348,7 @@ const Landing = () => {
               Postuler maintenant
               <ArrowRight className="w-5 h-5" />
             </Link>
-            <p className="text-t4 text-xs mt-3">Réponse sous 48h · Sans engagement immédiat</p>
+            <p className="text-t4 text-label mt-3">Réponse sous 48h · Sans engagement immédiat</p>
           </motion.div>
         </div>
       </section>
@@ -362,10 +362,10 @@ const Landing = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
               <SL>Open Source</SL>
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
+              <h2 className="text-section font-display font-bold text-white mb-4">
                 Contribue à des projets <span className="text-gold">qui existent vraiment</span>
               </h2>
-              <p className="text-t3 leading-relaxed mb-8 text-sm">
+              <p className="text-t3 leading-relaxed mb-8 text-body">
                 Chez LesCracks, l'open source n'est pas un exercice. C'est une façon de construire un portfolio solide, de collaborer en équipe et de se rendre visible sur la scène tech internationale.
               </p>
               <div className="space-y-5">
@@ -377,8 +377,8 @@ const Landing = () => {
                         <Icon className="w-4 h-4 text-gold/70" />
                       </div>
                       <div>
-                        <p className="font-medium text-white text-sm mb-0.5">{item.title}</p>
-                        <p className="text-xs text-t3 leading-relaxed">{item.desc}</p>
+                        <p className="font-medium text-white text-body mb-0.5">{item.title}</p>
+                        <p className="text-label text-t3 leading-relaxed">{item.desc}</p>
                       </div>
                     </div>
                   );
@@ -404,10 +404,10 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12">
             <SL>Communauté</SL>
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
+            <h2 className="text-section font-display font-bold text-white">
               Nos <span className="text-gold">activités</span> complémentaires
             </h2>
-            <p className="text-t3 mt-3 max-w-xl text-sm leading-relaxed">
+            <p className="text-t3 mt-3 max-w-xl text-body leading-relaxed">
               En plus des parcours principaux, LesCracks organise régulièrement des événements communautaires pour renforcer vos compétences et élargir votre réseau.
             </p>
           </motion.div>
@@ -417,9 +417,9 @@ const Landing = () => {
               <motion.div key={a.type}
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
                 className="p-5 rounded-xl border border-line-soft hover:border-gold/20 transition-colors">
-                <span className="text-label font-bold text-gold/60 uppercase tracking-widest">{a.type}</span>
+                <span className="text-label text-gold/60 uppercase tracking-widest">{a.type}</span>
                 <h3 className="font-semibold text-white mt-2 mb-2">{a.label}</h3>
-                <p className="text-xs text-t3 leading-relaxed">{a.desc}</p>
+                <p className="text-label text-t3 leading-relaxed">{a.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -427,15 +427,15 @@ const Landing = () => {
           {/* Events preview */}
           {events.length > 0 && (
             <>
-              <p className="text-xs text-t4 uppercase tracking-widest mb-4">Prochains événements</p>
+              <p className="text-label text-t4 uppercase tracking-widest mb-4">Prochains événements</p>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {events.map((event) => (
                   <motion.div key={event.id}
                     initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
                     className="p-4 border border-line-soft rounded-xl hover:border-line transition-colors">
                     <span className="text-label text-gold/70 uppercase tracking-wider">{event.type}</span>
-                    <h4 className="font-medium text-sm mt-1.5 mb-2 text-t1">{event.title}</h4>
-                    <div className="flex items-center gap-1.5 text-xs text-t4">
+                    <h4 className="font-medium text-body mt-1.5 mb-2 text-t1">{event.title}</h4>
+                    <div className="flex items-center gap-1.5 text-label text-t4">
                       {/* startDate is optional: new Date(undefined) renders "Invalid Date". */}
                       {event.startDate && (
                         <>
@@ -449,7 +449,7 @@ const Landing = () => {
                 ))}
               </div>
               <div className="mt-7 text-center">
-                <Link to="/evenements" className="inline-flex items-center gap-2 text-t3 hover:text-gold transition-colors text-sm">
+                <Link to="/evenements" className="inline-flex items-center gap-2 text-t3 hover:text-gold transition-colors text-body">
                   Voir tous les événements <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
@@ -465,14 +465,14 @@ const Landing = () => {
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mb-12 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
                 <SL>Communauté</SL>
-                <h2 className="text-3xl md:text-4xl font-display font-bold text-white">
+                <h2 className="text-section font-display font-bold text-white">
                   Ils sont <span className="text-gold">devenus des cracks</span>
                 </h2>
-                <p className="text-t3 mt-3 max-w-xl text-sm leading-relaxed">
+                <p className="text-t3 mt-3 max-w-xl text-body leading-relaxed">
                   Rencontrez quelques-uns des apprenants qui ont suivi notre accompagnement et qui construisent aujourd'hui leur carrière tech.
                 </p>
               </div>
-              <Link to="/apprenants" className="flex-shrink-0 flex items-center gap-1.5 text-sm text-gold hover:text-gold/70 transition-colors">
+              <Link to="/apprenants" className="flex-shrink-0 flex items-center gap-1.5 text-body text-gold hover:text-gold/70 transition-colors">
                 Voir tous les apprenants <ChevronRight className="w-4 h-4" />
               </Link>
             </motion.div>
@@ -491,18 +491,18 @@ const Landing = () => {
                       {l.photoUrl ? (
                         <img src={l.photoUrl} alt={l.fullName} className="w-11 h-11 rounded-full object-cover border border-line group-hover:border-gold/30 transition-colors flex-shrink-0" />
                       ) : (
-                        <div className="w-11 h-11 rounded-full bg-gold/10 border border-gold/15 flex items-center justify-center text-gold font-bold text-sm flex-shrink-0">
+                        <div className="w-11 h-11 rounded-full bg-gold/10 border border-gold/15 flex items-center justify-center text-gold font-bold text-body flex-shrink-0">
                           {l.firstName[0]}{l.lastName[0]}
                         </div>
                       )}
                       <div className="min-w-0">
-                        <p className="font-semibold text-white text-sm truncate">{l.fullName}</p>
-                        {l.cohort && <p className="text-xs text-t4">Cohorte {l.cohort}</p>}
+                        <p className="font-semibold text-white text-body truncate">{l.fullName}</p>
+                        {l.cohort && <p className="text-label text-t4">Cohorte {l.cohort}</p>}
                       </div>
                     </div>
-                    {l.bio && <p className="text-xs text-t3 line-clamp-2 mb-3">{l.bio}</p>}
+                    {l.bio && <p className="text-label text-t3 line-clamp-2 mb-3">{l.bio}</p>}
                     <div className="flex items-center justify-between">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      <span className={`text-label px-2 py-0.5 rounded-full font-medium ${
                         l.status === 'TERMINE_AVEC_CERTIFICAT'
                           ? 'bg-gold/10 text-gold border border-gold/20'
                           : l.status === 'EN_COURS'
@@ -526,7 +526,7 @@ const Landing = () => {
             <div className="mt-10 text-center">
               <Link
                 to="/apprenants"
-                className="inline-flex items-center gap-2 border border-line text-t2 hover:border-gold/30 hover:text-gold transition-colors px-6 py-3 rounded-xl text-sm"
+                className="inline-flex items-center gap-2 border border-line text-t2 hover:border-gold/30 hover:text-gold transition-colors px-6 py-3 rounded-xl text-body"
               >
                 <Users className="w-4 h-4" />
                 Découvrir toute la communauté
@@ -556,13 +556,13 @@ const Landing = () => {
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
               className="order-1 md:order-2">
               <SL>Notre histoire</SL>
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-white mb-4">
+              <h2 className="text-section font-display font-bold text-white mb-4">
                 Qui sommes-<span className="text-gold">nous</span> ?
               </h2>
-              <p className="text-t2 text-sm leading-relaxed mb-4">
+              <p className="text-t2 text-body leading-relaxed mb-4">
                 LesCracks est un accélérateur de carrière tech né au Cameroun, convaincu que le talent ne manque pas en Afrique — c'est l'accès à la bonne structure et au bon accompagnement qui fait la différence.
               </p>
-              <p className="text-t3 text-sm leading-relaxed mb-8">
+              <p className="text-t3 text-body leading-relaxed mb-8">
                 Fondée par des praticiens du terrain, notre mission est simple : rendre l'excellence tech accessible à tous ceux qui sont prêts à travailler, quelle que soit leur situation de départ.
               </p>
 
@@ -582,7 +582,7 @@ const Landing = () => {
                 })}
               </div>
 
-              <Link to="/about" className="inline-flex items-center gap-2 text-gold hover:text-gold-light transition-colors text-sm font-medium">
+              <Link to="/about" className="inline-flex items-center gap-2 text-gold hover:text-gold-light transition-colors text-body font-medium">
                 En savoir plus sur nous <ArrowRight className="w-4 h-4" />
               </Link>
             </motion.div>
@@ -602,15 +602,15 @@ const Landing = () => {
         <div className="relative z-10 max-w-2xl mx-auto px-4 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <SL>Passez à l'action</SL>
-            <h2 className="text-4xl md:text-5xl font-display font-bold mb-4 text-white">
+            <h2 className="text-display font-display font-bold mb-4 text-white">
               Prêt à changer<br />de <span className="text-gold">trajectoire</span> ?
             </h2>
-            <p className="text-t3 mb-8 max-w-lg mx-auto text-sm leading-relaxed">
+            <p className="text-t3 mb-8 max-w-lg mx-auto text-body leading-relaxed">
               Rejoins une communauté qui avance vraiment. Ton parcours commence par une candidature.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to={postulerHref}
-                className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-gold text-black font-bold text-lg hover:bg-gold-light transition-colors">
+                className="inline-flex items-center justify-center gap-2 px-10 py-5 bg-gold text-black text-heading hover:bg-gold-light transition-colors">
                 Postuler maintenant
                 <ArrowRight className="w-5 h-5" />
               </Link>
@@ -624,7 +624,7 @@ const Landing = () => {
                 Canal WhatsApp
               </a>
             </div>
-            <p className="text-t4 text-xs mt-6">Réponse sous 48h · Sans engagement · Entretien gratuit</p>
+            <p className="text-t4 text-label mt-6">Réponse sous 48h · Sans engagement · Entretien gratuit</p>
           </motion.div>
         </div>
       </section>

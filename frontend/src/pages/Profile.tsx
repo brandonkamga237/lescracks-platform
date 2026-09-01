@@ -270,17 +270,17 @@ const Profile = () => {
                   className="hidden"
                   onChange={handleAvatarChange}
                 />
-                <p className="text-center text-xs text-t4 mt-2">Cliquer pour changer</p>
+                <p className="text-center text-label text-t4 mt-2">Cliquer pour changer</p>
               </div>
 
               {/* Info */}
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex items-center justify-center sm:justify-start gap-3 mb-2">
-                  <h1 className="text-2xl font-display font-bold">
+                  <h1 className="text-title font-display font-bold">
                     {user?.name || `${user?.firstName} ${user?.lastName}` || 'Utilisateur'}
                   </h1>
                   {isLearner && (
-                    <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-info-subtle text-info text-sm">
+                    <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-info-subtle text-info text-body">
                       <GraduationCap className="w-4 h-4" />
                       Crack Accompagné
                     </span>
@@ -291,7 +291,7 @@ const Profile = () => {
                   {user?.email}
                 </div>
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-t3 mt-1">
-                  <span className="text-sm">
+                  <span className="text-body">
                     Connecte via {user?.provider === 'google' ? 'Google' : user?.provider === 'github' ? 'GitHub' : 'Email'}
                   </span>
                 </div>
@@ -299,7 +299,7 @@ const Profile = () => {
             </div>
 
             {avatarError && (
-              <div className="mt-4 p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
+              <div className="mt-4 p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-body">
                 {avatarError}
               </div>
             )}
@@ -310,7 +310,7 @@ const Profile = () => {
           <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
             <button
               onClick={() => setActiveTab('profile')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+              className={`px-4 py-2 rounded-lg text-body font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'profile'
                   ? 'bg-gold text-black'
                   : 'bg-white/5 text-t2 hover:text-white hover:bg-white/10'
@@ -322,7 +322,7 @@ const Profile = () => {
             {isLearner && (
               <button
                 onClick={() => setActiveTab('learner')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                className={`px-4 py-2 rounded-lg text-body font-medium transition-colors whitespace-nowrap ${
                   activeTab === 'learner'
                     ? 'bg-info text-white'
                     : 'bg-white/5 text-t2 hover:text-white hover:bg-white/10'
@@ -334,7 +334,7 @@ const Profile = () => {
             )}
             <button
               onClick={() => setActiveTab('settings')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+              className={`px-4 py-2 rounded-lg text-body font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'settings'
                   ? 'bg-gold text-black'
                   : 'bg-white/5 text-t2 hover:text-white hover:bg-white/10'
@@ -364,10 +364,10 @@ const Profile = () => {
                       <Lock className="w-5 h-5 text-gold" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-display font-semibold">
+                      <h2 className="text-title font-display font-semibold">
                         Changer le mot de passe
                       </h2>
-                      <p className="text-t3 text-sm">
+                      <p className="text-t3 text-body">
                         Modifiez votre mot de passe de connexion
                       </p>
                     </div>
@@ -375,7 +375,7 @@ const Profile = () => {
 
                   <form onSubmit={handleChangePassword} className="space-y-4">
                     <div>
-                      <label className="block text-sm text-t2 mb-2">
+                      <label className="block text-body text-t2 mb-2">
                         Mot de passe actuel
                       </label>
                       <div className="relative">
@@ -399,7 +399,7 @@ const Profile = () => {
 
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm text-t2 mb-2">
+                        <label className="block text-body text-t2 mb-2">
                           Nouveau mot de passe
                         </label>
                         <input
@@ -412,7 +412,7 @@ const Profile = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-t2 mb-2">
+                        <label className="block text-body text-t2 mb-2">
                           Confirmer le mot de passe
                         </label>
                         <input
@@ -427,13 +427,13 @@ const Profile = () => {
                     </div>
 
                     {passwordError && (
-                      <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
+                      <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-body">
                         {passwordError}
                       </div>
                     )}
 
                     {passwordSuccess && (
-                      <div className="p-3 rounded-lg bg-success-subtle border border-success/30 text-success text-sm flex items-center gap-2">
+                      <div className="p-3 rounded-lg bg-success-subtle border border-success/30 text-success text-body flex items-center gap-2">
                         <CheckCircle className="w-4 h-4" />
                         {passwordSuccess}
                       </div>
@@ -463,16 +463,16 @@ const Profile = () => {
                       <Lock className="w-5 h-5 text-gold" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-display font-semibold">
+                      <h2 className="text-title font-display font-semibold">
                         Mot de passe
                       </h2>
-                      <p className="text-t3 text-sm">
+                      <p className="text-t3 text-body">
                         Gestion du mot de passe
                       </p>
                     </div>
                   </div>
                   <div className="p-4 rounded-lg bg-white/5 text-t2">
-                    <p className="text-sm">
+                    <p className="text-body">
                       Vous etes connecte via <strong className="text-gold">{user?.provider === 'google' ? 'Google' : 'GitHub'}</strong>. 
                       Votre mot de passe est gere par ce provider. Vous ne pouvez pas modifier votre mot de passe ici.
                     </p>
@@ -492,10 +492,10 @@ const Profile = () => {
                     <Trash2 className="w-5 h-5 text-error" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-display font-semibold text-error">
+                    <h2 className="text-title font-display font-semibold text-error">
                       Supprimer le compte
                     </h2>
-                    <p className="text-t3 text-sm">
+                    <p className="text-t3 text-body">
                       Cette action est irreversible
                     </p>
                   </div>
@@ -504,7 +504,7 @@ const Profile = () => {
                 {!showDeleteConfirm ? (
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="px-4 py-2 rounded-lg bg-error-subtle text-error hover:bg-error-subtle transition-colors text-sm"
+                    className="px-4 py-2 rounded-lg bg-error-subtle text-error hover:bg-error-subtle transition-colors text-body"
                   >
                     Supprimer mon compte
                   </button>
@@ -515,7 +515,7 @@ const Profile = () => {
                         <AlertTriangle className="w-5 h-5 text-error mt-0.5" />
                         <div>
                           <p className="text-error font-medium mb-1">Etes-vous sur ?</p>
-                          <p className="text-t2 text-sm">
+                          <p className="text-t2 text-body">
                             Entrez <strong>{user?.email}</strong> pour confirmer la suppression definitive de votre compte.
                           </p>
                         </div>
@@ -533,7 +533,7 @@ const Profile = () => {
                     </div>
 
                     {passwordError && (
-                      <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
+                      <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-body">
                         {passwordError}
                       </div>
                     )}
@@ -545,14 +545,14 @@ const Profile = () => {
                           setDeleteConfirmText('');
                           setPasswordError('');
                         }}
-                        className="px-4 py-2 rounded-lg bg-white/5 text-t2 hover:text-white hover:bg-white/10 transition-colors text-sm"
+                        className="px-4 py-2 rounded-lg bg-white/5 text-t2 hover:text-white hover:bg-white/10 transition-colors text-body"
                       >
                         Annuler
                       </button>
                       <button
                         onClick={handleDeleteAccount}
                         disabled={deleting}
-                        className="px-4 py-2 rounded-lg bg-error text-error-foreground hover:bg-error/80 transition-colors text-sm flex items-center gap-2"
+                        className="px-4 py-2 rounded-lg bg-error text-error-foreground hover:bg-error/80 transition-colors text-body flex items-center gap-2"
                       >
                         {deleting ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -583,14 +583,14 @@ const Profile = () => {
                         <GraduationCap className="w-5 h-5 text-info" />
                       </div>
                       <div>
-                        <h2 className="text-xl font-display font-semibold">Mon parcours apprenant</h2>
-                        <p className="text-t3 text-sm">Ces informations apparaissent sur votre profil public</p>
+                        <h2 className="text-title font-display font-semibold">Mon parcours apprenant</h2>
+                        <p className="text-t3 text-body">Ces informations apparaissent sur votre profil public</p>
                       </div>
                     </div>
                     {!editingLearner && (
                       <button
                         onClick={() => setEditingLearner(true)}
-                        className="px-4 py-2 rounded-lg bg-info-subtle text-info hover:bg-info-subtle transition-colors text-sm"
+                        className="px-4 py-2 rounded-lg bg-info-subtle text-info hover:bg-info-subtle transition-colors text-body"
                       >
                         Modifier
                       </button>
@@ -600,25 +600,25 @@ const Profile = () => {
                   {/* Status + cohort (read-only — admin manages these) */}
                   <div className="grid grid-cols-2 gap-4 mb-6 p-4 rounded-xl bg-white/5">
                     <div>
-                      <p className="text-t3 text-xs mb-1">Statut</p>
-                      <p className="text-white text-sm font-medium">
+                      <p className="text-t3 text-label mb-1">Statut</p>
+                      <p className="text-white text-body font-medium">
                         {STATUS_LABELS[learnerProfile.status] || learnerProfile.status}
                       </p>
                     </div>
                     {learnerProfile.cohort && (
                       <div>
-                        <p className="text-t3 text-xs mb-1">Cohorte</p>
-                        <p className="text-white text-sm font-medium">{learnerProfile.cohort}</p>
+                        <p className="text-t3 text-label mb-1">Cohorte</p>
+                        <p className="text-white text-body font-medium">{learnerProfile.cohort}</p>
                       </div>
                     )}
                     {learnerProfile.slug && (
                       <div className="col-span-2">
-                        <p className="text-t3 text-xs mb-1">Profil public</p>
+                        <p className="text-t3 text-label mb-1">Profil public</p>
                         <a
                           href={`/apprenants/${learnerProfile.slug}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-gold text-sm hover:underline"
+                          className="inline-flex items-center gap-1 text-gold text-body hover:underline"
                         >
                           /apprenants/{learnerProfile.slug}
                           <ExternalLink className="w-3 h-3" />
@@ -630,7 +630,7 @@ const Profile = () => {
                   {editingLearner ? (
                     <form onSubmit={handleSaveLearnerProfile} className="space-y-4">
                       <div>
-                        <label className="block text-sm text-t2 mb-2">
+                        <label className="block text-body text-t2 mb-2">
                           <FileText className="w-4 h-4 inline mr-1" />
                           Bio
                         </label>
@@ -643,7 +643,7 @@ const Profile = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-t2 mb-2">
+                        <label className="block text-body text-t2 mb-2">
                           <Linkedin className="w-4 h-4 inline mr-1" />
                           LinkedIn
                         </label>
@@ -656,7 +656,7 @@ const Profile = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-t2 mb-2">
+                        <label className="block text-body text-t2 mb-2">
                           <Globe className="w-4 h-4 inline mr-1" />
                           Portfolio / GitHub
                         </label>
@@ -670,10 +670,10 @@ const Profile = () => {
                       </div>
 
                       {learnerError && (
-                        <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">{learnerError}</div>
+                        <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-body">{learnerError}</div>
                       )}
                       {learnerSuccess && (
-                        <div className="p-3 rounded-lg bg-success-subtle border border-success/30 text-success text-sm flex items-center gap-2">
+                        <div className="p-3 rounded-lg bg-success-subtle border border-success/30 text-success text-body flex items-center gap-2">
                           <CheckCircle className="w-4 h-4" />{learnerSuccess}
                         </div>
                       )}
@@ -686,11 +686,11 @@ const Profile = () => {
                             setLearnerData({ bio: learnerProfile.bio || '', linkedinUrl: learnerProfile.linkedinUrl || '', portfolioUrl: learnerProfile.portfolioUrl || '' });
                             setLearnerError(''); setLearnerSuccess('');
                           }}
-                          className="px-4 py-2 rounded-lg bg-white/5 text-t2 hover:text-white hover:bg-white/10 transition-colors text-sm"
+                          className="px-4 py-2 rounded-lg bg-white/5 text-t2 hover:text-white hover:bg-white/10 transition-colors text-body"
                         >
                           Annuler
                         </button>
-                        <button type="submit" disabled={savingLearner} className="btn-primary text-sm">
+                        <button type="submit" disabled={savingLearner} className="btn-primary text-body">
                           {savingLearner ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Enregistrer'}
                         </button>
                       </div>
@@ -698,26 +698,26 @@ const Profile = () => {
                   ) : (
                     <div className="space-y-4">
                       <div>
-                        <p className="text-t3 text-xs mb-2">Bio</p>
-                        <p className="text-t1 text-sm leading-relaxed">
+                        <p className="text-t3 text-label mb-2">Bio</p>
+                        <p className="text-t1 text-body leading-relaxed">
                           {learnerProfile.bio || <span className="italic text-t4">Aucune bio renseignée</span>}
                         </p>
                       </div>
                       <div className="flex gap-4 pt-2">
                         {learnerProfile.linkedinUrl && (
                           <a href={learnerProfile.linkedinUrl} target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 text-info hover:text-info text-sm">
+                            className="flex items-center gap-1.5 text-info hover:text-info text-body">
                             <Linkedin className="w-4 h-4" /> LinkedIn
                           </a>
                         )}
                         {learnerProfile.portfolioUrl && (
                           <a href={learnerProfile.portfolioUrl} target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 text-gold hover:text-gold/80 text-sm">
+                            className="flex items-center gap-1.5 text-gold hover:text-gold/80 text-body">
                             <Globe className="w-4 h-4" /> Portfolio
                           </a>
                         )}
                         {!learnerProfile.linkedinUrl && !learnerProfile.portfolioUrl && (
-                          <span className="text-t4 text-sm italic">Aucun lien renseigné</span>
+                          <span className="text-t4 text-body italic">Aucun lien renseigné</span>
                         )}
                       </div>
                     </div>
@@ -742,10 +742,10 @@ const Profile = () => {
                       <User className="w-5 h-5 text-gold" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-display font-semibold">
+                      <h2 className="text-title font-display font-semibold">
                         Informations du profil
                       </h2>
-                      <p className="text-t3 text-sm">
+                      <p className="text-t3 text-body">
                         Gerez vos informations personnelles
                       </p>
                     </div>
@@ -753,7 +753,7 @@ const Profile = () => {
                   {!editingProfile && (
                     <button
                       onClick={() => setEditingProfile(true)}
-                      className="px-4 py-2 rounded-lg bg-gold/10 text-gold hover:bg-gold/20 transition-colors text-sm"
+                      className="px-4 py-2 rounded-lg bg-gold/10 text-gold hover:bg-gold/20 transition-colors text-body"
                     >
                       Modifier
                     </button>
@@ -763,7 +763,7 @@ const Profile = () => {
                 {editingProfile ? (
                   <form onSubmit={handleSaveProfile} className="space-y-4">
                     <div>
-                      <label className="block text-sm text-t2 mb-2">
+                      <label className="block text-body text-t2 mb-2">
                         Nom d'utilisateur
                       </label>
                       <input
@@ -777,7 +777,7 @@ const Profile = () => {
 
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm text-t2 mb-2">
+                        <label className="block text-body text-t2 mb-2">
                           Telephone
                         </label>
                         <input
@@ -789,7 +789,7 @@ const Profile = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm text-t2 mb-2">
+                        <label className="block text-body text-t2 mb-2">
                           Pays
                         </label>
                         <input
@@ -803,13 +803,13 @@ const Profile = () => {
                     </div>
 
                     {profileError && (
-                      <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
+                      <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-body">
                         {profileError}
                       </div>
                     )}
 
                     {profileSuccess && (
-                      <div className="p-3 rounded-lg bg-success-subtle border border-success/30 text-success text-sm flex items-center gap-2">
+                      <div className="p-3 rounded-lg bg-success-subtle border border-success/30 text-success text-body flex items-center gap-2">
                         <CheckCircle className="w-4 h-4" />
                         {profileSuccess}
                       </div>
@@ -828,14 +828,14 @@ const Profile = () => {
                           setProfileError('');
                           setProfileSuccess('');
                         }}
-                        className="px-4 py-2 rounded-lg bg-white/5 text-t2 hover:text-white hover:bg-white/10 transition-colors text-sm"
+                        className="px-4 py-2 rounded-lg bg-white/5 text-t2 hover:text-white hover:bg-white/10 transition-colors text-body"
                       >
                         Annuler
                       </button>
                       <button
                         type="submit"
                         disabled={savingProfile}
-                        className="btn-primary text-sm"
+                        className="btn-primary text-body"
                       >
                         {savingProfile ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -848,22 +848,22 @@ const Profile = () => {
                 ) : (
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm text-t3 mb-1">Email</label>
+                      <label className="block text-body text-t3 mb-1">Email</label>
                       <div className="flex items-center gap-2 text-white">
                         <Mail className="w-4 h-4 text-t3" />
                         {user?.email}
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm text-t3 mb-1">Nom d'utilisateur</label>
+                      <label className="block text-body text-t3 mb-1">Nom d'utilisateur</label>
                       <div className="text-white">{user?.username || '-'}</div>
                     </div>
                     <div>
-                      <label className="block text-sm text-t3 mb-1">Telephone</label>
+                      <label className="block text-body text-t3 mb-1">Telephone</label>
                       <div className="text-white">{user?.phone || '-'}</div>
                     </div>
                     <div>
-                      <label className="block text-sm text-t3 mb-1">Pays</label>
+                      <label className="block text-body text-t3 mb-1">Pays</label>
                       <div className="text-white">{user?.country || '-'}</div>
                     </div>
                   </div>

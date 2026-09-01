@@ -70,7 +70,7 @@ const About = () => {
 
         {/* ── Breadcrumb ─────────────────────────────────────────── */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-          <div className="flex items-center gap-2 text-sm text-t4">
+          <div className="flex items-center gap-2 text-body text-t4">
             <Link to="/" className="hover:text-gold transition-colors">Accueil</Link>
             <ChevronRight className="w-3 h-3" />
             <span className="text-t2">À propos</span>
@@ -82,13 +82,13 @@ const About = () => {
           <motion.div {...fadeUp} className="max-w-3xl">
             <div className="flex items-center gap-2 mb-6">
               <MapPin className="w-4 h-4 text-gold" />
-              <span className="text-sm text-t3">Yaoundé, Cameroun — Afrique francophone</span>
+              <span className="text-body text-t3">Yaoundé, Cameroun — Afrique francophone</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6">
+            <h1 className="text-hero font-display font-bold leading-tight mb-6">
               Rendre la tech accessible{' '}
               <span className="text-gold">à ceux qu'on a longtemps oubliés</span>
             </h1>
-            <p className="text-xl text-t2 leading-relaxed max-w-2xl">
+            <p className="text-title text-t2 leading-relaxed max-w-2xl">
               LesCracks est née d'un constat simple : il y a des talents partout en Afrique
               francophone, mais peu de structures sérieuses pour les accompagner vers un vrai
               métier de la tech. On a décidé d'en être une.
@@ -102,8 +102,8 @@ const About = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
               {NUMBERS.map((n) => (
                 <motion.div key={n.label} {...fadeUp} className="text-center">
-                  <p className="text-3xl font-display font-bold text-gold mb-1">{n.value}</p>
-                  <p className="text-sm text-t3">{n.label}</p>
+                  <p className="text-section font-display font-bold text-gold mb-1">{n.value}</p>
+                  <p className="text-body text-t3">{n.label}</p>
                 </motion.div>
               ))}
             </div>
@@ -116,8 +116,8 @@ const About = () => {
 
             {/* Text */}
             <motion.div {...fadeUp}>
-              <p className="text-xs font-mono text-gold/70 tracking-widest uppercase mb-4">Notre histoire</p>
-              <h2 className="text-3xl sm:text-4xl font-display font-bold mb-6 leading-snug">
+              <p className="text-label font-mono text-gold/70 tracking-widest uppercase mb-4">Notre histoire</p>
+              <h2 className="text-section font-display font-bold mb-6 leading-snug">
                 Né de la frustration d'un praticien
               </h2>
               <div className="space-y-4 text-t2 leading-relaxed">
@@ -166,8 +166,8 @@ const About = () => {
               {/* Caption */}
               <div className="absolute bottom-4 left-4 right-4">
                 <div className="bg-black/70 backdrop-blur-sm rounded-xl px-4 py-3 border border-line">
-                  <p className="text-sm font-medium text-white">Brandon Kamga</p>
-                  <p className="text-xs text-t3">Fondateur &amp; Lead Coach · LesCracks</p>
+                  <p className="text-body font-medium text-white">Brandon Kamga</p>
+                  <p className="text-label text-t3">Fondateur &amp; Lead Coach · LesCracks</p>
                 </div>
               </div>
               {/* Decorative ring */}
@@ -181,8 +181,8 @@ const About = () => {
         <section className="bg-white/2 border-y border-line-soft py-20">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div {...fadeUp} className="text-center mb-12">
-              <p className="text-xs font-mono text-gold/70 tracking-widest uppercase mb-3">Ce en quoi on croit</p>
-              <h2 className="text-3xl sm:text-4xl font-display font-bold">Nos principes</h2>
+              <p className="text-label font-mono text-gold/70 tracking-widest uppercase mb-3">Ce en quoi on croit</p>
+              <h2 className="text-section font-display font-bold">Nos principes</h2>
             </motion.div>
             <div className="grid sm:grid-cols-2 gap-6">
               {VALUES.map((v) => {
@@ -199,8 +199,8 @@ const About = () => {
                     <div className="w-10 h-10 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center mb-4">
                       <Icon className="w-5 h-5 text-gold" />
                     </div>
-                    <h3 className="font-display font-semibold text-lg mb-2">{v.title}</h3>
-                    <p className="text-t3 text-sm leading-relaxed">{v.desc}</p>
+                    <h3 className="font-display text-heading mb-2">{v.title}</h3>
+                    <p className="text-t3 text-body leading-relaxed">{v.desc}</p>
                   </motion.div>
                 );
               })}
@@ -211,8 +211,8 @@ const About = () => {
         {/* ── Timeline ───────────────────────────────────────────── */}
         <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <motion.div {...fadeUp} className="mb-12">
-            <p className="text-xs font-mono text-gold/70 tracking-widest uppercase mb-3">Chronologie</p>
-            <h2 className="text-3xl sm:text-4xl font-display font-bold">Notre parcours</h2>
+            <p className="text-label font-mono text-gold/70 tracking-widest uppercase mb-3">Chronologie</p>
+            <h2 className="text-section font-display font-bold">Notre parcours</h2>
           </motion.div>
           <div className="relative">
             {/* Vertical line */}
@@ -234,11 +234,11 @@ const About = () => {
                   {/* Content */}
                   <div className="pb-2">
                     <div className="flex items-baseline gap-3 mb-1">
-                      <span className={`text-xs font-mono tracking-wider ${m.current ? 'text-gold' : 'text-gold/70'}`}>{m.year}</span>
+                      <span className={`text-label font-mono tracking-wider ${m.current ? 'text-gold' : 'text-gold/70'}`}>{m.year}</span>
                       <h3 className="font-display font-semibold">{m.title}</h3>
                       {m.current && <span className="text-label px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/25 font-medium">Actuel</span>}
                     </div>
-                    <p className="text-sm text-t3 leading-relaxed">{m.desc}</p>
+                    <p className="text-body text-t3 leading-relaxed">{m.desc}</p>
                   </div>
                 </motion.div>
               ))}
@@ -258,13 +258,13 @@ const About = () => {
               </div>
             </div>
             <div>
-              <h3 className="font-display font-semibold text-xl mb-3">Une équipe de praticiens</h3>
+              <h3 className="font-display text-title mb-3">Une équipe de praticiens</h3>
               <p className="text-t3 leading-relaxed mb-4">
                 Chez LesCracks, personne n'enseigne ce qu'il ne pratique pas. Chaque formateur et
                 coach est un professionnel actif de la tech — développeur, designer, data scientist —
                 qui partage son expérience réelle, pas seulement des slides.
               </p>
-              <p className="text-t4 text-sm">
+              <p className="text-t4 text-body">
                 Tu veux rejoindre l'équipe ou proposer ta contribution ?{' '}
                 <a href="mailto:contact@lescracks.com" className="text-gold hover:underline">
                   Écris-nous
@@ -285,15 +285,15 @@ const About = () => {
                 <Users className="w-7 h-7 text-gold" />
               </div>
               <div>
-                <h3 className="font-display font-semibold text-lg mb-2">Découvrez nos apprenants</h3>
-                <p className="text-t3 text-sm leading-relaxed max-w-md">
+                <h3 className="font-display text-heading mb-2">Découvrez nos apprenants</h3>
+                <p className="text-t3 text-body leading-relaxed max-w-md">
                   Rencontrez les cracks qui ont suivi ou suivent actuellement notre accompagnement. Profils, parcours, portfolios et liens LinkedIn.
                 </p>
               </div>
             </div>
             <Link
               to="/apprenants"
-              className="flex-shrink-0 flex items-center gap-2 btn-secondary text-sm whitespace-nowrap"
+              className="flex-shrink-0 flex items-center gap-2 btn-secondary text-body whitespace-nowrap"
             >
               Voir les apprenants <ChevronRight className="w-4 h-4" />
             </Link>
@@ -310,10 +310,10 @@ const About = () => {
             <div className="absolute inset-0 pointer-events-none">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gold/8 rounded-full blur-3xl" />
             </div>
-            <h2 className="relative text-3xl sm:text-4xl font-display font-bold mb-4">
+            <h2 className="relative text-section font-display font-bold mb-4">
               Prêt à rejoindre l'aventure ?
             </h2>
-            <p className="relative text-t3 text-lg mb-8 max-w-xl mx-auto">
+            <p className="relative text-t3 text-heading mb-8 max-w-xl mx-auto">
               Que tu veuilles apprendre, contribuer ou collaborer — il y a une place pour toi chez LesCracks.
             </p>
             <div className="relative flex flex-col sm:flex-row gap-4 justify-center">

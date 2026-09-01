@@ -50,12 +50,12 @@ const ForgotPassword = () => {
           {sent ? (
             <div className="text-center">
               <CheckCircle className="w-14 h-14 text-gold mx-auto mb-4" />
-              <h1 className="text-2xl font-display font-bold mb-3 text-white">Email envoyé !</h1>
-              <p className="text-t3 text-sm leading-relaxed mb-6">
+              <h1 className="text-title font-display font-bold mb-3 text-white">Email envoyé !</h1>
+              <p className="text-t3 text-body leading-relaxed mb-6">
                 Si <span className="text-t1">{email}</span> est associé à un compte, tu recevras
                 un lien de réinitialisation valable <strong className="text-white">30 minutes</strong>.
               </p>
-              <p className="text-t4 text-xs mb-6">
+              <p className="text-t4 text-label mb-6">
                 Vérifie aussi ton dossier spam.
               </p>
               <Link to="/connexion" className="btn-primary py-2.5 px-6 inline-block">
@@ -65,23 +65,23 @@ const ForgotPassword = () => {
           ) : (
             <>
               <div className="text-center mb-8">
-                <h1 className="text-2xl font-display font-bold mb-2 text-white">
+                <h1 className="text-title font-display font-bold mb-2 text-white">
                   Mot de passe <span className="text-gold">oublié ?</span>
                 </h1>
-                <p className="text-t3 text-sm">
+                <p className="text-t3 text-body">
                   Saisis ton adresse email et on t'envoie un lien de réinitialisation.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
-                  <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
+                  <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-body">
                     {error}
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-sm text-t2 mb-2">Email</label>
+                  <label className="block text-body text-t2 mb-2">Email</label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
                     <input

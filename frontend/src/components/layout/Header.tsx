@@ -67,10 +67,10 @@ const MegaMenu = ({ item, id, onNavigate }: { item: MenuItem; id: string; onNavi
                   <Icon className="w-4 h-4 text-t4 group-hover:text-gold transition-colors" aria-hidden="true" />
                 </span>
                 <span className="flex-1 min-w-0">
-                  <span className="block text-sm font-medium text-t2 group-hover:text-t1 transition-colors leading-snug">
+                  <span className="block text-body font-medium text-t2 group-hover:text-t1 transition-colors leading-snug">
                     {col.title}
                   </span>
-                  <span className="block text-xs text-t4 mt-0.5 leading-relaxed">{col.description}</span>
+                  <span className="block text-label text-t4 mt-0.5 leading-relaxed">{col.description}</span>
                 </span>
                 <ArrowRight className="w-3.5 h-3.5 text-t4 group-hover:text-gold group-hover:translate-x-0.5 transition-all mt-1 flex-shrink-0" aria-hidden="true" />
               </Link>
@@ -148,7 +148,7 @@ const Header = () => {
           {/* Desktop nav */}
           <nav ref={navRef} aria-label="Navigation principale" className="hidden lg:flex items-center gap-0.5">
             {!isAuthenticated && (
-              <Link to="/" className="px-3.5 py-2 text-sm text-t3 hover:text-t1 transition-colors rounded-lg hover:bg-secondary/40">
+              <Link to="/" className="px-3.5 py-2 text-body text-t3 hover:text-t1 transition-colors rounded-lg hover:bg-secondary/40">
                 Accueil
               </Link>
             )}
@@ -163,7 +163,7 @@ const Header = () => {
                   <Link
                     key={item.title}
                     to={item.href}
-                    className="flex items-center gap-1.5 px-3.5 py-2 text-sm text-t3 hover:text-t1 transition-colors rounded-lg hover:bg-secondary/40"
+                    className="flex items-center gap-1.5 px-3.5 py-2 text-body text-t3 hover:text-t1 transition-colors rounded-lg hover:bg-secondary/40"
                   >
                     {item.title}
                   </Link>
@@ -189,7 +189,7 @@ const Header = () => {
                     aria-controls={panelId}
                     onClick={() => setActiveMenu(open ? null : item.title)}
                     onFocus={() => setActiveMenu(item.title)}
-                    className={`flex items-center gap-1.5 px-3.5 py-2 text-sm transition-colors rounded-lg hover:bg-secondary/40 ${
+                    className={`flex items-center gap-1.5 px-3.5 py-2 text-body transition-colors rounded-lg hover:bg-secondary/40 ${
                       open ? 'text-t1 bg-secondary/40' : 'text-t3 hover:text-t1'
                     }`}
                   >
@@ -221,10 +221,10 @@ const Header = () => {
                     <img src={user.picture} alt="" className="w-7 h-7 rounded-full object-cover" />
                   ) : (
                     <span className="w-7 h-7 rounded-full bg-gold/15 flex items-center justify-center" aria-hidden="true">
-                      <span className="text-gold text-xs font-semibold">{getUserInitials()}</span>
+                      <span className="text-gold text-label">{getUserInitials()}</span>
                     </span>
                   )}
-                  <span className="text-sm text-t1 hidden md:block">{getDisplayName()}</span>
+                  <span className="text-body text-t1 hidden md:block">{getDisplayName()}</span>
                   <ChevronDown className={`w-3.5 h-3.5 text-t4 transition-transform ${profileOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
                 </button>
 
@@ -240,32 +240,32 @@ const Header = () => {
                     >
                       <div className="h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
                       <div className="p-3 border-b border-line-soft">
-                        <p className="text-sm font-medium text-t1 truncate">{user?.email}</p>
-                        <p className="text-xs text-t4 mt-0.5">
+                        <p className="text-body font-medium text-t1 truncate">{user?.email}</p>
+                        <p className="text-label text-t4 mt-0.5">
                           via {user?.provider === 'local' ? 'email' : user?.provider}
                         </p>
                       </div>
                       <div className="p-1.5">
                         <Link to="/profil" onClick={() => setProfileOpen(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-t3 hover:bg-secondary hover:text-t1 transition-colors text-sm">
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-t3 hover:bg-secondary hover:text-t1 transition-colors text-body">
                           <User className="w-4 h-4" aria-hidden="true" />Mon compte
                         </Link>
                         {isLearner && (
                           <Link to="/mon-profil-apprenant" onClick={() => setProfileOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gold/80 hover:bg-gold/8 hover:text-gold transition-colors text-sm font-medium">
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gold/80 hover:bg-gold/8 hover:text-gold transition-colors text-body font-medium">
                             <Award className="w-4 h-4" aria-hidden="true" />Mon profil apprenant
                           </Link>
                         )}
                         {isAdmin && (
                           <Link to="/admin" onClick={() => setProfileOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gold hover:bg-gold/8 transition-colors text-sm">
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gold hover:bg-gold/8 transition-colors text-body">
                             <Shield className="w-4 h-4" aria-hidden="true" />Panneau Admin
                           </Link>
                         )}
                       </div>
                       <div className="p-1.5 border-t border-line-soft">
                         <button type="button" onClick={handleLogout}
-                          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-error/80 hover:bg-error-subtle hover:text-error transition-colors text-sm">
+                          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-error/80 hover:bg-error-subtle hover:text-error transition-colors text-body">
                           <LogOut className="w-4 h-4" aria-hidden="true" />Déconnexion
                         </button>
                       </div>
@@ -275,14 +275,14 @@ const Header = () => {
               </div>
             ) : (
               <div className="hidden md:flex items-center gap-3">
-                <Link to="/connexion" className="text-t3 hover:text-t1 text-sm transition-colors">
+                <Link to="/connexion" className="text-t3 hover:text-t1 text-body transition-colors">
                   Se connecter
                 </Link>
                 {/* Postuler leads to the 360 funnel — hidden while the programme is closed. */}
                 {programmeOpen && (
                   <Link
                     to="/postuler"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-gold text-black text-sm font-semibold hover:bg-gold-light transition-colors rounded-sm"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-gold text-black text-body font-semibold hover:bg-gold-light transition-colors rounded-sm"
                   >
                     Postuler
                     <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
@@ -320,7 +320,7 @@ const Header = () => {
             <nav aria-label="Navigation mobile" className="p-5 space-y-1">
               {!isAuthenticated && (
                 <Link to="/" onClick={() => setMobileMenuOpen(false)}
-                  className="block py-2.5 px-4 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-sm">
+                  className="block py-2.5 px-4 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-body">
                   Accueil
                 </Link>
               )}
@@ -335,7 +335,7 @@ const Header = () => {
                           key={col.href}
                           to={col.href}
                           onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-2 py-2.5 px-4 pl-7 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-sm"
+                          className="flex items-center gap-2 py-2.5 px-4 pl-7 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-body"
                         >
                           {col.title}
                         </Link>
@@ -343,7 +343,7 @@ const Header = () => {
                     </>
                   ) : (
                     <Link to={item.href} onClick={() => setMobileMenuOpen(false)}
-                      className="block py-2.5 px-4 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-sm">
+                      className="block py-2.5 px-4 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-body">
                       {item.title}
                     </Link>
                   )}
@@ -353,19 +353,19 @@ const Header = () => {
               {isAuthenticated ? (
                 <div className="border-t border-line-soft mt-2 pt-3">
                   <Link to="/profil" onClick={() => setMobileMenuOpen(false)}
-                    className="block py-2.5 px-4 text-gold hover:bg-gold/8 rounded-xl text-sm font-medium">
+                    className="block py-2.5 px-4 text-gold hover:bg-gold/8 rounded-xl text-body font-medium">
                     Mon Profil
                   </Link>
                 </div>
               ) : (
                 <div className="border-t border-line-soft mt-2 pt-3 space-y-2">
                   <Link to="/connexion" onClick={() => setMobileMenuOpen(false)}
-                    className="block py-2.5 px-4 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-sm">
+                    className="block py-2.5 px-4 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-body">
                     Se connecter
                   </Link>
                   {programmeOpen && (
                     <Link to="/postuler" onClick={() => setMobileMenuOpen(false)}
-                      className="block py-3 px-4 bg-gold text-black font-semibold rounded-xl text-sm text-center">
+                      className="block py-3 px-4 bg-gold text-black font-semibold rounded-xl text-body text-center">
                       Postuler
                     </Link>
                   )}

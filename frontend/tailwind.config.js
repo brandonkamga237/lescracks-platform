@@ -187,7 +187,12 @@ export default {
     //    data     table cells and dense UI, never prose
     //    label    the uppercase micro-caption above a value
     fontSize: {
-      'display': ['2.5rem', { lineHeight: '1.05', letterSpacing: '-0.03em', fontWeight: '700' }],
+      // The three display roles fluidly scale themselves, which is what removes the
+      // thirty-one `text-3xl md:text-4xl` pairs that used to do it by hand — badly, since
+      // each pair picked its own breakpoint.
+      'hero': ['clamp(3rem, 9vw, 6rem)', { lineHeight: '0.95', letterSpacing: '-0.04em', fontWeight: '700' }],
+      'display': ['clamp(2.25rem, 5vw, 3.5rem)', { lineHeight: '1.05', letterSpacing: '-0.03em', fontWeight: '700' }],
+      'section': ['clamp(1.75rem, 3.2vw, 2.25rem)', { lineHeight: '1.12', letterSpacing: '-0.025em', fontWeight: '700' }],
       'title': ['1.5rem', { lineHeight: '1.15', letterSpacing: '-0.02em', fontWeight: '600' }],
       'heading': ['1rem', { lineHeight: '1.3', letterSpacing: '-0.01em', fontWeight: '600' }],
       'body': ['0.9375rem', { lineHeight: '1.6' }],

@@ -40,7 +40,7 @@ const FAQ = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h2 className={`text-3xl md:text-4xl font-display font-bold ${isDark ? 'text-white' : 'text-t1'}`}>
+          <h2 className={`text-section font-display font-bold ${isDark ? 'text-white' : 'text-t1'}`}>
             Questions <span className="text-gold">frequentes</span>
           </h2>
         </motion.div>

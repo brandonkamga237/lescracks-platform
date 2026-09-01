@@ -56,7 +56,7 @@ const Testimonials = () => {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className={`text-3xl md:text-4xl font-display font-bold ${isDark ? 'text-white' : 'text-t1'}`}>
+          <h2 className={`text-section font-display font-bold ${isDark ? 'text-white' : 'text-t1'}`}>
             Ils ont <span className="text-gold">reussi</span>
           </h2>
         </motion.div>
@@ -86,20 +86,20 @@ const Testimonials = () => {
                 }`}
               >
                 <div className="flex items-center gap-4 mb-6">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm ${
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-body ${
                     isDark ? 'bg-gold/15 text-gold border border-gold/20' : 'bg-gold/20 text-gold border border-gold/30'
                   }`}>
                     {testimonial.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
                   </div>
                   <div>
                     <p className={`font-semibold ${isDark ? 'text-white' : 'text-t1'}`}>{testimonial.name}</p>
-                    <p className={`text-xs ${isDark ? 'text-t3' : 'text-t3'}`}>{testimonial.role}</p>
+                    <p className={`text-label ${isDark ? 'text-t3' : 'text-t3'}`}>{testimonial.role}</p>
                   </div>
                 </div>
                 <p className={`leading-relaxed mb-4 ${isDark ? 'text-t3' : 'text-t3'}`}>
  "{testimonial.quote}"
                 </p>
-                <p className="text-xs text-gold">{testimonial.company}</p>
+                <p className="text-label text-gold">{testimonial.company}</p>
               </motion.div>
             ))}
           </AnimatePresence>

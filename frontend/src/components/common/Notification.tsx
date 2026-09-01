@@ -64,9 +64,9 @@ const Notification: React.FC<NotificationProps> = ({
             <div className="flex items-start">
               <Icon className={`w-5 h-5 mt-0.5 mr-3 flex-shrink-0 ${iconColors[type]}`} />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium">{title}</p>
+                <p className="text-body font-medium">{title}</p>
                 {message && (
-                  <p className="mt-1 text-sm opacity-90">{message}</p>
+                  <p className="mt-1 text-body opacity-90">{message}</p>
                 )}
               </div>
               <button

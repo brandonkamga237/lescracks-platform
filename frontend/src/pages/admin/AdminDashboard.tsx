@@ -44,7 +44,7 @@ const Kpi = ({
           </span>
         )}
       </div>
-      <p className="text-title sm:text-title text-t1 mt-3 tracking-tight">
+      <p className="text-title text-t1 mt-3 tracking-tight">
         {typeof value === 'number' ? fr(value) : value}
       </p>
       <p className="text-data text-t3 mt-0.5">{title}</p>
@@ -280,7 +280,7 @@ const AdminDashboard = () => {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-data font-medium uppercase tracking-wider text-gold mb-1">Business Intelligence</p>
-          <h2 className="text-title sm:text-title text-t1 tracking-tight">Tableau de bord</h2>
+          <h2 className="text-title text-t1 tracking-tight">Tableau de bord</h2>
           <p className="text-t3 text-data mt-1">Vue décisionnelle de la plateforme LesCracks</p>
         </div>
         <div className="flex items-center gap-2 text-data text-t3 bg-surface-1 border border-line rounded-xl px-3 py-2 self-start sm:self-auto">

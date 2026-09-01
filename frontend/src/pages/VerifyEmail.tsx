@@ -63,8 +63,8 @@ const VerifyEmail = () => {
         {status === 'loading' && (
           <>
             <Loader2 className="w-12 h-12 text-gold animate-spin mx-auto mb-6" />
-            <h1 className="text-xl font-display font-bold text-white mb-2">Vérification en cours…</h1>
-            <p className="text-t3 text-sm">Patiente quelques secondes.</p>
+            <h1 className="text-title font-display font-bold text-white mb-2">Vérification en cours…</h1>
+            <p className="text-t3 text-body">Patiente quelques secondes.</p>
           </>
         )}
 
@@ -73,9 +73,9 @@ const VerifyEmail = () => {
             <div className="w-16 h-16 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-8 h-8 text-gold" />
             </div>
-            <h1 className="text-2xl font-display font-bold text-white mb-3">Email confirmé !</h1>
+            <h1 className="text-title font-display font-bold text-white mb-3">Email confirmé !</h1>
             <p className="text-t3 mb-2">{message}</p>
-            <p className="text-t4 text-sm">Redirection vers la plateforme…</p>
+            <p className="text-t4 text-body">Redirection vers la plateforme…</p>
           </>
         )}
 
@@ -84,9 +84,9 @@ const VerifyEmail = () => {
             <div className="w-16 h-16 rounded-full bg-error-subtle border border-error/30 flex items-center justify-center mx-auto mb-6">
               <XCircle className="w-8 h-8 text-error" />
             </div>
-            <h1 className="text-2xl font-display font-bold text-white mb-3">Lien invalide</h1>
+            <h1 className="text-title font-display font-bold text-white mb-3">Lien invalide</h1>
             <p className="text-t3 mb-8">{message}</p>
-            <Link to="/inscription" className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-black font-semibold rounded-sm hover:bg-gold/90 transition-colors text-sm">
+            <Link to="/inscription" className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-black font-semibold rounded-sm hover:bg-gold/90 transition-colors text-body">
               Recommencer l'inscription
             </Link>
           </>
