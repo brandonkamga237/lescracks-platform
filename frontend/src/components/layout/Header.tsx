@@ -329,7 +329,7 @@ const Header = () => {
                 <div key={item.title} className="pt-2 pb-1 border-t border-line-soft">
                   {item.columns ? (
                     <>
-                      <p className="text-[11px] text-t4 uppercase tracking-widest px-4 mb-1">{item.title}</p>
+                      <p className="text-label text-t4 uppercase tracking-widest px-4 mb-1">{item.title}</p>
                       {item.columns.map((col) => (
                         <Link
                           key={col.href}

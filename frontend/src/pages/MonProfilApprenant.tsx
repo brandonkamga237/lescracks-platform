@@ -98,7 +98,7 @@ export default function MonProfilApprenant() {
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
           className="mb-10">
-          <p className="text-[11px] text-gold uppercase tracking-[0.4em] mb-3">Apprenant LesCracks</p>
+          <p className="text-eyebrow text-gold uppercase mb-3">Apprenant LesCracks</p>
           <h1 className="text-3xl font-display font-bold text-white">Mon profil public</h1>
           <p className="text-t3 text-sm mt-2">
             Ces informations sont visibles par tous sur{' '}

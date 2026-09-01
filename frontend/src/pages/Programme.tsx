@@ -21,7 +21,7 @@ const ClosedPill = () => (
 );
 
 const SL = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-[11px] text-gold uppercase tracking-[0.4em] mb-4">{children}</p>
+  <p className="text-eyebrow text-gold uppercase mb-4">{children}</p>
 );
 
 const FOR_WHO = [
@@ -300,7 +300,7 @@ const Programme = () => {
                         <span className="text-xs font-bold text-gold md:hidden">{step.num}</span>
                         <h3 className="font-semibold text-white">{step.title}</h3>
                       </div>
-                      <span className="text-[11px] text-gold/50 bg-gold/8 border border-gold/15 px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
+                      <span className="text-label text-gold/50 bg-gold/8 border border-gold/15 px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
                         {step.duration}
                       </span>
                     </div>

@@ -510,12 +510,12 @@ const Ressources = () => {
                     {resource.tags && resource.tags.length > 0 && (
                       <div className="flex items-center gap-1 mb-2 flex-wrap">
                         {resource.tags.slice(0, 3).map(tag => (
-                          <span key={tag.id} className="px-1.5 py-0.5 text-[11px] rounded bg-white/5 text-t4">
+                          <span key={tag.id} className="px-1.5 py-0.5 text-label rounded bg-white/5 text-t4">
                             {tag.name}
                           </span>
                         ))}
                         {resource.tags.length > 3 && (
-                          <span className="text-[11px] text-t4">+{resource.tags.length - 3}</span>
+                          <span className="text-label text-t4">+{resource.tags.length - 3}</span>
                         )}
                       </div>
                     )}

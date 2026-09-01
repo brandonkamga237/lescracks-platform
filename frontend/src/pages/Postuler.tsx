@@ -131,7 +131,7 @@ const Postuler = () => {
             <div className="w-16 h-16 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-6">
               <Clock className="w-7 h-7 text-gold" />
             </div>
-            <p className="text-[11px] text-gold uppercase tracking-[0.4em] mb-4">Accompagnement 360</p>
+            <p className="text-eyebrow text-gold uppercase mb-4">Accompagnement 360</p>
             <h1 className="text-2xl sm:text-3xl font-display font-bold text-white mb-4">
               Candidatures momentanément fermées
             </h1>
@@ -178,7 +178,7 @@ const Postuler = () => {
 
           {/* Header */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-            <p className="text-[11px] text-gold uppercase tracking-[0.4em] mb-4">Accompagnement 360</p>
+            <p className="text-eyebrow text-gold uppercase mb-4">Accompagnement 360</p>
             <h1 className="text-3xl sm:text-4xl font-display font-bold mb-3">
               Rejoindre <span className="text-gold">LesCracks</span>
             </h1>

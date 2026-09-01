@@ -80,7 +80,7 @@ export const PageHeader = ({
         </div>
       )}
       <div className="min-w-0">
-        <h1 className="text-xl sm:text-2xl font-bold text-t1 truncate">{title}</h1>
+        <h1 className="text-title text-t1 truncate">{title}</h1>
         {subtitle && <p className="text-data text-t3 mt-0.5">{subtitle}</p>}
       </div>
     </div>

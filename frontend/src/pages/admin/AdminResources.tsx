@@ -276,7 +276,7 @@ const AdminResources = () => {
         actions={
           <button
             onClick={openCreateModal}
-            className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 transition-colors font-medium text-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 transition-colors font-medium text-data"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Nouvelle ressource</span>
@@ -288,7 +288,7 @@ const AdminResources = () => {
       <div className="mb-6 p-4 bg-surface-1 rounded-2xl border border-line ">
         <form onSubmit={handleSearch} className="flex flex-wrap gap-3 items-end">
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-xs text-t3 mb-1">Rechercher</label>
+            <label className="block text-data text-t3 mb-1">Rechercher</label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-t4" />
               <input
@@ -301,7 +301,7 @@ const AdminResources = () => {
             </div>
           </div>
           <div className="w-48">
-            <label className="block text-xs text-t3 mb-1">Categorie</label>
+            <label className="block text-data text-t3 mb-1">Categorie</label>
             <select
               value={selectedCategory}
               onChange={(e) => { setSelectedCategory(e.target.value); setPage(0); }}
@@ -314,7 +314,7 @@ const AdminResources = () => {
             </select>
           </div>
           <div className="w-40">
-            <label className="block text-xs text-t3 mb-1">Type</label>
+            <label className="block text-data text-t3 mb-1">Type</label>
             <select
               value={selectedType}
               onChange={(e) => { setSelectedType(e.target.value); setPage(0); }}
@@ -336,7 +336,7 @@ const AdminResources = () => {
               <button
                 type="button"
                 onClick={clearFilters}
-                className="px-4 py-2 border border-line rounded-lg hover:bg-surface-2 text-sm"
+                className="px-4 py-2 border border-line rounded-lg hover:bg-surface-2 text-data"
               >
                 Effacer
               </button>
@@ -356,13 +356,13 @@ const AdminResources = () => {
             <table className="w-full">
               <thead className="bg-surface-2 border-b border-line">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-t3 uppercase w-12">#</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-t3 uppercase">Titre</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-t3 uppercase">Type</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-t3 uppercase">Catégorie</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-t3 uppercase">Vues</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-t3 uppercase">DL</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-t3 uppercase">Actions</th>
+                  <th className="px-4 py-3 text-left text-label text-t3 uppercase w-12">#</th>
+                  <th className="px-4 py-3 text-left text-label text-t3 uppercase">Titre</th>
+                  <th className="px-4 py-3 text-left text-label text-t3 uppercase">Type</th>
+                  <th className="px-4 py-3 text-left text-label text-t3 uppercase">Catégorie</th>
+                  <th className="px-4 py-3 text-left text-label text-t3 uppercase">Vues</th>
+                  <th className="px-4 py-3 text-left text-label text-t3 uppercase">DL</th>
+                  <th className="px-4 py-3 text-left text-label text-t3 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -370,17 +370,17 @@ const AdminResources = () => {
                   <tr key={resource.id} className="hover:bg-surface-2">
                     {/* Position in the list, not the database id: a row number must not leak
                         how many records exist or let anyone walk the table by guessing. */}
-                    <td className="px-4 py-3 text-sm text-t4 tabular-nums">
+                    <td className="px-4 py-3 text-data text-t4 tabular-nums">
                       {page * PAGE_SIZE + index + 1}
                     </td>
                     <td className="px-4 py-3">
                       <div>
-                        <p className="text-sm font-medium text-t1 truncate max-w-[200px]">{resource.title}</p>
-                        <p className="text-xs text-t4 truncate max-w-[200px]">{resource.description}</p>
+                        <p className="text-data font-medium text-t1 truncate max-w-[200px]">{resource.title}</p>
+                        <p className="text-data text-t4 truncate max-w-[200px]">{resource.description}</p>
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 text-xs rounded-full flex items-center gap-1 w-fit ${
+                      <span className={`px-2 py-0.5 text-data rounded-full flex items-center gap-1 w-fit ${
                         resource.resourceTypeName?.toLowerCase() === 'video'
                           ? 'bg-info-subtle text-info'
                           : 'bg-gold/20 text-gold'
@@ -389,9 +389,9 @@ const AdminResources = () => {
                         {resource.resourceTypeName?.toUpperCase()}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-t3">{resource.categoryName}</td>
-                    <td className="px-4 py-3 text-sm text-t3">{resource.viewCount ?? 0}</td>
-                    <td className="px-4 py-3 text-sm text-t3">{resource.downloadCount ?? 0}</td>
+                    <td className="px-4 py-3 text-data text-t3">{resource.categoryName}</td>
+                    <td className="px-4 py-3 text-data text-t3">{resource.viewCount ?? 0}</td>
+                    <td className="px-4 py-3 text-data text-t3">{resource.downloadCount ?? 0}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
                         <a href={resource.url} target="_blank" rel="noopener noreferrer"
@@ -424,7 +424,7 @@ const AdminResources = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-surface-1 rounded-xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">
+              <h3 className="text-heading">
                 {editingResource ? 'Modifier la ressource' : 'Nouvelle ressource'}
               </h3>
               <button 
@@ -437,7 +437,7 @@ const AdminResources = () => {
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Titre *</label>
+                <label className="block text-data font-medium mb-1">Titre *</label>
                 <input
                   type="text"
                   value={formData.title}
@@ -449,7 +449,7 @@ const AdminResources = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
+                <label className="block text-data font-medium mb-1">Description</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -460,7 +460,7 @@ const AdminResources = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Type *</label>
+                <label className="block text-data font-medium mb-1">Type *</label>
                 <select
                   value={formData.resourceTypeId}
                   onChange={(e) => setFormData({ ...formData, resourceTypeId: e.target.value })}
@@ -474,7 +474,7 @@ const AdminResources = () => {
                   ))}
                 </select>
                 {isVideo && (
-                  <p className="text-xs text-info mt-1">
+                  <p className="text-data text-info mt-1">
                     <Youtube className="w-3 h-3 inline mr-1" />
                     Pour les vidéos:collez l'URL YouTube (ex: https://youtube.com/watch?v=xxx)
                   </p>
@@ -484,10 +484,10 @@ const AdminResources = () => {
               {/* Source type — visible only for videos */}
               {isVideo && (
                 <div>
-                  <label className="block text-sm font-medium mb-2">Source de la vidéo *</label>
+                  <label className="block text-data font-medium mb-2">Source de la vidéo *</label>
                   <div className="flex gap-3">
                     {(['EXTERNAL', 'UPLOADED'] as const).map((s) => (
-                      <label key={s} className={`flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer transition-colors text-sm ${
+                      <label key={s} className={`flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer transition-colors text-data ${
                         formData.sourceType === s ? 'border-gold bg-gold/5 text-t1' : 'border-line text-t3'
                       }`}>
                         <input type="radio" name="sourceType" value={s} checked={formData.sourceType === s}
@@ -503,20 +503,20 @@ const AdminResources = () => {
               {isArticle && (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Contenu de l'article *</label>
+                    <label className="block text-data font-medium mb-1">Contenu de l'article *</label>
                     <textarea
                       value={formData.content}
                       onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                       placeholder={"# Titre\n\nÉcris ton article en Markdown."}
                       rows={14}
-                      className="w-full px-4 py-2 border border-line rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-gold/50"
+                      className="w-full px-4 py-2 border border-line rounded-lg font-mono text-data focus:outline-none focus:ring-2 focus:ring-gold/50"
                       required
                     />
-                    <p className="text-xs text-t4 mt-1">Markdown supporté. Aucune URL n'est nécessaire.</p>
+                    <p className="text-data text-t4 mt-1">Markdown supporté. Aucune URL n'est nécessaire.</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1">Auteur</label>
+                      <label className="block text-data font-medium mb-1">Auteur</label>
                       <input
                         type="text"
                         value={formData.author}
@@ -526,7 +526,7 @@ const AdminResources = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Temps de lecture (min)</label>
+                      <label className="block text-data font-medium mb-1">Temps de lecture (min)</label>
                       <input
                         type="number"
                         min={1}
@@ -541,7 +541,7 @@ const AdminResources = () => {
               )}
 
               <div className={isArticle ? 'hidden' : undefined}>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-data font-medium mb-1">
                   {formData.sourceType === 'UPLOADED' ? 'Fichier *' : 'URL *'}
                 </label>
                 {/* VIDEO — EXTERNAL */}
@@ -561,19 +561,19 @@ const AdminResources = () => {
                       onClick={() => fileInputRef.current?.click()}
                     >
                       <Upload className="w-8 h-8 text-t4 mb-2" />
-                      <span className="text-sm text-t3">Cliquez pour choisir un fichier</span>
-                      <p className="text-xs text-t4 mt-1">PDF · Images · Vidéos (MP4, WebM)</p>
+                      <span className="text-data text-t3">Cliquez pour choisir un fichier</span>
+                      <p className="text-data text-t4 mt-1">PDF · Images · Vidéos (MP4, WebM)</p>
                       <input ref={fileInputRef} type="file"
                         accept=".pdf,.png,.jpg,.jpeg,.gif,.mp4,.webm"
                         onChange={handleFileChange} className="hidden" />
                     </label>
                     {uploading && (
-                      <p className="text-sm text-info flex items-center gap-2">
+                      <p className="text-data text-info flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin" />Upload en cours...
                       </p>
                     )}
                     {uploadedFileName && !uploading && (
-                      <p className="text-sm text-success flex items-center gap-1">
+                      <p className="text-data text-success flex items-center gap-1">
                         <File className="w-4 h-4" />{uploadedFileName}
                       </p>
                     )}
@@ -582,7 +582,7 @@ const AdminResources = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Image de prévisualisation *</label>
+                <label className="block text-data font-medium mb-1">Image de prévisualisation *</label>
                 <div className="space-y-2">
                   {formData.previewImageUrl ? (
                     <div className="relative w-full h-32 rounded-lg overflow-hidden border border-line group">
@@ -605,10 +605,10 @@ const AdminResources = () => {
                       ) : (
                         <Upload className="w-6 h-6 text-t4 mb-1" />
                       )}
-                      <span className="text-sm text-t3">
+                      <span className="text-data text-t3">
                         {uploadingPreview ? 'Upload en cours...' : 'Uploader une image d\'aperçu'}
                       </span>
-                      <p className="text-xs text-t4 mt-1">PNG · JPEG · GIF · WebP</p>
+                      <p className="text-data text-t4 mt-1">PNG · JPEG · GIF · WebP</p>
                       <input ref={previewInputRef} type="file" accept=".png,.jpg,.jpeg,.gif,.webp"
                         onChange={handlePreviewImageChange} className="hidden" />
                     </label>
@@ -617,7 +617,7 @@ const AdminResources = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Categorie *</label>
+                <label className="block text-data font-medium mb-1">Categorie *</label>
                 <select
                   value={formData.categoryId}
                   onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
@@ -641,8 +641,8 @@ const AdminResources = () => {
                     <div className="flex items-center gap-2">
                       <Download className="w-4 h-4 text-info" />
                       <div>
-                        <p className="text-sm font-medium">Téléchargement autorisé</p>
-                        <p className="text-xs text-t4">Les utilisateurs pourront télécharger ce fichier</p>
+                        <p className="text-data font-medium">Téléchargement autorisé</p>
+                        <p className="text-data text-t4">Les utilisateurs pourront télécharger ce fichier</p>
                       </div>
                     </div>
                     <input type="checkbox" checked={formData.isDownloadable}

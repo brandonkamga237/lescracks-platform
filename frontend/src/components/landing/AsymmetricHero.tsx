@@ -110,7 +110,7 @@ const AsymmetricHero = () => {
         transition={{ delay: 1.5 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1"
       >
-        <span className={`text-[11px] tracking-widest ${isDark ? 'text-t4' : 'text-black/40'}`}>SCROLL</span>
+        <span className={`text-eyebrow ${isDark ? 'text-t4' : 'text-black/40'}`}>SCROLL</span>
         <motion.div
           animate={{ y: [0, 6, 0] }}
           transition={{ repeat: Infinity, duration: 1.5 }}

@@ -35,7 +35,7 @@ const Kpi = ({
           <Icon className="w-5 h-5" />
         </div>
         {trend !== undefined && (
-          <span className={`flex items-center gap-0.5 text-xs font-semibold px-2 py-1 rounded-full ${
+          <span className={`flex items-center gap-0.5 text-data font-medium px-2 py-1 rounded-full ${
             trend > 0 ? 'bg-success-subtle text-success'
               : trend < 0 ? 'bg-error-subtle text-error' : 'bg-surface-2 text-t3'
           }`}>
@@ -44,11 +44,11 @@ const Kpi = ({
           </span>
         )}
       </div>
-      <p className="text-2xl sm:text-3xl font-bold text-t1 mt-3 tracking-tight">
+      <p className="text-title sm:text-title text-t1 mt-3 tracking-tight">
         {typeof value === 'number' ? fr(value) : value}
       </p>
-      <p className="text-sm text-t3 mt-0.5">{title}</p>
-      {hint && <p className="text-xs text-t4 mt-1">{hint}</p>}
+      <p className="text-data text-t3 mt-0.5">{title}</p>
+      {hint && <p className="text-data text-t4 mt-1">{hint}</p>}
       {spark && spark.length > 1 && (
         <div className="h-8 -mx-1 mt-2 opacity-80">
           <ResponsiveContainer width="100%" height="100%">
@@ -79,8 +79,8 @@ const PanelHead = ({ icon: Icon, title, subtitle, tint = 'text-gold', action }: 
         <Icon className={`w-4 h-4 ${tint}`} />
       </div>
       <div className="min-w-0">
-        <h3 className="font-semibold text-t1 leading-tight">{title}</h3>
-        {subtitle && <p className="text-xs text-t3 truncate">{subtitle}</p>}
+        <h3 className="text-heading text-t1 leading-tight">{title}</h3>
+        {subtitle && <p className="text-data text-t3 truncate">{subtitle}</p>}
       </div>
     </div>
     {action}
@@ -90,7 +90,7 @@ const PanelHead = ({ icon: Icon, title, subtitle, tint = 'text-gold', action }: 
 // ── Horizontal bar row (magnitude, single hue) ──────────────────────────────────
 const Meter = ({ label, value, total, color }: { label: string; value: number; total: number; color: string }) => (
   <div>
-    <div className="flex justify-between items-baseline text-sm mb-1 gap-2">
+    <div className="flex justify-between items-baseline text-data mb-1 gap-2">
       <span className="text-t3 truncate">{label}</span>
       <span className="font-semibold text-t1 flex-shrink-0">{fr(value)}</span>
     </div>
@@ -105,12 +105,12 @@ const TopRow = ({ rank, title, type, count, icon: Icon, tint }: {
   rank: number; title: string; type?: string; count: number; icon: LucideIcon; tint: string;
 }) => (
   <div className="flex items-center gap-3 py-2 border-b border-line-soft last:border-0">
-    <span className="w-6 h-6 rounded-lg bg-surface-2 text-xs font-bold text-t3 flex items-center justify-center flex-shrink-0">{rank}</span>
+    <span className="w-6 h-6 rounded-lg bg-surface-2 text-data font-medium text-t3 flex items-center justify-center flex-shrink-0">{rank}</span>
     <div className="flex-1 min-w-0">
-      <p className="text-sm font-medium text-t1 truncate">{title}</p>
-      <p className="text-xs text-t4">{type}</p>
+      <p className="text-data font-medium text-t1 truncate">{title}</p>
+      <p className="text-data text-t4">{type}</p>
     </div>
-    <span className={`flex items-center gap-1 text-sm font-semibold flex-shrink-0 ${tint}`}>
+    <span className={`flex items-center gap-1 text-data font-medium flex-shrink-0 ${tint}`}>
       <Icon className="w-3.5 h-3.5" />{fr(count)}
     </span>
   </div>
@@ -156,8 +156,8 @@ const Programme360Control = () => {
             <Compass className="w-5 h-5 text-gold" />
           </div>
           <div className="min-w-0">
-            <h3 className="font-semibold text-t1 leading-tight">Accompagnement 360</h3>
-            <p className="text-xs text-t3 mt-0.5">
+            <h3 className="text-heading text-t1 leading-tight">Accompagnement 360</h3>
+            <p className="text-data text-t3 mt-0.5">
               Ouvrir ou fermer les candidatures. Fermé, les pages publiques masquent « Postuler ».
             </p>
           </div>
@@ -166,7 +166,7 @@ const Programme360Control = () => {
         {/* Status + toggle */}
         <div className="flex items-center gap-3 flex-shrink-0">
           {!loading && (
-            <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${
+            <span className={`inline-flex items-center gap-1.5 text-data font-medium px-2.5 py-1 rounded-full ${
               open ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'
             }`}>
               <span className={`w-1.5 h-1.5 rounded-full ${open ? 'bg-success' : 'bg-warning'}`} />
@@ -192,7 +192,7 @@ const Programme360Control = () => {
       {/* Closed message editor — only relevant while closed */}
       {!loading && !open && (
         <div className="mt-4 pt-4 border-t border-line-soft">
-          <label htmlFor="closed-msg" className="block text-xs font-medium text-t3 mb-1.5">
+          <label htmlFor="closed-msg" className="block text-data font-medium text-t3 mb-1.5">
             Message affiché aux visiteurs (facultatif)
           </label>
           <textarea
@@ -201,9 +201,9 @@ const Programme360Control = () => {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder={DEFAULT_360_CLOSED_MESSAGE}
-            className="w-full text-sm rounded-xl border border-line px-3 py-2 text-t1 placeholder:text-t4 focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold/40 resize-none"
+            className="w-full text-data rounded-xl border border-line px-3 py-2 text-t1 placeholder:text-t4 focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold/40 resize-none"
           />
-          <p className="text-[11px] text-t4 mt-1">Laissé vide, un message par défaut est utilisé.</p>
+          <p className="text-label text-t4 mt-1">Laissé vide, un message par défaut est utilisé.</p>
         </div>
       )}
 
@@ -212,7 +212,7 @@ const Programme360Control = () => {
           type="button"
           onClick={save}
           disabled={saving || loading}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-3 text-t1 text-sm font-medium hover:bg-surface-2 disabled:opacity-50 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-surface-3 text-t1 text-data font-medium hover:bg-surface-2 disabled:opacity-50 transition-colors"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" />
             : saved ? <Check className="w-4 h-4 text-success" />
@@ -279,11 +279,11 @@ const AdminDashboard = () => {
       {/* ── Header ── */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-gold mb-1">Business Intelligence</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-t1 tracking-tight">Tableau de bord</h2>
-          <p className="text-t3 text-sm mt-1">Vue décisionnelle de la plateforme LesCracks</p>
+          <p className="text-data font-medium uppercase tracking-wider text-gold mb-1">Business Intelligence</p>
+          <h2 className="text-title sm:text-title text-t1 tracking-tight">Tableau de bord</h2>
+          <p className="text-t3 text-data mt-1">Vue décisionnelle de la plateforme LesCracks</p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-t3 bg-surface-1 border border-line rounded-xl px-3 py-2 self-start sm:self-auto">
+        <div className="flex items-center gap-2 text-data text-t3 bg-surface-1 border border-line rounded-xl px-3 py-2 self-start sm:self-auto">
           <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
           Actualisé le {new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
         </div>
@@ -308,7 +308,7 @@ const AdminDashboard = () => {
         <PanelHead icon={TrendingUp} title="Acquisition & Croissance" subtitle="Nouveaux inscrits — 30 derniers jours" />
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <p className="text-xs text-t3 mb-3">Inscriptions quotidiennes</p>
+            <p className="text-data text-t3 mb-3">Inscriptions quotidiennes</p>
             <div className="h-56 sm:h-64 -ml-2">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={dailyUsers} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
@@ -332,10 +332,10 @@ const AdminDashboard = () => {
           {/* Provider mix (a compact list — a 3-bar chart was noise, not insight) + role split */}
           <div className="flex flex-col gap-4">
             <div>
-              <p className="text-xs text-t3 mb-2">Par méthode de connexion</p>
+              <p className="text-data text-t3 mb-2">Par méthode de connexion</p>
               <div className="space-y-1.5">
                 {usersByProvider.length ? usersByProvider.map((item) => (
-                  <div key={item.name} className="flex items-center justify-between text-sm">
+                  <div key={item.name} className="flex items-center justify-between text-data">
                     <span className="text-t3">{item.name}</span>
                     <span className="font-semibold text-t1">
                       {fr(item.value)}
@@ -344,15 +344,15 @@ const AdminDashboard = () => {
                       </span>
                     </span>
                   </div>
-                )) : <p className="text-sm text-t4">Aucune donnée</p>}
+                )) : <p className="text-data text-t4">Aucune donnée</p>}
               </div>
             </div>
             <div className="grid grid-cols-3 gap-2 pt-3 border-t border-line-soft">
               {usersByRole.map((item) => (
                 <div key={item.name} className="p-2.5 rounded-xl bg-surface-2">
-                  <p className="text-[11px] text-t3 truncate">{item.name}</p>
-                  <p className="text-lg font-bold mt-0.5 text-t1">{fr(item.value)}</p>
-                  <p className="text-[11px] text-t4">{totalUsers > 0 ? Math.round((item.value / totalUsers) * 100) : 0}%</p>
+                  <p className="text-label text-t3 truncate">{item.name}</p>
+                  <p className="text-heading mt-0.5 text-t1">{fr(item.value)}</p>
+                  <p className="text-label text-t4">{totalUsers > 0 ? Math.round((item.value / totalUsers) * 100) : 0}%</p>
                 </div>
               ))}
             </div>
@@ -368,20 +368,20 @@ const AdminDashboard = () => {
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-2">
               <div className="p-3 rounded-xl bg-info-subtle">
-                <p className="text-[11px] text-t3 leading-tight">Taux de téléch.</p>
-                <p className="text-xl font-bold text-info mt-1">{downloadRate}%</p>
+                <p className="text-label text-t3 leading-tight">Taux de téléch.</p>
+                <p className="text-title text-info mt-1">{downloadRate}%</p>
               </div>
               <div className="p-3 rounded-xl bg-info-subtle">
-                <p className="text-[11px] text-t3 leading-tight">Vues / ress.</p>
-                <p className="text-xl font-bold text-info mt-1">{fr(avgViews)}</p>
+                <p className="text-label text-t3 leading-tight">Vues / ress.</p>
+                <p className="text-title text-info mt-1">{fr(avgViews)}</p>
               </div>
               <div className="p-3 rounded-xl bg-info-subtle">
-                <p className="text-[11px] text-t3 leading-tight">Téléch. / ress.</p>
-                <p className="text-xl font-bold text-info mt-1">{avgDownloads}</p>
+                <p className="text-label text-t3 leading-tight">Téléch. / ress.</p>
+                <p className="text-title text-info mt-1">{avgDownloads}</p>
               </div>
             </div>
             <div>
-              <p className="text-xs text-t3 mb-2">Répartition par type</p>
+              <p className="text-data text-t3 mb-2">Répartition par type</p>
               {totalTypes > 0 ? (
                 <>
                   <div className="flex h-8 rounded-lg overflow-hidden bg-surface-2 gap-0.5">
@@ -392,19 +392,19 @@ const AdminDashboard = () => {
                   </div>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
                     {resourcesByType.map((t, i) => (
-                      <span key={t.name} className="flex items-center gap-1.5 text-xs text-t3">
+                      <span key={t.name} className="flex items-center gap-1.5 text-data text-t3">
                         <span className="w-2.5 h-2.5 rounded-sm" style={{ background: catColor(i) }} />
                         {t.name} · <span className="font-semibold text-t1">{fr(t.value)}</span>
                       </span>
                     ))}
                   </div>
                 </>
-              ) : <p className="text-sm text-t4 py-4 text-center">Aucune ressource</p>}
+              ) : <p className="text-data text-t4 py-4 text-center">Aucune ressource</p>}
             </div>
           </div>
           {/* By category — single hue, magnitude */}
           <div className="lg:col-span-2">
-            <p className="text-xs text-t3 mb-3">Par catégorie</p>
+            <p className="text-data text-t3 mb-3">Par catégorie</p>
             <div className="h-52 -ml-2">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={resourcesByCategory} layout="vertical" margin={{ top: 0, right: 12, bottom: 0, left: 0 }}>
@@ -421,20 +421,20 @@ const AdminDashboard = () => {
 
         <div className="grid md:grid-cols-2 gap-6 mt-6 pt-5 border-t border-line-soft">
           <div>
-            <p className="text-xs font-semibold text-t3 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+            <p className="text-label text-t3 uppercase mb-2 flex items-center gap-1.5">
               <Eye className="w-3.5 h-3.5 text-info" />Top — Plus vues
             </p>
             {topViewed.length ? topViewed.map((r, i) => (
               <TopRow key={r.id} rank={i + 1} title={r.title} type={r.type} count={r.viewCount} icon={Eye} tint="text-info" />
-            )) : <p className="text-sm text-t4 py-6 text-center">Aucune donnée</p>}
+            )) : <p className="text-data text-t4 py-6 text-center">Aucune donnée</p>}
           </div>
           <div>
-            <p className="text-xs font-semibold text-t3 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+            <p className="text-label text-t3 uppercase mb-2 flex items-center gap-1.5">
               <Download className="w-3.5 h-3.5 text-info" />Top — Plus téléchargées
             </p>
             {topDownloaded.length ? topDownloaded.map((r, i) => (
               <TopRow key={r.id} rank={i + 1} title={r.title} type={r.type} count={r.downloadCount} icon={Download} tint="text-info" />
-            )) : <p className="text-sm text-t4 py-6 text-center">Aucune donnée</p>}
+            )) : <p className="text-data text-t4 py-6 text-center">Aucune donnée</p>}
           </div>
         </div>
       </Card>
@@ -443,15 +443,15 @@ const AdminDashboard = () => {
       <div className="grid lg:grid-cols-2 gap-6">
         <Card className="p-4 sm:p-6">
           <PanelHead icon={ClipboardList} title="Candidatures" subtitle="Accompagnement 360, événements & archives" tint="text-info"
-            action={<Link to="/admin/applications" className="text-xs text-gold hover:text-gold/80 flex items-center gap-1 flex-shrink-0">Voir <ArrowUpRight className="w-3 h-3" /></Link>} />
+            action={<Link to="/admin/applications" className="text-data text-gold hover:text-gold/80 flex items-center gap-1 flex-shrink-0">Voir <ArrowUpRight className="w-3 h-3" /></Link>} />
           <div className="space-y-3 mt-1">
             {applicationsByStatus.length ? applicationsByStatus.map((item) => (
               <Meter key={item.name} label={item.name} value={item.value} total={totalApps} color={SEQUENTIAL} />
-            )) : <p className="text-sm text-t4 text-center py-6">Aucune candidature</p>}
+            )) : <p className="text-data text-t4 text-center py-6">Aucune candidature</p>}
           </div>
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-line-soft">
-            <p className="text-sm text-t3">Total</p>
-            <p className="text-lg font-bold text-t1">{fr(totalApps)}</p>
+            <p className="text-data text-t3">Total</p>
+            <p className="text-heading text-t1">{fr(totalApps)}</p>
           </div>
         </Card>
 
@@ -466,11 +466,11 @@ const AdminDashboard = () => {
               <div key={item.name} className="flex items-center justify-between p-2.5 rounded-lg bg-surface-2">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: catColor(i) }} />
-                  <span className="text-sm text-t2 truncate">{item.name}</span>
+                  <span className="text-data text-t2 truncate">{item.name}</span>
                 </div>
-                <span className="text-sm font-bold text-t1">{fr(item.value)}</span>
+                <span className="text-data font-medium text-t1">{fr(item.value)}</span>
               </div>
-            )) : <p className="text-sm text-t4 text-center py-6">Aucun événement</p>}
+            )) : <p className="text-data text-t4 text-center py-6">Aucun événement</p>}
           </div>
         </Card>
 
@@ -484,7 +484,7 @@ const AdminDashboard = () => {
             ].map(({ to, icon: Icon, label, c }) => (
               <Link key={to} to={to} className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${c}`}>
                 <Icon className="w-4 h-4 flex-shrink-0" />
-                <span className="text-sm font-medium truncate">{label}</span>
+                <span className="text-data font-medium truncate">{label}</span>
                 <ArrowUpRight className="w-3.5 h-3.5 ml-auto opacity-60 flex-shrink-0" />
               </Link>
             ))}
@@ -497,23 +497,23 @@ const AdminDashboard = () => {
             <h3 className="font-semibold">Santé de la plateforme</h3>
           </div>
           <div className="pt-4 mt-4 border-t border-line">
-            <p className="text-xs text-t4 mb-1">Taux de téléchargement</p>
+            <p className="text-data text-t4 mb-1">Taux de téléchargement</p>
             <div className="flex items-end gap-2">
-              <span className="text-2xl font-bold text-info">{downloadRate}%</span>
-              <span className="text-xs text-t3 mb-1">des vues → téléchargement</span>
+              <span className="text-title text-info">{downloadRate}%</span>
+              <span className="text-data text-t3 mb-1">des vues → téléchargement</span>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 pt-4 mt-4 border-t border-line">
-            <div><p className="text-xs text-t4">Catégories</p><p className="text-xl font-bold">{fr(stats?.totalCategories || 0)}</p></div>
-            <div><p className="text-xs text-t4">Tags</p><p className="text-xl font-bold">{fr(stats?.totalTags || 0)}</p></div>
+            <div><p className="text-data text-t4">Catégories</p><p className="text-title">{fr(stats?.totalCategories || 0)}</p></div>
+            <div><p className="text-data text-t4">Tags</p><p className="text-title">{fr(stats?.totalTags || 0)}</p></div>
           </div>
           <div className="pt-4 mt-4 border-t border-line space-y-1.5">
-            <p className="text-xs text-t4 mb-1">Croissance 30 j</p>
-            <div className="flex items-center justify-between text-sm">
+            <p className="text-data text-t4 mb-1">Croissance 30 j</p>
+            <div className="flex items-center justify-between text-data">
               <span className="text-t4">Nouveaux utilisateurs</span>
               <span className="font-bold text-success">+{fr(stats?.newUsersLast30Days || 0)}</span>
             </div>
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-data">
               <span className="text-t4">Nouvelles ressources</span>
               <span className="font-bold text-info">+{fr(stats?.newResourcesLast30Days || 0)}</span>
             </div>
@@ -529,15 +529,15 @@ const AdminDashboard = () => {
             {stats?.recentUsers?.length ? stats.recentUsers.map((u) => (
               <div key={u.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-surface-2 transition-colors">
                 <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-bold text-gold">{(u.username || u.email || '?').charAt(0).toUpperCase()}</span>
+                  <span className="text-data font-medium text-gold">{(u.username || u.email || '?').charAt(0).toUpperCase()}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-t1 truncate">{u.email || u.username}</p>
-                  <p className="text-xs text-t4 truncate">{u.roleName} · {u.providerName}</p>
+                  <p className="text-data font-medium text-t1 truncate">{u.email || u.username}</p>
+                  <p className="text-data text-t4 truncate">{u.roleName} · {u.providerName}</p>
                 </div>
-                <span className="text-xs text-t4 flex-shrink-0">{u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : ''}</span>
+                <span className="text-data text-t4 flex-shrink-0">{u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : ''}</span>
               </div>
-            )) : <p className="text-sm text-t4 text-center py-6">Aucun utilisateur récent</p>}
+            )) : <p className="text-data text-t4 text-center py-6">Aucun utilisateur récent</p>}
           </div>
         </Card>
 
@@ -552,12 +552,12 @@ const AdminDashboard = () => {
                   <FileText className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-t1 truncate">{r.title}</p>
-                  <p className="text-xs text-t4 truncate">{r.categoryName} · {r.resourceTypeName?.toUpperCase()}</p>
+                  <p className="text-data font-medium text-t1 truncate">{r.title}</p>
+                  <p className="text-data text-t4 truncate">{r.categoryName} · {r.resourceTypeName?.toUpperCase()}</p>
                 </div>
-                <span className="text-xs text-t4 flex-shrink-0">{r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR') : ''}</span>
+                <span className="text-data text-t4 flex-shrink-0">{r.createdAt ? new Date(r.createdAt).toLocaleDateString('fr-FR') : ''}</span>
               </div>
-            )) : <p className="text-sm text-t4 text-center py-6">Aucune ressource récente</p>}
+            )) : <p className="text-data text-t4 text-center py-6">Aucune ressource récente</p>}
           </div>
         </Card>
       </div>

@@ -143,7 +143,7 @@ export default function AdminApprenants() {
         actions={
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 bg-gold text-black px-4 py-2 rounded-lg font-medium text-sm hover:bg-gold/80 transition-colors"
+            className="flex items-center gap-2 bg-gold text-black px-4 py-2 rounded-lg font-medium text-data hover:bg-gold/80 transition-colors"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Ajouter un apprenant</span>
@@ -158,12 +158,12 @@ export default function AdminApprenants() {
           placeholder="Rechercher par nom ou cohorte..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="flex-1 border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
+          className="flex-1 border border-line rounded-lg px-3 py-2 text-data focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
         />
         <select
           value={filterStatus}
           onChange={e => setFilterStatus(e.target.value as LearnerStatus | '')}
-          className="border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
+          className="border border-line rounded-lg px-3 py-2 text-data focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
         >
           <option value="">Tous les statuts</option>
           {(Object.keys(STATUS_LABELS) as LearnerStatus[]).map(s => (
@@ -178,15 +178,15 @@ export default function AdminApprenants() {
       ) : (
         <div className="bg-surface-1 rounded-2xl border border-line overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-data">
               <thead>
                 <tr className="bg-surface-2 border-b border-line">
-                  <th className="text-left px-4 py-3 font-semibold text-t3">Apprenant</th>
-                  <th className="text-left px-4 py-3 font-semibold text-t3">Statut</th>
-                  <th className="text-left px-4 py-3 font-semibold text-t3">Cohorte</th>
-                  <th className="text-left px-4 py-3 font-semibold text-t3">Liens</th>
-                  <th className="text-left px-4 py-3 font-semibold text-t3">Vitrine</th>
-                  <th className="text-right px-4 py-3 font-semibold text-t3">Actions</th>
+                  <th className="text-left px-4 py-3 text-label text-t3">Apprenant</th>
+                  <th className="text-left px-4 py-3 text-label text-t3">Statut</th>
+                  <th className="text-left px-4 py-3 text-label text-t3">Cohorte</th>
+                  <th className="text-left px-4 py-3 text-label text-t3">Liens</th>
+                  <th className="text-left px-4 py-3 text-label text-t3">Vitrine</th>
+                  <th className="text-right px-4 py-3 text-label text-t3">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line-soft">
@@ -200,7 +200,7 @@ export default function AdminApprenants() {
                         {l.photoUrl ? (
                           <img src={l.photoUrl} alt={l.fullName} className="w-9 h-9 rounded-full object-cover" />
                         ) : (
-                          <div className="w-9 h-9 rounded-full bg-gold/20 flex items-center justify-center text-gold font-bold text-sm">
+                          <div className="w-9 h-9 rounded-full bg-gold/20 flex items-center justify-center text-gold font-medium text-data">
                             {l.firstName[0]}{l.lastName[0]}
                           </div>
                         )}
@@ -208,17 +208,17 @@ export default function AdminApprenants() {
                           <div className="flex items-center gap-2">
                             <p className="font-medium text-t1">{l.fullName}</p>
                             {l.userId ? (
-                              <span className="text-xs bg-info-subtle text-info px-1.5 py-0.5 rounded-full">Compte lié</span>
+                              <span className="text-data bg-info-subtle text-info px-1.5 py-0.5 rounded-full">Compte lié</span>
                             ) : (
-                              <span className="text-xs bg-surface-2 text-t4 px-1.5 py-0.5 rounded-full">Manuel</span>
+                              <span className="text-data bg-surface-2 text-t4 px-1.5 py-0.5 rounded-full">Manuel</span>
                             )}
                           </div>
-                          {l.email && <p className="text-xs text-t4">{l.email}</p>}
+                          {l.email && <p className="text-data text-t4">{l.email}</p>}
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLORS[l.status]}`}>
+                      <span className={`inline-block text-data px-2 py-1 rounded-full font-medium ${STATUS_COLORS[l.status]}`}>
                         {STATUS_LABELS[l.status]}
                       </span>
                     </td>
@@ -240,22 +240,22 @@ export default function AdminApprenants() {
                             <Mail className="w-4 h-4" />
                           </a>
                         )}
-                        {!l.linkedinUrl && !l.portfolioUrl && !l.email && <span className="text-t4 text-xs">—</span>}
+                        {!l.linkedinUrl && !l.portfolioUrl && !l.email && <span className="text-t4 text-data">—</span>}
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         {l.showcased ? (
-                          <span className="flex items-center gap-1 text-xs text-warning font-medium">
+                          <span className="flex items-center gap-1 text-data text-warning font-medium">
                             <Star className="w-3.5 h-3.5 fill-yellow-400 text-warning" /> Landing
                           </span>
                         ) : null}
                         {!l.visible && (
-                          <span className="flex items-center gap-1 text-xs text-t4">
+                          <span className="flex items-center gap-1 text-data text-t4">
                             <EyeOff className="w-3.5 h-3.5" /> Masqué
                           </span>
                         )}
-                        {l.visible && !l.showcased && <span className="text-xs text-t4">Visible</span>}
+                        {l.visible && !l.showcased && <span className="text-data text-t4">Visible</span>}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -289,15 +289,15 @@ export default function AdminApprenants() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-surface-1 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-line">
             <div className="flex items-center justify-between p-6 border-b border-line">
-              <h2 className="text-xl font-bold text-t1">
+              <h2 className="text-title text-t1">
                 {editing ? 'Modifier l\'apprenant' : 'Ajouter un apprenant'}
               </h2>
-              <button onClick={() => setShowModal(false)} className="text-t4 hover:text-t1 text-2xl leading-none">&times;</button>
+              <button onClick={() => setShowModal(false)} className="text-t4 hover:text-t1 text-title leading-none">&times;</button>
             </div>
 
             <div className="p-6 space-y-5">
               {error && (
-                <div className="bg-error-subtle border border-error/30 text-error text-sm rounded-lg px-4 py-3">{error}</div>
+                <div className="bg-error-subtle border border-error/30 text-error text-data rounded-lg px-4 py-3">{error}</div>
               )}
 
               {/* Photo */}
@@ -305,18 +305,18 @@ export default function AdminApprenants() {
                 {form.photoUrl ? (
                   <img src={form.photoUrl} alt="photo" className="w-16 h-16 rounded-full object-cover border-2 border-gold" />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-surface-2 flex items-center justify-center text-t4 text-2xl font-bold">
+                  <div className="w-16 h-16 rounded-full bg-surface-2 flex items-center justify-center text-t4 text-title">
                     {form.firstName?.[0] || '?'}{form.lastName?.[0] || ''}
                   </div>
                 )}
                 <div>
-                  <label className="block text-xs font-medium text-t3 mb-1">Photo de profil</label>
-                  <label className="cursor-pointer bg-surface-2 hover:bg-surface-3 text-t2 text-xs px-3 py-1.5 rounded-lg transition-colors">
+                  <label className="block text-data font-medium text-t3 mb-1">Photo de profil</label>
+                  <label className="cursor-pointer bg-surface-2 hover:bg-surface-3 text-t2 text-data px-3 py-1.5 rounded-lg transition-colors">
                     {uploading ? 'Upload...' : 'Choisir une photo'}
                     <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
                   </label>
                   {form.photoUrl && (
-                    <button onClick={() => setForm(f => ({ ...f, photoUrl: '' }))} className="ml-2 text-xs text-error hover:text-error">Retirer</button>
+                    <button onClick={() => setForm(f => ({ ...f, photoUrl: '' }))} className="ml-2 text-data text-error hover:text-error">Retirer</button>
                   )}
                 </div>
               </div>
@@ -324,22 +324,22 @@ export default function AdminApprenants() {
               {/* Nom */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-t2 mb-1">Prénom *</label>
+                  <label className="block text-data font-medium text-t2 mb-1">Prénom *</label>
                   <input
                     type="text"
                     value={form.firstName}
                     onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))}
-                    className="w-full border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
+                    className="w-full border border-line rounded-lg px-3 py-2 text-data focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
                     placeholder="Brandon"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-t2 mb-1">Nom *</label>
+                  <label className="block text-data font-medium text-t2 mb-1">Nom *</label>
                   <input
                     type="text"
                     value={form.lastName}
                     onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))}
-                    className="w-full border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
+                    className="w-full border border-line rounded-lg px-3 py-2 text-data focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
                     placeholder="Kamga"
                   />
                 </div>
@@ -347,12 +347,12 @@ export default function AdminApprenants() {
 
               {/* Bio */}
               <div>
-                <label className="block text-sm font-medium text-t2 mb-1">Résumé / Bio</label>
+                <label className="block text-data font-medium text-t2 mb-1">Résumé / Bio</label>
                 <textarea
                   value={form.bio}
                   onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
                   rows={3}
-                  className="w-full border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none resize-none"
+                  className="w-full border border-line rounded-lg px-3 py-2 text-data focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none resize-none"
                   placeholder="Développeur Full Stack, passionné par le cloud..."
                 />
               </div>
@@ -360,11 +360,11 @@ export default function AdminApprenants() {
               {/* Statut + Cohorte */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-t2 mb-1">Statut</label>
+                  <label className="block text-data font-medium text-t2 mb-1">Statut</label>
                   <select
                     value={form.status}
                     onChange={e => setForm(f => ({ ...f, status: e.target.value as LearnerStatus }))}
-                    className="w-full border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
+                    className="w-full border border-line rounded-lg px-3 py-2 text-data focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
                   >
                     {(Object.keys(STATUS_LABELS) as LearnerStatus[]).map(s => (
                       <option key={s} value={s}>{STATUS_LABELS[s]}</option>
@@ -372,12 +372,12 @@ export default function AdminApprenants() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-t2 mb-1">Cohorte (année)</label>
+                  <label className="block text-data font-medium text-t2 mb-1">Cohorte (année)</label>
                   <input
                     type="text"
                     value={form.cohort}
                     onChange={e => setForm(f => ({ ...f, cohort: e.target.value }))}
-                    className="w-full border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
+                    className="w-full border border-line rounded-lg px-3 py-2 text-data focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
                     placeholder="2025"
                   />
                 </div>
@@ -385,32 +385,32 @@ export default function AdminApprenants() {
 
               {/* Liens */}
               <div>
-                <label className="block text-sm font-medium text-t2 mb-1">Email</label>
+                <label className="block text-data font-medium text-t2 mb-1">Email</label>
                 <input
                   type="email"
                   value={form.email}
                   onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                  className="w-full border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
+                  className="w-full border border-line rounded-lg px-3 py-2 text-data focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
                   placeholder="brandon@example.com"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-t2 mb-1">LinkedIn</label>
+                <label className="block text-data font-medium text-t2 mb-1">LinkedIn</label>
                 <input
                   type="url"
                   value={form.linkedinUrl}
                   onChange={e => setForm(f => ({ ...f, linkedinUrl: e.target.value }))}
-                  className="w-full border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
+                  className="w-full border border-line rounded-lg px-3 py-2 text-data focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
                   placeholder="https://linkedin.com/in/brandon-kamga"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-t2 mb-1">Portfolio / Site web</label>
+                <label className="block text-data font-medium text-t2 mb-1">Portfolio / Site web</label>
                 <input
                   type="url"
                   value={form.portfolioUrl}
                   onChange={e => setForm(f => ({ ...f, portfolioUrl: e.target.value }))}
-                  className="w-full border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
+                  className="w-full border border-line rounded-lg px-3 py-2 text-data focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
                   placeholder="https://brandon.dev"
                 />
               </div>
@@ -418,12 +418,12 @@ export default function AdminApprenants() {
               {/* Ordre + options */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-t2 mb-1">Ordre d'affichage</label>
+                  <label className="block text-data font-medium text-t2 mb-1">Ordre d'affichage</label>
                   <input
                     type="number"
                     value={form.displayOrder}
                     onChange={e => setForm(f => ({ ...f, displayOrder: parseInt(e.target.value) || 0 }))}
-                    className="w-full border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
+                    className="w-full border border-line rounded-lg px-3 py-2 text-data focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
                     min={0}
                   />
                 </div>
@@ -434,7 +434,7 @@ export default function AdminApprenants() {
                     onChange={e => setForm(f => ({ ...f, visible: e.target.checked }))}
                     className="w-4 h-4 accent-gold"
                   />
-                  <span className="text-sm text-t2 flex items-center gap-1">
+                  <span className="text-data text-t2 flex items-center gap-1">
                     <Eye className="w-4 h-4" /> Visible
                   </span>
                 </label>
@@ -445,7 +445,7 @@ export default function AdminApprenants() {
                     onChange={e => setForm(f => ({ ...f, showcased: e.target.checked }))}
                     className="w-4 h-4 accent-gold"
                   />
-                  <span className="text-sm text-t2 flex items-center gap-1">
+                  <span className="text-data text-t2 flex items-center gap-1">
                     <Star className="w-4 h-4" /> Landing page
                   </span>
                 </label>
@@ -455,14 +455,14 @@ export default function AdminApprenants() {
             <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-line">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 text-sm text-t3 hover:text-t1 border border-line rounded-lg transition-colors"
+                className="px-4 py-2 text-data text-t3 hover:text-t1 border border-line rounded-lg transition-colors"
               >
                 Annuler
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-5 py-2 text-sm bg-gold text-black font-semibold rounded-lg hover:bg-gold/80 transition-colors disabled:opacity-60"
+                className="px-5 py-2 text-data bg-gold text-black font-medium rounded-lg hover:bg-gold/80 transition-colors disabled:opacity-60"
               >
                 {saving ? 'Enregistrement...' : (editing ? 'Mettre à jour' : 'Créer')}
               </button>

@@ -177,11 +177,26 @@ export default {
       'gutter-lg': '2rem',
     },
 
+    // ── TYPE ROLES — six roles, not fourteen sizes.
+    //    Weight and tracking travel with the size, so a caller cannot pair a display size
+    //    with a body weight. Pick the role the text plays; the scale is not negotiable.
+    //    display  the one statement on a page, used once or not at all
+    //    title    what the page is
+    //    heading  what a section is
+    //    body     prose meant to be read
+    //    data     table cells and dense UI, never prose
+    //    label    the uppercase micro-caption above a value
     fontSize: {
-      // Data and labels, distinct from the reading scale above them.
-      'label': ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.08em' }],
+      'display': ['2.5rem', { lineHeight: '1.05', letterSpacing: '-0.03em', fontWeight: '700' }],
+      'title': ['1.5rem', { lineHeight: '1.15', letterSpacing: '-0.02em', fontWeight: '600' }],
+      'heading': ['1rem', { lineHeight: '1.3', letterSpacing: '-0.01em', fontWeight: '600' }],
+      'body': ['0.9375rem', { lineHeight: '1.6' }],
       'data': ['0.8125rem', { lineHeight: '1.25rem' }],
       'data-lg': ['0.9375rem', { lineHeight: '1.375rem' }],
+      'label': ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.08em', fontWeight: '500' }],
+      // The wide gold caps above a section. It is a brand signature rather than a size,
+      // which is why it keeps its own role instead of collapsing into `label`.
+      'eyebrow': ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.4em', fontWeight: '500' }],
     },
 
     animation: {

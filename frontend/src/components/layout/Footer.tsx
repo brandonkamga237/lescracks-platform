@@ -93,7 +93,7 @@ const Footer = () => {
           {/* Nav columns */}
           {NAV.map((col) => (
             <div key={col.title}>
-              <p className="text-[11px] font-semibold text-t4 uppercase tracking-[0.12em] mb-4">
+              <p className="text-label font-semibold text-t4 uppercase tracking-[0.12em] mb-4">
                 {col.title}
               </p>
               <ul className="space-y-3">

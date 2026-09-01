@@ -88,7 +88,7 @@ const ACTIVITIES = [
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
 const SL = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-[11px] text-gold uppercase tracking-[0.4em] mb-4">{children}</p>
+  <p className="text-eyebrow text-gold uppercase mb-4">{children}</p>
 );
 
 // ─── page ─────────────────────────────────────────────────────────────────────
@@ -139,7 +139,7 @@ const Landing = () => {
           <motion.div style={{ y: heroY, opacity: heroOpacity }} className="max-w-2xl">
 
             <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-              className="text-[11px] text-gold uppercase tracking-[0.45em] mb-7">
+              className="text-eyebrow text-gold uppercase mb-7">
               Accélérateur de carrière tech · Afrique francophone
             </motion.p>
 
@@ -203,7 +203,7 @@ const Landing = () => {
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
-          <span className="text-[11px] tracking-widest text-t4">SCROLL</span>
+          <span className="text-eyebrow text-t4">SCROLL</span>
           <motion.div animate={{ y: [0, 6, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}
             className="w-px h-5 bg-gradient-to-b from-gold to-transparent" />
         </motion.div>
@@ -266,7 +266,7 @@ const Landing = () => {
 
               {/* For who */}
               <div className="p-4 rounded-xl bg-white/4 border border-line-soft mb-8">
-                <p className="text-[11px] text-gold/60 uppercase tracking-widest mb-2">Pour qui</p>
+                <p className="text-label text-gold/60 uppercase tracking-widest mb-2">Pour qui</p>
                 <p className="text-sm text-t2 leading-relaxed">
                   Débutants, personnes en reconversion, profils qui tournent en rond depuis des mois sans résultats concrets.
                 </p>
@@ -417,7 +417,7 @@ const Landing = () => {
               <motion.div key={a.type}
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
                 className="p-5 rounded-2xl border border-line-soft hover:border-gold/20 transition-colors">
-                <span className="text-[11px] font-bold text-gold/60 uppercase tracking-widest">{a.type}</span>
+                <span className="text-label font-bold text-gold/60 uppercase tracking-widest">{a.type}</span>
                 <h3 className="font-semibold text-white mt-2 mb-2">{a.label}</h3>
                 <p className="text-xs text-t3 leading-relaxed">{a.desc}</p>
               </motion.div>
@@ -433,7 +433,7 @@ const Landing = () => {
                   <motion.div key={event.id}
                     initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
                     className="p-4 border border-line-soft rounded-xl hover:border-line transition-colors">
-                    <span className="text-[11px] text-gold/70 uppercase tracking-wider">{event.type}</span>
+                    <span className="text-label text-gold/70 uppercase tracking-wider">{event.type}</span>
                     <h4 className="font-medium text-sm mt-1.5 mb-2 text-t1">{event.title}</h4>
                     <div className="flex items-center gap-1.5 text-xs text-t4">
                       {/* startDate is optional: new Date(undefined) renders "Invalid Date". */}
@@ -576,7 +576,7 @@ const Landing = () => {
                   return (
                     <div key={v.label} className="text-center p-3 rounded-xl border border-line-soft">
                       <Icon className="w-5 h-5 text-gold/60 mx-auto mb-2" />
-                      <p className="text-[11px] text-t3 leading-tight">{v.label}</p>
+                      <p className="text-label text-t3 leading-tight">{v.label}</p>
                     </div>
                   );
                 })}

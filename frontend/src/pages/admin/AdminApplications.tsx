@@ -119,13 +119,13 @@ const AdminApplications = () => {
               <button
                 key={t.key}
                 onClick={() => { setStream(t.key); setEventFilter('all'); setShowArchived(false); }}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-data font-medium transition-colors ${
                   stream === t.key ? 'bg-gold text-black' : 'text-t3 hover:bg-surface-2'
                 }`}
               >
                 <Icon className="w-4 h-4" />
                 {t.label}
-                <span className="ml-1 text-xs opacity-70 tabular-nums">{t.n}</span>
+                <span className="ml-1 text-data opacity-70 tabular-nums">{t.n}</span>
               </button>
             );
           })}
@@ -135,7 +135,7 @@ const AdminApplications = () => {
           <select
             value={String(eventFilter)}
             onChange={e => setEventFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-            className="border border-line rounded-lg px-3 py-1.5 text-sm text-t2 focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
+            className="border border-line rounded-lg px-3 py-1.5 text-data text-t2 focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
           >
             <option value="all">Tous les événements</option>
             {eventsInStream.map(([id, title]) => (
@@ -145,7 +145,7 @@ const AdminApplications = () => {
         )}
 
         {archivedInStream > 0 && (
-          <label className="inline-flex items-center gap-2 text-sm text-t3 cursor-pointer select-none ml-auto">
+          <label className="inline-flex items-center gap-2 text-data text-t3 cursor-pointer select-none ml-auto">
             <input type="checkbox" checked={showArchived}
               onChange={e => setShowArchived(e.target.checked)}
               className="w-4 h-4 accent-gold" />
@@ -165,14 +165,14 @@ const AdminApplications = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-line bg-surface-2">
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-t3 uppercase">Nom</th>
+                  <th className="text-left px-6 py-3 text-label text-t3 uppercase">Nom</th>
                   {stream === 'events' && (
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-t3 uppercase">Événement</th>
+                    <th className="text-left px-6 py-3 text-label text-t3 uppercase">Événement</th>
                   )}
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-t3 uppercase">Email</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-t3 uppercase">WhatsApp</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-t3 uppercase">Date</th>
-                  <th className="text-right px-6 py-3 text-xs font-semibold text-t3 uppercase">Actions</th>
+                  <th className="text-left px-6 py-3 text-label text-t3 uppercase">Email</th>
+                  <th className="text-left px-6 py-3 text-label text-t3 uppercase">WhatsApp</th>
+                  <th className="text-left px-6 py-3 text-label text-t3 uppercase">Date</th>
+                  <th className="text-right px-6 py-3 text-label text-t3 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -180,25 +180,25 @@ const AdminApplications = () => {
                   <tr key={app.id} className={`hover:bg-surface-2 transition-colors ${app.archived ? 'opacity-60' : ''}`}>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium text-t1 text-sm">{displayName(app)}</p>
+                        <p className="font-medium text-t1 text-data">{displayName(app)}</p>
                         {app.archived && (
-                          <span className="text-[10px] uppercase tracking-wide text-t4 border border-line rounded px-1.5 py-0.5">
+                          <span className="text-label uppercase tracking-wide text-t4 border border-line rounded px-1.5 py-0.5">
                             Archivée
                           </span>
                         )}
                       </div>
-                      {app.age && <p className="text-xs text-t4">{app.age} ans</p>}
+                      {app.age && <p className="text-data text-t4">{app.age} ans</p>}
                     </td>
                     {stream === 'events' && (
-                      <td className="px-6 py-4 text-sm text-t2">
+                      <td className="px-6 py-4 text-data text-t2">
                         {app.eventTitle || <span className="text-t4 italic">—</span>}
                       </td>
                     )}
-                    <td className="px-6 py-4 text-sm text-t3">{app.emailAddress || '—'}</td>
-                    <td className="px-6 py-4 text-sm text-t3">
+                    <td className="px-6 py-4 text-data text-t3">{app.emailAddress || '—'}</td>
+                    <td className="px-6 py-4 text-data text-t3">
                       {app.whatsappNumber || <span className="text-t4 italic">—</span>}
                     </td>
-                    <td className="px-6 py-4 text-sm text-t3 whitespace-nowrap">
+                    <td className="px-6 py-4 text-data text-t3 whitespace-nowrap">
                       {new Date(app.createdAt).toLocaleDateString('fr-FR')}
                     </td>
                     <td className="px-6 py-4">
@@ -236,8 +236,8 @@ const AdminApplications = () => {
           <div className="bg-surface-1 rounded-2xl w-full max-w-lg border border-line overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-line">
               <div>
-                <h3 className="font-bold text-t1 text-lg">{displayName(detailApp)}</h3>
-                <p className="text-xs text-t4">
+                <h3 className="text-t1 text-heading">{displayName(detailApp)}</h3>
+                <p className="text-data text-t4">
                   {detailApp.eventRegistration
                     ? `Inscription — ${detailApp.eventTitle || 'Événement'}`
                     : 'Accompagnement 360'}
@@ -260,8 +260,8 @@ const AdminApplications = () => {
                 ].filter(r => r.value).map(row => (
                   <div key={row.label} className="flex items-center gap-3 py-3">
                     <span className="text-t4 flex-shrink-0">{row.icon}</span>
-                    <span className="text-sm text-t3 w-28 flex-shrink-0">{row.label}</span>
-                    <span className="text-sm text-t1 font-medium">{row.value}</span>
+                    <span className="text-data text-t3 w-28 flex-shrink-0">{row.label}</span>
+                    <span className="text-data text-t1 font-medium">{row.value}</span>
                   </div>
                 ))}
               </div>
@@ -270,9 +270,9 @@ const AdminApplications = () => {
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <MessageSquare className="w-4 h-4 text-t4" />
-                    <p className="text-sm font-semibold text-t2">Motivation</p>
+                    <p className="text-data font-medium text-t2">Motivation</p>
                   </div>
-                  <p className="text-sm text-t3 leading-relaxed bg-surface-2 rounded-lg p-4 whitespace-pre-wrap">
+                  <p className="text-data text-t3 leading-relaxed bg-surface-2 rounded-lg p-4 whitespace-pre-wrap">
                     {detailApp.motivationText}
                   </p>
                 </div>
@@ -283,7 +283,7 @@ const AdminApplications = () => {
               <button
                 onClick={() => handleArchive(detailApp)}
                 disabled={busyId === detailApp.id}
-                className="flex items-center gap-2 px-4 py-2 border border-line text-t2 rounded-lg text-sm font-medium hover:bg-surface-2 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 border border-line text-t2 rounded-lg text-data font-medium hover:bg-surface-2 transition-colors disabled:opacity-50"
               >
                 {detailApp.archived ? <ArchiveRestore className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
                 {detailApp.archived ? 'Désarchiver' : 'Archiver'}
@@ -291,7 +291,7 @@ const AdminApplications = () => {
               <button
                 onClick={() => handleDelete(detailApp.id)}
                 disabled={busyId === detailApp.id}
-                className="flex items-center gap-2 px-4 py-2 bg-error text-error-foreground rounded-lg text-sm font-medium hover:bg-error/80 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-error text-error-foreground rounded-lg text-data font-medium hover:bg-error/80 transition-colors disabled:opacity-50"
               >
                 <Trash2 className="w-4 h-4" /> Supprimer
               </button>

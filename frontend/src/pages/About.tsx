@@ -236,7 +236,7 @@ const About = () => {
                     <div className="flex items-baseline gap-3 mb-1">
                       <span className={`text-xs font-mono tracking-wider ${m.current ? 'text-gold' : 'text-gold/70'}`}>{m.year}</span>
                       <h3 className="font-display font-semibold">{m.title}</h3>
-                      {m.current && <span className="text-[11px] px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/25 font-medium">Actuel</span>}
+                      {m.current && <span className="text-label px-2 py-0.5 rounded-full bg-gold/15 text-gold border border-gold/25 font-medium">Actuel</span>}
                     </div>
                     <p className="text-sm text-t3 leading-relaxed">{m.desc}</p>
                   </div>
