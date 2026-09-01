@@ -74,7 +74,7 @@ const PasswordInput = ({
           // users are told what they already have rather than what they'd get.
           aria-label={visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
           aria-pressed={visible}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-t4 hover:text-t1 hover:bg-white/5 transition-colors"
+          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-t4 hover:text-t1 hover:bg-white/5 transition-colors"
         >
           {visible ? <EyeOff className="w-4.5 h-4.5 w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
         </button>

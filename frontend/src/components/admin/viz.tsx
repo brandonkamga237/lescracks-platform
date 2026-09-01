@@ -4,7 +4,6 @@
 // checks PASS, worst adjacent-pair CVD ΔE 19.4 — well above the 12 target.
 // Order is FIXED and assigned by entity, never cycled or reassigned by rank.
 import React from 'react';
-import type { LucideIcon } from 'lucide-react';
 
 // ── Categorical palette (fixed order) ──────────────────────────────────────────
 export const CATEGORICAL = [
@@ -66,23 +65,20 @@ export const ChartTooltip = ({ active, payload, label, labelFormatter, valueSuff
   );
 };
 
-// ── Page header (responsive) ───────────────────────────────────────────────────
+/**
+ * The title carries the page; the count sits beside it rather than under it, so the header
+ * costs one line instead of three. The icon this used to show was already in the sidebar
+ * next to the active item, and repeating it bought nothing but vertical space.
+ */
 export const PageHeader = ({
-  icon: Icon, title, subtitle, actions,
+  title, subtitle, actions,
 }: {
-  icon?: LucideIcon; title: string; subtitle?: string; actions?: React.ReactNode;
+  title: string; subtitle?: string; actions?: React.ReactNode;
 }) => (
-  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-    <div className="flex items-center gap-3 min-w-0">
-      {Icon && (
-        <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0">
-          <Icon className="w-5 h-5 text-gold" />
-        </div>
-      )}
-      <div className="min-w-0">
-        <h1 className="text-title text-t1 truncate">{title}</h1>
-        {subtitle && <p className="text-data text-t3 mt-0.5">{subtitle}</p>}
-      </div>
+  <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 mb-gutter pb-3 border-b border-line">
+    <div className="flex items-baseline gap-3 min-w-0">
+      <h1 className="text-title text-t1 truncate">{title}</h1>
+      {subtitle && <span className="text-label text-t4 whitespace-nowrap">{subtitle}</span>}
     </div>
     {actions && <div className="flex items-center gap-2 flex-shrink-0">{actions}</div>}
   </div>

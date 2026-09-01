@@ -1,6 +1,6 @@
 // src/pages/admin/AdminApprenants.tsx
 import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Eye, EyeOff, Star, Linkedin, Globe, Mail, GraduationCap } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, EyeOff, Star, Linkedin, Globe, Mail } from 'lucide-react';
 import { PageHeader } from '@/components/admin/viz';
 import adminApi, { AdminLearner, AdminLearnerRequest, LearnerStatus } from '@/services/adminApi';
 import apiService from '@/services/api';
@@ -138,7 +138,7 @@ export default function AdminApprenants() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <PageHeader icon={GraduationCap} title="Apprenants"
+      <PageHeader title="Apprenants"
         subtitle={`${learners.length} apprenant(s) enregistré(s)`}
         actions={
           <button
@@ -146,8 +146,7 @@ export default function AdminApprenants() {
             className="flex items-center gap-2 bg-gold text-black px-4 py-2 rounded-lg font-medium text-data hover:bg-gold/80 transition-colors"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Ajouter un apprenant</span>
-            <span className="sm:hidden">Ajouter</span>
+            Ajouter un apprenant
           </button>
         } />
 
@@ -176,7 +175,7 @@ export default function AdminApprenants() {
       {loading ? (
         <div className="text-center py-16 text-t4">Chargement...</div>
       ) : (
-        <div className="bg-surface-1 rounded-2xl border border-line overflow-hidden">
+        <div className="bg-surface-1 rounded-xl border border-line overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-data">
               <thead>
@@ -287,7 +286,7 @@ export default function AdminApprenants() {
       {/* Modal create/edit */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-surface-1 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-line">
+          <div className="bg-surface-1 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-line">
             <div className="flex items-center justify-between p-6 border-b border-line">
               <h2 className="text-title text-t1">
                 {editing ? 'Modifier l\'apprenant' : 'Ajouter un apprenant'}

@@ -645,7 +645,7 @@ const Ressources = () => {
               animate={{ opacity: 1, y: 0 }}
               className="flex flex-col items-center text-center py-24"
             >
-              <div className="w-24 h-24 rounded-2xl bg-white/5 border border-line flex items-center justify-center mb-6">
+              <div className="w-24 h-24 rounded-xl bg-white/5 border border-line flex items-center justify-center mb-6">
                 <FileText className="w-12 h-12 text-t4" />
               </div>
               <h3 className="text-lg font-semibold text-t2 mb-2">Aucune ressource trouvée</h3>

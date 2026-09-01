@@ -151,7 +151,7 @@ const About = () => {
               transition={{ duration: 0.6 }}
               className="relative"
             >
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-white/5 border border-line">
+              <div className="aspect-[4/3] rounded-xl overflow-hidden bg-white/5 border border-line">
                 <img
                   src="/images/photo-brandon.jpeg"
                   alt="Brandon Kamga — fondateur de LesCracks"
@@ -253,7 +253,7 @@ const About = () => {
             className="card p-8 sm:p-10 flex flex-col sm:flex-row gap-8 items-start"
           >
             <div className="flex-shrink-0">
-              <div className="w-16 h-16 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center">
                 <Users className="w-8 h-8 text-gold" />
               </div>
             </div>
@@ -281,7 +281,7 @@ const About = () => {
             className="card p-8 sm:p-10 flex flex-col sm:flex-row gap-6 items-center justify-between"
           >
             <div className="flex items-start gap-5">
-              <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center">
+              <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center">
                 <Users className="w-7 h-7 text-gold" />
               </div>
               <div>
@@ -304,7 +304,7 @@ const About = () => {
         <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
           <motion.div
             {...fadeUp}
-            className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-gold/10 via-gold/5 to-transparent border border-gold/20 p-10 sm:p-14 text-center"
+            className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gold/10 via-gold/5 to-transparent border border-gold/20 p-10 sm:p-14 text-center"
           >
             {/* Background glow */}
             <div className="absolute inset-0 pointer-events-none">

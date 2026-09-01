@@ -1,6 +1,6 @@
 // src/pages/admin/AdminEvents.tsx
 import { useState, useEffect } from 'react';
-import { Calendar, Plus, Loader2, Trash2, Pencil, X, Save, Image } from 'lucide-react';
+import { Plus, Loader2, Trash2, Pencil, X, Save, Image } from 'lucide-react';
 import { PageHeader } from '@/components/admin/viz';
 import AsyncState from '@/components/ui/AsyncState';
 import Pagination from '@/components/ui/Pagination';
@@ -199,19 +199,18 @@ const AdminEvents = () => {
   return (
     <div>
       {/* Header */}
-      <PageHeader icon={Calendar} title="Événements"
+      <PageHeader title="Événements"
         subtitle={`${totalElements} événement${totalElements !== 1 ? 's' : ''}`}
         actions={
           <button onClick={openCreate}
             className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 transition-colors font-medium text-data">
             <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Nouvel événement</span>
-            <span className="sm:hidden">Ajouter</span>
+            Nouvel événement
           </button>
         } />
 
       {/* Table */}
-      <div className="bg-surface-1 rounded-2xl border border-line overflow-hidden">
+      <div className="bg-surface-1 rounded-xl border border-line overflow-hidden">
         <AsyncState
           loading={loading}
           empty={events.length === 0}
@@ -283,7 +282,7 @@ const AdminEvents = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-surface-1 rounded-2xl w-full max-w-xl border border-line max-h-[92vh] overflow-y-auto">
+          <div className="bg-surface-1 rounded-xl w-full max-w-xl border border-line max-h-[92vh] overflow-y-auto">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-line sticky top-0 bg-surface-1 z-10">
               <h2 className="text-heading text-t1">

@@ -83,9 +83,7 @@ const AdminCategories = () => {
 
   return (
     <div>
-      <PageHeader
-        icon={FolderOpen}
-        title="Catégories"
+      <PageHeader title="Catégories"
         subtitle={`${categories.length} catégorie${categories.length !== 1 ? 's' : ''}`}
         actions={
           <Button onClick={() => { setShowForm(true); cancelEdit(); setFormError(null); }}>

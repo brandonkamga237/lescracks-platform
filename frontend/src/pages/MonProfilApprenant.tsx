@@ -114,7 +114,7 @@ export default function MonProfilApprenant() {
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }} className="md:col-span-2">
             <p className="text-xs text-t4 uppercase tracking-widest mb-3">Aperçu de ta carte</p>
-            <div className="bg-white/5 border border-line rounded-2xl p-5 hover:border-gold/20 transition-colors">
+            <div className="bg-white/5 border border-line rounded-xl p-5 hover:border-gold/20 transition-colors">
               <div className="flex items-start gap-4 mb-4">
                 {learner.photoUrl ? (
                   <img src={learner.photoUrl} alt={learner.fullName}

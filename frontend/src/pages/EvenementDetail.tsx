@@ -97,7 +97,7 @@ const EvenementDetail = () => {
     return (
       <Layout>
         <div className="max-w-4xl mx-auto px-4 py-12 space-y-4">
-          <Skeleton className="h-56 w-full rounded-2xl" />
+          <Skeleton className="h-56 w-full rounded-xl" />
           <Skeleton className="h-8 w-2/3" />
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-5/6" />
@@ -163,7 +163,7 @@ const EvenementDetail = () => {
             <img
               src={event.coverImageUrl}
               alt=""
-              className="w-full h-64 object-cover rounded-2xl border border-line mb-8"
+              className="w-full h-64 object-cover rounded-xl border border-line mb-8"
             />
           )}
 

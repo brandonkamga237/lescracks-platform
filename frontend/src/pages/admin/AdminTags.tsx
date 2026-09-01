@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Tags, Plus, Trash2, Pencil, Check, X } from 'lucide-react';
+import { Plus, Trash2, Pencil, Check, X } from 'lucide-react';
 import { PageHeader } from '@/components/admin/viz';
 import adminApi, { AdminTag, AdminCategory } from '@/services/adminApi';
 import { errorMessage } from '@/lib/utils';
@@ -184,9 +184,7 @@ const AdminTags = () => {
 
   return (
     <div>
-      <PageHeader
-        icon={Tags}
-        title="Tags"
+      <PageHeader title="Tags"
         subtitle={`${totalElements} tag${totalElements !== 1 ? 's' : ''}`}
         actions={
           <Button onClick={() => { setShowForm(true); setFormError(null); }}>

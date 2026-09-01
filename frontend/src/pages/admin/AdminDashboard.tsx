@@ -29,7 +29,7 @@ const Kpi = ({
   link?: string; trend?: number; hint?: string; spark?: { date: string; count: number }[];
 }) => {
   const inner = (
-    <div className="relative bg-surface-1 rounded-2xl p-4 sm:p-5 border border-line hover:border-line-strong hover:border-gold/40 transition-all group h-full overflow-hidden">
+    <div className="relative bg-surface-1 rounded-xl p-4 sm:p-5 border border-line hover:border-line-strong hover:border-gold/40 transition-all group h-full overflow-hidden">
       <div className="flex items-start justify-between gap-2">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${tint}`}>
           <Icon className="w-5 h-5" />
@@ -491,7 +491,7 @@ const AdminDashboard = () => {
           </div>
         </Card>
 
-        <div className="bg-surface-2 rounded-2xl p-4 sm:p-6 text-white ">
+        <div className="bg-surface-2 rounded-xl p-4 sm:p-6 text-white ">
           <div className="flex items-center gap-2 mb-4">
             <Activity className="w-5 h-5 text-gold" />
             <h3 className="font-semibold">Santé de la plateforme</h3>

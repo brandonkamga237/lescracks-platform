@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Users, Trash2, Pencil, Shield, GraduationCap } from 'lucide-react';
+import { Trash2, Pencil, Shield, GraduationCap } from 'lucide-react';
 import adminApi, { AdminUser, PaginatedResponse } from '@/services/adminApi';
 import { PageHeader } from '@/components/admin/viz';
 import { errorMessage } from '@/lib/utils';
@@ -143,9 +143,7 @@ const AdminUsers = () => {
 
   return (
     <div>
-      <PageHeader
-        icon={Users}
-        title="Utilisateurs"
+      <PageHeader title="Utilisateurs"
         subtitle={`${totalElements} compte${totalElements !== 1 ? 's' : ''}`}
       />
 

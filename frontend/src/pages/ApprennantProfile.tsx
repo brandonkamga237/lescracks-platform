@@ -106,10 +106,10 @@ export default function ApprennantProfile() {
               <img
                 src={learner.photoUrl}
                 alt={learner.fullName}
-                className={`w-24 h-24 rounded-2xl object-cover border-2 flex-shrink-0 ${isCertified ? 'border-gold/40' : 'border-line'}`}
+                className={`w-24 h-24 rounded-xl object-cover border-2 flex-shrink-0 ${isCertified ? 'border-gold/40' : 'border-line'}`}
               />
             ) : (
-              <div className={`w-24 h-24 rounded-2xl flex items-center justify-center text-3xl font-bold flex-shrink-0 ${
+              <div className={`w-24 h-24 rounded-xl flex items-center justify-center text-3xl font-bold flex-shrink-0 ${
                 isCertified ? 'bg-gold/15 border border-gold/30 text-gold' : 'bg-white/8 border border-line text-t2'
               }`}>
                 {learner.firstName[0]}{learner.lastName[0]}
@@ -143,7 +143,7 @@ export default function ApprennantProfile() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-white/4 border border-line-soft rounded-2xl p-6"
+                className="bg-white/4 border border-line-soft rounded-xl p-6"
               >
                 <p className="text-4xl text-gold/20 font-serif leading-none mb-3 select-none">"</p>
                 <p className="text-t1 leading-relaxed text-sm italic">{learner.bio}</p>
@@ -156,7 +156,7 @@ export default function ApprennantProfile() {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white/4 border border-line-soft rounded-2xl p-6"
+                className="bg-white/4 border border-line-soft rounded-xl p-6"
               >
                 <h2 className="text-xs font-semibold uppercase tracking-wider text-t4 mb-4">
                   Retrouver {learner.firstName}
@@ -203,7 +203,7 @@ export default function ApprennantProfile() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.15 }}
-                className="bg-gradient-to-br from-gold/15 to-gold/5 border border-gold/25 rounded-2xl p-5 text-center"
+                className="bg-gradient-to-br from-gold/15 to-gold/5 border border-gold/25 rounded-xl p-5 text-center"
               >
                 <Award className="w-8 h-8 text-gold mx-auto mb-2" />
                 <p className="text-gold font-bold text-sm">Certifié LesCracks</p>
@@ -218,7 +218,7 @@ export default function ApprennantProfile() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="bg-white/4 border border-line-soft rounded-2xl p-5 space-y-3"
+              className="bg-white/4 border border-line-soft rounded-xl p-5 space-y-3"
             >
               <p className="text-t3 text-xs leading-relaxed">
                 Inspiré par {learner.firstName} ? Commence ta transformation dès maintenant.

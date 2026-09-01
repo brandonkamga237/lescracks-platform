@@ -1,6 +1,6 @@
 // src/pages/admin/AdminResources.tsx
 import { useState, useEffect, useRef } from 'react';
-import { FileText, Plus, Loader2, Trash2, Eye, Video, File, Search, Filter, X, Save, Youtube, Upload, Download, Pencil } from 'lucide-react';
+import { Plus, Loader2, Trash2, Eye, Video, File, Search, Filter, X, Save, Youtube, Upload, Download, Pencil } from 'lucide-react';
 import { PageHeader } from '@/components/admin/viz';
 import AsyncState from '@/components/ui/AsyncState';
 import Pagination from '@/components/ui/Pagination';
@@ -271,7 +271,7 @@ const AdminResources = () => {
 
   return (
     <div>
-      <PageHeader icon={FileText} title="Ressources"
+      <PageHeader title="Ressources"
         subtitle={`${totalElements} ressource${totalElements !== 1 ? 's' : ''}`}
         actions={
           <button
@@ -279,13 +279,12 @@ const AdminResources = () => {
             className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 transition-colors font-medium text-data"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Nouvelle ressource</span>
-            <span className="sm:hidden">Ajouter</span>
+            Nouvelle ressource
           </button>
         } />
 
       {/* Search and Filters */}
-      <div className="mb-6 p-4 bg-surface-1 rounded-2xl border border-line ">
+      <div className="mb-6 p-4 bg-surface-1 rounded-xl border border-line ">
         <form onSubmit={handleSearch} className="flex flex-wrap gap-3 items-end">
           <div className="flex-1 min-w-[200px]">
             <label className="block text-data text-t3 mb-1">Rechercher</label>
@@ -346,7 +345,7 @@ const AdminResources = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-surface-1 rounded-2xl border border-line overflow-hidden">
+      <div className="bg-surface-1 rounded-xl border border-line overflow-hidden">
         <AsyncState
           loading={loading}
           empty={resources.length === 0}

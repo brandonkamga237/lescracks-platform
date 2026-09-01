@@ -50,7 +50,7 @@ const MegaMenu = ({ item, id, onNavigate }: { item: MenuItem; id: string; onNavi
     transition={{ duration: 0.18, ease: 'easeOut' }}
     className={`absolute top-full pt-3 z-50 ${item.alignRight ? 'right-0' : 'left-0'}`}
   >
-    <div id={id} className="w-72 bg-background/95 backdrop-blur-xl border border-line rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
+    <div id={id} className="w-72 bg-background/95 backdrop-blur-xl border border-line rounded-xl shadow-2xl shadow-black/50 overflow-hidden">
       <div className="h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
       <ul className="py-2">
         {item.columns?.map((col, i) => {
@@ -236,7 +236,7 @@ const Header = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 8 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-2 w-56 bg-background/95 backdrop-blur-xl border border-line rounded-2xl shadow-2xl shadow-black/40 overflow-hidden"
+                      className="absolute right-0 top-full mt-2 w-56 bg-background/95 backdrop-blur-xl border border-line rounded-xl shadow-2xl shadow-black/40 overflow-hidden"
                     >
                       <div className="h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
                       <div className="p-3 border-b border-line-soft">

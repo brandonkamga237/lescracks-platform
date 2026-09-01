@@ -91,7 +91,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-line flex-shrink-0">
           <Link to="/admin" className="flex items-center gap-2 min-w-0">
-            <div className="w-8 h-8 bg-gold flex items-center justify-center flex-shrink-0 rounded-md">
+            <div className="w-8 h-8 bg-gold flex items-center justify-center flex-shrink-0 rounded-lg">
               <span className="text-black font-bold text-lg">L</span>
             </div>
             <span className={`font-display font-bold truncate ${collapsed ? 'lg:hidden' : ''}`}>LesCracks</span>

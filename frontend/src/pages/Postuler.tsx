@@ -128,7 +128,7 @@ const Postuler = () => {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-lg w-full text-center"
           >
-            <div className="w-16 h-16 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-6">
               <Clock className="w-7 h-7 text-gold" />
             </div>
             <p className="text-eyebrow text-gold uppercase mb-4">Accompagnement 360</p>
@@ -192,7 +192,7 @@ const Postuler = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
-            className="rounded-2xl border border-gold/20 bg-gold/3 p-6 mb-8"
+            className="rounded-xl border border-gold/20 bg-gold/3 p-6 mb-8"
           >
             <div className="flex items-center gap-3 mb-4">
               <div className="w-9 h-9 rounded-lg bg-gold/15 flex items-center justify-center">

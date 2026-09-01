@@ -156,7 +156,7 @@ export default function RessourceDetail() {
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative h-52 sm:h-64 rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/2 border border-line-soft mb-6 flex items-center justify-center"
+              className="relative h-52 sm:h-64 rounded-xl overflow-hidden bg-gradient-to-br from-white/5 to-white/2 border border-line-soft mb-6 flex items-center justify-center"
             >
               {resource.previewImageUrl && (
                 <img
@@ -266,7 +266,7 @@ export default function RessourceDetail() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white/4 border border-line-soft rounded-2xl p-5"
+              className="bg-white/4 border border-line-soft rounded-xl p-5"
             >
               {canAccess ? (
                 <div className="space-y-3">

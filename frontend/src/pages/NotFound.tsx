@@ -15,7 +15,7 @@ const NotFound = () => {
         animate={{ opacity: 1, y: 0 }}
         className="relative w-full max-w-md text-center"
       >
-        <div className="w-16 h-16 rounded-2xl bg-white/5 border border-line flex items-center justify-center mx-auto mb-6">
+        <div className="w-16 h-16 rounded-xl bg-white/5 border border-line flex items-center justify-center mx-auto mb-6">
           <Compass className="w-7 h-7 text-gold" />
         </div>
 

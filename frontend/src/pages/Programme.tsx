@@ -206,7 +206,7 @@ const Programme = () => {
                 <motion.div
                   key={item.title}
                   initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
-                  className="p-6 rounded-2xl border border-line-soft hover:border-gold/20 transition-colors"
+                  className="p-6 rounded-xl border border-line-soft hover:border-gold/20 transition-colors"
                 >
                   <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center mb-4">
                     <Icon className="w-5 h-5 text-gold" />
@@ -333,9 +333,9 @@ const Programme = () => {
                 <motion.div
                   key={item.title}
                   initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
-                  className="p-6 rounded-2xl border border-line-soft text-center"
+                  className="p-6 rounded-xl border border-line-soft text-center"
                 >
-                  <div className="w-12 h-12 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-4">
                     <Icon className="w-5 h-5 text-gold" />
                   </div>
                   <h3 className="font-display font-bold text-white mb-2">{item.title}</h3>
@@ -375,7 +375,7 @@ const Programme = () => {
       <section className="py-24 px-4 text-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-gold/5 via-transparent to-transparent pointer-events-none" />
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-2xl mx-auto relative z-10">
-          <div className="w-16 h-16 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 rounded-xl bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-6">
             <Compass className="w-7 h-7 text-gold" />
           </div>
           <SL>Passer à l'action</SL>

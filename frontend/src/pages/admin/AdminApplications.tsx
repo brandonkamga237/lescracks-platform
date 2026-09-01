@@ -9,8 +9,7 @@
 // You look at one stream at a time.
 
 import { useState, useEffect } from 'react';
-import {
-  ClipboardList, Loader2, Trash2, Eye, X, Phone, Mail, User, Calendar,
+import { Loader2, Trash2, Eye, X, Phone, Mail, User, Calendar,
   MessageSquare, Archive, ArchiveRestore, Ticket, Compass,
 } from 'lucide-react';
 import adminApi, { AdminApplication } from '@/services/adminApi';
@@ -102,7 +101,7 @@ const AdminApplications = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <PageHeader icon={ClipboardList} title="Candidatures"
+      <PageHeader title="Candidatures"
         subtitle={stream === '360'
           ? `${activeCount(stream360)} candidature${activeCount(stream360) !== 1 ? 's' : ''} active${activeCount(stream360) !== 1 ? 's' : ''} — Accompagnement 360`
           : `${activeCount(streamEvents)} inscription${activeCount(streamEvents) !== 1 ? 's' : ''} active${activeCount(streamEvents) !== 1 ? 's' : ''} aux événements`} />
@@ -119,7 +118,7 @@ const AdminApplications = () => {
               <button
                 key={t.key}
                 onClick={() => { setStream(t.key); setEventFilter('all'); setShowArchived(false); }}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-data font-medium transition-colors ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-data font-medium transition-colors ${
                   stream === t.key ? 'bg-gold text-black' : 'text-t3 hover:bg-surface-2'
                 }`}
               >
@@ -155,7 +154,7 @@ const AdminApplications = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-surface-1 rounded-2xl border border-line overflow-hidden">
+      <div className="bg-surface-1 rounded-xl border border-line overflow-hidden">
         <AsyncState
           loading={loading}
           empty={rows.length === 0}
@@ -233,7 +232,7 @@ const AdminApplications = () => {
       {/* Detail modal */}
       {detailApp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onClick={() => setDetailApp(null)}>
-          <div className="bg-surface-1 rounded-2xl w-full max-w-lg border border-line overflow-hidden" onClick={e => e.stopPropagation()}>
+          <div className="bg-surface-1 rounded-xl w-full max-w-lg border border-line overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-line">
               <div>
                 <h3 className="text-t1 text-heading">{displayName(detailApp)}</h3>

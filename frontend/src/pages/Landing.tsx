@@ -236,7 +236,7 @@ const Landing = () => {
               return (
                 <motion.div key={p.title}
                   initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
-                  className="p-6 rounded-2xl border border-line-soft hover:border-line transition-colors">
+                  className="p-6 rounded-xl border border-line-soft hover:border-line transition-colors">
                   <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-5">
                     <Icon className="w-5 h-5 text-gold/70" />
                   </div>
@@ -282,7 +282,7 @@ const Landing = () => {
 
             {/* Right — feature list */}
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
-              className="rounded-2xl border border-gold/20 bg-gold/3 p-8">
+              className="rounded-xl border border-gold/20 bg-gold/3 p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-11 h-11 rounded-xl bg-gold/15 flex items-center justify-center">
                   <Compass className="w-5 h-5 text-gold" />
@@ -388,7 +388,7 @@ const Landing = () => {
 
             {/* Visual illustration */}
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
-              className="rounded-2xl overflow-hidden border border-line-soft">
+              className="rounded-xl overflow-hidden border border-line-soft">
               <img
                 src="/images/community-2.jpg"
                 alt="Communauté LesCracks"
@@ -416,7 +416,7 @@ const Landing = () => {
             {ACTIVITIES.map((a) => (
               <motion.div key={a.type}
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
-                className="p-5 rounded-2xl border border-line-soft hover:border-gold/20 transition-colors">
+                className="p-5 rounded-xl border border-line-soft hover:border-gold/20 transition-colors">
                 <span className="text-label font-bold text-gold/60 uppercase tracking-widest">{a.type}</span>
                 <h3 className="font-semibold text-white mt-2 mb-2">{a.label}</h3>
                 <p className="text-xs text-t3 leading-relaxed">{a.desc}</p>
@@ -485,7 +485,7 @@ const Landing = () => {
                 >
                   <Link
                     to={`/apprenants/${l.slug}`}
-                    className="group block bg-white/3 border border-line-soft rounded-2xl p-5 hover:border-gold/25 hover:bg-white/6 transition-all duration-300"
+                    className="group block bg-white/3 border border-line-soft rounded-xl p-5 hover:border-gold/25 hover:bg-white/6 transition-all duration-300"
                   >
                     <div className="flex items-center gap-3 mb-3">
                       {l.photoUrl ? (
@@ -542,7 +542,7 @@ const Landing = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Image */}
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}
-              className="relative rounded-2xl overflow-hidden border border-line-soft order-2 md:order-1">
+              className="relative rounded-xl overflow-hidden border border-line-soft order-2 md:order-1">
               <img
                 src="/images/about.jpg"
                 alt="Apprenants LesCracks — Afrique francophone"

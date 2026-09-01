@@ -71,7 +71,7 @@ const Notification: React.FC<NotificationProps> = ({
               </div>
               <button
                 onClick={onClose}
-                className="ml-3 flex-shrink-0 p-1 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+                className="ml-3 flex-shrink-0 p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
