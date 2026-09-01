@@ -39,8 +39,6 @@ public class UserMapper {
                 .providerUserId(user.getProviderUserId())
                 .roleName(user.getRole() != null ? user.getRole().getName().name() : null)
                 .picture(picture)
-                .premiumActivatedAt(user.getPremiumActivatedAt())
-                .premiumExpiresAt(user.getPremiumExpiresAt())
                 .build();
     }
 

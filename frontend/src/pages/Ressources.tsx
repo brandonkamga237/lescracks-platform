@@ -13,7 +13,6 @@ import {
   Lock,
   Download,
   Search,
-  Crown,
   Eye,
   ChevronLeft,
   ChevronRight,
@@ -38,7 +37,7 @@ const SORT_OPTIONS: { key: SortKey; label: string }[] = [
 ];
 
 const Ressources = () => {
-  const { isAuthenticated, isPremium } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [searchParams] = useSearchParams();
 
   // Initialise l'onglet actif depuis ?type=VIDEO|DOCUMENT (liens du sous-menu)
@@ -205,13 +204,9 @@ const Ressources = () => {
   /**
    * Browsing the catalogue is public; opening the CONTENT is not.
    *
-   * This used to return true for any free resource, even to a signed-out visitor —
-   * matching a server that also left the file endpoint wide open. Both are closed now.
+   * Opening a resource needs an account; browsing the catalogue does not.
    */
-  const canAccess = (resource: Resource) => {
-    if (!isAuthenticated) return false;
-    return !resource.premium || isPremium;
-  };
+  const canAccess = () => isAuthenticated;
 
   const handleOpen = async (resource: Resource) => {
     window.open(resource.url, '_blank', 'noopener,noreferrer');
@@ -275,23 +270,6 @@ const Ressources = () => {
               </p>
             )}
           </div>
-
-          {/* Premium Notice */}
-          {!isPremium && isAuthenticated && (
-            <div className="mb-6 p-4 rounded-lg bg-gold/10 border border-gold/20">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Crown className="w-5 h-5 text-gold" />
-                  <span className="text-t1">
-                    Passez premium pour acceder a toutes les ressources
-                  </span>
-                </div>
-                <Link to="/premium" className="btn-primary text-sm py-2">
-                  Passer Premium
-                </Link>
-              </div>
-            </div>
-          )}
 
           {/* Tabs — IDs match #bibliotheque / #videotheque hash links from nav/footer */}
           <div className="flex items-center gap-4 mb-6 border-b border-line overflow-x-auto">
@@ -510,13 +488,6 @@ const Ressources = () => {
                       ) : (
                         <FileText className="w-12 h-12 text-gold/40 relative z-10" />
                       )}
-                      {/* Premium badge */}
-                      {resource.premium && (
-                        <div className="absolute top-2 right-2 z-10 flex items-center gap-1 px-2 py-0.5 bg-gold text-black rounded-full text-[11px] font-bold">
-                          <Crown className="w-2.5 h-2.5" />
-                          Premium
-                        </div>
-                      )}
                     </div>
 
                     {/* Type, Category */}
@@ -572,7 +543,7 @@ const Ressources = () => {
                     </div>
 
                     {/* CTA */}
-                    {canAccess(resource) ? (
+                    {canAccess() ? (
                       <div className="flex gap-2 mt-auto pt-2">
                         {resource.slug ? (
                           <Link
@@ -610,7 +581,7 @@ const Ressources = () => {
                     ) : (
                       <div className="w-full flex items-center justify-center gap-2 py-2 border border-line rounded-lg text-t4 text-sm cursor-not-allowed">
                         <Lock className="w-4 h-4" />
-                        {isAuthenticated ? 'Accès Premium requis' : 'Connexion requise'}
+                        Connexion requise
                       </div>
                     )}
                   </motion.div>

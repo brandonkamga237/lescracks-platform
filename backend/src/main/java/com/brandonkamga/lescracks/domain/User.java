@@ -60,16 +60,6 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "premium_activated_at")
-    private LocalDateTime premiumActivatedAt;
-
-    @Column(name = "premium_expires_at")
-    private LocalDateTime premiumExpiresAt;
-
-    /** Email used for premium reminders — provided by the user at request time. */
-    @Column(name = "premium_contact_email", length = 255)
-    private String premiumContactEmail;
-
     /** True once the user has clicked the verification link in their welcome email. */
     @Column(name = "email_verified", nullable = false, columnDefinition = "boolean NOT NULL DEFAULT false")
     @Builder.Default

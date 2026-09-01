@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Menu, X, ArrowRight, BookOpen, Video, ChevronDown,
-  User, LogOut, Shield, Crown, Award,
+  User, LogOut, Shield, Award,
   Compass, FileText,
 } from 'lucide-react';
 import LesCracksLogo from '@/components/common/LesCracksLogo';
@@ -87,7 +87,7 @@ const MegaMenu = ({ item, id, onNavigate }: { item: MenuItem; id: string; onNavi
 // ─── header ───────────────────────────────────────────────────────────────────
 
 const Header = () => {
-  const { isAuthenticated, isAdmin, isPremium, isLearner, user, logout } = useAuth();
+  const { isAuthenticated, isAdmin, isLearner, user, logout } = useAuth();
   const { open: programmeOpen } = useProgrammeStatus();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -255,12 +255,6 @@ const Header = () => {
                           <Link to="/mon-profil-apprenant" onClick={() => setProfileOpen(false)}
                             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gold/80 hover:bg-gold/8 hover:text-gold transition-colors text-sm font-medium">
                             <Award className="w-4 h-4" aria-hidden="true" />Mon profil apprenant
-                          </Link>
-                        )}
-                        {!isPremium && (
-                          <Link to="/premium" onClick={() => setProfileOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gold hover:bg-gold/8 transition-colors text-sm font-medium">
-                            <Crown className="w-4 h-4" aria-hidden="true" />Passer Premium
                           </Link>
                         )}
                         {isAdmin && (

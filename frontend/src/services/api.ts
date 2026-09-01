@@ -38,13 +38,12 @@ export interface Resource {
   resourceTypeId: number;
   resourceTypeName: ResourceTypeName;
   sourceType: ResourceSourceType;
-  premium: boolean;
   downloadable: boolean;
   viewCount: number;
   downloadCount: number;
   tags: { id: number; name: string }[];
   slug?: string;
-  /** Body of an ARTICLE; null when the caller may not read a premium resource. */
+  /** Body of an ARTICLE. */
   content?: string;
   metadata?: {
     fileSize?: number;

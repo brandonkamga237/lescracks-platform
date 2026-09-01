@@ -41,10 +41,4 @@ public class UserResponse {
 
     @Schema(description = "URL de la photo de profil")
     private String picture;
-
-    @Schema(description = "Date d'activation PREMIUM")
-    private LocalDateTime premiumActivatedAt;
-
-    @Schema(description = "Date d'expiration PREMIUM")
-    private LocalDateTime premiumExpiresAt;
 }

@@ -253,7 +253,7 @@ public class ResourceServiceImpl implements ResourceService {
     public String storeFile(String originalFileName, byte[] bytes, String contentType) {
         String key = storageService.store(originalFileName, bytes, contentType);
         // The url still points at the API rather than at MinIO directly: serving through the
-        // backend is what lets the premium check run before a byte leaves the bucket.
+        // backend keeps the access rules in one place.
         return "/api/resources/files/" + key;
     }
 }

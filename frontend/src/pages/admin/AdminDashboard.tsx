@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import {
   Users, FileText, Calendar, TrendingUp, Loader2, Activity,
   UserPlus, FilePlus, ArrowUpRight, ArrowDownRight, Eye,
-  Download, Crown, ClipboardList, Zap, Code2, Minus,
+  Download, ClipboardList, Zap, Code2, Minus,
   Compass, Save, Check,
 } from 'lucide-react';
 import {
@@ -244,7 +244,7 @@ const AdminDashboard = () => {
   }
 
   // Prettify raw enum keys into professional French labels.
-  const ROLE_LABEL: Record<string, string> = { ADMIN: 'Admins', PREMIUM: 'Premium', LEARNER: 'Apprenants', FREE: 'Gratuits' };
+  const ROLE_LABEL: Record<string, string> = { ADMIN: 'Admins', LEARNER: 'Apprenants', FREE: 'Gratuits' };
   const PROVIDER_LABEL: Record<string, string> = { LOCAL: 'Email', GOOGLE: 'Google', GITHUB: 'GitHub' };
   const EVENT_LABEL: Record<string, string> = { OUVERT: 'Ouvert', FERME: 'Fermé', A_VENIR: 'À venir' };
   const entries = (o: Record<string, number> | undefined, lbl?: Record<string, string>) =>
@@ -256,13 +256,11 @@ const AdminDashboard = () => {
   const resourcesByCategory: { categoryName: string; count: number }[] = stats?.resourcesByCategory || [];
   const eventsByStatus = entries(stats?.eventsByStatus, EVENT_LABEL);
   const applicationsByStatus = entries(stats?.applicationsByStatus);
-  const premiumByStatus = entries(stats?.premiumRequestsByStatus);
   const dailyUsers: { date: string; count: number }[] = stats?.dailyNewUsers || [];
   const topViewed: TopResource[] = stats?.topViewedResources || [];
   const topDownloaded: TopResource[] = stats?.topDownloadedResources || [];
 
   const totalApps = applicationsByStatus.reduce((s, x) => s + x.value, 0);
-  const totalPremiumReqs = stats?.totalPremiumRequests || 0;
   const totalUsers = stats?.totalUsers || 0;
 
   // Real month-over-month delta.
@@ -458,19 +456,6 @@ const AdminDashboard = () => {
           </div>
         </Card>
 
-        <Card className="p-4 sm:p-6">
-          <PanelHead icon={Crown} title="Demandes Premium" subtitle="Suivi des demandes d'abonnement" tint="text-amber-500"
-            action={<Link to="/admin/premium-requests" className="text-xs text-gold hover:text-gold/80 flex items-center gap-1 flex-shrink-0">Gérer <ArrowUpRight className="w-3 h-3" /></Link>} />
-          <div className="space-y-3 mt-1">
-            {premiumByStatus.length ? premiumByStatus.map((item) => (
-              <Meter key={item.name} label={item.name} value={item.value} total={totalPremiumReqs} color={SEQUENTIAL} />
-            )) : <p className="text-sm text-gray-400 text-center py-6">Aucune demande premium</p>}
-          </div>
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-            <p className="text-sm text-gray-500">Total</p>
-            <p className="text-lg font-bold text-gray-900">{fr(totalPremiumReqs)}</p>
-          </div>
-        </Card>
       </div>
 
       {/* ── EVENTS / ACTIONS / HEALTH ── */}
@@ -513,16 +498,6 @@ const AdminDashboard = () => {
           <div className="flex items-center gap-2 mb-4">
             <Activity className="w-5 h-5 text-gold" />
             <h3 className="font-semibold">Santé de la plateforme</h3>
-          </div>
-          <div>
-            <p className="text-xs text-gray-400 mb-1">Conversion premium</p>
-            <div className="flex items-end gap-2">
-              <span className="text-3xl font-bold text-gold">{stats?.premiumConversionRate || 0}%</span>
-              <span className="text-xs text-gray-500 mb-1">utilisateurs payants</span>
-            </div>
-            <div className="h-1.5 bg-gray-700 rounded-full mt-2 overflow-hidden">
-              <div className="h-full bg-gold rounded-full" style={{ width: `${Math.min(stats?.premiumConversionRate || 0, 100)}%` }} />
-            </div>
           </div>
           <div className="pt-4 mt-4 border-t border-gray-700">
             <p className="text-xs text-gray-400 mb-1">Taux de téléchargement</p>

@@ -29,7 +29,6 @@ public class AdminController {
     private final TagRepository tagRepository;
     private final RoleRepository roleRepository;
     private final ApplicationRepository applicationRepository;
-    private final PremiumRequestRepository premiumRequestRepository;
 
     public AdminController(
             UserRepository userRepository,
@@ -39,7 +38,6 @@ public class AdminController {
             TagRepository tagRepository,
             RoleRepository roleRepository,
             ApplicationRepository applicationRepository,
-            PremiumRequestRepository premiumRequestRepository,
             ResourceService resourceService) {
         this.userRepository = userRepository;
         this.resourceService = resourceService;
@@ -49,7 +47,6 @@ public class AdminController {
         this.tagRepository = tagRepository;
         this.roleRepository = roleRepository;
         this.applicationRepository = applicationRepository;
-        this.premiumRequestRepository = premiumRequestRepository;
     }
 
     // === DASHBOARD ===
@@ -67,12 +64,10 @@ public class AdminController {
         
         // Users by role
         long adminCount = userRepository.countByRole_Name(com.brandonkamga.lescracks.domain.RoleName.admin);
-        long premiumCount = userRepository.countByRole_Name(com.brandonkamga.lescracks.domain.RoleName.premium_user);
         long learnerCount = userRepository.countByRole_Name(com.brandonkamga.lescracks.domain.RoleName.learner);
         long freeCount = userRepository.countByRole_Name(com.brandonkamga.lescracks.domain.RoleName.user);
         stats.put("usersByRole", Map.of(
             "ADMIN", adminCount,
-            "PREMIUM", premiumCount,
             "LEARNER", learnerCount,
             "FREE", freeCount
         ));
@@ -130,12 +125,6 @@ public class AdminController {
         long newResourcesLast30Days = resourceRepository.countByCreatedAtAfter(thirtyDaysAgo);
         stats.put("newResourcesLast30Days", newResourcesLast30Days);
 
-        // Premium conversion rate (premium_user + learner + admin) / total * 100
-        double premiumRate = (totalUsers > 0)
-                ? Math.round(((adminCount + premiumCount + learnerCount) * 100.0) / totalUsers * 10) / 10.0
-                : 0.0;
-        stats.put("premiumConversionRate", premiumRate);
-
         // Applications — a registry now, not a funnel: active vs archived, split by kind.
         long active360   = applicationRepository.countByArchivedAtIsNullAndEventIsNull();
         long activeEvents = applicationRepository.countByArchivedAtIsNullAndEventIsNotNull();
@@ -146,10 +135,6 @@ public class AdminController {
                 "Archivées", archived
         ));
 
-        // Premium requests — all requests are pending by definition (no status field anymore)
-        long prPending = premiumRequestRepository.count();
-        stats.put("premiumRequestsByStatus", Map.of("En attente", prPending));
-        stats.put("totalPremiumRequests", prPending);
 
         // Engagement — total views and downloads across all resources
         List<Resource> allResources = resourceRepository.findAll();
@@ -252,7 +237,6 @@ public class AdminController {
         try {
             RoleName roleName = switch (newRole.toUpperCase()) {
                 case "ADMIN" -> RoleName.admin;
-                case "PREMIUM", "PREMIUM_USER" -> RoleName.premium_user;
                 case "LEARNER" -> RoleName.learner;
                 default -> RoleName.user;
             };
@@ -485,7 +469,6 @@ public class AdminController {
         // download counter read zero.
         map.put("viewCount", resource.getViewCount());
         map.put("downloadCount", resource.getDownloadCount());
-        map.put("premium", resource.isPremium());
         map.put("downloadable", resource.isDownloadable());
         map.put("sourceType", resource.getSourceType() != null ? resource.getSourceType().name() : null);
         map.put("previewImageUrl", resource.getPreviewImageUrl());
