@@ -153,7 +153,22 @@ public class ResourceServiceImpl implements ResourceService {
         // When tags are involved or a text search is combined with tags, use the unified query
         // (tagIds is guaranteed non-null when hasTags=true, avoiding Hibernate null collection issue)
         if (hasTags) {
-            return resourceRepository.searchWithFilters(toTypeName(typeName), categoryId, searchTerm, tagIds, page);
+            // The combined query interpolates :searchTerm into LOWER(CONCAT(...)). PostgreSQL
+            // types an unbound null as bytea and lower(bytea) does not exist, so a tag filter
+            // without a search term failed outright. Without a term, use the tag-only queries.
+            if (hasSearch) {
+                return resourceRepository.searchWithFilters(toTypeName(typeName), categoryId, searchTerm, tagIds, page);
+            }
+            if (hasType && hasCategory) {
+                return resourceRepository.findByTypeNameAndCategoryIdAndTagsIn(toTypeName(typeName), categoryId, tagIds, page);
+            }
+            if (hasType) {
+                return resourceRepository.findByTypeNameAndTagsIn(toTypeName(typeName), tagIds, page);
+            }
+            if (hasCategory) {
+                return resourceRepository.findByCategoryIdAndTagsIn(categoryId, tagIds, page);
+            }
+            return resourceRepository.findByTagsIn(tagIds, page);
         }
 
         // Text search without tags — use a dedicated query that avoids the IN(:tagIds) problem
