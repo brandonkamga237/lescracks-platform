@@ -1,82 +1,134 @@
-# 🚀 LesCracks Backend
+# LesCracks — Backend
 
-Plateforme de formation tech - API REST avec Spring Boot.
+API REST Spring Boot de la plateforme LesCracks.
 
-## 🛠️ Stack Technologique
+Stack : Spring Boot (Java 21), PostgreSQL, Flyway, Spring Security (JWT + OAuth2),
+MinIO, JavaMail, springdoc-openapi. Les versions font foi dans `pom.xml`.
 
-| Technologie | Version | Usage |
-|-------------|---------|-------|
-| Spring Boot | 4.0.2 | Framework principal |
-| Java | 21 | Langage |
-| PostgreSQL | Latest | Base de données |
-| JPA/Hibernate | Latest | ORM |
-| JWT (JJWT) | 0.12.3 | Authentification |
-| Spring Security OAuth2 | Latest | OAuth2 (Google, GitHub) |
-| Lombok | Latest | Réduction boilerplate |
-
-## 📦 Installation
+## Démarrer
 
 ```bash
-# Compiler le projet
-./mvnw clean package
+# Dépendances (depuis la racine du dépôt)
+docker compose up -d
 
-# Démarrer l'application
+# API sur http://localhost:8080, profil dev
 ./mvnw spring-boot:run
 
-# Exécuter les tests
+# Tests
 ./mvnw test
+
+# Package
+./mvnw clean package
 ```
 
-## 🔐 Authentification
+Documentation interactive de l'API : http://localhost:8080/swagger-ui.html
 
-### Authentification Providers Supportés
+## Structure
 
-| Provider | Type | Statut |
-|----------|------|--------|
-| Local | Email/Password | ✅ |
-| Google | OAuth2 | ✅ |
-| GitHub | OAuth2 | ✅ |
+```
+src/main/java/com/brandonkamga/lescracks/
+├── controller/   REST sous /api (+ SeoController et SitemapController hors /api)
+├── service/
+│   ├── interfaces/   contrats
+│   └── impl/         logique métier
+├── domain/       entités JPA et enums
+├── dto/          objets exposés par l'API
+├── repository/   Spring Data JPA
+├── mapper/       conversions entité ↔ DTO
+├── security/     filtre JWT, handlers OAuth2
+├── config/       SecurityConfig, DataInitializer, OpenApiConfig
+├── exception/    exceptions métier et GlobalExceptionHandler
+├── scheduler/    tâches planifiées
+└── util/
 
-### Endpoints Auth
+src/main/resources/
+├── application.yaml            base commune
+├── application-{dev,prod,test}.yml
+└── db/migration/               migrations Flyway
+```
+
+## Ajouter un endpoint
+
+Un endpoint traverse quatre couches, et en oublier une est l'erreur la plus fréquente :
+
+1. **DTO** dans `dto/` — ne jamais exposer une entité `domain/`.
+2. **Service** — interface dans `service/interfaces/`, implémentation dans `service/impl/`.
+3. **Controller** — retourne `ResponseEntity<ApiResponse<T>>`.
+4. **SecurityConfig** — la règle par défaut est `/api/**` authentifié : un nouvel
+   endpoint public doit être déclaré `permitAll()` explicitement.
+
+Les erreurs se lèvent (`ResourceNotFoundException`, `BadRequestException`,
+`ForbiddenException`) ; `GlobalExceptionHandler` produit la réponse HTTP.
+
+Toutes les réponses suivent l'enveloppe `ApiResponse<T>` :
+
+```json
+{ "success": true, "message": "...", "data": {}, "timestamp": "...", "path": "..." }
+```
+
+## Schéma de base
+
+**Flyway est propriétaire du schéma dans tous les environnements**, Hibernate tourne
+en `ddl-auto: validate` et ne crée jamais rien. Ajouter un champ à une entité sans
+migration correspondante fait échouer le démarrage — c'est volontaire.
+
+```bash
+# Nouvelle migration
+src/main/resources/db/migration/V{n+1}__description.sql
+```
+
+Ne jamais modifier une migration déjà mergée : Flyway en stocke le checksum, toute
+édition casse le démarrage sur les bases où elle est appliquée, production comprise.
+Pour corriger, créer la migration suivante.
+
+Les données de référence (rôles, types de candidature, types de ressource) sont
+insérées au démarrage par `config/DataInitializer.java`, pas par migration.
+
+## Authentification
 
 | Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/auth/register` | Inscription |
-| POST | `/auth/login` | Connexion |
-| POST | `/auth/logout` | Déconnexion |
+|---|---|---|
+| POST | `/api/auth/register` | Inscription |
+| POST | `/api/auth/login` | Connexion, retourne le JWT |
+| POST | `/api/auth/logout` | Déconnexion |
+| POST | `/api/auth/verify-email` | Vérification de l'adresse |
+| POST | `/api/auth/resend-verification` | Renvoi du mail de vérification |
+| POST | `/api/auth/forgot-password` | Demande de réinitialisation |
+| POST | `/api/auth/reset-password` | Réinitialisation par token |
 
+OAuth2 : GitHub et Google, via `/oauth2/authorization/{provider}`.
+Le JWT est stateless, transmis en en-tête `Authorization: Bearer <token>`.
 
-## 👥 Gestion Utilisateurs
+Rôles (`RoleName`) : `user`, `premium_user`, `learner`, `admin`.
+Les routes `/api/admin/**` exigent le rôle `admin`.
 
-### Endpoints Users
+## Fichiers et images
 
-| Méthode | Endpoint | Rôle Requis | Description |
-|---------|----------|-------------|-------------|
-| GET | `/api/users` | ADMIN | Lister tous |
-| GET | `/api/users/{id}` | USER/ADMIN | Par ID |
-| GET | `/api/users/email/{email}` | USER/ADMIN | Par email |
-| PUT | `/api/users/{id}` | OWNER | Modifier |
-| DELETE | `/api/users/{id}` | OWNER/ADMIN | Supprimer |
+Le stockage passe par MinIO (compatible S3), jamais par le disque applicatif en
+production. Console MinIO en local : http://localhost:9001 (`minioadmin` / `minioadmin`).
 
+## SEO
 
-## 🔒 Sécurité
+`SeoController` (`/seo/**`) rend des snapshots HTML serveur avec JSON-LD pour les
+crawlers qui n'exécutent pas JavaScript ; Nginx y redirige les user-agents de bots.
+`SitemapController` expose `/api/sitemap.xml`, généré depuis la base.
 
-- **JWT** : Expiration configurable (défaut: 24h)
-- **Password** : BCrypt hashing
-- **Validation** : Jakarta Validation
-- **Rôles** : USER, ADMIN
+Une nouvelle page publique indexable demande trois modifications conjointes :
+`SeoController`, la map de `frontend/nginx.conf`, et `SitemapController`.
 
+## Configuration
 
-## 📝 Variables d'Environnement
+Le profil actif vient de `SPRING_PROFILES_ACTIVE` (`dev` par défaut). Les variables
+de production sont listées dans `.env.example` à la racine du dépôt. Les principales :
 
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | URL PostgreSQL |
-| `GOOGLE_CLIENT_ID` | Google OAuth2 |
-| `GITHUB_CLIENT_ID` | GitHub OAuth2 |
-| `APP_JWT_SECRET` | Clé secrète JWT |
-| `APP_JWT_EXPIRATION` | Expiration JWT (ms) |
+| Variable | Rôle |
+|---|---|
+| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD` | PostgreSQL |
+| `JWT_SECRET`, `JWT_EXPIRATION` | Signature et durée de vie du JWT |
+| `MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`, `MINIO_BUCKET` | Stockage |
+| `GITHUB_CLIENT_ID`, `GOOGLE_CLIENT_ID` (+ secrets) | OAuth2 |
+| `FRONTEND_URL`, `CORS_ORIGINS` | Liens dans les mails, CORS |
+| `MAIL_HOST`, `MAIL_USERNAME`, `MAIL_PASSWORD` | SMTP |
 
----
-
-Développé par **Brandon Kamga**
+Toute nouvelle variable doit être ajoutée à `.env.example` **et** à
+`docker-compose.prod.yml`.
