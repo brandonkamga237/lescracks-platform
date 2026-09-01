@@ -26,7 +26,6 @@ const menuItems = [
       { title: 'Vidéothèque', description: 'Tutoriels vidéo et formations exclusives', href: '/ressources?type=VIDEO', icon: Video },
     ],
   },
-  { title: 'Open Source', href: '/open-source', alignRight: false, columns: undefined },
   {
     title: 'Accompagnement',
     href: '/programme',

@@ -45,5 +45,4 @@ public class LearnerResponse {
     private String githubUrl;
 
     /** Shipped work. The only part of the profile a reader can verify unaided. */
-    private List<LearnerProjectResponse> projects;
 }

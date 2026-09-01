@@ -2,9 +2,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Users, FileText, Calendar, TrendingUp, Loader2, Activity,
-  UserPlus, FilePlus, ArrowUpRight, ArrowDownRight, Eye,
-  Download, ClipboardList, Zap, Code2, Minus,
+  Users, FileText, Calendar, TrendingUp, Loader2, Activity, FilePlus, ArrowUpRight, ArrowDownRight, Eye,
+  Download, ClipboardList, Zap, Minus,
   Compass, Save, Check,
 } from 'lucide-react';
 import {
@@ -482,8 +481,6 @@ const AdminDashboard = () => {
               { to: '/admin/resources', icon: FileText, label: 'Nouvelle ressource', c: 'bg-amber-50 text-amber-700 hover:bg-amber-100' },
               { to: '/admin/events', icon: Calendar, label: 'Nouvel événement', c: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' },
               { to: '/admin/users', icon: Users, label: 'Gérer les utilisateurs', c: 'bg-blue-50 text-blue-700 hover:bg-blue-100' },
-              { to: '/admin/open-source', icon: Code2, label: 'Projets open source', c: 'bg-violet-50 text-violet-700 hover:bg-violet-100' },
-              { to: '/admin/contributors', icon: UserPlus, label: 'Contributeurs', c: 'bg-sky-50 text-sky-700 hover:bg-sky-100' },
             ].map(({ to, icon: Icon, label, c }) => (
               <Link key={to} to={to} className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${c}`}>
                 <Icon className="w-4 h-4 flex-shrink-0" />

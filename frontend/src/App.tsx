@@ -25,8 +25,6 @@ import AdminTags from './pages/admin/AdminTags';
 import AdminResources from './pages/admin/AdminResources';
 import AdminEvents from './pages/admin/AdminEvents';
 import AdminApplications from './pages/admin/AdminApplications';
-import AdminOpenSource from './pages/admin/AdminOpenSource';
-import AdminContributors from './pages/admin/AdminContributors';
 import AdminApprenants from './pages/admin/AdminApprenants';
 import Apprenants from './pages/Apprenants';
 import ApprennantProfile from './pages/ApprennantProfile';
@@ -36,7 +34,6 @@ import VerifyEmail from './pages/VerifyEmail';
 import ProviderUnavailable from './pages/ProviderUnavailable';
 import NotFound from './pages/NotFound';
 import About from './pages/About';
-import OpenSource from './pages/OpenSource';
 import Programme from './pages/Programme';
 import RessourceDetail from './pages/RessourceDetail';
 
@@ -129,7 +126,6 @@ function AppContent() {
           
           {/* Public Routes */}
           <Route path="/about" element={<About />} />
-          <Route path="/open-source" element={<OpenSource />} />
           <Route path="/evenements" element={<Evenements />} />
           <Route path="/evenements/:slug" element={<EvenementDetail />} />
           <Route path="/ressources" element={<Ressources />} />
@@ -172,16 +168,6 @@ function AppContent() {
           <Route path="/admin/applications" element={
             <AdminRoute>
               <AdminApplications />
-            </AdminRoute>
-          } />
-          <Route path="/admin/open-source" element={
-            <AdminRoute>
-              <AdminOpenSource />
-            </AdminRoute>
-          } />
-          <Route path="/admin/contributors" element={
-            <AdminRoute>
-              <AdminContributors />
             </AdminRoute>
           } />
           <Route path="/admin/apprenants" element={

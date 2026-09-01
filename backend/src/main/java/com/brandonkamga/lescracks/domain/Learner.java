@@ -95,10 +95,6 @@ public class Learner {
      * What they actually shipped. This is the only part a reader can verify without
      * trusting us, which makes it the most valuable thing on the profile.
      */
-    @OneToMany(mappedBy = "learner", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @OrderBy("displayOrder ASC, id ASC")
-    @Builder.Default
-    private List<LearnerProject> projects = new ArrayList<>();
 
     /** Measured duration in months, or empty while the journey is still running. */
     public Optional<Integer> durationInMonths() {

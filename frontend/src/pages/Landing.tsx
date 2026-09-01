@@ -384,9 +384,6 @@ const Landing = () => {
                   );
                 })}
               </div>
-              <Link to="/open-source" className="inline-flex items-center gap-2 mt-8 text-gold hover:text-gold-light transition-colors text-sm font-medium">
-                Voir nos projets open source <ArrowRight className="w-4 h-4" />
-              </Link>
             </motion.div>
 
             {/* Visual illustration */}
