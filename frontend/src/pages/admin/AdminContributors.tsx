@@ -2,22 +2,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Save, X, Loader2, Github, Linkedin, Globe, Twitter, Upload, Eye, EyeOff, Users } from 'lucide-react';
 import { PageHeader } from '@/components/admin/viz';
-import adminApi from '@/services/adminApi';
+import adminApi, { AdminContributor as Contributor } from '@/services/adminApi';
 import apiService from '@/services/api';
-
-interface Contributor {
-  id: number;
-  name: string;
-  description: string;
-  photoUrl: string;
-  githubUrl: string;
-  linkedinUrl: string;
-  websiteUrl: string;
-  twitterUrl: string;
-  contributedProjects: string[];
-  displayOrder: number;
-  visible: boolean;
-}
 
 const empty = (): Omit<Contributor, 'id'> => ({
   name: '', description: '', photoUrl: '', githubUrl: '', linkedinUrl: '',

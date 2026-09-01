@@ -2,23 +2,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Save, X, Loader2, Star, GitFork, Code2, Eye, EyeOff, Upload } from 'lucide-react';
 import { PageHeader } from '@/components/admin/viz';
-import adminApi from '@/services/adminApi';
+import adminApi, { AdminOpenSourceProject as OsProject } from '@/services/adminApi';
 import apiService from '@/services/api';
-
-interface OsProject {
-  id: number;
-  name: string;
-  description: string;
-  repoUrl: string;
-  language: string;
-  logoUrl: string;
-  techStack: string;
-  stars: number;
-  forks: number;
-  featured: boolean;
-  featuredOrder: number;
-  visible: boolean;
-}
 
 const empty = (): Omit<OsProject, 'id'> => ({
   name: '', description: '', repoUrl: '', language: '', logoUrl: '',

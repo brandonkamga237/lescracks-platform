@@ -54,6 +54,47 @@ export interface AdminResource {
  * `url` carries the link (EXTERNAL) or the uploaded file path (UPLOADED); `content` carries
  * the body of an article (INLINE). The backend rejects a payload that has neither.
  */
+
+/** Mirrors OpenSourceProjectResponse. */
+export interface AdminOpenSourceProject {
+  id: number;
+  name: string;
+  description: string;
+  repoUrl: string;
+  language: string;
+  logoUrl: string;
+  techStack: string;
+  stars: number;
+  forks: number;
+  featured: boolean;
+  featuredOrder: number;
+  visible: boolean;
+}
+
+/** Mirrors ContributorResponse. */
+export interface AdminContributor {
+  id: number;
+  name: string;
+  description: string;
+  photoUrl: string;
+  githubUrl: string;
+  linkedinUrl: string;
+  websiteUrl: string;
+  twitterUrl: string;
+  contributedProjects: string[];
+  displayOrder: number;
+  visible: boolean;
+}
+
+/** A row of the dashboard's most-viewed / most-downloaded lists. */
+export interface TopResource {
+  id: number;
+  title: string;
+  type?: string;
+  viewCount: number;
+  downloadCount: number;
+}
+
 export interface AdminResourcePayload {
   title: string;
   description: string;
@@ -138,8 +179,8 @@ export interface DashboardStats {
   premiumConversionRate: number;
   totalViews: number;
   totalDownloads: number;
-  topViewedResources: any[];
-  topDownloadedResources: any[];
+  topViewedResources: TopResource[];
+  topDownloadedResources: TopResource[];
   dailyNewUsers: { date: string; count: number }[];
   recentUsers: AdminUser[];
   recentResources: AdminResource[];
@@ -404,15 +445,15 @@ class AdminApiService {
   async createEvent(data: {
     title: string; description?: string; eventDate: string;
     applicationRequired: boolean; maxParticipants?: number | null; eventTypeId: number; eventStatusId: number; tagIds?: number[];
-  }): Promise<any> {
-    return this.request<any>('/events', { method: 'POST', body: JSON.stringify(data) });
+  }): Promise<AdminEvent> {
+    return this.request<AdminEvent>('/events', { method: 'POST', body: JSON.stringify(data) });
   }
 
   async updateEvent(id: number, data: {
     title: string; description?: string; eventDate: string;
     applicationRequired: boolean; maxParticipants?: number | null; eventTypeId: number; eventStatusId: number; tagIds?: number[];
-  }): Promise<any> {
-    return this.request<any>(`/events/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+  }): Promise<AdminEvent> {
+    return this.request<AdminEvent>(`/events/${id}`, { method: 'PUT', body: JSON.stringify(data) });
   }
 
   async getEventTypes(): Promise<{ id: number; name: string }[]> {
@@ -428,16 +469,16 @@ class AdminApiService {
   }
 
   // === OPEN SOURCE PROJECTS ===
-  async getOpenSourceProjects(): Promise<any[]> {
-    return this.request<any[]>('/open-source/admin/projects');
+  async getOpenSourceProjects(): Promise<AdminOpenSourceProject[]> {
+    return this.request<AdminOpenSourceProject[]>('/open-source/admin/projects');
   }
 
-  async createOpenSourceProject(data: object): Promise<any> {
-    return this.request<any>('/open-source/admin/projects', { method: 'POST', body: JSON.stringify(data) });
+  async createOpenSourceProject(data: object): Promise<AdminOpenSourceProject> {
+    return this.request<AdminOpenSourceProject>('/open-source/admin/projects', { method: 'POST', body: JSON.stringify(data) });
   }
 
-  async updateOpenSourceProject(id: number, data: object): Promise<any> {
-    return this.request<any>(`/open-source/admin/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+  async updateOpenSourceProject(id: number, data: object): Promise<AdminOpenSourceProject> {
+    return this.request<AdminOpenSourceProject>(`/open-source/admin/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) });
   }
 
   async deleteOpenSourceProject(id: number): Promise<void> {
@@ -445,16 +486,16 @@ class AdminApiService {
   }
 
   // === CONTRIBUTORS ===
-  async getContributors(): Promise<any[]> {
-    return this.request<any[]>('/open-source/admin/contributors');
+  async getContributors(): Promise<AdminContributor[]> {
+    return this.request<AdminContributor[]>('/open-source/admin/contributors');
   }
 
-  async createContributor(data: object): Promise<any> {
-    return this.request<any>('/open-source/admin/contributors', { method: 'POST', body: JSON.stringify(data) });
+  async createContributor(data: object): Promise<AdminContributor> {
+    return this.request<AdminContributor>('/open-source/admin/contributors', { method: 'POST', body: JSON.stringify(data) });
   }
 
-  async updateContributor(id: number, data: object): Promise<any> {
-    return this.request<any>(`/open-source/admin/contributors/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+  async updateContributor(id: number, data: object): Promise<AdminContributor> {
+    return this.request<AdminContributor>(`/open-source/admin/contributors/${id}`, { method: 'PUT', body: JSON.stringify(data) });
   }
 
   async deleteContributor(id: number): Promise<void> {
