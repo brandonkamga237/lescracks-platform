@@ -45,7 +45,7 @@ services:
       - lescracks-internal
 
   # ---------------------------------------------------------------------------
-  # MinIO — stockage fichiers (ressources, images)
+  # MinIO - file storage (resources, images)
   # Console: https://minio.lescracks.com
   # ---------------------------------------------------------------------------
   minio:
@@ -124,7 +124,7 @@ services:
       - traefik-public
 
   # ---------------------------------------------------------------------------
-  # Frontend — React SPA servie par Nginx
+  # Frontend - React SPA served by Nginx
   # Site: https://lescracks.com + https://www.lescracks.com
   # ---------------------------------------------------------------------------
   frontend:

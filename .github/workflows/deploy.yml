@@ -1,23 +1,23 @@
 # =============================================================================
-# LesCracks Platform — CI/CD Pipeline
+# LesCracks Platform - CI/CD Pipeline
 # =============================================================================
 #
-# Branching strategy — Gitflow Léger :
-#   feature/* / fix/*  →  develop  →  (PR)  →  main  →  deploy prod
-#   hotfix/*           →  main (direct, urgence prod)
+# Branching strategy - lightweight Gitflow:
+#   feature/* / fix/*  ->  develop  ->  (PR)  ->  main  ->  deploy prod
+#   hotfix/*           ->  main (direct, production emergency)
 #
-# Déclencheurs :
-#   • push main        → build + deploy prod (automatique)
-#   • push develop     → build + CI uniquement (pas de deploy)
-#   • pull_request → main → build + CI (validation avant merge)
-#   • workflow_dispatch → deploy manuel (choix du service)
+# Triggers:
+#   - push main          -> build + deploy prod (automatic)
+#   - push develop       -> build + CI only (no deploy)
+#   - pull_request main  -> build + CI (validation before merge)
+#   - workflow_dispatch  -> manual deploy (pick the service)
 #
 # Required GitHub Secrets:
-#   DOCKER_USERNAME   — Docker Hub username
-#   DOCKER_PASSWORD   — Docker Hub access token
-#   VPS_HOST          — IP du VPS
-#   VPS_USER          — Utilisateur SSH (root)
-#   VPS_SSH_KEY       — Clé privée SSH
+#   DOCKER_USERNAME   - Docker Hub username
+#   DOCKER_PASSWORD   - Docker Hub access token
+#   VPS_HOST          - VPS IP address
+#   VPS_USER          - SSH user (root)
+#   VPS_SSH_KEY       - SSH private key
 # =============================================================================
 
 name: CI/CD — LesCracks Platform
@@ -30,7 +30,7 @@ on:
   workflow_dispatch:
     inputs:
       service:
-        description: "Service à rebuilder"
+        description: "Service to rebuild"
         required: false
         default: "all"
         type: choice
@@ -134,7 +134,7 @@ jobs:
           cache-to:   type=gha,scope=frontend,mode=max
 
   # ---------------------------------------------------------------------------
-  # Deploy — SSH sur le VPS
+  # Deploy - over SSH to the VPS
   # ---------------------------------------------------------------------------
   deploy:
     name: Deploy to production
@@ -184,24 +184,24 @@ jobs:
             echo "  Commit : ${{ github.sha }}"
             echo "══════════════════════════════════════════════════"
 
-            # ── 1. Réseau Traefik ─────────────────────────────────
+            # ── 1. Traefik network ────────────────────────────────
             echo ""
-            echo "→ [1/4] Vérification réseau traefik-public..."
+            echo "-> [1/4] Checking traefik-public network..."
             docker network inspect traefik-public >/dev/null 2>&1 || \
               docker network create traefik-public
 
-            # ── 2. Auth Docker Hub + pull des images ──────────────
+            # ── 2. Docker Hub auth + pull ─────────────────────────
             echo ""
-            echo "→ [2/4] Authentification Docker Hub + pull des images..."
+            echo "-> [2/4] Docker Hub authentication + image pull..."
             # The VPS must be logged in to pull the images (its stored creds can
             # expire); authenticate every deploy so the pull never fails on auth.
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
             docker pull ${{ env.BACKEND_IMAGE }}:latest
             docker pull ${{ env.FRONTEND_IMAGE }}:latest
 
-            # ── 3. Démarrage infra + backend ─────────────────────
+            # ── 3. Start infra + backend ──────────────────────────
             echo ""
-            echo "→ [3/4] Démarrage infra (PostgreSQL, MinIO)..."
+            echo "-> [3/4] Starting infra (PostgreSQL, MinIO)..."
             docker compose -f docker-compose.prod.yml up -d --no-recreate postgres minio
 
             echo "  Attente PostgreSQL..."
@@ -210,7 +210,7 @@ jobs:
                 pg_isready -U "$DB_USERNAME" -d "$DB_NAME" >/dev/null 2>&1; \
               do sleep 3; done'
 
-            echo "  Démarrage backend (Spring Boot — peut prendre ~60s)..."
+            echo "  Starting backend (Spring Boot - may take ~60s)..."
             docker compose -f docker-compose.prod.yml up -d backend --remove-orphans
 
             echo "  Attente backend healthy (max 5 min)..."
@@ -222,14 +222,14 @@ jobs:
                 BACKEND_OK=1
                 break
               fi
-              echo "  Tentative $i/30 — statut: $STATUS, retry dans 10s..."
+              echo "  Attempt $i/30 - status: $STATUS, retrying in 10s..."
               sleep 10
             done
 
             if [ "$BACKEND_OK" -eq 0 ]; then
               echo ""
-              echo "══════ ERREUR : backend non healthy après 5 min ══════"
-              echo "  Dernières 100 lignes de logs backend :"
+              echo "══════ ERROR: backend not healthy after 5 min ══════"
+              echo "  Last 100 lines of backend logs:"
               echo "──────────────────────────────────────────────────────"
               docker logs --tail=100 lescracks-backend 2>&1 || true
               echo "──────────────────────────────────────────────────────"
@@ -238,20 +238,20 @@ jobs:
 
             # ── 4. Frontend ───────────────────────────────────────
             echo ""
-            echo "→ [4/4] Déploiement frontend..."
+            echo "-> [4/4] Deploying frontend..."
             docker compose -f docker-compose.prod.yml up -d frontend --remove-orphans
 
             # ── Cleanup ───────────────────────────────────────────
             echo ""
-            echo "→ Nettoyage images inutilisées..."
+            echo "-> Pruning unused images..."
             docker image prune -f --filter "until=24h" 2>/dev/null || true
 
-            # ── Statut final ──────────────────────────────────────
+            # ── Final status ──────────────────────────────────────
             echo ""
-            echo "→ Statut des services :"
+            echo "-> Service status:"
             docker compose -f docker-compose.prod.yml ps
 
             echo ""
             echo "══════════════════════════════════════════════════"
-            echo "  Déploiement terminé — $(date '+%H:%M:%S UTC')"
+            echo "  Deployment finished - $(date '+%H:%M:%S UTC')"
             echo "══════════════════════════════════════════════════"
