@@ -1,54 +1,55 @@
-// src/pages/admin/AdminCategories.tsx
-import { useState, useEffect } from 'react';
-import { FolderOpen, Plus, Loader2, Trash2, Edit, Check, X } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { FolderOpen, Plus, Trash2, Pencil, Check, X } from 'lucide-react';
 import { PageHeader } from '@/components/admin/viz';
 import adminApi, { AdminCategory } from '@/services/adminApi';
+import { errorMessage } from '@/lib/utils';
+import AsyncState from '@/components/ui/AsyncState';
+import Button from '@/components/ui/Button';
+import Field, { controlClass } from '@/components/ui/Field';
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
   const [showForm, setShowForm] = useState(false);
   const [newCategory, setNewCategory] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState('');
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
-      const data = await adminApi.getCategories();
-      setCategories(data);
+      setCategories(await adminApi.getCategories());
     } catch (err) {
-      console.error('Error loading categories:', err);
+      setLoadError(errorMessage(err, 'Les catégories n\'ont pas pu être chargées.'));
       setCategories([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const handleCreate = async () => {
     if (!newCategory.trim()) return;
     setSaving(true);
+    setFormError(null);
     try {
       const created = await adminApi.createCategory(newCategory.trim());
       setCategories([...categories, { ...created, resourceCount: 0 }]);
       setNewCategory('');
       setShowForm(false);
     } catch (err) {
-      console.error('Error creating category:', err);
-      alert('Erreur lors de la création de la catégorie');
+      setFormError(errorMessage(err, 'La catégorie n\'a pas pu être créée.'));
     } finally {
       setSaving(false);
     }
-  };
-
-  const startEdit = (cat: AdminCategory) => {
-    setEditingId(cat.id);
-    setEditingName(cat.name);
   };
 
   const cancelEdit = () => {
@@ -61,89 +62,85 @@ const AdminCategories = () => {
     setSaving(true);
     try {
       const updated = await adminApi.updateCategory(id, editingName.trim());
-      setCategories(categories.map(c => c.id === id ? { ...c, name: updated.name } : c));
-      setEditingId(null);
+      setCategories(categories.map(c => (c.id === id ? { ...c, name: updated.name } : c)));
+      cancelEdit();
     } catch (err) {
-      console.error('Error updating category:', err);
-      alert('Erreur lors de la modification de la catégorie');
+      alert(errorMessage(err, 'La catégorie n\'a pas pu être modifiée.'));
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Voulez-vous vraiment supprimer cette catégorie ?')) return;
+  const handleDelete = async (category: AdminCategory) => {
+    if (!confirm(`Supprimer la catégorie « ${category.name} » ?`)) return;
     try {
-      await adminApi.deleteCategory(id);
-      setCategories(categories.filter(c => c.id !== id));
+      await adminApi.deleteCategory(category.id);
+      setCategories(categories.filter(c => c.id !== category.id));
     } catch (err) {
-      console.error('Error deleting category:', err);
-      alert('Erreur lors de la suppression de la catégorie');
+      alert(errorMessage(err, 'La suppression a échoué.'));
     }
   };
 
   return (
     <div>
-      <PageHeader icon={FolderOpen} title="Catégories"
+      <PageHeader
+        icon={FolderOpen}
+        title="Catégories"
         subtitle={`${categories.length} catégorie${categories.length !== 1 ? 's' : ''}`}
         actions={
-          <button
-            onClick={() => { setShowForm(true); setEditingId(null); }}
-            className="flex items-center gap-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 transition-colors font-medium text-sm"
-          >
+          <Button onClick={() => { setShowForm(true); cancelEdit(); setFormError(null); }}>
             <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Nouvelle catégorie</span>
-            <span className="sm:hidden">Ajouter</span>
-          </button>
-        } />
+            Nouvelle catégorie
+          </Button>
+        }
+      />
 
-      {/* Create Form */}
       {showForm && (
-        <div className="mb-6 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
-          <h3 className="text-base font-semibold text-gray-900 mb-3">Nouvelle Catégorie</h3>
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-              placeholder="Nom de la catégorie"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-gold/50 placeholder-gray-400"
-              autoFocus
-            />
-            <button
-              onClick={handleCreate}
-              disabled={saving || !newCategory.trim()}
-              className="px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold/90 font-medium disabled:opacity-50 flex items-center gap-2"
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-              Créer
-            </button>
-            <button
-              onClick={() => { setShowForm(false); setNewCategory(''); }}
-              className="px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600"
-            >
-              Annuler
-            </button>
+        <div className="mb-gutter p-gutter bg-surface-1 border border-line rounded-xl">
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
+            <Field label="Nom de la catégorie" required error={formError ?? undefined} className="flex-1">
+              {(field) => (
+                <input
+                  {...field}
+                  type="text"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+                  placeholder="Développement web"
+                  className={controlClass}
+                  autoFocus
+                />
+              )}
+            </Field>
+            <div className="flex gap-2">
+              <Button onClick={handleCreate} loading={saving} disabled={!newCategory.trim()}>
+                <Check className="w-4 h-4" />
+                Créer
+              </Button>
+              <Button variant="secondary" onClick={() => { setShowForm(false); setNewCategory(''); }}>
+                Annuler
+              </Button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Grid */}
-      {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 animate-spin text-gold" />
-        </div>
-      ) : (
+      <AsyncState
+        loading={loading}
+        error={loadError}
+        onRetry={fetchCategories}
+        empty={categories.length === 0}
+        emptyLabel="Aucune catégorie. Créez la première ci-dessus."
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {categories.map((category) => (
             <div
               key={category.id}
-              className="bg-white rounded-xl p-5 border border-gray-200 hover:shadow-md transition-shadow"
+              className="bg-surface-1 border border-line rounded-xl p-gutter hover:border-line-strong transition-colors"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-gold/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <FolderOpen className="w-5 h-5 text-gold" />
+                <div className="w-10 h-10 bg-gold/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <FolderOpen className="w-5 h-5 text-gold" aria-hidden="true" />
                 </div>
                 <div className="flex-1 min-w-0">
                   {editingId === category.id ? (
@@ -155,68 +152,54 @@ const AdminCategories = () => {
                         if (e.key === 'Enter') handleUpdate(category.id);
                         if (e.key === 'Escape') cancelEdit();
                       }}
-                      className="w-full px-3 py-1.5 border border-gold rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-gold/50 text-sm font-medium"
+                      aria-label={`Renommer ${category.name}`}
+                      className={controlClass}
                       autoFocus
                     />
                   ) : (
                     <>
-                      <h3 className="font-semibold text-gray-900 truncate">{category.name}</h3>
-                      <p className="text-sm text-gray-500">{category.resourceCount || 0} ressource{category.resourceCount !== 1 ? 's' : ''}</p>
+                      <h3 className="font-medium text-t1 truncate">{category.name}</h3>
+                      <p className="text-data text-t4 tabular-nums">
+                        {category.resourceCount || 0} ressource{(category.resourceCount || 0) !== 1 ? 's' : ''}
+                      </p>
                     </>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
+              <div className="flex items-center gap-2 pt-3 border-t border-line-soft">
                 {editingId === category.id ? (
                   <>
-                    <button
-                      onClick={() => handleUpdate(category.id)}
-                      disabled={saving}
-                      className="flex-1 flex items-center justify-center gap-2 py-2 text-sm text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
-                    >
-                      {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-4 h-4" />}
-                      Sauvegarder
-                    </button>
-                    <button
-                      onClick={cancelEdit}
-                      className="flex-1 flex items-center justify-center gap-2 py-2 text-sm text-gray-600 border border-gray-200 hover:bg-gray-50 rounded-lg"
-                    >
+                    <Button onClick={() => handleUpdate(category.id)} loading={saving} className="flex-1">
+                      <Check className="w-4 h-4" />
+                      Enregistrer
+                    </Button>
+                    <Button variant="secondary" onClick={cancelEdit} className="flex-1">
                       <X className="w-4 h-4" />
                       Annuler
-                    </button>
+                    </Button>
                   </>
                 ) : (
                   <>
-                    <button
-                      onClick={() => startEdit(category)}
-                      className="flex-1 flex items-center justify-center gap-2 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    <Button
+                      variant="ghost"
+                      onClick={() => { setEditingId(category.id); setEditingName(category.name); }}
+                      className="flex-1"
                     >
-                      <Edit className="w-4 h-4" />
-                      Modifier
-                    </button>
-                    <button
-                      onClick={() => handleDelete(category.id)}
-                      className="flex-1 flex items-center justify-center gap-2 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
+                      <Pencil className="w-4 h-4" />
+                      Renommer
+                    </Button>
+                    <Button variant="ghost" onClick={() => handleDelete(category)} className="flex-1 hover:text-error">
                       <Trash2 className="w-4 h-4" />
                       Supprimer
-                    </button>
+                    </Button>
                   </>
                 )}
               </div>
             </div>
           ))}
         </div>
-      )}
-
-      {!loading && categories.length === 0 && (
-        <div className="text-center py-16">
-          <FolderOpen className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-          <p className="text-gray-500 font-medium">Aucune catégorie pour le moment</p>
-          <p className="text-sm text-gray-400 mt-1">Créez votre première catégorie ci-dessus</p>
-        </div>
-      )}
+      </AsyncState>
     </div>
   );
 };
