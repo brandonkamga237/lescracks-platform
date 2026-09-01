@@ -18,7 +18,7 @@ import java.util.Set;
 public class ResourceRequest {
 
     @Schema(description = "Titre de la ressource", example = "Cours Spring Boot", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "Title is required")
+    @NotBlank(message = "Le titre est obligatoire.")
     private String title;
 
     @Schema(description = "Description de la ressource")
@@ -28,11 +28,11 @@ public class ResourceRequest {
     private String url;
 
     @Schema(description = "ID de la catégorie", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "Category ID is required")
+    @NotNull(message = "La catégorie est obligatoire.")
     private Long categoryId;
 
     @Schema(description = "ID du type de ressource", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "Resource type ID is required")
+    @NotNull(message = "Le type de ressource est obligatoire.")
     private Long resourceTypeId;
 
     @Schema(description = "Liste des IDs des tags")

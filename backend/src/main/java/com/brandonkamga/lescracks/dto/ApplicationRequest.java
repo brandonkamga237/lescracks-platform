@@ -22,7 +22,7 @@ public class ApplicationRequest {
     private Long eventId;
 
     @Schema(description = "ID du type de candidature", example = "4", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "Application type ID is required")
+    @NotNull(message = "Le type de candidature est obligatoire.")
     private Long applicationTypeId;
 
     @Schema(description = "Nom complet du candidat", example = "Jean Dupont")

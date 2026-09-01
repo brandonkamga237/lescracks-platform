@@ -4,6 +4,11 @@ import com.brandonkamga.lescracks.dto.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -15,6 +20,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import java.util.Locale;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -26,7 +33,7 @@ public class GlobalExceptionHandler {
             OAuthProviderConflictException ex, HttpServletRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(ApiResponse.error(ex.getMessage(), request.getRequestURI()));
+                .body(ApiResponse.error(ex.getMessage(), request.getRequestURI(), ErrorCode.CONFLICT));
     }
 
     /**
@@ -38,7 +45,7 @@ public class GlobalExceptionHandler {
             NoResourceFoundException ex, HttpServletRequest request) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error("Ressource introuvable.", request.getRequestURI()));
+                .body(ApiResponse.error("Ressource introuvable.", request.getRequestURI(), ErrorCode.NOT_FOUND));
     }
 
     /**
@@ -51,7 +58,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(ApiResponse.error("Méthode " + ex.getMethod() + " non supportée pour cette ressource.",
-                        request.getRequestURI()));
+                        request.getRequestURI(), ErrorCode.METHOD_NOT_ALLOWED));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -59,7 +66,7 @@ public class GlobalExceptionHandler {
             ResourceNotFoundException ex, HttpServletRequest request) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.error(ex.getMessage(), request.getRequestURI()));
+                .body(ApiResponse.error(ex.getMessage(), request.getRequestURI(), ErrorCode.NOT_FOUND));
     }
 
     @ExceptionHandler(BadRequestException.class)
@@ -67,7 +74,7 @@ public class GlobalExceptionHandler {
             BadRequestException ex, HttpServletRequest request) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(ex.getMessage(), request.getRequestURI()));
+                .body(ApiResponse.error(ex.getMessage(), request.getRequestURI(), ErrorCode.BAD_REQUEST));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -92,6 +99,8 @@ public class GlobalExceptionHandler {
                 .message(topMessage)
                 .data(errors)
                 .path(request.getRequestURI())
+                .errorCode(ErrorCode.VALIDATION_FAILED.name())
+                .timestamp(java.time.LocalDateTime.now())
                 .build();
 
         return ResponseEntity.badRequest().body(response);
@@ -102,7 +111,7 @@ public class GlobalExceptionHandler {
             ForbiddenException ex, HttpServletRequest request) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error(ex.getMessage(), request.getRequestURI()));
+                .body(ApiResponse.error(ex.getMessage(), request.getRequestURI(), ErrorCode.FORBIDDEN));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -110,18 +119,89 @@ public class GlobalExceptionHandler {
             IllegalArgumentException ex, HttpServletRequest request) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(ex.getMessage(), request.getRequestURI()));
+                .body(ApiResponse.error(ex.getMessage(), request.getRequestURI(), ErrorCode.BAD_REQUEST));
     }
 
+    /**
+     * A database rule refused the write. The caller can act on this — rename the duplicate,
+     * detach what still points at the row — so it is a 409 with a usable sentence, not a 500.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrity(
+            DataIntegrityViolationException ex, HttpServletRequest request) {
+        String reference = newReference();
+        log.warn("[{}] Data integrity violation on {}: {}", reference, request.getRequestURI(),
+                ex.getMostSpecificCause().getMessage());
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(
+                        "Cette opération entre en conflit avec des données existantes. "
+                                + "Vérifiez qu'il ne s'agit pas d'un doublon, ou que l'élément n'est plus utilisé ailleurs.",
+                        request.getRequestURI(), ErrorCode.DATA_CONFLICT, reference));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUploadTooLarge(
+            MaxUploadSizeExceededException ex, HttpServletRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(ApiResponse.error(
+                        "Le fichier dépasse la taille maximale autorisée.",
+                        request.getRequestURI(), ErrorCode.PAYLOAD_TOO_LARGE));
+    }
+
+    /** The body could not be parsed at all — malformed JSON, or a type the field cannot hold. */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnreadableBody(
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(
+                        "La requête est mal formée et n'a pas pu être lue.",
+                        request.getRequestURI(), ErrorCode.MALFORMED_REQUEST));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(
+            AccessDeniedException ex, HttpServletRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(
+                        "Vous n'avez pas les droits nécessaires pour cette action.",
+                        request.getRequestURI(), ErrorCode.FORBIDDEN));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnauthenticated(
+            AuthenticationException ex, HttpServletRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(
+                        "Votre session a expiré. Reconnectez-vous pour continuer.",
+                        request.getRequestURI(), ErrorCode.UNAUTHENTICATED));
+    }
+
+    /**
+     * Whatever is left is a fault the user cannot do anything about. They get a reference
+     * rather than an apology: it is printed next to the stack trace, so a bug report that
+     * quotes it points straight at the log line.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGenericException(
             Exception ex, HttpServletRequest request) {
-        // Log the real cause server-side; never leak internal details to the client.
-        log.error("Unhandled exception on {}: {}", request.getRequestURI(), ex.getMessage(), ex);
+        String reference = newReference();
+        log.error("[{}] Unhandled exception on {}: {}", reference, request.getRequestURI(),
+                ex.getMessage(), ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(
-                        "Une erreur inattendue est survenue. Merci de réessayer plus tard.",
-                        request.getRequestURI()));
+                        "Une erreur est survenue de notre côté. Citez la référence " + reference
+                                + " si vous nous signalez le problème.",
+                        request.getRequestURI(), ErrorCode.INTERNAL_ERROR, reference));
+    }
+
+    /** Short enough to be read out or typed into a message, long enough not to collide in a day. */
+    private static String newReference() {
+        return UUID.randomUUID().toString().substring(0, 6).toUpperCase(Locale.ROOT);
     }
 }

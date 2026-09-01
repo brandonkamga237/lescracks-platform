@@ -1,5 +1,10 @@
 package com.brandonkamga.lescracks.config;
 
+import java.io.IOException;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.brandonkamga.lescracks.exception.ErrorCode;
+import com.brandonkamga.lescracks.dto.ApiResponse;
 import com.brandonkamga.lescracks.security.jwt.JwtAuthenticationFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
@@ -68,17 +73,18 @@ public class SecurityConfig {
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
+            // Spring Security answers before any controller runs, so these two never reach
+            // GlobalExceptionHandler. They write the same envelope by hand rather than a
+            // bespoke JSON string, so a client parses one shape whatever refused the request.
             .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.setContentType("application/json");
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    response.getWriter().write("{\"success\":false,\"message\":\"Unauthorized\"}");
-                })
-                .accessDeniedHandler((request, response, accessDeniedException) -> {
-                    response.setContentType("application/json");
-                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    response.getWriter().write("{\"success\":false,\"message\":\"Access denied - Admin role required\"}");
-                })
+                .authenticationEntryPoint((request, response, authException) ->
+                    writeError(response, HttpServletResponse.SC_UNAUTHORIZED, request.getRequestURI(),
+                            ErrorCode.UNAUTHENTICATED,
+                            "Vous devez être connecté pour accéder à cette ressource."))
+                .accessDeniedHandler((request, response, accessDeniedException) ->
+                    writeError(response, HttpServletResponse.SC_FORBIDDEN, request.getRequestURI(),
+                            ErrorCode.FORBIDDEN,
+                            "Vous n'avez pas les droits nécessaires pour cette action."))
             )
             .oauth2Login(oauth2 -> oauth2
                 .successHandler(successHandler)
@@ -118,5 +124,15 @@ public class SecurityConfig {
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
+    }
+
+    private static void writeError(HttpServletResponse response, int status, String path,
+                                   ErrorCode code, String message) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .writeValue(response.getWriter(), ApiResponse.error(message, path, code));
     }
 }
