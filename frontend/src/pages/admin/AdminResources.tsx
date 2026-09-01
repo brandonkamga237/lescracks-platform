@@ -9,14 +9,27 @@ const AdminResources = () => {
   const [resources, setResources] = useState<AdminResource[]>([]);
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const PAGE_SIZE = 20;
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
+  /** Settled search term: firing a request per keystroke hammers the API. */
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [selectedType, setSelectedType] = useState<string>('');
+
+  useEffect(() => {
+    setPage(0);
+  }, [selectedCategory, selectedType, debouncedSearch]);
 
   // Create/Edit modal states
   const [showModal, setShowModal] = useState(false);
@@ -72,25 +85,17 @@ const AdminResources = () => {
         const cats = await adminApi.getCategories();
         setCategories(cats);
         
-        const data: PaginatedResponse<AdminResource> = await adminApi.getResources(page, 100);
-        
-        let filtered = data.content;
-        if (searchQuery) {
-          filtered = filtered.filter(r => 
-            r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            r.description?.toLowerCase().includes(searchQuery.toLowerCase())
-          );
-        }
-        if (selectedCategory) {
-          filtered = filtered.filter(r => r.categoryId.toString() === selectedCategory);
-        }
-        if (selectedType) {
-          filtered = filtered.filter(r => r.resourceTypeName?.toLowerCase() === selectedType.toLowerCase());
-        }
-        
-        setResources(filtered);
-        setTotalPages(Math.ceil(filtered.length / 20) || 1);
-        setTotalElements(filtered.length);
+        // Filtering happens in the query, not in the browser: the previous version pulled
+        // one page and filtered that, so a search never reached rows on other pages.
+        const data: PaginatedResponse<AdminResource> = await adminApi.getResources(page, PAGE_SIZE, {
+          type: selectedType || undefined,
+          categoryId: selectedCategory ? parseInt(selectedCategory) : undefined,
+          search: debouncedSearch || undefined,
+        });
+
+        setResources(data.content);
+        setTotalPages(data.totalPages);
+        setTotalElements(data.totalElements);
       } catch (err) {
         console.error('Error loading resources:', err);
         setResources([]);
@@ -102,7 +107,7 @@ const AdminResources = () => {
       }
     };
     fetchData();
-  }, [page, selectedCategory, selectedType, searchQuery]);
+  }, [page, selectedCategory, selectedType, debouncedSearch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -353,6 +358,7 @@ const AdminResources = () => {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-12">#</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Titre</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catégorie</th>
@@ -363,8 +369,13 @@ const AdminResources = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {resources.map((resource) => (
+                {resources.map((resource, index) => (
                   <tr key={resource.id} className="hover:bg-gray-50">
+                    {/* Position in the list, not the database id: a row number must not leak
+                        how many records exist or let anyone walk the table by guessing. */}
+                    <td className="px-4 py-3 text-sm text-gray-400 tabular-nums">
+                      {page * PAGE_SIZE + index + 1}
+                    </td>
                     <td className="px-4 py-3">
                       <div>
                         <p className="text-sm font-medium text-gray-900 truncate max-w-[200px]">{resource.title}</p>
@@ -382,8 +393,8 @@ const AdminResources = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">{resource.categoryName}</td>
-                    <td className="px-4 py-3 text-sm text-gray-500">{(resource as any).viewCount ?? 0}</td>
-                    <td className="px-4 py-3 text-sm text-gray-500">{(resource as any).downloadCount ?? 0}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{resource.viewCount ?? 0}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{resource.downloadCount ?? 0}</td>
                     <td className="px-4 py-3">
                       {(resource as any).premium ? (
                         <span className="flex items-center gap-1 text-xs text-amber-600 font-medium">

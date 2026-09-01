@@ -38,13 +38,18 @@ export default function RessourceDetail() {
   const [resource, setResource] = useState<Resource | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slug) return;
     apiService.getResourceBySlug(slug)
       .then(r => {
         setResource(r);
-        apiService.trackResourceView(r.id).catch(() => {});
+        // Reflect the view we are about to record, so the figure on screen matches the
+        // one now stored rather than the one read a moment earlier.
+        apiService.trackResourceView(r.id)
+          .then(() => setResource(prev => (prev ? { ...prev, viewCount: (prev.viewCount ?? 0) + 1 } : prev)))
+          .catch(() => {});
       })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
@@ -89,23 +94,28 @@ export default function RessourceDetail() {
     ? resource.description.slice(0, 155)
     : `${isVideo ? 'Vidéo' : 'Document'} LesCracks — ${resource.categoryName}${resource.tags?.length ? ' · ' + resource.tags.slice(0, 3).map(t => t.name).join(', ') : ''}`;
 
-  const handleOpen = async () => {
-    await apiService.trackResourceView(resource.id).catch(() => {});
+  // Opening the resource is not a second view: landing on this page already counted one.
+  const handleOpen = () => {
     window.open(resource.url, '_blank', 'noopener,noreferrer');
   };
 
   const handleDownload = async () => {
     try {
       const url = await apiService.trackResourceDownload(resource.id);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = resource.metadata?.originalFileName || resource.title;
-      a.target = '_blank';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch {
-      window.open(resource.url, '_blank', 'noopener,noreferrer');
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = resource.metadata?.originalFileName || resource.title;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setResource(prev => (prev ? { ...prev, downloadCount: (prev.downloadCount ?? 0) + 1 } : prev));
+    } catch (error) {
+      // A refusal is an answer, not a glitch: opening the raw url anyway hid the reason
+      // the download was denied.
+      setDownloadError(
+        error instanceof Error ? error.message : "Le téléchargement n'a pas pu démarrer.",
+      );
     }
   };
 
@@ -284,6 +294,9 @@ export default function RessourceDetail() {
                     >
                       <Download className="w-4 h-4" /> Télécharger
                     </button>
+                  )}
+                  {downloadError && (
+                    <p role="alert" className="text-xs text-red-400 text-center">{downloadError}</p>
                   )}
                 </div>
               ) : (

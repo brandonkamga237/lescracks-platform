@@ -31,6 +31,8 @@ export interface AdminTag {
 
 export interface AdminResource {
   id: number;
+  viewCount?: number;
+  downloadCount?: number;
   title: string;
   description: string;
   url: string;
@@ -310,8 +312,16 @@ class AdminApiService {
   }
 
   // === RESOURCES ===
-  async getResources(page = 0, size = 20): Promise<PaginatedResponse<AdminResource>> {
-    return this.request<PaginatedResponse<AdminResource>>(`/admin/resources?page=${page}&size=${size}`);
+  async getResources(
+    page = 0,
+    size = 20,
+    filters: { type?: string; categoryId?: number; search?: string } = {},
+  ): Promise<PaginatedResponse<AdminResource>> {
+    const params = new URLSearchParams({ page: String(page), size: String(size) });
+    if (filters.type) params.set('type', filters.type);
+    if (filters.categoryId) params.set('categoryId', String(filters.categoryId));
+    if (filters.search) params.set('search', filters.search);
+    return this.request<PaginatedResponse<AdminResource>>(`/admin/resources?${params}`);
   }
 
   /** Type ids are database rows, not constants: always read them instead of hardcoding. */
