@@ -304,10 +304,6 @@ class AdminApiService {
     return this.request<PaginatedResponse<AdminUser>>(`/admin/users?page=${page}&size=${size}`);
   }
 
-  async getUser(id: number): Promise<AdminUser> {
-    return this.request<AdminUser>(`/admin/users/${id}`);
-  }
-
   async updateUserRole(id: number, roleName: string): Promise<AdminUser> {
     return this.request<AdminUser>(`/admin/users/${id}/role`, {
       method: 'PUT',
