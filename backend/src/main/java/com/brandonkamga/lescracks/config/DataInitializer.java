@@ -74,8 +74,6 @@ public class DataInitializer implements CommandLineRunner {
         // Initialize Roles — idempotent: insert only missing roles
         if (roleRepository.findByName(RoleName.user).isEmpty())
             roleRepository.save(Role.builder().name(RoleName.user).build());
-        if (roleRepository.findByName(RoleName.premium_user).isEmpty())
-            roleRepository.save(Role.builder().name(RoleName.premium_user).build());
         if (roleRepository.findByName(RoleName.learner).isEmpty())
             roleRepository.save(Role.builder().name(RoleName.learner).build());
         if (roleRepository.findByName(RoleName.admin).isEmpty())

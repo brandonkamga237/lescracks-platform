@@ -1,12 +1,10 @@
 package com.brandonkamga.lescracks.controller;
 
 import com.brandonkamga.lescracks.domain.Learner;
-import com.brandonkamga.lescracks.domain.LearnerProject;
 import com.brandonkamga.lescracks.domain.LearnerStatus;
 import com.brandonkamga.lescracks.domain.RoleName;
 import com.brandonkamga.lescracks.domain.User;
 import com.brandonkamga.lescracks.dto.ApiResponse;
-import com.brandonkamga.lescracks.dto.LearnerProjectResponse;
 import com.brandonkamga.lescracks.dto.LearnerRequest;
 import com.brandonkamga.lescracks.dto.LearnerResponse;
 import com.brandonkamga.lescracks.dto.LearnerSelfUpdateRequest;
@@ -215,7 +213,6 @@ public class LearnerController {
                 .testimonial(request.getTestimonial())
                 .githubUrl(request.getGithubUrl())
                 .build();
-        replaceProjects(learner, request);
         return ResponseEntity.ok(ApiResponse.success(toResponse(learnerRepository.save(learner)), "Learner created"));
     }
 
@@ -256,7 +253,6 @@ public class LearnerController {
         learner.setCompletedAt(request.getCompletedAt());
         learner.setTestimonial(request.getTestimonial());
         learner.setGithubUrl(request.getGithubUrl());
-        replaceProjects(learner, request);
 
         return ResponseEntity.ok(ApiResponse.success(toResponse(learnerRepository.save(learner)), "Learner updated"));
     }
@@ -287,54 +283,7 @@ public class LearnerController {
     // HELPERS
     // ─────────────────────────────────────────────────────────────
 
-    /**
-     * Replace the learner's shipped work with what the admin submitted.
-     *
-     * The collection is orphanRemoval, so clearing it deletes the rows that were
-     * dropped. Projects with neither a repo nor a live URL are rejected: they would
-     * appear on the public profile as an unverifiable claim, which is exactly what
-     * this model exists to prevent.
-     */
-    private void replaceProjects(Learner learner, LearnerRequest request) {
-        learner.getProjects().clear();
-        if (request.getProjects() == null) return;
 
-        for (LearnerRequest.LearnerProjectRequest p : request.getProjects()) {
-            if (p == null || p.getTitle() == null || p.getTitle().isBlank()) continue;
-
-            boolean hasLink = (p.getRepoUrl() != null && !p.getRepoUrl().isBlank())
-                           || (p.getLiveUrl() != null && !p.getLiveUrl().isBlank());
-            if (!hasLink) {
-                throw new BadRequestException(
-                        "Le projet « " + p.getTitle() + " » n'a ni lien de code ni lien en ligne. "
-                      + "Un projet que personne ne peut ouvrir ne prouve rien.");
-            }
-
-            learner.getProjects().add(LearnerProject.builder()
-                    .learner(learner)
-                    .title(p.getTitle())
-                    .description(p.getDescription())
-                    .repoUrl(p.getRepoUrl())
-                    .liveUrl(p.getLiveUrl())
-                    .imageUrl(p.getImageUrl())
-                    .displayOrder(p.getDisplayOrder())
-                    .createdAt(LocalDateTime.now())
-                    .build());
-        }
-    }
-
-    private LearnerProjectResponse toProjectResponse(LearnerProject p) {
-        return LearnerProjectResponse.builder()
-                .id(p.getId())
-                .title(p.getTitle())
-                .description(p.getDescription())
-                .repoUrl(p.getRepoUrl())
-                .liveUrl(p.getLiveUrl())
-                .imageUrl(p.getImageUrl())
-                .displayOrder(p.getDisplayOrder())
-                .verifiable(p.isVerifiable())
-                .build();
-    }
 
     private LearnerResponse toResponse(Learner l) {
         // For linked accounts: derive photo from user.pictureUrl if no explicit photoUrl
@@ -370,9 +319,6 @@ public class LearnerController {
                 .durationMonths(l.durationInMonths().orElse(null))
                 .testimonial(l.getTestimonial())
                 .githubUrl(l.getGithubUrl())
-                .projects(l.getProjects().stream()
-                        .map(this::toProjectResponse)
-                        .collect(Collectors.toList()))
                 .build();
     }
 

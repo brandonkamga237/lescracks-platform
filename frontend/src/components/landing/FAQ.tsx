@@ -18,12 +18,8 @@ const faqs = [
     answer: 'Oui, toutes nos formations delivrent une certification reconnue. Nos certificats sont verifies par les entreprises partenaires et attestent de vos competences reelles.',
   },
   {
-    question: 'Qu\'entendez vous par utilisateur premium ? ',
-    answer: 'Nos utilisateurs premium son des dabord des utilisateurs classiques mais aussi des utilisateurs qui ont acces a tous nous ressources et evenements quelques soit la restriction avec une baisse pouvant aller jusqu\'a 30% du prix de nos differents forme d\'accompagnemnt',
-  },
-  {
     question: 'Proposez-vous des financements ou paiements echelonnes?',
-    answer: 'Oui, nous proposons plusieurs options: paiement integral, echelonnement sur des periodes fixes, et des reductions considerables pour nos utilisateurs premium. Contactez-nous pour discuter de votre situation.',
+    answer: 'Oui, nous proposons plusieurs options: paiement integral, echelonnement sur des periodes fixes, et des reductions selon la situation. Contactez-nous pour discuter de votre situation.',
   },
 ];
 

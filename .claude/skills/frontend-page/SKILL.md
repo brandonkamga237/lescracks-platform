@@ -24,7 +24,7 @@ which reads `isAdmin` from `useAuth()`.
   - `api.ts` → public and authenticated endpoints alike
   - `adminApi.ts` → `/api/admin` endpoints
   Both send the session cookie through `credentials: 'include'`; no token is handled in
-  JavaScript. (`publicApi.ts` also exists, but nothing imports it.)
+  JavaScript.
   Add the method to the service with its exported TypeScript type, then call it from
   the page.
 - **Never hardcode an API URL**: the base comes from `ENV.API_BASE_URL`

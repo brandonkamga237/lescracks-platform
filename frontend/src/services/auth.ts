@@ -12,14 +12,12 @@ export interface User {
   lastName?: string;
   name?: string;
   picture?: string;
-  role: 'FREE' | 'PREMIUM' | 'LEARNER' | 'ADMIN';
+  role: 'FREE' | 'LEARNER' | 'ADMIN';
   provider: 'google' | 'github' | 'local';
   providerName?: string;
   providerUserId?: string;
   phone?: string;
   country?: string;
-  premiumActivatedAt?: string;
-  premiumExpiresAt?: string;
 }
 
 export interface AuthResponse {
@@ -27,18 +25,6 @@ export interface AuthResponse {
   message?: string;
   user?: User;
   token?: string;
-}
-
-export interface PremiumRequestResponse {
-  id: number;
-  userId: number;
-  username: string;
-  email: string;
-  whatsappNumber: string;
-  contactEmail: string;
-  country: string;
-  message?: string;
-  createdAt: string;
 }
 
 export interface ChangePasswordRequest {
@@ -67,8 +53,6 @@ interface BackendUser {
   providerName?: string;
   emailVerified?: boolean;
   createdAt?: string;
-  premiumActivatedAt?: string;
-  premiumExpiresAt?: string;
   providerUserId?: string;
   /** OAuth providers send these instead of the local fields. */
   name?: string;
@@ -234,17 +218,14 @@ class AuthService {
       providerUserId: backendUser.providerUserId,
       phone: backendUser.phone,
       country: backendUser.country,
-      premiumActivatedAt: backendUser.premiumActivatedAt,
-      premiumExpiresAt: backendUser.premiumExpiresAt,
     };
   }
 
   // Map backend role name to frontend role
-  private mapRole(roleName: string | undefined): 'FREE' | 'PREMIUM' | 'LEARNER' | 'ADMIN' {
+  private mapRole(roleName: string | undefined): 'FREE' | 'LEARNER' | 'ADMIN' {
     if (!roleName) return 'FREE';
     const upperRole = roleName.toUpperCase().replace('_', '');
     if (upperRole === 'ADMIN') return 'ADMIN';
-    if (upperRole === 'PREMIUMUSER' || upperRole === 'PREMIUM') return 'PREMIUM';
     if (upperRole === 'LEARNER') return 'LEARNER';
     return 'FREE';
   }
@@ -334,40 +315,7 @@ class AuthService {
     };
   }
 
-  // === PREMIUM REQUEST ===
-  async submitPremiumRequest(data: {
-    whatsappNumber: string;
-    contactEmail: string;
-    country: string;
-    message?: string;
-  }): Promise<{ success: boolean; message?: string; data?: PremiumRequestResponse }> {
-    const response = await fetch(`${API_BASE_URL}/premium/request`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    });
 
-    const json = await response.json();
-    if (json.success) {
-      return { success: true, message: json.message, data: json.data };
-    }
-    return { success: false, message: json.message || 'La demande n\'a pas pu être envoyée. Merci de réessayer.' };
-  }
-
-  async getMyPremiumRequest(): Promise<{ success: boolean; data?: PremiumRequestResponse | null }> {
-    const response = await fetch(`${API_BASE_URL}/premium/my-request`, {
-      credentials: 'include',
-    });
-
-    const json = await response.json();
-    if (json.success) {
-      return { success: true, data: json.data };
-    }
-    return { success: false };
-  }
 
   // === AVATAR UPLOAD ===
   async uploadAvatar(file: File): Promise<{ success: boolean; message?: string; user?: User }> {

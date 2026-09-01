@@ -1,6 +1,6 @@
 // src/pages/admin/AdminResources.tsx
 import { useState, useEffect, useRef } from 'react';
-import { FileText, Plus, Loader2, Trash2, Eye, Video, File, ChevronLeft, ChevronRight, Search, Filter, X, Save, Youtube, Upload, Crown, Download, Pencil } from 'lucide-react';
+import { FileText, Plus, Loader2, Trash2, Eye, Video, File, ChevronLeft, ChevronRight, Search, Filter, X, Save, Youtube, Upload, Download, Pencil } from 'lucide-react';
 import { PageHeader } from '@/components/admin/viz';
 import adminApi, { AdminResource, AdminCategory, AdminResourcePayload, PaginatedResponse } from '@/services/adminApi';
 import apiService from '@/services/api';
@@ -44,7 +44,6 @@ const AdminResources = () => {
     categoryId: '',
     resourceTypeId: '',
     sourceType: 'EXTERNAL' as 'EXTERNAL' | 'UPLOADED',
-    isPremium: false,
     isDownloadable: true,
     content: '',
     author: '',
@@ -146,7 +145,6 @@ const AdminResources = () => {
       categoryId: resource.categoryId.toString(),
       resourceTypeId: resource.resourceTypeId.toString(),
       sourceType: (resource.sourceType === 'UPLOADED' ? 'UPLOADED' : 'EXTERNAL') as 'EXTERNAL' | 'UPLOADED',
-      isPremium: resource.premium || false,
       isDownloadable: resource.downloadable !== false,
       content: resource.content || '',
       author: '',
@@ -168,8 +166,7 @@ const AdminResources = () => {
       categoryId: categories[0]?.id?.toString() || '',
       resourceTypeId: resourceTypes[0]?.id?.toString() || '',
       sourceType: 'EXTERNAL',
-      isPremium: false,
-      isDownloadable: true,
+        isDownloadable: true,
       content: '',
       author: '',
       readingTimeMinutes: '',
@@ -249,9 +246,6 @@ const AdminResources = () => {
         categoryId: parseInt(formData.categoryId),
         resourceTypeId: parseInt(formData.resourceTypeId),
         sourceType: isArticle ? 'INLINE' : formData.sourceType,
-        // The API forces a hosted video to premium; mirror it so the row does not
-        // display as free until the next reload.
-        premium: formData.isPremium || (isVideo && formData.sourceType === 'UPLOADED'),
         downloadable: isArticle ? false : formData.isDownloadable,
       };
 
@@ -366,7 +360,6 @@ const AdminResources = () => {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catégorie</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vues</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">DL</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Accès</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
               </thead>
@@ -397,15 +390,6 @@ const AdminResources = () => {
                     <td className="px-4 py-3 text-sm text-gray-600">{resource.categoryName}</td>
                     <td className="px-4 py-3 text-sm text-gray-500">{resource.viewCount ?? 0}</td>
                     <td className="px-4 py-3 text-sm text-gray-500">{resource.downloadCount ?? 0}</td>
-                    <td className="px-4 py-3">
-                      {resource.premium ? (
-                        <span className="flex items-center gap-1 text-xs text-amber-600 font-medium">
-                          <Crown className="w-3 h-3" />Premium
-                        </span>
-                      ) : (
-                        <span className="text-xs text-green-600">Gratuit</span>
-                      )}
-                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
                         <a href={resource.url} target="_blank" rel="noopener noreferrer"
@@ -672,18 +656,6 @@ const AdminResources = () => {
 
               {/* Access & download toggles */}
               <div className="flex flex-col gap-3 pt-1">
-                <label className="flex items-center justify-between p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                  <div className="flex items-center gap-2">
-                    <Crown className="w-4 h-4 text-amber-500" />
-                    <div>
-                      <p className="text-sm font-medium">Accès Premium uniquement</p>
-                      <p className="text-xs text-gray-400">Les utilisateurs gratuits verront un cadenas</p>
-                    </div>
-                  </div>
-                  <input type="checkbox" checked={formData.isPremium}
-                    onChange={(e) => setFormData({ ...formData, isPremium: e.target.checked })}
-                    className="w-4 h-4 accent-yellow-500" />
-                </label>
                 {/* Downloading only makes sense for a document. A video is watched and an
                     article is read in place — the backend forces both non-downloadable
                     regardless, so we hide the toggle rather than offer a dead switch. */}

@@ -94,17 +94,6 @@ public class ApplicationController {
         return ResponseEntity.ok(ApiResponse.success(applications));
     }
 
-    @GetMapping("/event/{eventId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Récupérer les candidatures d'un événement — admin uniquement")
-    public ResponseEntity<ApiResponse<List<ApplicationResponse>>> getApplicationsByEvent(
-            @PathVariable Long eventId) {
-        List<ApplicationResponse> applications = applicationService.findByEventId(eventId).stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success(applications));
-    }
 
     /**
      * Public list of application types.

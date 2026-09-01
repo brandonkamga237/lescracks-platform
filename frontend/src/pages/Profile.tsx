@@ -9,10 +9,8 @@ import Layout from '@/components/layout/Layout';
 import {
   User,
   Mail,
-  Crown,
   Settings,
   Loader2,
-  Star,
   Lock,
   Trash2,
   AlertTriangle,
@@ -34,7 +32,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const Profile = () => {
-  const { user, isPremium, isLearner, refreshUser, logout } = useAuth();
+  const { user, isLearner, refreshUser, logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
 
@@ -128,9 +126,6 @@ const Profile = () => {
     }
   };
 
-  const handleUpgrade = () => {
-    navigate('/premium');
-  };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -290,12 +285,6 @@ const Profile = () => {
                       Crack Accompagné
                     </span>
                   )}
-                  {!isLearner && isPremium && (
-                    <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-gold/20 text-gold text-sm">
-                      <Crown className="w-4 h-4" />
-                      Premium
-                    </span>
-                  )}
                 </div>
                 <div className="flex items-center justify-center sm:justify-start gap-2 text-t3">
                   <Mail className="w-4 h-4" />
@@ -315,33 +304,6 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Premium Upgrade Banner (if not premium) */}
-            {!isPremium && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="mt-6 p-6 rounded-xl bg-gradient-to-r from-gold/10 to-gold/5 border border-gold/20"
-              >
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="text-center sm:text-left">
-                    <h3 className="font-semibold text-gold mb-1">
-                      Devenez Premium
-                    </h3>
-                    <p className="text-t2 text-sm">
-                      Accedez a tous les contenus, telechargements et Ressources exclusives.
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleUpgrade}
-                    className="btn-primary whitespace-nowrap"
-                  >
-                    <Star className="w-4 h-4 inline mr-2" />
-                    Passer Premium
-                  </button>
-                </div>
-              </motion.div>
-            )}
           </motion.div>
 
           {/* Tabs Navigation */}

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Linkedin, Github, Youtube, Mail, BookOpen, Video, Code2, Users, Compass, Calendar, Info, ArrowUpRight } from 'lucide-react';
+import { Linkedin, Github, Youtube, Mail, BookOpen, Video, Compass, Calendar, Info, ArrowUpRight } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import LesCracksLogo from '@/components/common/LesCracksLogo';
@@ -28,14 +28,12 @@ const NAV: { title: string; links: FooterLink[] }[] = [
       { label: 'Bibliothèque', href: '/ressources#bibliotheque', icon: BookOpen },
       { label: 'Vidéothèque', href: '/ressources#videotheque', icon: Video },
       { label: 'Événements', href: '/evenements', icon: Calendar },
-      { label: 'Open Source', href: '/open-source', icon: Code2 },
     ],
   },
   {
     title: 'Entreprise',
     links: [
       { label: 'À propos', href: '/about', icon: Info },
-      { label: 'Communauté', href: '/open-source#contributors', icon: Users },
       { label: 'WhatsApp', href: 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK', icon: null, isWhatsApp: true, external: true },
       { label: 'contact@lescracks.com', href: 'mailto:contact@lescracks.com', icon: Mail, external: true },
     ],

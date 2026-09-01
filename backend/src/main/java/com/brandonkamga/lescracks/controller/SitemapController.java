@@ -52,7 +52,6 @@ public class SitemapController {
         url(xml, "/ressources", today, "weekly", "0.9");
         url(xml, "/evenements", today, "weekly", "0.85");
         url(xml, "/apprenants", today, "weekly", "0.8");
-        url(xml, "/open-source", today, "monthly", "0.75");
         url(xml, "/about", today, "monthly", "0.7");
 
         // Dynamic content, resolved by slug.

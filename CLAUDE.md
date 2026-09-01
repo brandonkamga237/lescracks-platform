@@ -18,7 +18,7 @@ Monorepo: `frontend/` React + Vite (SPA), `backend/` Spring Boot + PostgreSQL + 
 - `frontend/src/`
   - `pages/` → public routes, `pages/admin/` → back office
   - `components/{landing,cards,resources,admin,layout,common,ui}/`
-  - `services/` → `api.ts` (public and authenticated calls), `adminApi.ts`, `auth.ts` (`publicApi.ts` exists but nothing imports it)
+  - `services/` → `api.ts` (public and authenticated calls), `adminApi.ts`, `auth.ts`
   - `contexts/` → AuthContext, ThemeContext; `hooks/` → `useXxx` hooks
   - `nginx.conf` → SEO bot routing + `/api` proxy (prod)
 - `docker-compose.yml` → local dev stack (postgres, minio + backend under profile `app`)
@@ -65,7 +65,7 @@ Before any commit or PR:
 - Errors: throw `ResourceNotFoundException` / `BadRequestException` / `ForbiddenException`; do not set the status in the controller, `GlobalExceptionHandler` does it
 - DB schema: Flyway only (`ddl-auto: validate` everywhere). A new entity field means a new `V{n}__...sql` migration; never edit a migration that has already been applied
 - Lombok (`@Data`, `@Builder`) on DTOs and entities; logging through `slf4j`
-- Public vs protected endpoints are declared in `SecurityConfig`; roles: `user`, `premium_user`, `learner`, `admin`
+- Public vs protected endpoints are declared in `SecurityConfig`; roles: `user`, `learner`, `admin`
 - Text shown to users (emails, API errors) in French; everything else in English
 
 ### Frontend
@@ -111,6 +111,5 @@ Before any commit or PR:
 - **Accompagnement 360** = the flagship mentoring programme; an application to it is an `Application` with no `event`
 - **Application** = either a 360 application or an event registration (`event != null`)
 - **Learner / Apprenant** = public profile of a participant (page `/apprenants/{slug}`)
-- **Premium** = restricted resource or user (`premium_user`); `PremiumRequest` = an upgrade request
-- **Resource** = content (VIDEO/DOCUMENT), either `EXTERNAL` (link) or `UPLOADED` (MinIO)
+- **Resource** = content (VIDEO/DOCUMENT/ARTICLE). A video is always `EXTERNAL`, a document is `UPLOADED` to MinIO, an article is `INLINE` and written in the back office
 - **SEO snapshot** = server-rendered HTML served to bots instead of the SPA

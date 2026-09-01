@@ -58,9 +58,6 @@ public class ResourceResponse {
     @Schema(description = "Source de la ressource : EXTERNAL ou UPLOADED")
     private String sourceType;
 
-    @Schema(description = "Accès réservé aux utilisateurs premium")
-    private boolean premium;
-
     @Schema(description = "Le téléchargement est autorisé")
     private boolean downloadable;
 

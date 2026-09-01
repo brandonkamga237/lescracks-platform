@@ -151,7 +151,6 @@ public class SeoController {
     // ── Static marketing pages ────────────────────────────────────────────────────
     // The SPA renders these client-side, so JS-less crawlers (AI engines especially)
     // see an empty shell. nginx routes bots on /, /about, /programme, /postuler and
-    // /open-source here; the content is authored (these pages are hardcoded in React,
     // and the CI build has no backend to prerender against) and kept factual for GEO.
 
     private static final String ORG_JSONLD =
@@ -172,7 +171,6 @@ public class SeoController {
             case "about": return about();
             case "programme": return programme();
             case "postuler": return postuler();
-            case "open-source": return openSource();
             default: return notFound("Page introuvable");
         }
     }
@@ -237,18 +235,6 @@ public class SeoController {
                 SITE + "/postuler", null, ld, body);
     }
 
-    private ResponseEntity<String> openSource() {
-        String body = "<h1>Projets open source LesCracks</h1>"
-                + "<p>LesCracks construit en open source et contribue à l'écosystème tech africain : outils, librairies et"
-                + " projets ouverts à tous, portés par la communauté. La page présente les projets maintenus par LesCracks"
-                + " et les contributeurs reconnus.</p>";
-        String ld = "{\"@context\":\"https://schema.org\",\"@type\":\"CollectionPage\","
-                + "\"name\":\"Projets open source LesCracks\",\"url\":\"" + SITE + "/open-source\","
-                + "\"isPartOf\":{\"@type\":\"EducationalOrganization\",\"name\":\"LesCracks\",\"url\":\"" + SITE + "\"}}";
-        return html("Projets open source — LesCracks",
-                "LesCracks construit en open source pour l'écosystème tech africain : projets, librairies et contributeurs de la communauté.",
-                SITE + "/open-source", null, ld, body);
-    }
 
     // ── HTML assembly ─────────────────────────────────────────────────────────────
     private static ResponseEntity<String> html(String title, String metaDesc, String canonical,
