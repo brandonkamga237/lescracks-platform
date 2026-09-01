@@ -1,5 +1,6 @@
 // src/services/api.ts
 import { ENV } from '@/config/env';
+import { apiErrorFrom } from '@/lib/apiError';
 import authService from './auth';
 
 const API_BASE_URL = ENV.API_BASE_URL;
@@ -177,7 +178,7 @@ class ApiService {
 
     // Handle backend response format: { success: true, data: { ... } }
     if (!response.ok) {
-      throw new Error(json.message || `Request failed with status ${response.status}`);
+      throw apiErrorFrom(json, response.status, 'La requête a échoué.');
     }
 
     // Return the data part if success, otherwise throw
@@ -186,7 +187,7 @@ class ApiService {
     }
 
     if (!json.success) {
-      throw new Error(json.message || 'Request failed');
+      throw apiErrorFrom(json, response.status, 'La requête a échoué.');
     }
 
     return json as T;
@@ -412,9 +413,9 @@ class ApiService {
       body: formData,
     });
     const json = await response.json();
-    if (!response.ok) throw new Error(json.message || 'Upload failed');
+    if (!response.ok) throw apiErrorFrom(json, response.status, "Le fichier n'a pas pu être envoyé.");
     if (json.success && json.data !== undefined) return json.data as string;
-    throw new Error(json.message || 'Upload failed');
+    throw apiErrorFrom(json, response.status, "Le fichier n'a pas pu être envoyé.");
   }
 
   /** Upload an image (preview, cover) and get back its url. Images only. */

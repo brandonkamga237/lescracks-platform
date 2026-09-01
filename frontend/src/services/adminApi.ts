@@ -1,5 +1,6 @@
 // src/services/adminApi.ts
 import { ENV } from '@/config/env';
+import { apiErrorFrom } from '@/lib/apiError';
 
 const API_BASE_URL = ENV.API_BASE_URL;
 
@@ -232,7 +233,7 @@ class AdminApiService {
     const json = await response.json();
 
     if (!response.ok) {
-      throw new Error(json.message || `Request failed with status ${response.status}`);
+      throw apiErrorFrom(json, response.status, 'La requête a échoué.');
     }
 
     if (json.success && json.data !== undefined) {
@@ -240,7 +241,7 @@ class AdminApiService {
     }
 
     if (!json.success) {
-      throw new Error(json.message || 'Request failed');
+      throw apiErrorFrom(json, response.status, 'La requête a échoué.');
     }
 
     return json as T;
