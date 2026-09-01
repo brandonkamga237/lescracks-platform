@@ -18,7 +18,7 @@ Monorepo: `frontend/` React + Vite (SPA), `backend/` Spring Boot + PostgreSQL + 
 - `frontend/src/`
   - `pages/` → public routes, `pages/admin/` → back office
   - `components/{landing,cards,resources,admin,layout,common,ui}/`
-  - `services/` → `api.ts` (public and authenticated calls), `adminApi.ts`, `auth.ts` (`publicApi.ts` exists but nothing imports it)
+  - `services/` → `api.ts` (public and authenticated calls), `adminApi.ts`, `auth.ts`
   - `contexts/` → AuthContext, ThemeContext; `hooks/` → `useXxx` hooks
   - `nginx.conf` → SEO bot routing + `/api` proxy (prod)
 - `docker-compose.yml` → local dev stack (postgres, minio + backend under profile `app`)

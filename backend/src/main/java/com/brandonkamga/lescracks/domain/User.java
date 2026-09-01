@@ -46,8 +46,6 @@ public class User {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
-    private ImageAsset imageAsset;
 
     /**
      * When the password last changed. Any JWT issued BEFORE this instant is rejected.

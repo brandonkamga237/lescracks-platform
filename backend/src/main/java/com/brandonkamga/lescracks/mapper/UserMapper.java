@@ -27,11 +27,7 @@ public class UserMapper {
             return null;
         }
 
-        // Determine picture: stored pictureUrl first, then imageAsset if present
         String picture = user.getPictureUrl();
-        if (picture == null && user.getImageAsset() != null) {
-            picture = user.getImageAsset().getUrl();
-        }
 
         return UserResponse.builder()
                 .id(user.getId())
