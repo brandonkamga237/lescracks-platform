@@ -5,7 +5,7 @@ interface UseImageOptimizationProps {
   threshold?: number;
 }
 
-export const useImageOptimization = ({ src, threshold = 0.1 }: UseImageOptimizationProps) => {
+export const useImageOptimization = ({ threshold = 0.1 }: UseImageOptimizationProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);

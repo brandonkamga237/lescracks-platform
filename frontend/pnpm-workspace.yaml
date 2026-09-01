@@ -1,0 +1,4 @@
+# esbuild ships a postinstall that fetches its platform binary. Without an explicit answer
+# here, pnpm refuses to run any script until the build is approved interactively.
+allowBuilds:
+  esbuild: true

@@ -20,7 +20,7 @@ class PublicApiService {
     };
 
     const response = await fetch(url, config);
-    let data: any;
+    let data: unknown;
 
     try {
       data = await response.json();
@@ -44,7 +44,7 @@ class PublicApiService {
     if (filters?.search) params.append('search', filters.search);
 
     const url = `/courses${params.toString() ? `?${params.toString()}` : ''}`;
-    return this.request<{ success: true; data: { courses: any[] } }>(url);
+    return this.request<{ success: true; data: { courses: unknown[] } }>(url);
   }
 
   async getCourse(id: number) {
@@ -68,7 +68,7 @@ class PublicApiService {
     if (filters?.date) params.append('date', filters.date);
 
     const url = `/events${params.toString() ? `?${params.toString()}` : ''}`;
-    return this.request<{ success: true; data: { events: any[] } }>(url);
+    return this.request<{ success: true; data: { events: unknown[] } }>(url);
   }
 
   async getEvent(id: number) {
@@ -109,7 +109,7 @@ class PublicApiService {
     if (filters?.search) params.append('search', filters.search);
 
     const url = `/documents${params.toString() ? `?${params.toString()}` : ''}`;
-    return this.request<{ success: true; data: { documents: any[] } }>(url);
+    return this.request<{ success: true; data: { documents: unknown[] } }>(url);
   }
 
   // === VIDEOCOURSES ===
@@ -122,7 +122,7 @@ class PublicApiService {
     if (filters?.limit) params.append('limit', filters.limit.toString());
 
     const url = `/videoCourses${params.toString() ? `?${params.toString()}` : ''}`;
-    return this.request<{ success: true; data: any[]; pagination: { total: number; page: number; limit: number; pages: number } }>(url);
+    return this.request<{ success: true; data: unknown[]; pagination: { total: number; page: number; limit: number; pages: number } }>(url);
   }
 }
 

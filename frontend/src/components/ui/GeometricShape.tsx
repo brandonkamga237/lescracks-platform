@@ -31,7 +31,6 @@ export const GeometricShape: React.FC<GeometricShapeProps> = ({
     ...position,
   };
 
-  const MotionDiv = motion.div;
 
   return (
     <motion.div

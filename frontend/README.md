@@ -34,7 +34,7 @@ src/
 │   ├── admin/      back office components
 │   ├── common/     cross-cutting, including SEO
 │   └── icons/
-├── services/       api.ts, publicApi.ts, adminApi.ts, auth.ts
+├── services/       api.ts, adminApi.ts, auth.ts (publicApi.ts is unused)
 ├── contexts/       AuthContext, ThemeContext
 ├── hooks/          useXxx
 ├── config/env.ts   reads the Vite variables
@@ -47,9 +47,11 @@ src/
 
 - **Import through the `@/` alias** — never deep relative paths.
 - **No `fetch` inside a component.** Every API call goes through `src/services/`:
-  - `publicApi.ts` — public endpoints, no token
-  - `api.ts` — authenticated endpoints (JWT)
+  - `api.ts` — public and authenticated endpoints alike
   - `adminApi.ts` — `/api/admin` endpoints
+
+  Both send the session cookie via `credentials: 'include'`, so no token is handled in
+  JavaScript. `publicApi.ts` exists too, but nothing imports it.
 - **No hardcoded API URL**: the base comes from `ENV.API_BASE_URL` (`src/config/env.ts`).
 - Tailwind for styling, no inline styles. Light and dark themes through
   `ThemeContext` and the `dark:` variants.

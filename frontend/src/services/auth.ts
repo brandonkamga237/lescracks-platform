@@ -53,6 +53,28 @@ export interface UpdateProfileRequest {
   country?: string;
 }
 
+/** Shape of the user object the API returns; every field may be absent. */
+interface BackendUser {
+  id?: number | string;
+  email?: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  country?: string;
+  pictureUrl?: string;
+  roleName?: string;
+  providerName?: string;
+  emailVerified?: boolean;
+  createdAt?: string;
+  premiumActivatedAt?: string;
+  premiumExpiresAt?: string;
+  providerUserId?: string;
+  /** OAuth providers send these instead of the local fields. */
+  name?: string;
+  picture?: string;
+}
+
 class AuthService {
   private userKey = 'lescracks_user';
 
@@ -196,7 +218,8 @@ class AuthService {
   }
 
   // Map backend user response to frontend user format
-  mapBackendUserToFrontend(backendUser: any): User {
+
+  mapBackendUserToFrontend(backendUser: BackendUser): User {
     return {
       id: String(backendUser.id || ''),
       email: backendUser.email || '',

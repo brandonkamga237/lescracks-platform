@@ -8,6 +8,7 @@ import { ArrowLeft, Mail, Github, Loader2, RefreshCw } from 'lucide-react';
 import PasswordInput from '@/components/common/PasswordInput';
 import authService from '@/services/auth';
 
+import { errorMessage } from '@/lib/utils';
 const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -39,8 +40,8 @@ const Login = () => {
         // end: the mail may be in spam, or the 24h link may already have expired.
         setNeedsVerification(msg.toLowerCase().includes('confirm'));
       }
-    } catch (err: any) {
-      setError(err?.message || 'Une erreur est survenue. Merci de réessayer plus tard.');
+    } catch (err) {
+      setError(errorMessage(err, 'Une erreur est survenue. Merci de réessayer plus tard.'));
     } finally {
       setSubmitting(false);
     }

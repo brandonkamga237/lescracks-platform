@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { authService } from '@/services/auth';
+import type { Learner } from '@/services/api';
 import Layout from '@/components/layout/Layout';
 import {
   User,
@@ -38,7 +39,7 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('profile');
 
   // Learner profile state
-  const [learnerProfile, setLearnerProfile] = useState<any>(null);
+  const [learnerProfile, setLearnerProfile] = useState<Learner | null>(null);
   const [loadingLearner, setLoadingLearner] = useState(false);
   const [editingLearner, setEditingLearner] = useState(false);
   const [learnerData, setLearnerData] = useState({ bio: '', linkedinUrl: '', portfolioUrl: '' });
@@ -172,7 +173,7 @@ const Profile = () => {
       } else {
         setProfileError(response.message || 'Erreur lors de la mise a jour du profil');
       }
-    } catch (error) {
+    } catch {
       setProfileError('Une erreur est survenue');
     } finally {
       setSavingProfile(false);
@@ -205,7 +206,7 @@ const Profile = () => {
       } else {
         setPasswordError(response.message || 'Erreur lors du changement de mot de passe');
       }
-    } catch (error) {
+    } catch {
       setPasswordError('Une erreur est survenue');
     } finally {
       setChangingPassword(false);
@@ -227,7 +228,7 @@ const Profile = () => {
       } else {
         setPasswordError(response.message || 'Erreur lors de la suppression du compte');
       }
-    } catch (error) {
+    } catch {
       setPasswordError('Une erreur est survenue');
     } finally {
       setDeleting(false);

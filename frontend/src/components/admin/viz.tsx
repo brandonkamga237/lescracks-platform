@@ -4,6 +4,7 @@
 // checks PASS, worst adjacent-pair CVD ΔE 19.4 — well above the 12 target.
 // Order is FIXED and assigned by entity, never cycled or reassigned by rank.
 import React from 'react';
+import type { LucideIcon } from 'lucide-react';
 
 // ── Categorical palette (fixed order) ──────────────────────────────────────────
 export const CATEGORICAL = [
@@ -35,7 +36,15 @@ export const GRID = '#EEF0F2';
 export const AXIS_TICK = { fontSize: 11, fill: '#94A3B8' } as const;
 
 // ── Custom recharts tooltip (consistent, legible) ──────────────────────────────
-export const ChartTooltip = ({ active, payload, label, labelFormatter, valueSuffix = '' }: any) => {
+type ChartTooltipProps = {
+  active?: boolean;
+  payload?: { name?: string; value?: number | string; color?: string; fill?: string }[];
+  label?: string | number;
+  labelFormatter?: (label: string | number) => string;
+  valueSuffix?: string;
+};
+
+export const ChartTooltip = ({ active, payload, label, labelFormatter, valueSuffix = '' }: ChartTooltipProps) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg text-xs">
@@ -44,7 +53,7 @@ export const ChartTooltip = ({ active, payload, label, labelFormatter, valueSuff
           {labelFormatter ? labelFormatter(label) : label}
         </p>
       )}
-      {payload.map((p: any, i: number) => (
+      {payload.map((p, i) => (
         <div key={i} className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ background: p.color || p.fill }} />
           <span className="text-gray-500">{p.name}</span>
@@ -61,7 +70,7 @@ export const ChartTooltip = ({ active, payload, label, labelFormatter, valueSuff
 export const PageHeader = ({
   icon: Icon, title, subtitle, actions,
 }: {
-  icon?: any; title: string; subtitle?: string; actions?: React.ReactNode;
+  icon?: LucideIcon; title: string; subtitle?: string; actions?: React.ReactNode;
 }) => (
   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
     <div className="flex items-center gap-3 min-w-0">

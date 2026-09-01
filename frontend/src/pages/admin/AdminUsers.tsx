@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/admin/viz';
 const AdminUsers = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const PAGE_SIZE = 20;
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
@@ -20,7 +21,7 @@ const AdminUsers = () => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const data: PaginatedResponse<AdminUser> = await adminApi.getUsers(page, 20);
+        const data: PaginatedResponse<AdminUser> = await adminApi.getUsers(page, PAGE_SIZE);
         setUsers(data.content);
         setTotalPages(data.totalPages);
         setTotalElements(data.totalElements);
@@ -101,7 +102,7 @@ const AdminUsers = () => {
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden md:table-cell">ID</th>
+                  <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase w-12">#</th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">Username</th>
                   <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rôle</th>
@@ -111,9 +112,13 @@ const AdminUsers = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {users.map((user) => (
+                {users.map((user, index) => (
                   <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 hidden md:table-cell">{user.id}</td>
+                    {/* Position in the list, not the database id: a row number must not leak
+                        how many accounts exist or let anyone walk them by guessing. */}
+                    <td className="px-4 sm:px-6 py-4 text-sm text-gray-400 tabular-nums">
+                      {page * PAGE_SIZE + index + 1}
+                    </td>
                     <td className="px-4 sm:px-6 py-4 text-sm text-gray-900 max-w-[14rem] truncate">{user.email}</td>
                     <td className="px-4 sm:px-6 py-4 text-sm text-gray-600 hidden lg:table-cell">{user.username || '-'}</td>
                     <td className="px-4 sm:px-6 py-4">{getRoleBadge(user.roleName)}</td>

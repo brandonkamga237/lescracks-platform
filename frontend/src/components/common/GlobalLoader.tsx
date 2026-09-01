@@ -15,7 +15,7 @@ const GlobalLoader: React.FC<GlobalLoaderProps> = ({
   // Animation variants for dots
   const dotVariants = {
     initial: { scale: 0.8, opacity: 0.5 },
-    animate: (i: number) => ({
+    animate: () => ({
       scale: [0.8, 1.3, 0.8],
       opacity: [0.5, 1, 0.5],
       transition: {

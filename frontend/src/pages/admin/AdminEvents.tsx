@@ -2,10 +2,11 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Plus, Loader2, Trash2, Pencil, ChevronLeft, ChevronRight, X, Save, Image } from 'lucide-react';
 import { PageHeader } from '@/components/admin/viz';
-import adminApi, { AdminEvent, PaginatedResponse } from '@/services/adminApi';
+import adminApi, { AdminEvent, PaginatedResponse, AdminEventPayload } from '@/services/adminApi';
 import { deriveEventStatus } from '@/lib/eventStatus';
 import apiService from '@/services/api';
 
+import { errorMessage } from '@/lib/utils';
 interface EventType   { id: number; name: string; }
 interface EventStatus { id: number; name: string; }
 
@@ -136,8 +137,8 @@ const AdminEvents = () => {
     try {
       const url = await apiService.uploadImage(file);
       setForm(f => ({ ...f, coverImageUrl: url }));
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de l'upload de l'image");
+    } catch (err) {
+      setError(errorMessage(err, "Erreur lors de l'upload de l'image"));
     } finally { setUploading(false); }
   };
 
@@ -148,7 +149,7 @@ const AdminEvents = () => {
 
     setSaving(true); setError('');
     try {
-      const payload: any = {
+      const payload: AdminEventPayload = {
         title:               form.title,
         description:         form.description || undefined,
         eventDate:           toDateTime(form.startDate, form.startTime),
@@ -168,8 +169,8 @@ const AdminEvents = () => {
       }
       setShowModal(false);
       fetchEvents();
-    } catch (e: any) {
-      setError(e.message || 'Erreur lors de la sauvegarde.');
+    } catch (e) {
+      setError(errorMessage(e, 'Erreur lors de la sauvegarde.'));
     } finally { setSaving(false); }
   };
 

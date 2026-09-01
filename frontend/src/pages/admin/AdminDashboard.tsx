@@ -11,10 +11,11 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area,
 } from 'recharts';
-import adminApi from '@/services/adminApi';
+import adminApi, { DashboardStats, TopResource } from '@/services/adminApi';
 import { apiService } from '@/services/api';
 import { DEFAULT_360_CLOSED_MESSAGE } from '@/hooks/useProgrammeStatus';
 import { catColor, SEQUENTIAL, GRID, AXIS_TICK, ChartTooltip, Card } from '@/components/admin/viz';
+import type { LucideIcon } from 'lucide-react';
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 const fr = (n: number) => Number(n || 0).toLocaleString('fr-FR');
@@ -25,7 +26,7 @@ const pct = (curr: number, prev: number) =>
 const Kpi = ({
   title, value, icon: Icon, tint, link, trend, hint, spark,
 }: {
-  title: string; value: string | number; icon: any; tint: string;
+  title: string; value: string | number; icon: LucideIcon; tint: string;
   link?: string; trend?: number; hint?: string; spark?: { date: string; count: number }[];
 }) => {
   const inner = (
@@ -71,7 +72,7 @@ const Kpi = ({
 
 // ── Panel header ────────────────────────────────────────────────────────────────
 const PanelHead = ({ icon: Icon, title, subtitle, tint = 'text-gold', action }: {
-  icon: any; title: string; subtitle?: string; tint?: string; action?: React.ReactNode;
+  icon: LucideIcon; title: string; subtitle?: string; tint?: string; action?: React.ReactNode;
 }) => (
   <div className="flex items-start justify-between gap-3 mb-4">
     <div className="flex items-center gap-3 min-w-0">
@@ -102,7 +103,7 @@ const Meter = ({ label, value, total, color }: { label: string; value: number; t
 
 // ── Ranked resource row ─────────────────────────────────────────────────────────
 const TopRow = ({ rank, title, type, count, icon: Icon, tint }: {
-  rank: number; title: string; type: string; count: number; icon: any; tint: string;
+  rank: number; title: string; type?: string; count: number; icon: LucideIcon; tint: string;
 }) => (
   <div className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
     <span className="w-6 h-6 rounded-lg bg-gray-100 text-xs font-bold text-gray-500 flex items-center justify-center flex-shrink-0">{rank}</span>
@@ -226,7 +227,7 @@ const Programme360Control = () => {
 
 // ── Main ─────────────────────────────────────────────────────────────────────────
 const AdminDashboard = () => {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -246,7 +247,7 @@ const AdminDashboard = () => {
   const ROLE_LABEL: Record<string, string> = { ADMIN: 'Admins', PREMIUM: 'Premium', LEARNER: 'Apprenants', FREE: 'Gratuits' };
   const PROVIDER_LABEL: Record<string, string> = { LOCAL: 'Email', GOOGLE: 'Google', GITHUB: 'GitHub' };
   const EVENT_LABEL: Record<string, string> = { OUVERT: 'Ouvert', FERME: 'Fermé', A_VENIR: 'À venir' };
-  const entries = (o: any, lbl?: Record<string, string>) =>
+  const entries = (o: Record<string, number> | undefined, lbl?: Record<string, string>) =>
     o ? Object.entries(o).map(([name, value]) => ({ name: lbl?.[name] ?? name, value: Number(value) })) : [];
 
   const usersByRole = entries(stats?.usersByRole, ROLE_LABEL);
@@ -257,8 +258,8 @@ const AdminDashboard = () => {
   const applicationsByStatus = entries(stats?.applicationsByStatus);
   const premiumByStatus = entries(stats?.premiumRequestsByStatus);
   const dailyUsers: { date: string; count: number }[] = stats?.dailyNewUsers || [];
-  const topViewed: any[] = stats?.topViewedResources || [];
-  const topDownloaded: any[] = stats?.topDownloadedResources || [];
+  const topViewed: TopResource[] = stats?.topViewedResources || [];
+  const topDownloaded: TopResource[] = stats?.topDownloadedResources || [];
 
   const totalApps = applicationsByStatus.reduce((s, x) => s + x.value, 0);
   const totalPremiumReqs = stats?.totalPremiumRequests || 0;
@@ -324,7 +325,7 @@ const AdminDashboard = () => {
                   <XAxis dataKey="date" tickLine={false} axisLine={false} tick={AXIS_TICK} minTickGap={24}
                     tickFormatter={d => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} />
                   <YAxis tickLine={false} axisLine={false} tick={AXIS_TICK} allowDecimals={false} width={28} />
-                  <Tooltip content={<ChartTooltip labelFormatter={(d: string) => new Date(d).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' })} />} />
+                  <Tooltip content={<ChartTooltip labelFormatter={(d) => new Date(d).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' })} />} />
                   <Area type="monotone" dataKey="count" name="Inscriptions" stroke={SEQUENTIAL} strokeWidth={2} fill="url(#growth)" dot={false} activeDot={{ r: 4 }} />
                 </AreaChart>
               </ResponsiveContainer>
@@ -553,7 +554,7 @@ const AdminDashboard = () => {
         <Card className="p-4 sm:p-6">
           <PanelHead icon={Users} title="Derniers inscrits" tint="text-blue-500" />
           <div className="space-y-1 mt-1">
-            {stats?.recentUsers?.length ? stats.recentUsers.map((u: any) => (
+            {stats?.recentUsers?.length ? stats.recentUsers.map((u) => (
               <div key={u.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors">
                 <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0">
                   <span className="text-xs font-bold text-gold">{(u.username || u.email || '?').charAt(0).toUpperCase()}</span>
@@ -571,7 +572,7 @@ const AdminDashboard = () => {
         <Card className="p-4 sm:p-6">
           <PanelHead icon={FilePlus} title="Ressources récentes" />
           <div className="space-y-1 mt-1">
-            {stats?.recentResources?.length ? stats.recentResources.map((r: any) => (
+            {stats?.recentResources?.length ? stats.recentResources.map((r) => (
               <div key={r.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                   r.resourceTypeName?.toUpperCase() === 'VIDEO' ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'

@@ -41,7 +41,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
     
     // Custom query: Filter by resource type name (VIDEO or DOCUMENT)
     @Query("SELECT r FROM Resource r WHERE r.resourceType.name = :typeName")
-    Page<Resource> findByResourceTypeName(@Param("typeName") String typeName, Pageable pageable);
+    Page<Resource> findByResourceTypeName(@Param("typeName") ResourceTypeName typeName, Pageable pageable);
     
     // Custom query: Filter by category ID
     @Query("SELECT r FROM Resource r WHERE r.category.id = :categoryId")
@@ -54,14 +54,14 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
     // Custom query: Filter by resource type AND category
     @Query("SELECT r FROM Resource r WHERE r.resourceType.name = :typeName AND r.category.id = :categoryId")
     Page<Resource> findByTypeNameAndCategoryId(
-            @Param("typeName") String typeName, 
+            @Param("typeName") ResourceTypeName typeName, 
             @Param("categoryId") Long categoryId, 
             Pageable pageable);
     
     // Custom query: Filter by resource type AND tags (ANY tag)
     @Query("SELECT DISTINCT r FROM Resource r JOIN r.tags t WHERE r.resourceType.name = :typeName AND t.id IN :tagIds")
     Page<Resource> findByTypeNameAndTagsIn(
-            @Param("typeName") String typeName, 
+            @Param("typeName") ResourceTypeName typeName, 
             @Param("tagIds") List<Long> tagIds, 
             Pageable pageable);
     
@@ -75,7 +75,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
     // Custom query: Filter by resource type AND category AND tags (ANY tag)
     @Query("SELECT DISTINCT r FROM Resource r JOIN r.tags t WHERE r.resourceType.name = :typeName AND r.category.id = :categoryId AND t.id IN :tagIds")
     Page<Resource> findByTypeNameAndCategoryIdAndTagsIn(
-            @Param("typeName") String typeName, 
+            @Param("typeName") ResourceTypeName typeName, 
             @Param("categoryId") Long categoryId, 
             @Param("tagIds") List<Long> tagIds, 
             Pageable pageable);
@@ -91,7 +91,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
            "AND (:searchTerm IS NULL OR LOWER(r.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR LOWER(r.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
            "AND (:tagIds IS NULL OR t.id IN :tagIds)")
     Page<Resource> searchWithFilters(
-            @Param("typeName") String typeName,
+            @Param("typeName") ResourceTypeName typeName,
             @Param("categoryId") Long categoryId,
             @Param("searchTerm") String searchTerm,
             @Param("tagIds") List<Long> tagIds,
@@ -104,7 +104,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
            "AND (LOWER(r.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
            "  OR LOWER(r.description) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
     Page<Resource> searchByTermWithFilters(
-            @Param("typeName") String typeName,
+            @Param("typeName") ResourceTypeName typeName,
             @Param("categoryId") Long categoryId,
             @Param("searchTerm") String searchTerm,
             Pageable pageable);

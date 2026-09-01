@@ -231,7 +231,7 @@ const Landing = () => {
             </h2>
           </motion.div>
           <div className="grid md:grid-cols-3 gap-5">
-            {PAIN_POINTS.map((p, i) => {
+            {PAIN_POINTS.map((p) => {
               const Icon = p.icon;
               return (
                 <motion.div key={p.title}
@@ -323,7 +323,7 @@ const Landing = () => {
           <div className="relative">
             <div className="absolute left-[22px] top-8 bottom-8 w-px bg-gradient-to-b from-gold/40 via-gold/15 to-transparent hidden md:block" />
             <div className="space-y-5">
-              {PROCESS_STEPS.map((step, i) => (
+              {PROCESS_STEPS.map((step) => (
                 <motion.div key={step.num}
                   initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
                   className="flex gap-6">
@@ -416,7 +416,7 @@ const Landing = () => {
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-            {ACTIVITIES.map((a, i) => (
+            {ACTIVITIES.map((a) => (
               <motion.div key={a.type}
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
                 className="p-5 rounded-2xl border border-line-soft hover:border-gold/20 transition-colors">
@@ -432,15 +432,20 @@ const Landing = () => {
             <>
               <p className="text-xs text-t4 uppercase tracking-widest mb-5">Prochains événements</p>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {events.map((event, i) => (
+                {events.map((event) => (
                   <motion.div key={event.id}
                     initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}
                     className="p-4 border border-line-soft rounded-xl hover:border-line transition-colors">
                     <span className="text-[11px] text-gold/70 uppercase tracking-wider">{event.type}</span>
                     <h4 className="font-medium text-sm mt-1.5 mb-2 text-t1">{event.title}</h4>
                     <div className="flex items-center gap-1.5 text-xs text-t4">
-                      <Calendar className="w-3 h-3" />
-                      {new Date(event.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                      {/* startDate is optional: new Date(undefined) renders "Invalid Date". */}
+                      {event.startDate && (
+                        <>
+                          <Calendar className="w-3 h-3" />
+                          {new Date(event.startDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}
+                        </>
+                      )}
                       {event.location && <><span>·</span><MapPin className="w-3 h-3" />{event.location}</>}
                     </div>
                   </motion.div>
@@ -476,7 +481,7 @@ const Landing = () => {
             </motion.div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {showcasedLearners.slice(0, 8).map((l, i) => (
+              {showcasedLearners.slice(0, 8).map((l) => (
                 <motion.div
                   key={l.id}
                   initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0 }}

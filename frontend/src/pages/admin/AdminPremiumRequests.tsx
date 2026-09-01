@@ -7,6 +7,7 @@ import {
 import adminApi, { AdminPremiumRequest, PaginatedResponse } from '@/services/adminApi';
 import { PageHeader } from '@/components/admin/viz';
 
+import { errorMessage } from '@/lib/utils';
 const DURATION_OPTIONS = [1, 2, 3, 6, 12, 24];
 
 const AdminPremiumRequests = () => {
@@ -59,8 +60,8 @@ const AdminPremiumRequests = () => {
       setTotalElements((n) => n - 1);
       setAcceptTarget(null);
       refreshStats();
-    } catch (err: any) {
-      setAcceptError(err?.message || 'Une erreur est survenue');
+    } catch (err) {
+      setAcceptError(errorMessage(err, 'Une erreur est survenue'));
     } finally {
       setAccepting(false);
     }

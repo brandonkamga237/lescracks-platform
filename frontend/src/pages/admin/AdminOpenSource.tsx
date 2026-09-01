@@ -2,24 +2,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Save, X, Loader2, Star, GitFork, Code2, Eye, EyeOff, Upload } from 'lucide-react';
 import { PageHeader } from '@/components/admin/viz';
-import adminApi from '@/services/adminApi';
+import adminApi, { AdminOpenSourceProject as OsProject } from '@/services/adminApi';
 import apiService from '@/services/api';
 
-interface OsProject {
-  id: number;
-  name: string;
-  description: string;
-  repoUrl: string;
-  language: string;
-  logoUrl: string;
-  techStack: string;
-  stars: number;
-  forks: number;
-  featured: boolean;
-  featuredOrder: number;
-  visible: boolean;
-}
-
+import { errorMessage } from '@/lib/utils';
 const empty = (): Omit<OsProject, 'id'> => ({
   name: '', description: '', repoUrl: '', language: '', logoUrl: '',
   techStack: '', stars: 0, forks: 0, featured: false, featuredOrder: 0, visible: true,
@@ -67,7 +53,7 @@ const AdminOpenSource = () => {
     try {
       const url = await apiService.uploadImage(file);
       setForm(prev => ({ ...prev, logoUrl: url }));
-    } catch (err: any) { alert(err.message || 'Erreur upload logo'); }
+    } catch (err) { alert(errorMessage(err, 'Erreur upload logo')); }
     finally { setUploadingLogo(false); }
   };
 
@@ -84,7 +70,7 @@ const AdminOpenSource = () => {
         setProjects(ps => [created, ...ps]);
       }
       setShowModal(false);
-    } catch (err: any) { alert(err.message || 'Erreur lors de la sauvegarde'); }
+    } catch (err) { alert(errorMessage(err, 'Erreur lors de la sauvegarde')); }
     finally { setSaving(false); }
   };
 
@@ -93,7 +79,7 @@ const AdminOpenSource = () => {
     try {
       await adminApi.deleteOpenSourceProject(id);
       setProjects(ps => ps.filter(p => p.id !== id));
-    } catch (err: any) { alert(err.message || 'Erreur suppression'); }
+    } catch (err) { alert(errorMessage(err, 'Erreur suppression')); }
   };
 
   const toggleVisibility = async (p: OsProject) => {

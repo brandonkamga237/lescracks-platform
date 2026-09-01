@@ -3,6 +3,7 @@ package com.brandonkamga.lescracks.controller;
 import com.brandonkamga.lescracks.domain.*;
 import com.brandonkamga.lescracks.dto.ApiResponse;
 import com.brandonkamga.lescracks.repository.*;
+import com.brandonkamga.lescracks.service.interfaces.ResourceService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,7 @@ public class AdminController {
 
     private final UserRepository userRepository;
     private final ResourceRepository resourceRepository;
+    private final ResourceService resourceService;
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
@@ -37,8 +39,10 @@ public class AdminController {
             TagRepository tagRepository,
             RoleRepository roleRepository,
             ApplicationRepository applicationRepository,
-            PremiumRequestRepository premiumRequestRepository) {
+            PremiumRequestRepository premiumRequestRepository,
+            ResourceService resourceService) {
         this.userRepository = userRepository;
+        this.resourceService = resourceService;
         this.resourceRepository = resourceRepository;
         this.eventRepository = eventRepository;
         this.categoryRepository = categoryRepository;
@@ -380,10 +384,20 @@ public class AdminController {
     @GetMapping("/resources")
     public ResponseEntity<ApiResponse<Page<Map<String, Object>>>> getResources(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String search) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Resource> resources = resourceRepository.findAll(pageable);
-        
+        // Filtering server-side: the back office used to pull one page and filter it in the
+        // browser, so a search only ever looked at the rows already on screen.
+        Page<Resource> resources = resourceService.searchWithFilters(
+                type != null && !type.isBlank() ? type.toLowerCase(Locale.ROOT) : null,
+                categoryId,
+                null,
+                search != null && !search.isBlank() ? search : null,
+                pageable);
+
         Page<Map<String, Object>> response = resources.map(resource -> mapResourceToResponse(resource));
         return ResponseEntity.ok(ApiResponse.success(response));
     }
@@ -462,11 +476,21 @@ public class AdminController {
         }
         if (resource.getResourceType() != null) {
             map.put("resourceTypeId", resource.getResourceType().getId());
-            map.put("resourceTypeName", resource.getResourceType().getName().name());
+            map.put("resourceTypeName", resource.getResourceType().getName().name().toUpperCase(Locale.ROOT));
         } else {
             map.put("resourceTypeId", null);
             map.put("resourceTypeName", null);
         }
+        // The back office renders these columns; leaving them out made every view and
+        // download counter read zero.
+        map.put("viewCount", resource.getViewCount());
+        map.put("downloadCount", resource.getDownloadCount());
+        map.put("premium", resource.isPremium());
+        map.put("downloadable", resource.isDownloadable());
+        map.put("sourceType", resource.getSourceType() != null ? resource.getSourceType().name() : null);
+        map.put("previewImageUrl", resource.getPreviewImageUrl());
+        map.put("content", resource.getContent());
+        map.put("slug", resource.getSlug());
         return map;
     }
 

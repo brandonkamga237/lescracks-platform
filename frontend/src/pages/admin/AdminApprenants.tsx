@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/admin/viz';
 import adminApi, { AdminLearner, AdminLearnerRequest, LearnerStatus } from '@/services/adminApi';
 import apiService from '@/services/api';
 
+import { errorMessage } from '@/lib/utils';
 const STATUS_LABELS: Record<LearnerStatus, string> = {
   EN_COURS: 'En cours',
   TERMINE_AVEC_CERTIFICAT: 'Terminé · Certificat',
@@ -100,8 +101,8 @@ export default function AdminApprenants() {
       }
       setShowModal(false);
       fetchLearners();
-    } catch (e: any) {
-      setError(e.message || 'Erreur lors de la sauvegarde.');
+    } catch (e) {
+      setError(errorMessage(e, 'Erreur lors de la sauvegarde.'));
     } finally {
       setSaving(false);
     }
@@ -120,8 +121,8 @@ export default function AdminApprenants() {
     try {
       const url = await apiService.uploadImage(file);
       setForm(f => ({ ...f, photoUrl: url }));
-    } catch (err: any) {
-      setError(err.message || "Erreur upload photo");
+    } catch (err) {
+      setError(errorMessage(err, "Erreur upload photo"));
     } finally {
       setUploading(false);
     }

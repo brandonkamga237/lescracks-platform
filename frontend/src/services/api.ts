@@ -22,6 +22,10 @@ export interface Event {
   tags?: { id: number; name: string }[];
 }
 
+export type ResourceTypeName = 'VIDEO' | 'DOCUMENT' | 'ARTICLE';
+/** INLINE is an article written in the back office; its body is in `content`. */
+export type ResourceSourceType = 'EXTERNAL' | 'UPLOADED' | 'INLINE';
+
 export interface Resource {
   id: string;
   title: string;
@@ -32,19 +36,44 @@ export interface Resource {
   categoryId: number;
   categoryName: string;
   resourceTypeId: number;
-  resourceTypeName: 'VIDEO' | 'DOCUMENT';
-  sourceType: 'EXTERNAL' | 'UPLOADED';
+  resourceTypeName: ResourceTypeName;
+  sourceType: ResourceSourceType;
   premium: boolean;
   downloadable: boolean;
   viewCount: number;
   downloadCount: number;
   tags: { id: number; name: string }[];
   slug?: string;
+  /** Body of an ARTICLE; null when the caller may not read a premium resource. */
+  content?: string;
   metadata?: {
     fileSize?: number;
     mimeType?: string;
     originalFileName?: string;
+    readingTimeMinutes?: number;
+    author?: string;
   };
+}
+
+/** Mirrors ApplicationResponse: a 360 application, or an event sign-up when eventId is set. */
+export interface MyApplication {
+  id: number;
+  userId?: number;
+  username?: string;
+  eventId?: number;
+  eventTitle?: string;
+  applicationTypeId: number;
+  applicationTypeName: string;
+  eventRegistration: boolean;
+  archived: boolean;
+  archivedAt?: string;
+  fullName?: string;
+  emailAddress?: string;
+  whatsappNumber?: string;
+  age?: number;
+  motivationText?: string;
+  technicalLevel?: string;
+  createdAt: string;
 }
 
 export type LearnerStatus = 'EN_COURS' | 'TERMINE_AVEC_CERTIFICAT' | 'TERMINE_SANS_CERTIFICAT';
@@ -111,7 +140,7 @@ export interface PaginatedResponse<T> {
 
 // Resource filter options
 export interface ResourceFilters {
-  type?: 'VIDEO' | 'DOCUMENT';
+  type?: ResourceTypeName;
   categoryId?: number;
   tagIds?: number[];
   search?: string;
@@ -124,7 +153,7 @@ class ApiService {
   // Authentication rides on the HttpOnly cookie the backend sets, which the browser
   // attaches automatically — there is no token in JS to put in a header.
   // `includeAuth` is kept only to document which endpoints require a session.
-  private getHeaders(_includeAuth = false): Record<string, string> {
+  private getHeaders(): Record<string, string> {
     return {
       'Content-Type': 'application/json',
     };
@@ -133,14 +162,13 @@ class ApiService {
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
-    includeAuth = false
   ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
     const config: RequestInit = {
       ...options,
       credentials: 'include',
       headers: {
-        ...this.getHeaders(includeAuth),
+        ...this.getHeaders(),
         ...options.headers,
       },
     };
@@ -192,7 +220,7 @@ class ApiService {
    * Get paginated and filtered resources.
    * 
    * @param filters - Filter options:
-   *   - type: 'VIDEO' or 'DOCUMENT' to filter by resource type
+   *   - type: 'VIDEO', 'DOCUMENT' or 'ARTICLE' to filter by resource type
    *   - categoryId: number to filter by category
    *   - tagIds: number[] to filter by tags (resources with ANY of these tags)
    *   - search: string to search in title/description
@@ -239,7 +267,7 @@ class ApiService {
 
   /** Toggle: likes if not liked, unlikes if already liked. Returns the new state. */
   async toggleResourceLike(resourceId: string | number): Promise<ResourceLikes> {
-    return this.request<ResourceLikes>(`/resources/${resourceId}/likes`, { method: 'POST' }, true);
+    return this.request<ResourceLikes>(`/resources/${resourceId}/likes`, { method: 'POST' });
   }
 
   async getResourceComments(resourceId: string | number): Promise<ResourceComment[]> {
@@ -250,16 +278,14 @@ class ApiService {
   async addResourceComment(resourceId: string | number, content: string): Promise<ResourceComment> {
     return this.request<ResourceComment>(
       `/resources/${resourceId}/comments`,
-      { method: 'POST', body: JSON.stringify({ content }) },
-      true,
+      { method: 'POST', body: JSON.stringify({ content }) }
     );
   }
 
   async deleteResourceComment(resourceId: string | number, commentId: number): Promise<void> {
     await this.request<void>(
       `/resources/${resourceId}/comments/${commentId}`,
-      { method: 'DELETE' },
-      true,
+      { method: 'DELETE' }
     );
   }
 
@@ -292,8 +318,7 @@ class ApiService {
       {
         method: 'POST',
         body: JSON.stringify(payload),
-      },
-      false  // endpoint public — pas de token requis
+      }
     );
   }
 
@@ -320,8 +345,7 @@ class ApiService {
     Promise<{ open: boolean; message: string | null }> {
     return this.request<{ open: boolean; message: string | null }>(
       '/programme/status',
-      { method: 'PATCH', body: JSON.stringify(payload) },
-      true,
+      { method: 'PATCH', body: JSON.stringify(payload) }
     );
   }
 
@@ -359,8 +383,7 @@ class ApiService {
           applicationTypeId: registerType.id,
           ...payload,
         }),
-      },
-      false, // public — signing up for an event does not require an account
+      }
     );
   }
 
@@ -375,7 +398,7 @@ class ApiService {
 
   /** Increment download count and get authorised URL. */
   async trackResourceDownload(id: string): Promise<string> {
-    const data = await this.request<string>(`/resources/${id}/download`, { method: 'POST' }, true);
+    const data = await this.request<string>(`/resources/${id}/download`, { method: 'POST' });
     return data;
   }
 
@@ -422,25 +445,24 @@ class ApiService {
   }
 
   async getMyLearnerProfile(): Promise<Learner> {
-    return this.request<Learner>('/learners/me', { headers: this.getHeaders(true) });
+    return this.request<Learner>('/learners/me', { headers: this.getHeaders() });
   }
 
   async updateMyLearnerProfile(data: { bio?: string; linkedinUrl?: string; portfolioUrl?: string }): Promise<Learner> {
     return this.request<Learner>('/learners/me', {
       method: 'PUT',
-      headers: this.getHeaders(true),
+      headers: this.getHeaders(),
       body: JSON.stringify(data),
     });
   }
 
-  async getMyApplications(): Promise<any[]> {
+  async getMyApplications(): Promise<MyApplication[]> {
     const user = authService.getUser();
     if (!user) return [];
 
-    const data = await this.request<any[]>(
+    const data = await this.request<MyApplication[]>(
       `/applications/user/${user.id}`,
-      {},
-      true
+      {}
     );
     return Array.isArray(data) ? data : [];
   }

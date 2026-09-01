@@ -10,6 +10,7 @@ import { Heart, MessageSquare, Trash2, Loader2, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import apiService, { ResourceComment } from '@/services/api';
 
+import { errorMessage } from '@/lib/utils';
 interface Props {
   resourceId: string | number;
   /** Where to send someone who needs to log in, so they come back here afterwards. */
@@ -84,8 +85,8 @@ const ResourceEngagement = ({ resourceId, returnTo }: Props) => {
       const created = await apiService.addResourceComment(resourceId, content);
       setComments(prev => [created, ...prev]);
       setDraft('');
-    } catch (err: any) {
-      setError(err?.message || "Le commentaire n'a pas pu être publié.");
+    } catch (err) {
+      setError(errorMessage(err, "Le commentaire n'a pas pu être publié."));
     } finally {
       setPosting(false);
     }
