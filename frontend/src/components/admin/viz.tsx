@@ -35,7 +35,15 @@ export const GRID = '#EEF0F2';
 export const AXIS_TICK = { fontSize: 11, fill: '#94A3B8' } as const;
 
 // ── Custom recharts tooltip (consistent, legible) ──────────────────────────────
-export const ChartTooltip = ({ active, payload, label, labelFormatter, valueSuffix = '' }: any) => {
+type ChartTooltipProps = {
+  active?: boolean;
+  payload?: { name?: string; value?: number | string; color?: string }[];
+  label?: string | number;
+  labelFormatter?: (label: string | number) => string;
+  valueSuffix?: string;
+};
+
+export const ChartTooltip = ({ active, payload, label, labelFormatter, valueSuffix = '' }: ChartTooltipProps) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-lg text-xs">

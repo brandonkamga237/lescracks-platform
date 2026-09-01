@@ -324,7 +324,7 @@ const AdminDashboard = () => {
                   <XAxis dataKey="date" tickLine={false} axisLine={false} tick={AXIS_TICK} minTickGap={24}
                     tickFormatter={d => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} />
                   <YAxis tickLine={false} axisLine={false} tick={AXIS_TICK} allowDecimals={false} width={28} />
-                  <Tooltip content={<ChartTooltip labelFormatter={(d: string) => new Date(d).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' })} />} />
+                  <Tooltip content={<ChartTooltip labelFormatter={(d) => new Date(d).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' })} />} />
                   <Area type="monotone" dataKey="count" name="Inscriptions" stroke={SEQUENTIAL} strokeWidth={2} fill="url(#growth)" dot={false} activeDot={{ r: 4 }} />
                 </AreaChart>
               </ResponsiveContainer>
