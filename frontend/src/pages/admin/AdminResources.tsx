@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FileText, Plus, Loader2, Trash2, Eye, Video, File, ChevronLeft, ChevronRight, Search, Filter, X, Save, Youtube, Upload, Crown, Download, Pencil } from 'lucide-react';
 import { PageHeader } from '@/components/admin/viz';
-import adminApi, { AdminResource, AdminCategory, PaginatedResponse } from '@/services/adminApi';
+import adminApi, { AdminResource, AdminCategory, AdminResourcePayload, PaginatedResponse } from '@/services/adminApi';
 import apiService from '@/services/api';
 
 const AdminResources = () => {
@@ -32,6 +32,9 @@ const AdminResources = () => {
     sourceType: 'EXTERNAL' as 'EXTERNAL' | 'UPLOADED',
     isPremium: false,
     isDownloadable: true,
+    content: '',
+    author: '',
+    readingTimeMinutes: '',
   });
 
   // File upload state
@@ -41,11 +44,26 @@ const AdminResources = () => {
   const previewInputRef = useRef<HTMLInputElement>(null);
   const [uploadingPreview, setUploadingPreview] = useState(false);
 
-  // Resource types
-  const resourceTypes = [
-    { id: 1, name: 'VIDEO', label: 'Vidéo (YouTube)' },
-    { id: 2, name: 'DOCUMENT', label: 'Document (PDF)' },
-  ];
+  // Resource type ids are database rows: reading them avoids the drift a hardcoded
+  // list suffers the moment a type is added.
+  const [resourceTypes, setResourceTypes] = useState<{ id: number; name: string }[]>([]);
+
+  const TYPE_LABELS: Record<string, string> = {
+    VIDEO: 'Vidéo (YouTube ou fichier)',
+    DOCUMENT: 'Document (PDF, Word, …)',
+    ARTICLE: 'Article rédigé ici',
+  };
+
+  const selectedTypeName = resourceTypes
+    .find(t => t.id.toString() === formData.resourceTypeId)?.name?.toUpperCase() ?? '';
+  const isArticle = selectedTypeName === 'ARTICLE';
+  const isVideo = selectedTypeName === 'VIDEO';
+
+  useEffect(() => {
+    adminApi.getResourceTypes()
+      .then(setResourceTypes)
+      .catch(err => console.error('Error loading resource types:', err));
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -110,19 +128,22 @@ const AdminResources = () => {
 
   const openEditModal = (resource: AdminResource) => {
     setEditingResource(resource);
-    setUploadedFileName((resource as any).sourceType === 'UPLOADED' ? resource.url.split('/').pop() || '' : '');
+    setUploadedFileName(resource.sourceType === 'UPLOADED' ? resource.url?.split('/').pop() || '' : '');
     if (fileInputRef.current) fileInputRef.current.value = '';
     if (previewInputRef.current) previewInputRef.current.value = '';
     setFormData({
       title: resource.title,
       description: resource.description || '',
-      url: resource.url,
+      url: resource.url || '',
       previewImageUrl: resource.previewImageUrl || '',
       categoryId: resource.categoryId.toString(),
       resourceTypeId: resource.resourceTypeId.toString(),
-      sourceType: ((resource as any).sourceType || 'EXTERNAL') as 'EXTERNAL' | 'UPLOADED',
-      isPremium: (resource as any).premium || false,
-      isDownloadable: (resource as any).downloadable !== false,
+      sourceType: (resource.sourceType === 'UPLOADED' ? 'UPLOADED' : 'EXTERNAL') as 'EXTERNAL' | 'UPLOADED',
+      isPremium: resource.premium || false,
+      isDownloadable: resource.downloadable !== false,
+      content: resource.content || '',
+      author: '',
+      readingTimeMinutes: '',
     });
     setShowModal(true);
   };
@@ -138,10 +159,13 @@ const AdminResources = () => {
       url: '',
       previewImageUrl: '',
       categoryId: categories[0]?.id?.toString() || '',
-      resourceTypeId: '1',
+      resourceTypeId: resourceTypes[0]?.id?.toString() || '',
       sourceType: 'EXTERNAL',
       isPremium: false,
       isDownloadable: true,
+      content: '',
+      author: '',
+      readingTimeMinutes: '',
     });
     setShowModal(true);
   };
@@ -190,23 +214,38 @@ const AdminResources = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.url || !formData.categoryId || !formData.resourceTypeId) {
+    if (!formData.title || !formData.categoryId || !formData.resourceTypeId) {
       alert('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+    if (isArticle && !formData.content.trim()) {
+      alert("Le contenu de l'article est obligatoire");
+      return;
+    }
+    if (!isArticle && !formData.url) {
+      alert('Veuillez fournir une URL ou un fichier');
       return;
     }
 
     setSaving(true);
     try {
-      const data = {
+      const data: AdminResourcePayload = {
         title: formData.title,
         description: formData.description,
-        url: formData.url,
+        url: isArticle ? undefined : formData.url,
+        content: isArticle ? formData.content : undefined,
+        author: isArticle ? formData.author || undefined : undefined,
+        readingTimeMinutes: isArticle && formData.readingTimeMinutes
+          ? parseInt(formData.readingTimeMinutes)
+          : undefined,
         previewImageUrl: formData.previewImageUrl || undefined,
         categoryId: parseInt(formData.categoryId),
         resourceTypeId: parseInt(formData.resourceTypeId),
-        sourceType: formData.sourceType,
-        premium: formData.isPremium,
-        downloadable: formData.isDownloadable,
+        sourceType: isArticle ? 'INLINE' : formData.sourceType,
+        // The API forces a hosted video to premium; mirror it so the row does not
+        // display as free until the next reload.
+        premium: formData.isPremium || (isVideo && formData.sourceType === 'UPLOADED'),
+        downloadable: isArticle ? false : formData.isDownloadable,
       };
 
       if (editingResource) {
@@ -455,10 +494,12 @@ const AdminResources = () => {
                   required
                 >
                   {resourceTypes.map(type => (
-                    <option key={type.id} value={type.id}>{type.label}</option>
+                    <option key={type.id} value={type.id}>
+                      {TYPE_LABELS[type.name.toUpperCase()] ?? type.name}
+                    </option>
                   ))}
                 </select>
-                {formData.resourceTypeId === '1' && (
+                {isVideo && (
                   <p className="text-xs text-blue-600 mt-1">
                     <Youtube className="w-3 h-3 inline mr-1" />
                     Pour les vidéos:collez l'URL YouTube (ex: https://youtube.com/watch?v=xxx)
@@ -467,7 +508,7 @@ const AdminResources = () => {
               </div>
 
               {/* Source type — visible only for videos */}
-              {formData.resourceTypeId === '1' && (
+              {isVideo && (
                 <div>
                   <label className="block text-sm font-medium mb-2">Source de la vidéo *</label>
                   <div className="flex gap-3">
@@ -485,12 +526,52 @@ const AdminResources = () => {
                 </div>
               )}
 
-              <div>
+              {isArticle && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Contenu de l'article *</label>
+                    <textarea
+                      value={formData.content}
+                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                      placeholder={"# Titre\n\nÉcris ton article en Markdown."}
+                      rows={14}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-gold/50"
+                      required
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Markdown supporté. Aucune URL n'est nécessaire.</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Auteur</label>
+                      <input
+                        type="text"
+                        value={formData.author}
+                        onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                        placeholder="Brandon Kamga"
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Temps de lecture (min)</label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={formData.readingTimeMinutes}
+                        onChange={(e) => setFormData({ ...formData, readingTimeMinutes: e.target.value })}
+                        placeholder="8"
+                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/50"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className={isArticle ? 'hidden' : undefined}>
                 <label className="block text-sm font-medium mb-1">
                   {formData.sourceType === 'UPLOADED' ? 'Fichier *' : 'URL *'}
                 </label>
                 {/* VIDEO — EXTERNAL */}
-                {formData.resourceTypeId === '1' && formData.sourceType === 'EXTERNAL' && (
+                {isVideo && formData.sourceType === 'EXTERNAL' && (
                   <input type="url" value={formData.url}
                     onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                     placeholder="https://youtube.com/watch?v=..."
@@ -499,7 +580,7 @@ const AdminResources = () => {
                 )}
 
                 {/* VIDEO — UPLOADED or DOCUMENT — always upload */}
-                {(formData.resourceTypeId !== '1' || formData.sourceType === 'UPLOADED') && (
+                {!isArticle && (!isVideo || formData.sourceType === 'UPLOADED') && (
                   <div className="space-y-2">
                     <label
                       className="flex flex-col items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-gold transition-colors"
@@ -590,10 +671,10 @@ const AdminResources = () => {
                     onChange={(e) => setFormData({ ...formData, isPremium: e.target.checked })}
                     className="w-4 h-4 accent-yellow-500" />
                 </label>
-                {/* Downloading only makes sense for a document. A video is watched, not
-                    downloaded — the backend forces it non-downloadable regardless, so we
-                    hide the toggle rather than offer a switch that does nothing. */}
-                {formData.resourceTypeId !== '1' && (
+                {/* Downloading only makes sense for a document. A video is watched and an
+                    article is read in place — the backend forces both non-downloadable
+                    regardless, so we hide the toggle rather than offer a dead switch. */}
+                {!isVideo && !isArticle && (
                   <label className="flex items-center justify-between p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
                     <div className="flex items-center gap-2">
                       <Download className="w-4 h-4 text-blue-500" />

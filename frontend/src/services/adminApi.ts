@@ -314,6 +314,11 @@ class AdminApiService {
     return this.request<PaginatedResponse<AdminResource>>(`/admin/resources?page=${page}&size=${size}`);
   }
 
+  /** Type ids are database rows, not constants: always read them instead of hardcoding. */
+  async getResourceTypes(): Promise<{ id: number; name: string }[]> {
+    return this.request<{ id: number; name: string }[]>('/resources/types');
+  }
+
   async createResource(data: AdminResourcePayload): Promise<AdminResource> {
     return this.request<AdminResource>('/resources', {
       method: 'POST',

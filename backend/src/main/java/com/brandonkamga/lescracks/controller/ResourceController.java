@@ -43,9 +43,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -325,6 +327,21 @@ public class ResourceController {
         resource.setId(id);
         Resource savedResource = resourceService.save(resource);
         return ResponseEntity.ok(ApiResponse.success(toResponse(savedResource), "Resource updated successfully"));
+    }
+
+    @GetMapping("/types")
+    @Operation(summary = "Liste les types de ressource",
+               description = "Renvoie les types disponibles et leurs identifiants, que le back-office utilise pour construire son formulaire.")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getResourceTypes() {
+        List<Map<String, Object>> types = resourceTypeRepository.findAll().stream()
+                .map(type -> {
+                    Map<String, Object> entry = new HashMap<>();
+                    entry.put("id", type.getId());
+                    entry.put("name", type.getName().name().toUpperCase(Locale.ROOT));
+                    return entry;
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(ApiResponse.success(types));
     }
 
     // ── File upload ──────────────────────────────────────────────────────────────
