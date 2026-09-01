@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
@@ -43,4 +44,8 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
     @Modifying
     @Query("UPDATE Resource r SET r.viewCount = r.viewCount + 1 WHERE r.id = :id")
     void recordView(Long id);
+
+    /** Slugs only: a sitemap needs no rows, and this one grows with the catalogue. */
+    @Query("SELECT r.slug FROM Resource r WHERE r.published = TRUE ORDER BY r.slug")
+    List<String> findPublishedSlugs();
 }

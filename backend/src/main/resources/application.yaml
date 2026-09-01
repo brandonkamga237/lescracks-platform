@@ -3,115 +3,63 @@ spring:
     name: lescracks
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
-  config:
-    import: optional:classpath:application-${spring.profiles.active}.yml
-  main:
-    allow-circular-references: true
 
-  # Default datasource configuration (overridden by profile-specific files)
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:lescracks}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 20000
-      idle-timeout: 300000
-      max-lifetime: 1200000
 
-  # Flyway owns the schema in every environment. Hibernate only validates that the
-  # entities match it. Production already runs ddl-auto:validate, so without this a
-  # new entity field would simply refuse to start.
-  #
-  # baseline-on-migrate adopts the schema that already exists (V1 is the dump of it)
-  # and marks it as applied, so V1 never re-runs against a live database.
+  # Flyway owns the schema everywhere; Hibernate only checks the entities still match it.
+  # No baseline: the database is created by V1, never adopted from an existing one.
   flyway:
     enabled: true
-    baseline-on-migrate: true
-    baseline-version: 1
     locations: classpath:db/migration
 
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   security:
     oauth2:
       resourceserver:
         jwt:
-          # Keycloak signs; this verifies. The keys are fetched from the realm, so nothing
-          # secret lives in this file and rotating them needs no deployment.
+          # Keycloak signs, this verifies. Keys are fetched from the realm, so no secret
+          # lives in this file and rotating them needs no deployment.
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/lescracks}
-
-  mail:
-    host: ${MAIL_HOST:mail.spacemail.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:contact@lescracks.com}
-    password: ${MAIL_PASSWORD:}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          # Fail fast instead of hanging if the SMTP server is unreachable
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
-        debug: false
 
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: ${MAX_UPLOAD_SIZE:25MB}
+      max-request-size: ${MAX_UPLOAD_SIZE:25MB}
 
 app:
-  auth:
-    cookie:
-  frontend:
-    url: ${FRONTEND_URL:http://localhost:5173}
+  # Canonical origin used by the SEO snapshots and the sitemap.
+  site:
+    url: ${SITE_URL:http://localhost:5173}
+
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
 
-  uploads:
-    dir: ${UPLOADS_DIR:uploads/resources}
-    avatar-dir: ${AVATAR_DIR:uploads/avatars}
-
-  mail:
-    from: ${MAIL_FROM:LesCracks <contact@lescracks.com>}
-    admin: ${MAIL_ADMIN:contact@lescracks.com}
-    reset-token-expiry-minutes: 30
-
-  # MinIO Configuration
   minio:
     url: http://${MINIO_HOST:localhost}:${MINIO_PORT:9000}
     access-key: ${MINIO_ACCESS_KEY:minioadmin}
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
     bucket: ${MINIO_BUCKET:lescracks}
-    public-url: http://${MINIO_HOST:localhost}:${MINIO_PORT:9000}
 
-  # Swagger/OpenAPI Configuration
   swagger:
-    enabled: ${SWAGGER_ENABLED:true}
-    title: "LesCracks API"
-    version: "1.0.0"
-    description: "REST API for the LesCracks training platform — users, events, resources and programmes"
+    title: LesCracks API
+    version: 1.0.0
+    description: API de la plateforme LesCracks — événements, ressources, candidatures et attestations
 
-  # Admin bootstrap credentials — override via environment variables in all environments.
-  # Never commit real credentials here; these defaults are intentionally weak placeholders.
-  admin:
-    email: ${ADMIN_EMAIL:admin@lescracks.local}
-    initial-password: ${ADMIN_INITIAL_PASSWORD:ChangeMe@1234}
+server:
+  port: ${SERVER_PORT:8080}
 
 management:
-  health:
-    mail:
-      enabled: false   # Mail server unreachable doesn't mean the app is down
+  endpoints:
+    web:
+      exposure:
+        include: health

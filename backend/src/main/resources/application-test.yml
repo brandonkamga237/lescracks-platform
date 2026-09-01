@@ -1,53 +1,39 @@
+# Placeholder profile. The schema under test still needs deciding: the migrations are
+# PostgreSQL DDL with JSONB columns and partial unique indexes, none of which H2 can
+# represent, so a green test here would say nothing about the real database.
 spring:
-  # The migrations are PostgreSQL DDL; under H2 the schema comes from the entities instead.
   flyway:
     enabled: false
 
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
     username: sa
-    password: 
+    password:
     driver-class-name: org.h2.Driver
-    hikari:
-      maximum-pool-size: 5
-      minimum-idle: 2
-      connection-timeout: 10000
 
   jpa:
     hibernate:
       ddl-auto: create-drop
-    show-sql: false
     properties:
       hibernate:
-        format_sql: false
         dialect: org.hibernate.dialect.H2Dialect
 
-  h2:
-    console:
-      enabled: false
-
-  # MinIO Configuration for Test (mock/in-memory)
-  minio:
-    url: http://${MINIO_HOST:localhost}:${MINIO_PORT:9000}
-    access-key: ${MINIO_ACCESS_KEY:test}
-    secret-key: ${MINIO_SECRET_KEY:test}
-    bucket: ${MINIO_BUCKET:lescracks-test}
-    public-url: http://${MINIO_HOST:localhost}:${MINIO_PORT:9000}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/lescracks
 
 app:
-  jwt:
-    secret: ${JWT_SECRET:test-secret-key-for-testing-only-256-bits}
-    expiration: ${JWT_EXPIRATION:3600000}
-  frontend:
-    url: ${FRONTEND_URL:http://localhost:3000}
   cors:
-    allowed-origins: ${CORS_ORIGINS:http://localhost:3000}
-
-server:
-  port: ${SERVER_PORT:8080}
+    allowed-origins: http://localhost:5173
+  minio:
+    url: http://localhost:9000
+    access-key: test
+    secret-key: test
+    bucket: lescracks-test
 
 logging:
   level:
-    com.brandonkamga.lescracks: INFO
     org.springframework: WARN
     org.hibernate: WARN

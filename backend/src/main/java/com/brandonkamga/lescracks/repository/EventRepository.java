@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
@@ -34,4 +35,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             ORDER BY e.startsAt ASC
             """)
     Page<Event> findUpcoming(Instant now, EventKind kind, Pageable pageable);
+
+    /** Slugs only: a sitemap needs no rows, and this one grows with the catalogue. */
+    @Query("SELECT r.slug FROM Event r WHERE r.published = TRUE ORDER BY r.slug")
+    List<String> findPublishedSlugs();
 }

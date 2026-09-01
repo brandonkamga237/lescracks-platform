@@ -1,3 +1,4 @@
+# Nothing here has a default: production refuses to start rather than run on a dev value.
 spring:
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}
@@ -5,63 +6,47 @@ spring:
     password: ${DB_PASSWORD}
     hikari:
       maximum-pool-size: 20
-      minimum-idle: 10
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
+      minimum-idle: 5
 
   jpa:
-    hibernate:
-      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
         format_sql: false
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           batch_size: 20
         order_inserts: true
         order_updates: true
 
-  servlet:
-    multipart:
-      max-file-size: 50MB
-      max-request-size: 50MB
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
 
-  web:
-    error:
-      include-message: never
-      include-stacktrace: never
+# The API surface is not public documentation. Setting these off is what actually removes
+# the routes; the old app.swagger.enabled flag was read by nobody.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
 
 app:
-  # Object storage, read by MinioStorageService
+  site:
+    url: ${SITE_URL}
+  cors:
+    allowed-origins: ${CORS_ORIGINS}
   minio:
     url: ${MINIO_ENDPOINT}
     access-key: ${MINIO_ACCESS_KEY}
     secret-key: ${MINIO_SECRET_KEY}
     bucket: ${MINIO_BUCKET}
-    public-url: ${MINIO_PUBLIC_URL}
-  auth:
-    cookie:
-      # Production is https-only: the auth cookie must never travel over plain http.
-      secure: true
-  jwt:
-    secret: ${JWT_SECRET}
-    # Access-token lifetime, 24h by default to match dev (no refresh-token flow yet).
-    # Override with JWT_EXPIRATION (ms) if a shorter prod session is required.
-    expiration: ${JWT_EXPIRATION:86400000}
-  frontend:
-    url: ${APP_URL}
-  cors:
-    allowed-origins: ${CORS_ORIGINS}
-  swagger:
-    enabled: false
 
 server:
-  port: ${SERVER_PORT:8080}
   compression:
     enabled: true
-  # Trust X-Forwarded-Proto from Traefik/Nginx so Spring generates https:// redirect URIs
+  # Traefik terminates TLS, so Spring must read X-Forwarded-* to build https:// URLs.
   forward-headers-strategy: native
 
 logging:
@@ -69,7 +54,3 @@ logging:
     com.brandonkamga.lescracks: INFO
     org.springframework: WARN
     org.hibernate: WARN
-  file:
-    name: /var/log/lescracks/application.log
-    max-size: 10MB
-    max-history: 30

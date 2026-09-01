@@ -43,6 +43,11 @@ public class SecurityConfig {
                 .requestMatchers("/seo/**", "/api/sitemap.xml").permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
 
+                // Admin routes live under each domain, not under one /api/admin tree. Every
+                // one of them also carries @PreAuthorize; this matcher is the second lock,
+                // so a method someone forgets to annotate is still not an open door.
+                .requestMatchers("/api/*/admin", "/api/*/admin/**").hasRole("ADMIN")
+
                 // Anyone may read the catalogue and check an attestation. Reading is what
                 // brings people in; asking them to sign up first is what keeps them out.
                 .requestMatchers(HttpMethod.GET, "/api/events", "/api/events/*").permitAll()
@@ -53,7 +58,6 @@ public class SecurityConfig {
                 // Applying does not require an account: people apply first and register after.
                 .requestMatchers(HttpMethod.POST, "/api/applications").permitAll()
 
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(roleConverter)));
 
