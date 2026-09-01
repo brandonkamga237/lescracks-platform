@@ -3,6 +3,7 @@ package com.brandonkamga.lescracks.service.impl;
 import com.brandonkamga.lescracks.domain.Resource;
 import com.brandonkamga.lescracks.repository.ResourceRepository;
 import com.brandonkamga.lescracks.service.interfaces.ResourceService;
+import com.brandonkamga.lescracks.domain.ResourceTypeName;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -67,7 +69,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     @Transactional(readOnly = true)
     public Page<Resource> findByResourceTypeName(String typeName, Pageable page) {
-        return resourceRepository.findByResourceTypeName(typeName, page);
+        return resourceRepository.findByResourceTypeName(toTypeName(typeName), page);
     }
 
     @Override
@@ -82,7 +84,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     @Transactional(readOnly = true)
     public Page<Resource> findByTypeNameAndCategoryId(String typeName, Long categoryId, Pageable page) {
-        return resourceRepository.findByTypeNameAndCategoryId(typeName, categoryId, page);
+        return resourceRepository.findByTypeNameAndCategoryId(toTypeName(typeName), categoryId, page);
     }
 
     @Override
@@ -91,7 +93,7 @@ public class ResourceServiceImpl implements ResourceService {
         if (tagIds == null || tagIds.isEmpty()) {
             return Page.empty(page);
         }
-        return resourceRepository.findByTypeNameAndTagsIn(typeName, tagIds, page);
+        return resourceRepository.findByTypeNameAndTagsIn(toTypeName(typeName), tagIds, page);
     }
 
     @Override
@@ -109,13 +111,37 @@ public class ResourceServiceImpl implements ResourceService {
         if (tagIds == null || tagIds.isEmpty()) {
             return Page.empty(page);
         }
-        return resourceRepository.findByTypeNameAndCategoryIdAndTagsIn(typeName, categoryId, tagIds, page);
+        return resourceRepository.findByTypeNameAndCategoryIdAndTagsIn(toTypeName(typeName), categoryId, tagIds, page);
+    }
+
+    /**
+     * The queries bind :typeName against an enum column, so a raw String is rejected by
+     * Hibernate and every type filter answered with a 500. Callers still pass a String,
+     * which is converted here; an unknown value yields no match rather than an error.
+     */
+    private ResourceTypeName toTypeName(String typeName) {
+        if (typeName == null || typeName.isBlank()) {
+            return null;
+        }
+        try {
+            return ResourceTypeName.valueOf(typeName.toLowerCase(Locale.ROOT));
+        } catch (IllegalArgumentException unknownType) {
+            return null;
+        }
+    }
+
+    private boolean isKnownType(String typeName) {
+        return typeName != null && !typeName.isBlank() && toTypeName(typeName) != null;
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<Resource> searchWithFilters(String typeName, Long categoryId, List<Long> tagIds, String searchTerm, Pageable page) {
-        boolean hasType = typeName != null && !typeName.isEmpty();
+        // An unrecognised type must not silently widen the result set to everything.
+        if (typeName != null && !typeName.isBlank() && !isKnownType(typeName)) {
+            return Page.empty(page);
+        }
+        boolean hasType = isKnownType(typeName);
         boolean hasCategory = categoryId != null;
         boolean hasTags = tagIds != null && !tagIds.isEmpty();
         boolean hasSearch = searchTerm != null && !searchTerm.isEmpty();
@@ -127,20 +153,20 @@ public class ResourceServiceImpl implements ResourceService {
         // When tags are involved or a text search is combined with tags, use the unified query
         // (tagIds is guaranteed non-null when hasTags=true, avoiding Hibernate null collection issue)
         if (hasTags) {
-            return resourceRepository.searchWithFilters(typeName, categoryId, searchTerm, tagIds, page);
+            return resourceRepository.searchWithFilters(toTypeName(typeName), categoryId, searchTerm, tagIds, page);
         }
 
         // Text search without tags — use a dedicated query that avoids the IN(:tagIds) problem
         if (hasSearch) {
-            return resourceRepository.searchByTermWithFilters(typeName, categoryId, searchTerm, page);
+            return resourceRepository.searchByTermWithFilters(toTypeName(typeName), categoryId, searchTerm, page);
         }
 
         // Simple filters: type and/or category only — use specific efficient methods
         if (hasType && hasCategory) {
-            return resourceRepository.findByTypeNameAndCategoryId(typeName, categoryId, page);
+            return resourceRepository.findByTypeNameAndCategoryId(toTypeName(typeName), categoryId, page);
         }
         if (hasType) {
-            return resourceRepository.findByResourceTypeName(typeName, page);
+            return resourceRepository.findByResourceTypeName(toTypeName(typeName), page);
         }
         if (hasCategory) {
             return resourceRepository.findByCategoryIdWithPagination(categoryId, page);
