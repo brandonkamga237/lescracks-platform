@@ -15,8 +15,6 @@ import {
   ChevronRight,
   LogOut,
   Shield,
-  Code2,
-  UserCheck,
   GraduationCap,
   Menu,
   X,
@@ -34,13 +32,11 @@ const menuItems = [
   { path: '/admin/tags', label: 'Tags', icon: Tags, group: 'content' },
   { path: '/admin/resources', label: 'Ressources', icon: FileText, group: 'content' },
   { path: '/admin/events', label: 'Événements', icon: Calendar, group: 'content' },
-  { path: '/admin/open-source', label: 'Projets OS', icon: Code2, group: 'opensource' },
-  { path: '/admin/contributors', label: 'Contributeurs', icon: UserCheck, group: 'opensource' },
   { path: '/admin/apprenants', label: 'Apprenants', icon: GraduationCap, group: 'apprenants' },
 ];
 
 const groupLabel = (g: string) =>
-  g === 'content' ? 'Contenu' : g === 'opensource' ? 'Open Source' : g === 'apprenants' ? 'Communauté' : '';
+  g === 'content' ? 'Contenu' : g === 'apprenants' ? 'Communauté' : '';
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const { user, logout } = useAuth();

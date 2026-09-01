@@ -54,37 +54,6 @@ export interface AdminResource {
  * the body of an article (INLINE). The backend rejects a payload that has neither.
  */
 
-/** Mirrors OpenSourceProjectResponse. */
-export interface AdminOpenSourceProject {
-  id: number;
-  name: string;
-  description: string;
-  repoUrl: string;
-  language: string;
-  logoUrl: string;
-  techStack: string;
-  stars: number;
-  forks: number;
-  featured: boolean;
-  featuredOrder: number;
-  visible: boolean;
-}
-
-/** Mirrors ContributorResponse. */
-export interface AdminContributor {
-  id: number;
-  name: string;
-  description: string;
-  photoUrl: string;
-  githubUrl: string;
-  linkedinUrl: string;
-  websiteUrl: string;
-  twitterUrl: string;
-  contributedProjects: string[];
-  displayOrder: number;
-  visible: boolean;
-}
-
 /** A row of the dashboard's most-viewed / most-downloaded lists. */
 export interface TopResource {
   id: number;
@@ -436,40 +405,6 @@ class AdminApiService {
 
   async deleteEvent(id: number): Promise<void> {
     await this.request<void>(`/admin/events/${id}`, { method: 'DELETE' });
-  }
-
-  // === OPEN SOURCE PROJECTS ===
-  async getOpenSourceProjects(): Promise<AdminOpenSourceProject[]> {
-    return this.request<AdminOpenSourceProject[]>('/open-source/admin/projects');
-  }
-
-  async createOpenSourceProject(data: object): Promise<AdminOpenSourceProject> {
-    return this.request<AdminOpenSourceProject>('/open-source/admin/projects', { method: 'POST', body: JSON.stringify(data) });
-  }
-
-  async updateOpenSourceProject(id: number, data: object): Promise<AdminOpenSourceProject> {
-    return this.request<AdminOpenSourceProject>(`/open-source/admin/projects/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-  }
-
-  async deleteOpenSourceProject(id: number): Promise<void> {
-    await this.request<void>(`/open-source/admin/projects/${id}`, { method: 'DELETE' });
-  }
-
-  // === CONTRIBUTORS ===
-  async getContributors(): Promise<AdminContributor[]> {
-    return this.request<AdminContributor[]>('/open-source/admin/contributors');
-  }
-
-  async createContributor(data: object): Promise<AdminContributor> {
-    return this.request<AdminContributor>('/open-source/admin/contributors', { method: 'POST', body: JSON.stringify(data) });
-  }
-
-  async updateContributor(id: number, data: object): Promise<AdminContributor> {
-    return this.request<AdminContributor>(`/open-source/admin/contributors/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-  }
-
-  async deleteContributor(id: number): Promise<void> {
-    await this.request<void>(`/open-source/admin/contributors/${id}`, { method: 'DELETE' });
   }
 
   // === LEARNERS ===

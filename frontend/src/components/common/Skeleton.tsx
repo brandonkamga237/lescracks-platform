@@ -52,7 +52,7 @@ export const CardSkeletonGrid = ({ count = 6 }: { count?: number }) => (
   </div>
 );
 
-/** Placeholder for a list of people (learners, contributors). */
+/** Placeholder for a list of people. */
 export const PersonSkeletonGrid = ({ count = 6 }: { count?: number }) => (
   <div
     className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
