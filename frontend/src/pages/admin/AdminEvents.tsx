@@ -37,14 +37,14 @@ const EMPTY: EventForm = {
 
 const STATUS_LABELS: Record<string, string> = { open: 'Ouvert', upcoming: 'À venir', closed: 'Fermé' };
 const STATUS_COLORS: Record<string, string> = {
-  open:     'bg-green-100 text-green-700',
-  upcoming: 'bg-blue-100 text-blue-700',
-  closed:   'bg-gray-100 text-gray-600',
+  open:     'bg-success-subtle text-success',
+  upcoming: 'bg-info-subtle text-info',
+  closed:   'bg-surface-2 text-t3',
 };
 const TYPE_COLORS: Record<string, string> = {
-  BOOTCAMP:  'bg-purple-100 text-purple-700',
+  BOOTCAMP:  'bg-info-subtle text-info',
   HACKATHON: 'bg-pink-100 text-pink-700',
-  MEETUP:    'bg-blue-100 text-blue-700',
+  MEETUP:    'bg-info-subtle text-info',
   WORKSHOP:  'bg-yellow-100 text-yellow-700',
 };
 
@@ -209,54 +209,54 @@ const AdminEvents = () => {
         } />
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+      <div className="bg-surface-1 rounded-2xl border border-line overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <Loader2 className="w-8 h-8 animate-spin text-gold" />
           </div>
         ) : events.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-gray-400 gap-3">
+          <div className="flex flex-col items-center justify-center h-64 text-t4 gap-3">
             <Calendar className="w-12 h-12 opacity-30" />
             <p>Aucun événement. Créez-en un !</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-surface-2 border-b border-line">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Titre</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Type</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Statut</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Dates</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-t3 uppercase">Titre</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-t3 uppercase">Type</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-t3 uppercase">Statut</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-t3 uppercase">Dates</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-t3 uppercase">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-line-soft">
                 {events.map(ev => (
-                  <tr key={ev.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={ev.id} className="hover:bg-surface-2 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         {ev.coverImageUrl ? (
                           <img src={ev.coverImageUrl} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
                         ) : (
-                          <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                            <Image className="w-5 h-5 text-gray-300" />
+                          <div className="w-10 h-10 rounded-lg bg-surface-2 flex items-center justify-center flex-shrink-0">
+                            <Image className="w-5 h-5 text-t4" />
                           </div>
                         )}
-                        <span className="font-medium text-gray-900">{ev.title}</span>
+                        <span className="font-medium text-t1">{ev.title}</span>
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${TYPE_COLORS[ev.type] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${TYPE_COLORS[ev.type] ?? 'bg-surface-2 text-t3'}`}>
                         {ev.type}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${STATUS_COLORS[ev.status] ?? 'bg-gray-100 text-gray-600'}`}>
+                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${STATUS_COLORS[ev.status] ?? 'bg-surface-2 text-t3'}`}>
                         {STATUS_LABELS[ev.status] ?? ev.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs">
+                    <td className="px-4 py-3 text-t3 text-xs">
                       {formatDate(ev.startDate)}
                       {ev.endDate && <> → {formatDate(ev.endDate)}</>}
                     </td>
@@ -267,7 +267,7 @@ const AdminEvents = () => {
                           <Pencil className="w-4 h-4" />
                         </button>
                         <button onClick={() => handleDelete(ev.id)}
-                          className="p-1.5 rounded-lg text-red-400 hover:bg-red-50 transition-colors" title="Supprimer">
+                          className="p-1.5 rounded-lg text-error hover:bg-error-subtle transition-colors" title="Supprimer">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -284,12 +284,12 @@ const AdminEvents = () => {
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-4">
           <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
-            className="p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50">
+            className="p-2 rounded-lg bg-surface-1 border border-line hover:bg-surface-2 disabled:opacity-50">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <span className="text-sm text-gray-600">Page {page + 1} sur {totalPages}</span>
+          <span className="text-sm text-t3">Page {page + 1} sur {totalPages}</span>
           <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page === totalPages - 1}
-            className="p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-50">
+            className="p-2 rounded-lg bg-surface-1 border border-line hover:bg-surface-2 disabled:opacity-50">
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
@@ -298,40 +298,40 @@ const AdminEvents = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-xl shadow-2xl max-h-[92vh] overflow-y-auto">
+          <div className="bg-surface-1 rounded-2xl w-full max-w-xl border border-line max-h-[92vh] overflow-y-auto">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
-              <h2 className="text-lg font-bold text-gray-900">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-line sticky top-0 bg-surface-1 z-10">
+              <h2 className="text-lg font-bold text-t1">
                 {editing ? "Modifier l'événement" : 'Nouvel événement'}
               </h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setShowModal(false)} className="text-t4 hover:text-t1">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="px-6 py-5 space-y-5">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">{error}</div>
+                <div className="bg-error-subtle border border-red-200 text-error text-sm rounded-lg px-4 py-3">{error}</div>
               )}
 
               {/* Cover image */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Image de couverture</label>
+                <label className="block text-sm font-medium text-t2 mb-2">Image de couverture</label>
                 <div className="flex items-start gap-4">
                   {form.coverImageUrl ? (
                     <div className="relative flex-shrink-0">
-                      <img src={form.coverImageUrl} alt="" className="w-24 h-16 object-cover rounded-lg border border-gray-200" />
+                      <img src={form.coverImageUrl} alt="" className="w-24 h-16 object-cover rounded-lg border border-line" />
                       <button
                         onClick={() => setForm(f => ({ ...f, coverImageUrl: '' }))}
                         className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
                       >×</button>
                     </div>
                   ) : (
-                    <div className="w-24 h-16 rounded-lg bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0">
-                      <Image className="w-6 h-6 text-gray-300" />
+                    <div className="w-24 h-16 rounded-lg bg-surface-2 border-2 border-dashed border-line flex items-center justify-center flex-shrink-0">
+                      <Image className="w-6 h-6 text-t4" />
                     </div>
                   )}
-                  <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-3 py-2 rounded-lg transition-colors flex items-center gap-2">
+                  <label className="cursor-pointer bg-surface-2 hover:bg-surface-3 text-t2 text-sm px-3 py-2 rounded-lg transition-colors flex items-center gap-2">
                     {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Image className="w-4 h-4" />}
                     {uploading ? 'Upload...' : 'Choisir une image'}
                     <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
@@ -341,31 +341,31 @@ const AdminEvents = () => {
 
               {/* Titre */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Titre *</label>
+                <label className="block text-sm font-medium text-t2 mb-1">Titre *</label>
                 <input type="text" value={form.title} onChange={set('title')}
                   placeholder="Ex : Hackathon IA Yaoundé 2025"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none" />
+                  className="w-full border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none" />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-t2 mb-1">Description</label>
                 <textarea value={form.description} onChange={set('description')} rows={3}
                   placeholder="Décrivez l'événement..."
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none resize-none" />
+                  className="w-full border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none resize-none" />
               </div>
 
               {/* Date début */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date de début *</label>
+                <label className="block text-sm font-medium text-t2 mb-1">Date de début *</label>
                 <div className="grid grid-cols-2 gap-3">
                   <input type="date" value={form.startDate} onChange={set('startDate')}
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none" />
+                    className="border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none" />
                   <div className="relative">
                     <input type="time" value={form.startTime} onChange={set('startTime')}
                       placeholder="Heure (optionnelle)"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none" />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+                      className="w-full border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-t4 pointer-events-none">
                       {form.startTime ? '' : 'optionnel'}
                     </span>
                   </div>
@@ -374,34 +374,34 @@ const AdminEvents = () => {
 
               {/* Date fin */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date de fin <span className="text-gray-400 font-normal">(optionnelle — pour une plage)</span>
+                <label className="block text-sm font-medium text-t2 mb-1">
+                  Date de fin <span className="text-t4 font-normal">(optionnelle — pour une plage)</span>
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <input type="date" value={form.endDate} onChange={set('endDate')}
                     min={form.startDate || undefined}
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none" />
+                    className="border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none" />
                   <input type="time" value={form.endTime} onChange={set('endTime')} disabled={!form.endDate}
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none disabled:opacity-40" />
+                    className="border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none disabled:opacity-40" />
                 </div>
               </div>
 
               {/* Lieu */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Lieu <span className="text-gray-400 font-normal">(optionnel)</span>
+                <label className="block text-sm font-medium text-t2 mb-1">
+                  Lieu <span className="text-t4 font-normal">(optionnel)</span>
                 </label>
                 <input type="text" value={form.location} onChange={set('location')}
                   placeholder="Ex : Yaoundé / En ligne / ESSTIC"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none" />
+                  className="w-full border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none" />
               </div>
 
               {/* Type + Statut (calculé) */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+                  <label className="block text-sm font-medium text-t2 mb-1">Type *</label>
                   <select value={form.eventTypeId} onChange={set('eventTypeId')} disabled={!metaLoaded}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none">
+                    className="w-full border border-line rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none">
                     <option value="">— Choisir —</option>
                     {eventTypes.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                   </select>
@@ -409,15 +409,15 @@ const AdminEvents = () => {
                 <div>
                   {/* The status used to be picked by hand, which meant it was right on the day
                       you set it and wrong the morning after. It now follows the dates. */}
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
-                  <div className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-sm text-gray-600 flex items-center gap-2">
+                  <label className="block text-sm font-medium text-t2 mb-1">Statut</label>
+                  <div className="w-full border border-line bg-surface-2 rounded-lg px-3 py-2 text-sm text-t3 flex items-center gap-2">
                     <span className={`w-2 h-2 rounded-full ${
                       derivedStatus === 'open' ? 'bg-emerald-500'
-                      : derivedStatus === 'upcoming' ? 'bg-sky-500' : 'bg-gray-400'}`} />
+                      : derivedStatus === 'upcoming' ? 'bg-sky-500' : 'bg-t4'}`} />
                     {STATUS_LABELS[derivedStatus] ?? derivedStatus}
-                    <span className="ml-auto text-xs text-gray-400">automatique</span>
+                    <span className="ml-auto text-xs text-t4">automatique</span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-t3 mt-1">
                     Déduit des dates. L'événement s'ouvre et se ferme tout seul.
                   </p>
                 </div>
@@ -425,7 +425,7 @@ const AdminEvents = () => {
 
               {/* Places */}
               <div>
-                <label htmlFor="ev-max" className="block text-sm font-medium text-gray-700 mb-1.5">
+                <label htmlFor="ev-max" className="block text-sm font-medium text-t2 mb-1.5">
                   Nombre de places
                 </label>
                 <input
@@ -438,9 +438,9 @@ const AdminEvents = () => {
                     maxParticipants: e.target.value === '' ? '' : Number(e.target.value),
                   }))}
                   placeholder="Laisser vide = illimité"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+                  className="w-full px-3 py-2 border border-line rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-t3 mt-1">
                   Quand les places sont prises, la page affiche « Complet » et l'inscription se ferme.
                 </p>
               </div>
@@ -450,14 +450,14 @@ const AdminEvents = () => {
                 <input type="checkbox" checked={form.applicationRequired}
                   onChange={e => setForm(f => ({ ...f, applicationRequired: e.target.checked }))}
                   className="w-4 h-4 accent-gold" />
-                <span className="text-sm text-gray-700">Candidature requise pour participer</span>
+                <span className="text-sm text-t2">Candidature requise pour participer</span>
               </label>
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 sticky bottom-0 bg-white">
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-line sticky bottom-0 bg-surface-1">
               <button onClick={() => setShowModal(false)}
-                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg transition-colors">
+                className="px-4 py-2 text-sm text-t3 hover:text-t1 border border-line rounded-lg transition-colors">
                 Annuler
               </button>
               <button onClick={handleSave} disabled={saving}

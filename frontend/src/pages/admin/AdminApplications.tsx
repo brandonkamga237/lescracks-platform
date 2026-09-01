@@ -108,7 +108,7 @@ const AdminApplications = () => {
 
       {/* Stream switch — 360 and events are separate registries. */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1">
+        <div className="inline-flex rounded-lg border border-line bg-surface-1 p-1">
           {([
             { key: '360' as const,    label: 'Accompagnement 360', icon: Compass, n: activeCount(stream360) },
             { key: 'events' as const, label: 'Inscriptions événements', icon: Ticket, n: activeCount(streamEvents) },
@@ -119,7 +119,7 @@ const AdminApplications = () => {
                 key={t.key}
                 onClick={() => { setStream(t.key); setEventFilter('all'); setShowArchived(false); }}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  stream === t.key ? 'bg-gold text-black' : 'text-gray-600 hover:bg-gray-50'
+                  stream === t.key ? 'bg-gold text-black' : 'text-t3 hover:bg-surface-2'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -134,7 +134,7 @@ const AdminApplications = () => {
           <select
             value={String(eventFilter)}
             onChange={e => setEventFilter(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-            className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
+            className="border border-line rounded-lg px-3 py-1.5 text-sm text-t2 focus:ring-2 focus:ring-gold/30 focus:border-gold outline-none"
           >
             <option value="all">Tous les événements</option>
             {eventsInStream.map(([id, title]) => (
@@ -144,7 +144,7 @@ const AdminApplications = () => {
         )}
 
         {archivedInStream > 0 && (
-          <label className="inline-flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none ml-auto">
+          <label className="inline-flex items-center gap-2 text-sm text-t3 cursor-pointer select-none ml-auto">
             <input type="checkbox" checked={showArchived}
               onChange={e => setShowArchived(e.target.checked)}
               className="w-4 h-4 accent-gold" />
@@ -154,15 +154,15 @@ const AdminApplications = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+      <div className="bg-surface-1 rounded-2xl border border-line overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-8 h-8 text-gold animate-spin" />
           </div>
         ) : rows.length === 0 ? (
           <div className="text-center py-16">
-            <ClipboardList className="w-12 h-12 mx-auto mb-3 text-gray-200" />
-            <p className="text-gray-500 font-medium">
+            <ClipboardList className="w-12 h-12 mx-auto mb-3 text-t4" />
+            <p className="text-t3 font-medium">
               {stream === '360' ? 'Aucune candidature' : 'Aucune inscription'} pour l'instant
             </p>
           </div>
@@ -170,41 +170,41 @@ const AdminApplications = () => {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Nom</th>
+                <tr className="border-b border-line bg-surface-2">
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-t3 uppercase">Nom</th>
                   {stream === 'events' && (
-                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Événement</th>
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-t3 uppercase">Événement</th>
                   )}
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Email</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">WhatsApp</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Date</th>
-                  <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-t3 uppercase">Email</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-t3 uppercase">WhatsApp</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-t3 uppercase">Date</th>
+                  <th className="text-right px-6 py-3 text-xs font-semibold text-t3 uppercase">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-line">
                 {rows.map(app => (
-                  <tr key={app.id} className={`hover:bg-gray-50 transition-colors ${app.archived ? 'opacity-60' : ''}`}>
+                  <tr key={app.id} className={`hover:bg-surface-2 transition-colors ${app.archived ? 'opacity-60' : ''}`}>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <p className="font-medium text-gray-900 text-sm">{displayName(app)}</p>
+                        <p className="font-medium text-t1 text-sm">{displayName(app)}</p>
                         {app.archived && (
-                          <span className="text-[10px] uppercase tracking-wide text-gray-400 border border-gray-200 rounded px-1.5 py-0.5">
+                          <span className="text-[10px] uppercase tracking-wide text-t4 border border-line rounded px-1.5 py-0.5">
                             Archivée
                           </span>
                         )}
                       </div>
-                      {app.age && <p className="text-xs text-gray-400">{app.age} ans</p>}
+                      {app.age && <p className="text-xs text-t4">{app.age} ans</p>}
                     </td>
                     {stream === 'events' && (
-                      <td className="px-6 py-4 text-sm text-gray-700">
-                        {app.eventTitle || <span className="text-gray-300 italic">—</span>}
+                      <td className="px-6 py-4 text-sm text-t2">
+                        {app.eventTitle || <span className="text-t4 italic">—</span>}
                       </td>
                     )}
-                    <td className="px-6 py-4 text-sm text-gray-600">{app.emailAddress || '—'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {app.whatsappNumber || <span className="text-gray-300 italic">—</span>}
+                    <td className="px-6 py-4 text-sm text-t3">{app.emailAddress || '—'}</td>
+                    <td className="px-6 py-4 text-sm text-t3">
+                      {app.whatsappNumber || <span className="text-t4 italic">—</span>}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                    <td className="px-6 py-4 text-sm text-t3 whitespace-nowrap">
                       {new Date(app.createdAt).toLocaleDateString('fr-FR')}
                     </td>
                     <td className="px-6 py-4">
@@ -213,16 +213,16 @@ const AdminApplications = () => {
                       ) : (
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={() => setDetailApp(app)}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg" title="Voir">
+                            className="p-1.5 text-info hover:bg-info-subtle rounded-lg" title="Voir">
                             <Eye className="w-4 h-4" />
                           </button>
                           <button onClick={() => handleArchive(app)}
-                            className="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg"
+                            className="p-1.5 text-t3 hover:bg-surface-2 rounded-lg"
                             title={app.archived ? 'Désarchiver' : 'Archiver'}>
                             {app.archived ? <ArchiveRestore className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
                           </button>
                           <button onClick={() => handleDelete(app.id)}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg" title="Supprimer">
+                            className="p-1.5 text-error hover:bg-error-subtle rounded-lg" title="Supprimer">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
@@ -239,11 +239,11 @@ const AdminApplications = () => {
       {/* Detail modal */}
       {detailApp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onClick={() => setDetailApp(null)}>
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <div className="bg-surface-1 rounded-2xl w-full max-w-lg border border-line overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-line">
               <div>
-                <h3 className="font-bold text-gray-900 text-lg">{displayName(detailApp)}</h3>
-                <p className="text-xs text-gray-400">
+                <h3 className="font-bold text-t1 text-lg">{displayName(detailApp)}</h3>
+                <p className="text-xs text-t4">
                   {detailApp.eventRegistration
                     ? `Inscription — ${detailApp.eventTitle || 'Événement'}`
                     : 'Accompagnement 360'}
@@ -251,13 +251,13 @@ const AdminApplications = () => {
                   {new Date(detailApp.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
               </div>
-              <button onClick={() => setDetailApp(null)} className="p-2 rounded-lg hover:bg-gray-100">
-                <X className="w-5 h-5 text-gray-500" />
+              <button onClick={() => setDetailApp(null)} className="p-2 rounded-lg hover:bg-surface-2">
+                <X className="w-5 h-5 text-t3" />
               </button>
             </div>
 
             <div className="px-6 py-5 space-y-4">
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-line-soft">
                 {[
                   { icon: <User className="w-4 h-4" />, label: 'Nom complet', value: detailApp.fullName },
                   { icon: <Mail className="w-4 h-4" />, label: 'Email', value: detailApp.emailAddress },
@@ -265,9 +265,9 @@ const AdminApplications = () => {
                   { icon: <Calendar className="w-4 h-4" />, label: 'Âge', value: detailApp.age ? `${detailApp.age} ans` : null },
                 ].filter(r => r.value).map(row => (
                   <div key={row.label} className="flex items-center gap-3 py-3">
-                    <span className="text-gray-400 flex-shrink-0">{row.icon}</span>
-                    <span className="text-sm text-gray-500 w-28 flex-shrink-0">{row.label}</span>
-                    <span className="text-sm text-gray-900 font-medium">{row.value}</span>
+                    <span className="text-t4 flex-shrink-0">{row.icon}</span>
+                    <span className="text-sm text-t3 w-28 flex-shrink-0">{row.label}</span>
+                    <span className="text-sm text-t1 font-medium">{row.value}</span>
                   </div>
                 ))}
               </div>
@@ -275,21 +275,21 @@ const AdminApplications = () => {
               {detailApp.motivationText && (
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <MessageSquare className="w-4 h-4 text-gray-400" />
-                    <p className="text-sm font-semibold text-gray-700">Motivation</p>
+                    <MessageSquare className="w-4 h-4 text-t4" />
+                    <p className="text-sm font-semibold text-t2">Motivation</p>
                   </div>
-                  <p className="text-sm text-gray-600 leading-relaxed bg-gray-50 rounded-lg p-4 whitespace-pre-wrap">
+                  <p className="text-sm text-t3 leading-relaxed bg-surface-2 rounded-lg p-4 whitespace-pre-wrap">
                     {detailApp.motivationText}
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
+            <div className="px-6 py-4 border-t border-line flex gap-3 justify-end">
               <button
                 onClick={() => handleArchive(detailApp)}
                 disabled={busyId === detailApp.id}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 border border-line text-t2 rounded-lg text-sm font-medium hover:bg-surface-2 transition-colors disabled:opacity-50"
               >
                 {detailApp.archived ? <ArchiveRestore className="w-4 h-4" /> : <Archive className="w-4 h-4" />}
                 {detailApp.archived ? 'Désarchiver' : 'Archiver'}
