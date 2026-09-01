@@ -226,7 +226,7 @@ export default function AdminApprenants() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         {l.linkedinUrl && (
-                          <a href={l.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700">
+                          <a href={l.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-info hover:text-info">
                             <Linkedin className="w-4 h-4" />
                           </a>
                         )}
@@ -246,8 +246,8 @@ export default function AdminApprenants() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         {l.showcased ? (
-                          <span className="flex items-center gap-1 text-xs text-yellow-600 font-medium">
-                            <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" /> Landing
+                          <span className="flex items-center gap-1 text-xs text-warning font-medium">
+                            <Star className="w-3.5 h-3.5 fill-yellow-400 text-warning" /> Landing
                           </span>
                         ) : null}
                         {!l.visible && (
@@ -297,7 +297,7 @@ export default function AdminApprenants() {
 
             <div className="p-6 space-y-5">
               {error && (
-                <div className="bg-error-subtle border border-red-200 text-error text-sm rounded-lg px-4 py-3">{error}</div>
+                <div className="bg-error-subtle border border-error/30 text-error text-sm rounded-lg px-4 py-3">{error}</div>
               )}
 
               {/* Photo */}
@@ -316,7 +316,7 @@ export default function AdminApprenants() {
                     <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
                   </label>
                   {form.photoUrl && (
-                    <button onClick={() => setForm(f => ({ ...f, photoUrl: '' }))} className="ml-2 text-xs text-error hover:text-red-600">Retirer</button>
+                    <button onClick={() => setForm(f => ({ ...f, photoUrl: '' }))} className="ml-2 text-xs text-error hover:text-error">Retirer</button>
                   )}
                 </div>
               </div>

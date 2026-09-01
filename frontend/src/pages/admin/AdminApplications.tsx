@@ -291,7 +291,7 @@ const AdminApplications = () => {
               <button
                 onClick={() => handleDelete(detailApp.id)}
                 disabled={busyId === detailApp.id}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-error text-error-foreground rounded-lg text-sm font-medium hover:bg-error/80 transition-colors disabled:opacity-50"
               >
                 <Trash2 className="w-4 h-4" /> Supprimer
               </button>

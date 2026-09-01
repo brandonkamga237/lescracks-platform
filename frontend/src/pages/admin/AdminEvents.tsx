@@ -47,7 +47,7 @@ const TYPE_COLORS: Record<string, string> = {
   BOOTCAMP:  'bg-info-subtle text-info',
   HACKATHON: 'bg-info-subtle text-info',
   MEETUP:    'bg-info-subtle text-info',
-  WORKSHOP:  'bg-yellow-100 text-yellow-700',
+  WORKSHOP:  'bg-warning-subtle text-warning',
 };
 
 /** Combine a date string + optional time into a LocalDateTime string */
@@ -296,7 +296,7 @@ const AdminEvents = () => {
 
             <div className="px-6 py-5 space-y-5">
               {error && (
-                <div className="bg-error-subtle border border-red-200 text-error text-sm rounded-lg px-4 py-3">{error}</div>
+                <div className="bg-error-subtle border border-error/30 text-error text-sm rounded-lg px-4 py-3">{error}</div>
               )}
 
               {/* Cover image */}
@@ -308,7 +308,7 @@ const AdminEvents = () => {
                       <img src={form.coverImageUrl} alt="" className="w-24 h-16 object-cover rounded-lg border border-line" />
                       <button
                         onClick={() => setForm(f => ({ ...f, coverImageUrl: '' }))}
-                        className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
+                        className="absolute -top-2 -right-2 w-5 h-5 bg-error text-error-foreground rounded-full flex items-center justify-center text-xs"
                       >×</button>
                     </div>
                   ) : (

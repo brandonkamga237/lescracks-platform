@@ -169,7 +169,7 @@ const Programme360Control = () => {
             <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${
               open ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'
             }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${open ? 'bg-success' : 'bg-amber-500'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${open ? 'bg-success' : 'bg-warning'}`} />
               {open ? 'Ouvert' : 'Fermé'}
             </span>
           )}
@@ -362,7 +362,7 @@ const AdminDashboard = () => {
 
       {/* ── CONTENT & ENGAGEMENT ── */}
       <Card className="p-4 sm:p-6">
-        <PanelHead icon={FileText} title="Contenu & Engagement" subtitle="Performance des ressources pédagogiques" tint="text-amber-500" />
+        <PanelHead icon={FileText} title="Contenu & Engagement" subtitle="Performance des ressources pédagogiques" tint="text-warning" />
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Engagement efficiency — derived metrics + type split */}
           <div className="space-y-4">
@@ -442,7 +442,7 @@ const AdminDashboard = () => {
       {/* ── PIPELINES ── */}
       <div className="grid lg:grid-cols-2 gap-6">
         <Card className="p-4 sm:p-6">
-          <PanelHead icon={ClipboardList} title="Candidatures" subtitle="Accompagnement 360, événements & archives" tint="text-blue-500"
+          <PanelHead icon={ClipboardList} title="Candidatures" subtitle="Accompagnement 360, événements & archives" tint="text-info"
             action={<Link to="/admin/applications" className="text-xs text-gold hover:text-gold/80 flex items-center gap-1 flex-shrink-0">Voir <ArrowUpRight className="w-3 h-3" /></Link>} />
           <div className="space-y-3 mt-1">
             {applicationsByStatus.length ? applicationsByStatus.map((item) => (
@@ -478,9 +478,9 @@ const AdminDashboard = () => {
           <PanelHead icon={Zap} title="Actions rapides" />
           <div className="space-y-2 mt-1">
             {[
-              { to: '/admin/resources', icon: FileText, label: 'Nouvelle ressource', c: 'bg-warning-subtle text-warning hover:bg-amber-100' },
+              { to: '/admin/resources', icon: FileText, label: 'Nouvelle ressource', c: 'bg-warning-subtle text-warning hover:bg-warning-subtle' },
               { to: '/admin/events', icon: Calendar, label: 'Nouvel événement', c: 'bg-success-subtle text-success hover:bg-success-subtle' },
-              { to: '/admin/users', icon: Users, label: 'Gérer les utilisateurs', c: 'bg-info-subtle text-info hover:bg-blue-100' },
+              { to: '/admin/users', icon: Users, label: 'Gérer les utilisateurs', c: 'bg-info-subtle text-info hover:bg-info-subtle' },
             ].map(({ to, icon: Icon, label, c }) => (
               <Link key={to} to={to} className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors ${c}`}>
                 <Icon className="w-4 h-4 flex-shrink-0" />
@@ -515,7 +515,7 @@ const AdminDashboard = () => {
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-t4">Nouvelles ressources</span>
-              <span className="font-bold text-blue-400">+{fr(stats?.newResourcesLast30Days || 0)}</span>
+              <span className="font-bold text-info">+{fr(stats?.newResourcesLast30Days || 0)}</span>
             </div>
           </div>
         </div>
@@ -524,7 +524,7 @@ const AdminDashboard = () => {
       {/* ── RECENT ACTIVITY ── */}
       <div className="grid lg:grid-cols-2 gap-6">
         <Card className="p-4 sm:p-6">
-          <PanelHead icon={Users} title="Derniers inscrits" tint="text-blue-500" />
+          <PanelHead icon={Users} title="Derniers inscrits" tint="text-info" />
           <div className="space-y-1 mt-1">
             {stats?.recentUsers?.length ? stats.recentUsers.map((u) => (
               <div key={u.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-surface-2 transition-colors">

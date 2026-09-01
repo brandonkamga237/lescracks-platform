@@ -590,7 +590,7 @@ const AdminResources = () => {
                       <button
                         type="button"
                         onClick={() => { setFormData(prev => ({ ...prev, previewImageUrl: '' })); if (previewInputRef.current) previewInputRef.current.value = ''; }}
-                        className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 p-1 bg-error text-error-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -639,7 +639,7 @@ const AdminResources = () => {
                 {!isVideo && !isArticle && (
                   <label className="flex items-center justify-between p-3 border border-line rounded-lg cursor-pointer hover:bg-surface-2">
                     <div className="flex items-center gap-2">
-                      <Download className="w-4 h-4 text-blue-500" />
+                      <Download className="w-4 h-4 text-info" />
                       <div>
                         <p className="text-sm font-medium">Téléchargement autorisé</p>
                         <p className="text-xs text-t4">Les utilisateurs pourront télécharger ce fichier</p>
