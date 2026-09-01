@@ -29,14 +29,10 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Event> published(EventKind kind, Pageable pageable) {
-        return events.findPublished(kind, pageable);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<Event> upcoming(Pageable pageable) {
-        return events.findUpcoming(Instant.now(), pageable);
+    public Page<Event> published(EventKind kind, boolean upcomingOnly, Pageable pageable) {
+        return upcomingOnly
+                ? events.findUpcoming(Instant.now(), kind, pageable)
+                : events.findPublished(kind, pageable);
     }
 
     @Override

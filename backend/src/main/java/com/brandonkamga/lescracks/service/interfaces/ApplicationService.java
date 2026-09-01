@@ -26,8 +26,6 @@ public interface ApplicationService {
     /** Accepting is what {@code ParticipationService} turns into a participation. */
     Application decide(Long id, ApplicationStatus outcome);
 
-    long pendingCount();
-
     record ApplicationDraft(
             EnrolmentTarget target,
             Long eventId,

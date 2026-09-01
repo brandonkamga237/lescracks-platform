@@ -25,11 +25,13 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             """)
     Page<Event> findPublished(EventKind kind, Pageable pageable);
 
-    /** Still to come, for the handful shown on the landing page. */
+    /** Same rows as above, narrowed to what is still to come and ordered soonest-first. */
     @Query("""
             SELECT e FROM Event e
-            WHERE e.published = TRUE AND e.startsAt > :now
+            WHERE e.published = TRUE
+              AND e.startsAt > :now
+              AND (:kind IS NULL OR e.kind = :kind)
             ORDER BY e.startsAt ASC
             """)
-    Page<Event> findUpcoming(Instant now, Pageable pageable);
+    Page<Event> findUpcoming(Instant now, EventKind kind, Pageable pageable);
 }

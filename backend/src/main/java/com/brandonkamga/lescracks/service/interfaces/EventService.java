@@ -15,10 +15,12 @@ import java.time.Instant;
  */
 public interface EventService {
 
-    /** What the public sees. A null kind means both. */
-    Page<Event> published(EventKind kind, Pageable pageable);
-
-    Page<Event> upcoming(Pageable pageable);
+    /**
+     * What the public sees. A null kind means both. {@code upcomingOnly} narrows to events
+     * still to come and flips the order to soonest-first, which is the only order that reads
+     * correctly when the list is a countdown rather than an archive.
+     */
+    Page<Event> published(EventKind kind, boolean upcomingOnly, Pageable pageable);
 
     Page<Event> all(Pageable pageable);
 

@@ -124,10 +124,4 @@ public class ApplicationServiceImpl implements ApplicationService {
         application.decide(outcome);
         return application;
     }
-
-    @Override
-    @Transactional(readOnly = true)
-    public long pendingCount() {
-        return applications.countByStatus(ApplicationStatus.PENDING);
-    }
 }

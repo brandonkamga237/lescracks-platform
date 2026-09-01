@@ -14,8 +14,6 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
     Page<Application> findByTargetOrderByCreatedAtDesc(EnrolmentTarget target, Pageable pageable);
 
-    long countByStatus(ApplicationStatus status);
-
     /**
      * Whether this person already has a request open for the same thing. The database refuses
      * the duplicate anyway; asking first is what turns a constraint violation into a sentence

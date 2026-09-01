@@ -68,11 +68,4 @@ public class ApplicationController {
     public ApplicationResponse decide(@PathVariable Long id, @RequestParam ApplicationStatus outcome) {
         return mapper.toResponse(applications.decide(id, outcome));
     }
-
-    @GetMapping("/admin/pending-count")
-    @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Combien de candidatures attendent une réponse")
-    public long pendingCount() {
-        return applications.pendingCount();
-    }
 }

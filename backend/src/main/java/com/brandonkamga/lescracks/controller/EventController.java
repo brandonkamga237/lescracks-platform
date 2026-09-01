@@ -30,16 +30,11 @@ public class EventController {
     }
 
     @GetMapping
-    @Operation(summary = "Les événements publiés, filtrables par type")
+    @Operation(summary = "Les événements publiés, filtrables par type et limitables aux prochains")
     public PageResponse<EventSummary> list(@RequestParam(required = false) EventKind kind,
+                                           @RequestParam(defaultValue = "false") boolean upcoming,
                                            @PageableDefault(size = 12) Pageable pageable) {
-        return PageResponse.of(events.published(kind, pageable), mapper::toSummary);
-    }
-
-    @GetMapping("/upcoming")
-    @Operation(summary = "Les prochains événements")
-    public PageResponse<EventSummary> upcoming(@PageableDefault(size = 4) Pageable pageable) {
-        return PageResponse.of(events.upcoming(pageable), mapper::toSummary);
+        return PageResponse.of(events.published(kind, upcoming, pageable), mapper::toSummary);
     }
 
     /** By slug rather than id: the slug is what is in a shared link. */
