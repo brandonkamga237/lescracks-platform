@@ -156,7 +156,7 @@ const ResourceEngagement = ({ resourceId, returnTo }: Props) => {
               placeholder="Partage ce que tu en as pensé, ou pose une question…"
               className="input w-full resize-y"
             />
-            {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
+            {error && <p className="text-error text-sm mt-2">{error}</p>}
             <div className="flex items-center justify-between mt-3">
               <span className="text-t4 text-xs tabular-nums">{draft.length}/2000</span>
               <button
@@ -209,7 +209,7 @@ const ResourceEngagement = ({ resourceId, returnTo }: Props) => {
                     <button
                       onClick={() => handleDelete(c.id)}
                       aria-label="Supprimer mon commentaire"
-                      className="ml-auto p-1 text-t4 hover:text-red-400 transition-colors flex-shrink-0"
+                      className="ml-auto p-1 text-t4 hover:text-error transition-colors flex-shrink-0"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>

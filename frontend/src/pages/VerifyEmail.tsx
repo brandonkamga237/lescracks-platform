@@ -81,8 +81,8 @@ const VerifyEmail = () => {
 
         {status === 'error' && (
           <>
-            <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-6">
-              <XCircle className="w-8 h-8 text-red-400" />
+            <div className="w-16 h-16 rounded-full bg-error-subtle border border-error/30 flex items-center justify-center mx-auto mb-6">
+              <XCircle className="w-8 h-8 text-error" />
             </div>
             <h1 className="text-2xl font-display font-bold text-white mb-3">Lien invalide</h1>
             <p className="text-t3 mb-8">{message}</p>

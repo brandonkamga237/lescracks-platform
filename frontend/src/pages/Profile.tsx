@@ -280,7 +280,7 @@ const Profile = () => {
                     {user?.name || `${user?.firstName} ${user?.lastName}` || 'Utilisateur'}
                   </h1>
                   {isLearner && (
-                    <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 text-sm">
+                    <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-info-subtle text-info text-sm">
                       <GraduationCap className="w-4 h-4" />
                       Crack Accompagné
                     </span>
@@ -299,7 +299,7 @@ const Profile = () => {
             </div>
 
             {avatarError && (
-              <div className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              <div className="mt-4 p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
                 {avatarError}
               </div>
             )}
@@ -324,7 +324,7 @@ const Profile = () => {
                 onClick={() => setActiveTab('learner')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                   activeTab === 'learner'
-                    ? 'bg-purple-500 text-white'
+                    ? 'bg-info text-white'
                     : 'bg-white/5 text-t2 hover:text-white hover:bg-white/10'
                 }`}
               >
@@ -427,13 +427,13 @@ const Profile = () => {
                     </div>
 
                     {passwordError && (
-                      <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                      <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
                         {passwordError}
                       </div>
                     )}
 
                     {passwordSuccess && (
-                      <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm flex items-center gap-2">
+                      <div className="p-3 rounded-lg bg-success-subtle border border-success/30 text-success text-sm flex items-center gap-2">
                         <CheckCircle className="w-4 h-4" />
                         {passwordSuccess}
                       </div>
@@ -485,14 +485,14 @@ const Profile = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="card p-8 border-red-500/20"
+                className="card p-8 border-error/30"
               >
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
-                    <Trash2 className="w-5 h-5 text-red-500" />
+                  <div className="w-10 h-10 rounded-lg bg-error-subtle flex items-center justify-center">
+                    <Trash2 className="w-5 h-5 text-error" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-display font-semibold text-red-400">
+                    <h2 className="text-xl font-display font-semibold text-error">
                       Supprimer le compte
                     </h2>
                     <p className="text-t3 text-sm">
@@ -504,17 +504,17 @@ const Profile = () => {
                 {!showDeleteConfirm ? (
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="px-4 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors text-sm"
+                    className="px-4 py-2 rounded-lg bg-error-subtle text-error hover:bg-error-subtle transition-colors text-sm"
                   >
                     Supprimer mon compte
                   </button>
                 ) : (
                   <div className="space-y-4">
-                    <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+                    <div className="p-4 rounded-lg bg-error-subtle border border-error/30">
                       <div className="flex items-start gap-3">
-                        <AlertTriangle className="w-5 h-5 text-red-400 mt-0.5" />
+                        <AlertTriangle className="w-5 h-5 text-error mt-0.5" />
                         <div>
-                          <p className="text-red-400 font-medium mb-1">Etes-vous sur ?</p>
+                          <p className="text-error font-medium mb-1">Etes-vous sur ?</p>
                           <p className="text-t2 text-sm">
                             Entrez <strong>{user?.email}</strong> pour confirmer la suppression definitive de votre compte.
                           </p>
@@ -527,13 +527,13 @@ const Profile = () => {
                         type="text"
                         value={deleteConfirmText}
                         onChange={(e) => setDeleteConfirmText(e.target.value)}
-                        className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-red-500"
+                        className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-error"
                         placeholder="Entrez votre email pour confirmer"
                       />
                     </div>
 
                     {passwordError && (
-                      <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                      <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
                         {passwordError}
                       </div>
                     )}
@@ -552,7 +552,7 @@ const Profile = () => {
                       <button
                         onClick={handleDeleteAccount}
                         disabled={deleting}
-                        className="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors text-sm flex items-center gap-2"
+                        className="px-4 py-2 rounded-lg bg-error text-error-foreground hover:bg-error/80 transition-colors text-sm flex items-center gap-2"
                       >
                         {deleting ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -579,8 +579,8 @@ const Profile = () => {
                 <div className="card p-8">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                        <GraduationCap className="w-5 h-5 text-purple-400" />
+                      <div className="w-10 h-10 rounded-lg bg-info-subtle flex items-center justify-center">
+                        <GraduationCap className="w-5 h-5 text-info" />
                       </div>
                       <div>
                         <h2 className="text-xl font-display font-semibold">Mon parcours apprenant</h2>
@@ -590,7 +590,7 @@ const Profile = () => {
                     {!editingLearner && (
                       <button
                         onClick={() => setEditingLearner(true)}
-                        className="px-4 py-2 rounded-lg bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition-colors text-sm"
+                        className="px-4 py-2 rounded-lg bg-info-subtle text-info hover:bg-info-subtle transition-colors text-sm"
                       >
                         Modifier
                       </button>
@@ -670,10 +670,10 @@ const Profile = () => {
                       </div>
 
                       {learnerError && (
-                        <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{learnerError}</div>
+                        <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">{learnerError}</div>
                       )}
                       {learnerSuccess && (
-                        <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm flex items-center gap-2">
+                        <div className="p-3 rounded-lg bg-success-subtle border border-success/30 text-success text-sm flex items-center gap-2">
                           <CheckCircle className="w-4 h-4" />{learnerSuccess}
                         </div>
                       )}
@@ -706,7 +706,7 @@ const Profile = () => {
                       <div className="flex gap-4 pt-2">
                         {learnerProfile.linkedinUrl && (
                           <a href={learnerProfile.linkedinUrl} target="_blank" rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-sm">
+                            className="flex items-center gap-1.5 text-info hover:text-info text-sm">
                             <Linkedin className="w-4 h-4" /> LinkedIn
                           </a>
                         )}
@@ -803,13 +803,13 @@ const Profile = () => {
                     </div>
 
                     {profileError && (
-                      <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                      <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
                         {profileError}
                       </div>
                     )}
 
                     {profileSuccess && (
-                      <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-sm flex items-center gap-2">
+                      <div className="p-3 rounded-lg bg-success-subtle border border-success/30 text-success text-sm flex items-center gap-2">
                         <CheckCircle className="w-4 h-4" />
                         {profileSuccess}
                       </div>

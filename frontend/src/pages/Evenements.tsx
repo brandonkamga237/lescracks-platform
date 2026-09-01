@@ -18,8 +18,8 @@ import {
 
 const getCapacityInfo = (current: number, max: number) => {
   const pct = current / max;
-  if (pct >= 0.9) return { label: 'Presque complet', color: 'text-red-400 bg-red-400/10', urgent: true };
-  if (pct >= 0.7) return { label: `${max - current} places restantes`, color: 'text-orange-400 bg-orange-400/10', urgent: true };
+  if (pct >= 0.9) return { label: 'Presque complet', color: 'text-error bg-error-subtle', urgent: true };
+  if (pct >= 0.7) return { label: `${max - current} places restantes`, color: 'text-warning bg-warning-subtle', urgent: true };
   return { label: `${current}/${max} places`, color: 'text-t3 bg-white/5', urgent: false };
 };
 
@@ -153,10 +153,10 @@ const Evenements = () => {
                     </span>
                     <span className={`px-2 py-1 text-xs rounded-full ${
                       event.status === 'open'
-                        ? 'bg-green-500/20 text-green-400'
+                        ? 'bg-success-subtle text-success'
                         : event.status === 'upcoming'
-                        ? 'bg-blue-500/20 text-blue-400'
-                        : 'bg-red-500/20 text-red-400'
+                        ? 'bg-info-subtle text-info'
+                        : 'bg-error-subtle text-error'
                     }`}>
                       {event.status === 'open' ? 'Ouvert' :
                        event.status === 'upcoming' ? 'À venir' : 'Fermé'}

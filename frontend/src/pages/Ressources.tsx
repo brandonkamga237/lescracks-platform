@@ -419,7 +419,7 @@ const Ressources = () => {
                         onClick={() => handleTagToggle(tag.id)}
                         className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
                           selectedTags.includes(tag.id)
-                            ? 'bg-blue-500 text-white'
+                            ? 'bg-info text-white'
                             : 'bg-white/10 text-t2 hover:bg-white/20'
                         }`}
                       >
@@ -445,7 +445,7 @@ const Ressources = () => {
                 </span>
               )}
               {selectedTags.map(tagId => (
-                <span key={tagId} className="px-2 py-1 text-xs bg-blue-500/20 text-blue-400 rounded-full flex items-center gap-1">
+                <span key={tagId} className="px-2 py-1 text-xs bg-info-subtle text-info rounded-full flex items-center gap-1">
                   {tags.find(t => t.id === tagId)?.name}
                   <button onClick={() => handleTagToggle(tagId)} className="hover:text-white">
                     <X className="w-3 h-3" />
@@ -494,7 +494,7 @@ const Ressources = () => {
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <span className={`px-2 py-0.5 text-xs rounded-full ${
                         resource.resourceTypeName === 'VIDEO'
-                          ? 'bg-blue-500/15 text-blue-400'
+                          ? 'bg-info-subtle text-info'
                           : 'bg-gold/15 text-gold'
                       }`}>
                         {getResourceTypeName(resource.resourceTypeName)}

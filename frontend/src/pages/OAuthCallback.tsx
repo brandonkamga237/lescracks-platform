@@ -44,8 +44,8 @@ const OAuthCallback = () => {
       <div className="min-h-screen flex items-center justify-center bg-black px-4">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(212,175,55,0.1)_0%,_transparent_50%)]" />
         <div className="relative text-center max-w-md">
-          <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-6">
-            <XCircle className="w-8 h-8 text-red-400" />
+          <div className="w-16 h-16 rounded-full bg-error-subtle border border-error/30 flex items-center justify-center mx-auto mb-6">
+            <XCircle className="w-8 h-8 text-error" />
           </div>
           <h1 className="text-2xl font-display font-bold text-white mb-3">Connexion impossible</h1>
           <p className="text-t3 mb-8">{error}</p>

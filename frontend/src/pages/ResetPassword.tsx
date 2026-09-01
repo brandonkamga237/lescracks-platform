@@ -85,7 +85,7 @@ const ResetPassword = () => {
             </div>
           ) : !token ? (
             <div className="text-center">
-              <AlertCircle className="w-14 h-14 text-red-400 mx-auto mb-4" />
+              <AlertCircle className="w-14 h-14 text-error mx-auto mb-4" />
               <h1 className="text-xl font-display font-bold mb-3 text-white">Lien invalide</h1>
               <p className="text-t3 text-sm mb-6">
                 Ce lien de réinitialisation est invalide ou a expiré.
@@ -107,7 +107,7 @@ const ResetPassword = () => {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
-                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                  <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
                     {error}
                   </div>
                 )}

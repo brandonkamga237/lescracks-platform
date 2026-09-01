@@ -6,8 +6,8 @@ const STATUS_CONFIG: Record<LearnerStatus, { label: string; icon: React.ElementT
   EN_COURS: {
     label: 'En parcours',
     icon: Clock,
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/10 border-blue-500/20',
+    color: 'text-info',
+    bg: 'bg-info-subtle border-info/30',
   },
   TERMINE_AVEC_CERTIFICAT: {
     label: 'Certifié',
@@ -146,7 +146,7 @@ export default function LearnerCard({ learner, featured = false }: LearnerCardPr
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
-                className="flex items-center gap-1.5 text-xs text-t4 hover:text-blue-400 transition-colors"
+                className="flex items-center gap-1.5 text-xs text-t4 hover:text-info transition-colors"
               >
                 <Linkedin className="w-3.5 h-3.5" />
                 LinkedIn

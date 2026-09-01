@@ -506,14 +506,14 @@ const Landing = () => {
                         l.status === 'TERMINE_AVEC_CERTIFICAT'
                           ? 'bg-gold/10 text-gold border border-gold/20'
                           : l.status === 'EN_COURS'
-                          ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                          ? 'bg-info-subtle text-info border border-info/30'
                           : 'bg-white/5 text-t3 border border-line'
                       }`}>
                         {l.status === 'TERMINE_AVEC_CERTIFICAT' && <Award className="w-3 h-3 inline mr-1 -mt-0.5" />}
                         {l.status === 'TERMINE_AVEC_CERTIFICAT' ? 'Certifié' : l.status === 'EN_COURS' ? 'En cours' : 'Diplômé'}
                       </span>
                       {l.linkedinUrl && (
-                        <a href={l.linkedinUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="text-t4 hover:text-blue-400 transition-colors">
+                        <a href={l.linkedinUrl} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="text-t4 hover:text-info transition-colors">
                           <Linkedin className="w-3.5 h-3.5" />
                         </a>
                       )}

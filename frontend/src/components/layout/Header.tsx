@@ -265,7 +265,7 @@ const Header = () => {
                       </div>
                       <div className="p-1.5 border-t border-line-soft">
                         <button type="button" onClick={handleLogout}
-                          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-red-400/80 hover:bg-red-500/8 hover:text-red-400 transition-colors text-sm">
+                          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-error/80 hover:bg-error-subtle hover:text-error transition-colors text-sm">
                           <LogOut className="w-4 h-4" aria-hidden="true" />Déconnexion
                         </button>
                       </div>

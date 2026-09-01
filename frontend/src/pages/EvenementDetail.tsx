@@ -18,8 +18,8 @@ import {
 
 import { errorMessage } from '@/lib/utils';
 const STATUS_LABEL: Record<string, { label: string; chip: string }> = {
-  open:     { label: 'Inscriptions ouvertes', chip: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25' },
-  upcoming: { label: 'À venir',               chip: 'bg-sky-500/10 text-sky-300 border-sky-500/25' },
+  open:     { label: 'Inscriptions ouvertes', chip: 'bg-success-subtle text-success border-success/30' },
+  upcoming: { label: 'À venir',               chip: 'bg-info-subtle text-info border-info/30' },
   closed:   { label: 'Terminé',               chip: 'bg-white/5 text-t4 border-line' },
 };
 
@@ -272,7 +272,7 @@ const EvenementDetail = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {error && (
-                    <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                    <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
                       {error}
                     </div>
                   )}

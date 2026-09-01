@@ -180,7 +180,7 @@ export default function RessourceDetail() {
               className="flex items-center gap-2 flex-wrap mb-4"
             >
               <span className={`px-2.5 py-1 text-xs rounded-full font-medium ${
-                isVideo ? 'bg-blue-500/15 text-blue-400' : 'bg-gold/15 text-gold'
+                isVideo ? 'bg-info-subtle text-info' : 'bg-gold/15 text-gold'
               }`}>
                 {isVideo ? 'Vidéo' : 'Document'}
               </span>
@@ -290,7 +290,7 @@ export default function RessourceDetail() {
                     </button>
                   )}
                   {downloadError && (
-                    <p role="alert" className="text-xs text-red-400 text-center">{downloadError}</p>
+                    <p role="alert" className="text-xs text-error text-center">{downloadError}</p>
                   )}
                 </div>
               ) : (

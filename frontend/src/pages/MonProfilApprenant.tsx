@@ -11,7 +11,7 @@ import SEO from '@/components/common/SEO';
 import apiService, { Learner, LearnerStatus } from '@/services/api';
 
 const STATUS_CONFIG: Record<LearnerStatus, { label: string; icon: React.ElementType; color: string; bg: string }> = {
-  EN_COURS:                { label: 'En cours de parcours',  icon: Clock,    color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
+  EN_COURS:                { label: 'En cours de parcours',  icon: Clock,    color: 'text-info', bg: 'bg-info-subtle border-info/30' },
   TERMINE_AVEC_CERTIFICAT: { label: 'Certifié LesCracks',    icon: Award,    color: 'text-gold',     bg: 'bg-gold/10 border-gold/20' },
   TERMINE_SANS_CERTIFICAT: { label: 'Diplômé LesCracks',     icon: BookOpen, color: 'text-t1', bg: 'bg-white/5 border-line' },
 };
@@ -136,7 +136,7 @@ export default function MonProfilApprenant() {
               {bio && <p className="text-xs text-t3 line-clamp-3 mb-3">{bio}</p>}
               <div className="flex gap-3">
                 {linkedinUrl && (
-                  <span className="flex items-center gap-1.5 text-xs text-blue-400">
+                  <span className="flex items-center gap-1.5 text-xs text-info">
                     <Linkedin className="w-3.5 h-3.5" /> LinkedIn
                   </span>
                 )}

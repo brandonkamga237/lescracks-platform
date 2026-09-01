@@ -147,11 +147,11 @@ const Login = () => {
           {/* Email Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
                 <p>{error}</p>
 
                 {needsVerification && (
-                  <div className="mt-3 pt-3 border-t border-red-500/20">
+                  <div className="mt-3 pt-3 border-t border-error/30">
                     {resent ? (
                       <p className="text-t2">
                         Si un compte non vérifié existe pour cette adresse, un nouveau lien

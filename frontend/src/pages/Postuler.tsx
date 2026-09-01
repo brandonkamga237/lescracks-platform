@@ -93,8 +93,8 @@ const Postuler = () => {
             animate={{ opacity: 1, scale: 1 }}
             className="max-w-md w-full text-center"
           >
-            <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-10 h-10 text-green-400" />
+            <div className="w-20 h-20 rounded-full bg-success-subtle flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="w-10 h-10 text-success" />
             </div>
             <h1 className="text-2xl font-display font-bold mb-3">Candidature reçue !</h1>
             <p className="text-t2 leading-relaxed mb-2">
@@ -232,7 +232,7 @@ const Postuler = () => {
             <div>
               <label className="flex items-center gap-2 text-sm text-t2 mb-2">
                 <User className="w-4 h-4 text-gold" />
-                Nom complet <span className="text-red-400">*</span>
+                Nom complet <span className="text-error">*</span>
               </label>
               <input
                 type="text"
@@ -248,7 +248,7 @@ const Postuler = () => {
             <div>
               <label className="flex items-center gap-2 text-sm text-t2 mb-2">
                 <Mail className="w-4 h-4 text-gold" />
-                Adresse email <span className="text-red-400">*</span>
+                Adresse email <span className="text-error">*</span>
               </label>
               <input
                 type="email"
@@ -265,7 +265,7 @@ const Postuler = () => {
               <div>
                 <label className="flex items-center gap-2 text-sm text-t2 mb-2">
                   <Phone className="w-4 h-4 text-gold" />
-                  Numéro WhatsApp <span className="text-red-400">*</span>
+                  Numéro WhatsApp <span className="text-error">*</span>
                 </label>
                 <input
                   type="tel"
@@ -297,7 +297,7 @@ const Postuler = () => {
             <div>
               <label className="flex items-center gap-2 text-sm text-t2 mb-2">
                 <MessageSquare className="w-4 h-4 text-gold" />
-                Motivation / présentation <span className="text-red-400">*</span>
+                Motivation / présentation <span className="text-error">*</span>
               </label>
               <textarea
                 value={motivation}
@@ -307,13 +307,13 @@ const Postuler = () => {
                 placeholder="Où en es-tu ? Quel est ton objectif concret ? Pourquoi tu veux rejoindre LesCracks ? (min. 50 caractères)"
                 required
               />
-              <p className={`text-xs mt-1 ${motivation.length >= 50 ? 'text-green-400' : 'text-t4'}`}>
+              <p className={`text-xs mt-1 ${motivation.length >= 50 ? 'text-success' : 'text-t4'}`}>
                 {motivation.length}/50 caractères minimum
               </p>
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              <div className="p-3 rounded-lg bg-error-subtle border border-error/30 text-error text-sm">
                 {error}
               </div>
             )}

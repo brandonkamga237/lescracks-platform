@@ -12,9 +12,9 @@ const STATUS_CONFIG: Record<LearnerStatus, { label: string; icon: React.ElementT
   EN_COURS: {
     label: 'En cours de parcours',
     icon: Clock,
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/10 border-blue-500/20',
-    accent: 'from-blue-500/8',
+    color: 'text-info',
+    bg: 'bg-info-subtle border-info/30',
+    accent: 'from-info/10',
   },
   TERMINE_AVEC_CERTIFICAT: {
     label: 'Certifié LesCracks',
@@ -167,7 +167,7 @@ export default function ApprennantProfile() {
                       href={learner.linkedinUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 transition-colors px-4 py-2 rounded-xl text-sm font-medium"
+                      className="flex items-center gap-2 bg-info-subtle border border-info/30 text-info hover:bg-info-subtle transition-colors px-4 py-2 rounded-xl text-sm font-medium"
                     >
                       <Linkedin className="w-4 h-4" /> LinkedIn
                     </a>
