@@ -101,8 +101,8 @@ export default function AdminApprenants() {
       }
       setShowModal(false);
       fetchLearners();
-    } catch (e: any) {
-      setError(e.message || 'Erreur lors de la sauvegarde.');
+    } catch (e) {
+      setError(errorMessage(e, 'Erreur lors de la sauvegarde.'));
     } finally {
       setSaving(false);
     }

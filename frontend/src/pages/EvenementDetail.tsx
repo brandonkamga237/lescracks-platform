@@ -344,7 +344,7 @@ const EvenementDetail = () => {
           {event.tags && event.tags.length > 0 && (
             <div className="flex flex-wrap items-center gap-2 mt-8">
               <TagIcon className="w-4 h-4 text-t4" aria-hidden="true" />
-              {event.tags.map((t: any) => (
+              {event.tags.map((t) => (
                 <span key={t.id} className="px-2.5 py-1 rounded-full bg-white/5 border border-line text-xs text-t3">
                   {t.name}
                 </span>
