@@ -89,18 +89,41 @@ export default {
       900: '#171717',
       DEFAULT: '#ffffff',
     },
-    // Couleurs semantiques
+    // ── SURFACE RAMP — panel grounds stacked above the black page.
+    //    The page itself stays pure black (see `background`); these are what sits on it.
+    //    surface.1 cards and table headers · surface.2 hover rows and popovers
+    //    surface.3 modals and the highest elevation · surface.sunken wells and code
+    surface: {
+      1: '#0d0d10',
+      2: '#141418',
+      3: '#1c1c22',
+      sunken: '#050506',
+      DEFAULT: '#0d0d10',
+    },
+
+    // ── STATE RAMP — meaning, never decoration. Tuned for the black ground:
+    //    the light-context values these replaced glared at 21:1 against it.
+    //    `.subtle` is the badge/row background, `.DEFAULT` the text and icon.
+    //    Gold is the accent and never a state — a warning must not read as a brand moment.
     success: {
-      DEFAULT: '#22c55e',
-      foreground: '#ffffff',
+      DEFAULT: '#3fb950',
+      subtle: 'rgba(63, 185, 80, 0.14)',
+      foreground: '#031306',
     },
     error: {
-      DEFAULT: '#ef4444',
-      foreground: '#ffffff',
+      DEFAULT: '#f0656f',
+      subtle: 'rgba(240, 101, 111, 0.14)',
+      foreground: '#1a0405',
     },
     warning: {
-      DEFAULT: '#f59e0b',
-      foreground: '#000000',
+      DEFAULT: '#d29922',
+      subtle: 'rgba(210, 153, 34, 0.14)',
+      foreground: '#150e01',
+    },
+    info: {
+      DEFAULT: '#58a6ff',
+      subtle: 'rgba(88, 166, 255, 0.14)',
+      foreground: '#02101f',
     },
     // Legacy - garder pour compatibilite
     primary: {
@@ -139,6 +162,28 @@ export default {
     input: 'rgba(255, 255, 255, 0.08)',
     ring: '#d4af37',
   },
+    // ── DENSITY — the two rhythms the product works in.
+    //    `comfortable` is the public site: reading, breathing, one thing at a time.
+    //    `compact` is the back office: rows scanned by the dozen, never read.
+    //    A component takes one or the other; it never invents a third.
+    spacing: {
+      'row-compact': '2.25rem',
+      'row': '2.75rem',
+      'row-comfortable': '3.5rem',
+      'cell-x': '0.75rem',
+      'cell-y': '0.5rem',
+      'cell-y-comfortable': '0.875rem',
+      'gutter': '1.25rem',
+      'gutter-lg': '2rem',
+    },
+
+    fontSize: {
+      // Data and labels, distinct from the reading scale above them.
+      'label': ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.08em' }],
+      'data': ['0.8125rem', { lineHeight: '1.25rem' }],
+      'data-lg': ['0.9375rem', { lineHeight: '1.375rem' }],
+    },
+
     animation: {
       'fade-in': 'fadeIn 0.5s ease-in-out',
       'slide-up': 'slideUp 0.5s ease-out',
