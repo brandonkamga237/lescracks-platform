@@ -22,6 +22,10 @@ export interface Event {
   tags?: { id: number; name: string }[];
 }
 
+export type ResourceTypeName = 'VIDEO' | 'DOCUMENT' | 'ARTICLE';
+/** INLINE is an article written in the back office; its body is in `content`. */
+export type ResourceSourceType = 'EXTERNAL' | 'UPLOADED' | 'INLINE';
+
 export interface Resource {
   id: string;
   title: string;
@@ -32,18 +36,22 @@ export interface Resource {
   categoryId: number;
   categoryName: string;
   resourceTypeId: number;
-  resourceTypeName: 'VIDEO' | 'DOCUMENT';
-  sourceType: 'EXTERNAL' | 'UPLOADED';
+  resourceTypeName: ResourceTypeName;
+  sourceType: ResourceSourceType;
   premium: boolean;
   downloadable: boolean;
   viewCount: number;
   downloadCount: number;
   tags: { id: number; name: string }[];
   slug?: string;
+  /** Body of an ARTICLE; null when the caller may not read a premium resource. */
+  content?: string;
   metadata?: {
     fileSize?: number;
     mimeType?: string;
     originalFileName?: string;
+    readingTimeMinutes?: number;
+    author?: string;
   };
 }
 
@@ -111,7 +119,7 @@ export interface PaginatedResponse<T> {
 
 // Resource filter options
 export interface ResourceFilters {
-  type?: 'VIDEO' | 'DOCUMENT';
+  type?: ResourceTypeName;
   categoryId?: number;
   tagIds?: number[];
   search?: string;
@@ -192,7 +200,7 @@ class ApiService {
    * Get paginated and filtered resources.
    * 
    * @param filters - Filter options:
-   *   - type: 'VIDEO' or 'DOCUMENT' to filter by resource type
+   *   - type: 'VIDEO', 'DOCUMENT' or 'ARTICLE' to filter by resource type
    *   - categoryId: number to filter by category
    *   - tagIds: number[] to filter by tags (resources with ANY of these tags)
    *   - search: string to search in title/description

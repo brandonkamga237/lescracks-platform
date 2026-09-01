@@ -34,12 +34,38 @@ export interface AdminResource {
   title: string;
   description: string;
   url: string;
+  content?: string;
   previewImageUrl?: string;
   createdAt: string;
   categoryId: number;
   categoryName: string;
   resourceTypeId: number;
   resourceTypeName: string;
+  sourceType?: string;
+  premium?: boolean;
+  downloadable?: boolean;
+}
+
+/**
+ * Payload for creating or updating a resource.
+ *
+ * `url` carries the link (EXTERNAL) or the uploaded file path (UPLOADED); `content` carries
+ * the body of an article (INLINE). The backend rejects a payload that has neither.
+ */
+export interface AdminResourcePayload {
+  title: string;
+  description: string;
+  url?: string;
+  content?: string;
+  previewImageUrl?: string;
+  categoryId: number;
+  resourceTypeId: number;
+  tagIds?: number[];
+  sourceType?: 'EXTERNAL' | 'UPLOADED' | 'INLINE';
+  premium?: boolean;
+  downloadable?: boolean;
+  readingTimeMinutes?: number;
+  author?: string;
 }
 
 export interface AdminApplication {
@@ -288,30 +314,14 @@ class AdminApiService {
     return this.request<PaginatedResponse<AdminResource>>(`/admin/resources?page=${page}&size=${size}`);
   }
 
-  async createResource(data: {
-    title: string;
-    description: string;
-    url: string;
-    previewImageUrl?: string;
-    categoryId: number;
-    resourceTypeId: number;
-    tagIds?: number[];
-  }): Promise<AdminResource> {
+  async createResource(data: AdminResourcePayload): Promise<AdminResource> {
     return this.request<AdminResource>('/resources', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async updateResource(id: number, data: {
-    title: string;
-    description: string;
-    url: string;
-    previewImageUrl?: string;
-    categoryId: number;
-    resourceTypeId: number;
-    tagIds?: number[];
-  }): Promise<AdminResource> {
+  async updateResource(id: number, data: AdminResourcePayload): Promise<AdminResource> {
     return this.request<AdminResource>(`/resources/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
