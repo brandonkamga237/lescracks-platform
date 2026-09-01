@@ -1,7 +1,6 @@
 package com.brandonkamga.lescracks.controller;
 
 import com.brandonkamga.lescracks.domain.ProviderType;
-import com.brandonkamga.lescracks.domain.RoleName;
 import com.brandonkamga.lescracks.domain.User;
 import com.brandonkamga.lescracks.dto.ApiResponse;
 import com.brandonkamga.lescracks.dto.ChangePasswordRequest;
@@ -11,6 +10,7 @@ import com.brandonkamga.lescracks.exception.BadRequestException;
 import com.brandonkamga.lescracks.exception.ResourceNotFoundException;
 import com.brandonkamga.lescracks.mapper.UserMapper;
 import com.brandonkamga.lescracks.service.interfaces.UserService;
+import com.brandonkamga.lescracks.security.Authorities;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -224,7 +224,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Mettre à jour un utilisateur", 
                description = "Met à jour les informations d'un utilisateur. L'utilisateur peut uniquement modifier son propre compte.")
     @ApiResponses(value = {
@@ -260,7 +260,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Supprimer un utilisateur", 
                description = "Supprime un utilisateur. L'utilisateur peut uniquement supprimer son propre compte.")
     @ApiResponses(value = {
@@ -304,8 +304,7 @@ public class UserController {
         if (authentication == null || !authentication.isAuthenticated()) {
             return false;
         }
-        return authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals(RoleName.admin.name()));
+        return Authorities.isAdmin(authentication);
     }
 
     @PostMapping(value = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -90,7 +90,7 @@ public class LearnerController {
     // ─────────────────────────────────────────────────────────────
 
     @GetMapping("/me")
-    @PreAuthorize("hasRole('learner')")
+    @PreAuthorize("hasRole('LEARNER')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "My learner profile")
     public ResponseEntity<ApiResponse<LearnerResponse>> getMyProfile(Authentication authentication) {
@@ -101,7 +101,7 @@ public class LearnerController {
     }
 
     @PutMapping("/me")
-    @PreAuthorize("hasRole('learner')")
+    @PreAuthorize("hasRole('LEARNER')")
     @SecurityRequirement(name = "bearerAuth")
     @Transactional
     @Operation(summary = "Update my learner profile (bio, LinkedIn, portfolio)")

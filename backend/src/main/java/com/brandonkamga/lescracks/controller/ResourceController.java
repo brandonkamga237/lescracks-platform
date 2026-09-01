@@ -16,6 +16,7 @@ import com.brandonkamga.lescracks.repository.ResourceRepository;
 import com.brandonkamga.lescracks.repository.ResourceTypeRepository;
 import com.brandonkamga.lescracks.repository.TagRepository;
 import com.brandonkamga.lescracks.service.interfaces.ResourceService;
+import com.brandonkamga.lescracks.security.Authorities;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -455,10 +456,7 @@ public class ResourceController {
         if (authentication == null || !authentication.isAuthenticated()) {
             return false;
         }
-        return authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_premium_user")
-                        || a.getAuthority().equals("ROLE_learner")
-                        || a.getAuthority().equals("ROLE_admin"));
+        return Authorities.hasPremiumAccess(authentication);
     }
 
     private Resource toEntity(ResourceRequest request) {
