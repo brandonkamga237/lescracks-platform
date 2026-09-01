@@ -7,6 +7,7 @@ import SEO from '@/components/common/SEO';
 import { ArrowLeft, Mail, User, Github, Loader2, CheckCircle } from 'lucide-react';
 import PasswordInput from '@/components/common/PasswordInput';
 
+import { errorMessage } from '@/lib/utils';
 const Register = () => {
   const { register, loginWithGitHub, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -54,8 +55,8 @@ const Register = () => {
       } else {
         setError(response.message || 'L\'inscription a échoué. Merci de réessayer.');
       }
-    } catch (err: any) {
-      setError(err?.message || 'Une erreur est survenue. Merci de réessayer plus tard.');
+    } catch (err) {
+      setError(errorMessage(err, 'Une erreur est survenue. Merci de réessayer plus tard.'));
     } finally {
       setSubmitting(false);
     }

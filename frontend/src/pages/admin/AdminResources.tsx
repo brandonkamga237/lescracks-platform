@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/admin/viz';
 import adminApi, { AdminResource, AdminCategory, AdminResourcePayload, PaginatedResponse } from '@/services/adminApi';
 import apiService from '@/services/api';
 
+import { errorMessage } from '@/lib/utils';
 const AdminResources = () => {
   const [resources, setResources] = useState<AdminResource[]>([]);
   const [categories, setCategories] = useState<AdminCategory[]>([]);
@@ -187,8 +188,8 @@ const AdminResources = () => {
     try {
       const url = await apiService.uploadImage(file);
       setFormData(prev => ({ ...prev, previewImageUrl: url }));
-    } catch (err: any) {
-      alert(err.message || 'Erreur lors de l\'upload de l\'image');
+    } catch (err) {
+      alert(errorMessage(err, 'Erreur lors de l\'upload de l\'image'));
     } finally {
       setUploadingPreview(false);
     }
@@ -210,8 +211,8 @@ const AdminResources = () => {
       const url = await apiService.uploadResourceFile(file);
       setFormData(prev => ({ ...prev, url, sourceType: 'UPLOADED' }));
       setUploadedFileName(file.name);
-    } catch (err: any) {
-      alert(err.message || 'Erreur lors de l\'upload du fichier');
+    } catch (err) {
+      alert(errorMessage(err, 'Erreur lors de l\'upload du fichier'));
     } finally {
       setUploading(false);
     }

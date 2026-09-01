@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useProgrammeStatus } from '@/hooks/useProgrammeStatus';
 
+import { errorMessage } from '@/lib/utils';
 const ACCOMPAGNEMENT_TYPE_ID = 4;
 const WHATSAPP_URL = 'https://wa.me/237691788026';
 
@@ -76,8 +77,8 @@ const Postuler = () => {
         age: age ? parseInt(age, 10) : undefined,
       });
       setSubmitted(true);
-    } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue. Veuillez réessayer.');
+    } catch (err) {
+      setError(errorMessage(err, 'Une erreur est survenue. Veuillez réessayer.'));
     } finally {
       setSubmitting(false);
     }

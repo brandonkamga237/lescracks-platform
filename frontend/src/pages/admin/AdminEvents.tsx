@@ -6,6 +6,7 @@ import adminApi, { AdminEvent, PaginatedResponse } from '@/services/adminApi';
 import { deriveEventStatus } from '@/lib/eventStatus';
 import apiService from '@/services/api';
 
+import { errorMessage } from '@/lib/utils';
 interface EventType   { id: number; name: string; }
 interface EventStatus { id: number; name: string; }
 
@@ -136,8 +137,8 @@ const AdminEvents = () => {
     try {
       const url = await apiService.uploadImage(file);
       setForm(f => ({ ...f, coverImageUrl: url }));
-    } catch (err: any) {
-      setError(err.message || "Erreur lors de l'upload de l'image");
+    } catch (err) {
+      setError(errorMessage(err, "Erreur lors de l'upload de l'image"));
     } finally { setUploading(false); }
   };
 

@@ -16,6 +16,7 @@ import {
   ArrowLeft, Calendar, MapPin, Users, CheckCircle, Loader2, AlertCircle, Tag as TagIcon, LogIn,
 } from 'lucide-react';
 
+import { errorMessage } from '@/lib/utils';
 const STATUS_LABEL: Record<string, { label: string; chip: string }> = {
   open:     { label: 'Inscriptions ouvertes', chip: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25' },
   upcoming: { label: 'À venir',               chip: 'bg-sky-500/10 text-sky-300 border-sky-500/25' },
@@ -85,8 +86,8 @@ const EvenementDetail = () => {
       // Registration keys on the internal numeric id, never the public slug.
       await apiService.registerToEvent(String(event.id), form);
       setRegistered(true);
-    } catch (err: any) {
-      setError(err?.message || "L'inscription a échoué. Merci de réessayer.");
+    } catch (err) {
+      setError(errorMessage(err, "L'inscription a échoué. Merci de réessayer."));
     } finally {
       setSubmitting(false);
     }

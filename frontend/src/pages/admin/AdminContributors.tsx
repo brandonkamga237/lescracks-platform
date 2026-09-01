@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/admin/viz';
 import adminApi, { AdminContributor as Contributor } from '@/services/adminApi';
 import apiService from '@/services/api';
 
+import { errorMessage } from '@/lib/utils';
 const empty = (): Omit<Contributor, 'id'> => ({
   name: '', description: '', photoUrl: '', githubUrl: '', linkedinUrl: '',
   websiteUrl: '', twitterUrl: '', contributedProjects: [], displayOrder: 0, visible: true,
@@ -56,7 +57,7 @@ const AdminContributors = () => {
     try {
       const url = await apiService.uploadImage(file);
       setForm(prev => ({ ...prev, photoUrl: url }));
-    } catch (err: any) { alert(err.message || 'Erreur upload photo'); }
+    } catch (err) { alert(errorMessage(err, 'Erreur upload photo')); }
     finally { setUploadingPhoto(false); }
   };
 
@@ -84,7 +85,7 @@ const AdminContributors = () => {
         setContributors(cs => [created, ...cs]);
       }
       setShowModal(false);
-    } catch (err: any) { alert(err.message || 'Erreur lors de la sauvegarde'); }
+    } catch (err) { alert(errorMessage(err, 'Erreur lors de la sauvegarde')); }
     finally { setSaving(false); }
   };
 
@@ -93,7 +94,7 @@ const AdminContributors = () => {
     try {
       await adminApi.deleteContributor(id);
       setContributors(cs => cs.filter(c => c.id !== id));
-    } catch (err: any) { alert(err.message || 'Erreur suppression'); }
+    } catch (err) { alert(errorMessage(err, 'Erreur suppression')); }
   };
 
   const toggleVisibility = async (c: Contributor) => {
