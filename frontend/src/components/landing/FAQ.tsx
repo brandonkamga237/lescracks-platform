@@ -40,7 +40,7 @@ const FAQ = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className={`text-3xl md:text-4xl font-display font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <h2 className={`text-3xl md:text-4xl font-display font-bold ${isDark ? 'text-white' : 'text-t1'}`}>
             Questions <span className="text-gold">frequentes</span>
           </h2>
         </motion.div>
@@ -59,10 +59,10 @@ const FAQ = () => {
                 className={`w-full flex items-center justify-between p-6 border transition-colors text-left group theme-transition ${
                   isDark 
                     ? 'bg-black border-line-soft hover:border-gold/30' 
-                    : 'bg-white border-gray-200 hover:border-gold/30'
+                    : 'bg-surface-1 border-line hover:border-gold/30'
                 }`}
               >
-                <span className={`font-medium pr-4 group-hover:text-gold transition-colors ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <span className={`font-medium pr-4 group-hover:text-gold transition-colors ${isDark ? 'text-white' : 'text-t1'}`}>
                   {faq.question}
                 </span>
                 <ChevronDown
@@ -80,7 +80,7 @@ const FAQ = () => {
                     transition={{ duration: 0.3, ease: 'easeInOut' }}
                     className="overflow-hidden"
                   >
-                    <div className={`p-6 pt-0 leading-relaxed ${isDark ? 'text-t3' : 'text-gray-600'}`}>
+                    <div className={`p-6 pt-0 leading-relaxed ${isDark ? 'text-t3' : 'text-t3'}`}>
                       {faq.answer}
                     </div>
                   </motion.div>

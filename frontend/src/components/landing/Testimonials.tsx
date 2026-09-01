@@ -48,7 +48,7 @@ const Testimonials = () => {
   const { isDark } = useTheme();
 
   return (
-    <section className={`py-24 relative theme-transition ${isDark ? 'bg-[#0a0a0a]' : 'bg-gray-100'}`}>
+    <section className={`py-24 relative theme-transition ${isDark ? 'bg-[#0a0a0a]' : 'bg-surface-2'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -56,7 +56,7 @@ const Testimonials = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className={`text-3xl md:text-4xl font-display font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <h2 className={`text-3xl md:text-4xl font-display font-bold ${isDark ? 'text-white' : 'text-t1'}`}>
             Ils ont <span className="text-gold">reussi</span>
           </h2>
         </motion.div>
@@ -82,7 +82,7 @@ const Testimonials = () => {
                 className={`p-8 border transition-colors theme-transition ${
                   isDark 
                     ? 'bg-black border-line-soft hover:border-gold/20' 
-                    : 'bg-white border-gray-200 hover:border-gold/30'
+                    : 'bg-surface-1 border-line hover:border-gold/30'
                 }`}
               >
                 <div className="flex items-center gap-4 mb-6">
@@ -92,12 +92,12 @@ const Testimonials = () => {
                     {testimonial.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
                   </div>
                   <div>
-                    <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{testimonial.name}</p>
-                    <p className={`text-xs ${isDark ? 'text-t3' : 'text-gray-500'}`}>{testimonial.role}</p>
+                    <p className={`font-semibold ${isDark ? 'text-white' : 'text-t1'}`}>{testimonial.name}</p>
+                    <p className={`text-xs ${isDark ? 'text-t3' : 'text-t3'}`}>{testimonial.role}</p>
                   </div>
                 </div>
-                <p className={`leading-relaxed mb-4 ${isDark ? 'text-t3' : 'text-gray-600'}`}>
-                  "{testimonial.quote}"
+                <p className={`leading-relaxed mb-4 ${isDark ? 'text-t3' : 'text-t3'}`}>
+ "{testimonial.quote}"
                 </p>
                 <p className="text-xs text-gold">{testimonial.company}</p>
               </motion.div>
@@ -137,7 +137,7 @@ const Testimonials = () => {
               className={`inline-flex items-center gap-2 px-6 py-3 border transition-colors ${
                 isDark 
                   ? 'border-line text-t2 hover:text-white hover:border-gold/30' 
-                  : 'border-gray-300 text-gray-600 hover:text-gray-900 hover:border-gold/30'
+                  : 'border-line text-t3 hover:text-t1 hover:border-gold/30'
               }`}
             >
               Reduire
