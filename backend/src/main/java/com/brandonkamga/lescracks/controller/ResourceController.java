@@ -350,6 +350,24 @@ public class ResourceController {
 
     // ── File upload ──────────────────────────────────────────────────────────────
 
+    @PostMapping(value = "/upload/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Upload an image",
+               description = "Stores a preview or cover image and returns its url. Reserved for administrators.")
+    public ResponseEntity<ApiResponse<String>> uploadImage(
+            @RequestParam("file") MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new BadRequestException("File is empty");
+        }
+        requireExtensionIn(file.getOriginalFilename(), ALLOWED_IMAGE_EXTENSIONS,
+                "Format d'image non autorisé. Formats acceptés : JPEG, PNG, WebP, GIF.");
+        String url = resourceService.storeFile(
+                file.getOriginalFilename(),
+                file.getBytes(),
+                file.getContentType());
+        return ResponseEntity.ok(ApiResponse.success(url, "Image uploaded successfully"));
+    }
+
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Upload a resource file",
@@ -359,7 +377,9 @@ public class ResourceController {
         if (file.isEmpty()) {
             throw new BadRequestException("File is empty");
         }
-        requireAllowedExtension(file.getOriginalFilename());
+        requireExtensionIn(file.getOriginalFilename(), ALLOWED_DOCUMENT_EXTENSIONS,
+                "Format non autorisé. Formats acceptés : documents (PDF, Word, Excel, PowerPoint, texte) "
+                        + "et vidéos (MP4, WebM, MOV).");
         String url = resourceService.storeFile(
                 file.getOriginalFilename(),
                 file.getBytes(),
@@ -501,21 +521,20 @@ public class ResourceController {
      * so anything the browser renders as markup (html, svg, …) would run on the API origin.
      * Only the document, video and image formats the catalogue actually uses are accepted.
      */
-    private static final Set<String> ALLOWED_UPLOAD_EXTENSIONS = Set.of(
+    private static final Set<String> ALLOWED_DOCUMENT_EXTENSIONS = Set.of(
             "pdf", "doc", "docx", "odt", "rtf", "txt", "md",
-            "ppt", "pptx", "odp", "xls", "xlsx", "ods", "csv",
-            "zip",
-            "mp4", "webm", "mov", "m4v",
+            "ppt", "pptx", "odp", "xls", "xlsx", "ods", "csv", "zip",
+            "mp4", "webm", "mov", "m4v");
+
+    private static final Set<String> ALLOWED_IMAGE_EXTENSIONS = Set.of(
             "jpg", "jpeg", "png", "webp", "gif");
 
-    private void requireAllowedExtension(String originalFileName) {
+    private void requireExtensionIn(String originalFileName, Set<String> allowed, String message) {
         String name = originalFileName == null ? "" : originalFileName;
         int dot = name.lastIndexOf('.');
         String extension = dot >= 0 ? name.substring(dot + 1).toLowerCase(Locale.ROOT) : "";
-        if (!ALLOWED_UPLOAD_EXTENSIONS.contains(extension)) {
-            throw new BadRequestException(
-                    "Format de fichier non autorisé. Formats acceptés : documents (PDF, Word, Excel, PowerPoint, texte), "
-                            + "vidéos (MP4, WebM, MOV) et images.");
+        if (!allowed.contains(extension)) {
+            throw new BadRequestException(message);
         }
     }
 

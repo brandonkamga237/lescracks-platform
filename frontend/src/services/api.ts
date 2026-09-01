@@ -402,12 +402,12 @@ class ApiService {
     return data;
   }
 
-  /** Upload a file to the resource upload endpoint and return its public URL. */
-  private async uploadFile(file: File): Promise<string> {
+  /** Posts one file to an upload endpoint and returns the url it answers with. */
+  private async uploadFile(file: File, endpoint: string): Promise<string> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${API_BASE_URL}/resources/upload`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       credentials: 'include',
       body: formData,
@@ -418,14 +418,14 @@ class ApiService {
     throw new Error(json.message || 'Upload failed');
   }
 
-  /** Upload an image and get back its public URL. */
+  /** Upload an image (preview, cover) and get back its url. Images only. */
   async uploadImage(file: File): Promise<string> {
-    return this.uploadFile(file);
+    return this.uploadFile(file, '/resources/upload/image');
   }
 
-  /** Upload a resource file (PDF, video, etc.) and get back its public URL. */
+  /** Upload a document or a video and get back its url. Images are refused here. */
   async uploadResourceFile(file: File): Promise<string> {
-    return this.uploadFile(file);
+    return this.uploadFile(file, '/resources/upload');
   }
 
   // === LEARNERS (public) ===
