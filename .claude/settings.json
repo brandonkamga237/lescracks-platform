@@ -15,7 +15,9 @@
       "Bash(git status:*)",
       "Bash(git diff:*)",
       "Bash(git log:*)",
-      "Bash(git branch:*)"
+      "Bash(git branch:*)",
+      "Bash(git merge:*)",
+      "Bash(git push origin develop:*)"
     ],
     "deny": [
       "Read(./.env)",
