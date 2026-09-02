@@ -25,8 +25,21 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
      * one that mattered was broken for months because nothing exercised that particular
      * corner. Every parameter is nullable and a null means "no filter on this".
      */
-    @Query("""
+    @Query(value = """
             SELECT DISTINCT r FROM Resource r
+            LEFT JOIN r.tags t
+            WHERE r.published = TRUE
+              AND (:kind IS NULL OR r.kind = :kind)
+              AND (:categoryId IS NULL OR r.category.id = :categoryId)
+              AND (:tagIds IS NULL OR t.id IN :tagIds)
+              AND (:search IS NULL OR LOWER(r.title) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))
+            """,
+            // Spelled out rather than derived: Spring Data renames an expanded collection
+            // parameter when it builds the count query itself, and the rewritten query then
+            // has no argument for :tagIds. It only shows once a page fills, which on a real
+            // catalogue is every page.
+            countQuery = """
+            SELECT COUNT(DISTINCT r) FROM Resource r
             LEFT JOIN r.tags t
             WHERE r.published = TRUE
               AND (:kind IS NULL OR r.kind = :kind)
