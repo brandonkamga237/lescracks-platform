@@ -121,17 +121,18 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       MINIO_BUCKET:   ${MINIO_BUCKET:-lescracks}
-      FRONTEND_URL:   ${FRONTEND_URL:-http://localhost:5173}
-      # OAuth2: Spring requires these keys at startup, even empty ones locally
-      GITHUB_CLIENT_ID:     ${GITHUB_CLIENT_ID:-}
-      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
-      GOOGLE_CLIENT_ID:     ${GOOGLE_CLIENT_ID:-}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      SITE_URL:       ${SITE_URL:-http://localhost:5173}
+      # The browser reaches Keycloak on localhost, this container reaches it by service
+      # name. The issuer must stay the browser's address or it will not match the tokens.
+      KEYCLOAK_ISSUER_URI: http://localhost:${KEYCLOAK_PORT:-8081}/realms/lescracks
+      KEYCLOAK_JWKS_URI:   http://keycloak:8080/realms/lescracks/protocol/openid-connect/certs
     depends_on:
       postgres:
         condition: service_healthy
       minio:
         condition: service_healthy
+      keycloak:
+        condition: service_started
 
 volumes:
   postgres_data:

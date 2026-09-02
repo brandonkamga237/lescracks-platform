@@ -53,6 +53,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/events", "/api/events/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/resources", "/api/resources/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories", "/api/tags").permitAll()
+                // Whether the 360 is open decides what the landing page offers.
+                .requestMatchers(HttpMethod.GET, "/api/mentorship").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/attestations/*").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/resources/*/view").permitAll()
                 // Applying does not require an account: people apply first and register after.

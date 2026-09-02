@@ -6,7 +6,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class TekizzApplicationTests {
+class LesCracksApplicationTests {
 
 	@Test
 	void contextLoads() {

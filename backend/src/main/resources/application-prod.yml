@@ -23,6 +23,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI}
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:${KEYCLOAK_ISSUER_URI}/protocol/openid-connect/certs}
 
 # The API surface is not public documentation. Setting these off is what actually removes
 # the routes; the old app.swagger.enabled flag was read by nobody.

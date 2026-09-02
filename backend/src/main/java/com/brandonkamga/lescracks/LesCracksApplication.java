@@ -2,14 +2,12 @@ package com.brandonkamga.lescracks;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-@EnableJpaAuditing
 @SpringBootApplication
-public class TekizzApplication {
+public class LesCracksApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TekizzApplication.class, args);
+		SpringApplication.run(LesCracksApplication.class, args);
 	}
 
 }

@@ -1,5 +1,5 @@
 # LesCracks Platform
-French-language tech training platform: resources, events, learners, Accompagnement 360.
+French-language tech training platform: resources, events, participations, Accompagnement 360.
 Monorepo: `frontend/` React + Vite (SPA), `backend/` Spring Boot + PostgreSQL + MinIO.
 
 ## Structure
@@ -9,8 +9,8 @@ Monorepo: `frontend/` React + Vite (SPA), `backend/` Spring Boot + PostgreSQL + 
   - `domain/` → JPA entities and enums
   - `dto/` → exposed payloads (never entities)
   - `repository/` → Spring Data JPA
-  - `security/jwt/`, `security/oauth/` → JWT filter, OAuth2 handlers (GitHub, Google)
-  - `config/` → SecurityConfig, DataInitializer (seeds roles/types), OpenApiConfig
+  - `security/` → SecurityConfig (route rules) + KeycloakRoleConverter. Identity is Keycloak's; the API only verifies tokens
+  - `config/` → OpenApiConfig, JacksonConfig, AppBeans
   - `exception/` → business exceptions + `GlobalExceptionHandler`
 - `backend/src/main/resources/`
   - `application.yaml` + `application-{dev,prod,test}.yml`
@@ -65,7 +65,7 @@ Before any commit or PR:
 - Errors: throw `ResourceNotFoundException` / `BadRequestException` / `ForbiddenException`; do not set the status in the controller, `GlobalExceptionHandler` does it
 - DB schema: Flyway only (`ddl-auto: validate` everywhere). A new entity field means a new `V{n}__...sql` migration; never edit a migration that has already been applied
 - Lombok (`@Data`, `@Builder`) on DTOs and entities; logging through `slf4j`
-- Public vs protected endpoints are declared in `SecurityConfig`; roles: `user`, `learner`, `admin`
+- Public vs protected endpoints are declared in `SecurityConfig`, plus `@PreAuthorize` on each admin method; roles come from the Keycloak realm: `user`, `admin`
 - Text shown to users (emails, API errors) in French; everything else in English
 
 ### Frontend
@@ -93,7 +93,7 @@ Before any commit or PR:
 - Do not commit until `pnpm typecheck` / `./mvnw test` pass on the part that changed
 
 ### Never
-- NEVER: `git push --force`, commit `.env`, hardcode JWT_SECRET / MinIO keys / OAuth secrets
+- NEVER: `git push --force`, commit `.env`, hardcode MinIO keys / Keycloak admin credentials
 - NEVER: edit a Flyway migration that is already merged (add `V{n+1}` instead)
 - A new environment variable goes into `.env.example` AND `docker-compose.prod.yml`
 - One compose file per environment, at the root: do not recreate one under `backend/` or `frontend/`
@@ -103,13 +103,14 @@ Before any commit or PR:
 ## Architecture
 - Client-rendered SPA → nginx routes bot user-agents to `/seo/*` (HTML + JSON-LD snapshots rendered by the backend). Every new indexable public page needs its snapshot in `SeoController` and its nginx entry
 - Flyway owns the schema (Hibernate only validates) → keeps dev and prod from drifting apart
-- Stateless JWT + OAuth2 (GitHub, Google) → no server-side session
+- Keycloak owns identity (password, Google, GitHub, reset, login throttling); the API is an OAuth2 resource server and holds no credentials. Adding a provider is realm configuration, not code
 - MinIO (S3-compatible) for files and images, no application disk storage in production
 - Frontend and backend ship as separate containers behind Traefik; the frontend only talks to the backend through `/api/*`
 
 ## Vocabulary
 - **Accompagnement 360** = the flagship mentoring programme; an application to it is an `Application` with no `event`
 - **Application** = either a 360 application or an event registration (`event != null`)
-- **Learner / Apprenant** = public profile of a participant (page `/apprenants/{slug}`)
+- **Participation** = someone enrolled on an event or on the 360, `IN_PROGRESS` then `COMPLETED` or `ABANDONED`
+- **Attestation** = proof of a completed participation, checkable by anyone at `/attestations/{code}`
 - **Resource** = content (VIDEO/DOCUMENT/ARTICLE). A video is always `EXTERNAL`, a document is `UPLOADED` to MinIO, an article is `INLINE` and written in the back office
 - **SEO snapshot** = server-rendered HTML served to bots instead of the SPA

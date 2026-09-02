@@ -2,7 +2,7 @@
 # LesCracks Platform — Production Stack
 # =============================================================================
 #
-# Services: PostgreSQL · MinIO · Backend (Spring Boot) · Frontend (Nginx/SPA)
+# Services: PostgreSQL · MinIO · Keycloak · Backend (Spring Boot) · Frontend (Nginx/SPA)
 #
 # Prerequisites on the server:
 #   - Docker + Docker Compose plugin installed
@@ -35,6 +35,8 @@ services:
       POSTGRES_DB:       ${DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Creates the keycloak database, once, on an empty volume.
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test:         ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
       interval:     10s
@@ -80,6 +82,55 @@ services:
       - traefik-public
 
   # ---------------------------------------------------------------------------
+  # Keycloak - identity provider (Google, GitHub, password)
+  # Issuer: https://auth.lescracks.com/realms/lescracks
+  # ---------------------------------------------------------------------------
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: lescracks-keycloak
+    restart: unless-stopped
+    # start, not start-dev: production must not run the development profile.
+    command: start --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${DB_USERNAME}
+      KC_DB_PASSWORD: ${DB_PASSWORD}
+      KC_HOSTNAME: ${KEYCLOAK_HOSTNAME}
+      KC_HTTP_ENABLED: "true"
+      # Traefik terminates TLS. Without this Keycloak builds http:// issuer URLs
+      # and the API rejects every token it signs.
+      KC_PROXY_HEADERS: xforwarded
+      KC_HEALTH_ENABLED: "true"
+    volumes:
+      - ./keycloak/realm:/opt/keycloak/data/import:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:         ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+      interval:     15s
+      timeout:      5s
+      retries:      10
+      start_period: 90s
+    labels:
+      - "traefik.enable=true"
+      # ── HTTPS router ────────────────────────────────────────────────────────
+      - "traefik.http.routers.lescracks-auth.rule=Host(`auth.lescracks.com`)"
+      - "traefik.http.routers.lescracks-auth.entrypoints=websecure"
+      - "traefik.http.routers.lescracks-auth.tls.certresolver=le"
+      - "traefik.http.services.lescracks-auth.loadbalancer.server.port=8080"
+      # ── HTTP router (port 80) — Let's Encrypt HTTP-01 challenge ─────────────
+      - "traefik.http.routers.lescracks-auth-http.rule=Host(`auth.lescracks.com`)"
+      - "traefik.http.routers.lescracks-auth-http.entrypoints=web"
+      - "traefik.http.routers.lescracks-auth-http.middlewares=lescracks-https-redirect"
+    networks:
+      - lescracks-internal
+      - traefik-public
+
+  # ---------------------------------------------------------------------------
   # Backend API — Spring Boot (port 8080)
   # API: https://api.lescracks.com
   # ---------------------------------------------------------------------------
@@ -88,19 +139,14 @@ services:
     container_name: lescracks-backend
     restart: unless-stopped
     env_file: .env
-    environment:
-      # Override ddl-auto (update = safe for first deploy, change to validate after)
-      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_DDL_AUTO:-update}
-      # Explicit absolute paths inside the mounted volume to prevent fragile relative path resolution
-      UPLOADS_DIR: /app/uploads/resources
-      AVATAR_DIR: /app/uploads/avatars
     depends_on:
       postgres:
         condition: service_healthy
       minio:
         condition: service_healthy
+      keycloak:
+        condition: service_healthy
     volumes:
-      - backend_uploads:/app/uploads
       - backend_logs:/var/log/lescracks
     healthcheck:
       test:         ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
@@ -164,8 +210,6 @@ volumes:
     name: lescracks_postgres_data
   minio_data:
     name: lescracks_minio_data
-  backend_uploads:
-    name: lescracks_backend_uploads
   backend_logs:
     name: lescracks_backend_logs
 

@@ -29,7 +29,14 @@ spring:
         jwt:
           # Keycloak signs, this verifies. Keys are fetched from the realm, so no secret
           # lives in this file and rotating them needs no deployment.
+          #
+          # Two URLs, on purpose. issuer-uri is the public address, the one written into
+          # every token and the one checked against it. jwk-set-uri is where this process
+          # actually fetches the keys, which inside a container is the service name — the
+          # public address would not resolve. Setting it also makes the decoder lazy, so
+          # the API starts whether or not Keycloak is up yet.
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/lescracks}
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/lescracks}/protocol/openid-connect/certs}
 
   servlet:
     multipart:
