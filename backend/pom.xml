@@ -197,6 +197,15 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<configuration>
+					<systemPropertyVariables>
+						<!-- docker-java announces API 1.32 when nothing tells it otherwise, and
+						     recent daemons refuse anything below 1.40. It reads this property,
+						     not DOCKER_API_VERSION, so pinning it here is what makes the suite
+						     run the same way on every machine and in CI. -->
+						<api.version>1.41</api.version>
+					</systemPropertyVariables>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
