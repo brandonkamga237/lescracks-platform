@@ -1,429 +1,145 @@
-// src/services/adminApi.ts
-import { ENV } from '@/config/env';
-
-const API_BASE_URL = ENV.API_BASE_URL;
-
-// Types
-export interface AdminUser {
-  id: number;
-  email: string;
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  roleName: 'FREE' | 'LEARNER' | 'ADMIN';
-  providerName: string;
-  createdAt: string;
-  enabled: boolean;
-}
-
-export interface AdminCategory {
-  id: number;
-  name: string;
-  resourceCount?: number;
-}
-
-export interface AdminTag {
-  id: number;
-  name: string;
-  categoryId: number;
-  categoryName?: string;
-}
-
-export interface AdminResource {
-  id: number;
-  viewCount?: number;
-  downloadCount?: number;
-  title: string;
-  description: string;
-  url: string;
-  content?: string;
-  previewImageUrl?: string;
-  createdAt: string;
-  categoryId: number;
-  categoryName: string;
-  resourceTypeId: number;
-  resourceTypeName: string;
-  sourceType?: string;
-  downloadable?: boolean;
-}
+import { http } from '@/services/http';
+import type {
+  ApplicationResponse,
+  ApplicationStatus,
+  Category,
+  EnrolmentTarget,
+  EventDetail,
+  EventKind,
+  EventSummary,
+  Media,
+  Mentorship,
+  PageResponse,
+  Participation,
+  ParticipationStatus,
+  ResourceDetail,
+  ResourceSummary,
+  Tag,
+} from '@/services/types';
 
 /**
- * Payload for creating or updating a resource.
+ * The back office.
  *
- * `url` carries the link (EXTERNAL) or the uploaded file path (UPLOADED); `content` carries
- * the body of an article (INLINE). The backend rejects a payload that has neither.
+ * Deliberately the smallest set that keeps the platform alive: publish a resource, open or
+ * close the 360, decide a candidature, record that somebody finished. Anything beyond that
+ * waits until it is actually needed rather than being built because a table exists.
  */
 
-/** A row of the dashboard's most-viewed / most-downloaded lists. */
-export interface TopResource {
-  id: number;
+export interface ResourceCommon {
   title: string;
-  type?: string;
-  viewCount: number;
-  downloadCount: number;
-}
-
-/**
- * What the event form actually sends. eventStatusId is optional because the API derives
- * the status from the dates, and the location and cover fields were missing from the old
- * inline shape although every call passed them.
- */
-export interface AdminEventPayload {
-  title: string;
-  description?: string;
-  eventDate: string;
-  endDate?: string;
-  location?: string;
-  coverImageUrl?: string;
-  applicationRequired: boolean;
-  maxParticipants?: number | null;
-  eventTypeId: number;
-  eventStatusId?: number;
-  tagIds?: number[];
-}
-
-export interface AdminResourcePayload {
-  title: string;
-  description: string;
-  url?: string;
-  content?: string;
-  previewImageUrl?: string;
+  summary?: string;
   categoryId: number;
-  resourceTypeId: number;
   tagIds?: number[];
-  sourceType?: 'EXTERNAL' | 'UPLOADED' | 'INLINE';
-  downloadable?: boolean;
-  readingTimeMinutes?: number;
-  author?: string;
+  coverId?: number;
 }
 
-export interface AdminApplication {
-  id: number;
-  userId?: number;
-  username?: string;
-  eventId?: number;
-  eventTitle?: string;
-  applicationTypeId: number;
-  applicationTypeName: string;
-  /** True for an event sign-up, false for an Accompagnement 360 application. */
-  eventRegistration: boolean;
-  archived: boolean;
-  archivedAt?: string;
-  fullName?: string;
-  emailAddress?: string;
-  whatsappNumber?: string;
-  age?: number;
-  motivationText?: string;
-  technicalLevel?: string;
-  createdAt: string;
-}
-
-export interface AdminEvent {
-  id: number;
+export interface EventDraft {
+  kind: EventKind;
   title: string;
+  summary?: string;
   description?: string;
-  startDate?: string;
-  endDate?: string;
+  startsAt: string;
+  endsAt?: string;
   location?: string;
-  coverImageUrl?: string;
-  type: string;
-  status: string;
-  applicationRequired?: boolean;
-  maxParticipants?: number;
-  currentParticipants?: number;
+  capacity?: number;
+  coverId?: number;
 }
 
-export interface DashboardStats {
-  totalUsers: number;
-  totalResources: number;
-  totalEvents: number;
-  totalCategories: number;
-  totalTags: number;
-  usersByRole: { [key: string]: number };
-  usersByProvider: { [key: string]: number };
-  resourcesByType: { [key: string]: number };
-  resourcesByCategory: { categoryName: string; count: number }[];
-  eventsByStatus: { [key: string]: number };
-  applicationsByStatus: { [key: string]: number };
-  newUsersLast30Days: number;
-  newUsersPrev30Days: number;
-  newResourcesLast30Days: number;
-  totalViews: number;
-  totalDownloads: number;
-  topViewedResources: TopResource[];
-  topDownloadedResources: TopResource[];
-  dailyNewUsers: { date: string; count: number }[];
-  recentUsers: AdminUser[];
-  recentResources: AdminResource[];
-}
+export const adminApi = {
+  // ── Catalogue ────────────────────────────────────────────────────────────
+  resources: (page = 0, signal?: AbortSignal) =>
+    http.get<PageResponse<ResourceSummary>>('/resources/admin', { page, size: 50 }, signal),
 
-export type LearnerStatus = 'EN_COURS' | 'TERMINE_AVEC_CERTIFICAT' | 'TERMINE_SANS_CERTIFICAT';
+  createVideo: (body: { common: ResourceCommon; externalUrl: string; durationSeconds?: number }) =>
+    http.post<ResourceDetail>('/resources/admin/videos', body),
 
-export interface AdminLearner {
-  id: number;
-  userId?: number;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  slug: string;
-  bio?: string;
-  photoUrl?: string;
-  email?: string;
-  linkedinUrl?: string;
-  portfolioUrl?: string;
-  status: LearnerStatus;
-  cohort?: string;
-  showcased: boolean;
-  visible: boolean;
-  displayOrder: number;
-  createdAt: string;
-}
+  updateVideo: (id: number, body: { common: ResourceCommon; externalUrl: string; durationSeconds?: number }) =>
+    http.put<ResourceDetail>(`/resources/admin/videos/${id}`, body),
 
-export interface AdminLearnerRequest {
-  firstName: string;
-  lastName: string;
-  bio?: string;
-  photoUrl?: string;
-  email?: string;
-  linkedinUrl?: string;
-  portfolioUrl?: string;
-  status: LearnerStatus;
-  cohort?: string;
-  showcased: boolean;
-  visible: boolean;
-  displayOrder: number;
-}
+  createArticle: (body: { common: ResourceCommon; body: unknown; authorName?: string }) =>
+    http.post<ResourceDetail>('/resources/admin/articles', body),
 
-// Pagination
-export interface PaginatedResponse<T> {
-  content: T[];
-  number: number;
-  size: number;
-  totalElements: number;
-  totalPages: number;
-  first: boolean;
-  last: boolean;
-}
+  updateArticle: (id: number, body: { common: ResourceCommon; body: unknown; authorName?: string }) =>
+    http.put<ResourceDetail>(`/resources/admin/articles/${id}`, body),
 
-class AdminApiService {
-  // Auth rides on the HttpOnly cookie the browser attaches automatically — there is
-  // no token in JS to put in a header.
-  private getHeaders(): Record<string, string> {
-    return {
-      'Content-Type': 'application/json',
-    };
-  }
+  /** The file travels beside the description rather than encoded inside it. */
+  createEbook: (data: { common: ResourceCommon; pageCount?: number }, file: File) => {
+    const form = new FormData();
+    form.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    form.append('file', file);
+    return http.postForm<ResourceDetail>('/resources/admin/ebooks', form);
+  },
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const config: RequestInit = {
-      credentials: 'include',
-      ...options,
-      headers: {
-        ...this.getHeaders(),
-        ...options.headers,
-      },
-    };
+  /** Publishing is deliberate, never a side effect of editing. */
+  publishResource: (id: number, published: boolean) =>
+    http.put<ResourceDetail>(`/resources/admin/${id}/published`, undefined, { published }),
 
-    const response = await fetch(url, config);
-    const json = await response.json();
+  deleteResource: (id: number) => http.delete<void>(`/resources/admin/${id}`),
 
-    if (!response.ok) {
-      throw new Error(json.message || `Request failed with status ${response.status}`);
-    }
+  // ── Events ───────────────────────────────────────────────────────────────
+  events: (page = 0, signal?: AbortSignal) =>
+    http.get<PageResponse<EventSummary>>('/events/admin', { page, size: 50 }, signal),
 
-    if (json.success && json.data !== undefined) {
-      return json.data as T;
-    }
+  createEvent: (draft: EventDraft) => http.post<EventDetail>('/events/admin', draft),
+  updateEvent: (id: number, draft: EventDraft) => http.put<EventDetail>(`/events/admin/${id}`, draft),
+  publishEvent: (id: number, published: boolean) =>
+    http.put<EventDetail>(`/events/admin/${id}/published`, undefined, { published }),
+  deleteEvent: (id: number) => http.delete<void>(`/events/admin/${id}`),
 
-    if (!json.success) {
-      throw new Error(json.message || 'Request failed');
-    }
+  // ── Applications ─────────────────────────────────────────────────────────
+  applications: (
+    filters: { status?: ApplicationStatus; target?: EnrolmentTarget; page?: number } = {},
+    signal?: AbortSignal,
+  ) => http.get<PageResponse<ApplicationResponse>>('/applications/admin', { ...filters, size: 50 }, signal),
 
-    return json as T;
-  }
+  /** Deciding records the answer; turning it into a participation is a second, deliberate step. */
+  decide: (id: number, outcome: Exclude<ApplicationStatus, 'PENDING'>) =>
+    http.put<ApplicationResponse>(`/applications/admin/${id}/decision`, undefined, { outcome }),
 
-  // === DASHBOARD ===
-  async getDashboardStats(): Promise<DashboardStats> {
-    return this.request<DashboardStats>('/admin/dashboard');
-  }
+  // ── Participations and attestations ──────────────────────────────────────
+  participations: (
+    filters: { status?: ParticipationStatus; page?: number } = {},
+    signal?: AbortSignal,
+  ) => http.get<PageResponse<Participation>>('/participations/admin', { ...filters, size: 50 }, signal),
 
-  // === USERS ===
-  async getUsers(page = 0, size = 20): Promise<PaginatedResponse<AdminUser>> {
-    return this.request<PaginatedResponse<AdminUser>>(`/admin/users?page=${page}&size=${size}`);
-  }
+  enrolFromApplication: (applicationId: number, body: { cohort?: string; startedAt?: string } = {}) =>
+    http.post<Participation>(`/participations/admin/from-application/${applicationId}`, body),
 
-  async updateUserRole(id: number, roleName: string): Promise<AdminUser> {
-    return this.request<AdminUser>(`/admin/users/${id}/role`, {
-      method: 'PUT',
-      body: JSON.stringify({ roleName }),
-    });
-  }
+  /** Completing is what issues the attestation, and it issues exactly one. */
+  complete: (id: number, completedOn?: string) =>
+    http.put<{ code: string }>(`/participations/admin/${id}/complete`, undefined, { completedOn }),
 
-  async deleteUser(id: number): Promise<void> {
-    await this.request<void>(`/admin/users/${id}`, {
-      method: 'DELETE',
-    });
-  }
+  abandon: (id: number) => http.put<void>(`/participations/admin/${id}/abandon`),
 
-  // === CATEGORIES ===
-  async getCategories(): Promise<AdminCategory[]> {
-    return this.request<AdminCategory[]>('/admin/categories');
-  }
+  // ── Accompagnement 360 ───────────────────────────────────────────────────
+  setMentorshipOpen: (open: boolean) =>
+    http.put<Mentorship>('/mentorship/admin/open', undefined, { open }),
 
-  async createCategory(name: string): Promise<AdminCategory> {
-    return this.request<AdminCategory>('/admin/categories', {
-      method: 'POST',
-      body: JSON.stringify({ name }),
-    });
-  }
+  updateMentorship: (body: {
+    title: string;
+    summary?: string;
+    description?: string;
+    coverId?: number;
+  }) => http.put<Mentorship>('/mentorship/admin', body),
 
-  async updateCategory(id: number, name: string): Promise<AdminCategory> {
-    return this.request<AdminCategory>(`/admin/categories/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ name }),
-    });
-  }
+  // ── Taxonomy ─────────────────────────────────────────────────────────────
+  createCategory: (name: string) => http.post<Category>('/admin/categories', { name }),
+  renameCategory: (id: number, name: string) =>
+    http.put<Category>(`/admin/categories/${id}`, { name }),
+  deleteCategory: (id: number) => http.delete<void>(`/admin/categories/${id}`),
 
-  async deleteCategory(id: number): Promise<void> {
-    await this.request<void>(`/admin/categories/${id}`, {
-      method: 'DELETE',
-    });
-  }
+  createTag: (name: string, categoryId: number) =>
+    http.post<Tag>('/admin/tags', { name, categoryId }),
+  updateTag: (id: number, name: string, categoryId: number) =>
+    http.put<Tag>(`/admin/tags/${id}`, { name, categoryId }),
+  deleteTag: (id: number) => http.delete<void>(`/admin/tags/${id}`),
 
-  // === TAGS ===
-  async getTags(page = 0, size = 50): Promise<PaginatedResponse<AdminTag>> {
-    return this.request<PaginatedResponse<AdminTag>>(`/admin/tags?page=${page}&size=${size}`);
-  }
+  // ── Media ────────────────────────────────────────────────────────────────
+  uploadImage: (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return http.postForm<Media>('/media', form);
+  },
+};
 
-  async createTag(name: string, categoryId: number): Promise<AdminTag> {
-    return this.request<AdminTag>('/admin/tags', {
-      method: 'POST',
-      body: JSON.stringify({ name, categoryId }),
-    });
-  }
-
-  async updateTag(id: number, name: string, categoryId: number): Promise<AdminTag> {
-    return this.request<AdminTag>(`/admin/tags/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ name, categoryId }),
-    });
-  }
-
-  async deleteTag(id: number): Promise<void> {
-    await this.request<void>(`/admin/tags/${id}`, {
-      method: 'DELETE',
-    });
-  }
-
-  // === RESOURCES ===
-  async getResources(
-    page = 0,
-    size = 20,
-    filters: { type?: string; categoryId?: number; search?: string } = {},
-  ): Promise<PaginatedResponse<AdminResource>> {
-    const params = new URLSearchParams({ page: String(page), size: String(size) });
-    if (filters.type) params.set('type', filters.type);
-    if (filters.categoryId) params.set('categoryId', String(filters.categoryId));
-    if (filters.search) params.set('search', filters.search);
-    return this.request<PaginatedResponse<AdminResource>>(`/admin/resources?${params}`);
-  }
-
-  /** Type ids are database rows, not constants: always read them instead of hardcoding. */
-  async getResourceTypes(): Promise<{ id: number; name: string }[]> {
-    return this.request<{ id: number; name: string }[]>('/resources/types');
-  }
-
-  async createResource(data: AdminResourcePayload): Promise<AdminResource> {
-    return this.request<AdminResource>('/resources', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async updateResource(id: number, data: AdminResourcePayload): Promise<AdminResource> {
-    return this.request<AdminResource>(`/resources/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  }
-
-  async deleteResource(id: number): Promise<void> {
-    await this.request<void>(`/resources/${id}`, {
-      method: 'DELETE',
-    });
-  }
-
-  // === APPLICATIONS / CANDIDATURES ===
-  async getApplications(): Promise<AdminApplication[]> {
-    return this.request<AdminApplication[]>('/applications');
-  }
-
-  async archiveApplication(id: number): Promise<AdminApplication> {
-    return this.request<AdminApplication>(`/applications/${id}/archive`, { method: 'PATCH' });
-  }
-
-  async unarchiveApplication(id: number): Promise<AdminApplication> {
-    return this.request<AdminApplication>(`/applications/${id}/unarchive`, { method: 'PATCH' });
-  }
-
-  async deleteApplication(id: number): Promise<void> {
-    await this.request<void>(`/applications/${id}`, { method: 'DELETE' });
-  }
-
-  // === LEARNERS ===
-  async assignLearnerRole(userId: number, cohort?: string): Promise<AdminLearner> {
-    return this.request<AdminLearner>(`/learners/admin/assign/${userId}`, {
-      method: 'POST',
-      body: JSON.stringify({ cohort: cohort ?? null }),
-    });
-  }
-
-  // === EVENTS ===
-  async getEvents(page = 0, size = 20): Promise<PaginatedResponse<AdminEvent>> {
-    return this.request<PaginatedResponse<AdminEvent>>(`/admin/events?page=${page}&size=${size}`);
-  }
-
-  async createEvent(data: AdminEventPayload): Promise<AdminEvent> {
-    return this.request<AdminEvent>('/events', { method: 'POST', body: JSON.stringify(data) });
-  }
-
-  async updateEvent(id: number, data: AdminEventPayload): Promise<AdminEvent> {
-    return this.request<AdminEvent>(`/events/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-  }
-
-  async getEventTypes(): Promise<{ id: number; name: string }[]> {
-    return this.request<{ id: number; name: string }[]>('/events/types');
-  }
-
-  async getEventStatuses(): Promise<{ id: number; name: string }[]> {
-    return this.request<{ id: number; name: string }[]>('/events/statuses');
-  }
-
-  async deleteEvent(id: number): Promise<void> {
-    await this.request<void>(`/admin/events/${id}`, { method: 'DELETE' });
-  }
-
-  // === LEARNERS ===
-  async getLearners(): Promise<AdminLearner[]> {
-    return this.request<AdminLearner[]>('/learners/admin/all');
-  }
-
-  async createLearner(data: AdminLearnerRequest): Promise<AdminLearner> {
-    return this.request<AdminLearner>('/learners/admin', { method: 'POST', body: JSON.stringify(data) });
-  }
-
-  async updateLearner(id: number, data: AdminLearnerRequest): Promise<AdminLearner> {
-    return this.request<AdminLearner>(`/learners/admin/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-  }
-
-  async deleteLearner(id: number): Promise<void> {
-    await this.request<void>(`/learners/admin/${id}`, { method: 'DELETE' });
-  }
-}
-
-export const adminApi = new AdminApiService();
 export default adminApi;

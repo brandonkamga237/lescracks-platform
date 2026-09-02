@@ -1,382 +1,166 @@
-import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '@/contexts/AuthContext';
-import {
-  Menu, X, ArrowRight, BookOpen, Video, ChevronDown,
-  User, LogOut, Shield, Award,
-  Compass, FileText,
-} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, NavLink } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { LogOut, Menu, Shield, User, X } from 'lucide-react';
+
 import LesCracksLogo from '@/components/common/LesCracksLogo';
-import { useProgrammeStatus } from '@/hooks/useProgrammeStatus';
+import { useSession } from '@/hooks/useSession';
 
-// ─── menu config — single source of truth for desktop AND mobile ─────────────
-// Order reflects what LesCracks actually does day to day: Événements and Ressources
-// lead. Accompagnement 360 is a paid, occasional offering — present, but last of the
-// dropdowns, no decorative emphasis. Open Source is a plain link (no sub-menu).
-
-const menuItems = [
-  { title: 'Événements', href: '/evenements', alignRight: false, columns: undefined },
-  {
-    title: 'Ressources',
-    href: '/ressources',
-    alignRight: false,
-    columns: [
-      { title: 'Bibliothèque', description: 'Livres, articles et guides techniques', href: '/ressources?type=DOCUMENT', icon: BookOpen },
-      { title: 'Vidéothèque', description: 'Tutoriels vidéo et formations exclusives', href: '/ressources?type=VIDEO', icon: Video },
-    ],
-  },
-  {
-    title: 'Accompagnement',
-    href: '/programme',
-    alignRight: true,
-    columns: [
-      { title: 'Le programme', description: 'Tout ce que tu dois savoir sur l\'Accompagnement 360', href: '/programme', icon: Compass },
-      { title: 'Postuler', description: 'Soumettre ta candidature', href: '/postuler', icon: FileText },
-    ],
-  },
-  { title: 'À propos', href: '/about', alignRight: false, columns: undefined },
+/**
+ * Four destinations, no dropdowns.
+ *
+ * The previous header hid the catalogue behind a mega-menu that split it by format — a
+ * distinction the catalogue itself no longer leads with. Nothing here needs a second level:
+ * a site with four public sections does not have a navigation problem to solve.
+ */
+const LINKS = [
+  { to: '/ressources', label: 'Ressources' },
+  { to: '/evenements', label: 'Événements' },
+  { to: '/programme', label: 'Accompagnement 360' },
+  { to: '/about', label: 'À propos' },
 ] as const;
 
-type MenuItem = (typeof menuItems)[number];
+export default function Header() {
+  const [open, setOpen] = useState(false);
+  const { isSignedIn, isAdmin, name, signIn, signOut } = useSession();
 
-// ─── desktop dropdown ─────────────────────────────────────────────────────────
-
-const MegaMenu = ({ item, id, onNavigate }: { item: MenuItem; id: string; onNavigate: () => void }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 8 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: 8 }}
-    transition={{ duration: 0.18, ease: 'easeOut' }}
-    className={`absolute top-full pt-3 z-50 ${item.alignRight ? 'right-0' : 'left-0'}`}
-  >
-    <div id={id} className="w-72 bg-background/95 backdrop-blur-xl border border-line rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
-      <div className="h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent" />
-      <ul className="py-2">
-        {item.columns?.map((col, i) => {
-          const Icon = col.icon;
-          return (
-            <li key={col.title}>
-              {i > 0 && <div className="mx-4 my-1 border-t border-line-soft" />}
-              <Link
-                to={col.href}
-                onClick={onNavigate}
-                className="group flex items-start gap-3 px-4 py-3 hover:bg-secondary/50 transition-colors"
-              >
-                <span className="w-8 h-8 mt-0.5 rounded-lg bg-white/5 border border-line-soft flex items-center justify-center flex-shrink-0 group-hover:bg-gold/10 group-hover:border-gold/20 transition-colors">
-                  <Icon className="w-4 h-4 text-t4 group-hover:text-gold transition-colors" aria-hidden="true" />
-                </span>
-                <span className="flex-1 min-w-0">
-                  <span className="block text-sm font-medium text-t2 group-hover:text-t1 transition-colors leading-snug">
-                    {col.title}
-                  </span>
-                  <span className="block text-xs text-t4 mt-0.5 leading-relaxed">{col.description}</span>
-                </span>
-                <ArrowRight className="w-3.5 h-3.5 text-t4 group-hover:text-gold group-hover:translate-x-0.5 transition-all mt-1 flex-shrink-0" aria-hidden="true" />
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-      <div className="h-px bg-gradient-to-r from-transparent via-gold/15 to-transparent" />
-    </div>
-  </motion.div>
-);
-
-// ─── header ───────────────────────────────────────────────────────────────────
-
-const Header = () => {
-  const { isAuthenticated, isAdmin, isLearner, user, logout } = useAuth();
-  const { open: programmeOpen } = useProgrammeStatus();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const [profileOpen, setProfileOpen] = useState(false);
-
-  const navRef = useRef<HTMLElement>(null);
-  const profileRef = useRef<HTMLDivElement>(null);
-
-  // Escape always closes — a keyboard user must never be trapped in a menu.
+  // A menu that survives navigation traps the reader on the page they just left.
   useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setActiveMenu(null);
-        setProfileOpen(false);
-        setMobileMenuOpen(false);
-      }
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, []);
-
-  // Outside click closes dropdowns. pointerdown covers mouse AND touch.
-  useEffect(() => {
-    const onPointerDown = (e: PointerEvent) => {
-      const t = e.target as Node;
-      if (profileRef.current && !profileRef.current.contains(t)) setProfileOpen(false);
-      if (navRef.current && !navRef.current.contains(t)) setActiveMenu(null);
-    };
-    document.addEventListener('pointerdown', onPointerDown);
-    return () => document.removeEventListener('pointerdown', onPointerDown);
-  }, []);
-
-  const handleLogout = async () => {
-    await logout();
-    setProfileOpen(false);
-  };
-
-  const getDisplayName = () =>
-    user?.firstName || user?.username || user?.email?.split('@')[0] || 'Mon compte';
-
-  const getUserInitials = () => {
-    if (user?.firstName && user?.lastName) return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
-    if (user?.username) return user.username.substring(0, 2).toUpperCase();
-    if (user?.email) return user.email.substring(0, 2).toUpperCase();
-    return 'U';
-  };
+    if (!open) return;
+    const close = () => setOpen(false);
+    window.addEventListener('popstate', close);
+    return () => window.removeEventListener('popstate', close);
+  }, [open]);
 
   return (
-    <>
-      <header className="fixed top-0 left-0 right-0 z-50 px-4 py-4 bg-background/80 backdrop-blur-lg border-b border-line">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <header className="sticky top-0 z-50 border-b border-line-soft bg-background/80 backdrop-blur">
+      <div className="mx-auto flex max-w-6xl items-center gap-8 px-6 py-4">
+        <Link to="/" className="shrink-0" aria-label="LesCracks, accueil">
+          <LesCracksLogo className="h-7 w-auto" />
+        </Link>
 
-          <Link to={isAuthenticated ? '/ressources' : '/'} className="flex items-center gap-1 flex-shrink-0">
-            {/* The logo defaults to a black "Les", which is invisible on this dark header. */}
-            <LesCracksLogo height={40} lesColor="#FFFFFF" className="w-auto" />
-            <span className="sr-only">LesCracks — accueil</span>
-          </Link>
-
-          {/* Desktop nav */}
-          <nav ref={navRef} aria-label="Navigation principale" className="hidden lg:flex items-center gap-0.5">
-            {!isAuthenticated && (
-              <Link to="/" className="px-3.5 py-2 text-sm text-t3 hover:text-t1 transition-colors rounded-lg hover:bg-secondary/40">
-                Accueil
-              </Link>
-            )}
-
-            {menuItems.map((item) => {
-              const hasMenu = Boolean(item.columns);
-              const open = activeMenu === item.title;
-              const panelId = `menu-${item.title.replace(/\s+/g, '-').toLowerCase()}`;
-
-              if (!hasMenu) {
-                return (
-                  <Link
-                    key={item.title}
-                    to={item.href}
-                    className="flex items-center gap-1.5 px-3.5 py-2 text-sm text-t3 hover:text-t1 transition-colors rounded-lg hover:bg-secondary/40"
-                  >
-                    {item.title}
-                  </Link>
-                );
+        <nav className="hidden items-center gap-7 md:flex" aria-label="Navigation principale">
+          {LINKS.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className={({ isActive }) =>
+                `text-sm transition-colors ${isActive ? 'text-t1' : 'text-t3 hover:text-t1'}`
               }
+            >
+              {link.label}
+            </NavLink>
+          ))}
+        </nav>
 
-              return (
-                <div
-                  key={item.title}
-                  className="relative"
-                  onMouseEnter={() => setActiveMenu(item.title)}
-                  onMouseLeave={() => setActiveMenu(null)}
-                >
-                  {/*
-                    A real <button>: reachable with Tab, activated with Enter/Space,
-                    and announced with its expanded state. Hover still works for the
-                    mouse — it is simply no longer the ONLY way in.
-                  */}
-                  <button
-                    type="button"
-                    aria-expanded={open}
-                    aria-haspopup="true"
-                    aria-controls={panelId}
-                    onClick={() => setActiveMenu(open ? null : item.title)}
-                    onFocus={() => setActiveMenu(item.title)}
-                    className={`flex items-center gap-1.5 px-3.5 py-2 text-sm transition-colors rounded-lg hover:bg-secondary/40 ${
-                      open ? 'text-t1 bg-secondary/40' : 'text-t3 hover:text-t1'
-                    }`}
-                  >
-                    {item.title}
-                    <ChevronDown className={`w-3 h-3 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
-                  </button>
+        <div className="ml-auto hidden items-center gap-4 md:flex">
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="flex items-center gap-1.5 text-sm text-t3 transition-colors hover:text-t1"
+            >
+              <Shield className="h-4 w-4" aria-hidden />
+              Back-office
+            </Link>
+          )}
 
-                  <AnimatePresence>
-                    {open && <MegaMenu item={item} id={panelId} onNavigate={() => setActiveMenu(null)} />}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </nav>
-
-          {/* Right — auth */}
-          <div className="flex items-center gap-3">
-            {isAuthenticated ? (
-              <div className="relative" ref={profileRef}>
-                <button
-                  type="button"
-                  aria-expanded={profileOpen}
-                  aria-haspopup="true"
-                  aria-controls="menu-profil"
-                  onClick={() => setProfileOpen(!profileOpen)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-secondary transition-colors border border-line"
-                >
-                  {user?.picture ? (
-                    <img src={user.picture} alt="" className="w-7 h-7 rounded-full object-cover" />
-                  ) : (
-                    <span className="w-7 h-7 rounded-full bg-gold/15 flex items-center justify-center" aria-hidden="true">
-                      <span className="text-gold text-xs font-semibold">{getUserInitials()}</span>
-                    </span>
-                  )}
-                  <span className="text-sm text-t1 hidden md:block">{getDisplayName()}</span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-t4 transition-transform ${profileOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
-                </button>
-
-                <AnimatePresence>
-                  {profileOpen && (
-                    <motion.div
-                      id="menu-profil"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 8 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-full mt-2 w-56 bg-background/95 backdrop-blur-xl border border-line rounded-2xl shadow-2xl shadow-black/40 overflow-hidden"
-                    >
-                      <div className="h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
-                      <div className="p-3 border-b border-line-soft">
-                        <p className="text-sm font-medium text-t1 truncate">{user?.email}</p>
-                        <p className="text-xs text-t4 mt-0.5">
-                          via {user?.provider === 'local' ? 'email' : user?.provider}
-                        </p>
-                      </div>
-                      <div className="p-1.5">
-                        <Link to="/profil" onClick={() => setProfileOpen(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-t3 hover:bg-secondary hover:text-t1 transition-colors text-sm">
-                          <User className="w-4 h-4" aria-hidden="true" />Mon compte
-                        </Link>
-                        {isLearner && (
-                          <Link to="/mon-profil-apprenant" onClick={() => setProfileOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gold/80 hover:bg-gold/8 hover:text-gold transition-colors text-sm font-medium">
-                            <Award className="w-4 h-4" aria-hidden="true" />Mon profil apprenant
-                          </Link>
-                        )}
-                        {isAdmin && (
-                          <Link to="/admin" onClick={() => setProfileOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gold hover:bg-gold/8 transition-colors text-sm">
-                            <Shield className="w-4 h-4" aria-hidden="true" />Panneau Admin
-                          </Link>
-                        )}
-                      </div>
-                      <div className="p-1.5 border-t border-line-soft">
-                        <button type="button" onClick={handleLogout}
-                          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-red-400/80 hover:bg-red-500/8 hover:text-red-400 transition-colors text-sm">
-                          <LogOut className="w-4 h-4" aria-hidden="true" />Déconnexion
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ) : (
-              <div className="hidden md:flex items-center gap-3">
-                <Link to="/connexion" className="text-t3 hover:text-t1 text-sm transition-colors">
-                  Se connecter
-                </Link>
-                {/* Postuler leads to the 360 funnel — hidden while the programme is closed. */}
-                {programmeOpen && (
-                  <Link
-                    to="/postuler"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-gold text-black text-sm font-semibold hover:bg-gold-light transition-colors rounded-sm"
-                  >
-                    Postuler
-                    <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-                  </Link>
-                )}
-              </div>
-            )}
-
+          {isSignedIn ? (
+            <>
+              <Link
+                to="/profil"
+                className="flex items-center gap-1.5 text-sm text-t2 transition-colors hover:text-t1"
+              >
+                <User className="h-4 w-4" aria-hidden />
+                {name ?? 'Mon profil'}
+              </Link>
+              <button
+                type="button"
+                onClick={() => void signOut()}
+                className="text-t4 transition-colors hover:text-t2"
+                aria-label="Se déconnecter"
+              >
+                <LogOut className="h-4 w-4" aria-hidden />
+              </button>
+            </>
+          ) : (
             <button
               type="button"
-              className="p-2 lg:hidden text-t1"
-              aria-expanded={mobileMenuOpen}
-              aria-controls="menu-mobile"
-              aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => void signIn()}
+              className="rounded-full border border-line px-4 py-1.5 text-sm text-t2 transition-colors hover:border-gold-400 hover:text-t1"
             >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              Se connecter
             </button>
-          </div>
+          )}
         </div>
-      </header>
 
-      {/* ── Mobile menu — generated from the SAME config as the desktop nav.
-           It used to be a hand-written duplicate, which had already drifted
-           out of sync (the descriptions were missing).                        */}
+        <button
+          type="button"
+          onClick={() => setOpen((value) => !value)}
+          className="ml-auto text-t2 md:hidden"
+          aria-expanded={open}
+          aria-label={open ? 'Fermer le menu' : 'Ouvrir le menu'}
+        >
+          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+      </div>
+
       <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            id="menu-mobile"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="fixed top-[72px] left-0 right-0 z-40 bg-background/97 backdrop-blur-xl lg:hidden border-b border-line overflow-hidden"
+        {open && (
+          <motion.nav
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden border-t border-line-soft md:hidden"
+            aria-label="Navigation principale"
           >
-            <nav aria-label="Navigation mobile" className="p-5 space-y-1">
-              {!isAuthenticated && (
-                <Link to="/" onClick={() => setMobileMenuOpen(false)}
-                  className="block py-2.5 px-4 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-sm">
-                  Accueil
-                </Link>
-              )}
-
-              {menuItems.map((item) => (
-                <div key={item.title} className="pt-2 pb-1 border-t border-line-soft">
-                  {item.columns ? (
-                    <>
-                      <p className="text-[11px] text-t4 uppercase tracking-widest px-4 mb-1">{item.title}</p>
-                      {item.columns.map((col) => (
-                        <Link
-                          key={col.href}
-                          to={col.href}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-2 py-2.5 px-4 pl-7 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-sm"
-                        >
-                          {col.title}
-                        </Link>
-                      ))}
-                    </>
-                  ) : (
-                    <Link to={item.href} onClick={() => setMobileMenuOpen(false)}
-                      className="block py-2.5 px-4 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-sm">
-                      {item.title}
-                    </Link>
-                  )}
-                </div>
+            <div className="flex flex-col gap-1 px-6 py-4">
+              {LINKS.map((link) => (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setOpen(false)}
+                  className={({ isActive }) =>
+                    `py-2 text-base ${isActive ? 'text-t1' : 'text-t3'}`
+                  }
+                >
+                  {link.label}
+                </NavLink>
               ))}
 
-              {isAuthenticated ? (
-                <div className="border-t border-line-soft mt-2 pt-3">
-                  <Link to="/profil" onClick={() => setMobileMenuOpen(false)}
-                    className="block py-2.5 px-4 text-gold hover:bg-gold/8 rounded-xl text-sm font-medium">
-                    Mon Profil
+              <div className="mt-3 flex flex-col gap-1 border-t border-line-soft pt-3">
+                {isAdmin && (
+                  <Link to="/admin" onClick={() => setOpen(false)} className="py-2 text-t3">
+                    Back-office
                   </Link>
-                </div>
-              ) : (
-                <div className="border-t border-line-soft mt-2 pt-3 space-y-2">
-                  <Link to="/connexion" onClick={() => setMobileMenuOpen(false)}
-                    className="block py-2.5 px-4 text-t3 hover:text-t1 hover:bg-secondary rounded-xl text-sm">
-                    Se connecter
-                  </Link>
-                  {programmeOpen && (
-                    <Link to="/postuler" onClick={() => setMobileMenuOpen(false)}
-                      className="block py-3 px-4 bg-gold text-black font-semibold rounded-xl text-sm text-center">
-                      Postuler
+                )}
+                {isSignedIn ? (
+                  <>
+                    <Link to="/profil" onClick={() => setOpen(false)} className="py-2 text-t3">
+                      Mon profil
                     </Link>
-                  )}
-                </div>
-              )}
-            </nav>
-          </motion.div>
+                    <button
+                      type="button"
+                      onClick={() => void signOut()}
+                      className="py-2 text-left text-t4"
+                    >
+                      Se déconnecter
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => void signIn()}
+                    className="py-2 text-left text-t2"
+                  >
+                    Se connecter
+                  </button>
+                )}
+              </div>
+            </div>
+          </motion.nav>
         )}
       </AnimatePresence>
-    </>
+    </header>
   );
-};
-
-export default Header;
+}

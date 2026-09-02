@@ -53,6 +53,13 @@ export interface ResourceSummary {
   viewCount: number;
   published: boolean;
   createdAt: string;
+
+  /**
+   * What it costs the reader. Which one is filled follows `kind`: minutes for a video or an
+   * article, pages for an ebook. Null when nobody recorded it.
+   */
+  minutes?: number;
+  pages?: number;
 }
 
 /** Only the part matching `kind` is present; the API omits the other two. */

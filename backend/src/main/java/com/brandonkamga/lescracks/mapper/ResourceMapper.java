@@ -40,7 +40,23 @@ public class ResourceMapper {
                 resource.getId(), resource.getSlug(), resource.getKind(), resource.getTitle(),
                 resource.getSummary(), mediaMapper.toResponse(resource.getCover()),
                 resource.getCategory().getName(), tagsOf(resource),
-                resource.getViewCount(), resource.isPublished(), resource.getCreatedAt());
+                resource.getViewCount(), resource.isPublished(), resource.getCreatedAt(),
+                minutesOf(resource), pagesOf(resource));
+    }
+
+    /**
+     * How long this takes, rounded up to the minute a reader can plan around. A video of
+     * 90 seconds is two minutes of someone's evening, not one and a half.
+     */
+    private Integer minutesOf(Resource resource) {
+        if (resource instanceof ResourceVideo video && video.getDurationSeconds() != null) {
+            return Math.max(1, (int) Math.ceil(video.getDurationSeconds() / 60.0));
+        }
+        return resource instanceof ResourceArticle article ? article.getReadingMinutes() : null;
+    }
+
+    private Integer pagesOf(Resource resource) {
+        return resource instanceof ResourceEbook ebook ? ebook.getPageCount() : null;
     }
 
     public ResourceDetail toDetail(Resource resource) {

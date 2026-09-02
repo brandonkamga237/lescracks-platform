@@ -1,675 +1,149 @@
-// src/pages/Ressources.tsx
-import { useState, useEffect, useCallback } from 'react';
-import SEO from '@/components/common/SEO';
-import { CardSkeletonGrid } from '@/components/common/Skeleton';
-import { Link, useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { apiService, Resource, Tag, Category, PaginatedResponse } from '@/services/api';
-import { useAuth } from '@/contexts/AuthContext';
+import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+
 import Layout from '@/components/layout/Layout';
-import {
-  FileText,
-  PlayCircle,
-  Lock,
-  Download,
-  Search,
-  Eye,
-  ChevronLeft,
-  ChevronRight,
-  Filter,
-  X,
-  ExternalLink,
-  ArrowRight,
-  ArrowUpDown,
-} from 'lucide-react';
+import ResourceCard from '@/components/resources/ResourceCard';
+import { useApi } from '@/hooks/useApi';
+import { EFFORT_BANDS, KIND_LABEL, type EffortBand } from '@/lib/effort';
+import { api } from '@/services/api';
+import type { ResourceKind } from '@/services/types';
 
-type ResourceType = 'all' | 'VIDEO' | 'DOCUMENT';
+const KINDS: ResourceKind[] = ['VIDEO', 'ARTICLE', 'EBOOK'];
 
-/** Sort keys the backend understands (field,direction). */
-type SortKey = 'createdAt,desc' | 'createdAt,asc' | 'viewCount,desc' | 'downloadCount,desc' | 'title,asc';
+/**
+ * The catalogue.
+ *
+ * Organised by what a resource costs before what it is about: a beginner knows how much of
+ * their evening they have long before they know whether they want DevOps. Subject filters
+ * are still here — second, where they belong.
+ *
+ * The time band is applied in the browser rather than in the query: the API has no notion
+ * of it, and pushing one there would freeze a product decision into the schema before we
+ * know whether people use it.
+ */
+export default function Ressources() {
+  const [params, setParams] = useSearchParams();
+  const [band, setBand] = useState<EffortBand | null>(null);
 
-const SORT_OPTIONS: { key: SortKey; label: string }[] = [
-  { key: 'createdAt,desc',     label: 'Plus récentes' },
-  { key: 'createdAt,asc',      label: 'Plus anciennes' },
-  { key: 'viewCount,desc',     label: 'Les plus vues' },
-  { key: 'downloadCount,desc', label: 'Les plus téléchargées' },
-  { key: 'title,asc',          label: 'Titre (A-Z)' },
-];
+  const kind = (params.get('kind') as ResourceKind | null) ?? undefined;
+  const search = params.get('q') ?? '';
 
-const Ressources = () => {
-  const { isAuthenticated } = useAuth();
-  const [searchParams] = useSearchParams();
+  const catalogue = useApi(
+    (signal) => api.resources({ kind, search: search || undefined, size: 60 }, signal),
+    [kind, search],
+  );
 
-  // Initialise l'onglet actif depuis ?type=VIDEO|DOCUMENT (liens du sous-menu)
-  const initialTab = (): ResourceType => {
-    const t = searchParams.get('type');
-    if (t === 'VIDEO' || t === 'DOCUMENT') return t;
-    return 'all';
-  };
+  const visible = useMemo(() => {
+    const all = catalogue.data?.content ?? [];
+    if (!band) return all;
+    const definition = EFFORT_BANDS.find((b) => b.id === band);
+    return definition ? all.filter(definition.matches) : all;
+  }, [catalogue.data, band]);
 
-  // Data state
-  const [resources, setResources] = useState<Resource[]>([]);
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-
-  // Loading states
-  const [loading, setLoading] = useState(true);
-  const [loadingFilters, setLoadingFilters] = useState(true);
-
-  // Filter state
-  const [activeTab, setActiveTab] = useState<ResourceType>(initialTab);
-  const [searchTerm, setSearchTerm] = useState('');
-  /** What the user typed, settled. Firing a request per keystroke hammers the API and
-   *  makes the list flicker; we only search once they stop typing. */
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [selectedTags, setSelectedTags] = useState<number[]>([]);
-  const [sortBy, setSortBy] = useState<SortKey>('createdAt,desc');
-  const [showFilters, setShowFilters] = useState(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 350);
-    return () => clearTimeout(t);
-  }, [searchTerm]);
-  
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalElements, setTotalElements] = useState(0);
-  const pageSize = 12;
-
-  // Synchronise l'onglet si le query param change (navigation depuis le menu)
-  useEffect(() => {
-    const t = searchParams.get('type');
-    if (t === 'VIDEO' || t === 'DOCUMENT') setActiveTab(t);
-    else if (!t) setActiveTab('all');
-  }, [searchParams]);
-
-  // Load filters (tags and categories)
-  useEffect(() => {
-    const loadFilters = async () => {
-      try {
-        const [tagsData, categoriesData] = await Promise.all([
-          apiService.getTags(),
-          apiService.getCategories()
-        ]);
-        setTags(tagsData);
-        setCategories(categoriesData);
-      } catch (error) {
-        console.error('Failed to load filters:', error);
-      } finally {
-        setLoadingFilters(false);
-      }
-    };
-    loadFilters();
-  }, []);
-
-  // Load resources with filters and pagination
-  const fetchResources = useCallback(async () => {
-    setLoading(true);
-    try {
-      // Determine resource type filter based on tab
-      let typeFilter: 'VIDEO' | 'DOCUMENT' | undefined;
-      if (activeTab === 'VIDEO') typeFilter = 'VIDEO';
-      else if (activeTab === 'DOCUMENT') typeFilter = 'DOCUMENT';
-      
-      const response: PaginatedResponse<Resource> = await apiService.getResources({
-        type: typeFilter,
-        categoryId: selectedCategory || undefined,
-        tagIds: selectedTags.length > 0 ? selectedTags : undefined,
-        search: debouncedSearch || undefined,
-        page: currentPage,
-        size: pageSize,
-        sort: sortBy,
-      });
-
-      setResources(response.content);
-      setTotalPages(response.totalPages);
-      setTotalElements(response.totalElements);
-    } catch (error) {
-      console.error('Failed to fetch resources:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [activeTab, selectedCategory, selectedTags, debouncedSearch, sortBy, currentPage]);
-
-  // Initial load and when filters change
-  useEffect(() => {
-    fetchResources();
-  }, [fetchResources]);
-
-  // Reset to first page when filters change
-  useEffect(() => {
-    setCurrentPage(0);
-  }, [activeTab, selectedCategory, selectedTags, debouncedSearch, sortBy]);
-
-  // Handle tab change
-  const handleTabChange = (tab: ResourceType) => {
-    setActiveTab(tab);
-  };
-
-  /**
-   * Tags belong to a category. Picking a category narrows the tag list to that
-   * category's tags — the whole point of having both filters.
-   *
-   * This is what the old code claimed to do and never did: its callback was literally
-   * `return true`, because the client had dropped the tag's categoryId. Selecting a
-   * category left every tag on screen, including ones that could not possibly match.
-   */
-  const visibleTags = selectedCategory === null
-    ? tags
-    : tags.filter(tag => tag.categoryId === selectedCategory);
-
-  // Changing category can strand a selected tag that no longer belongs — drop those,
-  // otherwise the query keeps filtering on an invisible tag and returns nothing.
-  const handleCategoryChange = (categoryId: number | null) => {
-    setSelectedCategory(categoryId);
-    if (categoryId !== null) {
-      setSelectedTags(prev =>
-        prev.filter(id => tags.find(t => t.id === id)?.categoryId === categoryId)
-      );
-    }
-  };
-
-  // Handle tag toggle
-  const handleTagToggle = (tagId: number) => {
-    setSelectedTags(prev =>
-      prev.includes(tagId)
-        ? prev.filter(id => id !== tagId)
-        : [...prev, tagId]
-    );
-  };
-
-  // Clear all filters
-  const clearFilters = () => {
-    setSelectedCategory(null);
-    setSelectedTags([]);
-    setSearchTerm('');
-    setSortBy('createdAt,desc');
-  };
-
-  // Handle search submit
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Search is triggered by useEffect on searchTerm change
-  };
-
-  // Handle pagination
-  const goToPage = (page: number) => {
-    if (page >= 0 && page < totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  /**
-   * Browsing the catalogue is public; opening the CONTENT is not.
-   *
-   * Opening a resource needs an account; browsing the catalogue does not.
-   */
-  const canAccess = () => isAuthenticated;
-
-  const handleOpen = async (resource: Resource) => {
-    window.open(resource.url, '_blank', 'noopener,noreferrer');
-    // Keep the figure on the card in step with the view we just recorded.
-    await apiService.trackResourceView(resource.id);
-    setResources(prev => prev.map(r =>
-      r.id === resource.id ? { ...r, viewCount: (r.viewCount ?? 0) + 1 } : r,
-    ));
-  };
-
-  const handleDownload = async (resource: Resource) => {
-    try {
-      const url = await apiService.trackResourceDownload(resource.id);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = resource.metadata?.originalFileName || resource.title;
-      a.target = '_blank';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } catch {
-      // Fallback: open directly
-      window.open(resource.url, '_blank', 'noopener,noreferrer');
-    }
-  };
-
-  // Get display name for resource type
-  const getResourceTypeName = (type: string) => {
-    return type === 'VIDEO' ? 'Video' : 'Document';
-  };
-
-  // Check if any filters are active
-  const activeFilterCount =
-    (selectedCategory ? 1 : 0) + selectedTags.length + (searchTerm ? 1 : 0);
-
-  const hasActiveFilters =
-    selectedCategory !== null || selectedTags.length > 0 || searchTerm !== '' || sortBy !== 'createdAt,desc';
-
+  function setParam(key: string, value: string | null) {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    setParams(next, { replace: true });
+  }
 
   return (
     <Layout>
-      <SEO
-        title="Ressources tech — vidéos et documents"
-        description="Accède à la bibliothèque de ressources LesCracks : tutoriels vidéo, guides techniques, articles et formations exclusives pour les apprenants."
-        url="/ressources"
-      />
-      <div className="pt-8 pb-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="mx-auto max-w-4xl px-6 py-16 sm:py-24">
+        <header className="max-w-2xl">
+          <h1 className="font-display text-4xl font-semibold leading-tight text-t1 sm:text-5xl">
+            Vous avez combien de temps&nbsp;?
+          </h1>
+          <p className="mt-4 text-lg leading-relaxed text-t3">
+            Tout ce qu’on publie est rangé par ce que ça vous demande, pas par sujet.
+            Choisissez le temps que vous avez devant vous.
+          </p>
+        </header>
 
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              Nos <span className="text-gold">Ressources</span>
-            </h1>
-            <p className="text-t2 max-w-2xl">
-              Accedez a notre bibliotheque de documents et videos pour accelerer votre apprentissage.
-            </p>
-            {totalElements > 0 && (
-              <p className="text-t3 text-sm mt-2">
-                {totalElements} ressource{totalElements !== 1 ? 's' : ''} disponible{totalElements !== 1 ? 's' : ''}
-              </p>
-            )}
-          </div>
-
-          {/* Tabs — IDs match #bibliotheque / #videotheque hash links from nav/footer */}
-          <div className="flex items-center gap-4 mb-6 border-b border-line overflow-x-auto">
-            <button
-              onClick={() => handleTabChange('all')}
-              className={`py-3 px-1 border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'all'
-                  ? 'border-gold text-gold'
-                  : 'border-transparent text-t2 hover:text-white'
-              }`}
-            >
-              Toutes les ressources
-            </button>
-            <button
-              id="bibliotheque"
-              onClick={() => handleTabChange('DOCUMENT')}
-              className={`py-3 px-1 border-b-2 transition-colors flex items-center gap-2 whitespace-nowrap ${
-                activeTab === 'DOCUMENT'
-                  ? 'border-gold text-gold'
-                  : 'border-transparent text-t2 hover:text-white'
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              Bibliothèque
-            </button>
-            <button
-              id="videotheque"
-              onClick={() => handleTabChange('VIDEO')}
-              className={`py-3 px-1 border-b-2 transition-colors flex items-center gap-2 whitespace-nowrap ${
-                activeTab === 'VIDEO'
-                  ? 'border-gold text-gold'
-                  : 'border-transparent text-t2 hover:text-white'
-              }`}
-            >
-              <PlayCircle className="w-4 h-4" />
-              Vidéothèque
-            </button>
-          </div>
-
-          {/* Search and Filters Bar */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            {/* Search */}
-            <form onSubmit={handleSearch} className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-t4" />
-              <input
-                type="text"
-                placeholder="Rechercher une ressource..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="input pl-10 w-full"
-              />
-            </form>
-
-            {/* Sort — the backend has always supported it; the client hard-coded
-                'createdAt,desc' and never let anyone change it. */}
-            <div className="relative">
-              <label htmlFor="sort" className="sr-only">Trier les ressources</label>
-              <select
-                id="sort"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortKey)}
-                className="input pr-8 appearance-none cursor-pointer"
+        {/* The primary filter, first and largest, because it is the real question. */}
+        <div className="mt-10 flex flex-wrap gap-3">
+          {EFFORT_BANDS.map((definition) => {
+            const active = band === definition.id;
+            return (
+              <button
+                key={definition.id}
+                type="button"
+                onClick={() => setBand(active ? null : definition.id)}
+                aria-pressed={active}
+                className={`rounded-full border px-5 py-2.5 text-left transition-colors ${
+                  active
+                    ? 'border-gold-400 bg-gold-400/10 text-t1'
+                    : 'border-line text-t2 hover:border-line-strong hover:text-t1'
+                }`}
               >
-                {SORT_OPTIONS.map(o => (
-                  <option key={o.key} value={o.key}>{o.label}</option>
-                ))}
-              </select>
-              <ArrowUpDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-t4 pointer-events-none" />
-            </div>
-
-            {/* Filter Toggle */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`btn-secondary flex items-center gap-2 ${showFilters ? 'bg-gold/20 border-gold text-gold' : ''}`}
-            >
-              <Filter className="w-4 h-4" />
-              Filtres
-              {activeFilterCount > 0 && (
-                <span className="ml-1 px-2 py-0.5 text-xs bg-gold text-black rounded-full">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
-          </div>
-
-          {/* Filter Panel */}
-          {showFilters && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mb-6 p-4 rounded-lg bg-white/5 border border-line"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">Filtres</h3>
-                {hasActiveFilters && (
-                  <button
-                    onClick={clearFilters}
-                    className="text-sm text-gold hover:text-gold/80 flex items-center gap-1"
-                  >
-                    <X className="w-3 h-3" />
-                    Effacer
-                  </button>
-                )}
-              </div>
-
-              {/* Categories */}
-              <div className="mb-4">
-                <label className="block text-sm text-t2 mb-2">Categorie</label>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => handleCategoryChange(null)}
-                    className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
-                      selectedCategory === null
-                        ? 'bg-gold text-black'
-                        : 'bg-white/10 text-t2 hover:bg-white/20'
-                    }`}
-                  >
-                    Toutes
-                  </button>
-                  {categories.map(category => (
-                    <button
-                      key={category.id}
-                      onClick={() => handleCategoryChange(category.id)}
-                      className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
-                        selectedCategory === category.id
-                          ? 'bg-gold text-black'
-                          : 'bg-white/10 text-t2 hover:bg-white/20'
-                      }`}
-                    >
-                      {category.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tags */}
-              {!loadingFilters && tags.length > 0 && (
-                <div>
-                  <label className="block text-sm text-t2 mb-2">
-                    Tags (selection multiple - OU logique)
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {visibleTags.map(tag => (
-                      <button
-                        key={tag.id}
-                        onClick={() => handleTagToggle(tag.id)}
-                        className={`px-3 py-1.5 text-sm rounded-full transition-colors ${
-                          selectedTags.includes(tag.id)
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-white/10 text-t2 hover:bg-white/20'
-                        }`}
-                      >
-                        {tag.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          )}
-
-          {/* Active Filters Display */}
-          {hasActiveFilters && (
-            <div className="flex flex-wrap items-center gap-2 mb-6">
-              <span className="text-sm text-t3">Filtres actifs:</span>
-              {selectedCategory !== null && (
-                <span className="px-2 py-1 text-xs bg-white/10 rounded-full flex items-center gap-1">
-                  Categorie: {categories.find(c => c.id === selectedCategory)?.name}
-                  <button onClick={() => handleCategoryChange(null)} className="hover:text-gold">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-              {selectedTags.map(tagId => (
-                <span key={tagId} className="px-2 py-1 text-xs bg-blue-500/20 text-blue-400 rounded-full flex items-center gap-1">
-                  {tags.find(t => t.id === tagId)?.name}
-                  <button onClick={() => handleTagToggle(tagId)} className="hover:text-white">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              ))}
-              {searchTerm && (
-                <span className="px-2 py-1 text-xs bg-white/10 rounded-full flex items-center gap-1">
-                  Recherche: "{searchTerm}"
-                  <button onClick={() => setSearchTerm('')} className="hover:text-gold">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* Resources Grid */}
-          {loading ? (
-            <CardSkeletonGrid count={6} />
-          ) : resources.length > 0 ? (
-            <>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {resources.map((resource) => (
-                  <motion.div
-                    key={resource.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0 }}
-                    className="card card-hover overflow-hidden h-full flex flex-col"
-                  >
-                    {/* Thumbnail */}
-                    <div className="h-36 bg-gradient-to-br from-gold/10 to-white/3 rounded-xl mb-4 flex items-center justify-center relative overflow-hidden">
-                      {resource.previewImageUrl ? (
-                        <img src={resource.previewImageUrl} alt={resource.title}
-                          className="absolute inset-0 w-full h-full object-cover opacity-60" />
-                      ) : null}
-                      {resource.resourceTypeName === 'VIDEO' ? (
-                        <PlayCircle className="w-12 h-12 text-gold/40 relative z-10" />
-                      ) : (
-                        <FileText className="w-12 h-12 text-gold/40 relative z-10" />
-                      )}
-                    </div>
-
-                    {/* Type, Category */}
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <span className={`px-2 py-0.5 text-xs rounded-full ${
-                        resource.resourceTypeName === 'VIDEO'
-                          ? 'bg-blue-500/15 text-blue-400'
-                          : 'bg-gold/15 text-gold'
-                      }`}>
-                        {getResourceTypeName(resource.resourceTypeName)}
-                      </span>
-                      {resource.categoryName && (
-                        <span className="px-2 py-0.5 text-xs rounded-full bg-white/5 text-t4">
-                          {resource.categoryName}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Tags */}
-                    {resource.tags && resource.tags.length > 0 && (
-                      <div className="flex items-center gap-1 mb-2 flex-wrap">
-                        {resource.tags.slice(0, 3).map(tag => (
-                          <span key={tag.id} className="px-1.5 py-0.5 text-[11px] rounded bg-white/5 text-t4">
-                            {tag.name}
-                          </span>
-                        ))}
-                        {resource.tags.length > 3 && (
-                          <span className="text-[11px] text-t4">+{resource.tags.length - 3}</span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Title */}
-                    <h3 className="text-base font-semibold mb-1.5 leading-snug">{resource.title}</h3>
-
-                    {/* Description */}
-                    <p className="text-t3 text-sm mb-3 line-clamp-2 leading-relaxed flex-1">
-                      {resource.description}
-                    </p>
-
-                    {/* Indicators */}
-                    <div className="flex items-center gap-3 mb-3 text-xs text-t4">
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-3 h-3" />
-                        {resource.viewCount ?? 0}
-                      </span>
-                      {resource.downloadable && resource.resourceTypeName !== 'VIDEO' && (
-                        <span className="flex items-center gap-1">
-                          <Download className="w-3 h-3" />
-                          {resource.downloadCount ?? 0}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* CTA */}
-                    {canAccess() ? (
-                      <div className="flex gap-2 mt-auto pt-2">
-                        {resource.slug ? (
-                          <Link
-                            to={`/ressources/${resource.slug}`}
-                            className="flex-1 btn-secondary text-center flex items-center justify-center gap-2 text-sm py-2"
-                          >
-                            {resource.resourceTypeName === 'VIDEO' ? (
-                              <><PlayCircle className="w-4 h-4" />Regarder</>
-                            ) : (
-                              <><ArrowRight className="w-4 h-4" />Voir</>
-                            )}
-                          </Link>
-                        ) : (
-                          <button
-                            onClick={() => handleOpen(resource)}
-                            className="flex-1 btn-secondary text-center flex items-center justify-center gap-2 text-sm py-2"
-                          >
-                            {resource.resourceTypeName === 'VIDEO' ? (
-                              <><PlayCircle className="w-4 h-4" />Regarder</>
-                            ) : (
-                              <><ExternalLink className="w-4 h-4" />Consulter</>
-                            )}
-                          </button>
-                        )}
-                        {resource.downloadable && resource.resourceTypeName !== 'VIDEO' && (
-                          <button
-                            onClick={() => handleDownload(resource)}
-                            className="px-3 py-2 border border-line rounded-lg text-t3 hover:text-gold hover:border-gold/30 transition-colors"
-                            title="Télécharger"
-                          >
-                            <Download className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="w-full flex items-center justify-center gap-2 py-2 border border-line rounded-lg text-t4 text-sm cursor-not-allowed">
-                        <Lock className="w-4 h-4" />
-                        Connexion requise
-                      </div>
-                    )}
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-8">
-                  <button
-                    onClick={() => goToPage(currentPage - 1)}
-                    disabled={currentPage === 0}
-                    className="p-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  
-                  {/* Page numbers */}
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                      let pageNum: number;
-                      if (totalPages <= 5) {
-                        pageNum = i;
-                      } else if (currentPage < 3) {
-                        pageNum = i;
-                      } else if (currentPage > totalPages - 3) {
-                        pageNum = totalPages - 5 + i;
-                      } else {
-                        pageNum = currentPage - 2 + i;
-                      }
-                      
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => goToPage(pageNum)}
-                          className={`w-10 h-10 rounded-lg transition-colors ${
-                            currentPage === pageNum
-                              ? 'bg-gold text-black'
-                              : 'bg-white/10 hover:bg-white/20'
-                          }`}
-                        >
-                          {pageNum + 1}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  
-                  <button
-                    onClick={() => goToPage(currentPage + 1)}
-                    disabled={currentPage === totalPages - 1}
-                    className="p-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-center text-center py-24"
-            >
-              <div className="w-24 h-24 rounded-2xl bg-white/5 border border-line flex items-center justify-center mb-6">
-                <FileText className="w-12 h-12 text-t4" />
-              </div>
-              <h3 className="text-lg font-semibold text-t2 mb-2">Aucune ressource trouvée</h3>
-              <p className="text-t4 text-sm max-w-xs mb-6">
-                {hasActiveFilters
-                  ? 'Modifiez vos filtres pour voir plus de contenu.'
-                  : 'Les ressources arrivent bientôt. Créez un compte pour être notifié.'}
-              </p>
-              {hasActiveFilters && (
-                <button onClick={clearFilters} className="btn-primary">
-                  Réinitialiser les filtres
-                </button>
-              )}
-              {!isAuthenticated && !hasActiveFilters && (
-                <Link to="/inscription" className="btn-primary">
-                  Créer un compte gratuit
-                </Link>
-              )}
-            </motion.div>
-          )}
+                <span className="block text-sm font-medium">{definition.label}</span>
+                <span className="block text-xs text-t4">{definition.hint}</span>
+              </button>
+            );
+          })}
         </div>
+
+        {/* Subject filters, deliberately quieter. */}
+        <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line-soft pt-6 text-sm">
+          <button
+            type="button"
+            onClick={() => setParam('kind', null)}
+            className={!kind ? 'text-t1' : 'text-t4 hover:text-t2'}
+          >
+            Tous les formats
+          </button>
+          {KINDS.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setParam('kind', kind === option ? null : option)}
+              className={kind === option ? 'text-t1' : 'text-t4 hover:text-t2'}
+            >
+              {KIND_LABEL[option]}
+            </button>
+          ))}
+
+          <label className="ml-auto flex items-center gap-2">
+            <span className="sr-only">Rechercher une ressource</span>
+            <input
+              type="search"
+              defaultValue={search}
+              placeholder="Rechercher…"
+              onChange={(event) => setParam('q', event.target.value || null)}
+              className="w-44 border-b border-line bg-transparent py-1 text-t1 placeholder:text-t4 focus:border-gold-400 focus:outline-none"
+            />
+          </label>
+        </div>
+
+        <section className="mt-4" aria-live="polite">
+          {catalogue.loading && <p className="py-16 text-center text-t4">Chargement…</p>}
+
+          {catalogue.error && (
+            <div className="py-16 text-center">
+              <p className="text-t2">{catalogue.error.message}</p>
+              <button
+                type="button"
+                onClick={catalogue.reload}
+                className="mt-4 text-sm text-gold-400 underline underline-offset-4"
+              >
+                Réessayer
+              </button>
+            </div>
+          )}
+
+          {!catalogue.loading && !catalogue.error && visible.length === 0 && (
+            <p className="py-16 text-center text-t3">
+              {band
+                ? 'Rien dans cette durée pour l’instant. Essayez une autre.'
+                : 'Le catalogue est encore vide.'}
+            </p>
+          )}
+
+          {visible.map((resource) => (
+            <ResourceCard key={resource.id} resource={resource} />
+          ))}
+        </section>
       </div>
     </Layout>
   );
-};
-
-export default Ressources;
+}

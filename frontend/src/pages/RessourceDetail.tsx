@@ -1,335 +1,122 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import {
-  ArrowLeft,
-  FileText,
-  PlayCircle,
-  Download,
-  ExternalLink,
-  Eye,
-  Lock,
-  Tag,
-  Calendar,
-  ChevronRight,
-} from 'lucide-react';
+import { useEffect } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { ArrowLeft, Download, ExternalLink } from 'lucide-react';
+
 import Layout from '@/components/layout/Layout';
-import ResourceEngagement from '@/components/resources/ResourceEngagement';
-import SEO from '@/components/common/SEO';
-import { apiService, Resource } from '@/services/api';
-import { useAuth } from '@/contexts/AuthContext';
-import { Link as RouterLink } from 'react-router-dom';
+import ArticleBody from '@/components/resources/ArticleBody';
+import { useApi } from '@/hooks/useApi';
+import { KIND_LABEL, effortLabel } from '@/lib/effort';
+import { api } from '@/services/api';
+import { ENV } from '@/config/env';
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
-}
+const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' });
 
-function formatSize(bytes?: number) {
-  if (!bytes) return null;
-  if (bytes < 1024) return `${bytes} o`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} Ko`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} Mo`;
+function megabytes(bytes: number): string {
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
 }
 
 export default function RessourceDetail() {
-  const { slug } = useParams<{ slug: string }>();
-  const { isAuthenticated } = useAuth();
-  const [resource, setResource] = useState<Resource | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const { slug = '' } = useParams();
+  const resource = useApi((signal) => api.resource(slug, signal), [slug]);
+  const loaded = resource.data;
 
+  // Counted once the resource is actually on screen, not on every render.
   useEffect(() => {
-    if (!slug) return;
-    apiService.getResourceBySlug(slug)
-      .then(r => {
-        setResource(r);
-        // Reflect the view we are about to record, so the figure on screen matches the
-        // one now stored rather than the one read a moment earlier.
-        apiService.trackResourceView(r.id)
-          .then(() => setResource(prev => (prev ? { ...prev, viewCount: (prev.viewCount ?? 0) + 1 } : prev)))
-          .catch(() => {});
-      })
-      .catch(() => setNotFound(true))
-      .finally(() => setLoading(false));
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-gold border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (notFound || !resource) {
-    return (
-      <Layout>
-        <div className="flex flex-col items-center justify-center py-40 px-4 text-center">
-          <p className="text-5xl mb-4">📭</p>
-          <h1 className="text-2xl font-bold text-white mb-2">Ressource introuvable</h1>
-          <p className="text-t3 mb-8">Cette ressource n'existe pas ou a été retirée.</p>
-          <Link to="/ressources" className="flex items-center gap-2 text-gold hover:text-gold/80 transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Toutes les ressources
-          </Link>
-        </div>
-      </Layout>
-    );
-  }
-
-  const isVideo = resource.resourceTypeName === 'VIDEO';
-
-  /**
-   * Browsing the catalogue is public. Opening or downloading the CONTENT is not.
-   *
-   * The server now enforces this (the file endpoint used to be permitAll, so anyone
-   * with the URL could pull down any file). We mirror the rule here
-   * so the button says "connecte-toi" instead of firing a request that would 401.
-   */
-  const canAccess = isAuthenticated;
-  const fileSize = formatSize(resource.metadata?.fileSize);
-
-  const seoDescription = resource.description
-    ? resource.description.slice(0, 155)
-    : `${isVideo ? 'Vidéo' : 'Document'} LesCracks — ${resource.categoryName}${resource.tags?.length ? ' · ' + resource.tags.slice(0, 3).map(t => t.name).join(', ') : ''}`;
-
-  // Opening the resource is not a second view: landing on this page already counted one.
-  const handleOpen = () => {
-    window.open(resource.url, '_blank', 'noopener,noreferrer');
-  };
-
-  const handleDownload = async () => {
-    try {
-      const url = await apiService.trackResourceDownload(resource.id);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = resource.metadata?.originalFileName || resource.title;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setResource(prev => (prev ? { ...prev, downloadCount: (prev.downloadCount ?? 0) + 1 } : prev));
-    } catch (error) {
-      // A refusal is an answer, not a glitch: opening the raw url anyway hid the reason
-      // the download was denied.
-      setDownloadError(
-        error instanceof Error ? error.message : "Le téléchargement n'a pas pu démarrer.",
-      );
-    }
-  };
+    if (loaded?.id) api.countView(loaded.id);
+  }, [loaded?.id]);
 
   return (
     <Layout>
-      <SEO
-        title={`${resource.title} — Ressources LesCracks`}
-        description={seoDescription}
-        url={`/ressources/${resource.slug || resource.id}`}
-      />
+      <article className="mx-auto max-w-2xl px-6 py-12 sm:py-20">
+        <Link
+          to="/ressources"
+          className="inline-flex items-center gap-2 text-sm text-t4 transition-colors hover:text-t2"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          Le catalogue
+        </Link>
 
-      {/* Breadcrumb */}
-      <div className="pt-20 pb-4 px-4 max-w-4xl mx-auto">
-        <nav className="flex items-center gap-2 text-xs text-t4">
-          <RouterLink to="/ressources" className="hover:text-t2 transition-colors">Ressources</RouterLink>
-          <ChevronRight className="w-3 h-3" />
-          {resource.categoryName && (
-            <>
-              <RouterLink
-                to={`/ressources?categoryId=${resource.categoryId}`}
-                className="hover:text-t2 transition-colors"
+        {resource.loading && <p className="py-20 text-center text-t4">Chargement…</p>}
+
+        {resource.error && (
+          <div className="py-20 text-center">
+            <p className="text-t2">{resource.error.message}</p>
+          </div>
+        )}
+
+        {loaded && (
+          <>
+            <header className="mt-10">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-t4">
+                <span className="text-gold-400">{KIND_LABEL[loaded.kind]}</span>
+                <span aria-hidden>·</span>
+                <span>{loaded.categoryName}</span>
+                {effortLabel(loaded) && (
+                  <>
+                    <span aria-hidden>·</span>
+                    <span className="font-mono tabular-nums">{effortLabel(loaded)}</span>
+                  </>
+                )}
+              </div>
+
+              <h1 className="mt-4 font-display text-3xl font-semibold leading-tight text-t1 sm:text-4xl">
+                {loaded.title}
+              </h1>
+
+              {loaded.summary && (
+                <p className="mt-4 text-lg leading-relaxed text-t2">{loaded.summary}</p>
+              )}
+
+              <p className="mt-6 text-sm text-t4">
+                Publié le {dateFormat.format(new Date(loaded.createdAt))}
+                {loaded.viewCount > 0 && ` · consulté ${loaded.viewCount} fois`}
+                {loaded.article?.authorName && ` · par ${loaded.article.authorName}`}
+              </p>
+            </header>
+
+            {/* A video is watched where it lives: we point at it rather than wrap it. */}
+            {loaded.video && (
+              <a
+                href={loaded.video.externalUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="mt-10 flex items-center justify-between gap-4 rounded border border-line px-5 py-4 transition-colors hover:border-gold-400"
               >
-                {resource.categoryName}
-              </RouterLink>
-              <ChevronRight className="w-3 h-3" />
-            </>
-          )}
-          <span className="text-t3 truncate max-w-[180px]">{resource.title}</span>
-        </nav>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 pb-16">
-        <div className="grid md:grid-cols-3 gap-8">
-
-          {/* ── Main ─────────────────────────────────────────────── */}
-          <div className="md:col-span-2">
-
-            {/* Thumbnail */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="relative h-52 sm:h-64 rounded-2xl overflow-hidden bg-gradient-to-br from-white/5 to-white/2 border border-line-soft mb-6 flex items-center justify-center"
-            >
-              {resource.previewImageUrl && (
-                <img
-                  src={resource.previewImageUrl}
-                  alt={resource.title}
-                  className="absolute inset-0 w-full h-full object-cover opacity-50"
-                />
-              )}
-              {isVideo ? (
-                <PlayCircle className="w-16 h-16 text-gold/50 relative z-10" />
-              ) : (
-                <FileText className="w-16 h-16 text-gold/50 relative z-10" />
-              )}
-            </motion.div>
-
-            {/* Badges */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 }}
-              className="flex items-center gap-2 flex-wrap mb-4"
-            >
-              <span className={`px-2.5 py-1 text-xs rounded-full font-medium ${
-                isVideo ? 'bg-blue-500/15 text-blue-400' : 'bg-gold/15 text-gold'
-              }`}>
-                {isVideo ? 'Vidéo' : 'Document'}
-              </span>
-              {resource.categoryName && (
-                <span className="px-2.5 py-1 text-xs rounded-full bg-white/6 text-t3">
-                  {resource.categoryName}
-                </span>
-              )}
-              {fileSize && (
-                <span className="px-2.5 py-1 text-xs rounded-full bg-white/6 text-t4">
-                  {fileSize}
-                </span>
-              )}
-            </motion.div>
-
-            {/* Title */}
-            <motion.h1
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08 }}
-              className="text-2xl sm:text-3xl font-display font-bold text-white mb-4 leading-tight"
-            >
-              {resource.title}
-            </motion.h1>
-
-            {/* Description */}
-            {resource.description && (
-              <motion.p
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-t2 leading-relaxed mb-6 text-sm"
-              >
-                {resource.description}
-              </motion.p>
+                <span className="text-t1">Regarder la vidéo</span>
+                <ExternalLink className="h-4 w-4 shrink-0 text-gold-400" aria-hidden />
+              </a>
             )}
 
-            {/* Tags */}
-            {resource.tags && resource.tags.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.12 }}
-                className="flex items-center gap-2 flex-wrap mb-6"
+            {loaded.ebook && (
+              <a
+                href={`${ENV.API_BASE_URL}${loaded.ebook.downloadUrl.replace(/^\/api/, '')}`}
+                className="mt-10 flex items-center justify-between gap-4 rounded border border-line px-5 py-4 transition-colors hover:border-gold-400"
               >
-                <Tag className="w-3.5 h-3.5 text-t4" />
-                {resource.tags.map(tag => (
-                  <RouterLink
-                    key={tag.id}
-                    to={`/ressources?tagIds=${tag.id}`}
-                    className="px-2 py-0.5 text-xs rounded bg-white/5 border border-line-soft text-t3 hover:text-t1 hover:border-line-strong transition-colors"
-                  >
+                <span className="min-w-0">
+                  <span className="block truncate text-t1">{loaded.ebook.originalName}</span>
+                  <span className="mt-0.5 block text-sm text-t4">
+                    {megabytes(loaded.ebook.sizeBytes)}
+                    {loaded.ebook.pageCount ? ` · ${loaded.ebook.pageCount} pages` : ''}
+                  </span>
+                </span>
+                <Download className="h-4 w-4 shrink-0 text-gold-400" aria-hidden />
+              </a>
+            )}
+
+            {loaded.article && <ArticleBody body={loaded.article.body} />}
+
+            {loaded.tags.length > 0 && (
+              <footer className="mt-16 flex flex-wrap gap-2 border-t border-line-soft pt-6">
+                {loaded.tags.map((tag) => (
+                  <span key={tag.id} className="rounded-full border border-line-soft px-3 py-1 text-xs text-t3">
                     {tag.name}
-                  </RouterLink>
+                  </span>
                 ))}
-              </motion.div>
+              </footer>
             )}
-
-            {/* Stats */}
-            <div className="flex items-center gap-5 text-xs text-t4 mb-6">
-              <span className="flex items-center gap-1.5">
-                <Eye className="w-3.5 h-3.5" />
-                {resource.viewCount ?? 0} vue{(resource.viewCount ?? 0) !== 1 ? 's' : ''}
-              </span>
-              {resource.downloadable && !isVideo && (
-                <span className="flex items-center gap-1.5">
-                  <Download className="w-3.5 h-3.5" />
-                  {resource.downloadCount ?? 0} téléchargement{(resource.downloadCount ?? 0) !== 1 ? 's' : ''}
-                </span>
-              )}
-              <span className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5" />
-                {formatDate(resource.createdAt)}
-              </span>
-            </div>
-          </div>
-
-          {/* ── Sidebar ──────────────────────────────────────────── */}
-          <div className="space-y-4">
-
-            {/* CTA card */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-white/4 border border-line-soft rounded-2xl p-5"
-            >
-              {canAccess ? (
-                <div className="space-y-3">
-                  <p className="text-xs text-t3 text-center mb-1">Accès libre</p>
-                  <button
-                    onClick={handleOpen}
-                    className="w-full flex items-center justify-center gap-2 bg-gold text-black font-semibold px-4 py-3 rounded-xl hover:bg-gold/80 transition-colors text-sm"
-                  >
-                    {isVideo ? (
-                      <><PlayCircle className="w-4 h-4" /> Regarder la vidéo</>
-                    ) : (
-                      <><ExternalLink className="w-4 h-4" /> Consulter le document</>
-                    )}
-                  </button>
-                  {resource.downloadable && !isVideo && (
-                    <button
-                      onClick={handleDownload}
-                      className="w-full flex items-center justify-center gap-2 bg-white/6 border border-line text-t1 font-medium px-4 py-2.5 rounded-xl hover:bg-white/10 transition-colors text-sm"
-                    >
-                      <Download className="w-4 h-4" /> Télécharger
-                    </button>
-                  )}
-                  {downloadError && (
-                    <p role="alert" className="text-xs text-red-400 text-center">{downloadError}</p>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center space-y-3">
-                  <div className="w-10 h-10 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto">
-                    <Lock className="w-5 h-5 text-gold" />
-                  </div>
-                  <p className="text-sm text-t2 leading-relaxed">
-                    Connecte-toi pour ouvrir cette ressource. La consultation du catalogue reste libre.
-                  </p>
-                  <Link
-                    to={`/connexion?redirect=/ressources/${resource.slug || resource.id}`}
-                    className="w-full flex items-center justify-center gap-2 bg-gold text-black font-semibold px-4 py-3 rounded-xl hover:bg-gold/80 transition-colors text-sm"
-                  >
-                    Se connecter
-                  </Link>
-                </div>
-              )}
-            </motion.div>
-
-            {/* Back */}
-            <Link
-              to="/ressources"
-              className="flex items-center gap-2 text-xs text-t4 hover:text-t2 transition-colors px-1"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Toutes les ressources
-            </Link>
-          </div>
-        </div>
-
-        {/* Likes & comments — readable by anyone, writable only with an account. */}
-        <div className="md:max-w-2xl">
-          <ResourceEngagement
-            resourceId={resource.id}
-            returnTo={`/ressources/${resource.slug || resource.id}`}
-          />
-        </div>
-      </div>
+          </>
+        )}
+      </article>
     </Layout>
   );
 }

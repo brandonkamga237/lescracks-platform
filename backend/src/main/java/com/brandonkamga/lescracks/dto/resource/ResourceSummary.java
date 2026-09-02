@@ -26,5 +26,14 @@ public record ResourceSummary(
         List<TagResponse> tags,
         long viewCount,
         boolean published,
-        Instant createdAt) {
+        Instant createdAt,
+
+        /**
+         * What this costs the reader, so the catalogue can be browsed by the time somebody
+         * actually has rather than by subject. Which of the two is filled follows {@code kind}:
+         * minutes for a video or an article, pages for an ebook. Null when unknown — an
+         * external video whose length nobody recorded.
+         */
+        Integer minutes,
+        Integer pages) {
 }

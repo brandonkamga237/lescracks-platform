@@ -217,6 +217,46 @@ class MapperTest {
         }
 
         @Test
+        @DisplayName("the catalogue says what each kind costs, in the unit that fits it")
+        void summaryCarriesTheEffort() {
+            // A beginner asks "what can I do tonight in twenty minutes", not "give me DevOps".
+            assertThat(mapper.toSummary(video()).minutes()).isEqualTo(10);
+            assertThat(mapper.toSummary(video()).pages()).isNull();
+
+            ResourceArticle written = article("{\"type\":\"doc\"}");
+            written.setReadingMinutes(7);
+            assertThat(mapper.toSummary(written).minutes()).isEqualTo(7);
+
+            ResourceEbook book = new ResourceEbook();
+            book.setId(4L);
+            book.setSlug("e");
+            book.setTitle("Un guide");
+            book.setCategory(backend);
+            book.setCreatedAt(Instant.now());
+            book.setPageCount(120);
+            assertThat(mapper.toSummary(book).pages()).isEqualTo(120);
+            assertThat(mapper.toSummary(book).minutes()).isNull();
+        }
+
+        @Test
+        @DisplayName("a part-minute is rounded up: it still costs somebody that minute")
+        void roundsPartMinutesUp() {
+            ResourceVideo short_ = video();
+            short_.setDurationSeconds(90);
+
+            assertThat(mapper.toSummary(short_).minutes()).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("a video of unknown length says nothing rather than claiming zero")
+        void unknownDurationStaysUnknown() {
+            ResourceVideo unknown = video();
+            unknown.setDurationSeconds(null);
+
+            assertThat(mapper.toSummary(unknown).minutes()).isNull();
+        }
+
+        @Test
         @DisplayName("tags come out in a stable alphabetical order, whatever the set gave")
         void tagsAreSorted() {
             ResourceVideo video = video();

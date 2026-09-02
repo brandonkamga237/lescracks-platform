@@ -1,159 +1,75 @@
-// src/pages/Postuler.tsx
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import SEO from '@/components/common/SEO';
-import { motion } from 'framer-motion';
-import { apiService } from '@/services/api';
+import { Link, useSearchParams } from 'react-router-dom';
+import { CheckCircle2 } from 'lucide-react';
+
 import Layout from '@/components/layout/Layout';
-import {
-  Crown,
-  CheckCircle,
-  Loader2,
-  ArrowRight,
-  ChevronRight,
-  User,
-  Mail,
-  Phone,
-  MessageSquare,
-  MessageCircle,
-  Clock,
-  Calendar,
-} from 'lucide-react';
-import { useProgrammeStatus } from '@/hooks/useProgrammeStatus';
+import { useApi } from '@/hooks/useApi';
+import { api } from '@/services/api';
+import { ApiError } from '@/services/http';
 
-import { errorMessage } from '@/lib/utils';
-const ACCOMPAGNEMENT_TYPE_ID = 4;
-const WHATSAPP_URL = 'https://wa.me/237691788026';
+/**
+ * Applying, to the 360 or to an event.
+ *
+ * No account is required and none is offered here: asking someone to register before they
+ * have told you anything is what loses them. The backend attaches the application to an
+ * account later, on its own, if the address turns out to belong to one.
+ */
+export default function Postuler() {
+  const [params] = useSearchParams();
+  const eventId = params.get('evenement') ? Number(params.get('evenement')) : undefined;
 
-const FEATURES = [
-  'Bilan de profil approfondi',
-  'Plan de progression personnalisé',
-  'Séances de coaching régulières avec un mentor',
-  'Accès aux ressources et à la communauté LesCracks',
-  'Préparation à l\'emploi, au freelance ou à la création',
-  'Attestation de complétion',
-];
+  const mentorship = useApi((signal) => api.mentorship(signal), []);
+  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [failure, setFailure] = useState<ApiError | null>(null);
 
-const Postuler = () => {
-  const { open: programmeOpen, message: closedMessage } = useProgrammeStatus();
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [motivation, setMotivation] = useState('');
-  const [age, setAge] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState('');
+  async function submit(form: React.FormEvent<HTMLFormElement>) {
+    form.preventDefault();
+    const data = new FormData(form.currentTarget);
+    setSending(true);
+    setFailure(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!fullName.trim()) {
-      setError('Le nom complet est requis.');
-      return;
-    }
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Veuillez saisir une adresse email valide.');
-      return;
-    }
-    if (!whatsapp.trim()) {
-      setError('Le numéro WhatsApp est requis.');
-      return;
-    }
-    if (motivation.trim().length < 50) {
-      setError('Votre motivation doit faire au moins 50 caractères.');
-      return;
-    }
-
-    setSubmitting(true);
     try {
-      await apiService.submitServiceApplication({
-        applicationTypeId: ACCOMPAGNEMENT_TYPE_ID,
-        fullName: fullName.trim(),
-        emailAddress: email.trim(),
-        whatsappNumber: whatsapp.trim(),
-        motivationText: motivation.trim(),
-        age: age ? parseInt(age, 10) : undefined,
+      await api.apply({
+        target: eventId ? 'EVENT' : 'MENTORSHIP',
+        eventId,
+        fullName: String(data.get('fullName') ?? ''),
+        email: String(data.get('email') ?? ''),
+        phone: String(data.get('phone') ?? '') || undefined,
+        motivation: String(data.get('motivation') ?? '') || undefined,
       });
-      setSubmitted(true);
-    } catch (err) {
-      setError(errorMessage(err, 'Une erreur est survenue. Veuillez réessayer.'));
+      setSent(true);
+    } catch (error) {
+      // The backend writes these sentences in French for a reason; showing our own would
+      // drift from what it actually refused.
+      setFailure(
+        error instanceof ApiError ? error : new ApiError(0, { message: 'Le serveur est injoignable.' }),
+      );
     } finally {
-      setSubmitting(false);
+      setSending(false);
     }
-  };
-
-  if (submitted) {
-    return (
-      <Layout>
-        <div className="min-h-[80vh] flex items-center justify-center px-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="max-w-md w-full text-center"
-          >
-            <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-10 h-10 text-green-400" />
-            </div>
-            <h1 className="text-2xl font-display font-bold mb-3">Candidature reçue !</h1>
-            <p className="text-t2 leading-relaxed mb-2">
-              Merci <strong className="text-white">{fullName}</strong>. Ta demande d'<strong className="text-gold">Accompagnement 360</strong> a bien été enregistrée.
-            </p>
-            <p className="text-t3 text-sm mb-2">
-              Un email de confirmation a été envoyé à <strong className="text-t2">{email}</strong>.
-            </p>
-            <p className="text-t3 text-sm mb-8">
-              Notre équipe te contactera prochainement sur WhatsApp au <strong className="text-t2">{whatsapp}</strong>.
-            </p>
-            <Link to="/" className="btn-primary">Retour à l'accueil</Link>
-          </motion.div>
-        </div>
-      </Layout>
-    );
   }
 
-  // Programme closed: no form at all — a clear message and a way to stay in touch.
-  if (!programmeOpen) {
+  const closed = !eventId && mentorship.data && !mentorship.data.open;
+
+  if (sent) {
     return (
       <Layout>
-        <SEO
-          title="Accompagnement 360 — candidatures fermées"
-          description="Les candidatures à l'Accompagnement 360 de LesCracks sont momentanément fermées. De nouvelles sessions ouvriront prochainement."
-          url="/postuler"
-        />
-        <div className="min-h-[70vh] flex items-center justify-center px-4 py-16">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-lg w-full text-center"
+        <div className="mx-auto max-w-lg px-6 py-24 text-center">
+          <CheckCircle2 className="mx-auto h-10 w-10 text-gold-400" aria-hidden />
+          <h1 className="mt-6 font-display text-2xl font-semibold text-t1">
+            Candidature reçue
+          </h1>
+          <p className="mt-4 leading-relaxed text-t3">
+            Nous la lisons et revenons vers vous par e-mail. En attendant, le catalogue est
+            ouvert&nbsp;: il n’y a rien à attendre pour commencer.
+          </p>
+          <Link
+            to="/ressources"
+            className="mt-8 inline-block rounded-full border border-line px-6 py-2.5 text-t2 transition-colors hover:border-gold-400 hover:text-t1"
           >
-            <div className="w-16 h-16 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center mx-auto mb-6">
-              <Clock className="w-7 h-7 text-gold" />
-            </div>
-            <p className="text-[11px] text-gold uppercase tracking-[0.4em] mb-4">Accompagnement 360</p>
-            <h1 className="text-2xl sm:text-3xl font-display font-bold text-white mb-4">
-              Candidatures momentanément fermées
-            </h1>
-            <p className="text-t3 leading-relaxed mb-8">{closedMessage}</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gold text-black font-semibold hover:bg-gold-light transition-colors rounded-sm"
-              >
-                <MessageCircle className="w-4 h-4" />
-                Nous contacter sur WhatsApp
-              </a>
-              <Link
-                to="/programme"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 border border-line-strong text-t2 hover:text-white transition-colors rounded-sm"
-              >
-                Découvrir le programme
-              </Link>
-            </div>
-          </motion.div>
+            Voir les ressources
+          </Link>
         </div>
       </Layout>
     );
@@ -161,186 +77,95 @@ const Postuler = () => {
 
   return (
     <Layout>
-      <SEO
-        title="Postuler à l'Accompagnement 360"
-        description="Rejoins l'Accompagnement 360 de LesCracks — suivi personnalisé de 6 à 12 mois avec mentor dédié, projets réels et attestation. Postule maintenant."
-        url="/postuler"
-      />
-      <div className="pt-8 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
+      <div className="mx-auto max-w-lg px-6 py-16 sm:py-24">
+        <h1 className="font-display text-3xl font-semibold leading-tight text-t1 sm:text-4xl">
+          {eventId ? 'S’inscrire à l’événement' : 'Postuler à l’Accompagnement 360'}
+        </h1>
+        <p className="mt-4 leading-relaxed text-t3">
+          Quelques lignes suffisent. Ce qui compte, c’est où vous en êtes et ce que vous
+          voulez atteindre — pas votre CV.
+        </p>
 
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-t4 mb-8">
-            <Link to="/" className="hover:text-gold transition-colors">Accueil</Link>
-            <ChevronRight className="w-3 h-3" />
-            <span className="text-t2">Postuler</span>
-          </div>
+        {closed && (
+          <p className="mt-8 rounded border border-line px-5 py-4 text-t2">
+            Les candidatures à l’Accompagnement 360 sont fermées pour le moment. Elles
+            rouvriront&nbsp;; les ressources et les événements restent accessibles.
+          </p>
+        )}
 
-          {/* Header */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-            <p className="text-[11px] text-gold uppercase tracking-[0.4em] mb-4">Accompagnement 360</p>
-            <h1 className="text-3xl sm:text-4xl font-display font-bold mb-3">
-              Rejoindre <span className="text-gold">LesCracks</span>
-            </h1>
-            <p className="text-t3 text-lg max-w-xl">
-              Un suivi humain et structuré pour passer de débutant à profil employable dans la tech.
-            </p>
-          </motion.div>
-
-          {/* What you get */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="rounded-2xl border border-gold/20 bg-gold/3 p-6 mb-8"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-lg bg-gold/15 flex items-center justify-center">
-                <Crown className="w-4 h-4 text-gold" />
-              </div>
-              <p className="font-display font-semibold text-white">Ce que tu obtiens</p>
-            </div>
-            <ul className="grid sm:grid-cols-2 gap-2.5">
-              {FEATURES.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm text-t2">
-                  <CheckCircle className="w-4 h-4 text-gold/60 mt-0.5 flex-shrink-0" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </motion.div>
-
-          {/* Form */}
-          <motion.form
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            onSubmit={handleSubmit}
-            className="card p-8 space-y-6"
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center">
-                <User className="w-5 h-5 text-gold" />
-              </div>
-              <div>
-                <h2 className="font-display font-semibold text-lg">Ta candidature</h2>
-                <p className="text-t3 text-sm">pour l'<span className="text-gold">Accompagnement 360</span></p>
-              </div>
-            </div>
-
-            {/* Nom complet */}
+        {!closed && (
+          <form onSubmit={submit} className="mt-10 space-y-6" noValidate>
             <div>
-              <label className="flex items-center gap-2 text-sm text-t2 mb-2">
-                <User className="w-4 h-4 text-gold" />
-                Nom complet <span className="text-red-400">*</span>
+              <label htmlFor="fullName" className="block text-sm text-t2">
+                Nom complet
               </label>
               <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
-                placeholder="Jean Dupont"
+                id="fullName"
+                name="fullName"
                 required
+                autoComplete="name"
+                className="mt-2 w-full border-b border-line bg-transparent py-2 text-t1 focus:border-gold-400 focus:outline-none"
               />
             </div>
 
-            {/* Email */}
             <div>
-              <label className="flex items-center gap-2 text-sm text-t2 mb-2">
-                <Mail className="w-4 h-4 text-gold" />
-                Adresse email <span className="text-red-400">*</span>
+              <label htmlFor="email" className="block text-sm text-t2">
+                Adresse e-mail
               </label>
               <input
+                id="email"
+                name="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
-                placeholder="jean@example.com"
                 required
+                autoComplete="email"
+                className="mt-2 w-full border-b border-line bg-transparent py-2 text-t1 focus:border-gold-400 focus:outline-none"
+              />
+              {failure?.fields?.email && (
+                <p className="mt-2 text-sm text-error">{failure.fields.email}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="phone" className="block text-sm text-t2">
+                Téléphone <span className="text-t4">(facultatif)</span>
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                autoComplete="tel"
+                className="mt-2 w-full border-b border-line bg-transparent py-2 text-t1 focus:border-gold-400 focus:outline-none"
               />
             </div>
 
-            {/* WhatsApp + Âge en ligne */}
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="flex items-center gap-2 text-sm text-t2 mb-2">
-                  <Phone className="w-4 h-4 text-gold" />
-                  Numéro WhatsApp <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="tel"
-                  value={whatsapp}
-                  onChange={(e) => setWhatsapp(e.target.value)}
-                  className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
-                  placeholder="+237 6XX XXX XXX"
-                  required
-                />
-              </div>
-              <div>
-                <label className="flex items-center gap-2 text-sm text-t2 mb-2">
-                  <Calendar className="w-4 h-4 text-gold" />
-                  Âge <span className="text-t4 text-xs">(optionnel)</span>
-                </label>
-                <input
-                  type="number"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  min={12}
-                  max={99}
-                  className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold text-sm"
-                  placeholder="ex : 22"
-                />
-              </div>
-            </div>
-
-            {/* Motivation */}
             <div>
-              <label className="flex items-center gap-2 text-sm text-t2 mb-2">
-                <MessageSquare className="w-4 h-4 text-gold" />
-                Motivation / présentation <span className="text-red-400">*</span>
+              <label htmlFor="motivation" className="block text-sm text-t2">
+                Où en êtes-vous, et où voulez-vous aller&nbsp;?
               </label>
               <textarea
-                value={motivation}
-                onChange={(e) => setMotivation(e.target.value)}
+                id="motivation"
+                name="motivation"
                 rows={5}
-                className="w-full bg-white/5 border border-line rounded-lg px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-gold resize-none text-sm"
-                placeholder="Où en es-tu ? Quel est ton objectif concret ? Pourquoi tu veux rejoindre LesCracks ? (min. 50 caractères)"
-                required
+                className="mt-2 w-full resize-y border-b border-line bg-transparent py-2 leading-relaxed text-t1 focus:border-gold-400 focus:outline-none"
               />
-              <p className={`text-xs mt-1 ${motivation.length >= 50 ? 'text-green-400' : 'text-t4'}`}>
-                {motivation.length}/50 caractères minimum
-              </p>
             </div>
 
-            {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-                {error}
-              </div>
+            {failure && !failure.fields && (
+              <p role="alert" className="rounded border border-line px-4 py-3 text-t2">
+                {failure.message}
+              </p>
             )}
 
             <button
               type="submit"
-              disabled={submitting}
-              className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2"
+              disabled={sending}
+              className="rounded-full bg-gold-400 px-6 py-3 font-medium text-black transition-colors hover:bg-gold-300 disabled:opacity-50"
             >
-              {submitting ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  Envoyer ma candidature
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              )}
+              {sending ? 'Envoi…' : 'Envoyer ma candidature'}
             </button>
-            <p className="text-center text-t4 text-xs">
-              Notre équipe te contactera prochainement sur WhatsApp.
-            </p>
-          </motion.form>
-
-        </div>
+          </form>
+        )}
       </div>
     </Layout>
   );
-};
-
-export default Postuler;
+}

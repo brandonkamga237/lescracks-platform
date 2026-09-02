@@ -1,96 +1,71 @@
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { motion, AnimatePresence, MotionConfig } from 'framer-motion';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 
-// Pages
-import Landing from './pages/Landing';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import Profile from './pages/Profile';
-import Evenements from './pages/Evenements';
-import EvenementDetail from './pages/EvenementDetail';
-import Ressources from './pages/Ressources';
-import OAuthCallback from './pages/OAuthCallback';
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import { useSession } from '@/hooks/useSession';
+import AdminLayout from '@/components/layout/AdminLayout';
+import AuthCallback from '@/pages/AuthCallback';
 
-// Admin Pages
-import AdminLayout from './components/layout/AdminLayout';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminUsers from './pages/admin/AdminUsers';
-import AdminCategories from './pages/admin/AdminCategories';
-import AdminTags from './pages/admin/AdminTags';
-import AdminResources from './pages/admin/AdminResources';
-import AdminEvents from './pages/admin/AdminEvents';
-import AdminApplications from './pages/admin/AdminApplications';
-import AdminApprenants from './pages/admin/AdminApprenants';
-import Apprenants from './pages/Apprenants';
-import ApprennantProfile from './pages/ApprennantProfile';
-import MonProfilApprenant from './pages/MonProfilApprenant';
-import Postuler from './pages/Postuler';
-import VerifyEmail from './pages/VerifyEmail';
-import ProviderUnavailable from './pages/ProviderUnavailable';
-import NotFound from './pages/NotFound';
-import About from './pages/About';
-import Programme from './pages/Programme';
-import RessourceDetail from './pages/RessourceDetail';
+import About from '@/pages/About';
+import Attestation from '@/pages/Attestation';
+import EvenementDetail from '@/pages/EvenementDetail';
+import Evenements from '@/pages/Evenements';
+import Landing from '@/pages/Landing';
+import NotFound from '@/pages/NotFound';
+import Postuler from '@/pages/Postuler';
+import Profile from '@/pages/Profile';
+import Programme from '@/pages/Programme';
+import RessourceDetail from '@/pages/RessourceDetail';
+import Ressources from '@/pages/Ressources';
 
-// Home route — landing for guests, /ressources for logged-in users
-const HomeRoute = () => {
-  const { isAuthenticated, isLoading } = useAuth();
-  if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" />
+import AdminApplications from '@/pages/admin/AdminApplications';
+import AdminCategories from '@/pages/admin/AdminCategories';
+import AdminEvents from '@/pages/admin/AdminEvents';
+import AdminParticipations from '@/pages/admin/AdminParticipations';
+import AdminResources from '@/pages/admin/AdminResources';
+import AdminTags from '@/pages/admin/AdminTags';
+
+function Waiting() {
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-gold border-t-transparent" />
     </div>
   );
-  if (isAuthenticated) return <Navigate to="/ressources" replace />;
-  return <Landing />;
-};
+}
 
-// Protected Route wrapper for any authenticated user
-const UserRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+/** Signed in or not, everyone may read the catalogue; only the door differs. */
+function MemberRoute({ children }: { children: React.ReactNode }) {
+  const { isLoading, isSignedIn, signIn } = useSession();
   const location = useLocation();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" />
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!isLoading && !isSignedIn) void signIn();
+  }, [isLoading, isSignedIn, signIn, location.pathname]);
 
-  if (!isAuthenticated) {
-    return <Navigate to={`/connexion?redirect=${encodeURIComponent(location.pathname)}`} replace />;
-  }
-
+  if (isLoading || !isSignedIn) return <Waiting />;
   return <>{children}</>;
-};
+}
 
-// Protected Route wrapper for admin
-const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isAdmin, isLoading } = useAuth();
+/**
+ * A non-admin lands on the catalogue rather than on a refusal: they did nothing wrong,
+ * they simply followed a link that was not for them.
+ */
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { isLoading, isSignedIn, isAdmin, signIn } = useSession();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-gold border-t-transparent rounded-full" />
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!isLoading && !isSignedIn) void signIn();
+  }, [isLoading, isSignedIn, signIn]);
 
-  if (!isAuthenticated || !isAdmin) {
-    return <Navigate to="/" replace />;
-  }
-
+  if (isLoading || !isSignedIn) return <Waiting />;
+  if (!isAdmin) return <Navigate to="/ressources" replace />;
   return <AdminLayout>{children}</AdminLayout>;
-};
+}
 
-function AppContent() {
+function AppRoutes() {
   const location = useLocation();
-  // Scroll to top on route change
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [location.pathname]);
@@ -102,81 +77,35 @@ function AppContent() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.25 }}
       >
         <Routes location={location}>
-          {/* Landing Page — redirects to /ressources when authenticated */}
-          <Route path="/" element={<HomeRoute />} />
-          
-          {/* Auth Routes */}
-          <Route path="/connexion" element={<Login />} />
-          <Route path="/inscription" element={<Register />} />
-          <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/oauth/callback" element={<OAuthCallback />} />
-          <Route path="/provider-unavailable" element={<ProviderUnavailable />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
-          {/* Protected Routes — authenticated users only */}
-          <Route path="/profil" element={<UserRoute><Profile /></UserRoute>} />
-
-          {/* Public — Postuler + Programme accessibles sans compte */}
-          <Route path="/postuler" element={<Postuler />} />
-          <Route path="/programme" element={<Programme />} />
-          
-          {/* Public Routes */}
-          <Route path="/about" element={<About />} />
-          <Route path="/evenements" element={<Evenements />} />
-          <Route path="/evenements/:slug" element={<EvenementDetail />} />
+          {/* Reading is what brings people in; asking them to sign up first is what keeps
+              them out. Everything below is open. */}
           <Route path="/ressources" element={<Ressources />} />
           <Route path="/ressources/:slug" element={<RessourceDetail />} />
-          <Route path="/apprenants" element={<Apprenants />} />
-          <Route path="/apprenants/:slug" element={<ApprennantProfile />} />
-          <Route path="/mon-profil-apprenant" element={<MonProfilApprenant />} />
-          
-          {/* Admin Routes */}
-          <Route path="/admin" element={
-            <AdminRoute>
-              <AdminDashboard />
-            </AdminRoute>
-          } />
-          <Route path="/admin/users" element={
-            <AdminRoute>
-              <AdminUsers />
-            </AdminRoute>
-          } />
-          <Route path="/admin/categories" element={
-            <AdminRoute>
-              <AdminCategories />
-            </AdminRoute>
-          } />
-          <Route path="/admin/tags" element={
-            <AdminRoute>
-              <AdminTags />
-            </AdminRoute>
-          } />
-          <Route path="/admin/resources" element={
-            <AdminRoute>
-              <AdminResources />
-            </AdminRoute>
-          } />
-          <Route path="/admin/events" element={
-            <AdminRoute>
-              <AdminEvents />
-            </AdminRoute>
-          } />
-          <Route path="/admin/applications" element={
-            <AdminRoute>
-              <AdminApplications />
-            </AdminRoute>
-          } />
-          <Route path="/admin/apprenants" element={
-            <AdminRoute>
-              <AdminApprenants />
-            </AdminRoute>
-          } />
+          <Route path="/evenements" element={<Evenements />} />
+          <Route path="/evenements/:slug" element={<EvenementDetail />} />
+          <Route path="/programme" element={<Programme />} />
+          <Route path="/postuler" element={<Postuler />} />
+          <Route path="/about" element={<About />} />
 
-          {/* 404 */}
+          {/* Verifying a code is done by a recruiter who has no account and wants none. */}
+          <Route path="/attestations/:code" element={<Attestation />} />
+
+          <Route path="/profil" element={<MemberRoute><Profile /></MemberRoute>} />
+
+          <Route path="/admin" element={<AdminRoute><AdminResources /></AdminRoute>} />
+          <Route path="/admin/ressources" element={<AdminRoute><AdminResources /></AdminRoute>} />
+          <Route path="/admin/evenements" element={<AdminRoute><AdminEvents /></AdminRoute>} />
+          <Route path="/admin/candidatures" element={<AdminRoute><AdminApplications /></AdminRoute>} />
+          <Route path="/admin/participations" element={<AdminRoute><AdminParticipations /></AdminRoute>} />
+          <Route path="/admin/categories" element={<AdminRoute><AdminCategories /></AdminRoute>} />
+          <Route path="/admin/tags" element={<AdminRoute><AdminTags /></AdminRoute>} />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
@@ -184,25 +113,20 @@ function AppContent() {
   );
 }
 
-function App() {
+export default function App() {
   return (
     /*
-      reducedMotion="user" makes every framer-motion animation in the app honour the
-      OS "reduce motion" setting. The CSS media query alone cannot do this: framer
-      animates via JS-driven inline styles, so it ignores CSS transition overrides.
+      reducedMotion="user" makes every framer-motion animation honour the OS setting. The
+      CSS media query alone cannot: framer animates through inline styles it sets itself.
     */
     <MotionConfig reducedMotion="user">
       <ThemeProvider>
-        <AuthProvider>
-          <Router>
-            <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-              <AppContent />
-            </div>
-          </Router>
-        </AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-background text-foreground">
+            <AppRoutes />
+          </div>
+        </Router>
       </ThemeProvider>
     </MotionConfig>
   );
 }
-
-export default App;
