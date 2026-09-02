@@ -32,12 +32,18 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, KeycloakRoleConverter roleConverter) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, KeycloakRoleConverter roleConverter,
+                                    SecurityErrorWriter errors) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             // No cookie, no session: every request carries its own bearer token.
             .csrf(csrf -> csrf.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // Rejections happen in this chain, never in a controller, so the error body has
+            // to be written here or the client gets a bare status and an empty response.
+            .exceptionHandling(handling -> handling
+                    .authenticationEntryPoint(errors)
+                    .accessDeniedHandler(errors))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/actuator/health", "/error").permitAll()
                 .requestMatchers("/seo/**", "/api/sitemap.xml").permitAll()
@@ -61,7 +67,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/applications").permitAll()
 
                 .anyRequest().authenticated())
-            .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(roleConverter)));
+            // The resource server keeps its own pair, or a bad token would answer with the
+            // bare bearer-token default instead of the body every other failure uses.
+            .oauth2ResourceServer(oauth -> oauth
+                    .jwt(jwt -> jwt.jwtAuthenticationConverter(roleConverter))
+                    .authenticationEntryPoint(errors)
+                    .accessDeniedHandler(errors));
 
         return http.build();
     }

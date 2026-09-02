@@ -36,20 +36,25 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public Application apply(ApplicationDraft draft) {
         validate(draft);
+        // Normalised once, before anything reads it: checking the raw address and storing the
+        // trimmed one let " ada@b.c " look free, and the duplicate then surfaced as a
+        // constraint violation instead of a sentence.
+        String email = draft.email().strip().toLowerCase();
+
         Event event = resolveEvent(draft);
-        refuseDuplicate(draft, event);
+        refuseDuplicate(email, draft.target(), event);
 
         Application application = Application.builder()
                 .target(draft.target())
                 .event(event)
                 .fullName(draft.fullName().strip())
-                .email(draft.email().strip().toLowerCase())
+                .email(email)
                 .phone(draft.phone())
                 .motivation(draft.motivation())
                 .build();
         // Attach the account when the address already belongs to one, so the person finds
         // the application under their profile without doing anything.
-        users.findByEmailIgnoreCase(application.getEmail()).ifPresent(application::setUser);
+        users.findByEmailIgnoreCase(email).ifPresent(application::setUser);
         return applications.save(application);
     }
 
@@ -88,9 +93,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     /** The database refuses this too; asking first turns a violation into a usable sentence. */
-    private void refuseDuplicate(ApplicationDraft draft, Event event) {
+    private void refuseDuplicate(String email, EnrolmentTarget target, Event event) {
         Long eventId = event == null ? null : event.getId();
-        if (applications.hasPendingFor(draft.email(), draft.target(), eventId)) {
+        if (applications.hasPendingFor(email, target, eventId)) {
             throw new BadRequestException(
                     "Une candidature est déjà en cours d'examen pour cette adresse.");
         }

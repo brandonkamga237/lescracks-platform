@@ -194,6 +194,36 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<!-- Coverage over both suites at once: most of the domain is only reached
+			     through the integration tests, so a surefire-only report would read as far
+			     worse than reality and push toward testing the wrong things. -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<configuration>
+					<excludes>
+						<exclude>**/dto/**</exclude>
+						<exclude>**/LesCracksApplication.class</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<id>unit-agent</id>
+						<goals><goal>prepare-agent</goal></goals>
+					</execution>
+					<execution>
+						<id>integration-agent</id>
+						<goals><goal>prepare-agent-integration</goal></goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals><goal>report</goal><goal>report-integration</goal></goals>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
