@@ -3,15 +3,12 @@
   "enabled": true,
   "displayName": "LesCracks",
   "loginTheme": "keycloak",
-
   "registrationAllowed": true,
   "registrationEmailAsUsername": true,
   "resetPasswordAllowed": true,
   "verifyEmail": true,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
-
-  "_comment_bruteforce": "Login attempt limits, which the application used to implement by hand.",
   "bruteForceProtected": true,
   "permanentLockout": false,
   "failureFactor": 5,
@@ -20,21 +17,25 @@
   "quickLoginCheckMilliSeconds": 1000,
   "minimumQuickLoginWaitSeconds": 60,
   "maxDeltaTimeSeconds": 43200,
-
   "passwordPolicy": "length(10) and notUsername and notEmail and passwordHistory(3)",
-
   "accessTokenLifespan": 900,
   "ssoSessionIdleTimeout": 1800,
   "ssoSessionMaxLifespan": 36000,
-
   "roles": {
     "realm": [
-      { "name": "user", "description": "Signed-in member" },
-      { "name": "admin", "description": "Back office" }
+      {
+        "name": "user",
+        "description": "Signed-in member"
+      },
+      {
+        "name": "admin",
+        "description": "Back office"
+      }
     ]
   },
-  "defaultRoles": ["user"],
-
+  "defaultRoles": [
+    "user"
+  ],
   "clients": [
     {
       "clientId": "lescracks-frontend",
@@ -43,9 +44,17 @@
       "publicClient": true,
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": false,
-      "redirectUris": ["http://localhost:5173/*", "https://lescracks.com/*"],
-      "webOrigins": ["http://localhost:5173", "https://lescracks.com"],
-      "attributes": { "pkce.code.challenge.method": "S256" }
+      "redirectUris": [
+        "http://localhost:5173/*",
+        "https://lescracks.com/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5173",
+        "https://lescracks.com"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
     },
     {
       "clientId": "lescracks-api",
@@ -55,22 +64,28 @@
       "publicClient": false
     }
   ],
-
-  "_comment_providers": "Adding a provider is a block here, not a class in the codebase. Fill the two secrets and it works.",
   "identityProviders": [
     {
       "alias": "google",
       "providerId": "google",
       "enabled": false,
       "trustEmail": true,
-      "config": { "clientId": "", "clientSecret": "", "defaultScope": "openid profile email" }
+      "config": {
+        "clientId": "",
+        "clientSecret": "",
+        "defaultScope": "openid profile email"
+      }
     },
     {
       "alias": "github",
       "providerId": "github",
       "enabled": false,
       "trustEmail": true,
-      "config": { "clientId": "", "clientSecret": "", "defaultScope": "user:email" }
+      "config": {
+        "clientId": "",
+        "clientSecret": "",
+        "defaultScope": "user:email"
+      }
     }
   ]
 }
