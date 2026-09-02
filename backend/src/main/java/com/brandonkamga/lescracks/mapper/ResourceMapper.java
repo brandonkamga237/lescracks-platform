@@ -37,7 +37,7 @@ public class ResourceMapper {
 
     public ResourceSummary toSummary(Resource resource) {
         return new ResourceSummary(
-                resource.getId(), resource.getSlug(), resource.kind(), resource.getTitle(),
+                resource.getId(), resource.getSlug(), resource.getKind(), resource.getTitle(),
                 resource.getSummary(), mediaMapper.toResponse(resource.getCover()),
                 resource.getCategory().getName(), tagsOf(resource),
                 resource.getViewCount(), resource.isPublished(), resource.getCreatedAt());
@@ -45,7 +45,7 @@ public class ResourceMapper {
 
     public ResourceDetail toDetail(Resource resource) {
         return new ResourceDetail(
-                resource.getId(), resource.getSlug(), resource.kind(), resource.getTitle(),
+                resource.getId(), resource.getSlug(), resource.getKind(), resource.getTitle(),
                 resource.getSummary(), mediaMapper.toResponse(resource.getCover()),
                 resource.getCategory().getId(), resource.getCategory().getName(), tagsOf(resource),
                 resource.getViewCount(), resource.isPublished(), resource.getCreatedAt(),

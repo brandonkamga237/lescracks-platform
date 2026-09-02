@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.domain;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,6 +34,16 @@ public abstract class Resource {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    /**
+     * The discriminator, mapped read-only so the catalogue filters on it in one query:
+     * a Java method is invisible to HQL. Hibernate still writes the column from the entity
+     * type, and the constructor sets the field so an instance answers before it is saved.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "kind", insertable = false, updatable = false, nullable = false, length = 20)
+    @Setter(AccessLevel.NONE)
+    private ResourceKind kind;
 
     @Column(nullable = false, unique = true, length = 160)
     private String slug;
@@ -82,12 +93,13 @@ public abstract class Resource {
             inverseJoinColumns = @JoinColumn(name = "media_id"))
     private Set<Media> media = new HashSet<>();
 
-    /** Which of the three this is, without needing an instanceof at the call site. */
-    public abstract ResourceKind kind();
+    protected Resource(ResourceKind kind) {
+        this.kind = kind;
+    }
 
     /** Only an ebook is a file to take away; the other two are watched or read where they are. */
     public boolean isDownloadable() {
-        return kind() == ResourceKind.EBOOK;
+        return kind == ResourceKind.EBOOK;
     }
 
     // Identity is the database id alone. Lombok's generated equality would walk the whole

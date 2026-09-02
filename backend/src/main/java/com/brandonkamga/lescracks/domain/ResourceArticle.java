@@ -2,7 +2,6 @@ package com.brandonkamga.lescracks.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -22,8 +21,11 @@ import org.hibernate.type.SqlTypes;
 @PrimaryKeyJoinColumn(name = "resource_id")
 @Getter
 @Setter
-@NoArgsConstructor
 public class ResourceArticle extends Resource {
+
+    public ResourceArticle() {
+        super(ResourceKind.ARTICLE);
+    }
 
     /** The block document. Images inside it point at {@link Media} rows by id. */
     @JdbcTypeCode(SqlTypes.JSON)
@@ -45,9 +47,4 @@ public class ResourceArticle extends Resource {
     /** An estimate, so a reader knows what they are committing to. Null when not computed. */
     @Column(name = "reading_minutes")
     private Integer readingMinutes;
-
-    @Override
-    public ResourceKind kind() {
-        return ResourceKind.ARTICLE;
-    }
 }

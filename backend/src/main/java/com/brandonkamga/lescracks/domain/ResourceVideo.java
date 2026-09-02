@@ -2,7 +2,6 @@ package com.brandonkamga.lescracks.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -17,8 +16,11 @@ import lombok.Setter;
 @PrimaryKeyJoinColumn(name = "resource_id")
 @Getter
 @Setter
-@NoArgsConstructor
 public class ResourceVideo extends Resource {
+
+    public ResourceVideo() {
+        super(ResourceKind.VIDEO);
+    }
 
     /** Where it plays: a YouTube link, or another platform's. */
     @Column(name = "external_url", nullable = false, length = 1000)
@@ -27,9 +29,4 @@ public class ResourceVideo extends Resource {
     /** Shown so a reader can judge the commitment before clicking. Null when unknown. */
     @Column(name = "duration_seconds")
     private Integer durationSeconds;
-
-    @Override
-    public ResourceKind kind() {
-        return ResourceKind.VIDEO;
-    }
 }

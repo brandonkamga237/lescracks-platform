@@ -2,7 +2,6 @@ package com.brandonkamga.lescracks.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -17,8 +16,11 @@ import lombok.Setter;
 @PrimaryKeyJoinColumn(name = "resource_id")
 @Getter
 @Setter
-@NoArgsConstructor
 public class ResourceEbook extends Resource {
+
+    public ResourceEbook() {
+        super(ResourceKind.EBOOK);
+    }
 
     /** The object key in storage. Never a URL: a URL would pin the file to today's host. */
     @Column(name = "file_key", nullable = false, length = 255)
@@ -37,9 +39,4 @@ public class ResourceEbook extends Resource {
 
     @Column(name = "page_count")
     private Integer pageCount;
-
-    @Override
-    public ResourceKind kind() {
-        return ResourceKind.EBOOK;
-    }
 }
