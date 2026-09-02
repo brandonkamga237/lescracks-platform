@@ -13,6 +13,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -99,6 +100,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ApiError.of(
                 ErrorCode.MALFORMED_REQUEST,
                 "La requête est mal formée et n'a pas pu être lue.", path(request)));
+    }
+
+    /**
+     * A query parameter that will not convert — ?kind=PODCAST, ?categoryId=abc. Reachable by
+     * anyone typing a url, so it must be a 400: as an unhandled fault it answered 500 and put
+     * a stack trace in the log for every mistyped link.
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleBadParameter(MethodArgumentTypeMismatchException ex,
+                                                       HttpServletRequest request) {
+        log.warn("BAD_REQUEST on {} {}: {}={}", request.getMethod(), path(request),
+                ex.getName(), ex.getValue());
+        return ResponseEntity.badRequest().body(ApiError.of(
+                ErrorCode.BAD_REQUEST,
+                "La valeur du paramètre « " + ex.getName() + " » n'est pas valide.", path(request)));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
