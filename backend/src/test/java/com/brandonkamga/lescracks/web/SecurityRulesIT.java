@@ -3,6 +3,7 @@ package com.brandonkamga.lescracks.web;
 import com.brandonkamga.lescracks.support.PostgresIT;
 import com.brandonkamga.lescracks.support.Tokens;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,22 @@ class SecurityRulesIT extends PostgresIT {
     @DisplayName("anyone may read what brings people in")
     void publicRoutesAreOpen(String path) throws Exception {
         mvc.perform(get(path)).andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("a recruiter checking an attestation needs no account")
+    void attestationCheckIsOpen() throws Exception {
+        // The route lives under /participations because that is what it reads, not because
+        // it is private. Matching the wrong path here answers 401 to the only person the
+        // code was ever issued for.
+        mvc.perform(get("/api/participations/attestations/LC-2026-INCONNU"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("the public counters are readable by anyone")
+    void proofOfWorkIsOpen() throws Exception {
+        mvc.perform(get("/api/participations/proof-of-work")).andExpect(status().isOk());
     }
 
     @ParameterizedTest

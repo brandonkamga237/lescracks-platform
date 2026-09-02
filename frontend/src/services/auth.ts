@@ -1,393 +1,64 @@
-// src/services/auth.ts
+import { User, WebStorageStateStore } from 'oidc-client-ts';
+import type { AuthProviderProps } from 'react-oidc-context';
+
 import { ENV } from '@/config/env';
 
-const API_BASE_URL = ENV.API_BASE_URL;
+/**
+ * Keycloak configuration for the browser.
+ *
+ * There is no login form, no password field and no reset flow in this codebase any more:
+ * signing in is a redirect to the realm, and adding Google or GitHub is realm configuration
+ * that changes nothing here.
+ */
+export const oidcConfig: AuthProviderProps = {
+  authority: ENV.KEYCLOAK_ISSUER,
+  client_id: ENV.KEYCLOAK_CLIENT_ID,
+  redirect_uri: `${window.location.origin}/auth/callback`,
+  post_logout_redirect_uri: window.location.origin,
+  response_type: 'code',
+  scope: 'openid profile email',
 
-// Types
-export interface User {
-  id: string;
-  email: string;
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  name?: string;
-  picture?: string;
-  role: 'FREE' | 'LEARNER' | 'ADMIN';
-  provider: 'google' | 'github' | 'local';
-  providerName?: string;
-  providerUserId?: string;
-  phone?: string;
-  country?: string;
-}
+  // Session storage rather than local: closing the tab ends the session, and a token that
+  // outlives the tab it was issued in is a token nobody remembers granting.
+  userStore: new WebStorageStateStore({ store: window.sessionStorage }),
 
-export interface AuthResponse {
-  success: boolean;
-  message?: string;
-  user?: User;
-  token?: string;
-}
+  // Renewed in a hidden iframe before it expires, so a long read is never interrupted by a
+  // redirect the reader did not ask for.
+  automaticSilentRenew: true,
 
-export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
-}
+  // The callback lands on a route of ours; clearing it keeps the code out of history.
+  onSigninCallback: () => {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  },
+};
 
-export interface UpdateProfileRequest {
-  username?: string;
-  email?: string;
-  phone?: string;
-  country?: string;
-}
+/** Where oidc-client-ts keeps the session, so the api client can read the token it holds. */
+const storageKey = `oidc.user:${ENV.KEYCLOAK_ISSUER}:${ENV.KEYCLOAK_CLIENT_ID}`;
 
-/** Shape of the user object the API returns; every field may be absent. */
-interface BackendUser {
-  id?: number | string;
-  email?: string;
-  username?: string;
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
-  country?: string;
-  pictureUrl?: string;
-  roleName?: string;
-  providerName?: string;
-  emailVerified?: boolean;
-  createdAt?: string;
-  providerUserId?: string;
-  /** OAuth providers send these instead of the local fields. */
-  name?: string;
-  picture?: string;
-}
+/**
+ * The access token, or null when nobody is signed in.
+ *
+ * Read at call time rather than captured: a renewed token must be picked up without the
+ * caller knowing a renewal happened.
+ */
+export function currentAccessToken(): string | null {
+  const stored = sessionStorage.getItem(storageKey);
+  if (!stored) return null;
 
-class AuthService {
-  private userKey = 'lescracks_user';
-
-  // The JWT lives in an HttpOnly cookie issued by the backend. It is deliberately NOT
-  // readable from JavaScript, so an XSS flaw anywhere in the app cannot steal it. The
-  // browser attaches it to API calls automatically; we only cache the (non-secret)
-  // user profile locally so the UI can render instantly on load.
-
-  // === USER MANAGEMENT ===
-  getUser(): User | null {
-    const userStr = localStorage.getItem(this.userKey);
-    if (!userStr) return null;
-    try {
-      return JSON.parse(userStr);
-    } catch {
-      return null;
-    }
-  }
-
-  setUser(user: User): void {
-    localStorage.setItem(this.userKey, JSON.stringify(user));
-  }
-
-  removeUser(): void {
-    localStorage.removeItem(this.userKey);
-  }
-
-  // === AUTH STATE ===
-  // The cookie is not visible to JS, so the server is the source of truth:
-  // AuthContext confirms the session on load via getCurrentUser().
-  isAuthenticated(): boolean {
-    return !!this.getUser();
-  }
-
-  // === OAUTH REDIRECT ===
-  // Note: OAuth endpoints are at root level, not under /api
-  loginWithGoogle(): void {
-    window.location.href = `/oauth2/authorization/google`;
-  }
-
-  loginWithGitHub(): void {
-    window.location.href = `/oauth2/authorization/github`;
-  }
-
-  // === EMAIL/PASSWORD AUTH ===
-  async login(email: string, password: string): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ email, password }),
-    });
-
-    const json = await response.json();
-
-    // The backend set the auth cookie on this response — we only cache the profile.
-    if (json.success && json.data) {
-      const mappedUser = this.mapBackendUserToFrontend(json.data.user);
-      this.setUser(mappedUser);
-      return {
-        success: true,
-        user: mappedUser,
-        message: json.message
-      };
-    }
-
-    return {
-      success: false,
-      message: json.message || 'Email ou mot de passe incorrect.'
-    };
-  }
-
-  async register(email: string, password: string, username?: string): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ email, password, username }),
-    });
-
-    const json = await response.json();
-
-    // A successful registration returns no session: the account must be activated via
-    // the email verification link first. Treat success-without-user as success so the
-    // UI shows the "check your inbox" screen instead of an error.
-    if (json.success) {
-      if (json.data?.user) {
-        // Immediate-login path (only if email verification is ever disabled)
-        const mappedUser = this.mapBackendUserToFrontend(json.data.user);
-        this.setUser(mappedUser);
-        return { success: true, user: mappedUser, message: json.message };
-      }
-      return { success: true, message: json.message };
-    }
-
-    return {
-      success: false,
-      message: json.message || 'Inscription impossible. Merci de réessayer.'
-    };
-  }
-
-  async logout(): Promise<void> {
-    try {
-      // The cookie rides along automatically; the backend revokes it and clears it.
-      await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-    } catch (error) {
-      console.warn('Logout API error (non-blocking):', error);
-    } finally {
-      this.removeUser();
-    }
-  }
-
-  // === USER PROFILE ===
-  async getCurrentUser(): Promise<User | null> {
-    try {
-      // Authenticated by the HttpOnly cookie. A 401 simply means no valid session.
-      const response = await fetch(`${API_BASE_URL}/users/me`, {
-        credentials: 'include',
-      });
-
-      const json = await response.json();
-      
-      // Handle backend response format: { success: true, data: { ... } }
-      if (json.success && json.data) {
-        const userData = this.mapBackendUserToFrontend(json.data);
-        this.setUser(userData);
-        return userData;
-      }
-    } catch (error) {
-      console.error('Failed to get current user:', error);
-    }
-
+  try {
+    const user = User.fromStorageString(stored);
+    return user.expired ? null : user.access_token;
+  } catch {
     return null;
   }
-
-  // Map backend user response to frontend user format
-
-  mapBackendUserToFrontend(backendUser: BackendUser): User {
-    return {
-      id: String(backendUser.id || ''),
-      email: backendUser.email || '',
-      username: backendUser.username,
-      firstName: backendUser.firstName,
-      lastName: backendUser.lastName,
-      name: backendUser.name || backendUser.username,
-      picture: backendUser.picture,
-      role: this.mapRole(backendUser.roleName),
-      provider: this.mapProvider(backendUser.providerName),
-      providerName: backendUser.providerName,
-      providerUserId: backendUser.providerUserId,
-      phone: backendUser.phone,
-      country: backendUser.country,
-    };
-  }
-
-  // Map backend role name to frontend role
-  private mapRole(roleName: string | undefined): 'FREE' | 'LEARNER' | 'ADMIN' {
-    if (!roleName) return 'FREE';
-    const upperRole = roleName.toUpperCase().replace('_', '');
-    if (upperRole === 'ADMIN') return 'ADMIN';
-    if (upperRole === 'LEARNER') return 'LEARNER';
-    return 'FREE';
-  }
-
-  // Map backend provider name to frontend provider
-  private mapProvider(providerName: string | undefined): 'google' | 'github' | 'local' {
-    if (!providerName) return 'local';
-    const upperProvider = providerName.toUpperCase();
-    if (upperProvider === 'GOOGLE') return 'google';
-    if (upperProvider === 'GITHUB') return 'github';
-    return 'local';
-  }
-
-  // === UPDATE PROFILE ===
-  async updateProfile(data: UpdateProfileRequest): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/users/me`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    });
-
-    const json = await response.json();
-
-    // Handle backend response format: { success: true, data: { ... } }
-    if (json.success && json.data) {
-      this.setUser(json.data);
-      return {
-        success: true,
-        user: json.data,
-        message: json.message
-      };
-    }
-
-    return {
-      success: false,
-      message: json.message || 'La mise à jour a échoué. Merci de réessayer.'
-    };
-  }
-
-  // === CHANGE PASSWORD ===
-  async changePassword(currentPassword: string, newPassword: string): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/users/me/change-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ currentPassword, newPassword }),
-    });
-
-    const json = await response.json();
-    
-    // Handle backend response format
-    if (json.success) {
-      return {
-        success: true,
-        message: json.message
-      };
-    }
-
-    return {
-      success: false,
-      message: json.message || 'Le changement de mot de passe a échoué.'
-    };
-  }
-
-  // === DELETE ACCOUNT ===
-  async deleteAccount(): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/users/me`, {
-      method: 'DELETE',
-      credentials: 'include',
-    });
-
-    const json = await response.json();
-
-    if (json.success) {
-      this.removeUser();
-      return { success: true, message: json.message || 'Compte supprimé avec succès.' };
-    }
-
-    return {
-      success: false,
-      message: json.message || 'La suppression du compte a échoué.'
-    };
-  }
-
-
-
-  // === AVATAR UPLOAD ===
-  async uploadAvatar(file: File): Promise<{ success: boolean; message?: string; user?: User }> {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await fetch(`${API_BASE_URL}/users/me/avatar`, {
-      method: 'POST',
-      credentials: 'include',
-      body: formData,
-    });
-
-    const json = await response.json();
-    if (json.success && json.data) {
-      const user = this.mapBackendUserToFrontend(json.data);
-      this.setUser(user);
-      return { success: true, user, message: json.message };
-    }
-    return { success: false, message: json.message || 'L\'envoi du fichier a échoué. Merci de réessayer.' };
-  }
-
-
-  /**
-   * Ask for the verification email again.
-   *
-   * The server answers the same way whether the address exists or not, so this can never
-   * be used to discover who has an account here.
-   */
-  async resendVerification(email: string): Promise<{ success: boolean; message?: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email }),
-    });
-    const json = await response.json();
-    return { success: !!json.success, message: json.message };
-  }
-
-  // === PASSWORD RESET ===
-  async forgotPassword(email: string): Promise<{ success: boolean; message?: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    const json = await response.json();
-    return { success: json.success, message: json.message };
-  }
-
-  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message?: string }> {
-    const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, newPassword }),
-    });
-    const json = await response.json();
-    return { success: json.success, message: json.message };
-  }
-
-  // === CHECK OAUTH CALLBACK ===
-  // After the OAuth redirect the backend has already set the auth cookie, so we just
-  // ask the server who we are.
-  async handleOAuthCallback(): Promise<AuthResponse> {
-    const user = await this.getCurrentUser();
-    if (user) {
-      return { success: true, user };
-    }
-    
-    return { success: false, message: 'Authentication failed' };
-  }
 }
 
-export const authService = new AuthService();
-export default authService;
+/** Realm roles, read from the token rather than from anything the client could set. */
+export function rolesOf(user: User | null | undefined): string[] {
+  const claims = user?.profile as { realm_access?: { roles?: string[] } } | undefined;
+  return claims?.realm_access?.roles ?? [];
+}
+
+export function isAdmin(user: User | null | undefined): boolean {
+  return rolesOf(user).includes('admin');
+}

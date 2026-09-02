@@ -61,7 +61,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/categories", "/api/tags").permitAll()
                 // Whether the 360 is open decides what the landing page offers.
                 .requestMatchers(HttpMethod.GET, "/api/mentorship").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/attestations/*").permitAll()
+                // Verifying a code is the whole point of issuing one, and whoever verifies is
+                // a recruiter with no account. These live under /participations because that
+                // is what they read, not because they are private.
+                .requestMatchers(HttpMethod.GET, "/api/participations/attestations/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/participations/proof-of-work").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/resources/*/view").permitAll()
                 // Applying does not require an account: people apply first and register after.
                 .requestMatchers(HttpMethod.POST, "/api/applications").permitAll()
