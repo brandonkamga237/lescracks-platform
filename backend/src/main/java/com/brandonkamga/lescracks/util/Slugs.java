@@ -24,10 +24,10 @@ public final class Slugs {
     public static String from(String text) {
         String ascii = Normalizer.normalize(text, Normalizer.Form.NFD)
                 .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-        String slug = EDGE_DASHES.matcher(
-                NON_ALPHANUMERIC.matcher(ascii.toLowerCase(Locale.ROOT)).replaceAll("-")
-        ).replaceAll("");
-        return slug.length() > MAX_LENGTH ? slug.substring(0, MAX_LENGTH) : slug;
+        String dashed = NON_ALPHANUMERIC.matcher(ascii.toLowerCase(Locale.ROOT)).replaceAll("-");
+        String cut = dashed.length() > MAX_LENGTH ? dashed.substring(0, MAX_LENGTH) : dashed;
+        // Trimmed after cutting, not before: the cut itself can land on a dash.
+        return EDGE_DASHES.matcher(cut).replaceAll("");
     }
 
     /**
