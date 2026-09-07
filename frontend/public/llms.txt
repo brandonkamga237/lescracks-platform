@@ -1,28 +1,22 @@
 # LesCracks
 
-> Agence edtech d'Afrique francophone qui aide les jeunes passionnés de tech à devenir employables — à travers des événements, des ressources pédagogiques, une communauté d'apprenants et des projets open source, plus l'Accompagnement 360, un programme de mentoring premium de 6 à 12 mois avec mentor dédié.
+> Une bibliothèque de vidéos et d’ebooks, des événements tech et une communauté francophone pour apprendre à son rythme.
 
-LesCracks (aussi appelée « Les Cracks Academy ») est basée à Yaoundé, au Cameroun, et sert principalement l'Afrique francophone (Cameroun, Côte d'Ivoire, Sénégal) ainsi que la France et la Belgique. Le contenu est en français. Fondateur : Brandon Kamga.
-
-L'activité de LesCracks s'articule autour d'événements (workshops, bootcamps), de ressources pédagogiques (documents et vidéos), d'une communauté et d'une vitrine d'apprenants accompagnés, et de projets open source. Pour aller plus loin, l'« Accompagnement 360 » est son programme de mentoring premium en ligne de 6 à 12 mois : mentor dédié, projets concrets, montée en compétences progressive et attestation de complétion.
+LesCracks est basée à Yaoundé, au Cameroun. Le contenu de la plateforme est en français. Fondateur : Brandon Kamga.
 
 ## Pages principales
 
-- [Accueil](https://lescracks.com/) : présentation de l'agence, de la mission et de l'approche d'accompagnement.
-- [Postuler à l'Accompagnement 360](https://lescracks.com/postuler) : candidature au programme de suivi personnalisé de 6 à 12 mois.
-- [Ressources](https://lescracks.com/ressources) : catalogue de ressources pédagogiques tech (documents, vidéos), consultables publiquement.
-- [Événements](https://lescracks.com/evenements) : workshops, bootcamps et rencontres, avec inscription en ligne.
-- [Apprenants](https://lescracks.com/apprenants) : vitrine des apprenants accompagnés et de leurs parcours.
-- [Open Source](https://lescracks.com/open-source) : projets open source portés par la communauté LesCracks.
-- [À propos](https://lescracks.com/about) : histoire, valeurs et équipe de LesCracks.
+- [Accueil](https://lescracks.com/) : découvrir la bibliothèque et les prochains événements.
+- [Ressources](https://lescracks.com/ressources) : vidéos externes et ebooks, consultables publiquement et filtrables par format, catégorie et sujet.
+- [Événements](https://lescracks.com/evenements) : ateliers, bootcamps, webinaires et conférences, avec dates et lieux lorsqu’ils sont renseignés.
+
+## Accès
+
+Les ressources et les événements publiés sont accessibles sans compte. Les vidéos s’ouvrent sur leur plateforme de diffusion ; les ebooks se téléchargent depuis la plateforme. Les espaces personnels et d’administration nécessitent une connexion.
 
 ## En bref
 
-- Type : agence / organisation éducative (edtech).
 - Localisation : Yaoundé, Cameroun.
-- Zones servies : Cameroun, Côte d'Ivoire, Sénégal, France, Belgique.
 - Langue : français.
-- Programme premium : Accompagnement 360 (mentoring en ligne, 6 à 12 mois).
 - Fondateur : Brandon Kamga.
 - Site : https://lescracks.com
-- Plan du site : https://lescracks.com/sitemap.xml

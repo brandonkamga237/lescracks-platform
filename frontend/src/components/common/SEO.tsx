@@ -11,8 +11,8 @@ interface SEOProps {
 
 const SITE = 'https://lescracks.com';
 const DEFAULT_IMAGE = `${SITE}/og-image.png`;
-const DEFAULT_TITLE = 'LesCracks – Devenez un crack de la tech';
-const DEFAULT_DESC = "Un accompagnement structuré de 6 à 12 mois pour passer de débutant à profil employable — avec un mentor, des projets réels et une communauté.";
+const DEFAULT_TITLE = 'LesCracks — Comprends la tech. Passe à la pratique.';
+const DEFAULT_DESC = 'Des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme.';
 
 const setMeta = (selector: string, value: string) => {
   const el = document.querySelector(selector);

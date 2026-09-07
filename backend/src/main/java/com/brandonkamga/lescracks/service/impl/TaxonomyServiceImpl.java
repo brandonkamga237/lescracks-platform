@@ -7,6 +7,7 @@ import com.brandonkamga.lescracks.exception.NotFoundException;
 import com.brandonkamga.lescracks.repository.CategoryRepository;
 import com.brandonkamga.lescracks.repository.TagRepository;
 import com.brandonkamga.lescracks.service.interfaces.TaxonomyService;
+import com.brandonkamga.lescracks.util.Slugs;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +40,8 @@ public class TaxonomyServiceImpl implements TaxonomyService {
         if (categories.existsByNameIgnoreCase(clean)) {
             throw new BadRequestException("Une catégorie porte déjà ce nom.");
         }
-        return categories.save(Category.builder().name(clean).build());
+        return categories.save(Category.builder().name(clean)
+            .slug(Slugs.uniqueFrom(clean, categories::existsBySlug)).build());
     }
 
     @Override
@@ -53,6 +55,10 @@ public class TaxonomyServiceImpl implements TaxonomyService {
             throw new BadRequestException("Une autre catégorie porte déjà ce nom.");
         }
         category.setName(clean);
+        category.setSlug(Slugs.uniqueFrom(clean,
+            slug -> categories.findBySlug(slug)
+                .filter(other -> !other.getId().equals(id))
+                .map(other -> true).orElse(false)));
         return category;
     }
 

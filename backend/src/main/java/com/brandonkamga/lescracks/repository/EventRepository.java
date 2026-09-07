@@ -1,42 +1,21 @@
 package com.brandonkamga.lescracks.repository;
 
 import com.brandonkamga.lescracks.domain.Event;
-import com.brandonkamga.lescracks.domain.EventKind;
+import com.brandonkamga.lescracks.domain.EventStatus;
+import com.brandonkamga.lescracks.domain.EventType;
+import com.brandonkamga.lescracks.domain.EventFormat;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-
 import java.time.Instant;
+
 import java.util.List;
-import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
-
-    Optional<Event> findBySlug(String slug);
-
-    boolean existsBySlug(String slug);
-
-    /** What the public sees: published, optionally narrowed to bootcamps or workshops. */
-    @Query("""
-            SELECT e FROM Event e
-            WHERE e.published = TRUE
-              AND (:kind IS NULL OR e.kind = :kind)
-            ORDER BY e.startsAt DESC
-            """)
-    Page<Event> findPublished(EventKind kind, Pageable pageable);
-
-    /** Same rows as above, narrowed to what is still to come and ordered soonest-first. */
-    @Query("""
-            SELECT e FROM Event e
-            WHERE e.published = TRUE
-              AND e.startsAt > :now
-              AND (:kind IS NULL OR e.kind = :kind)
-            ORDER BY e.startsAt ASC
-            """)
-    Page<Event> findUpcoming(Instant now, EventKind kind, Pageable pageable);
-
-    /** Slugs only: a sitemap needs no rows, and this one grows with the catalogue. */
-    @Query("SELECT r.slug FROM Event r WHERE r.published = TRUE ORDER BY r.slug")
-    List<String> findPublishedSlugs();
+    Page<Event> findByStatusOrderByStartDateAsc(EventStatus status, Pageable pageable);
+    Page<Event> findByStatusAndTypeOrderByStartDateAsc(EventStatus status, EventType type, Pageable pageable);
+    Page<Event> findByStatusAndFormatOrderByStartDateAsc(EventStatus status, EventFormat format, Pageable pageable);
+    Page<Event> findByStatusAndTypeAndFormatOrderByStartDateAsc(EventStatus status, EventType type, EventFormat format, Pageable pageable);
+    Page<Event> findByStatusAndStartDateAfterOrderByStartDateAsc(EventStatus status, Instant now, Pageable pageable);
+    Page<Event> findByStatusAndStartDateBeforeOrderByStartDateDesc(EventStatus status, Instant now, Pageable pageable);
 }

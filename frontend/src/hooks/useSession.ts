@@ -1,6 +1,31 @@
-import { useAuth } from 'react-oidc-context';
+import { createContext, useContext } from 'react';
 
-import { isAdmin } from '@/services/auth';
+import type { RegisterRequest } from '@/services/api';
+import type { UserProfile } from '@/services/types';
+
+export interface SessionIdentity {
+  isSignedIn: boolean;
+  isAdmin: boolean;
+  name: string | null;
+  email: string | null;
+  user: UserProfile | null;
+}
+
+export interface SessionContextValue extends SessionIdentity {
+  isLoading: boolean;
+  error: Error | null;
+  reload: () => Promise<void>;
+  refresh: () => Promise<void>;
+  signIn: (returnTo?: string) => void;
+  register: (returnTo?: string) => void;
+  signOut: () => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  createAccount: (body: RegisterRequest) => Promise<void>;
+  loginAdmin: (username: string, password: string) => Promise<void>;
+  socialSignIn: (provider: 'google' | 'github', returnTo?: string) => Promise<void>;
+}
+
+export const SessionContext = createContext<SessionContextValue | null>(null);
 
 /**
  * Who is reading, in the terms screens actually ask in.
@@ -9,23 +34,15 @@ import { isAdmin } from '@/services/auth';
  * behind one file: pages ask "is this an admin", not "what does realm_access contain".
  */
 export function useSession() {
-  const auth = useAuth();
+  const session = useContext(SessionContext);
+  if (!session) throw new Error('useSession must be used within SessionProvider');
 
   return {
-    isLoading: auth.isLoading,
-    isSignedIn: auth.isAuthenticated,
-    isAdmin: isAdmin(auth.user),
-    name: auth.user?.profile.name ?? auth.user?.profile.preferred_username ?? null,
-    email: auth.user?.profile.email ?? null,
-
+    ...session,
     /** Sends the reader to the realm; they come back where they left off. */
-    signIn: () => auth.signinRedirect({ state: { from: window.location.pathname } }),
-
+    socialSignIn: session.socialSignIn,
     /** Registration is a realm screen too, reached by asking Keycloak for it directly. */
-    register: () =>
-      auth.signinRedirect({ extraQueryParams: { kc_action: 'register' } }),
-
-    signOut: () => auth.signoutRedirect(),
+    register: session.register,
   };
 }
 

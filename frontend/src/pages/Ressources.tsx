@@ -1,148 +1,171 @@
-import { useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Search, X } from 'lucide-react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
+import Pagination from '@/components/common/Pagination';
+import SEO from '@/components/common/SEO';
+import { CardSkeletonGrid } from '@/components/common/Skeleton';
 import Layout from '@/components/layout/Layout';
 import ResourceCard from '@/components/resources/ResourceCard';
 import { useApi } from '@/hooks/useApi';
-import { EFFORT_BANDS, KIND_LABEL, type EffortBand } from '@/lib/effort';
 import { api } from '@/services/api';
 import type { ResourceKind } from '@/services/types';
 
-const KINDS: ResourceKind[] = ['VIDEO', 'ARTICLE', 'EBOOK'];
+const KIND_LABEL = { EXTERNAL_VIDEO: 'Vidéos', EBOOK: 'Ebooks' } as const;
+const KINDS: ResourceKind[] = ['EXTERNAL_VIDEO', 'EBOOK'];
+const selectClass = 'mt-1.5 w-full rounded-lg border border-line bg-noir-900 px-3 py-2.5 text-sm text-t2 focus:border-gold-400 focus:outline-none';
+
+function positiveInteger(value: string | null): number | undefined {
+  if (!value || !/^[1-9]\d*$/.test(value)) return undefined;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed <= 2147483647 ? parsed : undefined;
+}
 
 /**
- * The catalogue.
- *
- * Organised by what a resource costs before what it is about: a beginner knows how much of
- * their evening they have long before they know whether they want DevOps. Subject filters
- * are still here — second, where they belong.
- *
- * The time band is applied in the browser rather than in the query: the API has no notion
- * of it, and pushing one there would freeze a product decision into the schema before we
- * know whether people use it.
+ * The catalogue of learning resources.
  */
 export default function Ressources() {
-  const [params, setParams] = useSearchParams();
-  const [band, setBand] = useState<EffortBand | null>(null);
-
-  const kind = (params.get('kind') as ResourceKind | null) ?? undefined;
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const routeKind = location.pathname.endsWith('/ebooks') ? 'EBOOK' : location.pathname.endsWith('/videos') ? 'EXTERNAL_VIDEO' : undefined;
+  const requestedKind = params.get('kind');
+  const kind = routeKind ?? KINDS.find((value) => value === requestedKind);
   const search = params.get('q') ?? '';
-
+  const categoryId = positiveInteger(params.get('categoryId'));
+  const tagId = positiveInteger(params.get('tagId'));
+  const page = positiveInteger(params.get('page')) ?? 1;
+  const categories = useApi((signal) => api.categories(signal), []);
+  const tags = useApi((signal) => api.tags(categoryId, signal), [categoryId]);
   const catalogue = useApi(
-    (signal) => api.resources({ kind, search: search || undefined, size: 60 }, signal),
-    [kind, search],
+    async (signal) => {
+      await new Promise<void>((resolve, reject) => {
+        const cancel = () => { window.clearTimeout(timer); reject(new DOMException('Aborted', 'AbortError')); };
+        const timer = window.setTimeout(() => { signal.removeEventListener('abort', cancel); resolve(); }, 250);
+        signal.addEventListener('abort', cancel, { once: true });
+      });
+      return api.resources({ kind, search: search.trim() || undefined, categoryId, tagId, page: page - 1, size: 12 }, signal);
+    },
+    [kind, search, categoryId, tagId, page],
   );
-
-  const visible = useMemo(() => {
-    const all = catalogue.data?.content ?? [];
-    if (!band) return all;
-    const definition = EFFORT_BANDS.find((b) => b.id === band);
-    return definition ? all.filter(definition.matches) : all;
-  }, [catalogue.data, band]);
+  const visible = catalogue.data?.content ?? [];
+  const hasFilters = Boolean(kind || search.trim() || categoryId || tagId);
+  const total = catalogue.data?.totalElements ?? 0;
 
   function setParam(key: string, value: string | null) {
     const next = new URLSearchParams(params);
+    if (kind) next.set('kind', kind);
+    else next.delete('kind');
     if (value) next.set(key, value);
     else next.delete(key);
-    setParams(next, { replace: true });
+    if (key !== 'page') next.delete('page');
+    if (key === 'categoryId') next.delete('tagId');
+    navigate({ pathname: '/ressources', search: next.toString() }, { replace: key === 'q' });
   }
 
   return (
     <Layout>
-      <div className="mx-auto max-w-4xl px-6 py-16 sm:py-24">
-        <header className="max-w-2xl">
-          <h1 className="font-display text-4xl font-semibold leading-tight text-t1 sm:text-5xl">
-            Vous avez combien de temps&nbsp;?
-          </h1>
-          <p className="mt-4 text-lg leading-relaxed text-t3">
-            Tout ce qu’on publie est rangé par ce que ça vous demande, pas par sujet.
-            Choisissez le temps que vous avez devant vous.
-          </p>
+      <SEO title="Bibliothèque" description="Ebooks et vidéos pour apprendre la tech en français. Filtre par format, catégorie et sujet." url="/ressources" />
+      <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
+        <header className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3">
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-t1 sm:text-4xl">Bibliothèque</h1>
+          {!catalogue.loading && !catalogue.error && (
+            <p className="text-sm text-t4">{total} ressource{total > 1 ? 's' : ''}</p>
+          )}
         </header>
 
-        {/* The primary filter, first and largest, because it is the real question. */}
-        <div className="mt-10 flex flex-wrap gap-3">
-          {EFFORT_BANDS.map((definition) => {
-            const active = band === definition.id;
-            return (
-              <button
-                key={definition.id}
-                type="button"
-                onClick={() => setBand(active ? null : definition.id)}
-                aria-pressed={active}
-                className={`rounded-full border px-5 py-2.5 text-left transition-colors ${
-                  active
-                    ? 'border-gold-400 bg-gold-400/10 text-t1'
-                    : 'border-line text-t2 hover:border-line-strong hover:text-t1'
-                }`}
-              >
-                <span className="block text-sm font-medium">{definition.label}</span>
-                <span className="block text-xs text-t4">{definition.hint}</span>
-              </button>
-            );
-          })}
-        </div>
+        <div className="mt-8 lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
+          {/* Filters — a quiet rail, not a banner */}
+          <aside className="mb-8 border-t border-line-soft pt-6 lg:mb-0 lg:border-t-0 lg:pt-0" aria-label="Filtres">
+            <div className="space-y-6 lg:sticky lg:top-28">
+              <fieldset>
+                <legend className="text-xs font-medium uppercase tracking-wider text-t4">Format</legend>
+                <div className="mt-3 flex flex-col gap-1 border-l border-line">
+                  {[undefined, ...KINDS].map((option) => (
+                    <button
+                      key={option ?? 'all'}
+                      type="button"
+                      aria-pressed={kind === option}
+                      onClick={() => setParam('kind', option ?? null)}
+                      className={`-ml-px border-l-2 pl-3 pr-2 py-1.5 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${kind === option ? 'border-gold-400 text-t1' : 'border-transparent text-t3 hover:text-t1'}`}
+                    >
+                      {option ? KIND_LABEL[option] : 'Tout'}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
 
-        {/* Subject filters, deliberately quieter. */}
-        <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line-soft pt-6 text-sm">
-          <button
-            type="button"
-            onClick={() => setParam('kind', null)}
-            className={!kind ? 'text-t1' : 'text-t4 hover:text-t2'}
-          >
-            Tous les formats
-          </button>
-          {KINDS.map((option) => (
-            <button
-              key={option}
-              type="button"
-              onClick={() => setParam('kind', kind === option ? null : option)}
-              className={kind === option ? 'text-t1' : 'text-t4 hover:text-t2'}
-            >
-              {KIND_LABEL[option]}
-            </button>
-          ))}
+              <label className="block text-xs font-medium uppercase tracking-wider text-t4">
+                Catégorie
+                <select value={categoryId ?? ''} onChange={(event) => setParam('categoryId', event.target.value || null)} className={selectClass} disabled={categories.loading || Boolean(categories.error)}>
+                  <option value="">Toutes</option>
+                  {categoryId && !categories.data?.some((category) => category.id === categoryId) && <option value={categoryId}>Catégorie sélectionnée</option>}
+                  {categories.data?.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                </select>
+              </label>
 
-          <label className="ml-auto flex items-center gap-2">
-            <span className="sr-only">Rechercher une ressource</span>
-            <input
-              type="search"
-              defaultValue={search}
-              placeholder="Rechercher…"
-              onChange={(event) => setParam('q', event.target.value || null)}
-              className="w-44 border-b border-line bg-transparent py-1 text-t1 placeholder:text-t4 focus:border-gold-400 focus:outline-none"
-            />
-          </label>
-        </div>
+              <label className="block text-xs font-medium uppercase tracking-wider text-t4">
+                Sujet
+                <select value={tagId ?? ''} onChange={(event) => setParam('tagId', event.target.value || null)} className={selectClass} disabled={tags.loading || Boolean(tags.error)}>
+                  <option value="">Tous</option>
+                  {tagId && !tags.data?.some((tag) => tag.id === tagId) && <option value={tagId}>Sujet sélectionné</option>}
+                  {tags.data?.map((tag) => <option key={tag.id} value={tag.id}>{tag.name}</option>)}
+                </select>
+              </label>
 
-        <section className="mt-4" aria-live="polite">
-          {catalogue.loading && <p className="py-16 text-center text-t4">Chargement…</p>}
+              {(categories.error || tags.error) && (
+                <p className="text-xs text-t3">
+                  Certains filtres sont indisponibles.{' '}
+                  <button type="button" onClick={() => { categories.reload(); tags.reload(); }} className="text-gold-400 underline underline-offset-4">Réessayer</button>
+                </p>
+              )}
 
-          {catalogue.error && (
-            <div className="py-16 text-center">
-              <p className="text-t2">{catalogue.error.message}</p>
-              <button
-                type="button"
-                onClick={catalogue.reload}
-                className="mt-4 text-sm text-gold-400 underline underline-offset-4"
-              >
-                Réessayer
-              </button>
+              {hasFilters && (
+                <button type="button" onClick={() => navigate('/ressources')} className="inline-flex items-center gap-1.5 text-sm text-t3 transition-colors hover:text-t1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400">
+                  <X className="h-3.5 w-3.5" aria-hidden />Effacer les filtres
+                </button>
+              )}
             </div>
-          )}
+          </aside>
 
-          {!catalogue.loading && !catalogue.error && visible.length === 0 && (
-            <p className="py-16 text-center text-t3">
-              {band
-                ? 'Rien dans cette durée pour l’instant. Essayez une autre.'
-                : 'Le catalogue est encore vide.'}
-            </p>
-          )}
+          <section aria-label="Ressources" aria-live="polite" aria-busy={catalogue.loading}>
+            <label htmlFor="resource-search" className="sr-only">Rechercher une ressource</label>
+            <div className="flex items-center gap-3 border-b border-line pb-3 focus-within:border-gold-400">
+              <Search className="h-4 w-4 shrink-0 text-t4" aria-hidden />
+              <input
+                id="resource-search"
+                type="search"
+                value={search}
+                placeholder="Chercher un sujet, un outil…"
+                onChange={(event) => setParam('q', event.target.value || null)}
+                className="min-h-10 min-w-0 flex-1 bg-transparent text-sm text-t1 placeholder:text-t4 focus:outline-none"
+              />
+            </div>
 
-          {visible.map((resource) => (
-            <ResourceCard key={resource.id} resource={resource} />
-          ))}
-        </section>
+            <div className="mt-8">
+              {catalogue.loading && <CardSkeletonGrid count={6} />}
+              {catalogue.error && (
+                <div className="rounded-2xl border border-line bg-card px-6 py-14 text-center" role="alert">
+                  <p className="font-medium text-t1">La bibliothèque est momentanément indisponible.</p>
+                  <p className="mt-2 text-sm text-t3">{catalogue.error.message}</p>
+                  <button type="button" onClick={catalogue.reload} className="btn-primary mt-5 !min-h-10 !px-4 !py-2">Réessayer</button>
+                </div>
+              )}
+              {!catalogue.loading && !catalogue.error && visible.length === 0 && (
+                <div className="rounded-2xl border border-dashed border-line-strong bg-card px-6 py-14 text-center">
+                  <p className="font-display text-xl text-t1">{page > 1 ? 'Cette page est vide.' : hasFilters ? 'Aucun résultat pour cette recherche.' : 'La bibliothèque se construit.'}</p>
+                  <p className="mx-auto mt-2 max-w-md text-sm text-t3">{hasFilters ? 'Essaie un autre mot-clé ou retire un filtre.' : page > 1 ? 'Reviens à la première page pour retrouver les ressources.' : 'Les ressources apparaîtront ici dès leur publication.'}</p>
+                  {(hasFilters || page > 1) && <button type="button" onClick={page > 1 ? () => setParam('page', null) : () => navigate('/ressources')} className="mt-5 text-sm font-medium text-gold-400 underline underline-offset-4">{page > 1 ? 'Revenir à la première page' : 'Voir tout le catalogue'}</button>}
+                </div>
+              )}
+              {visible.length > 0 && !catalogue.loading && !catalogue.error && (
+                <>
+                  <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{visible.map((resource) => <ResourceCard key={resource.id} resource={resource} />)}</div>
+                  <Pagination page={page} totalPages={catalogue.data?.totalPages ?? 0} onPageChange={(value) => setParam('page', value === 1 ? null : String(value))} />
+                </>
+              )}
+            </div>
+          </section>
+        </div>
       </div>
     </Layout>
   );

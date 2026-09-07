@@ -1,8 +1,9 @@
 // src/components/layout/Layout.tsx
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import Header from './Header';
-import Footer from './Footer';
+import { motion, useReducedMotion } from 'framer-motion';
+import Header from '@/components/layout/Header';
+import NewsletterBar from '@/components/layout/NewsletterBar';
+import Footer from '@/components/layout/Footer';
 import { ArrowUp } from 'lucide-react';
 
 const WHATSAPP_URL = 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK';
@@ -21,57 +22,53 @@ interface LayoutProps {
 
 const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutProps) => {
   const [showScrollToTop, setShowScrollToTop] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollToTop(window.scrollY > 500);
     };
-    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: reducedMotion ? 'instant' : 'smooth' });
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground custom-scrollbar theme-transition">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <a href="#main-content" className="sr-only z-[60] rounded-xl bg-gold px-5 py-3 font-medium text-black focus:not-sr-only focus:fixed focus:left-5 focus:top-3">Aller au contenu</a>
+      <NewsletterBar />
       <Header />
 
-      <main className="pt-16">
+      <main id="main-content" tabIndex={-1} className="flex-1 scroll-mt-24">
         {children}
       </main>
 
+      {/* WhatsApp flottant — canal principal de conversion */}
+      {showFooter && (
+        <aside aria-label="La communauté LesCracks" className="mx-auto w-full max-w-7xl px-5 py-10 sm:px-8">
+          <div className="flex flex-col items-start justify-between gap-4 border-t border-line-soft pt-8 sm:flex-row sm:items-center">
+            <p className="text-sm text-t3"><span className="font-medium text-t1">La conversation continue.</span> La communauté est sur WhatsApp.</p>
+            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-gold-400 underline-offset-4 hover:text-gold-300 hover:underline" aria-label="Rejoindre la communauté sur WhatsApp, nouvel onglet"><WhatsAppSVG />Rejoindre la communauté</a>
+          </div>
+        </aside>
+      )}
       {showFooter && <Footer />}
 
-      {/* WhatsApp flottant — canal principal de conversion */}
-      <motion.a
-        href={WHATSAPP_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 1.5, duration: 0.3 }}
-        className="fixed bottom-8 right-8 z-50 w-14 h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-lg shadow-[#25D366]/30 hover:bg-[#1ebe5c] hover:scale-105 transition-all duration-200"
-        aria-label="Rejoindre le canal WhatsApp LesCracks"
-      >
-        <WhatsAppSVG />
-      </motion.a>
-
       {/* Scroll to Top — au-dessus du bouton WhatsApp */}
-      {showScrollTop && (
+      {showScrollTop && showScrollToTop && (
         <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{
-            opacity: showScrollToTop ? 1 : 0,
-            y: showScrollToTop ? 0 : 20,
-            pointerEvents: showScrollToTop ? 'auto' : 'none'
-          }}
+          type="button"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           onClick={scrollToTop}
-          className="fixed bottom-28 right-8 z-50 w-10 h-10 rounded-full bg-white/10 border border-line-strong text-t2 flex items-center justify-center shadow-lg hover:bg-white/20 hover:text-white transition-colors"
+          className="fixed bottom-5 right-5 z-30 hidden h-11 w-11 items-center justify-center rounded-full border border-line-strong bg-card text-t2 shadow-lg transition-colors hover:border-gold/40 hover:text-gold lg:flex"
           aria-label="Remonter en haut"
         >
-          <ArrowUp className="w-4 h-4" />
+          <ArrowUp className="h-4 w-4" aria-hidden />
         </motion.button>
       )}
     </div>

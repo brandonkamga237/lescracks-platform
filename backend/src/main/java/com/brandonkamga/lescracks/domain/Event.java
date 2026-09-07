@@ -3,26 +3,22 @@ package com.brandonkamga.lescracks.domain;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.Instant;
 
 /**
- * A bootcamp or a workshop: something created for a date, that happens, and then is past.
+ * A bootcamp, workshop, webinar or conference: something created for a date,
+ * that happens, and then is past.
  *
- * It has nothing in common with the Accompagnement 360, which is why they share no table.
- * A start is required — an event without one is not scheduled, it is an idea. An end is not:
- * plenty of sessions run for an evening and nobody records when they finished.
- *
- * The lifecycle is read from those dates rather than stored beside them. A status column and
- * a date column describing the same thing drift apart, and the date is the fact.
+ * A start is required — an event without one is not scheduled, it is an idea.
+ * An end is not: plenty of sessions run for an evening and nobody records when
+ * they finished.
  */
 @Entity
 @Table(name = "events")
-@Getter
-@Setter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,63 +28,42 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private EventKind kind;
-
-    @Column(nullable = false, unique = true, length = 160)
-    private String slug;
-
     @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(length = 500)
-    private String summary;
-
-    @Column(columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cover_id")
-    private Media cover;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private EventType type;
 
-    /** Required: an event is defined by when it starts. */
-    @Column(name = "starts_at", nullable = false)
-    private Instant startsAt;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private EventFormat format;
 
-    /** Optional: many sessions never record an end, and inventing one would be a lie. */
-    @Column(name = "ends_at")
-    private Instant endsAt;
+    @Column(name = "start_date", nullable = false)
+    private Instant startDate;
+
+    @Column(name = "end_date")
+    private Instant endDate;
 
     @Column(length = 200)
     private String location;
 
-    /** Null means no limit, which is different from a limit of zero. */
-    private Integer capacity;
+    @Column(name = "cover_image", length = 1000)
+    private String coverImage;
 
-    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
     @Builder.Default
-    private boolean published = false;
+    private EventStatus status = EventStatus.DRAFT;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();
 
-    /** When an end was recorded, it bounds the event; otherwise the start does. */
-    public Instant effectiveEnd() {
-        return endsAt != null ? endsAt : startsAt;
-    }
-
-    public boolean isUpcoming() {
-        return startsAt.isAfter(Instant.now());
-    }
-
-    public boolean isPast() {
-        return effectiveEnd().isBefore(Instant.now());
-    }
-
-    /** Neither upcoming nor over: the window it is being held in. */
-    public boolean isRunning() {
-        return !isUpcoming() && !isPast();
-    }
+    @Column(name = "updated_at", nullable = false)
+    @Builder.Default
+    private Instant updatedAt = Instant.now();
 }

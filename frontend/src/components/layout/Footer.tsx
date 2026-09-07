@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Linkedin, Github, Youtube, Mail, BookOpen, Video, Compass, Calendar, Info, ArrowUpRight } from 'lucide-react';
+import { Linkedin, Github, Youtube, Mail, BookOpen, Calendar } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import LesCracksLogo from '@/components/common/LesCracksLogo';
@@ -16,24 +16,16 @@ type FooterLink = {
 
 const NAV: { title: string; links: FooterLink[] }[] = [
   {
-    title: 'Accompagnement',
-    links: [
-      { label: 'Le programme', href: '/programme', icon: Compass },
-      { label: 'Postuler maintenant', href: '/postuler', icon: ArrowUpRight, highlight: true },
-    ],
-  },
-  {
     title: 'Plateforme',
     links: [
-      { label: 'Bibliothèque', href: '/ressources#bibliotheque', icon: BookOpen },
-      { label: 'Vidéothèque', href: '/ressources#videotheque', icon: Video },
+      { label: 'Toutes les ressources', href: '/ressources', icon: BookOpen },
       { label: 'Événements', href: '/evenements', icon: Calendar },
+      { label: 'À propos', href: '/a-propos', icon: null },
     ],
   },
   {
-    title: 'Entreprise',
+    title: 'Nous retrouver',
     links: [
-      { label: 'À propos', href: '/about', icon: Info },
       { label: 'WhatsApp', href: 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK', icon: null, isWhatsApp: true, external: true },
       { label: 'contact@lescracks.com', href: 'mailto:contact@lescracks.com', icon: Mail, external: true },
     ],
@@ -58,7 +50,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
 
         {/* ── Main grid ──────────────────────────────────────────── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-8">
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-[2fr_1fr_1fr] md:gap-12">
 
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
@@ -70,7 +62,7 @@ const Footer = () => {
               />
             </Link>
             <p className="text-sm text-t3 leading-relaxed mb-6 max-w-[220px]">
-              Accélérateur de carrière tech au service des talents de l'Afrique francophone.
+              Comprendre, explorer, pratiquer. La tech avance, toi aussi.
             </p>
 
             {/* Socials */}

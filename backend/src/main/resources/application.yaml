@@ -43,6 +43,13 @@ spring:
       max-file-size: ${MAX_UPLOAD_SIZE:25MB}
       max-request-size: ${MAX_UPLOAD_SIZE:25MB}
 
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+
 app:
   # Canonical origin used by the SEO snapshots and the sitemap.
   site:

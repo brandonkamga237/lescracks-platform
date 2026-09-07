@@ -1,144 +1,119 @@
 package com.brandonkamga.lescracks.controller;
 
-import com.brandonkamga.lescracks.domain.ResourceEbook;
-import com.brandonkamga.lescracks.domain.ResourceKind;
-import com.brandonkamga.lescracks.dto.common.PageResponse;
+import com.brandonkamga.lescracks.domain.Ebook;
+import com.brandonkamga.lescracks.domain.Resource;
 import com.brandonkamga.lescracks.dto.resource.*;
 import com.brandonkamga.lescracks.exception.NotFoundException;
 import com.brandonkamga.lescracks.mapper.ResourceMapper;
+import com.brandonkamga.lescracks.repository.EbookRepository;
 import com.brandonkamga.lescracks.service.interfaces.ResourceService;
 import com.brandonkamga.lescracks.service.interfaces.StorageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.brandonkamga.lescracks.dto.common.PageResponse;
+import com.brandonkamga.lescracks.domain.ResourceStatus;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/resources")
 @Tag(name = "Ressources")
 public class ResourceController {
-
     private final ResourceService resources;
-    private final StorageService storage;
     private final ResourceMapper mapper;
+    private final EbookRepository ebooks;
+    private final StorageService storage;
 
-    public ResourceController(ResourceService resources, StorageService storage, ResourceMapper mapper) {
+    public ResourceController(ResourceService resources, ResourceMapper mapper,
+                              EbookRepository ebooks, StorageService storage) {
         this.resources = resources;
-        this.storage = storage;
         this.mapper = mapper;
+        this.ebooks = ebooks;
+        this.storage = storage;
     }
 
     @GetMapping
-    @Operation(summary = "Le catalogue, filtrable par type, catégorie, tags et recherche")
-    public PageResponse<ResourceSummary> search(
-            @RequestParam(required = false) ResourceKind kind,
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Set<Long> tagIds,
-            @RequestParam(required = false) String search,
-            @PageableDefault(size = 12) Pageable pageable) {
-        return PageResponse.of(
-                resources.search(kind, categoryId, tagIds, search, pageable), mapper::toSummary);
+    @Operation(summary = "Consulter les ressources publiées")
+    public PageResponse<ResourceResponse> published(@RequestParam(required = false) String kind,
+                                                    @RequestParam(required = false) String search,
+                                                    @RequestParam(required = false) Long categoryId,
+                                                    @RequestParam(required = false) Long tagId,
+                                                    @PageableDefault(size = 12) Pageable pageable) {
+        return PageResponse.of(resources.search(ResourceStatus.PUBLISHED, search, kind, categoryId, tagId, pageable), mapper::toResponse);
     }
 
-    @GetMapping("/{slug}")
-    @Operation(summary = "Une ressource")
-    public ResourceDetail bySlug(@PathVariable String slug) {
-        return mapper.toDetail(resources.requireBySlug(slug));
+    @GetMapping("/{id}")
+    @Operation(summary = "Consulter une ressource publiée")
+    public ResourceResponse get(@PathVariable Long id) {
+        return mapper.toResponse(resources.requirePublished(id));
     }
 
-    /**
-     * Counting a view. Open, and answered with no content: a reader's page should not wait on
-     * a statistic, and a lost view costs less than a slow page.
-     */
-    @PostMapping("/{id}/view")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Enregistrer une consultation")
-    public void recordView(@PathVariable Long id) {
-        resources.recordView(id);
-    }
-
-    /**
-     * Serving an ebook through the API rather than from storage directly: the file keeps its
-     * original name on the way out, and the platform stays able to decide who may take it.
-     */
-    @GetMapping("/download/{id}")
-    @Operation(summary = "Télécharger un ebook")
+    @GetMapping("/{id}/download")
+    @Operation(summary = "Télécharger un ebook publié")
     public ResponseEntity<InputStreamResource> download(@PathVariable Long id) {
-        if (!(resources.require(id) instanceof ResourceEbook ebook)) {
-            throw new NotFoundException("Cette ressource n'est pas un ebook.");
-        }
-        var stored = storage.read(ebook.getFileKey())
+        Resource resource = resources.requirePublished(id);
+        Ebook ebook = ebooks.findByResourceId(id)
+                .orElseThrow(() -> new NotFoundException("Cette ressource n'est pas un ebook."));
+        var stored = storage.read(ebook.getDocument().getFile())
                 .orElseThrow(() -> new NotFoundException("Fichier", "id", id));
-
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + ebook.getOriginalName() + "\"")
-                .contentType(MediaType.parseMediaType(ebook.getContentType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getTitle() + "\"")
+                .contentType(MediaType.parseMediaType(ebook.getDocument().getFormat()))
                 .contentLength(stored.size())
                 .body(new InputStreamResource(stored.content()));
     }
 
-    // ── Back office ───────────────────────────────────────────────────────────
-
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Toutes les ressources, publiées ou non")
-    public PageResponse<ResourceSummary> all(@PageableDefault(size = 20) Pageable pageable) {
-        return PageResponse.of(resources.all(pageable), mapper::toSummary);
+    public PageResponse<ResourceResponse> all(@RequestParam(required = false) ResourceStatus status,
+                                              @RequestParam(required = false) String kind,
+                                              @RequestParam(required = false) String search,
+                                              @RequestParam(required = false) Long categoryId,
+                                              @RequestParam(required = false) Long tagId,
+                                              @PageableDefault(size = 20) Pageable pageable) {
+        return PageResponse.of(resources.search(status, search, kind, categoryId, tagId, pageable), mapper::toResponse);
     }
 
-    @PostMapping("/admin/videos")
+    @PostMapping(value = "/admin/videos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResourceDetail createVideo(@Valid @RequestBody VideoRequest request) {
-        return mapper.toDetail(resources.createVideo(toDraft(request)));
+    public ResourceResponse createVideo(@Valid @RequestPart("data") VideoResourceRequest request,
+                                        @RequestPart(value = "coverImageFile", required = false) MultipartFile coverImageFile) {
+        return mapper.toResponse(resources.createVideo(request, coverImageFile));
     }
 
-    @PutMapping("/admin/videos/{id}")
+    @PutMapping(value = "/admin/videos/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResourceDetail updateVideo(@PathVariable Long id, @Valid @RequestBody VideoRequest request) {
-        return mapper.toDetail(resources.updateVideo(id, toDraft(request)));
+    public ResourceResponse updateVideo(@PathVariable Long id,
+                                        @Valid @RequestPart("data") VideoResourceRequest request,
+                                        @RequestPart(value = "coverImageFile", required = false) MultipartFile coverImageFile) {
+        return mapper.toResponse(resources.updateVideo(id, request, coverImageFile));
     }
 
-    /** Multipart: the file travels beside the description rather than encoded inside it. */
     @PostMapping(value = "/admin/ebooks", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResourceDetail createEbook(@Valid @RequestPart("data") EbookRequest request,
-                                      @RequestPart("file") MultipartFile file) {
-        return mapper.toDetail(resources.createEbook(
-                new ResourceService.EbookDraft(toCommon(request.common()), request.pageCount()), file));
+    public ResourceResponse createEbook(@Valid @RequestPart("data") EbookResourceRequest request,
+                                        @RequestPart("file") MultipartFile file,
+                                        @RequestPart(value = "coverImageFile", required = false) MultipartFile coverImageFile) {
+        return mapper.toResponse(resources.createEbook(request, file, coverImageFile));
     }
 
-    @PostMapping("/admin/articles")
+    @PutMapping(value = "/admin/ebooks/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResourceDetail createArticle(@Valid @RequestBody ArticleRequest request) {
-        return mapper.toDetail(resources.createArticle(toDraft(request)));
-    }
-
-    @PutMapping("/admin/articles/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResourceDetail updateArticle(@PathVariable Long id,
-                                        @Valid @RequestBody ArticleRequest request) {
-        return mapper.toDetail(resources.updateArticle(id, toDraft(request)));
-    }
-
-    @PutMapping("/admin/{id}/published")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResourceDetail setPublished(@PathVariable Long id, @RequestParam boolean published) {
-        return mapper.toDetail(resources.setPublished(id, published));
+    public ResourceResponse updateEbook(@PathVariable Long id,
+                                       @Valid @RequestPart("data") EbookResourceRequest request,
+                                       @RequestPart(value = "file", required = false) MultipartFile file,
+                                       @RequestPart(value = "coverImageFile", required = false) MultipartFile coverImageFile) {
+        return mapper.toResponse(resources.updateEbook(id, request, file, coverImageFile));
     }
 
     @DeleteMapping("/admin/{id}")
@@ -146,23 +121,5 @@ public class ResourceController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         resources.delete(id);
-    }
-
-    // ── Request to draft ──────────────────────────────────────────────────────
-
-    private ResourceService.Common toCommon(ResourceCommonRequest common) {
-        return new ResourceService.Common(common.title(), common.summary(),
-                common.categoryId(), common.tagIds(), common.coverId());
-    }
-
-    private ResourceService.VideoDraft toDraft(VideoRequest request) {
-        return new ResourceService.VideoDraft(
-                toCommon(request.common()), request.externalUrl(), request.durationSeconds());
-    }
-
-    /** The body is serialised back to text here: the service stores a document, not a tree. */
-    private ResourceService.ArticleDraft toDraft(ArticleRequest request) {
-        return new ResourceService.ArticleDraft(
-                toCommon(request.common()), request.body().toString(), request.authorName());
     }
 }

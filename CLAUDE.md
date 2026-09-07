@@ -114,3 +114,11 @@ Before any commit or PR:
 - **Attestation** = proof of a completed participation, checkable by anyone at `/attestations/{code}`
 - **Resource** = content (VIDEO/DOCUMENT/ARTICLE). A video is always `EXTERNAL`, a document is `UPLOADED` to MinIO, an article is `INLINE` and written in the back office
 - **SEO snapshot** = server-rendered HTML served to bots instead of the SPA
+
+## Current product scope (September 2026)
+- The current backend controllers and DTOs are the source of truth when older architecture notes above differ from the code.
+- Do not restore removed programmes, applications, participations, attestations, articles, or SEO snapshot controllers as part of frontend work. Do not invent progress, favourites, event registration, or personalised history without backend support.
+- Resources currently use `EBOOK` and `EXTERNAL_VIDEO`; public event detail routes use numeric IDs. Public resources and downloads do not require an account.
+- Preserve the black, anthracite, white and gold palette (`#d4af37`). Visitor, member and administrator experiences must use a coherent shared session and actual backend data.
+- Local member/admin authentication uses backend sessions; existing OIDC authentication is a separate transport. Do not send a stale OIDC bearer token alongside local cookie authentication.
+- Validate frontend changes with `pnpm typecheck`, `pnpm lint`, and `pnpm build`. Browser checks using API fixtures verify UI behaviour, not live backend integration.

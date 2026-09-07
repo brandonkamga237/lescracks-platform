@@ -15,7 +15,8 @@ const LesCracksLogo = ({
     <svg 
       xmlns="http://www.w3.org/2000/svg" 
       viewBox="150 520 1140 460" 
-      style={{ height, width }}
+      height={height}
+      width={width}
       className={className}
     >
       <defs>

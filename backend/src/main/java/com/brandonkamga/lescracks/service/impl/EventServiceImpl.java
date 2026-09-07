@@ -1,120 +1,145 @@
 package com.brandonkamga.lescracks.service.impl;
 
 import com.brandonkamga.lescracks.domain.Event;
-import com.brandonkamga.lescracks.domain.EventKind;
+import com.brandonkamga.lescracks.domain.EventStatus;
+import com.brandonkamga.lescracks.domain.EventType;
+import com.brandonkamga.lescracks.domain.EventFormat;
+import com.brandonkamga.lescracks.dto.event.EventRequest;
 import com.brandonkamga.lescracks.exception.BadRequestException;
 import com.brandonkamga.lescracks.exception.NotFoundException;
 import com.brandonkamga.lescracks.repository.EventRepository;
 import com.brandonkamga.lescracks.service.interfaces.EventService;
-import com.brandonkamga.lescracks.service.interfaces.MediaService;
-import com.brandonkamga.lescracks.util.Slugs;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.brandonkamga.lescracks.service.interfaces.NewsletterService;
+import com.brandonkamga.lescracks.service.interfaces.StorageService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @Transactional
 public class EventServiceImpl implements EventService {
-
     private final EventRepository events;
-    private final MediaService media;
+    private final NewsletterService newsletter;
+    private final StorageService storage;
 
-    public EventServiceImpl(EventRepository events, MediaService media) {
+    public EventServiceImpl(EventRepository events, NewsletterService newsletter, StorageService storage) {
         this.events = events;
-        this.media = media;
+        this.newsletter = newsletter;
+        this.storage = storage;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Event> published(EventKind kind, boolean upcomingOnly, Pageable pageable) {
-        return upcomingOnly
-                ? events.findUpcoming(Instant.now(), kind, pageable)
-                : events.findPublished(kind, pageable);
+    public Page<Event> published(EventType type, Pageable pageable) {
+        return type == null
+                ? events.findByStatusOrderByStartDateAsc(EventStatus.PUBLISHED, pageable)
+                : events.findByStatusAndTypeOrderByStartDateAsc(EventStatus.PUBLISHED, type, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Event> all(Pageable pageable) {
-        return events.findAll(pageable);
+    public Page<Event> published(EventType type, EventFormat format, Pageable pageable) {
+        if (type != null && format != null) return events.findByStatusAndTypeAndFormatOrderByStartDateAsc(EventStatus.PUBLISHED, type, format, pageable);
+        if (type != null) return events.findByStatusAndTypeOrderByStartDateAsc(EventStatus.PUBLISHED, type, pageable);
+        if (format != null) return events.findByStatusAndFormatOrderByStartDateAsc(EventStatus.PUBLISHED, format, pageable);
+        return events.findByStatusOrderByStartDateAsc(EventStatus.PUBLISHED, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Event requireBySlug(String slug) {
-        return events.findBySlug(slug)
-                .orElseThrow(() -> new NotFoundException("Event", "slug", slug));
+    public Page<Event> upcoming(Pageable pageable) {
+        return events.findByStatusAndStartDateAfterOrderByStartDateAsc(EventStatus.PUBLISHED, Instant.now(), pageable);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Event> past(Pageable pageable) {
+        return events.findByStatusAndStartDateBeforeOrderByStartDateDesc(EventStatus.PUBLISHED, Instant.now(), pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Event> all(Pageable pageable) { return events.findAll(pageable); }
 
     @Override
     @Transactional(readOnly = true)
     public Event require(Long id) {
-        return events.findById(id)
-                .orElseThrow(() -> new NotFoundException("Event", "id", id));
+        return events.findById(id).orElseThrow(() -> new NotFoundException("Event", "id", id));
     }
 
     @Override
-    public Event create(EventDraft draft) {
-        validate(draft);
-        Event event = Event.builder()
-                .slug(Slugs.uniqueFrom(draft.title(), events::existsBySlug))
-                .build();
-        apply(event, draft);
-        return events.save(event);
-    }
-
-    @Override
-    public Event update(Long id, EventDraft draft) {
-        validate(draft);
-        Event event = require(id);
-        // The slug is left alone on purpose: it is in links people have already shared.
-        apply(event, draft);
+    public Event create(EventRequest request, MultipartFile coverImageFile) {
+        validateDates(request.startDate(), request.endDate());
+        Event event = events.save(apply(new Event(), request, coverImageFile));
+        if (event.getStatus() == EventStatus.PUBLISHED) newsletter.notifyEventSubscribers(event);
         return event;
     }
 
-    /** One place that turns a draft into an event, so create and update cannot drift apart. */
-    private void apply(Event event, EventDraft draft) {
-        event.setKind(draft.kind());
-        event.setTitle(draft.title().strip());
-        event.setSummary(draft.summary());
-        event.setDescription(draft.description());
-        event.setStartsAt(draft.startsAt());
-        event.setEndsAt(draft.endsAt());
-        event.setLocation(draft.location());
-        event.setCapacity(draft.capacity());
-        event.setCover(draft.coverId() == null ? null : media.require(draft.coverId()));
-    }
-
-    /** What the database also refuses, said early and in words the admin can act on. */
-    private void validate(EventDraft draft) {
-        if (draft.kind() == null) {
-            throw new BadRequestException("Précisez s'il s'agit d'un bootcamp ou d'un workshop.");
-        }
-        if (draft.title() == null || draft.title().isBlank()) {
-            throw new BadRequestException("Le titre est obligatoire.");
-        }
-        if (draft.startsAt() == null) {
-            throw new BadRequestException("La date de début est obligatoire.");
-        }
-        if (draft.endsAt() != null && draft.endsAt().isBefore(draft.startsAt())) {
-            throw new BadRequestException("La date de fin ne peut pas précéder la date de début.");
-        }
-        if (draft.capacity() != null && draft.capacity() <= 0) {
-            throw new BadRequestException("La capacité doit être supérieure à zéro, ou vide si illimitée.");
-        }
-    }
-
     @Override
-    public Event setPublished(Long id, boolean published) {
-        Event event = require(id);
-        event.setPublished(published);
-        return event;
+    public Event update(Long id, EventRequest request, MultipartFile coverImageFile) {
+        validateDates(request.startDate(), request.endDate());
+        return apply(require(id), request, coverImageFile);
     }
 
     @Override
     public void delete(Long id) {
-        events.delete(require(id));
+        Event event = require(id);
+        deleteCoverImage(event.getCoverImage());
+        events.delete(event);
+    }
+
+    private Event apply(Event event, EventRequest request, MultipartFile coverImageFile) {
+        event.setTitle(request.title().trim());
+        event.setDescription(request.description().trim());
+        event.setType(request.type());
+        event.setFormat(request.format());
+        event.setStartDate(request.startDate());
+        event.setEndDate(request.endDate());
+        event.setLocation(request.location() == null ? null : request.location().trim());
+        event.setStatus(request.status() == null ? EventStatus.DRAFT : request.status());
+        event.setCoverImage(resolveCoverImage(coverImageFile, event.getCoverImage()));
+        return event;
+    }
+
+    private String resolveCoverImage(MultipartFile coverImageFile, String existingCoverImage) {
+        if (coverImageFile != null && !coverImageFile.isEmpty()) {
+            validateImage(coverImageFile);
+            try {
+                String key = storage.store(coverImageFile.getOriginalFilename(), coverImageFile.getBytes(), coverImageFile.getContentType());
+                return "/api/files/" + key;
+            } catch (IOException exception) {
+                throw new BadRequestException("L'image de couverture n'a pas pu être lue.");
+            }
+        }
+        if (existingCoverImage != null && !existingCoverImage.isBlank()) return existingCoverImage;
+        return null;
+    }
+
+    private void validateImage(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new BadRequestException("L'image de couverture doit être au format image (jpg, png, webp, …).");
+        }
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new BadRequestException("L'image de couverture ne doit pas dépasser 5 Mo.");
+        }
+    }
+
+    private void deleteCoverImage(String coverImage) {
+        if (coverImage == null || !coverImage.startsWith("/api/files/")) return;
+        String key = coverImage.substring("/api/files/".length());
+        if (!key.isBlank()) storage.delete(key);
+    }
+
+    private void validateDates(Instant start, Instant end) {
+        if (end != null && end.isBefore(start)) {
+            throw new BadRequestException("La date de fin ne peut pas précéder la date de début.");
+        }
     }
 }

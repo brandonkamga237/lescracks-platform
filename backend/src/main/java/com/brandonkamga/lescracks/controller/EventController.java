@@ -1,87 +1,88 @@
 package com.brandonkamga.lescracks.controller;
 
-import com.brandonkamga.lescracks.domain.EventKind;
-import com.brandonkamga.lescracks.dto.common.PageResponse;
-import com.brandonkamga.lescracks.dto.event.EventDetail;
+import com.brandonkamga.lescracks.domain.Event;
+import com.brandonkamga.lescracks.domain.EventType;
+import com.brandonkamga.lescracks.domain.EventFormat;
 import com.brandonkamga.lescracks.dto.event.EventRequest;
-import com.brandonkamga.lescracks.dto.event.EventSummary;
-import com.brandonkamga.lescracks.mapper.EventMapper;
+import com.brandonkamga.lescracks.dto.event.EventResponse;
 import com.brandonkamga.lescracks.service.interfaces.EventService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import com.brandonkamga.lescracks.dto.common.PageResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/events")
-@Tag(name = "Événements")
 public class EventController {
-
     private final EventService events;
-    private final EventMapper mapper;
 
-    public EventController(EventService events, EventMapper mapper) {
+    public EventController(EventService events) {
         this.events = events;
-        this.mapper = mapper;
     }
 
     @GetMapping
-    @Operation(summary = "Les événements publiés, filtrables par type et limitables aux prochains")
-    public PageResponse<EventSummary> list(@RequestParam(required = false) EventKind kind,
-                                           @RequestParam(defaultValue = "false") boolean upcoming,
-                                           @PageableDefault(size = 12) Pageable pageable) {
-        return PageResponse.of(events.published(kind, upcoming, pageable), mapper::toSummary);
+    public PageResponse<EventResponse> published(@RequestParam(required = false) EventType type,
+                                                 @RequestParam(required = false) EventFormat format,
+                                                 @PageableDefault(size = 12) Pageable pageable) {
+        return PageResponse.of(events.published(type, format, pageable), EventController::response);
     }
 
-    /** By slug rather than id: the slug is what is in a shared link. */
-    @GetMapping("/{slug}")
-    @Operation(summary = "Un événement")
-    public EventDetail bySlug(@PathVariable String slug) {
-        return mapper.toDetail(events.requireBySlug(slug));
+    @GetMapping("/upcoming")
+    public PageResponse<EventResponse> upcoming(@PageableDefault(size = 12) Pageable pageable) {
+        return PageResponse.of(events.upcoming(pageable), EventController::response);
+    }
+
+    @GetMapping("/past")
+    public PageResponse<EventResponse> past(@PageableDefault(size = 12) Pageable pageable) {
+        return PageResponse.of(events.past(pageable), EventController::response);
+    }
+
+    @GetMapping("/{id}")
+    public EventResponse get(@PathVariable Long id) {
+        Event event = events.require(id);
+        if (event.getStatus() != com.brandonkamga.lescracks.domain.EventStatus.PUBLISHED) {
+            throw new com.brandonkamga.lescracks.exception.NotFoundException("Event", "id", id);
+        }
+        return response(event);
     }
 
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Tous les événements, publiés ou non")
-    public PageResponse<EventSummary> all(@PageableDefault(size = 20) Pageable pageable) {
-        return PageResponse.of(events.all(pageable), mapper::toSummary);
+    public PageResponse<EventResponse> all(@PageableDefault(size = 20) Pageable pageable) {
+        return PageResponse.of(events.all(pageable), EventController::response);
     }
 
-    @PostMapping("/admin")
+    @PostMapping(value = "/admin", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventDetail create(@Valid @RequestBody EventRequest request) {
-        return mapper.toDetail(events.create(toDraft(request)));
+    public EventResponse create(@Valid @RequestPart("data") EventRequest request,
+                                @RequestPart(value = "coverImageFile", required = false) MultipartFile coverImageFile) {
+        return response(events.create(request, coverImageFile));
     }
 
-    @PutMapping("/admin/{id}")
+    @PutMapping(value = "/admin/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public EventDetail update(@PathVariable Long id, @Valid @RequestBody EventRequest request) {
-        return mapper.toDetail(events.update(id, toDraft(request)));
-    }
-
-    /** Publishing is deliberate, never a side effect of editing. */
-    @PutMapping("/admin/{id}/published")
-    @PreAuthorize("hasRole('ADMIN')")
-    public EventDetail setPublished(@PathVariable Long id, @RequestParam boolean published) {
-        return mapper.toDetail(events.setPublished(id, published));
+    public EventResponse update(@PathVariable Long id,
+                                @Valid @RequestPart("data") EventRequest request,
+                                @RequestPart(value = "coverImageFile", required = false) MultipartFile coverImageFile) {
+        return response(events.update(id, request, coverImageFile));
     }
 
     @DeleteMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        events.delete(id);
-    }
+    public void delete(@PathVariable Long id) { events.delete(id); }
 
-    private EventService.EventDraft toDraft(EventRequest request) {
-        return new EventService.EventDraft(
-                request.kind(), request.title(), request.summary(), request.description(),
-                request.startsAt(), request.endsAt(), request.location(),
-                request.capacity(), request.coverId());
+    private static EventResponse response(Event event) {
+        return new EventResponse(event.getId(), event.getTitle(), event.getDescription(), event.getType(),
+                event.getFormat(), event.getStartDate(), event.getEndDate(), event.getLocation(), event.getCoverImage(),
+                event.getStatus(), event.getCreatedAt(), event.getUpdatedAt());
     }
 }

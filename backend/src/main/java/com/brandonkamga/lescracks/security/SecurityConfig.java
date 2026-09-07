@@ -38,7 +38,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             // No cookie, no session: every request carries its own bearer token.
             .csrf(csrf -> csrf.disable())
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             // Rejections happen in this chain, never in a controller, so the error body has
             // to be written here or the client gets a bare status and an empty response.
             .exceptionHandling(handling -> handling
@@ -46,29 +46,24 @@ public class SecurityConfig {
                     .accessDeniedHandler(errors))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/actuator/health", "/error").permitAll()
+                .requestMatchers("/api/admin/auth/login", "/api/admin/auth/logout").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/seo/**", "/api/sitemap.xml").permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
 
                 // Admin routes live under each domain, not under one /api/admin tree. Every
                 // one of them also carries @PreAuthorize; this matcher is the second lock,
                 // so a method someone forgets to annotate is still not an open door.
-                .requestMatchers("/api/*/admin", "/api/*/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**", "/api/*/admin", "/api/*/admin/**").hasRole("ADMIN")
 
                 // Anyone may read the catalogue and check an attestation. Reading is what
                 // brings people in; asking them to sign up first is what keeps them out.
                 .requestMatchers(HttpMethod.GET, "/api/events", "/api/events/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/resources", "/api/resources/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/resources/*/download").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories", "/api/tags").permitAll()
-                // Whether the 360 is open decides what the landing page offers.
-                .requestMatchers(HttpMethod.GET, "/api/mentorship").permitAll()
-                // Verifying a code is the whole point of issuing one, and whoever verifies is
-                // a recruiter with no account. These live under /participations because that
-                // is what they read, not because they are private.
-                .requestMatchers(HttpMethod.GET, "/api/participations/attestations/*").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/participations/proof-of-work").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/resources/*/view").permitAll()
-                // Applying does not require an account: people apply first and register after.
-                .requestMatchers(HttpMethod.POST, "/api/applications").permitAll()
+                .requestMatchers("/api/files/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/resources/*/likes").permitAll()
 
                 .anyRequest().authenticated())
             // The resource server keeps its own pair, or a bad token would answer with the

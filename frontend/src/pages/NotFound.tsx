@@ -1,40 +1,23 @@
 // src/pages/NotFound.tsx
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Compass } from 'lucide-react';
+import { ArrowRight, Compass } from 'lucide-react';
 import SEO from '@/components/common/SEO';
+import Layout from '@/components/layout/Layout';
 
 const NotFound = () => {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
-      <SEO title="Page introuvable" description="Cette page n'existe pas ou a été déplacée." url="/404" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(212,175,55,0.1)_0%,_transparent_50%)]" />
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative w-full max-w-md text-center"
-      >
-        <div className="w-16 h-16 rounded-2xl bg-white/5 border border-line flex items-center justify-center mx-auto mb-6">
-          <Compass className="w-7 h-7 text-gold" />
+    <Layout showFooter={false} showScrollTop={false}>
+      <SEO title="Page introuvable" description="Cette page n’existe pas ou a été déplacée." url="/404" />
+      <div className="flex min-h-[calc(100dvh_-_5rem)] items-center justify-center px-5 py-16">
+        <div className="w-full max-w-lg rounded-3xl border border-line bg-card p-8 text-center sm:p-12">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-gold/20 bg-gold/10 text-gold"><Compass className="h-7 w-7" aria-hidden /></div>
+          <p className="mb-4 font-mono text-sm text-gold">ERREUR 404</p>
+          <h1 className="font-display text-3xl font-medium text-t1">On a perdu le fil.</h1>
+          <p className="mt-4 text-sm leading-relaxed text-t3">Cette page n’existe pas ou n’est plus disponible. La bibliothèque, elle, reste à portée de clic.</p>
+          <div className="mt-8 flex flex-col gap-3"><Link to="/ressources" className="btn-primary gap-2">Explorer la bibliothèque<ArrowRight className="h-4 w-4" aria-hidden /></Link><Link to="/" className="btn-secondary">Revenir à l’accueil</Link></div>
         </div>
-
-        <p className="text-gold font-display text-5xl font-bold mb-3">404</p>
-        <h1 className="text-2xl font-display font-bold text-white mb-3">Page introuvable</h1>
-        <p className="text-t3 text-sm leading-relaxed mb-8">
-          La page que tu cherches n'existe pas ou a été déplacée.
-          Vérifie l'adresse ou reviens à l'accueil.
-        </p>
-
-        <Link
-          to="/"
-          className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gold text-black font-semibold hover:bg-gold/90 transition-colors rounded-sm"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Retour à l'accueil
-        </Link>
-      </motion.div>
-    </div>
+      </div>
+    </Layout>
   );
 };
 

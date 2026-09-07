@@ -1,147 +1,172 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
+import SEO from '@/components/common/SEO';
+import { CardSkeletonGrid } from '@/components/common/Skeleton';
 import Layout from '@/components/layout/Layout';
 import ResourceCard from '@/components/resources/ResourceCard';
 import { useApi } from '@/hooks/useApi';
-import { EFFORT_BANDS } from '@/lib/effort';
+import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
 
-const dayFormat = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'long' });
+const dayFormat = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
 /**
- * The front door.
- *
- * It opens on the same question the catalogue is organised around — how much time do you
- * have — rather than on a claim about ourselves. Someone arriving with twenty minutes can
- * be reading something within two clicks, without an account.
- *
- * The numbers further down are counted, not asserted: they come from participations that
- * were actually completed, each with an attestation anybody can verify.
+ * The front door for the learning catalogue.
  */
 export default function Landing() {
-  const recent = useApi((signal) => api.resources({ size: 5 }, signal), []);
-  const upcoming = useApi((signal) => api.events({ upcoming: true, size: 3 }, signal), []);
-  const mentorship = useApi((signal) => api.mentorship(signal), []);
-  const proof = useApi((signal) => api.proofOfWork(signal), []);
+  const recent = useApi((signal) => api.resources({ size: 3 }, signal), []);
+  const upcoming = useApi((signal) => api.upcomingEvents(0, 4, signal), []);
+  const categories = useApi((signal) => api.categories(signal), []);
+  const { isSignedIn, isAdmin, name } = useSession();
+  const firstName = name?.trim().split(/\s+/)[0];
 
   return (
     <Layout>
-      <section className="mx-auto max-w-4xl px-6 pb-16 pt-20 sm:pt-28">
-        <h1 className="max-w-3xl font-display text-4xl font-semibold leading-[1.1] text-t1 sm:text-6xl">
-          Apprendre la tech quand on part de zéro,
-          <span className="text-t3"> avec le temps qu’on a.</span>
-        </h1>
-        <p className="mt-6 max-w-xl text-lg leading-relaxed text-t3">
-          Des ressources rangées par ce qu’elles vous demandent, des événements datés, et un
-          accompagnement individuel quand vous voulez aller plus vite.
-        </p>
+      <SEO title="Apprendre la tech, concrètement" description="Des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme. Une bibliothèque ouverte, une communauté francophone." url="/" />
 
-        {/* The catalogue's own question, asked here so the first click already filters. */}
-        <div className="mt-10 flex flex-wrap gap-3">
-          {EFFORT_BANDS.map((band) => (
-            <Link
-              key={band.id}
-              to="/ressources"
-              className="rounded-full border border-line px-5 py-2.5 transition-colors hover:border-gold-400"
-            >
-              <span className="block text-sm font-medium text-t1">{band.label}</span>
-              <span className="block text-xs text-t4">{band.hint}</span>
-            </Link>
-          ))}
+      {/* Hero — editorial, image-driven, no ornament */}
+      <section className="border-b border-line-soft">
+        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 lg:grid-cols-[1fr_0.9fr] lg:items-center lg:py-20">
+          <div>
+            <p className="text-sm font-medium text-gold-400">L’école en ligne pour monter en compétence</p>
+            <h1 className="mt-5 max-w-2xl font-display text-4xl font-semibold leading-[1.08] tracking-tight text-t1 sm:text-5xl xl:text-6xl">
+              {isSignedIn
+                ? `Bon retour${firstName ? `, ${firstName}` : ''}. La suite est dans la bibliothèque.`
+                : 'Deviens aussi un crack de la tech.'}
+            </h1>
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-t3 sm:text-lg">
+              {isSignedIn
+                ? 'Reprends ta lecture, découvre les derniers contenus publiés ou trouve le prochain rendez-vous de la communauté.'
+                : 'Des vidéos, des ebooks et des ateliers conçus par des gens qui font. Tu choisis un sujet, tu apprends à ton rythme, tu pratiques en communauté.'}
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <Link to="/ressources" className="btn-primary">
+                Explorer la bibliothèque
+                <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
+              </Link>
+              <Link to="/evenements" className="text-sm font-medium text-t2 underline-offset-4 transition-colors hover:text-gold-300 hover:underline">
+                Voir les événements
+              </Link>
+              {isSignedIn && isAdmin && (
+                <Link to="/admin" className="text-sm font-medium text-t4 underline-offset-4 transition-colors hover:text-t1 hover:underline">
+                  Administration
+                </Link>
+              )}
+            </div>
+          </div>
+
+          <div className="relative">
+            <img
+              src="/images/community-1.jpg"
+              alt="Des membres de la communauté LesCracks réunis autour d’un ordinateur"
+              className="aspect-[4/3] w-full rounded-2xl border border-line object-cover"
+              loading="eager"
+            />
+          </div>
         </div>
       </section>
 
-      {(recent.data?.content.length ?? 0) > 0 && (
-        <section className="mx-auto max-w-4xl px-6 py-12">
-          <div className="flex items-baseline justify-between gap-4 border-b border-line-soft pb-3">
-            <h2 className="font-display text-xl font-medium text-t1">Derniers ajouts</h2>
-            <Link
-              to="/ressources"
-              className="flex items-center gap-1.5 text-sm text-t4 transition-colors hover:text-t2"
-            >
-              Tout le catalogue
-              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-            </Link>
-          </div>
-          {recent.data?.content.map((resource) => (
-            <ResourceCard key={resource.id} resource={resource} />
-          ))}
-        </section>
-      )}
-
-      {(upcoming.data?.content.length ?? 0) > 0 && (
-        <section className="mx-auto max-w-4xl px-6 py-12">
-          <div className="flex items-baseline justify-between gap-4 border-b border-line-soft pb-3">
-            <h2 className="font-display text-xl font-medium text-t1">Prochains rendez-vous</h2>
-            <Link
-              to="/evenements"
-              className="flex items-center gap-1.5 text-sm text-t4 transition-colors hover:text-t2"
-            >
-              Tous les événements
-              <ArrowRight className="h-3.5 w-3.5" aria-hidden />
-            </Link>
-          </div>
-          {upcoming.data?.content.map((event) => (
-            <Link
-              key={event.id}
-              to={`/evenements/${event.slug}`}
-              className="group flex items-baseline gap-6 border-b border-line-soft py-5"
-            >
-              <time
-                dateTime={event.startsAt}
-                className="w-28 shrink-0 font-mono text-sm text-gold-400"
-              >
-                {dayFormat.format(new Date(event.startsAt))}
-              </time>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-t1 transition-colors group-hover:text-gold-300">
-                  {event.title}
-                </span>
-                {event.location && (
-                  <span className="mt-0.5 block text-sm text-t4">{event.location}</span>
-                )}
-              </span>
-            </Link>
-          ))}
-        </section>
-      )}
-
-      {mentorship.data && (
-        <section className="mx-auto max-w-4xl px-6 py-16">
-          <div className="rounded border border-line-soft px-6 py-8 sm:px-10 sm:py-10">
-            <p className="text-sm uppercase tracking-widest text-t4">
-              {mentorship.data.open ? (
-                <span className="text-gold-400">Candidatures ouvertes</span>
-              ) : (
-                'Candidatures fermées'
-              )}
-            </p>
-            <h2 className="mt-3 font-display text-2xl font-semibold text-t1">
-              {mentorship.data.title}
+      {/* Latest resources */}
+      <section aria-labelledby="latest-heading" className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
+        <div className="mb-8 flex flex-wrap items-baseline justify-between gap-4">
+          <div>
+            <h2 id="latest-heading" className="font-display text-2xl font-semibold tracking-tight text-t1 sm:text-3xl">
+              Publié récemment
             </h2>
-            {mentorship.data.summary && (
-              <p className="mt-3 max-w-xl leading-relaxed text-t3">{mentorship.data.summary}</p>
-            )}
+            <p className="mt-2 text-sm text-t3">En accès libre, sans compte.</p>
+          </div>
+          <Link to="/ressources" className="text-sm font-medium text-gold-400 underline-offset-4 hover:text-gold-300 hover:underline">
+            Toute la bibliothèque
+          </Link>
+        </div>
 
-            {proof.data && proof.data.peopleHelped > 0 && (
-              <p className="mt-6 text-sm text-t4">
-                {proof.data.peopleHelped} personnes accompagnées ·{' '}
-                {proof.data.completed} parcours terminés, chacun avec une attestation
-                vérifiable.
-              </p>
-            )}
+        {recent.loading ? (
+          <CardSkeletonGrid count={3} />
+        ) : recent.error ? (
+          <div role="alert" className="rounded-2xl border border-line bg-card p-6">
+            <p className="text-sm text-t3">La bibliothèque est momentanément indisponible.</p>
+            <button type="button" onClick={recent.reload} className="mt-4 text-sm font-medium text-gold-400 underline underline-offset-4">Réessayer</button>
+          </div>
+        ) : recent.data?.content.length ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {recent.data.content.map((resource) => <ResourceCard key={resource.id} resource={resource} />)}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-line-strong bg-card p-8">
+            <p className="font-medium text-t1">Les premières ressources arrivent.</p>
+            <p className="mt-2 max-w-lg text-sm text-t3">Les vidéos et les ebooks apparaîtront ici dès leur publication.</p>
+          </div>
+        )}
 
-            <Link
-              to={mentorship.data.open ? '/postuler' : '/programme'}
-              className="mt-8 inline-flex items-center gap-2 text-gold-400 underline underline-offset-4"
-            >
-              {mentorship.data.open ? 'Postuler' : 'En savoir plus'}
-              <ArrowRight className="h-4 w-4" aria-hidden />
+        {!!categories.data?.length && (
+          <nav aria-label="Explorer par sujet" className="mt-8 border-t border-line-soft pt-6">
+            <span className="mr-3 text-xs text-t4">Par sujet :</span>
+            {categories.data.slice(0, 10).map((category) => (
+              <Link
+                key={category.id}
+                to={`/ressources?categoryId=${category.id}`}
+                className="mr-1.5 inline-block rounded-full border border-line px-3.5 py-1.5 text-xs text-t2 transition-colors hover:border-gold-400/50 hover:text-gold-300"
+              >
+                {category.name}
+              </Link>
+            ))}
+          </nav>
+        )}
+      </section>
+
+      {/* Events — list, not cards */}
+      <section aria-labelledby="events-heading" className="border-t border-line-soft bg-noir-900/40">
+        <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
+          <div className="mb-8 flex flex-wrap items-baseline justify-between gap-4">
+            <div>
+              <h2 id="events-heading" className="font-display text-2xl font-semibold tracking-tight text-t1 sm:text-3xl">
+                Prochains rendez-vous
+              </h2>
+              <p className="mt-2 text-sm text-t3">Ateliers, webinaires, conférences — en ligne ou sur place.</p>
+            </div>
+            <Link to="/evenements" className="text-sm font-medium text-gold-400 underline-offset-4 hover:text-gold-300 hover:underline">
+              Tout l’agenda
             </Link>
           </div>
-        </section>
-      )}
+
+          {upcoming.loading ? (
+            <div role="status" className="divide-y divide-line-soft border-y border-line-soft">
+              {[0, 1, 2].map((i) => <div key={i} className="h-16 animate-pulse bg-white/[0.02]" />)}
+              <span className="sr-only">Chargement des événements…</span>
+            </div>
+          ) : upcoming.error ? (
+            <div role="alert" className="rounded-2xl border border-line bg-card p-6">
+              <p className="text-sm text-t3">L’agenda est momentanément indisponible.</p>
+              <button type="button" onClick={upcoming.reload} className="mt-4 text-sm font-medium text-gold-400 underline underline-offset-4">Réessayer</button>
+            </div>
+          ) : upcoming.data?.content.length ? (
+            <ul className="divide-y divide-line-soft border-y border-line-soft">
+              {upcoming.data.content.map((event) => (
+                <li key={event.id}>
+                  <Link to={`/evenements/${event.id}`} className="group flex flex-wrap items-baseline gap-x-6 gap-y-1 py-5">
+                    <time dateTime={event.startDate} className="w-48 shrink-0 text-sm text-gold-300">
+                      {dayFormat.format(new Date(event.startDate))}
+                    </time>
+                    <span className="min-w-0 flex-1 font-medium text-t1 transition-colors group-hover:text-gold-300">
+                      {event.title}
+                    </span>
+                    <span className="text-sm text-t4">
+                      {event.format === 'ONLINE' ? 'En ligne' : event.format === 'HYBRID' ? 'Hybride' : 'Sur place'}
+                      {event.location ? ` · ${event.location}` : ''}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-line-strong bg-card p-8">
+              <p className="font-medium text-t1">Le prochain rendez-vous se prépare.</p>
+              <p className="mt-2 max-w-lg text-sm text-t3">Aucun événement n’est publié pour le moment. Les dates seront annoncées ici.</p>
+            </div>
+          )}
+        </div>
+      </section>
     </Layout>
   );
 }

@@ -1,134 +1,104 @@
-import { Link } from 'react-router-dom';
-import { BadgeCheck, Copy } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
+import { ArrowRight, BookOpen, CalendarDays, Loader2, LogOut, ShieldCheck, UserRound } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 import Layout from '@/components/layout/Layout';
-import { useApi } from '@/hooks/useApi';
+import SEO from '@/components/common/SEO';
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
-import type { Participation, ParticipationStatus } from '@/services/types';
+import { ApiError } from '@/services/http';
 
-const STATUS_LABEL: Record<ParticipationStatus, string> = {
-  IN_PROGRESS: 'En cours',
-  COMPLETED: 'Terminé',
-  ABANDONED: 'Interrompu',
-};
+const statusLabels = { ACTIVE: 'Actif', INACTIVE: 'Inactif', BANNED: 'Suspendu' };
 
-const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' });
-
-function ParticipationRow({ participation }: { participation: Participation }) {
-  const code = participation.attestationCode;
-
-  return (
-    <li className="border-b border-line-soft py-6">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h3 className="font-display text-lg text-t1">{participation.programme}</h3>
-        <span
-          className={
-            participation.status === 'COMPLETED'
-              ? 'text-sm text-gold-400'
-              : 'text-sm text-t4'
-          }
-        >
-          {STATUS_LABEL[participation.status]}
-        </span>
-      </div>
-
-      <p className="mt-1 text-sm text-t4">
-        Commencé le {dateFormat.format(new Date(participation.startedAt))}
-        {participation.completedAt &&
-          ` · terminé le ${dateFormat.format(new Date(participation.completedAt))}`}
-        {participation.cohort && ` · promotion ${participation.cohort}`}
-      </p>
-
-      {code && (
-        <div className="mt-4 flex flex-wrap items-center gap-3 rounded border border-line-soft px-4 py-3">
-          <BadgeCheck className="h-4 w-4 shrink-0 text-gold-400" aria-hidden />
-          <span className="font-mono text-sm text-t2">{code}</span>
-
-          <div className="ml-auto flex items-center gap-4 text-sm">
-            <button
-              type="button"
-              onClick={() => void navigator.clipboard?.writeText(
-                `${window.location.origin}/attestations/${code}`,
-              )}
-              className="flex items-center gap-1.5 text-t4 transition-colors hover:text-t2"
-            >
-              <Copy className="h-3.5 w-3.5" aria-hidden />
-              Copier le lien
-            </button>
-            <Link
-              to={`/attestations/${code}`}
-              className="text-gold-400 underline underline-offset-4"
-            >
-              Voir
-            </Link>
-          </div>
-        </div>
-      )}
-    </li>
-  );
-}
-
-/**
- * What someone has followed, and what they can show for it.
- *
- * The attestation link is the point of the page: a code that stays in a database proves
- * nothing, and the person who earned it is the one who needs to hand it to somebody.
- */
 export default function Profile() {
-  const { name, email } = useSession();
-  const participations = useApi((signal) => api.myParticipations(signal), []);
-  const list = participations.data ?? [];
+  const { name, email, user, isAdmin, refresh, signOut } = useSession();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ firstName: user?.firstName ?? '', lastName: user?.lastName ?? '' });
+  const [editing, setEditing] = useState(false);
+  const [busy, setBusy] = useState<'save' | 'logout' | null>(null);
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [fields, setFields] = useState<Record<string, string>>({});
 
-  return (
-    <Layout>
-      <div className="mx-auto max-w-2xl px-6 py-16 sm:py-24">
-        <header>
-          <h1 className="font-display text-3xl font-semibold text-t1 sm:text-4xl">
-            {name ?? 'Mon profil'}
-          </h1>
-          {email && <p className="mt-2 text-t4">{email}</p>}
-          <p className="mt-4 text-sm text-t4">
-            Votre mot de passe et vos connexions Google ou GitHub se gèrent depuis votre
-            compte, pas ici.
-          </p>
-        </header>
+  useEffect(() => {
+    setForm({ firstName: user?.firstName ?? '', lastName: user?.lastName ?? '' });
+  }, [user?.firstName, user?.lastName]);
 
-        <section className="mt-14">
-          <h2 className="font-display text-xl font-medium text-t1">Mon parcours</h2>
+  async function save(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError('');
+    setNotice('');
+    setFields({});
+    if (!form.firstName.trim() || !form.lastName.trim()) {
+      setError('Renseigne ton prénom et ton nom pour enregistrer les modifications.');
+      return;
+    }
+    setBusy('save');
+    try {
+      await api.updateProfile({ firstName: form.firstName.trim(), lastName: form.lastName.trim() });
+      await refresh();
+      setEditing(false);
+      setNotice('Tes informations ont bien été mises à jour.');
+    } catch (cause) {
+      setError(cause instanceof ApiError ? cause.message : 'Tes modifications n’ont pas pu être confirmées. Réessaie dans un instant.');
+      setFields(cause instanceof ApiError ? cause.fields ?? {} : {});
+      if (cause instanceof ApiError && cause.isUnauthenticated) await refresh().catch(() => undefined);
+    } finally {
+      setBusy(null);
+    }
+  }
 
-          {participations.loading && <p className="py-10 text-t4">Chargement…</p>}
-          {participations.error && (
-            <p className="py-10 text-t2">{participations.error.message}</p>
-          )}
+  async function logout() {
+    setBusy('logout');
+    setError('');
+    try {
+      await signOut();
+      navigate('/connexion', { replace: true });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'La déconnexion a échoué. Réessaie.');
+    } finally {
+      setBusy(null);
+    }
+  }
 
-          {!participations.loading && !participations.error && list.length === 0 && (
-            <div className="mt-6 rounded border border-line-soft px-5 py-6">
-              <p className="leading-relaxed text-t3">
-                Vous ne suivez rien pour l’instant. L’Accompagnement 360 et les événements
-                démarrent par une candidature&nbsp;; les ressources, elles, sont ouvertes tout
-                de suite.
-              </p>
-              <div className="mt-4 flex flex-wrap gap-4 text-sm">
-                <Link to="/ressources" className="text-gold-400 underline underline-offset-4">
-                  Le catalogue
-                </Link>
-                <Link to="/programme" className="text-gold-400 underline underline-offset-4">
-                  L’Accompagnement 360
-                </Link>
-              </div>
-            </div>
-          )}
+  const joined = user?.createdAt ? new Date(user.createdAt) : null;
+  const joinedLabel = joined && !Number.isNaN(joined.getTime()) ? joined.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
 
-          {list.length > 0 && (
-            <ul className="mt-4">
-              {list.map((participation) => (
-                <ParticipationRow key={participation.id} participation={participation} />
-              ))}
-            </ul>
-          )}
+  return <Layout>
+    <SEO title="Ton espace" description="Retrouve tes informations et les ressources de la communauté LesCracks." url="/profil" />
+    <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
+      <header className="flex flex-col gap-6 border-b border-line-soft pb-10 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-5"><div aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-[#d4af37]/30 bg-[#d4af37]/10 font-display text-2xl text-[#d4af37]">{name ? name.charAt(0).toUpperCase() : <UserRound className="h-7 w-7" />}</div><div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d4af37]">Ton espace personnel</p><h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-t1 sm:text-4xl">Bonjour{user?.firstName ? `, ${user.firstName}` : name ? `, ${name}` : ''}.</h1><p className="mt-2 text-sm text-t4">Un point de départ pour ta prochaine découverte.</p></div></div>
+        <button type="button" disabled={Boolean(busy)} onClick={() => void logout()} className="inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-xl border border-line-strong px-4 py-2 text-sm text-t3 transition hover:border-[#d4af37]/50 hover:text-t1 disabled:opacity-50"><LogOut aria-hidden="true" className="h-4 w-4" />{busy === 'logout' ? 'Déconnexion…' : 'Me déconnecter'}</button>
+      </header>
+      <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.2fr_1fr]">
+        <section className="rounded-2xl border border-line-soft bg-card p-6 sm:p-8" aria-labelledby="profile-heading">
+          <div className="flex items-start justify-between gap-4"><div><h2 id="profile-heading" className="font-display text-xl font-semibold text-t1">Mes informations</h2><p className="mt-2 text-sm text-t4">Les informations liées à ton compte.</p></div>{user && !editing && <button type="button" disabled={Boolean(busy)} onClick={() => { setEditing(true); setNotice(''); }} className="min-h-10 text-sm font-medium text-[#d4af37] underline-offset-4 hover:underline">Modifier</button>}</div>
+          {error && <p role="alert" className="mt-5 rounded-xl border border-red-400/25 bg-red-400/5 p-3 text-sm text-red-400">{error}</p>}
+          {notice && <p role="status" className="mt-5 rounded-xl border border-[#d4af37]/25 bg-[#d4af37]/5 p-3 text-sm text-[#d4af37]">{notice}</p>}
+          {editing && user ? <form onSubmit={save} className="mt-7" aria-busy={busy === 'save'}>
+            <fieldset disabled={Boolean(busy)} className="space-y-5"><legend className="sr-only">Modifier tes informations</legend>
+              {(['firstName', 'lastName'] as const).map((key) => <div key={key}><label htmlFor={`profile-${key}`} className="text-sm font-medium text-t2">{key === 'firstName' ? 'Prénom' : 'Nom'}</label><input id={`profile-${key}`} name={key} autoComplete={key === 'firstName' ? 'given-name' : 'family-name'} required value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} className="mt-2 w-full rounded-xl border border-line-strong bg-background px-4 py-3 text-t1 outline-none focus:border-[#d4af37] focus:ring-2 focus:ring-[#d4af37]/20" aria-invalid={Boolean(fields[key])} aria-describedby={fields[key] ? `profile-${key}-error` : undefined} />{fields[key] && <p id={`profile-${key}-error`} className="mt-2 text-sm text-red-400">{fields[key]}</p>}</div>)}
+              <div className="flex flex-wrap gap-3"><button type="submit" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#d4af37] px-5 py-3 text-sm font-semibold text-black disabled:opacity-60">{busy === 'save' && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}{busy === 'save' ? 'Enregistrement…' : 'Enregistrer'}</button><button type="button" onClick={() => { setEditing(false); setForm({ firstName: user.firstName, lastName: user.lastName }); setError(''); setFields({}); }} className="min-h-11 rounded-xl border border-line-strong px-5 py-3 text-sm text-t3">Annuler</button></div>
+            </fieldset>
+          </form> : <dl className="mt-7 space-y-5">
+            <div><dt className="text-xs uppercase tracking-wider text-t4">Nom complet</dt><dd className="mt-1 text-t1">{name || 'Non renseigné'}</dd></div>
+            <div><dt className="text-xs uppercase tracking-wider text-t4">Adresse email</dt><dd className="mt-1 break-all text-t1">{email || 'Non disponible pour ce compte'}</dd></div>
+            {user && <div className="flex flex-wrap gap-x-12 gap-y-5"><div><dt className="text-xs uppercase tracking-wider text-t4">Statut du compte</dt><dd className="mt-1 text-t1">{statusLabels[user.status] ?? user.status}</dd></div>{joinedLabel && <div><dt className="text-xs uppercase tracking-wider text-t4">Membre depuis le</dt><dd className="mt-1 text-t1"><time dateTime={user.createdAt}>{joinedLabel}</time></dd></div>}</div>}
+          </dl>}
+          <div className="mt-7 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-[#d4af37]" /><p>{user ? 'Tu peux modifier ton prénom et ton nom ici. Ton adresse email reste liée à ton compte et ne peut pas être modifiée depuis cet espace.' : isAdmin ? 'Tu utilises un compte administrateur. La gestion des contenus est accessible depuis ton tableau de bord.' : 'Tu es connecté avec un fournisseur externe. Aucun profil membre modifiable n’est disponible pour cette connexion. Ton identité et ton mot de passe se gèrent auprès de ton fournisseur.'}</p></div>
+          {isAdmin && <Link to="/admin" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-[#d4af37]">Ouvrir l’administration<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>}
+        </section>
+        <section aria-labelledby="quick-links-heading">
+          <h2 id="quick-links-heading" className="font-display text-xl font-semibold text-t1">Et maintenant ?</h2>
+          <p className="mt-2 text-sm text-t4">Choisis ce que tu veux explorer aujourd’hui.</p>
+          <div className="mt-5 space-y-4">
+            <Link to="/ressources" className="group flex gap-4 rounded-2xl border border-line-soft bg-card p-6 transition hover:border-[#d4af37]/40"><BookOpen aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-[#d4af37]" /><div className="flex-1"><h3 className="font-semibold text-t1">Explorer les ressources</h3><p className="mt-2 text-sm leading-relaxed text-t4">Des ebooks et des vidéos pour approfondir les sujets qui t’intéressent.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-[#d4af37]" /></Link>
+            <Link to="/evenements" className="group flex gap-4 rounded-2xl border border-line-soft bg-card p-6 transition hover:border-[#d4af37]/40"><CalendarDays aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-[#d4af37]" /><div className="flex-1"><h3 className="font-semibold text-t1">Trouver un événement</h3><p className="mt-2 text-sm leading-relaxed text-t4">Découvre les prochains rendez-vous pour apprendre et échanger.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-[#d4af37]" /></Link>
+          </div>
         </section>
       </div>
-    </Layout>
-  );
+    </div>
+  </Layout>;
 }

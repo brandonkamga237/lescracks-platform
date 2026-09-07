@@ -54,5 +54,3 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 Disallow: /profil
-
-Sitemap: https://lescracks.com/sitemap.xml

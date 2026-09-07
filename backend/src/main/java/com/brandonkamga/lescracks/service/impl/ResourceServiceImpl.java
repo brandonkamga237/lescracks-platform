@@ -1,227 +1,228 @@
 package com.brandonkamga.lescracks.service.impl;
 
 import com.brandonkamga.lescracks.domain.*;
+import com.brandonkamga.lescracks.dto.resource.EbookResourceRequest;
+import com.brandonkamga.lescracks.dto.resource.VideoResourceRequest;
 import com.brandonkamga.lescracks.exception.BadRequestException;
 import com.brandonkamga.lescracks.exception.NotFoundException;
-import com.brandonkamga.lescracks.repository.MediaRepository;
-import com.brandonkamga.lescracks.repository.ResourceRepository;
-import com.brandonkamga.lescracks.service.interfaces.MediaService;
+import com.brandonkamga.lescracks.repository.*;
 import com.brandonkamga.lescracks.service.interfaces.ResourceService;
 import com.brandonkamga.lescracks.service.interfaces.StorageService;
 import com.brandonkamga.lescracks.service.interfaces.TaxonomyService;
-import com.brandonkamga.lescracks.util.ArticleBody;
-import com.brandonkamga.lescracks.util.Slugs;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.brandonkamga.lescracks.service.interfaces.NewsletterService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collection;
+import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @Transactional
 public class ResourceServiceImpl implements ResourceService {
-
-    /** Document formats an ebook may be. Anything a browser executes is not on the list. */
-    private static final Set<String> EBOOK_TYPES = Set.of(
-            "application/pdf",
-            "application/epub+zip",
-            "application/msword",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "application/vnd.oasis.opendocument.text");
-
     private final ResourceRepository resources;
-    private final MediaRepository mediaRepository;
-    private final MediaService media;
-    private final TaxonomyService taxonomy;
+    private final EbookRepository ebooks;
+    private final ExternalVideoReferenceRepository videos;
+    private final DocumentRepository documents;
+    private final TagRepository tags;
     private final StorageService storage;
-    private final ArticleBody articleBody;
+    private final TaxonomyService taxonomy;
+    private final NewsletterService newsletter;
 
-    public ResourceServiceImpl(ResourceRepository resources, MediaRepository mediaRepository,
-                               MediaService media, TaxonomyService taxonomy,
-                               StorageService storage, ArticleBody articleBody) {
+    public ResourceServiceImpl(ResourceRepository resources, EbookRepository ebooks,
+                               ExternalVideoReferenceRepository videos, DocumentRepository documents,
+                               TagRepository tags,
+                               StorageService storage, TaxonomyService taxonomy,
+                               NewsletterService newsletter) {
         this.resources = resources;
-        this.mediaRepository = mediaRepository;
-        this.media = media;
-        this.taxonomy = taxonomy;
+        this.ebooks = ebooks;
+        this.videos = videos;
+        this.documents = documents;
+        this.tags = tags;
         this.storage = storage;
-        this.articleBody = articleBody;
+        this.taxonomy = taxonomy;
+        this.newsletter = newsletter;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Resource> search(ResourceKind kind, Long categoryId, Collection<Long> tagIds,
-                                 String search, Pageable pageable) {
-        Collection<Long> tags = (tagIds == null || tagIds.isEmpty()) ? null : tagIds;
-        String term = (search == null || search.isBlank()) ? null : search.strip();
-        return resources.search(kind, categoryId, tags, term, pageable);
+    public List<Resource> published() {
+        return resources.findByStatusOrderByCreatedAtDesc(ResourceStatus.PUBLISHED);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Resource> all(Pageable pageable) {
-        return resources.findAll(pageable);
+    public Page<Resource> search(ResourceStatus status, String search, String kind, Long categoryId, Long tagId, Pageable pageable) {
+        return resources.search(status, search == null || search.isBlank() ? null : search.trim(),
+                kind == null || kind.isBlank() ? null : kind.trim().toUpperCase(), categoryId, tagId, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Resource requireBySlug(String slug) {
-        return resources.findBySlug(slug)
-                .orElseThrow(() -> new NotFoundException("Resource", "slug", slug));
+    public Resource requirePublished(Long id) {
+        return resources.findById(id)
+                .filter(resource -> resource.getStatus() == ResourceStatus.PUBLISHED)
+                .orElseThrow(() -> new NotFoundException("Resource", "id", id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Resource require(Long id) {
-        return resources.findById(id)
-                .orElseThrow(() -> new NotFoundException("Resource", "id", id));
-    }
-
-    // ── Creating ──────────────────────────────────────────────────────────────
-
-    @Override
-    public Resource createVideo(VideoDraft draft) {
-        ResourceVideo video = new ResourceVideo();
-        video.setSlug(newSlug(draft.common()));
-        applyCommon(video, draft.common());
-        applyVideo(video, draft);
-        return resources.save(video);
+        return resources.findById(id).orElseThrow(() -> new NotFoundException("Resource", "id", id));
     }
 
     @Override
-    public Resource createEbook(EbookDraft draft, MultipartFile file) {
-        byte[] content = readEbook(file);
-        ResourceEbook ebook = new ResourceEbook();
-        ebook.setSlug(newSlug(draft.common()));
-        applyCommon(ebook, draft.common());
-        ebook.setFileKey(storage.store(file.getOriginalFilename(), content, file.getContentType()));
-        ebook.setOriginalName(file.getOriginalFilename());
-        ebook.setContentType(file.getContentType());
-        ebook.setSizeBytes(content.length);
-        ebook.setPageCount(draft.pageCount());
-        return resources.save(ebook);
+    public Resource createVideo(VideoResourceRequest request, MultipartFile coverImageFile) {
+        String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, null);
+        Resource resource = base(request.title(), request.description(), coverImage,
+                request.categoryId(), request.status(), request.tagIds());
+        Resource saved = resources.save(resource);
+        videos.save(ExternalVideoReference.builder().resource(saved)
+                .videoUrl(request.videoUrl().trim()).platform(request.platform().trim()).build());
+        if (saved.getStatus() == ResourceStatus.PUBLISHED) newsletter.notifyResourceSubscribers(saved);
+        return saved;
     }
 
     @Override
-    public Resource createArticle(ArticleDraft draft) {
-        ResourceArticle article = new ResourceArticle();
-        article.setSlug(newSlug(draft.common()));
-        applyCommon(article, draft.common());
-        applyArticle(article, draft);
-        return resources.save(article);
-    }
-
-    // ── Updating ──────────────────────────────────────────────────────────────
-
-    @Override
-    public Resource updateVideo(Long id, VideoDraft draft) {
-        ResourceVideo video = requireOfKind(id, ResourceVideo.class, "vidéo");
-        applyCommon(video, draft.common());
-        applyVideo(video, draft);
-        return video;
-    }
-
-    @Override
-    public Resource updateArticle(Long id, ArticleDraft draft) {
-        ResourceArticle article = requireOfKind(id, ResourceArticle.class, "article");
-        applyCommon(article, draft.common());
-        applyArticle(article, draft);
-        return article;
-    }
-
-    // ── Shared steps ──────────────────────────────────────────────────────────
-
-    private String newSlug(Common common) {
-        requireText(common.title(), "Le titre est obligatoire.");
-        return Slugs.uniqueFrom(common.title(), resources::existsBySlug);
-    }
-
-    /** What every kind sets, in one place, so the three creates cannot drift apart. */
-    private void applyCommon(Resource resource, Common common) {
-        requireText(common.title(), "Le titre est obligatoire.");
-        resource.setTitle(common.title().strip());
-        resource.setSummary(common.summary());
-        resource.setCategory(taxonomy.requireCategory(common.categoryId()));
-        resource.setTags(taxonomy.requireAll(common.tagIds()));
-        resource.setCover(common.coverId() == null ? null : media.require(common.coverId()));
-    }
-
-    private void applyVideo(ResourceVideo video, VideoDraft draft) {
-        requireText(draft.externalUrl(), "Le lien de la vidéo est obligatoire.");
-        video.setExternalUrl(draft.externalUrl().strip());
-        video.setDurationSeconds(draft.durationSeconds());
-    }
-
-    /**
-     * Saving an article derives everything that can be derived: its prose, its reading time,
-     * and which images it uses. None of the three is asked of the caller, so none can be
-     * supplied wrongly or forgotten.
-     */
-    private void applyArticle(ResourceArticle article, ArticleDraft draft) {
-        requireText(draft.body(), "Le contenu de l'article est obligatoire.");
-        String plainText = articleBody.toPlainText(draft.body());
-        if (plainText.isBlank()) {
-            throw new BadRequestException("L'article ne contient aucun texte.");
-        }
-        article.setBody(draft.body());
-        article.setBodyText(plainText);
-        article.setReadingMinutes(articleBody.readingMinutes(plainText));
-        article.setAuthorName(draft.authorName());
-        article.setMedia(new HashSet<>(mediaRepository.findAllById(articleBody.mediaIds(draft.body()))));
-    }
-
-    private byte[] readEbook(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new BadRequestException("Le fichier est obligatoire pour un ebook.");
-        }
-        if (!EBOOK_TYPES.contains(file.getContentType())) {
-            throw new BadRequestException("Format non accepté. Utilisez PDF, EPUB, Word ou OpenDocument.");
-        }
-        try {
-            return file.getBytes();
-        } catch (Exception unreadable) {
-            throw new BadRequestException("Le fichier n'a pas pu être lu.");
-        }
-    }
-
-    /** Editing a video as if it were an article is a caller mistake worth naming. */
-    private <T extends Resource> T requireOfKind(Long id, Class<T> type, String label) {
+    public Resource updateVideo(Long id, VideoResourceRequest request, MultipartFile coverImageFile) {
         Resource resource = require(id);
-        if (!type.isInstance(resource)) {
-            throw new BadRequestException("Cette ressource n'est pas " + (label.equals("article") ? "un " : "une ") + label + ".");
-        }
-        return type.cast(resource);
-    }
-
-    private void requireText(String value, String message) {
-        if (value == null || value.isBlank()) {
-            throw new BadRequestException(message);
-        }
-    }
-
-    // ── State ─────────────────────────────────────────────────────────────────
-
-    @Override
-    public Resource setPublished(Long id, boolean published) {
-        Resource resource = require(id);
-        resource.setPublished(published);
+        ensureVideo(resource);
+        String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, resource.getCoverImage());
+        apply(resource, request.title(), request.description(), coverImage, request.categoryId(), request.status(), request.tagIds());
+        ExternalVideoReference video = videos.findByResourceId(id).orElseThrow();
+        video.setVideoUrl(request.videoUrl().trim());
+        video.setPlatform(request.platform().trim());
         return resource;
     }
 
     @Override
-    public void delete(Long id) {
-        Resource resource = require(id);
-        if (resource instanceof ResourceEbook ebook) {
-            storage.delete(ebook.getFileKey());
+    public Resource createEbook(EbookResourceRequest request, MultipartFile file, MultipartFile coverImageFile) {
+        validateFile(file);
+        String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, null);
+        Resource resource = base(request.title(), request.description(), coverImage,
+                request.categoryId(), request.status(), request.tagIds());
+        Resource saved = resources.save(resource);
+        try {
+            String key = storage.store(file.getOriginalFilename(), file.getBytes(), file.getContentType());
+            Document document = documents.save(Document.builder().file(key)
+                    .format(file.getContentType() == null ? "application/octet-stream" : file.getContentType())
+                    .fileSize(file.getSize()).build());
+            ebooks.save(Ebook.builder().resource(saved).document(document).build());
+            if (saved.getStatus() == ResourceStatus.PUBLISHED) newsletter.notifyResourceSubscribers(saved);
+            return saved;
+        } catch (IOException exception) {
+            throw new BadRequestException("Le fichier ebook n'a pas pu être lu.");
         }
-        resources.delete(resource);
     }
 
     @Override
-    public void recordView(Long id) {
-        resources.recordView(id);
+    public Resource updateEbook(Long id, EbookResourceRequest request, MultipartFile file, MultipartFile coverImageFile) {
+        Resource resource = require(id);
+        ensureEbook(resource);
+        String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, resource.getCoverImage());
+        apply(resource, request.title(), request.description(), coverImage, request.categoryId(), request.status(), request.tagIds());
+        if (file != null && !file.isEmpty()) {
+            Ebook ebook = ebooks.findByResourceId(id).orElseThrow();
+            Document old = ebook.getDocument();
+            try {
+                String key = storage.store(file.getOriginalFilename(), file.getBytes(), file.getContentType());
+                old.setFile(key);
+                old.setFormat(file.getContentType() == null ? "application/octet-stream" : file.getContentType());
+                old.setFileSize(file.getSize());
+            } catch (IOException exception) {
+                throw new BadRequestException("Le fichier ebook n'a pas pu être lu.");
+            }
+        }
+        return resource;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Resource> all(Pageable pageable) { return resources.findAll(pageable); }
+
+    @Override
+    public void delete(Long id) {
+        Resource resource = require(id);
+        deleteCoverImage(resource.getCoverImage());
+        ebooks.findByResourceId(id).ifPresent(ebook -> {
+            storage.delete(ebook.getDocument().getFile());
+            ebooks.delete(ebook);
+            documents.delete(ebook.getDocument());
+        });
+        videos.findByResourceId(id).ifPresent(videos::delete);
+        resources.delete(resource);
+    }
+
+    private void deleteCoverImage(String coverImage) {
+        if (coverImage == null || !coverImage.startsWith("/api/files/")) return;
+        String key = coverImage.substring("/api/files/".length());
+        if (!key.isBlank()) storage.delete(key);
+    }
+
+    private Resource base(String title, String description, String coverImage, Long categoryId,
+                          ResourceStatus status, Set<Long> tagIds) {
+        Resource resource = Resource.builder().category(taxonomy.requireCategory(categoryId)).title(title.trim())
+                .description(description.trim()).coverImage(coverImage.trim())
+                .status(status == null ? ResourceStatus.DRAFT : status).build();
+        applyTags(resource, tagIds);
+        return resources.save(resource);
+    }
+
+    private void apply(Resource resource, String title, String description, String coverImage,
+                       Long categoryId, ResourceStatus status, Set<Long> tagIds) {
+        resource.setTitle(title.trim());
+        resource.setDescription(description.trim());
+        resource.setCoverImage(coverImage.trim());
+        resource.setCategory(taxonomy.requireCategory(categoryId));
+        resource.setStatus(status == null ? resource.getStatus() : status);
+        applyTags(resource, tagIds);
+    }
+
+    private void applyTags(Resource resource, Set<Long> tagIds) {
+        if (tagIds == null) return;
+        Set<Tag> selected = new HashSet<>(tags.findAllById(tagIds));
+        resource.getTags().clear();
+        resource.getTags().addAll(selected);
+    }
+
+    private String resolveCoverImage(String coverImageUrl, MultipartFile coverImageFile, String existingCoverImage) {
+        if (coverImageFile != null && !coverImageFile.isEmpty()) {
+            validateImage(coverImageFile);
+            try {
+                String key = storage.store(coverImageFile.getOriginalFilename(), coverImageFile.getBytes(), coverImageFile.getContentType());
+                return "/api/files/" + key;
+            } catch (IOException exception) {
+                throw new BadRequestException("L'image de couverture n'a pas pu être lue.");
+            }
+        }
+        if (coverImageUrl != null && !coverImageUrl.isBlank()) return coverImageUrl;
+        if (existingCoverImage != null && !existingCoverImage.isBlank()) return existingCoverImage;
+        throw new BadRequestException("L'image de couverture est obligatoire.");
+    }
+
+    private void validateImage(MultipartFile file) {
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new BadRequestException("L'image de couverture doit être au format image (jpg, png, webp, …).");
+        }
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new BadRequestException("L'image de couverture ne doit pas dépasser 5 Mo.");
+        }
+    }
+
+    private void ensureVideo(Resource resource) {
+        if (!videos.existsById(resource.getId())) throw new BadRequestException("Cette ressource n'est pas une vidéo externe.");
+    }
+
+    private void ensureEbook(Resource resource) {
+        if (!ebooks.existsById(resource.getId())) throw new BadRequestException("Cette ressource n'est pas un ebook.");
+    }
+
+    private void validateFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) throw new BadRequestException("Le fichier ebook est obligatoire.");
     }
 }

@@ -21,7 +21,7 @@ services:
   # PostgreSQL - localhost:5432
   # ---------------------------------------------------------------------------
   postgres:
-    image: postgres:16-alpine
+    image: postgres:16
     container_name: lescracks-postgres-dev
     restart: unless-stopped
     environment:
@@ -64,6 +64,14 @@ services:
       retries:      3
       start_period: 10s
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: lescracks-mailpit-dev
+    restart: unless-stopped
+    ports:
+      - "${MAIL_PORT:-1025}:1025"
+      - "${MAIL_UI_PORT:-8025}:8025"
+
   # ---------------------------------------------------------------------------
   # Keycloak - localhost:8081, admin console at /admin (admin/admin)
   #
@@ -72,7 +80,7 @@ services:
   # code we would have to keep correct ourselves.
   # ---------------------------------------------------------------------------
   keycloak:
-    image: quay.io/keycloak/keycloak:26.0
+    image: quay.io/keycloak/keycloak:latest
     container_name: lescracks-keycloak-dev
     restart: unless-stopped
     command: start-dev --import-realm

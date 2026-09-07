@@ -9,11 +9,10 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 
 /**
- * A local projection of a Keycloak subject.
+ * A registered user of the platform.
  *
- * It holds no password, no provider and no role: those live in the realm. What it exists for
- * is to give applications, participations and attestations something stable to point at, and
- * to answer "who is this" without a round trip to Keycloak on every request.
+ * Unlike the previous Keycloak-linked model, the user now holds a local password hash
+ * and a status. Identity is fully managed here.
  */
 @Entity
 @Table(name = "users")
@@ -27,24 +26,28 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** The `sub` claim. Stable for the life of the account, and the only link to the token. */
-    @Column(nullable = false, unique = true, length = 64)
-    private String subject;
-
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Column(name = "display_name", nullable = false, length = 120)
-    private String displayName;
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "avatar_id")
-    private Media avatar;
+    @Column(name = "first_name", nullable = false, length = 120)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false, length = 120)
+    private String lastName;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private UserStatus status = UserStatus.ACTIVE;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();
 
-    @Column(name = "last_seen_at")
-    private Instant lastSeenAt;
+    @Column(name = "updated_at", nullable = false)
+    @Builder.Default
+    private Instant updatedAt = Instant.now();
 }

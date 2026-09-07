@@ -1,64 +1,31 @@
 package com.brandonkamga.lescracks.repository;
 
 import com.brandonkamga.lescracks.domain.Resource;
-import com.brandonkamga.lescracks.domain.ResourceKind;
+import com.brandonkamga.lescracks.domain.ResourceStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
+    List<Resource> findByStatusOrderByCreatedAtDesc(ResourceStatus status);
 
-    Optional<Resource> findBySlug(String slug);
-
-    boolean existsBySlug(String slug);
-
-    /**
-     * The catalogue, filtered by whatever the caller supplied and nothing else.
-     *
-     * One query rather than a branch per combination: the previous model had eight, and the
-     * one that mattered was broken for months because nothing exercised that particular
-     * corner. Every parameter is nullable and a null means "no filter on this".
-     */
-    @Query(value = """
-            SELECT DISTINCT r FROM Resource r
-            LEFT JOIN r.tags t
-            WHERE r.published = TRUE
-              AND (:kind IS NULL OR r.kind = :kind)
-              AND (:categoryId IS NULL OR r.category.id = :categoryId)
-              AND (:tagIds IS NULL OR t.id IN :tagIds)
-              AND (:search IS NULL OR LOWER(r.title) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))
-            """,
-            // Spelled out rather than derived: Spring Data renames an expanded collection
-            // parameter when it builds the count query itself, and the rewritten query then
-            // has no argument for :tagIds. It only shows once a page fills, which on a real
-            // catalogue is every page.
-            countQuery = """
-            SELECT COUNT(DISTINCT r) FROM Resource r
-            LEFT JOIN r.tags t
-            WHERE r.published = TRUE
-              AND (:kind IS NULL OR r.kind = :kind)
-              AND (:categoryId IS NULL OR r.category.id = :categoryId)
-              AND (:tagIds IS NULL OR t.id IN :tagIds)
-              AND (:search IS NULL OR LOWER(r.title) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))
-            """)
-    Page<Resource> search(ResourceKind kind, Long categoryId, Collection<Long> tagIds,
-                          String search, Pageable pageable);
-
-    /**
-     * Counting a view without loading the row and writing it back, which would lose
-     * concurrent views and take a lock for a number nobody edits.
-     */
-    @Modifying
-    @Query("UPDATE Resource r SET r.viewCount = r.viewCount + 1 WHERE r.id = :id")
-    void recordView(Long id);
-
-    /** Slugs only: a sitemap needs no rows, and this one grows with the catalogue. */
-    @Query("SELECT r.slug FROM Resource r WHERE r.published = TRUE ORDER BY r.slug")
-    List<String> findPublishedSlugs();
+        @Query("""
+                        select r from Resource r
+                        where (:status is null or r.status = :status)
+                            and (:search is null or lower(r.title) like concat('%', lower(cast(:search as string)), '%'))
+                            and (:categoryId is null or r.category.id = :categoryId)
+                            and (:tagId is null or exists (select t.id from Resource r2 join r2.tags t where r2.id = r.id and t.id = :tagId))
+                              and (:kind is null
+                                     or (:kind = 'EBOOK' and exists (select e.resourceId from Ebook e where e.resourceId = r.id))
+                                     or (:kind = 'EXTERNAL_VIDEO' and exists (select v.resourceId from ExternalVideoReference v where v.resourceId = r.id)))
+                        order by r.createdAt desc
+                        """)
+        Page<Resource> search(@Param("status") ResourceStatus status, @Param("search") String search,
+                              @Param("kind") String kind, @Param("categoryId") Long categoryId,
+                              @Param("tagId") Long tagId,
+                              Pageable pageable);
 }
