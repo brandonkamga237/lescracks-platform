@@ -16,6 +16,8 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class UserAuthController {
@@ -27,18 +29,29 @@ public class UserAuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserAuthResponse> register(@Valid @RequestBody UserRegisterRequest request,
-                                                     HttpServletRequest httpRequest,
-                                                     HttpServletResponse httpResponse) {
+    public ResponseEntity<UserAuthResponse> register(@Valid @RequestBody UserRegisterRequest request) {
         User user = auth.register(request);
-        return login(user, httpRequest, httpResponse);
+        return ResponseEntity.status(201).body(response(user));
     }
 
     @PostMapping("/login")
     public ResponseEntity<UserAuthResponse> login(@Valid @RequestBody UserLoginRequest request,
                                                   HttpServletRequest httpRequest,
                                                   HttpServletResponse httpResponse) {
-        return login(auth.authenticate(request), httpRequest, httpResponse);
+        User user = auth.authenticate(request);
+        return login(user, httpRequest, httpResponse);
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<Void> verifyEmail(@RequestParam String token) {
+        auth.verifyEmail(token);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<Void> resendVerification(@Valid @RequestBody Map<String, String> body) {
+        auth.resendVerificationEmail(body.getOrDefault("email", ""));
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/forgot-password")
@@ -69,6 +82,10 @@ public class UserAuthController {
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
         contexts.saveContext(context, request, response);
-        return ResponseEntity.ok(new UserAuthResponse(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName()));
+        return ResponseEntity.ok(response(user));
+    }
+
+    private UserAuthResponse response(User user) {
+        return new UserAuthResponse(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(), user.isEmailVerified());
     }
 }

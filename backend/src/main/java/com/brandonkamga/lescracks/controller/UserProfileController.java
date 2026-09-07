@@ -33,6 +33,6 @@ public class UserProfileController {
 
     private UserProfileResponse response(User user) {
         return new UserProfileResponse(user.getId(), user.getEmail(), user.getFirstName(),
-                user.getLastName(), user.getStatus(), user.getCreatedAt());
+                user.getLastName(), user.getStatus(), user.isEmailVerified(), user.getCreatedAt());
     }
 }

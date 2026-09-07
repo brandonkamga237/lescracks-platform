@@ -73,11 +73,12 @@ export default function AuthPage({ mode }: AuthPageProps) {
   const location = useLocation();
   const { login, createAccount, socialSignIn, isSignedIn, isLoading, isAdmin, error: sessionError } = useSession();
   const [form, setForm] = useState({ email: '', password: '', firstName: '', lastName: '' });
-  const [busy, setBusy] = useState<'submit' | 'forgot' | 'google' | 'github' | null>(null);
+  const [busy, setBusy] = useState<'submit' | 'forgot' | 'resend' | 'google' | 'github' | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [fields, setFields] = useState<Record<string, string>>({});
+  const [needsVerification, setNeedsVerification] = useState(false);
   const state = location.state as { from?: string; expired?: boolean } | null;
   const returnTo = safeReturnPath(new URLSearchParams(location.search).get('retour') ?? state?.from, isAdmin ? '/admin' : '/profil');
   const registering = mode === 'register';
@@ -101,15 +102,37 @@ export default function AuthPage({ mode }: AuthPageProps) {
     setError('');
     setNotice('');
     setFields({});
+    setNeedsVerification(false);
     try {
-      if (registering) await createAccount({ ...form, email: form.email.trim(), firstName: form.firstName.trim(), lastName: form.lastName.trim() });
-      else await login(form.email.trim(), form.password);
-      navigate(returnTo, { replace: true });
+      if (registering) {
+        await createAccount({ ...form, email: form.email.trim(), firstName: form.firstName.trim(), lastName: form.lastName.trim() });
+        setNotice('Ton compte a été créé. Vérifie ta boîte de réception pour confirmer ton adresse email.');
+        setForm({ email: '', password: '', firstName: '', lastName: '' });
+      } else {
+        await login(form.email.trim(), form.password);
+        navigate(returnTo, { replace: true });
+      }
     } catch (cause) {
+      if (cause instanceof ApiError && cause.message.toLowerCase().includes('vérifiée')) {
+        setNeedsVerification(true);
+      }
       report(cause);
     } finally {
       setBusy(null);
     }
+  }
+
+  async function resend() {
+    if (!form.email.trim()) return;
+    setBusy('resend');
+    setError('');
+    setNotice('');
+    try {
+      await api.resendVerification(form.email.trim());
+      setNotice('Un nouveau lien de vérification a été envoyé.');
+    } catch (cause) {
+      report(cause);
+    } finally { setBusy(null); }
   }
 
   async function forgot() {
@@ -167,6 +190,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
             <div><label htmlFor="auth-password" className="text-sm font-medium text-zinc-200">Mot de passe</label><div className="relative"><input id="auth-password" name="password" autoComplete={registering ? 'new-password' : 'current-password'} required minLength={registering ? 10 : undefined} type={showPassword ? 'text' : 'password'} value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} className={`${inputClass} pr-14`} aria-invalid={Boolean(fields.password)} aria-describedby="password-help" /><button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} aria-pressed={showPassword} className="absolute right-1 top-3 flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#d4af37]">{showPassword ? <EyeOff aria-hidden="true" className="h-5 w-5" /> : <Eye aria-hidden="true" className="h-5 w-5" />}</button></div><p id="password-help" className={`mt-2 text-xs ${fields.password ? 'text-red-300' : 'text-zinc-400'}`}>{fields.password ?? (registering ? 'Au moins 10 caractères.' : 'Le mot de passe de ton compte LesCracks.')}</p></div>
             {error && <p role="alert" className="rounded-xl border border-red-400/20 bg-red-400/5 p-3 text-sm text-red-300">{error}</p>}
             {notice && <p role="status" className="rounded-xl border border-[#d4af37]/20 p-3 text-sm text-[#d4af37]">{notice}</p>}
+            {needsVerification && <button type="button" disabled={Boolean(busy)} onClick={() => void resend()} className="-mt-3 text-left text-sm text-[#d4af37] underline underline-offset-4 hover:text-white disabled:opacity-60">{busy === 'resend' ? 'Envoi…' : 'Renvoyer le lien de vérification'}</button>}
             <button type="submit" className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#d4af37] px-5 py-3 font-semibold text-black transition hover:bg-[#e4c45d] disabled:cursor-wait disabled:opacity-60">{busy === 'submit' ? <><Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />Connexion en cours…</> : <>{registering ? 'Créer mon compte' : 'Me connecter'}<ArrowRight aria-hidden="true" className="h-4 w-4" /></>}</button>
             {!registering && <button type="button" onClick={() => void forgot()} className="min-h-10 w-full text-sm text-zinc-300 underline-offset-4 hover:text-[#d4af37] hover:underline">{busy === 'forgot' ? 'Envoi du lien…' : 'Mot de passe oublié ?'}</button>}
           </fieldset>

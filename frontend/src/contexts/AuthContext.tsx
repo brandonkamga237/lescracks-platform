@@ -160,7 +160,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
     register: (returnTo) => openAuth('/inscription', returnTo),
     signOut,
     login: (email, password) => cookieLogin(() => api.login(email, password)),
-    createAccount: (body) => cookieLogin(() => api.register(body)),
+    createAccount: async (body) => { await api.register(body); },
     loginAdmin: (username, password) => cookieLogin(() => adminApi.login(username, password), () => adminApi.me()),
     socialSignIn,
   }}>{children}</SessionContext.Provider>;

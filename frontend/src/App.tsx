@@ -12,6 +12,7 @@ import AdminLogin from '@/pages/AdminLogin';
 
 import About from '@/pages/About';
 import EvenementDetail from '@/pages/EvenementDetail';
+import VerifyEmail from '@/pages/VerifyEmail';
 import Evenements from '@/pages/Evenements';
 import Landing from '@/pages/Landing';
 import NotFound from '@/pages/NotFound';
@@ -86,7 +87,8 @@ function AppRoutes() {
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/connexion" element={<AuthPage mode="login" />} />
       <Route path="/inscription" element={<AuthPage mode="register" />} />
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/reinitialiser" element={<ResetPasswordPage />} />
+      <Route path="/verifier-email" element={<VerifyEmail />} />
       <Route path="/admin/connexion" element={<AdminLogin />} />
 
       {/* Reading is what brings people in; asking them to sign up first is what keeps

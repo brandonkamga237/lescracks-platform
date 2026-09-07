@@ -12,21 +12,34 @@ import org.springframework.stereotype.Service;
 public class MailServiceImpl implements MailService {
     private final JavaMailSender sender;
     private final String frontendUrl;
+    private final String from;
 
     public MailServiceImpl(JavaMailSender sender,
-                           @Value("${app.site.url:http://localhost:5173}") String frontendUrl) {
+                           @Value("${app.site.url:http://localhost:5173}") String frontendUrl,
+                           @Value("${app.mail.from:LesCracks <contact@lescracks.com>}") String from) {
         this.sender = sender;
         this.frontendUrl = frontendUrl;
+        this.from = from;
     }
 
     @Override
     public void sendPasswordReset(String recipient, String token) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(recipient);
+        SimpleMailMessage message = message(recipient);
         message.setSubject("Réinitialisation de votre mot de passe LesCracks");
-        message.setText("Réinitialisez votre mot de passe ici : "
-                + frontendUrl + "/reset-password?token=" + token
+        message.setText("Bonjour,\n\nRéinitialisez votre mot de passe ici : "
+                + frontendUrl + "/reinitialiser?token=" + token
                 + "\n\nCe lien expire dans 30 minutes.");
+        sender.send(message);
+    }
+
+    @Override
+    public void sendVerificationEmail(String recipient, String token, String firstName) {
+        SimpleMailMessage message = message(recipient);
+        message.setSubject("Confirme ton adresse email LesCracks");
+        String name = firstName == null || firstName.isBlank() ? "" : firstName;
+        message.setText("Bonjour" + (name.isBlank() ? "" : " " + name) + ",\n\nConfirme ton adresse email en cliquant sur ce lien : "
+                + frontendUrl + "/verifier-email?token=" + token
+                + "\n\nCe lien expire dans 24 heures.\n\nSi tu n’as pas créé de compte, ignore ce message.");
         sender.send(message);
     }
 
@@ -54,9 +67,15 @@ public class MailServiceImpl implements MailService {
         send(recipient, subject, personalized);
     }
 
-    private void send(String recipient, String subject, String text) {
+    private SimpleMailMessage message(String recipient) {
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(from);
         message.setTo(recipient);
+        return message;
+    }
+
+    private void send(String recipient, String subject, String text) {
+        SimpleMailMessage message = message(recipient);
         message.setSubject(subject);
         message.setText(text);
         sender.send(message);

@@ -71,5 +71,6 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   status: 'ACTIVE' | 'INACTIVE' | 'BANNED';
+  verified: boolean;
   createdAt: string;
 }
