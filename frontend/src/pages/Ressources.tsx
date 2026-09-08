@@ -92,7 +92,7 @@ export default function Ressources() {
           <aside id="resource-filters" className={`mb-8 border-t border-line-soft pt-6 lg:mb-0 lg:border-t-0 lg:pt-0 ${filtersOpen ? 'block' : 'hidden'}`} aria-label="Filtres">
             <div className="space-y-6 lg:sticky lg:top-28">
               <fieldset>
-                <legend className="text-xs font-medium uppercase tracking-wider text-t4">Format</legend>
+                <legend className="text-xs font-medium tracking-wide text-t4">Format</legend>
                 <div className="mt-3 flex flex-col gap-1 border-l border-line">
                   {[undefined, ...KINDS].map((option) => (
                     <button
@@ -108,7 +108,7 @@ export default function Ressources() {
                 </div>
               </fieldset>
 
-              <label className="block text-xs font-medium uppercase tracking-wider text-t4">
+              <label className="block text-xs font-medium tracking-wide text-t4">
                 Catégorie
                 <select value={categoryId ?? ''} onChange={(event) => setParam('categoryId', event.target.value || null)} className={selectClass} disabled={categories.loading || Boolean(categories.error)}>
                   <option value="">Toutes</option>
@@ -117,7 +117,7 @@ export default function Ressources() {
                 </select>
               </label>
 
-              <label className="block text-xs font-medium uppercase tracking-wider text-t4">
+              <label className="block text-xs font-medium tracking-wide text-t4">
                 Sujet
                 <select value={tagId ?? ''} onChange={(event) => setParam('tagId', event.target.value || null)} className={selectClass} disabled={tags.loading || Boolean(tags.error)}>
                   <option value="">Tous</option>

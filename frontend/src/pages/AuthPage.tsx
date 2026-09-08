@@ -58,7 +58,7 @@ export function ResetPasswordPage() {
     <SEO title="Nouveau mot de passe" description="Choisis un nouveau mot de passe pour ton compte LesCracks." url="/reset-password" />
     <div className="mx-auto max-w-lg px-5 py-16 sm:py-24">
       <section className="rounded-3xl border border-white/10 bg-[#171717] p-6 text-white shadow-2xl sm:p-9">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#d4af37]">LesCracks / Sécurité</p>
+        <p className="text-xs font-semibold tracking-wide text-[#d4af37]">LesCracks / Sécurité</p>
         <h1 className="mt-4 font-display text-3xl font-semibold">Un nouveau départ.</h1>
         <p className="mt-3 text-sm leading-relaxed text-zinc-400">Choisis un nouveau mot de passe pour retrouver ton compte.</p>
         {done ? <div role="status" className="mt-6 rounded-xl border border-[#d4af37]/25 p-4 text-sm text-[#d4af37]">Ton mot de passe a été mis à jour. Tu peux maintenant te connecter.</div> : !token ? <p role="alert" className="mt-6 text-sm text-red-300">Ce lien est incomplet. Retourne à la connexion pour demander un nouveau lien.</p> : <form onSubmit={submit} className="mt-7" aria-busy={busy}>
@@ -179,13 +179,13 @@ export default function AuthPage({ mode }: AuthPageProps) {
     <SEO title={registering ? 'Créer ton compte' : 'Connexion'} description="Retrouve ton espace LesCracks et continue à apprendre la tech." url={registering ? '/inscription' : '/connexion'} />
     <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl gap-8 px-5 py-8 sm:px-8 sm:py-12 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-20">
       <section className="order-2 lg:order-1">
-        <Link to="/" className="text-xs font-semibold uppercase tracking-[0.24em] text-[#d4af37]">LesCracks / Ton espace</Link>
+        <Link to="/" className="text-xs font-semibold tracking-wide text-[#d4af37]">LesCracks / Ton espace</Link>
         <h1 className="mt-4 max-w-lg font-display text-2xl font-semibold leading-tight tracking-tight text-t1 sm:text-4xl lg:text-6xl">{registering ? <>Ta prochaine étape<br /><span className="text-[#d4af37]">commence ici.</span></> : <>Le bon endroit<br />pour <span className="text-[#d4af37]">aller plus loin.</span></>}</h1>
         <p className="mt-4 max-w-md text-base leading-relaxed text-t3 sm:text-lg">{registering ? 'Crée ton compte, explore les ressources et trouve ton prochain rendez-vous tech.' : 'Retrouve ton espace personnel. Les ressources et les événements t’attendent, à ton rythme.'}</p>
         <div className="mt-6 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-[#d4af37]" /><p>Tu peux aussi découvrir le catalogue sans compte.<br /><Link to="/ressources" className="mt-2 inline-flex items-center gap-2 text-t2 underline underline-offset-4">Explorer les ressources <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link></p></div>
       </section>
       <section className="order-1 rounded-3xl border border-white/10 bg-[#171717] p-5 text-white shadow-2xl sm:p-9 lg:order-2" aria-labelledby="auth-heading">
-        <p className="text-xs uppercase tracking-[0.2em] text-[#d4af37]">{registering ? 'Bienvenue dans la communauté' : 'Heureux de te retrouver'}</p>
+        <p className="text-xs tracking-wide text-[#d4af37]">{registering ? 'Bienvenue dans la communauté' : 'Heureux de te retrouver'}</p>
         <h2 id="auth-heading" className="mt-3 font-display text-3xl font-semibold">{registering ? 'Créer ton compte' : 'Te connecter'}</h2>
         <p className="mt-2 text-sm text-zinc-400">{registering ? 'Quelques informations, et c’est parti.' : 'Entre tes identifiants pour continuer.'}</p>
         {state?.expired && <p role="status" className="mt-5 rounded-xl border border-[#d4af37]/25 bg-[#d4af37]/5 p-3 text-sm text-[#d4af37]">Connecte-toi pour accéder à cette page. Si ta session a expiré, tu reprendras là où tu en étais.</p>}

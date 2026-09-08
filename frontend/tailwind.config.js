@@ -10,13 +10,16 @@ export default {
  fontFamily: {
   sans: [
     'Inter',
-    'system-ui',
     '-apple-system',
+    'BlinkMacSystemFont',
+    'system-ui',
     'sans-serif'
   ],
   display: [
-    'Space Grotesk',
+    '-apple-system',
+    'BlinkMacSystemFont',
     'Inter',
+    'Space Grotesk',
     'system-ui',
     'sans-serif'
   ],

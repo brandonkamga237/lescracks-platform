@@ -67,7 +67,7 @@ export default function RessourceDetail() {
           <header className="mt-8 max-w-4xl sm:mt-12">
             <div className="flex flex-wrap items-center gap-3 text-xs font-medium">
               <span className="inline-flex items-center gap-2 rounded-full border border-gold-400/30 bg-gold-400/10 px-3 py-1.5 text-gold-400">{loaded.kind === 'EBOOK' ? 'Ebook' : 'Vidéo'}</span>
-              {loaded.categoryName && <span className="uppercase tracking-wider text-t3">{loaded.categoryName}</span>}
+              {loaded.categoryName && <span className="tracking-wide text-t3">{loaded.categoryName}</span>}
             </div>
             <h1 className="mt-5 break-words font-display text-4xl font-semibold leading-[1.1] tracking-tight text-t1 sm:text-5xl lg:text-6xl">{loaded.title}</h1>
             {loaded.createdAt && <p className="mt-5 text-sm text-t3">Publié le <time dateTime={loaded.createdAt}>{dateFormat.format(new Date(loaded.createdAt))}</time></p>}
@@ -83,7 +83,7 @@ export default function RessourceDetail() {
                 <p className="mt-5 whitespace-pre-line break-words text-base leading-loose text-t2 sm:text-lg">{loaded.description}</p>
                 {loaded.tags?.length > 0 && (
                   <div className="mt-7">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-t4">Sujets abordés</h3>
+                    <h3 className="text-xs font-semibold tracking-wide text-t4">Sujets abordés</h3>
                     <ul aria-label="Sujets abordés" className="mt-3 flex flex-wrap gap-2">
                       {loaded.tags.map((tag) => (
                         <li key={tag} className="rounded-md border border-line-soft bg-noir-950 px-3 py-1.5 text-sm font-medium text-t3">{tag}</li>

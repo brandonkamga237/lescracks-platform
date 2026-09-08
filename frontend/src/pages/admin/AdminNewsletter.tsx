@@ -76,15 +76,15 @@ export default function AdminNewsletter() {
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-line-soft bg-card p-5">
-          <p className="text-xs uppercase tracking-wider text-t4">Abonnés</p>
+          <p className="text-xs tracking-wide text-t4">Abonnés</p>
           <p className="mt-2 font-display text-2xl font-semibold text-t1">{stats.data?.subscribed ?? '—'}</p>
         </div>
         <div className="rounded-2xl border border-line-soft bg-card p-5">
-          <p className="text-xs uppercase tracking-wider text-t4">Désabonnés</p>
+          <p className="text-xs tracking-wide text-t4">Désabonnés</p>
           <p className="mt-2 font-display text-2xl font-semibold text-t1">{stats.data?.unsubscribed ?? '—'}</p>
         </div>
         <div className="rounded-2xl border border-line-soft bg-card p-5">
-          <p className="text-xs uppercase tracking-wider text-t4">Campagnes envoyées</p>
+          <p className="text-xs tracking-wide text-t4">Campagnes envoyées</p>
           <p className="mt-2 font-display text-2xl font-semibold text-t1">{campaigns.data?.length ?? '—'}</p>
         </div>
       </div>

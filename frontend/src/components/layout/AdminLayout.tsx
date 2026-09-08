@@ -31,7 +31,7 @@ interface WorkspaceNavProps { onNavigate?: () => void }
 function WorkspaceNav({ onNavigate }: WorkspaceNavProps) {
   return <nav aria-label="Administration" className="space-y-7">
     {['Espace de travail', 'Contenu', 'Organisation', 'Sécurité'].map((group) => <div key={group}>
-      <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-t4">{group}</p>
+      <p className="mb-3 px-3 text-[11px] font-semibold tracking-wide text-t4">{group}</p>
       <div className="space-y-1">{SECTIONS.filter((section) => section.group === group).map(({ to, label, icon: Icon }) => <NavLink key={to} end={to === '/admin'} to={to} onClick={onNavigate} className={({ isActive }) => `flex items-center gap-3 rounded-2xl px-3 py-3 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400 ${isActive ? 'bg-gold-400/10 font-medium text-gold-400' : 'text-t3 hover:bg-noir-800 hover:text-t1'}`}><Icon className="h-5 w-5" aria-hidden />{label}</NavLink>)}</div>
     </div>)}
   </nav>;
@@ -57,7 +57,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   return <div className="min-h-screen bg-black text-t1 selection:bg-gold-400/30">
     <a href="#admin-content" className="sr-only z-[60] rounded-full bg-gold-400 px-5 py-3 text-black focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Aller au contenu</a>
     <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-line-soft bg-noir-900 px-5 py-8 lg:flex">
-      <Link to="/admin" aria-label="LesCracks, vue d’ensemble" className="mb-10 px-3"><LesCracksLogo className="h-8 w-auto" /><span className="mt-3 block text-[10px] uppercase tracking-[0.2em] text-t4">Administration</span></Link>
+      <Link to="/admin" aria-label="LesCracks, vue d’ensemble" className="mb-10 px-3"><LesCracksLogo className="h-8 w-auto" /><span className="mt-3 block text-[10px] tracking-wide text-t4">Administration</span></Link>
       <WorkspaceNav />
       <Link to="/" className="mt-auto flex items-center justify-between rounded-2xl border border-line-soft px-4 py-3 text-sm text-t3 hover:border-gold-400/40 hover:text-t1">Voir le site public<ArrowUpRight className="h-4 w-4" aria-hidden /></Link>
     </aside>

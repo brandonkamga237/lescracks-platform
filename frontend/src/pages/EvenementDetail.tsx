@@ -45,7 +45,7 @@ export default function EvenementDetail() {
             </div>
             <div className="p-6 sm:p-10 lg:p-12">
               <div className="flex flex-wrap items-center gap-3 text-xs font-medium"><span className="rounded-full border border-gold-400/30 bg-gold-400/10 px-3 py-1.5 text-gold-400">{typeLabels[loaded.type]}</span><span className="text-t2">{formatLabels[loaded.format]}</span><span className="ml-auto rounded-full border border-line-strong px-3 py-1.5 text-t2">{status}</span></div>
-              <p className="mt-5 text-xs font-medium uppercase tracking-[0.2em] text-t3">Un rendez-vous LesCracks</p>
+              <p className="mt-5 text-xs font-medium tracking-wide text-t3">Un rendez-vous LesCracks</p>
               <h1 className="mt-3 max-w-4xl break-words font-display text-4xl font-semibold leading-[1.1] tracking-tight text-t1 sm:text-5xl lg:text-6xl">{loaded.title}</h1>
               {hasDate && <p className="mt-6 text-sm text-t2"><time dateTime={loaded.startDate}>{dateFormat.format(start)}</time></p>}
             </div>

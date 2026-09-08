@@ -60,7 +60,7 @@ export default function Header() {
   );
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line-soft bg-background/95 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-line-soft/50 bg-background/80 backdrop-blur-2xl">
       <div className="mx-auto flex h-20 max-w-7xl items-center gap-8 px-5 sm:px-8">
         <Link to="/" className="shrink-0" aria-label="LesCracks, accueil">
           <LesCracksLogo height={36} className="w-auto" />
@@ -85,7 +85,7 @@ export default function Header() {
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <button type="button" className="ml-auto flex h-11 w-11 items-center justify-center rounded-xl border border-line text-t1 md:hidden" aria-label="Ouvrir le menu"><Menu className="h-5 w-5" aria-hidden /></button>
+            <button type="button" className="ml-auto flex h-10 w-10 items-center justify-center rounded-full border border-line/50 text-t1 transition-colors hover:bg-white/5 md:hidden" aria-label="Ouvrir le menu"><Menu className="h-5 w-5" aria-hidden /></button>
           </DialogTrigger>
           <DialogContent className="top-2 w-[calc(100%_-_1rem)] translate-y-0 rounded-2xl border-line bg-card p-4 sm:top-4 sm:w-[calc(100%_-_2rem)] sm:p-6 sm:rounded-2xl">
             <DialogTitle className="font-display text-lg">Explorer LesCracks</DialogTitle>

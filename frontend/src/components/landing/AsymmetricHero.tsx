@@ -49,12 +49,12 @@ const AsymmetricHero = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="text-sm text-gold uppercase tracking-[0.5em] mt-4 mb-2"
+              className="text-sm text-gold tracking-wide mt-4 mb-2"
             >
               Excellence en formation tech
             </motion.p>
 
-            <h1 className="text-6xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-bold leading-tight mb-4">
+            <h1 className="text-6xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-semibold leading-tight mb-4">
               <span>Devenez </span>
               <span className="relative inline-block text-gold">
   un crack
