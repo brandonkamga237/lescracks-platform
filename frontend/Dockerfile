@@ -1,10 +1,14 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci
+
+# pnpm is the package manager used in the project; package-lock.json does not exist.
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+COPY package.json pnpm-lock.yaml ./
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
 
 COPY . .
-RUN npm run build   # Vite outputs the build to /dist
+RUN pnpm build
 
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
