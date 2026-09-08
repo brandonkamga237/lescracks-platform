@@ -41,6 +41,8 @@ public class KeycloakRoleConverter implements Converter<Jwt, AbstractAuthenticat
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase(Locale.ROOT)))
                 .collect(Collectors.toList());
 
-        return new UsernamePasswordAuthenticationToken(jwt.getSubject(), jwt, authorities);
+        String email = jwt.getClaimAsString("email");
+        String principal = (email != null && !email.isBlank()) ? email : jwt.getSubject();
+        return new UsernamePasswordAuthenticationToken(principal, jwt, authorities);
     }
 }
