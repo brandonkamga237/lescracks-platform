@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import Layout from '@/components/layout/Layout';
 import SEO from '@/components/common/SEO';
+import NewsletterCard from '@/components/common/NewsletterCard';
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
@@ -166,6 +167,9 @@ export default function Profile() {
           <div className="mt-5 space-y-4">
             <Link to="/ressources" className="group flex gap-4 rounded-2xl border border-line-soft bg-card p-6 transition hover:border-[#d4af37]/40"><BookOpen aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-[#d4af37]" /><div className="flex-1"><h3 className="font-semibold text-t1">Explorer les ressources</h3><p className="mt-2 text-sm leading-relaxed text-t4">Des ebooks et des vidéos pour approfondir les sujets qui t’intéressent.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-[#d4af37]" /></Link>
             <Link to="/evenements" className="group flex gap-4 rounded-2xl border border-line-soft bg-card p-6 transition hover:border-[#d4af37]/40"><CalendarDays aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-[#d4af37]" /><div className="flex-1"><h3 className="font-semibold text-t1">Trouver un événement</h3><p className="mt-2 text-sm leading-relaxed text-t4">Découvre les prochains rendez-vous pour apprendre et échanger.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-[#d4af37]" /></Link>
+          </div>
+          <div className="mt-6">
+            <NewsletterCard />
           </div>
         </section>
       </div>

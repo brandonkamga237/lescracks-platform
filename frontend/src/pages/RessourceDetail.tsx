@@ -104,6 +104,13 @@ export default function RessourceDetail() {
                 {loaded.platform && <div className="flex justify-between gap-4"><dt className="text-t3">Plateforme</dt><dd className="break-words text-right text-t1">{loaded.platform}</dd></div>}
               </dl>
 
+              {loaded && (
+                <div className="mb-4 flex items-center justify-between rounded-xl border border-line-soft bg-noir-950 px-4 py-3">
+                  <span className="text-sm text-t3">Partager</span>
+                  <ResourceShare resourceId={loaded.id} title={loaded.title} />
+                </div>
+              )}
+
               {loaded.kind === 'EXTERNAL_VIDEO' && loaded.videoUrl && <a href={loaded.videoUrl} target="_blank" rel="noreferrer noopener" className="flex min-h-12 items-center justify-center gap-3 rounded-xl bg-gold-400 px-4 py-3 text-center text-sm font-semibold text-noir-950 transition-colors hover:bg-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-noir-900">Regarder la vidéo<ExternalLink className="h-4 w-4 shrink-0" aria-hidden /><span className="sr-only"> (nouvel onglet)</span></a>}
               {loaded.kind === 'EBOOK' && loaded.downloadUrl && <a href={`${ENV.API_BASE_URL.replace(/\/$/, '')}${loaded.downloadUrl.replace(/^\/api(?=\/)/, '')}`} className="flex min-h-12 items-center justify-center gap-3 rounded-xl bg-gold-400 px-4 py-3 text-center text-sm font-semibold text-noir-950 transition-colors hover:bg-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-noir-900">Télécharger l’ebook<Download className="h-4 w-4 shrink-0" aria-hidden /></a>}
               {!(loaded.kind === 'EBOOK' ? loaded.downloadUrl : loaded.videoUrl) && <p className="text-sm text-t3">Le lien d’accès n’est pas disponible pour le moment.</p>}
@@ -118,8 +125,6 @@ export default function RessourceDetail() {
                 {liked ? 'Coup de cœur envoyé' : 'Mettre un coup de cœur'}
                 {likeCount > 0 && <span className="rounded-full bg-noir-800 px-2 py-0.5 text-xs text-t2">{likeCount}</span>}
               </button>
-
-              {loaded && <ResourceShare resourceId={loaded.id} title={loaded.title} />}
             </aside>
           </div>
           <div className="mt-14 border-t border-line-soft pt-7"><Link to={cataloguePath} className="inline-flex min-h-11 items-center gap-3 text-sm font-medium text-gold-400 hover:text-gold-300">Continuer à explorer la bibliothèque<ArrowUpRight className="h-4 w-4" aria-hidden /></Link></div>

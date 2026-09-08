@@ -1,5 +1,6 @@
-import { Search, X } from 'lucide-react';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
 
 import Pagination from '@/components/common/Pagination';
 import SEO from '@/components/common/SEO';
@@ -34,6 +35,7 @@ export default function Ressources() {
   const categoryId = positiveInteger(params.get('categoryId'));
   const tagId = positiveInteger(params.get('tagId'));
   const page = positiveInteger(params.get('page')) ?? 1;
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const categories = useApi((signal) => api.categories(signal), []);
   const tags = useApi((signal) => api.tags(categoryId, signal), [categoryId]);
   const catalogue = useApi(
@@ -66,16 +68,28 @@ export default function Ressources() {
     <Layout>
       <SEO title="Bibliothèque" description="Ebooks et vidéos pour apprendre la tech en français. Filtre par format, catégorie et sujet." url="/ressources" />
       <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
-        <header className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3">
+        <header className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3">
           <h1 className="font-display text-3xl font-semibold tracking-tight text-t1 sm:text-4xl">Bibliothèque</h1>
-          {!catalogue.loading && !catalogue.error && (
-            <p className="text-sm text-t4">{total} ressource{total > 1 ? 's' : ''}</p>
-          )}
+          <div className="flex items-center gap-3">
+            {!catalogue.loading && !catalogue.error && (
+              <p className="text-sm text-t4">{total} ressource{total > 1 ? 's' : ''}</p>
+            )}
+            <button
+              type="button"
+              onClick={() => setFiltersOpen((v) => !v)}
+              className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm transition ${filtersOpen ? 'border-gold-400 text-gold-400' : 'border-line text-t3 hover:text-t1'}`}
+              aria-expanded={filtersOpen}
+              aria-controls="resource-filters"
+            >
+              {filtersOpen ? <X className="h-4 w-4" aria-hidden /> : <SlidersHorizontal className="h-4 w-4" aria-hidden />}
+              {filtersOpen ? 'Masquer' : 'Filtres'}
+            </button>
+          </div>
         </header>
 
-        <div className="mt-8 lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
+        <div className={`mt-8 ${filtersOpen ? 'lg:grid lg:grid-cols-[220px_minmax(0,1fr)]' : ''} lg:gap-10`}>
           {/* Filters — a quiet rail, not a banner */}
-          <aside className="mb-8 border-t border-line-soft pt-6 lg:mb-0 lg:border-t-0 lg:pt-0" aria-label="Filtres">
+          <aside id="resource-filters" className={`mb-8 border-t border-line-soft pt-6 lg:mb-0 lg:border-t-0 lg:pt-0 ${filtersOpen ? 'block' : 'hidden'}`} aria-label="Filtres">
             <div className="space-y-6 lg:sticky lg:top-28">
               <fieldset>
                 <legend className="text-xs font-medium uppercase tracking-wider text-t4">Format</legend>

@@ -14,7 +14,7 @@ import { api } from '@/services/api';
 export default function NewsletterBar() {
   const { isSignedIn, isAdmin, isLoading } = useSession();
   const [subscribed, setSubscribed] = useState<boolean | null>(null);
-  const [dismissed, setDismissed] = useState(() => sessionStorage.getItem('lescracks.newsletter.dismissed') === '1');
+  const [visible, setVisible] = useState(true);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState('');
 
@@ -30,7 +30,7 @@ export default function NewsletterBar() {
     return () => controller.abort();
   }, [isSignedIn, isAdmin]);
 
-  if (dismissed || isLoading || isAdmin || subscribed === true) return null;
+  if (!visible || isLoading || isAdmin || subscribed === true) return null;
 
   async function subscribe() {
     setBusy(true);
@@ -43,11 +43,6 @@ export default function NewsletterBar() {
     } finally {
       setBusy(false);
     }
-  }
-
-  function close() {
-    sessionStorage.setItem('lescracks.newsletter.dismissed', '1');
-    setDismissed(true);
   }
 
   return (
@@ -74,7 +69,7 @@ export default function NewsletterBar() {
           </Link>
         )}
         {failure && <span role="alert" className="text-red-300">{failure}</span>}
-        <button type="button" onClick={close} aria-label="Masquer ce message" className="ml-1 rounded px-1 text-t4 transition-colors hover:text-t1">×</button>
+        <button type="button" onClick={() => setVisible(false)} aria-label="Masquer ce message" className="ml-1 rounded px-1 text-t4 transition-colors hover:text-t1">×</button>
       </p>
     </div>
   );
