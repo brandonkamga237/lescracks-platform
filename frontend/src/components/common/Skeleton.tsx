@@ -1,12 +1,3 @@
-// src/components/common/Skeleton.tsx
-//
-// Loading placeholders that mirror the shape of the real content.
-//
-// A centred spinner tells the user "something is happening". A skeleton tells them
-// *what* is coming and how much of it — which makes the same wait feel shorter.
-// That matters here: the API answers in ~30ms, but users are 150–300ms away from
-// the server, so there is always a gap to fill with structure rather than emptiness.
-
 interface SkeletonProps {
   className?: string;
 }
@@ -15,17 +6,17 @@ interface SkeletonProps {
 export const Skeleton = ({ className = '' }: SkeletonProps) => (
   <div
     aria-hidden="true"
-    className={`animate-pulse rounded bg-white/[0.07] ${className}`}
+    className={`animate-pulse rounded-2xl bg-white/[0.04] ${className}`}
   />
 );
 
 /** Placeholder shaped like a resource / event card: thumbnail, title, meta, tags. */
 export const CardSkeleton = () => (
   <div className="card overflow-hidden">
-    <Skeleton className="h-40 w-full rounded-lg mb-4" />
-    <Skeleton className="h-4 w-3/4 mb-2.5" />
-    <Skeleton className="h-3 w-full mb-1.5" />
-    <Skeleton className="h-3 w-5/6 mb-4" />
+    <Skeleton className="mb-5 h-44 w-full rounded-2xl" />
+    <Skeleton className="mb-3 h-4 w-3/4" />
+    <Skeleton className="mb-2 h-3 w-full" />
+    <Skeleton className="mb-5 h-3 w-5/6" />
     <div className="flex gap-2">
       <Skeleton className="h-5 w-16 rounded-full" />
       <Skeleton className="h-5 w-12 rounded-full" />
@@ -41,7 +32,7 @@ export const CardSkeleton = () => (
  */
 export const CardSkeletonGrid = ({ count = 6 }: { count?: number }) => (
   <div
-    className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+    className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
     role="status"
     aria-label="Chargement en cours"
   >
@@ -55,15 +46,15 @@ export const CardSkeletonGrid = ({ count = 6 }: { count?: number }) => (
 /** Placeholder for a list of people. */
 export const PersonSkeletonGrid = ({ count = 6 }: { count?: number }) => (
   <div
-    className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
+    className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
     role="status"
     aria-label="Chargement en cours"
   >
     {Array.from({ length: count }).map((_, i) => (
       <div key={i} className="card flex items-center gap-4">
-        <Skeleton className="h-14 w-14 rounded-full flex-shrink-0" />
-        <div className="flex-1 min-w-0">
-          <Skeleton className="h-4 w-2/3 mb-2" />
+        <Skeleton className="h-14 w-14 flex-shrink-0 rounded-full" />
+        <div className="min-w-0 flex-1">
+          <Skeleton className="mb-2 h-4 w-2/3" />
           <Skeleton className="h-3 w-1/2" />
         </div>
       </div>

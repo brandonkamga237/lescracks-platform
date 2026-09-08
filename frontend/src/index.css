@@ -200,10 +200,10 @@
 
   /* ========== CARDS ========== */
   .card {
-    @apply bg-card rounded-xl border border-line-soft p-6 
+    @apply bg-card rounded-3xl border border-white/[0.06] p-6
            transition-all duration-300;
   }
-  
+
   .card-hover:hover {
     @apply border-gold/30;
     box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);

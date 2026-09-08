@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
 import SEO from '@/components/common/SEO';
@@ -9,12 +10,15 @@ import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
 
+const reveal = (reduced: boolean | null) => (reduced ? {} : { initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.55, ease: 'easeOut' } });
+
 const dayFormat = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
 /**
  * The front door for the learning catalogue.
  */
 export default function Landing() {
+  const reduced = useReducedMotion();
   const recent = useApi((signal) => api.resources({ size: 3 }, signal), []);
   const upcoming = useApi((signal) => api.upcomingEvents(0, 4, signal), []);
   const categories = useApi((signal) => api.categories(signal), []);
@@ -26,7 +30,7 @@ export default function Landing() {
       <SEO title="Apprendre la tech, concrètement" description="Des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme. Une bibliothèque ouverte, une communauté francophone." url="/" />
 
       {/* Hero — editorial, image-driven, no ornament */}
-      <section className="border-b border-line-soft/50">
+      <motion.section {...reveal(reduced)} className="border-b border-line-soft/50">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1fr_0.9fr] lg:items-center">
           <div>
             <p className="text-sm font-medium tracking-wide text-gold-400">L’école en ligne pour monter en compétence</p>
@@ -65,10 +69,10 @@ export default function Landing() {
             />
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Latest resources */}
-      <section aria-labelledby="latest-heading" className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-24">
+      <motion.section aria-labelledby="latest-heading" {...reveal(reduced)} className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-24">
         <div className="mb-10 flex flex-wrap items-baseline justify-between gap-4">
           <div>
             <h2 id="latest-heading" className="font-display text-2xl font-semibold tracking-tight text-t1 sm:text-3xl">
@@ -113,10 +117,10 @@ export default function Landing() {
             ))}
           </nav>
         )}
-      </section>
+      </motion.section>
 
       {/* Events — list, not cards */}
-      <section aria-labelledby="events-heading" className="border-t border-line-soft/50 bg-noir-900/30">
+      <motion.section aria-labelledby="events-heading" {...reveal(reduced)} className="border-t border-line-soft/50 bg-noir-900/30">
         <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-24">
           <div className="mb-10 flex flex-wrap items-baseline justify-between gap-4">
             <div>
@@ -166,10 +170,10 @@ export default function Landing() {
             </div>
           )}
         </div>
-      </section>
+      </motion.section>
 
       {/* Closing CTA */}
-      <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-24">
+      <motion.section {...reveal(reduced)} className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-24">
         <div className="rounded-3xl border border-line-soft/50 bg-gradient-to-br from-gold-400/[0.08] to-transparent px-6 py-14 text-center sm:px-12 sm:py-20">
           <h2 className="font-display text-3xl font-semibold tracking-tight text-t1 sm:text-4xl">Prêt à monter en compétence ?</h2>
           <p className="mx-auto mt-4 max-w-xl text-t3">Rejoins les membres qui apprennent chaque semaine. C’est gratuit et tu progresses à ton rythme.</p>
@@ -178,7 +182,7 @@ export default function Landing() {
             <Link to="/ressources" className="btn-secondary">Explorer sans compte</Link>
           </div>
         </div>
-      </section>
+      </motion.section>
     </Layout>
   );
 }
