@@ -12,11 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,15 +33,28 @@ public class StatsServiceImpl implements StatsService {
         this.newsletter = newsletter;
     }
 
+    /**
+     * Every breakdown is a grouped count query.
+     *
+     * This used to load all users, events and resources into memory and count them there,
+     * which turned the dashboard into the slowest page on the platform as the tables grew.
+     */
     @Override
     public StatsOverviewResponse overview() {
-        var userRows = users.findAll();
-        var eventRows = events.findAll();
-        var resourceRows = resources.findAll();
+        Map<String, Long> usersByStatus = toCounts(users.countGroupedByStatus());
+        Map<String, Long> usersByProvider = toCounts(users.countGroupedByProvider());
+        Map<String, Long> eventsByStatus = toCounts(events.countGroupedByStatus());
+        Map<String, Long> eventsByType = toCounts(events.countGroupedByType());
+        Map<String, Long> resourcesByStatus = toCounts(resources.countGroupedByStatus());
+        Map<String, Long> resourcesByCategory = toCounts(resources.countGroupedByCategory());
+        Map<String, Long> resourcesByKind = new LinkedHashMap<>();
+        resourcesByKind.put("EXTERNAL_VIDEO", resources.countExternalVideos());
+        resourcesByKind.put("EBOOK", resources.countEbooks());
+
         return new StatsOverviewResponse(
-                userRows.size(), group(userRows, user -> user.getStatus().name()),
-                eventRows.size(), group(eventRows, event -> event.getStatus().name()),
-                resourceRows.size(), group(resourceRows, resource -> resource.getStatus().name()),
+                total(usersByStatus), usersByStatus, usersByProvider, users.countByEmailVerifiedTrue(),
+                total(eventsByStatus), eventsByStatus, eventsByType,
+                total(resourcesByStatus), resourcesByStatus, resourcesByKind, resourcesByCategory,
                 newsletter.countByStatus(NewsletterStatus.SUBSCRIBED),
                 newsletter.countByStatus(NewsletterStatus.UNSUBSCRIBED));
     }
@@ -67,8 +78,18 @@ public class StatsServiceImpl implements StatsService {
                 .collect(Collectors.toList());
     }
 
-    private <T> Map<String, Long> group(Iterable<T> rows, Function<T, String> key) {
-        return java.util.stream.StreamSupport.stream(rows.spliterator(), false)
-                .collect(Collectors.groupingBy(key, Collectors.counting()));
+    /** Grouped-count rows arrive as [key, count]; enum keys are exposed by name. */
+    private Map<String, Long> toCounts(List<Object[]> rows) {
+        Map<String, Long> counts = new LinkedHashMap<>();
+        for (Object[] row : rows) {
+            if (row[0] == null) continue;
+            String key = row[0] instanceof Enum<?> value ? value.name() : row[0].toString();
+            counts.put(key, ((Number) row[1]).longValue());
+        }
+        return counts;
+    }
+
+    private long total(Map<String, Long> counts) {
+        return counts.values().stream().mapToLong(Long::longValue).sum();
     }
 }

@@ -37,4 +37,21 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
             order by count(l.id) desc
             """)
     List<Object[]> topResources(Pageable pageable);
+
+    @Query("select r.status, count(r) from Resource r group by r.status")
+    List<Object[]> countGroupedByStatus();
+
+    @Query("select count(e) from Ebook e")
+    long countEbooks();
+
+    @Query("select count(v) from ExternalVideoReference v")
+    long countExternalVideos();
+
+    @Query("""
+            select c.name, count(r)
+            from Resource r join r.category c
+            group by c.name
+            order by count(r) desc
+            """)
+    List<Object[]> countGroupedByCategory();
 }

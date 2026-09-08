@@ -25,4 +25,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
             ORDER BY d
             """, nativeQuery = true)
     List<Object[]> userGrowth(@Param("from") Instant from, @Param("to") Instant to);
+
+    @Query("select u.status, count(u) from User u group by u.status")
+    List<Object[]> countGroupedByStatus();
+
+    @Query("select u.provider, count(u) from User u group by u.provider")
+    List<Object[]> countGroupedByProvider();
+
+    long countByEmailVerifiedTrue();
 }

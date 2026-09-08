@@ -22,32 +22,14 @@ public class StatsController {
 
     public StatsController(StatsService stats) { this.stats = stats; }
 
+    /** Every breakdown the dashboard needs, in one round trip. */
     @GetMapping("/overview")
     public StatsOverviewResponse overview() { return stats.overview(); }
-
-    @GetMapping("/users")
-    public Map<String, Object> users() {
-        StatsOverviewResponse value = stats.overview();
-        return Map.of("total", value.users(), "byStatus", value.usersByStatus());
-    }
-
-    @GetMapping("/events")
-    public Map<String, Object> events() {
-        StatsOverviewResponse value = stats.overview();
-        return Map.of("total", value.events(), "byStatus", value.eventsByStatus());
-    }
-
-    @GetMapping("/resources")
-    public Map<String, Object> resources() {
-        StatsOverviewResponse value = stats.overview();
-        return Map.of("total", value.resources(), "byStatus", value.resourcesByStatus());
-    }
 
     @GetMapping("/user-growth")
     public Map<String, Object> userGrowth(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-            @RequestParam(defaultValue = "5") int limit) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         Instant fromInstant = from.atStartOfDay(ZoneId.of("UTC")).toInstant();
         Instant toInstant = to.plusDays(1).atStartOfDay(ZoneId.of("UTC")).toInstant();
         return Map.of("from", from.toString(), "to", to.toString(),
