@@ -144,8 +144,10 @@ services:
         condition: service_healthy
       minio:
         condition: service_healthy
+      # Keycloak is only needed for OIDC; the API starts and uses local auth
+      # without it. Do not block the whole deploy on Keycloak readiness.
       keycloak:
-        condition: service_healthy
+        condition: service_started
     volumes:
       - backend_logs:/var/log/lescracks
     healthcheck:
