@@ -1,6 +1,6 @@
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminUser, Category, EventFormat, EventStatus, EventSummary, EventType, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag } from '@/services/types';
+import type { AdminSubscriber, AdminUser, Category, EventFormat, EventStatus, EventSummary, EventType, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag } from '@/services/types';
 
 export interface EbookRequest {
   title: string;
@@ -97,6 +97,13 @@ export const adminApi = {
   updateUserStatus: (id: number, status: AdminUser['status']) =>
     http.patch<AdminUser>(`/admin/users/${id}/status`, { status }),
   deleteUser: (id: number) => http.delete<void>(`/admin/users/${id}`),
+  newsletterStats: (signal?: AbortSignal) => http.get<NewsletterStats>('/newsletter/admin/stats', undefined, signal),
+  newsletterSubscriptions: (status: string | '', signal?: AbortSignal) =>
+    http.get<AdminSubscriber[]>('/newsletter/admin/subscriptions', status ? { status } : undefined, signal),
+  newsletterBroadcast: (subject: string, message: string) =>
+    http.post<number>('/newsletter/admin/broadcast', { subject, message }),
+  newsletterUnsubscribe: (userId: number) => http.post<AdminSubscriber>(`/newsletter/admin/subscriptions/${userId}/unsubscribe`),
+  newsletterSubscribe: (userId: number) => http.post<AdminSubscriber>(`/newsletter/admin/subscriptions/${userId}/subscribe`),
 };
 
 export default adminApi;

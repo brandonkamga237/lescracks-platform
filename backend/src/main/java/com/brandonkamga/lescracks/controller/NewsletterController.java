@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.controller;
 
 import com.brandonkamga.lescracks.domain.NewsletterSubscription;
+import com.brandonkamga.lescracks.domain.User;
 import com.brandonkamga.lescracks.dto.newsletter.NewsletterResponse;
 import com.brandonkamga.lescracks.dto.newsletter.BroadcastRequest;
 import com.brandonkamga.lescracks.dto.newsletter.AdminSubscriberResponse;
@@ -60,6 +61,25 @@ public class NewsletterController {
             .toList();
         }
 
+        @GetMapping("/admin/subscriptions")
+        @PreAuthorize("hasRole('ADMIN')")
+        public List<AdminSubscriberResponse> subscriptions(@RequestParam(required = false) NewsletterStatus status) {
+            List<NewsletterSubscription> list = status == null ? subscriptions.findAll() : subscriptions.findByStatus(status);
+            return list.stream().map(this::toAdminResponse).toList();
+        }
+
+        @PostMapping("/admin/subscriptions/{userId}/unsubscribe")
+        @PreAuthorize("hasRole('ADMIN')")
+        public ResponseEntity<AdminSubscriberResponse> unsubscribeById(@PathVariable Long userId) {
+            return ResponseEntity.ok(toAdminResponse(newsletter.unsubscribeById(userId)));
+        }
+
+        @PostMapping("/admin/subscriptions/{userId}/subscribe")
+        @PreAuthorize("hasRole('ADMIN')")
+        public ResponseEntity<AdminSubscriberResponse> subscribeById(@PathVariable Long userId) {
+            return ResponseEntity.ok(toAdminResponse(newsletter.subscribeById(userId)));
+        }
+
         @GetMapping("/admin/stats")
         @PreAuthorize("hasRole('ADMIN')")
         public NewsletterStats stats() {
@@ -69,6 +89,13 @@ public class NewsletterController {
         }
 
         public record NewsletterStats(long subscribed, long unsubscribed) { }
+
+    private AdminSubscriberResponse toAdminResponse(NewsletterSubscription subscription) {
+        User user = subscription.getUser();
+        return new AdminSubscriberResponse(user.getId(), user.getEmail(), user.getFirstName(),
+                user.getLastName(), subscription.getStatus(), subscription.getSubscribedAt(),
+                subscription.getUnsubscribedAt());
+    }
 
     private NewsletterResponse response(NewsletterSubscription subscription) {
         return new NewsletterResponse(subscription.getStatus(), subscription.getSubscribedAt(),

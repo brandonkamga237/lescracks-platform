@@ -70,8 +70,25 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export type NewsletterState = 'SUBSCRIBED' | 'UNSUBSCRIBED';
+
+export interface AdminSubscriber {
+  userId: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  status: NewsletterState;
+  subscribedAt: string | null;
+  unsubscribedAt: string | null;
+}
+
+export interface NewsletterStats {
+  subscribed: number;
+  unsubscribed: number;
+}
+
 export interface NewsletterStatus {
-  status: 'SUBSCRIBED' | 'UNSUBSCRIBED';
+  status: NewsletterState;
   subscribedAt: string | null;
   unsubscribedAt: string | null;
 }

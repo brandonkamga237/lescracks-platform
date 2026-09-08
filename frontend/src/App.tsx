@@ -26,6 +26,7 @@ import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminCategories from '@/pages/admin/AdminCategories';
 import AdminEvents from '@/pages/admin/AdminEvents';
 import AdminResources from '@/pages/admin/AdminResources';
+import AdminNewsletter from '@/pages/admin/AdminNewsletter';
 import AdminTags from '@/pages/admin/AdminTags';
 import AdminUsers from '@/pages/admin/AdminUsers';
 
@@ -115,6 +116,7 @@ function AppRoutes() {
         <Route path="categories" element={<AdminCategories />} />
         <Route path="tags" element={<AdminTags />} />
         <Route path="utilisateurs" element={<AdminUsers />} />
+        <Route path="newsletter" element={<AdminNewsletter />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

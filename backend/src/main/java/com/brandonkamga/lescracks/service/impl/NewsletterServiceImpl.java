@@ -60,6 +60,28 @@ public class NewsletterServiceImpl implements NewsletterService {
     }
 
     @Override
+    public NewsletterSubscription unsubscribeById(Long userId) {
+        User user = users.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Utilisateur", "id", userId));
+        NewsletterSubscription subscription = subscriptions.findByUserId(user.getId())
+                .orElseGet(() -> NewsletterSubscription.builder().user(user).build());
+        subscription.setStatus(NewsletterStatus.UNSUBSCRIBED);
+        subscription.setUnsubscribedAt(Instant.now());
+        return subscriptions.save(subscription);
+    }
+
+    @Override
+    public NewsletterSubscription subscribeById(Long userId) {
+        User user = users.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Utilisateur", "id", userId));
+        NewsletterSubscription subscription = subscriptions.findByUserId(user.getId())
+                .orElseGet(() -> NewsletterSubscription.builder().user(user).build());
+        subscription.setStatus(NewsletterStatus.SUBSCRIBED);
+        subscription.setUnsubscribedAt(null);
+        return subscriptions.save(subscription);
+    }
+
+    @Override
     public void notifyEventSubscribers(Event event) {
         subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED)
                 .forEach(subscription -> mail.sendEventNotification(subscription.getUser().getEmail(), event));
