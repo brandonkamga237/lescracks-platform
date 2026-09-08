@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useSession } from '@/hooks/useSession';
@@ -22,6 +22,15 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(resource.likeCount ?? 0);
   const [liking, setLiking] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+    const signal = new AbortController();
+    api.resourceLikes(resource.id, signal.signal)
+      .then((status) => { if (!ignore) { setLiked(status.liked); setLikeCount(status.count); } })
+      .catch(() => { /* count comes from the summary; keep defaults on error */ });
+    return () => { ignore = true; signal.abort(); };
+  }, [resource.id]);
 
   const cataloguePath = /^\/ressources(?:\/(?:ebooks|videos))?$/.test(location.pathname)
     ? `${location.pathname}${location.search}`

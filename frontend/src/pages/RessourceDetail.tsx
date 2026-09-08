@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, Download, ExternalLink } from 'lucide-react';
 
@@ -25,8 +25,15 @@ export default function RessourceDetail() {
   const loaded = validId && !resource.loading && !resource.error && resource.data?.id === Number(id) ? resource.data : null;
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const [liking, setLiking] = useState(false);
-  const [liked, setLiked] = useState(likes.data?.liked ?? false);
-  const [likeCount, setLikeCount] = useState(likes.data?.count ?? loaded?.likeCount ?? 0);
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(loaded?.likeCount ?? 0);
+
+  useEffect(() => {
+    if (likes.data) {
+      setLiked(likes.data.liked);
+      setLikeCount(likes.data.count);
+    }
+  }, [likes.data]);
   const previousPath: unknown = location.state?.cataloguePath;
   const cataloguePath = typeof previousPath === 'string' && /^\/ressources(?:\/(?:ebooks|videos))?(?:\?.*)?$/.test(previousPath) ? previousPath : '/ressources';
   const missing = !validId || resource.error?.status === 404;
