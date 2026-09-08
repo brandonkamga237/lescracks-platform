@@ -1,8 +1,11 @@
 package com.brandonkamga.lescracks.service.interfaces;
 
+import com.brandonkamga.lescracks.domain.NewsletterCampaign;
 import com.brandonkamga.lescracks.domain.NewsletterSubscription;
 import com.brandonkamga.lescracks.domain.Event;
 import com.brandonkamga.lescracks.domain.Resource;
+
+import java.util.List;
 
 public interface NewsletterService {
     NewsletterSubscription status(String username);
@@ -13,4 +16,5 @@ public interface NewsletterService {
     void notifyEventSubscribers(Event event);
     void notifyResourceSubscribers(Resource resource);
     int broadcast(String subject, String message);
+    List<NewsletterCampaign> campaigns();
 }

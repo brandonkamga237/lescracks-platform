@@ -87,6 +87,25 @@ export interface NewsletterStats {
   unsubscribed: number;
 }
 
+export interface UserGrowthPoint {
+  date: string;
+  count: number;
+}
+
+export interface TopResource {
+  id: number;
+  title: string;
+  likes: number;
+}
+
+export interface NewsletterCampaign {
+  id: number;
+  subject: string;
+  message: string;
+  recipientCount: number;
+  sentAt: string;
+}
+
 export interface NewsletterStatus {
   status: NewsletterState;
   subscribedAt: string | null;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Trash2, Users } from 'lucide-react';
+import { Download, Search, Trash2, Users } from 'lucide-react';
 
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
@@ -70,15 +70,20 @@ export default function AdminUsers() {
           <h1 className="font-display text-2xl font-semibold text-t1">Utilisateurs</h1>
           <p className="mt-1 text-sm text-t4">Gère les comptes enregistrés et leur statut.</p>
         </div>
-        <form onSubmit={submitSearch} className="relative w-full max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-t4" aria-hidden />
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Rechercher par email ou nom…"
-            className="w-full rounded-2xl border border-line-strong bg-background py-2.5 pl-9 pr-4 text-sm text-t1 outline-none focus:border-gold-400"
-          />
-        </form>
+        <div className="flex w-full max-w-md items-center gap-2">
+          <form onSubmit={submitSearch} className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-t4" aria-hidden />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Rechercher par email ou nom…"
+              className="w-full rounded-2xl border border-line-strong bg-background py-2.5 pl-9 pr-4 text-sm text-t1 outline-none focus:border-gold-400"
+            />
+          </form>
+          <button type="button" onClick={() => void adminApi.exportUsers()} className="inline-flex shrink-0 items-center gap-2 rounded-2xl border border-gold-400/30 bg-card px-3 py-2.5 text-sm text-gold-400 hover:bg-gold-400/10">
+            <Download className="h-4 w-4" aria-hidden /> CSV
+          </button>
+        </div>
       </header>
 
       {error && <p role="alert" className="mb-5 rounded-xl border border-red-500/25 bg-red-500/5 p-3 text-sm text-red-400">{error}</p>}

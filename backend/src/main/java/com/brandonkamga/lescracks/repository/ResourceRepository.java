@@ -28,4 +28,13 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
                               @Param("kind") String kind, @Param("categoryId") Long categoryId,
                               @Param("tagId") Long tagId,
                               Pageable pageable);
+
+    @Query("""
+            select r.id, r.title, count(l.id)
+            from Resource r
+            left join ResourceLike l on l.resource.id = r.id
+            group by r.id, r.title
+            order by count(l.id) desc
+            """)
+    List<Object[]> topResources(Pageable pageable);
 }

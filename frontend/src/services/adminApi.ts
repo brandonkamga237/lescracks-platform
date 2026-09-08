@@ -1,6 +1,7 @@
+import { ENV } from '@/config/env';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminSubscriber, AdminUser, Category, EventFormat, EventStatus, EventSummary, EventType, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag } from '@/services/types';
+import type { AdminSubscriber, AdminUser, Category, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag, TopResource, UserGrowthPoint } from '@/services/types';
 
 export interface EbookRequest {
   title: string;
@@ -70,6 +71,23 @@ function videoForm(data: VideoRequest, coverImageFile?: File) {
   return form;
 }
 
+async function downloadCsv(path: string, filename: string) {
+  const response = await fetch(`${ENV.API_BASE_URL}${path}`, { credentials: 'include' });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || 'Le téléchargement a échoué.');
+  }
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 export const adminApi = {
   login: (username: string, password: string) => http.post('/admin/auth/login', { username, password }),
   me: () => http.get<{ username: string; role: string }>('/admin/auth/me'),
@@ -104,6 +122,13 @@ export const adminApi = {
     http.post<number>('/newsletter/admin/broadcast', { subject, message }),
   newsletterUnsubscribe: (userId: number) => http.post<AdminSubscriber>(`/newsletter/admin/subscriptions/${userId}/unsubscribe`),
   newsletterSubscribe: (userId: number) => http.post<AdminSubscriber>(`/newsletter/admin/subscriptions/${userId}/subscribe`),
+  newsletterCampaigns: (signal?: AbortSignal) => http.get<NewsletterCampaign[]>('/newsletter/admin/campaigns', undefined, signal),
+  exportUsers: () => downloadCsv('/admin/users/export', 'lescracks-users.csv'),
+  exportNewsletter: () => downloadCsv('/newsletter/admin/subscriptions/export', 'lescracks-newsletter.csv'),
+  userGrowth: (from: string, to: string, signal?: AbortSignal) =>
+    http.get<{ from: string; to: string; points: UserGrowthPoint[] }>('/admin/stats/user-growth', { from, to }, signal),
+  topResources: (limit = 5, signal?: AbortSignal) =>
+    http.get<{ limit: number; resources: TopResource[] }>('/admin/stats/top-resources', { limit }, signal),
 };
 
 export default adminApi;

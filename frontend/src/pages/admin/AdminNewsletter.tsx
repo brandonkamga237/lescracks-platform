@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, Send } from 'lucide-react';
+import { Clock, Download, Mail, Send } from 'lucide-react';
 
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
@@ -18,6 +18,7 @@ export default function AdminNewsletter() {
 
   const stats = useApi((signal) => adminApi.newsletterStats(signal), []);
   const subscriptions = useApi((signal) => adminApi.newsletterSubscriptions(filter, signal), [filter]);
+  const campaigns = useApi((signal) => adminApi.newsletterCampaigns(signal), []);
 
   async function toggle(subscriber: AdminSubscriber) {
     setBusyId(subscriber.userId);
@@ -51,6 +52,7 @@ export default function AdminNewsletter() {
       setNotice(`Campagne envoyée à ${count} abonné${count > 1 ? 's' : ''}.`);
       setSubject('');
       setMessage('');
+      await campaigns.reload();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'L’envoi a échoué.');
     } finally {
@@ -62,8 +64,15 @@ export default function AdminNewsletter() {
 
   return (
     <section>
-      <h1 className="font-display text-2xl font-semibold text-t1">Newsletter</h1>
-      <p className="mt-1 text-sm text-t4">Abonnés, désabonnements et campagnes personnalisées.</p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl font-semibold text-t1">Newsletter</h1>
+          <p className="mt-1 text-sm text-t4">Abonnés, désabonnements et campagnes personnalisées.</p>
+        </div>
+        <button type="button" onClick={() => void adminApi.exportNewsletter()} className="inline-flex items-center gap-2 rounded-full border border-gold-400/30 px-4 py-3 text-sm text-gold-400 hover:bg-gold-400/10">
+          <Download className="h-4 w-4" aria-hidden /> Export CSV
+        </button>
+      </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-line-soft bg-card p-5">
@@ -75,8 +84,8 @@ export default function AdminNewsletter() {
           <p className="mt-2 font-display text-2xl font-semibold text-t1">{stats.data?.unsubscribed ?? '—'}</p>
         </div>
         <div className="rounded-2xl border border-line-soft bg-card p-5">
-          <p className="text-xs uppercase tracking-wider text-t4">Total</p>
-          <p className="mt-2 font-display text-2xl font-semibold text-t1">{(stats.data?.subscribed ?? 0) + (stats.data?.unsubscribed ?? 0)}</p>
+          <p className="text-xs uppercase tracking-wider text-t4">Campagnes envoyées</p>
+          <p className="mt-2 font-display text-2xl font-semibold text-t1">{campaigns.data?.length ?? '—'}</p>
         </div>
       </div>
 
@@ -161,6 +170,34 @@ export default function AdminNewsletter() {
             </button>
           </div>
         </form>
+      </div>
+
+      <div className="mt-10">
+        <h2 className="font-display text-lg font-semibold text-t1">Historique des campagnes</h2>
+        {campaigns.loading ? <p className="py-8 text-center text-t3">Chargement…</p> : (campaigns.data ?? []).length === 0 ? (
+          <p className="mt-4 text-sm text-t3">Aucune campagne envoyée pour le moment.</p>
+        ) : (
+          <div className="mt-5 overflow-x-auto rounded-2xl border border-line-soft bg-card">
+            <table className="w-full min-w-[560px] text-left text-sm">
+              <thead className="border-b border-line-soft bg-noir-950/50 text-t4">
+                <tr>
+                  <th className="px-5 py-3 font-medium">Objet</th>
+                  <th className="px-5 py-3 font-medium">Date</th>
+                  <th className="px-5 py-3 font-medium">Destinataires</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(campaigns.data ?? []).map((c) => (
+                  <tr key={c.id} className="border-b border-line-soft/50 last:border-b-0">
+                    <td className="px-5 py-3 text-t1">{c.subject}</td>
+                    <td className="px-5 py-3 text-t3"><Clock className="mr-1 inline h-3 w-3" aria-hidden />{new Date(c.sentAt).toLocaleString('fr-FR')}</td>
+                    <td className="px-5 py-3 text-t3">{c.recipientCount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </section>
   );
