@@ -50,7 +50,7 @@ export function AdminState({
   onRetry,
   children,
 }: AdminStateProps) {
-  if (loading) return <p role="status" className="rounded-2xl border border-line-soft bg-card px-6 py-16 text-center text-t3">Chargement…</p>;
+  if (loading) return <p role="status" className="rounded-3xl border border-line-soft bg-card px-6 py-16 text-center text-t3">Chargement…</p>;
 
   if (error) {
     return (
@@ -72,7 +72,7 @@ export function AdminState({
     );
   }
 
-  if (empty) return <p role="status" className="rounded-2xl border border-dashed border-line bg-card px-6 py-16 text-center text-t3">{emptyMessage}</p>;
+  if (empty) return <p role="status" className="rounded-3xl border border-dashed border-line bg-card px-6 py-16 text-center text-t3">{emptyMessage}</p>;
 
   return <>{children}</>;
 }
@@ -82,7 +82,7 @@ interface AdminRowProps { children: React.ReactNode }
 
 export function AdminRow({ children }: AdminRowProps) {
   return (
-    <div className="mb-3 flex flex-wrap items-center gap-4 rounded-2xl border border-line-soft bg-card p-5 transition-colors hover:border-line">
+    <div className="mb-4 flex flex-wrap items-center gap-4 rounded-3xl border border-white/[0.06] bg-card p-6 transition-all hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20">
       {children}
     </div>
   );
@@ -115,7 +115,7 @@ export function AdminModal({ open, onClose, title, description, busy = false, wi
         onCloseAutoFocus={(event) => { event.preventDefault(); if (previousFocus.current?.isConnected) previousFocus.current.focus(); else document.getElementById('admin-content')?.focus(); }}
         onEscapeKeyDown={(event) => { if (busy) event.preventDefault(); }}
         onPointerDownOutside={(event) => event.preventDefault()}
-        className={`fixed left-1/2 top-1/2 z-50 max-h-[90dvh] w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-line bg-card p-6 text-t1 shadow-2xl sm:p-8 ${wide ? 'max-w-3xl' : 'max-w-lg'}`}
+        className={`fixed left-1/2 top-1/2 z-50 max-h-[90dvh] w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-3xl border border-line-soft bg-card p-6 text-t1 shadow-2xl sm:p-8 ${wide ? 'max-w-3xl' : 'max-w-lg'}`}
       >
         <Dialog.Title className="pr-10 font-display text-2xl font-semibold">{title}</Dialog.Title>
         <Dialog.Description className="mb-6 mt-2 text-sm leading-relaxed text-t3">{description}</Dialog.Description>

@@ -23,7 +23,7 @@ export default function AdminTags() {
   const categories = useApi((signal) => api.categories(signal), []);
   const tags = useApi((signal) => api.tags(filterCategory || undefined, signal), [filterCategory]);
   const list = (tags.data ?? []).filter((tag) => tag.name.toLocaleLowerCase('fr').includes(search.trim().toLocaleLowerCase('fr')));
-  const field = 'mt-2 w-full rounded-2xl border border-line bg-noir-900 px-4 py-3 text-sm text-t1 focus:border-gold-400 focus:outline-none disabled:opacity-50';
+  const field = 'input mt-2';
   const categoriesReady = !categories.loading && !categories.error && !!categories.data?.length;
 
   async function act(action: string, work: () => Promise<unknown>, onSuccess: () => void) {

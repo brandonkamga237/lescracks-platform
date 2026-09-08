@@ -64,18 +64,18 @@ export default function AdminAdmins() {
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="admin-username" className="text-sm font-medium text-t2">Nom d’utilisateur</label>
-            <input id="admin-username" value={username} onChange={(event) => setUsername(event.target.value)} required minLength={3} className="mt-2 w-full rounded-xl border border-line-strong bg-background px-4 py-3 text-t1 outline-none focus:border-gold-400" />
+            <input id="admin-username" value={username} onChange={(event) => setUsername(event.target.value)} required minLength={3} className="input mt-2" />
           </div>
           <div className="relative">
             <label htmlFor="admin-password" className="text-sm font-medium text-t2">Mot de passe</label>
-            <input id="admin-password" type={show ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} required minLength={10} className="mt-2 w-full rounded-xl border border-line-strong bg-background px-4 py-3 pr-10 text-t1 outline-none focus:border-gold-400" />
-            <button type="button" onClick={() => setShow((v) => !v)} className="absolute right-3 top-[2.65rem] text-t3" aria-label={show ? 'Masquer' : 'Afficher'}>{show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
+            <input id="admin-password" type={show ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} required minLength={10} className="input mt-2 pr-10" />
+            <button type="button" onClick={() => setShow((v) => !v)} className="absolute right-2 top-2.5 flex h-9 w-9 items-center justify-center rounded-full text-t4 transition hover:text-t1" aria-label={show ? 'Masquer' : 'Afficher'}>{show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
           </div>
         </div>
-        <button type="submit" disabled={busy} className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gold-400 px-5 py-3 text-sm font-semibold text-noir-950 transition hover:bg-gold-300 disabled:opacity-50"><Plus className="h-4 w-4" aria-hidden /> {busy ? 'Création…' : 'Créer l’admin'}</button>
+        <button type="submit" disabled={busy} className="btn-primary mt-5"><Plus className="h-4 w-4" aria-hidden /> {busy ? 'Création…' : 'Créer l’admin'}</button>
       </form>
 
-      <div className="mt-10 overflow-x-auto rounded-2xl border border-line-soft bg-card">
+      <div className="mt-10 overflow-x-auto rounded-3xl border border-line-soft bg-card">
         <table className="w-full min-w-[360px] text-left text-sm">
           <thead className="border-b border-line-soft bg-noir-950/50 text-t4">
             <tr>

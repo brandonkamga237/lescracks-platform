@@ -19,7 +19,7 @@ export default function AdminCategories() {
   const [busy, setBusy] = useState<string | null>(null);
   const categories = useApi((signal) => api.categories(signal), []);
   const list = (categories.data ?? []).filter((category) => category.name.toLocaleLowerCase('fr').includes(search.trim().toLocaleLowerCase('fr')));
-  const field = 'mt-2 w-full rounded-2xl border border-line bg-noir-900 px-4 py-3 text-sm text-t1 focus:border-gold-400 focus:outline-none';
+  const field = 'input mt-2';
 
   async function act(action: string, work: () => Promise<unknown>, onSuccess: () => void) {
     if (busy) return;

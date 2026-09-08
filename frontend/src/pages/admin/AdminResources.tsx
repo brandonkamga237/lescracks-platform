@@ -29,7 +29,7 @@ export default function AdminResources() {
   const categories = useApi((signal) => api.categories(signal), []);
   const tags = useApi((signal) => filters.categoryId ? api.tags(filters.categoryId, signal) : Promise.resolve([]), [filters.categoryId]);
   const list = resources.data?.content ?? [];
-  const field = 'w-full rounded-2xl border border-line bg-noir-900 px-4 py-3 text-sm text-t1 focus:border-gold-400 focus:outline-none';
+  const field = 'input';
   const actionClass = 'rounded-full border border-line px-3 py-2 text-xs font-medium text-t2 hover:border-gold-400/40 hover:text-gold-400 disabled:opacity-40';
 
   async function changeStatus(resource: ResourceSummary, status: ResourceStatus) {
