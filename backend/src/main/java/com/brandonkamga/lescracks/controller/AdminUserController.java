@@ -40,6 +40,6 @@ public class AdminUserController {
 
     private UserAdminResponse response(User user) {
         return new UserAdminResponse(user.getId(), user.getEmail(), user.getFirstName(),
-                user.getLastName(), user.getStatus(), user.getCreatedAt());
+                user.getLastName(), user.getStatus(), user.isEmailVerified(), user.getProvider(), user.getCreatedAt());
     }
 }

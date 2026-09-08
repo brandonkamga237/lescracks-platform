@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import * as Dialog from '@radix-ui/react-dialog';
-import { ArrowUpRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, LayoutDashboard, LogOut, Menu, Tags, X } from 'lucide-react';
+import { ArrowUpRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, LayoutDashboard, LogOut, Menu, Tags, Users, X } from 'lucide-react';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import { useSession } from '@/hooks/useSession';
@@ -16,6 +16,7 @@ import { ApiError } from '@/services/http';
  */
 const SECTIONS = [
   { to: '/admin', label: 'Vue d’ensemble', group: 'Espace de travail', icon: LayoutDashboard },
+  { to: '/admin/utilisateurs', label: 'Utilisateurs', group: 'Espace de travail', icon: Users },
   { to: '/admin/ressources', label: 'Ressources', group: 'Contenu', icon: BookOpen },
   { to: '/admin/evenements', label: 'Événements', group: 'Contenu', icon: CalendarDays },
   { to: '/admin/categories', label: 'Catégories', group: 'Organisation', icon: FolderOpen },

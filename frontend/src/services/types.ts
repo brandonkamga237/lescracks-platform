@@ -59,6 +59,17 @@ export interface EventSummary {
 
 export type EventDetail = EventSummary;
 
+export interface AdminUser {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  status: 'ACTIVE' | 'INACTIVE' | 'BANNED';
+  verified: boolean;
+  provider: AuthProvider;
+  createdAt: string;
+}
+
 export interface NewsletterStatus {
   status: 'SUBSCRIBED' | 'UNSUBSCRIBED';
   subscribedAt: string | null;

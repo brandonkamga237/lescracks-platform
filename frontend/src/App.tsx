@@ -27,6 +27,7 @@ import AdminCategories from '@/pages/admin/AdminCategories';
 import AdminEvents from '@/pages/admin/AdminEvents';
 import AdminResources from '@/pages/admin/AdminResources';
 import AdminTags from '@/pages/admin/AdminTags';
+import AdminUsers from '@/pages/admin/AdminUsers';
 
 function Waiting() {
   return (
@@ -113,6 +114,7 @@ function AppRoutes() {
         <Route path="evenements" element={<AdminEvents />} />
         <Route path="categories" element={<AdminCategories />} />
         <Route path="tags" element={<AdminTags />} />
+        <Route path="utilisateurs" element={<AdminUsers />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

@@ -1,6 +1,6 @@
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { Category, EventFormat, EventStatus, EventSummary, EventType, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag } from '@/services/types';
+import type { AdminUser, Category, EventFormat, EventStatus, EventSummary, EventType, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag } from '@/services/types';
 
 export interface EbookRequest {
   title: string;
@@ -92,6 +92,11 @@ export const adminApi = {
   createTag: (name: string, categoryId: number) => http.post<Tag>('/admin/tags', { name, categoryId }),
   updateTag: (id: number, name: string, categoryId: number) => http.put<Tag>(`/admin/tags/${id}`, { name, categoryId }),
   deleteTag: (id: number) => http.delete<void>(`/admin/tags/${id}`),
+  users: (page = 0, search = '', signal?: AbortSignal) =>
+    http.get<PageResponse<AdminUser>>('/admin/users', { page, size: 12, search, sort: 'createdAt,desc' }, signal),
+  updateUserStatus: (id: number, status: AdminUser['status']) =>
+    http.patch<AdminUser>(`/admin/users/${id}/status`, { status }),
+  deleteUser: (id: number) => http.delete<void>(`/admin/users/${id}`),
 };
 
 export default adminApi;
