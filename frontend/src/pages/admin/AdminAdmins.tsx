@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Plus, Shield, Trash2 } from 'lucide-react';
 
+import { AdminConfirm, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
+import type { AdminSummary } from '@/services/types';
 
 export default function AdminAdmins() {
   const [username, setUsername] = useState('');
@@ -11,8 +13,11 @@ export default function AdminAdmins() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [deletePending, setDeletePending] = useState<AdminSummary | null>(null);
+  const [deleteError, setDeleteError] = useState('');
 
   const admins = useApi((signal) => adminApi.admins(signal), []);
+  const list = admins.data ?? [];
 
   async function create(event: React.FormEvent) {
     event.preventDefault();
@@ -36,30 +41,28 @@ export default function AdminAdmins() {
     }
   }
 
-  async function remove(id: number, name: string) {
-    if (!window.confirm(`Supprimer l’admin ${name} ?`)) return;
-    setError('');
-    setNotice('');
+  async function confirmDelete() {
+    if (!deletePending) return;
+    setDeleteError('');
+    setBusy(true);
     try {
-      await adminApi.deleteAdmin(id);
+      await adminApi.deleteAdmin(deletePending.id);
       setNotice('Admin supprimé.');
+      setDeletePending(null);
       await admins.reload();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'La suppression a échoué.');
+      setDeleteError(cause instanceof Error ? cause.message : 'La suppression a échoué.');
+    } finally {
+      setBusy(false);
     }
   }
 
-  const list = admins.data ?? [];
-
   return (
-    <section>
-      <h1 className="font-display text-2xl font-semibold text-t1">Administrateurs</h1>
-      <p className="mt-1 text-sm text-t4">Créer et gérer les accès au tableau de bord.</p>
+    <AdminSection title="Administrateurs" description="Créer et gérer les accès au tableau de bord.">
+      {error && <p role="alert" className="mb-5 rounded-xl border border-red-500/25 bg-red-500/5 p-3 text-sm text-red-400">{error}</p>}
+      {notice && <p role="status" className="mb-5 rounded-xl border border-green-500/25 bg-green-500/5 p-3 text-sm text-green-400">{notice}</p>}
 
-      {error && <p role="alert" className="mb-5 mt-5 rounded-xl border border-red-500/25 bg-red-500/5 p-3 text-sm text-red-400">{error}</p>}
-      {notice && <p role="status" className="mb-5 mt-5 rounded-xl border border-green-500/25 bg-green-500/5 p-3 text-sm text-green-400">{notice}</p>}
-
-      <form onSubmit={create} className="mt-8 rounded-3xl border border-white/[0.06] bg-card p-6">
+      <form onSubmit={create} className="mb-6 rounded-3xl border border-white/[0.06] bg-card p-6">
         <h2 className="font-display text-lg font-semibold text-t1">Nouvel administrateur</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div>
@@ -75,28 +78,43 @@ export default function AdminAdmins() {
         <button type="submit" disabled={busy} className="btn-primary mt-5"><Plus className="h-4 w-4" aria-hidden /> {busy ? 'Création…' : 'Créer l’admin'}</button>
       </form>
 
-      <div className="mt-10 overflow-x-auto rounded-3xl border border-line-soft bg-card">
-        <table className="w-full min-w-[360px] text-left text-sm">
-          <thead className="border-b border-line-soft bg-noir-950/50 text-t4">
-            <tr>
-              <th className="px-5 py-3 font-medium">Nom d’utilisateur</th>
-              <th className="px-5 py-3 font-medium text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {list.map((admin, index) => (
-              <tr key={index} className="border-b border-line-soft/50 last:border-b-0">
-                <td className="px-5 py-3 text-t1"><Shield className="mr-2 inline h-4 w-4 text-gold-400" aria-hidden />{admin.username}</td>
-                <td className="px-5 py-3 text-right">
-                  <button type="button" onClick={() => void remove(admin.id ?? index, admin.username)} className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 p-2 text-red-400 transition hover:bg-red-500/10" aria-label="Supprimer"><Trash2 className="h-4 w-4" aria-hidden /></button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {admins.loading && <p className="py-8 text-center text-t3">Chargement…</p>}
-        {!admins.loading && list.length === 0 && <p className="py-8 text-center text-t3">Aucun administrateur.</p>}
-      </div>
-    </section>
+      <AdminState
+        loading={admins.loading}
+        error={admins.error}
+        empty={!list.length}
+        emptyMessage="Aucun administrateur."
+        onRetry={admins.reload}
+      >
+        {list.map((admin) => (
+          <AdminRow key={admin.id}>
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-noir-800 text-gold-400">
+              <Shield className="h-5 w-5" aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="break-words font-display font-medium text-t1">{admin.username}</p>
+              <p className="text-xs text-t3">{admin.role}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setDeleteError(''); setDeletePending(admin); }}
+              className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 p-2 text-red-400 transition hover:bg-red-500/10"
+              aria-label="Supprimer"
+            >
+              <Trash2 className="h-4 w-4" aria-hidden />
+            </button>
+          </AdminRow>
+        ))}
+      </AdminState>
+
+      <AdminConfirm
+        open={!!deletePending}
+        title="Supprimer cet administrateur ?"
+        description={deletePending ? `Le compte de ${deletePending.username} sera supprimé définitivement.` : ''}
+        busy={busy}
+        error={deleteError}
+        onCancel={() => { setDeletePending(null); setDeleteError(''); }}
+        onConfirm={confirmDelete}
+      />
+    </AdminSection>
   );
 }
