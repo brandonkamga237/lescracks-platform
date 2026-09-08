@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import { ArrowRight, Eye, EyeOff, Loader2, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Loader2, Mail, ShieldCheck } from 'lucide-react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import Layout from '@/components/layout/Layout';
@@ -9,6 +9,13 @@ import { safeReturnPath } from '@/services/auth';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
 import { useSession } from '@/hooks/useSession';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface AuthPageProps {
   mode: 'login' | 'register';
@@ -79,6 +86,8 @@ export default function AuthPage({ mode }: AuthPageProps) {
   const [notice, setNotice] = useState('');
   const [fields, setFields] = useState<Record<string, string>>({});
   const [needsVerification, setNeedsVerification] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
   const state = location.state as { from?: string; expired?: boolean } | null;
   const returnTo = safeReturnPath(new URLSearchParams(location.search).get('retour') ?? state?.from, isAdmin ? '/admin' : '/profil');
   const registering = mode === 'register';
@@ -105,8 +114,10 @@ export default function AuthPage({ mode }: AuthPageProps) {
     setNeedsVerification(false);
     try {
       if (registering) {
-        await createAccount({ ...form, email: form.email.trim(), firstName: form.firstName.trim(), lastName: form.lastName.trim() });
-        setNotice('Ton compte a été créé. Vérifie ta boîte de réception pour confirmer ton adresse email.');
+        const email = form.email.trim();
+        await createAccount({ ...form, email, firstName: form.firstName.trim(), lastName: form.lastName.trim() });
+        setRegisteredEmail(email);
+        setSuccessOpen(true);
         setForm({ email: '', password: '', firstName: '', lastName: '' });
       } else {
         await login(form.email.trim(), form.password);
@@ -209,5 +220,25 @@ export default function AuthPage({ mode }: AuthPageProps) {
         <p className="mt-7 border-t border-white/10 pt-6 text-center text-sm text-zinc-400">{registering ? 'Déjà un compte ? ' : 'Pas encore de compte ? '}<Link className="font-medium text-[#d4af37] underline-offset-4 hover:underline" to={`${registering ? '/connexion' : '/inscription'}?retour=${encodeURIComponent(returnTo)}`}>{registering ? 'Connecte-toi' : 'Rejoins-nous'}</Link></p>
       </section>
     </div>
+    <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
+      <DialogContent className="border-white/10 bg-[#171717] text-white sm:max-w-md" aria-describedby="verify-desc">
+        <DialogHeader>
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-[#d4af37]/25 bg-[#d4af37]/10 text-[#d4af37]">
+            <Mail className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <DialogTitle className="mt-4 text-center font-display text-2xl font-semibold">Vérifie ta boîte de réception</DialogTitle>
+          <DialogDescription id="verify-desc" className="text-center text-zinc-400">
+            Un email de confirmation a été envoyé à <span className="font-medium text-white">{registeredEmail}</span>.<br />
+            Clique sur le lien qu'il contient pour activer ton compte.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="mt-4 space-y-3">
+          <p className="text-center text-sm text-zinc-500">Le lien expire dans 24 heures. Pense à vérifier tes indésirables.</p>
+          <Link to="/connexion" onClick={() => setSuccessOpen(false)} className="block rounded-xl bg-[#d4af37] px-5 py-3 text-center font-semibold text-black transition hover:bg-[#e4c45d]">
+            Aller à la connexion
+          </Link>
+        </div>
+      </DialogContent>
+    </Dialog>
   </Layout>;
 }
