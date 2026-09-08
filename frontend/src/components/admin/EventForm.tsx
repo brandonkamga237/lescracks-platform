@@ -25,7 +25,9 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(initial?.coverImage ?? null);
   const [form, setForm] = useState<EventRequest>({ title: initial?.title ?? '', description: initial?.description ?? '', type: initial?.type ?? 'WORKSHOP', format: initial?.format ?? 'ONLINE', startDate: localDate(initial?.startDate), endDate: localDate(initial?.endDate), location: initial?.location ?? '', status: initial?.status ?? 'DRAFT' });
-  const field = 'mt-2 w-full rounded-2xl border border-line bg-noir-900 px-4 py-3 text-sm text-t1 placeholder:text-t4 focus:border-gold-400 focus:outline-none focus:ring-1 focus:ring-gold-400';
+  const field = 'input mt-2';
+  // The shared input is a fixed-height control; a textarea has to grow with its rows.
+  const area = 'input mt-2 h-auto py-3';
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   function handleCoverFile(file: File | null) {
@@ -43,6 +45,8 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
     const start = new Date(form.startDate);
     const end = form.endDate ? new Date(form.endDate) : undefined;
     if (!form.title.trim() || !form.description.trim()) { setFailure('Renseigne le titre et la description.'); return; }
+    // Creating without a cover reaches the backend and fails there; say so before the round trip.
+    if (!initial && !coverImageFile) { setFailure('Ajoute une image de couverture : elle est obligatoire pour créer un événement.'); return; }
     if (Number.isNaN(start.getTime()) || (end && Number.isNaN(end.getTime()))) { setFailure('Renseigne des dates valides.'); return; }
     if (localDate(start.toISOString()).slice(0, 16) !== form.startDate.slice(0, 16) || (end && localDate(end.toISOString()).slice(0, 16) !== form.endDate?.slice(0, 16))) { setFailure('Cette heure n’existe pas dans ton fuseau horaire lors du changement d’heure. Choisis une autre heure.'); return; }
     if (end && end < start) { setFailure('La date de fin ne peut pas précéder la date de début.'); return; }
@@ -63,7 +67,7 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
       <fieldset disabled={busy} className="space-y-5">
         <legend className="mb-4 font-display text-lg font-medium">01 — Le programme</legend>
         <label className="block text-sm text-t2">Titre<input required maxLength={200} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} className={field} /></label>
-        <label className="block text-sm text-t2">Description<textarea required rows={5} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className={field} /></label>
+        <label className="block text-sm text-t2">Description<textarea required rows={5} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className={area} /></label>
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="block text-sm text-t2">Type<select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value as EventType })} className={field}><option value="BOOTCAMP">Bootcamp</option><option value="WORKSHOP">Atelier</option><option value="WEBINAR">Webinaire</option><option value="CONFERENCE">Conférence</option></select></label>
           <label className="block text-sm text-t2">Format<select value={form.format} onChange={(event) => setForm({ ...form, format: event.target.value as EventFormat })} className={field}><option value="ONLINE">En ligne</option><option value="OFFLINE">Sur place</option><option value="HYBRID">Hybride</option></select></label>
@@ -71,10 +75,10 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
       </fieldset>
 
       <fieldset disabled={busy} className="space-y-5 border-t border-line-soft pt-5">
-        <legend className="pr-3 font-display text-lg font-medium">02 — Image de couverture</legend>
-        <div className="rounded-2xl border border-dashed border-line p-5">
-          {coverPreview ? <div className="mb-4 aspect-video w-full overflow-hidden rounded-xl border border-line bg-noir-800"><img src={coverPreview} alt="Aperçu de la couverture" className="h-full w-full object-cover" /></div> : null}
-          <input type="file" accept="image/*" onChange={(event) => handleCoverFile(event.target.files?.[0] ?? null)} className="block w-full text-sm text-t3 file:mr-4 file:rounded-full file:border-0 file:bg-noir-700 file:px-4 file:py-2 file:text-t1" />
+        <legend className="pr-3 font-display text-lg font-medium">02 — Image de couverture{!initial && <span className="ml-2 text-sm font-normal text-gold-400">obligatoire</span>}</legend>
+        <div className="rounded-3xl border border-dashed border-line p-5">
+          {coverPreview ? <div className="mb-4 aspect-video w-full overflow-hidden rounded-2xl border border-line bg-noir-800"><img src={coverPreview} alt="Aperçu de la couverture" className="h-full w-full object-cover" /></div> : null}
+          <input type="file" accept="image/*" required={!initial} onChange={(event) => handleCoverFile(event.target.files?.[0] ?? null)} className="block w-full text-sm text-t3 file:mr-4 file:min-h-11 file:rounded-full file:border-0 file:bg-noir-700 file:px-4 file:text-t1" />
           {initial && !coverImageFile && <p className="mt-2 text-xs text-t3">Laisse vide pour conserver l’image actuelle.</p>}
         </div>
       </fieldset>
@@ -94,7 +98,7 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
         <p className="text-xs text-t3">{form.status === 'PUBLISHED' ? 'En enregistrant, cet événement sera visible sur le site public.' : 'Seuls les événements publiés sont visibles sur le site public.'}</p>
       </fieldset>
       {failure && <div role="alert" className="rounded-2xl border border-gold-400/40 bg-gold-400/10 p-4 text-sm text-t1"><p>{failure}</p>{fieldErrors.length > 0 && <ul className="mt-2 list-inside list-disc">{fieldErrors.map((error, index) => <li key={index}>{error}</li>)}</ul>}</div>}
-      <div className="flex flex-wrap justify-end gap-3 border-t border-line-soft pt-5"><button type="button" disabled={busy} onClick={onCancel} className="rounded-full border border-line px-5 py-3 text-sm text-t2 disabled:opacity-50">Annuler</button><button disabled={busy} className="rounded-full bg-gold-400 px-6 py-3 text-sm font-semibold text-black disabled:opacity-50">{busy ? 'Enregistrement…' : form.status === 'PUBLISHED' ? 'Enregistrer et publier' : 'Enregistrer'}</button></div>
+      <div className="flex flex-wrap justify-end gap-3 border-t border-line-soft pt-5"><button type="button" disabled={busy} onClick={onCancel} className="btn-secondary">Annuler</button><button disabled={busy} className="btn-primary">{busy ? 'Enregistrement…' : form.status === 'PUBLISHED' ? 'Enregistrer et publier' : 'Enregistrer'}</button></div>
     </form>
   </AdminModal>;
 }

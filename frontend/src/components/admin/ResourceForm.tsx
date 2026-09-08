@@ -43,7 +43,9 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
     }
   }, [resource, tags.data]);
 
-  const field = 'mt-2 w-full rounded-2xl border border-line bg-noir-900 px-4 py-3 text-sm text-t1 placeholder:text-t4 focus:border-gold-400 focus:outline-none focus:ring-1 focus:ring-gold-400 disabled:opacity-50';
+  const field = 'input mt-2';
+  // The shared input is a fixed-height control; a textarea has to grow with its rows.
+  const area = 'input mt-2 h-auto py-3';
 
   function handleCoverFile(file: File | null) {
     setCoverImageFile(file);
@@ -109,7 +111,7 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
         <label className="block text-sm text-t2">Type de ressource<select disabled={!!resource} value={kind} onChange={(event) => setKind(event.target.value as ResourceKind)} className={field}><option value="EXTERNAL_VIDEO">Vidéo externe</option><option value="EBOOK">Ebook</option></select></label>
         {resource && <p className="text-xs text-t4">Le type d’une ressource existante ne peut pas être modifié.</p>}
         <label className="block text-sm text-t2">Titre<input required maxLength={200} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} className={field} /></label>
-        <label className="block text-sm text-t2">Description<textarea required rows={5} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className={field} /></label>
+        <label className="block text-sm text-t2">Description<textarea required rows={5} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className={area} /></label>
 
         <label className="block text-sm text-t2">Image de couverture
           <div className="mt-2 rounded-2xl border border-dashed border-line p-5">

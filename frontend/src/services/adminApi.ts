@@ -1,7 +1,7 @@
 import { ENV } from '@/config/env';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminSubscriber, AdminSummary, AdminUser, Category, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag, TopResource, UserGrowthPoint } from '@/services/types';
+import type { AdminSubscriber, AdminSummary, AdminUser, AuthProvider, Category, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag, TopResource, UserGrowthPoint } from '@/services/types';
 
 export interface EbookRequest {
   title: string;
@@ -37,10 +37,15 @@ export interface AdminResourceFilters extends Query {
 export interface StatsOverview {
   users: number;
   usersByStatus: Partial<Record<'ACTIVE' | 'INACTIVE' | 'BANNED', number>>;
+  usersByProvider: Partial<Record<AuthProvider, number>>;
+  verifiedUsers: number;
   events: number;
   eventsByStatus: Partial<Record<EventStatus, number>>;
+  eventsByType: Partial<Record<EventType, number>>;
   resources: number;
   resourcesByStatus: Partial<Record<ResourceStatus, number>>;
+  resourcesByKind: Partial<Record<ResourceKind, number>>;
+  resourcesByCategory: Record<string, number>;
   newsletterSubscribers: number;
   newsletterUnsubscribed: number;
 }
@@ -112,6 +117,7 @@ export const adminApi = {
   deleteTag: (id: number) => http.delete<void>(`/admin/tags/${id}`),
   users: (page = 0, search = '', signal?: AbortSignal) =>
     http.get<PageResponse<AdminUser>>('/admin/users', { page, size: 12, search, sort: 'createdAt,desc' }, signal),
+  user: (id: number, signal?: AbortSignal) => http.get<AdminUser>(`/admin/users/${id}`, undefined, signal),
   updateUserStatus: (id: number, status: AdminUser['status']) =>
     http.patch<AdminUser>(`/admin/users/${id}/status`, { status }),
   deleteUser: (id: number) => http.delete<void>(`/admin/users/${id}`),
@@ -127,6 +133,7 @@ export const adminApi = {
   exportNewsletter: () => downloadCsv('/newsletter/admin/subscriptions/export', 'lescracks-newsletter.csv'),
   userGrowth: (from: string, to: string, signal?: AbortSignal) =>
     http.get<{ from: string; to: string; points: UserGrowthPoint[] }>('/admin/stats/user-growth', { from, to }, signal),
+  newsletterSubscribers: (signal?: AbortSignal) => http.get<AdminSubscriber[]>('/newsletter/admin/subscribers', undefined, signal),
   topResources: (limit = 5, signal?: AbortSignal) =>
     http.get<{ limit: number; resources: TopResource[] }>('/admin/stats/top-resources', { limit }, signal),
   admins: (signal?: AbortSignal) => http.get<AdminSummary[]>('/admin/admins', undefined, signal),
