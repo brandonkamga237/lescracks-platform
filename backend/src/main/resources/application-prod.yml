@@ -22,8 +22,10 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URI}
-          jwk-set-uri: ${KEYCLOAK_JWKS_URI:${KEYCLOAK_ISSUER_URI}/protocol/openid-connect/certs}
+          # Public issuer URI (the one written into each token). Internal JWK set URL
+          # defaults to the keycloak container inside the Docker network.
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:https://auth.lescracks.com/realms/lescracks}
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:http://lescracks-keycloak:8080/realms/lescracks/protocol/openid-connect/certs}
 
 # The API surface is not public documentation. Setting these off is what actually removes
 # the routes; the old app.swagger.enabled flag was read by nobody.
