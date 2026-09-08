@@ -1,0 +1,94 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "lescracks-prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "min": 0, "max": 1 }, "overrides": [] },
+      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" }, "textMode": "auto" },
+      "pluginVersion": "10.4.0",
+      "targets": [
+        { "expr": "process_cpu_usage", "refId": "A", "legendFormat": "CPU Java" },
+        { "expr": "system_cpu_usage", "refId": "B", "legendFormat": "CPU système" }
+      ],
+      "title": "Utilisation CPU",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "lescracks-prometheus" },
+      "fieldConfig": { "defaults": { "unit": "bytes" }, "overrides": [] },
+      "gridPos": { "h": 7, "w": 9, "x": 6, "y": 0 },
+      "id": 2,
+      "targets": [
+        { "expr": "jvm_memory_used_bytes{area=\"heap\"}", "refId": "A", "legendFormat": "Heap utilisé" },
+        { "expr": "jvm_memory_max_bytes{area=\"heap\"}", "refId": "B", "legendFormat": "Heap max" }
+      ],
+      "title": "Mémoire JVM Heap",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "lescracks-prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps" }, "overrides": [] },
+      "gridPos": { "h": 7, "w": 9, "x": 15, "y": 0 },
+      "id": 3,
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count[1m]))", "refId": "A", "legendFormat": "Requêtes/s" }
+      ],
+      "title": "Requêtes HTTP/s",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "lescracks-prometheus" },
+      "fieldConfig": { "defaults": { "unit": "reqps", "min": 0, "custom": { "axisLabel": "", "drawStyle": "line", "lineWidth": 1, "fillOpacity": 10, "spanNulls": false } }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 7 },
+      "id": 4,
+      "targets": [
+        { "expr": "sum(rate(http_server_requests_seconds_count{status=~\"5..\"}[1m]))", "refId": "A", "legendFormat": "5xx" },
+        { "expr": "sum(rate(http_server_requests_seconds_count{status=~\"401|403\"}[1m]))", "refId": "B", "legendFormat": "401/403" }
+      ],
+      "title": "Erreurs et refus",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "lescracks-prometheus" },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 7 },
+      "id": 5,
+      "targets": [
+        { "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[1m])) by (le))", "refId": "A", "legendFormat": "p95" },
+        { "expr": "histogram_quantile(0.5, sum(rate(http_server_requests_seconds_bucket[1m])) by (le))", "refId": "B", "legendFormat": "p50" }
+      ],
+      "title": "Temps de réponse",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "lescracks-loki" },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 15 },
+      "id": 6,
+      "targets": [
+        { "expr": "{job=\"lescracks-backend\"} |= \"ERROR\"", "refId": "A" }
+      ],
+      "title": "Logs d'erreur",
+      "type": "logs"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["lescracks", "security", "scalability"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "LesCracks - Sécurité et scalabilité",
+  "uid": "lescracks-ops",
+  "version": 1,
+  "weekStart": ""
+}

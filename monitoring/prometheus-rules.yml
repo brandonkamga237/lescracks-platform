@@ -1,0 +1,48 @@
+groups:
+  - name: lescracks-security
+    interval: 15s
+    rules:
+      - alert: HighErrorRate
+        expr: sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) / sum(rate(http_server_requests_seconds_count[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Taux d'erreurs 5xx élevé"
+          description: "Plus de 5 % des requêtes backend renvoient une erreur 5xx."
+
+      - alert: UnauthorizedSpike
+        expr: sum(rate(http_server_requests_seconds_count{status=~"401|403"}[5m])) > 0.2
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pic de requêtes refusées"
+          description: "Beaucoup de réponses 401/403 : possible scan ou problème d'authentification."
+
+      - alert: SlowResponses
+        expr: histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[5m])) by (le)) > 2
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Requêtes lentes"
+          description: "Le 95e percentile du temps de réponse dépasse 2 secondes."
+
+      - alert: HighMemoryUsage
+        expr: jvm_memory_used_bytes / jvm_memory_max_bytes > 0.85
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Mémoire JVM élevée"
+          description: "Le backend utilise plus de 85 % de sa mémoire allouée."
+
+      - alert: HighCPUUsage
+        expr: process_cpu_usage > 0.8
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU backend élevé"
+          description: "L'utilisation CPU du process Java dépasse 80 %."
