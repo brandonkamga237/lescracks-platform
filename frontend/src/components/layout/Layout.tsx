@@ -1,5 +1,6 @@
 // src/components/layout/Layout.tsx
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import Header from '@/components/layout/Header';
 import NewsletterBar from '@/components/layout/NewsletterBar';
@@ -23,6 +24,7 @@ interface LayoutProps {
 const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutProps) => {
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const reducedMotion = useReducedMotion();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,9 +45,17 @@ const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutPro
       <NewsletterBar />
       <Header />
 
-      <main id="main-content" tabIndex={-1} className="flex-1 scroll-mt-24">
+      <motion.main
+        id="main-content"
+        tabIndex={-1}
+        key={location.pathname}
+        initial={reducedMotion ? false : { opacity: 0, y: 12 }}
+        animate={reducedMotion ? false : { opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
+        className="flex-1 scroll-mt-24"
+      >
         {children}
-      </main>
+      </motion.main>
 
       {/* WhatsApp flottant — canal principal de conversion */}
       {showFooter && (

@@ -49,11 +49,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-black border-t border-line-soft">
-
-      {/* Gold accent line */}
-      <div className="h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" />
-
+    <footer className="bg-black border-t border-line-soft/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
 
         {/* ── Main grid ──────────────────────────────────────────── */}
@@ -81,7 +77,7 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="w-8 h-8 rounded-lg bg-white/5 border border-line-soft flex items-center justify-center text-t3 hover:text-gold hover:border-gold/30 hover:bg-gold/8 transition-all"
+                  className="w-9 h-9 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-t3 hover:text-gold hover:border-gold/30 hover:bg-gold/10 transition-all"
                 >
                   <Icon className="w-4 h-4" />
                 </a>
