@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, Download, ExternalLink } from 'lucide-react';
 
+import ResourceShare from '@/components/resources/ResourceShare';
 import SEO from '@/components/common/SEO';
 import Layout from '@/components/layout/Layout';
 import { useApi } from '@/hooks/useApi';
@@ -80,7 +81,16 @@ export default function RessourceDetail() {
               <section className="mt-10" aria-labelledby="resource-description">
                 <h2 id="resource-description" className="font-display text-2xl font-semibold text-t1">À propos de cette ressource</h2>
                 <p className="mt-5 whitespace-pre-line break-words text-base leading-loose text-t2 sm:text-lg">{loaded.description}</p>
-                {loaded.tags?.length > 0 && <ul aria-label="Sujets abordés" className="mt-7 flex flex-wrap gap-2">{loaded.tags.map((tag) => <li key={tag} className="rounded-full border border-line px-3 py-1.5 text-sm text-t3">{tag}</li>)}</ul>}
+                {loaded.tags?.length > 0 && (
+                  <div className="mt-7">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-t4">Sujets abordés</h3>
+                    <ul aria-label="Sujets abordés" className="mt-3 flex flex-wrap gap-2">
+                      {loaded.tags.map((tag) => (
+                        <li key={tag} className="rounded-md border border-line-soft bg-noir-950 px-3 py-1.5 text-sm font-medium text-t3">{tag}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </section>
             </div>
 
@@ -108,6 +118,8 @@ export default function RessourceDetail() {
                 {liked ? 'Coup de cœur envoyé' : 'Mettre un coup de cœur'}
                 {likeCount > 0 && <span className="rounded-full bg-noir-800 px-2 py-0.5 text-xs text-t2">{likeCount}</span>}
               </button>
+
+              {loaded && <ResourceShare resourceId={loaded.id} title={loaded.title} />}
             </aside>
           </div>
           <div className="mt-14 border-t border-line-soft pt-7"><Link to={cataloguePath} className="inline-flex min-h-11 items-center gap-3 text-sm font-medium text-gold-400 hover:text-gold-300">Continuer à explorer la bibliothèque<ArrowUpRight className="h-4 w-4" aria-hidden /></Link></div>
