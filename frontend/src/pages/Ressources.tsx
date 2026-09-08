@@ -67,7 +67,7 @@ export default function Ressources() {
   return (
     <Layout>
       <SEO title="Bibliothèque" description="Ebooks et vidéos pour apprendre la tech en français. Filtre par format, catégorie et sujet." url="/ressources" />
-      <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
+      <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
         <header className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3">
           <h1 className="font-display text-3xl font-semibold tracking-tight text-t1 sm:text-4xl">Bibliothèque</h1>
           <div className="flex items-center gap-3">
@@ -87,9 +87,9 @@ export default function Ressources() {
           </div>
         </header>
 
-        <div className={`mt-8 ${filtersOpen ? 'lg:grid lg:grid-cols-[220px_minmax(0,1fr)]' : ''} lg:gap-10`}>
+        <div className={`mt-10 ${filtersOpen ? 'lg:grid lg:grid-cols-[220px_minmax(0,1fr)]' : ''} lg:gap-12`}>
           {/* Filters — a quiet rail, not a banner */}
-          <aside id="resource-filters" className={`mb-8 border-t border-line-soft pt-6 lg:mb-0 lg:border-t-0 lg:pt-0 ${filtersOpen ? 'block' : 'hidden'}`} aria-label="Filtres">
+          <aside id="resource-filters" className={`mb-8 rounded-2xl border border-line-soft/50 bg-noir-900/40 p-6 lg:mb-0 lg:border-none lg:bg-transparent lg:p-0 ${filtersOpen ? 'block' : 'hidden'}`} aria-label="Filtres">
             <div className="space-y-6 lg:sticky lg:top-28">
               <fieldset>
                 <legend className="text-xs font-medium tracking-wide text-t4">Format</legend>
@@ -143,7 +143,7 @@ export default function Ressources() {
 
           <section aria-label="Ressources" aria-live="polite" aria-busy={catalogue.loading}>
             <label htmlFor="resource-search" className="sr-only">Rechercher une ressource</label>
-            <div className="flex items-center gap-3 border-b border-line pb-3 focus-within:border-gold-400">
+            <div className="flex items-center gap-3 rounded-full border border-line/50 bg-noir-900/40 px-5 py-3 transition-colors focus-within:border-gold-400/50 focus-within:bg-noir-900/60">
               <Search className="h-4 w-4 shrink-0 text-t4" aria-hidden />
               <input
                 id="resource-search"
@@ -155,7 +155,7 @@ export default function Ressources() {
               />
             </div>
 
-            <div className="mt-8">
+            <div className="mt-10">
               {catalogue.loading && <CardSkeletonGrid count={6} />}
               {catalogue.error && (
                 <div className="rounded-2xl border border-line bg-card px-6 py-14 text-center" role="alert">
@@ -173,7 +173,7 @@ export default function Ressources() {
               )}
               {visible.length > 0 && !catalogue.loading && !catalogue.error && (
                 <>
-                  <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">{visible.map((resource) => <ResourceCard key={resource.id} resource={resource} />)}</div>
+                  <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">{visible.map((resource) => <ResourceCard key={resource.id} resource={resource} />)}</div>
                   <Pagination page={page} totalPages={catalogue.data?.totalPages ?? 0} onPageChange={(value) => setParam('page', value === 1 ? null : String(value))} />
                 </>
               )}

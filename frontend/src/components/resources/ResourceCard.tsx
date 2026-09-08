@@ -71,30 +71,30 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
   return (
     <article
       onClick={open}
-      className="group relative flex h-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-2xl border border-line bg-noir-900 transition-colors hover:border-gold-400/50 hover:bg-noir-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+      className="group relative flex h-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-3xl border border-white/[0.06] bg-noir-900 shadow-sm transition-all duration-300 hover:border-white/[0.12] hover:bg-noir-900/80 hover:shadow-2xl hover:shadow-black/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
       tabIndex={0}
       onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } }}
     >
-      <div className="relative aspect-[16/9] overflow-hidden border-b border-line-soft bg-noir-800">
+      <div className="relative aspect-[16/10] overflow-hidden bg-noir-800">
         {resource.coverImage && failedImage !== resource.coverImage ? (
           <img
             src={resource.coverImage}
             alt=""
             loading="lazy"
             onError={() => setFailedImage(resource.coverImage)}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full items-end bg-noir-800 p-5" aria-hidden>
-            <span className="font-display text-5xl font-semibold leading-none text-white/10">{KIND_LABEL[resource.kind]}</span>
+          <div className="flex h-full items-end bg-noir-800 p-6" aria-hidden>
+            <span className="font-display text-6xl font-semibold leading-none text-white/10">{KIND_LABEL[resource.kind]}</span>
           </div>
         )}
-        <div className="absolute left-3 top-3 flex items-center gap-2">
-          <span className="rounded-full border border-gold-400/30 bg-black/70 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-gold-400 backdrop-blur-sm">
+        <div className="absolute left-4 top-4 flex items-center gap-2">
+          <span className="rounded-full border border-gold-400/30 bg-black/70 px-3 py-1 text-[10px] font-medium tracking-wide text-gold-400 backdrop-blur-sm">
             {KIND_LABEL[resource.kind]}
           </span>
           {resource.categoryName && (
-            <span className="rounded-full border border-line/60 bg-black/70 px-2.5 py-1 text-[10px] font-medium text-t2 backdrop-blur-sm">
+            <span className="rounded-full border border-white/[0.12] bg-black/70 px-3 py-1 text-[10px] font-medium text-t2 backdrop-blur-sm">
               {resource.categoryName}
             </span>
           )}
@@ -102,26 +102,24 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
       </div>
 
       <div className="flex flex-1 flex-col p-5">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="min-w-0 flex-1 break-words font-display text-lg font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-300">{resource.title}</h3>
-        </div>
+        <h3 className="break-words font-display text-lg font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-300">{resource.title}</h3>
 
         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-t3">{resource.description}</p>
 
         {resource.tags?.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {resource.tags.slice(0, 5).map((tag) => (
-              <span key={tag} className="rounded-md border border-line-soft bg-noir-950 px-2 py-0.5 text-[10px] font-medium text-t4">
+          <div className="mt-4 flex flex-wrap gap-2">
+            {resource.tags.slice(0, 4).map((tag) => (
+              <span key={tag} className="rounded-full border border-line-soft bg-noir-950 px-3 py-1 text-[11px] font-medium text-t4">
                 {tag}
               </span>
             ))}
           </div>
         )}
 
-        <div className="mt-auto pt-4">
-          <div className="flex items-center justify-between border-t border-line-soft pt-3 text-xs text-t4">
+        <div className="mt-auto pt-5">
+          <div className="flex items-center justify-between border-t border-line-soft/50 pt-4 text-xs text-t4">
             <div className="flex items-center gap-1.5">
-              {resource.kind === 'EBOOK' ? <FileText className="h-3.5 w-3.5 text-gold-400" aria-hidden /> : <PlayCircle className="h-3.5 w-3.5 text-gold-400" aria-hidden />}
+              {resource.kind === 'EBOOK' ? <FileText className="h-3.5 w-3.5 text-t4" aria-hidden /> : <PlayCircle className="h-3.5 w-3.5 text-t4" aria-hidden />}
               <span className="text-t3">{detail}</span>
             </div>
             {resource.kind === 'EBOOK' && resource.downloadUrl ? (
@@ -133,13 +131,13 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
         </div>
       </div>
 
-      <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
+      <div className="absolute right-4 top-4 z-10 flex items-center gap-2">
         <ResourceShare resourceId={resource.id} title={resource.title} compact />
         <button
           onClick={toggleLike}
           disabled={liking}
           aria-label={liked ? 'Retirer le coup de cœur' : 'Mettre un coup de cœur'}
-          className={`flex items-center gap-1 rounded-full border px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-50 ${liked ? 'border-gold-400 bg-gold-400/15 text-gold-300' : 'border-line/60 bg-black/60 text-t3 hover:text-gold-300'}`}
+          className={`flex items-center gap-1 rounded-full border px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-50 ${liked ? 'border-gold-400 bg-gold-400/15 text-gold-300' : 'border-white/[0.12] bg-black/60 text-t3 hover:text-gold-300'}`}
         >
           <Heart filled={liked} />
           {likeCount > 0 && <span>{likeCount}</span>}
