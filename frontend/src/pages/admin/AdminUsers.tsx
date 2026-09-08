@@ -94,12 +94,12 @@ export default function AdminUsers() {
       ) : users.error ? (
         <p role="alert" className="py-16 text-center text-red-400">{users.error.message}</p>
       ) : list.length === 0 ? (
-        <div className="rounded-2xl border border-line-soft bg-card py-16 text-center">
+        <div className="rounded-3xl border border-white/[0.06] bg-card py-16 text-center">
           <Users className="mx-auto h-8 w-8 text-t4" aria-hidden />
           <p className="mt-4 text-t3">Aucun utilisateur trouvé.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-line-soft bg-card">
+        <div className="overflow-x-auto rounded-3xl border border-white/[0.06] bg-card">
           <table className="w-full min-w-[680px] text-left text-sm">
             <thead className="border-b border-line-soft bg-noir-950/50 text-t4">
               <tr>

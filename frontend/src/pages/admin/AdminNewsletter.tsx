@@ -75,15 +75,15 @@ export default function AdminNewsletter() {
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-line-soft bg-card p-5">
+        <div className="rounded-3xl border border-white/[0.06] bg-card p-5">
           <p className="text-xs tracking-wide text-t4">Abonnés</p>
           <p className="mt-2 font-display text-2xl font-semibold text-t1">{stats.data?.subscribed ?? '—'}</p>
         </div>
-        <div className="rounded-2xl border border-line-soft bg-card p-5">
+        <div className="rounded-3xl border border-white/[0.06] bg-card p-5">
           <p className="text-xs tracking-wide text-t4">Désabonnés</p>
           <p className="mt-2 font-display text-2xl font-semibold text-t1">{stats.data?.unsubscribed ?? '—'}</p>
         </div>
-        <div className="rounded-2xl border border-line-soft bg-card p-5">
+        <div className="rounded-3xl border border-white/[0.06] bg-card p-5">
           <p className="text-xs tracking-wide text-t4">Campagnes envoyées</p>
           <p className="mt-2 font-display text-2xl font-semibold text-t1">{campaigns.data?.length ?? '—'}</p>
         </div>
@@ -110,12 +110,12 @@ export default function AdminNewsletter() {
           {subscriptions.loading ? (
             <p className="py-16 text-center text-t3">Chargement…</p>
           ) : list.length === 0 ? (
-            <div className="rounded-2xl border border-line-soft bg-card py-12 text-center">
+            <div className="rounded-3xl border border-white/[0.06] bg-card py-12 text-center">
               <Mail className="mx-auto h-8 w-8 text-t4" aria-hidden />
               <p className="mt-4 text-t3">Aucun abonnement.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-2xl border border-line-soft bg-card">
+            <div className="overflow-x-auto rounded-3xl border border-white/[0.06] bg-card">
               <table className="w-full min-w-[560px] text-left text-sm">
                 <thead className="border-b border-line-soft bg-noir-950/50 text-t4">
                   <tr>
@@ -153,7 +153,7 @@ export default function AdminNewsletter() {
           )}
         </div>
 
-        <form onSubmit={broadcast} className="rounded-2xl border border-line-soft bg-card p-6">
+        <form onSubmit={broadcast} className="rounded-3xl border border-white/[0.06] bg-card p-6">
           <h2 className="font-display text-lg font-semibold text-t1">Envoyer une campagne</h2>
           <p className="mt-2 text-sm text-t4">Message personnalisé aux abonnés. Variables : {'{{firstName}}'}, {'{{lastName}}'}, {'{{email}}'}.</p>
           <div className="mt-5 space-y-4">
@@ -177,7 +177,7 @@ export default function AdminNewsletter() {
         {campaigns.loading ? <p className="py-8 text-center text-t3">Chargement…</p> : (campaigns.data ?? []).length === 0 ? (
           <p className="mt-4 text-sm text-t3">Aucune campagne envoyée pour le moment.</p>
         ) : (
-          <div className="mt-5 overflow-x-auto rounded-2xl border border-line-soft bg-card">
+          <div className="mt-5 overflow-x-auto rounded-3xl border border-white/[0.06] bg-card">
             <table className="w-full min-w-[560px] text-left text-sm">
               <thead className="border-b border-line-soft bg-noir-950/50 text-t4">
                 <tr>

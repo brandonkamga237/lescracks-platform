@@ -59,7 +59,7 @@ export default function AdminAdmins() {
       {error && <p role="alert" className="mb-5 mt-5 rounded-xl border border-red-500/25 bg-red-500/5 p-3 text-sm text-red-400">{error}</p>}
       {notice && <p role="status" className="mb-5 mt-5 rounded-xl border border-green-500/25 bg-green-500/5 p-3 text-sm text-green-400">{notice}</p>}
 
-      <form onSubmit={create} className="mt-8 rounded-2xl border border-line-soft bg-card p-6">
+      <form onSubmit={create} className="mt-8 rounded-3xl border border-white/[0.06] bg-card p-6">
         <h2 className="font-display text-lg font-semibold text-t1">Nouvel administrateur</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div>

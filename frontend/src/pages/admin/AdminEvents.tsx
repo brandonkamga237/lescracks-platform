@@ -49,7 +49,7 @@ export default function AdminEvents() {
   }
 
   return <AdminSection title="Événements" description="Préparer les rendez-vous qui font avancer la communauté." action={<button type="button" onClick={() => setEditor('new')} className="inline-flex items-center gap-2 rounded-full bg-gold-400 px-5 py-3 text-sm font-semibold text-black"><Plus className="h-4 w-4" aria-hidden />Nouvel événement</button>}>
-    <div className="mb-6 rounded-2xl border border-line-soft bg-card p-5">
+    <div className="mb-6 rounded-3xl border border-white/[0.06] bg-card p-5">
       <div className="grid items-end gap-4 sm:grid-cols-[1fr_14rem]">
         <label className="text-xs text-t3">Rechercher dans cette page<span className="relative mt-2 block"><Search className="pointer-events-none absolute left-4 top-3.5 h-4 w-4 text-t4" aria-hidden /><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Titre, description ou lieu…" aria-describedby="event-filter-scope" className="w-full rounded-2xl border border-line bg-noir-900 py-3 pl-11 pr-4 text-sm text-t1 focus:border-gold-400 focus:outline-none" /></span></label>
         <label className="text-xs text-t3">Statut dans cette page<select value={status} onChange={(event) => setStatus(event.target.value as EventStatus | '')} aria-describedby="event-filter-scope" className="input mt-2"><option value="">Tous les statuts</option><option value="DRAFT">Brouillon</option><option value="PUBLISHED">Publié</option><option value="COMPLETED">Terminé</option><option value="CANCELLED">Annulé</option></select></label>

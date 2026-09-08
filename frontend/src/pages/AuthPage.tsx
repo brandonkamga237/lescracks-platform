@@ -58,10 +58,10 @@ export function ResetPasswordPage() {
     <SEO title="Nouveau mot de passe" description="Choisis un nouveau mot de passe pour ton compte LesCracks." url="/reset-password" />
     <div className="mx-auto max-w-lg px-5 py-16 sm:py-24">
       <section className="rounded-3xl border border-white/10 bg-[#171717] p-6 text-white shadow-2xl sm:p-9">
-        <p className="text-xs font-semibold tracking-wide text-[#d4af37]">LesCracks / Sécurité</p>
+        <p className="text-xs font-semibold tracking-wide text-gold-400">LesCracks / Sécurité</p>
         <h1 className="mt-4 font-display text-3xl font-semibold">Un nouveau départ.</h1>
         <p className="mt-3 text-sm leading-relaxed text-zinc-400">Choisis un nouveau mot de passe pour retrouver ton compte.</p>
-        {done ? <div role="status" className="mt-6 rounded-xl border border-[#d4af37]/25 p-4 text-sm text-[#d4af37]">Ton mot de passe a été mis à jour. Tu peux maintenant te connecter.</div> : !token ? <p role="alert" className="mt-6 text-sm text-red-300">Ce lien est incomplet. Retourne à la connexion pour demander un nouveau lien.</p> : <form onSubmit={submit} className="mt-7" aria-busy={busy}>
+        {done ? <div role="status" className="mt-6 rounded-xl border border-gold-400/25 p-4 text-sm text-gold-400">Ton mot de passe a été mis à jour. Tu peux maintenant te connecter.</div> : !token ? <p role="alert" className="mt-6 text-sm text-red-300">Ce lien est incomplet. Retourne à la connexion pour demander un nouveau lien.</p> : <form onSubmit={submit} className="mt-7" aria-busy={busy}>
           <fieldset disabled={busy} className="space-y-5"><legend className="sr-only">Nouveau mot de passe</legend>
             <div><label htmlFor="reset-password" className="text-sm font-medium text-zinc-200">Nouveau mot de passe</label><div className="relative"><input id="reset-password" name="password" type={visible ? 'text' : 'password'} autoComplete="new-password" required minLength={10} value={password} onChange={(event) => setPassword(event.target.value)} className={`${inputClass} pr-14`} aria-describedby="reset-help" /><button type="button" onClick={() => setVisible(!visible)} aria-label={visible ? 'Masquer les mots de passe' : 'Afficher les mots de passe'} aria-pressed={visible} className="absolute right-2 top-2.5 flex h-9 w-9 items-center justify-center rounded-full text-t4 transition hover:text-t1">{visible ? <EyeOff aria-hidden="true" className="h-5 w-5" /> : <Eye aria-hidden="true" className="h-5 w-5" />}</button></div><p id="reset-help" className="mt-2 text-xs text-zinc-400">Au moins 10 caractères.</p></div>
             <div><label htmlFor="reset-confirmation" className="text-sm font-medium text-zinc-200">Confirme ton mot de passe</label><input id="reset-confirmation" name="confirmation" type={visible ? 'text' : 'password'} autoComplete="new-password" required minLength={10} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} className={inputClass} /></div>
@@ -69,7 +69,7 @@ export function ResetPasswordPage() {
             <button type="submit" className="btn-primary w-full" disabled={busy}>{busy && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}{busy ? 'Enregistrement…' : 'Enregistrer mon mot de passe'}</button>
           </fieldset>
         </form>}
-        <Link to="/connexion" replace className="mt-7 block text-center text-sm font-medium text-[#d4af37] underline-offset-4 hover:underline">Revenir à la connexion</Link>
+        <Link to="/connexion" replace className="mt-7 block text-center text-sm font-medium text-gold-400 underline-offset-4 hover:underline">Revenir à la connexion</Link>
       </section>
     </div>
   </Layout>;
@@ -179,16 +179,16 @@ export default function AuthPage({ mode }: AuthPageProps) {
     <SEO title={registering ? 'Créer ton compte' : 'Connexion'} description="Retrouve ton espace LesCracks et continue à apprendre la tech." url={registering ? '/inscription' : '/connexion'} />
     <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl gap-8 px-5 py-8 sm:px-8 sm:py-12 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-20">
       <section className="order-2 lg:order-1">
-        <Link to="/" className="text-xs font-semibold tracking-wide text-[#d4af37]">LesCracks / Ton espace</Link>
-        <h1 className="mt-4 max-w-lg font-display text-2xl font-semibold leading-tight tracking-tight text-t1 sm:text-4xl lg:text-6xl">{registering ? <>Ta prochaine étape<br /><span className="text-[#d4af37]">commence ici.</span></> : <>Le bon endroit<br />pour <span className="text-[#d4af37]">aller plus loin.</span></>}</h1>
+        <Link to="/" className="text-xs font-semibold tracking-wide text-gold-400">LesCracks / Ton espace</Link>
+        <h1 className="mt-4 max-w-lg font-display text-2xl font-semibold leading-tight tracking-tight text-t1 sm:text-4xl lg:text-6xl">{registering ? <>Ta prochaine étape<br /><span className="text-gold-400">commence ici.</span></> : <>Le bon endroit<br />pour <span className="text-gold-400">aller plus loin.</span></>}</h1>
         <p className="mt-4 max-w-md text-base leading-relaxed text-t3 sm:text-lg">{registering ? 'Crée ton compte, explore les ressources et trouve ton prochain rendez-vous tech.' : 'Retrouve ton espace personnel. Les ressources et les événements t’attendent, à ton rythme.'}</p>
-        <div className="mt-6 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-[#d4af37]" /><p>Tu peux aussi découvrir le catalogue sans compte.<br /><Link to="/ressources" className="mt-2 inline-flex items-center gap-2 text-t2 underline underline-offset-4">Explorer les ressources <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link></p></div>
+        <div className="mt-6 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-400" /><p>Tu peux aussi découvrir le catalogue sans compte.<br /><Link to="/ressources" className="mt-2 inline-flex items-center gap-2 text-t2 underline underline-offset-4">Explorer les ressources <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link></p></div>
       </section>
       <section className="order-1 rounded-3xl border border-white/10 bg-[#171717] p-5 text-white shadow-2xl sm:p-9 lg:order-2" aria-labelledby="auth-heading">
-        <p className="text-xs tracking-wide text-[#d4af37]">{registering ? 'Bienvenue dans la communauté' : 'Heureux de te retrouver'}</p>
+        <p className="text-xs tracking-wide text-gold-400">{registering ? 'Bienvenue dans la communauté' : 'Heureux de te retrouver'}</p>
         <h2 id="auth-heading" className="mt-3 font-display text-3xl font-semibold">{registering ? 'Créer ton compte' : 'Te connecter'}</h2>
         <p className="mt-2 text-sm text-zinc-400">{registering ? 'Quelques informations, et c’est parti.' : 'Entre tes identifiants pour continuer.'}</p>
-        {state?.expired && <p role="status" className="mt-5 rounded-xl border border-[#d4af37]/25 bg-[#d4af37]/5 p-3 text-sm text-[#d4af37]">Connecte-toi pour accéder à cette page. Si ta session a expiré, tu reprendras là où tu en étais.</p>}
+        {state?.expired && <p role="status" className="mt-5 rounded-xl border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-400">Connecte-toi pour accéder à cette page. Si ta session a expiré, tu reprendras là où tu en étais.</p>}
         {sessionError && <p role="alert" className="mt-5 text-sm text-amber-200">{sessionError.message}</p>}
         <form onSubmit={submit} className="mt-7" aria-busy={Boolean(busy)}>
           <fieldset disabled={Boolean(busy)} className="space-y-5">
@@ -200,10 +200,10 @@ export default function AuthPage({ mode }: AuthPageProps) {
             <div><label htmlFor="auth-email" className="text-sm font-medium text-zinc-200">Adresse email</label><input id="auth-email" name="email" autoComplete="email" required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className={inputClass} aria-invalid={Boolean(fields.email)} aria-describedby={fields.email ? 'email-error' : undefined} />{fields.email && <p id="email-error" className="mt-2 text-sm text-red-300">{fields.email}</p>}</div>
             <div><label htmlFor="auth-password" className="text-sm font-medium text-zinc-200">Mot de passe</label><div className="relative"><input id="auth-password" name="password" autoComplete={registering ? 'new-password' : 'current-password'} required minLength={registering ? 10 : undefined} type={showPassword ? 'text' : 'password'} value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} className={`${inputClass} pr-14`} aria-invalid={Boolean(fields.password)} aria-describedby="password-help" /><button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} aria-pressed={showPassword} className="absolute right-2 top-2.5 flex h-9 w-9 items-center justify-center rounded-full text-t4 transition hover:text-t1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">{showPassword ? <EyeOff aria-hidden="true" className="h-5 w-5" /> : <Eye aria-hidden="true" className="h-5 w-5" />}</button></div><p id="password-help" className={`mt-2 text-xs ${fields.password ? 'text-red-300' : 'text-zinc-400'}`}>{fields.password ?? (registering ? 'Au moins 10 caractères.' : 'Le mot de passe de ton compte LesCracks.')}</p></div>
             {error && <p role="alert" className="rounded-xl border border-red-400/20 bg-red-400/5 p-3 text-sm text-red-300">{error}</p>}
-            {notice && <p role="status" className="rounded-xl border border-[#d4af37]/20 p-3 text-sm text-[#d4af37]">{notice}</p>}
-            {needsVerification && <button type="button" disabled={Boolean(busy)} onClick={() => void resend()} className="-mt-3 text-left text-sm text-[#d4af37] underline underline-offset-4 hover:text-white disabled:opacity-60">{busy === 'resend' ? 'Envoi…' : 'Renvoyer le lien de vérification'}</button>}
+            {notice && <p role="status" className="rounded-xl border border-gold-400/20 p-3 text-sm text-gold-400">{notice}</p>}
+            {needsVerification && <button type="button" disabled={Boolean(busy)} onClick={() => void resend()} className="-mt-3 text-left text-sm text-gold-400 underline underline-offset-4 hover:text-white disabled:opacity-60">{busy === 'resend' ? 'Envoi…' : 'Renvoyer le lien de vérification'}</button>}
             <button type="submit" className="btn-primary w-full" disabled={Boolean(busy)}>{busy === 'submit' ? <><Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />Connexion en cours…</> : <>{registering ? 'Créer mon compte' : 'Me connecter'}<ArrowRight aria-hidden="true" className="h-4 w-4" /></>}</button>
-            {!registering && <button type="button" onClick={() => void forgot()} className="min-h-10 w-full text-sm text-zinc-300 underline-offset-4 hover:text-[#d4af37] hover:underline">{busy === 'forgot' ? 'Envoi du lien…' : 'Mot de passe oublié ?'}</button>}
+            {!registering && <button type="button" onClick={() => void forgot()} className="min-h-10 w-full text-sm text-zinc-300 underline-offset-4 hover:text-gold-400 hover:underline">{busy === 'forgot' ? 'Envoi du lien…' : 'Mot de passe oublié ?'}</button>}
           </fieldset>
         </form>
         <div className="my-6 flex items-center gap-3 text-xs text-zinc-500"><span className="h-px flex-1 bg-white/10" />ou<span className="h-px flex-1 bg-white/10" /></div>
@@ -217,13 +217,13 @@ export default function AuthPage({ mode }: AuthPageProps) {
             {busy === 'github' ? 'Redirection…' : 'GitHub'}
           </button>
         </div>
-        <p className="mt-7 border-t border-white/10 pt-6 text-center text-sm text-zinc-400">{registering ? 'Déjà un compte ? ' : 'Pas encore de compte ? '}<Link className="font-medium text-[#d4af37] underline-offset-4 hover:underline" to={`${registering ? '/connexion' : '/inscription'}?retour=${encodeURIComponent(returnTo)}`}>{registering ? 'Connecte-toi' : 'Rejoins-nous'}</Link></p>
+        <p className="mt-7 border-t border-white/10 pt-6 text-center text-sm text-zinc-400">{registering ? 'Déjà un compte ? ' : 'Pas encore de compte ? '}<Link className="font-medium text-gold-400 underline-offset-4 hover:underline" to={`${registering ? '/connexion' : '/inscription'}?retour=${encodeURIComponent(returnTo)}`}>{registering ? 'Connecte-toi' : 'Rejoins-nous'}</Link></p>
       </section>
     </div>
     <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
       <DialogContent className="border-white/10 bg-[#171717] text-white sm:max-w-md" aria-describedby="verify-desc">
         <DialogHeader>
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-[#d4af37]/25 bg-[#d4af37]/10 text-[#d4af37]">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-gold-400/25 bg-gold-400/10 text-gold-400">
             <Mail className="h-5 w-5" aria-hidden="true" />
           </div>
           <DialogTitle className="mt-4 text-center font-display text-2xl font-semibold">Vérifie ta boîte de réception</DialogTitle>
@@ -234,7 +234,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
         </DialogHeader>
         <div className="mt-4 space-y-3">
           <p className="text-center text-sm text-zinc-500">Le lien expire dans 24 heures. Pense à vérifier tes indésirables.</p>
-          <Link to="/connexion" onClick={() => setSuccessOpen(false)} className="block rounded-xl bg-[#d4af37] px-5 py-3 text-center font-semibold text-black transition hover:bg-[#e4c45d]">
+          <Link to="/connexion" onClick={() => setSuccessOpen(false)} className="block rounded-xl bg-gold-400 px-5 py-3 text-center font-semibold text-black transition hover:bg-[#e4c45d]">
             Aller à la connexion
           </Link>
         </div>

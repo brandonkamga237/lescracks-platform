@@ -32,7 +32,7 @@ export default function AdminCategories() {
   }
 
   return <AdminSection title="Catégories" description="Les grands repères du catalogue. Chaque catégorie regroupe ses propres tags." action={<Link to="/admin/tags" className="rounded-full border border-line px-5 py-3 text-sm text-t2 hover:text-gold-400">Gérer les tags</Link>}>
-    <form onSubmit={(event) => { event.preventDefault(); if (name.trim()) void act('create', () => adminApi.createCategory(name.trim()), () => { setName(''); setNotice('La catégorie a été créée.'); }); }} className="mb-6 flex flex-wrap items-end gap-4 rounded-2xl border border-line-soft bg-card p-6">
+    <form onSubmit={(event) => { event.preventDefault(); if (name.trim()) void act('create', () => adminApi.createCategory(name.trim()), () => { setName(''); setNotice('La catégorie a été créée.'); }); }} className="mb-6 flex flex-wrap items-end gap-4 rounded-3xl border border-white/[0.06] bg-card p-6">
       <label className="min-w-48 flex-1 text-sm text-t2">Nouvelle catégorie<input required maxLength={80} value={name} disabled={!!busy} onChange={(event) => setName(event.target.value)} placeholder="Ex. Développement web" className={field} /></label>
       <button type="submit" disabled={!!busy || !name.trim()} className="inline-flex items-center gap-2 rounded-full bg-gold-400 px-5 py-3 text-sm font-semibold text-black disabled:opacity-50"><Plus className="h-4 w-4" aria-hidden />{busy === 'create' ? 'Ajout…' : 'Ajouter'}</button>
     </form>

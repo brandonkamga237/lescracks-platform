@@ -34,7 +34,7 @@ import AdminUsers from '@/pages/admin/AdminUsers';
 function Waiting() {
   return (
     <div role="status" className="flex min-h-screen flex-col items-center justify-center gap-4 text-t3">
-      <div aria-hidden="true" className="h-8 w-8 animate-spin rounded-full border-2 border-[#d4af37] border-t-transparent motion-reduce:animate-none" />
+      <div aria-hidden="true" className="h-8 w-8 animate-spin rounded-full border-2 border-gold-400 border-t-transparent motion-reduce:animate-none" />
       <p>Vérification de ta session…</p>
     </div>
   );
@@ -46,7 +46,7 @@ function SessionFailure() {
     <h1 className="font-display text-3xl text-t1">Ta session est indisponible</h1>
     <p role="alert" className="mt-4 text-t3">{error?.message}</p>
     <p className="mt-3 text-sm text-t4">Un problème de serveur ne signifie pas que tu es déconnecté.</p>
-    <button type="button" onClick={() => void reload().catch(() => undefined)} className="mt-6 rounded-full bg-[#d4af37] px-6 py-3 font-semibold text-black">Réessayer</button>
+    <button type="button" onClick={() => void reload().catch(() => undefined)} className="mt-6 rounded-full bg-gold-400 px-6 py-3 font-semibold text-black">Réessayer</button>
     <Link to="/ressources" className="mt-4 text-sm text-t2 underline">Explorer les ressources publiques</Link>
   </div>;
 }

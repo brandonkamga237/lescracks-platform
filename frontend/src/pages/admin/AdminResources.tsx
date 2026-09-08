@@ -61,7 +61,7 @@ export default function AdminResources() {
   }
 
   return <AdminSection title="Ressources" description="Un catalogue utile, de la première idée à la publication." action={<div className="flex items-center gap-3"><Link to="/admin" className="inline-flex items-center gap-2 rounded-full border border-gold-400/30 px-4 py-3 text-sm font-medium text-gold-400 transition hover:bg-gold-400/10"><TrendingUp className="h-4 w-4" aria-hidden />Les plus likés</Link><button type="button" onClick={() => setEditor('new')} className="inline-flex items-center gap-2 rounded-full bg-gold-400 px-5 py-3 text-sm font-semibold text-black"><Plus className="h-4 w-4" aria-hidden />Nouvelle ressource</button></div>}>
-    <div className="mb-6 rounded-2xl border border-line-soft bg-card p-5">
+    <div className="mb-6 rounded-3xl border border-white/[0.06] bg-card p-5">
       <form onSubmit={(event) => { event.preventDefault(); setFilters({ ...filters, search: search.trim() || undefined, page: 0 }); }} className="flex flex-wrap items-end gap-3">
         <label className="min-w-48 flex-1 text-xs text-t3">Rechercher dans le catalogue<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Titre ou description…" className={`mt-2 ${field}`} /></label>
         <button type="submit" className="inline-flex items-center gap-2 rounded-full border border-line px-5 py-3 text-sm text-t2"><Search className="h-4 w-4" aria-hidden />Rechercher</button>
