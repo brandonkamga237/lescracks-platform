@@ -54,7 +54,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     finally { setBusy(false); }
   }
 
-  return <div className="min-h-screen bg-black text-t1 selection:bg-gold-400/30">
+  return <div className="min-h-[100dvh] bg-black text-t1 selection:bg-gold-400/30">
     <a href="#admin-content" className="sr-only z-[60] rounded-full bg-gold-400 px-5 py-3 text-black focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Aller au contenu</a>
     <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-line-soft bg-noir-900 px-5 py-8 lg:flex">
       <Link to="/admin" aria-label="LesCracks, vue d’ensemble" className="mb-10 px-3"><LesCracksLogo className="h-8 w-auto" /><span className="mt-3 block text-[10px] tracking-wide text-t4">Administration</span></Link>
