@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import * as Dialog from '@radix-ui/react-dialog';
-import { ArrowUpRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, LayoutDashboard, LogOut, Mail, Menu, Tags, Users, X } from 'lucide-react';
+import { ArrowUpRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, LayoutDashboard, LogOut, Mail, Menu, Shield, Tags, Users, X } from 'lucide-react';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import { useSession } from '@/hooks/useSession';
@@ -22,6 +22,7 @@ const SECTIONS = [
   { to: '/admin/evenements', label: 'Événements', group: 'Contenu', icon: CalendarDays },
   { to: '/admin/categories', label: 'Catégories', group: 'Organisation', icon: FolderOpen },
   { to: '/admin/tags', label: 'Tags', group: 'Organisation', icon: Tags },
+  { to: '/admin/admins', label: 'Administrateurs', group: 'Sécurité', icon: Shield },
 ] as const;
 
 interface AdminLayoutProps { children: React.ReactNode }
@@ -29,7 +30,7 @@ interface WorkspaceNavProps { onNavigate?: () => void }
 
 function WorkspaceNav({ onNavigate }: WorkspaceNavProps) {
   return <nav aria-label="Administration" className="space-y-7">
-    {['Espace de travail', 'Contenu', 'Organisation'].map((group) => <div key={group}>
+    {['Espace de travail', 'Contenu', 'Organisation', 'Sécurité'].map((group) => <div key={group}>
       <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-t4">{group}</p>
       <div className="space-y-1">{SECTIONS.filter((section) => section.group === group).map(({ to, label, icon: Icon }) => <NavLink key={to} end={to === '/admin'} to={to} onClick={onNavigate} className={({ isActive }) => `flex items-center gap-3 rounded-2xl px-3 py-3 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400 ${isActive ? 'bg-gold-400/10 font-medium text-gold-400' : 'text-t3 hover:bg-noir-800 hover:text-t1'}`}><Icon className="h-5 w-5" aria-hidden />{label}</NavLink>)}</div>
     </div>)}

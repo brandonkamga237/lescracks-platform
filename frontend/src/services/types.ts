@@ -70,6 +70,12 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export interface AdminSummary {
+  id: number;
+  username: string;
+  role: string;
+}
+
 export type NewsletterState = 'SUBSCRIBED' | 'UNSUBSCRIBED';
 
 export interface AdminSubscriber {

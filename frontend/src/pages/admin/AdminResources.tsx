@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { BookOpen, Plus, Search, Video } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { BookOpen, Heart, Plus, Search, TrendingUp, Video } from 'lucide-react';
 import { AdminConfirm, AdminPagination, AdminRow, AdminSection, AdminState, StatusBadge } from '@/components/admin/AdminTable';
 import ResourceForm from '@/components/admin/ResourceForm';
 import { useApi } from '@/hooks/useApi';
@@ -59,7 +60,7 @@ export default function AdminResources() {
     setPending({ resource, action });
   }
 
-  return <AdminSection title="Ressources" description="Un catalogue utile, de la première idée à la publication." action={<button type="button" onClick={() => setEditor('new')} className="inline-flex items-center gap-2 rounded-full bg-gold-400 px-5 py-3 text-sm font-semibold text-black"><Plus className="h-4 w-4" aria-hidden />Nouvelle ressource</button>}>
+  return <AdminSection title="Ressources" description="Un catalogue utile, de la première idée à la publication." action={<div className="flex items-center gap-3"><Link to="/admin" className="inline-flex items-center gap-2 rounded-full border border-gold-400/30 px-4 py-3 text-sm font-medium text-gold-400 transition hover:bg-gold-400/10"><TrendingUp className="h-4 w-4" aria-hidden />Les plus likés</Link><button type="button" onClick={() => setEditor('new')} className="inline-flex items-center gap-2 rounded-full bg-gold-400 px-5 py-3 text-sm font-semibold text-black"><Plus className="h-4 w-4" aria-hidden />Nouvelle ressource</button></div>}>
     <div className="mb-6 rounded-2xl border border-line-soft bg-card p-5">
       <form onSubmit={(event) => { event.preventDefault(); setFilters({ ...filters, search: search.trim() || undefined, page: 0 }); }} className="flex flex-wrap items-end gap-3">
         <label className="min-w-48 flex-1 text-xs text-t3">Rechercher dans le catalogue<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Titre ou description…" className={`mt-2 ${field}`} /></label>
@@ -79,6 +80,7 @@ export default function AdminResources() {
       {list.map((resource) => <AdminRow key={resource.id}>
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-noir-800 text-gold-400">{resource.kind === 'EBOOK' ? <BookOpen className="h-5 w-5" aria-hidden /> : <Video className="h-5 w-5" aria-hidden />}</span>
         <div className="min-w-0 flex-1 basis-48"><h2 className="break-words font-display font-medium text-t1">{resource.title}</h2><p className="mt-1 text-xs leading-relaxed text-t3">{resource.kind === 'EBOOK' ? 'Ebook' : 'Vidéo externe'} · {resource.categoryName} · {dateFormat.format(new Date(resource.createdAt))}</p></div>
+        <div className="flex items-center gap-1.5 rounded-full border border-line-soft bg-noir-950 px-2.5 py-1.5 text-xs text-t2"><Heart className="h-3.5 w-3.5 text-gold-400" aria-hidden />{resource.likeCount ?? 0}</div>
         <StatusBadge status={resource.status} resource />
         <div className="flex flex-wrap gap-2" role="group" aria-label={`Actions pour ${resource.title}`}>
           <button type="button" disabled={!!busy[resource.id]} onClick={() => setEditor(resource)} className={actionClass}>Modifier</button>

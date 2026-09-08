@@ -1,7 +1,7 @@
 import { ENV } from '@/config/env';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminSubscriber, AdminUser, Category, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag, TopResource, UserGrowthPoint } from '@/services/types';
+import type { AdminSubscriber, AdminSummary, AdminUser, Category, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag, TopResource, UserGrowthPoint } from '@/services/types';
 
 export interface EbookRequest {
   title: string;
@@ -129,6 +129,9 @@ export const adminApi = {
     http.get<{ from: string; to: string; points: UserGrowthPoint[] }>('/admin/stats/user-growth', { from, to }, signal),
   topResources: (limit = 5, signal?: AbortSignal) =>
     http.get<{ limit: number; resources: TopResource[] }>('/admin/stats/top-resources', { limit }, signal),
+  admins: (signal?: AbortSignal) => http.get<AdminSummary[]>('/admin/admins', undefined, signal),
+  createAdmin: (username: string, password: string) => http.post<AdminSummary>('/admin/admins', { username, password }),
+  deleteAdmin: (id: number) => http.delete<void>(`/admin/admins/${id}`),
 };
 
 export default adminApi;
