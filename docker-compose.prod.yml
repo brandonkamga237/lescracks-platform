@@ -204,6 +204,91 @@ services:
       - lescracks-internal
       - traefik-public
 
+  # ---------------------------------------------------------------------------
+  # Prometheus - metrics storage
+  # Not exposed publicly; accessed by Grafana only.
+  # ---------------------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: lescracks-prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - lescracks-internal
+
+  # ---------------------------------------------------------------------------
+  # Grafana - dashboards and alerting
+  # URL: https://grafana.lescracks.com
+  # ---------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:11.3.1
+    container_name: lescracks-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER:     ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: 'false'
+      GF_SERVER_ROOT_URL: 'https://grafana.lescracks.com'
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+    depends_on:
+      - prometheus
+      - loki
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lescracks-grafana.rule=Host(`grafana.lescracks.com`)"
+      - "traefik.http.routers.lescracks-grafana.entrypoints=websecure"
+      - "traefik.http.routers.lescracks-grafana.tls.certresolver=le"
+      - "traefik.http.services.lescracks-grafana.loadbalancer.server.port=3000"
+      - "traefik.http.routers.lescracks-grafana-http.rule=Host(`grafana.lescracks.com`)"
+      - "traefik.http.routers.lescracks-grafana-http.entrypoints=web"
+      - "traefik.http.routers.lescracks-grafana-http.middlewares=lescracks-https-redirect"
+    networks:
+      - lescracks-internal
+      - traefik-public
+
+  # ---------------------------------------------------------------------------
+  # Loki - log aggregation
+  # Not exposed publicly; accessed by Grafana only.
+  # ---------------------------------------------------------------------------
+  loki:
+    image: grafana/loki:2.9.10
+    container_name: lescracks-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./monitoring/loki.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    networks:
+      - lescracks-internal
+
+  # ---------------------------------------------------------------------------
+  # Promtail - ships backend logs to Loki
+  # ---------------------------------------------------------------------------
+  promtail:
+    image: grafana/promtail:2.9.10
+    container_name: lescracks-promtail
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./monitoring/promtail.yml:/etc/promtail/config.yml:ro
+      - backend_logs:/var/log/lescracks:ro
+    depends_on:
+      - loki
+      - backend
+    networks:
+      - lescracks-internal
+
 # =============================================================================
 # Volumes
 # =============================================================================
@@ -214,6 +299,12 @@ volumes:
     name: lescracks_minio_data
   backend_logs:
     name: lescracks_backend_logs
+  prometheus_data:
+    name: lescracks_prometheus_data
+  grafana_data:
+    name: lescracks_grafana_data
+  loki_data:
+    name: lescracks_loki_data
 
 # =============================================================================
 # Networks

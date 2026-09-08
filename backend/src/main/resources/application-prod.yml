@@ -65,3 +65,22 @@ logging:
     com.brandonkamga.lescracks: INFO
     org.springframework: WARN
     org.hibernate: WARN
+  file:
+    name: /var/log/lescracks/app.log
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+      base-path: /actuator
+  metrics:
+    tags:
+      application: lescracks-backend
+    enable:
+      jvm: true
+      process: true
+      system: true
+      tomcat: true
+      http: true
+      logback: true
