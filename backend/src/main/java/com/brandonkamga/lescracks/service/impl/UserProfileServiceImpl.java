@@ -1,10 +1,13 @@
 package com.brandonkamga.lescracks.service.impl;
 
 import com.brandonkamga.lescracks.domain.User;
+import com.brandonkamga.lescracks.dto.user.UserPasswordChangeRequest;
 import com.brandonkamga.lescracks.dto.user.UserProfileUpdateRequest;
+import com.brandonkamga.lescracks.exception.BadRequestException;
 import com.brandonkamga.lescracks.exception.NotFoundException;
 import com.brandonkamga.lescracks.repository.UserRepository;
 import com.brandonkamga.lescracks.service.interfaces.UserProfileService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,8 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserProfileServiceImpl implements UserProfileService {
     private final UserRepository users;
+    private final PasswordEncoder passwords;
 
-    public UserProfileServiceImpl(UserRepository users) { this.users = users; }
+    public UserProfileServiceImpl(UserRepository users, PasswordEncoder passwords) {
+        this.users = users;
+        this.passwords = passwords;
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -28,6 +35,18 @@ public class UserProfileServiceImpl implements UserProfileService {
         user.setFirstName(request.firstName().trim());
         user.setLastName(request.lastName().trim());
         return user;
+    }
+
+    @Override
+    public void changePassword(String email, UserPasswordChangeRequest request) {
+        User user = require(email);
+        if (user.getPasswordHash() == null || !passwords.matches(request.currentPassword(), user.getPasswordHash())) {
+            throw new BadRequestException("Le mot de passe actuel est incorrect.");
+        }
+        if (!request.newPassword().equals(request.confirmPassword())) {
+            throw new BadRequestException("Le nouveau mot de passe et sa confirmation ne correspondent pas.");
+        }
+        user.setPasswordHash(passwords.encode(request.newPassword()));
     }
 
     @Override

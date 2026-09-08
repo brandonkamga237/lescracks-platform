@@ -47,6 +47,11 @@ public class User {
     @Builder.Default
     private boolean emailVerified = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private AuthProvider provider = AuthProvider.LOCAL;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();

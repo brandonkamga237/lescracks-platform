@@ -65,6 +65,8 @@ export interface NewsletterStatus {
   unsubscribedAt: string | null;
 }
 
+export type AuthProvider = 'LOCAL' | 'GOOGLE' | 'GITHUB';
+
 export interface UserProfile {
   id: number;
   email: string;
@@ -72,5 +74,6 @@ export interface UserProfile {
   lastName: string;
   status: 'ACTIVE' | 'INACTIVE' | 'BANNED';
   verified: boolean;
+  provider: AuthProvider;
   createdAt: string;
 }

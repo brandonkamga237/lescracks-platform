@@ -86,6 +86,6 @@ public class UserAuthController {
     }
 
     private UserAuthResponse response(User user) {
-        return new UserAuthResponse(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(), user.isEmailVerified());
+        return new UserAuthResponse(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(), user.isEmailVerified(), user.getProvider());
     }
 }

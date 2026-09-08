@@ -12,6 +12,8 @@ import AdminLogin from '@/pages/AdminLogin';
 
 import About from '@/pages/About';
 import EvenementDetail from '@/pages/EvenementDetail';
+import Privacy from '@/pages/Privacy';
+import Terms from '@/pages/Terms';
 import VerifyEmail from '@/pages/VerifyEmail';
 import Evenements from '@/pages/Evenements';
 import Landing from '@/pages/Landing';
@@ -100,6 +102,8 @@ function AppRoutes() {
       <Route path="/evenements" element={<Evenements />} />
       <Route path="/evenements/:id" element={<EvenementDetail />} />
       <Route path="/a-propos" element={<About />} />
+      <Route path="/conditions-utilisation" element={<Terms />} />
+      <Route path="/politique-confidentialite" element={<Privacy />} />
       {/* Verifying a code is done by a recruiter who has no account and wants none. */}
       <Route path="/profil" element={<MemberRoute><Profile /></MemberRoute>} />
 

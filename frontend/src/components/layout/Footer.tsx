@@ -24,6 +24,13 @@ const NAV: { title: string; links: FooterLink[] }[] = [
     ],
   },
   {
+    title: 'Légal',
+    links: [
+      { label: "Conditions d'utilisation", href: '/conditions-utilisation', icon: null },
+      { label: 'Politique de confidentialité', href: '/politique-confidentialite', icon: null },
+    ],
+  },
+  {
     title: 'Nous retrouver',
     links: [
       { label: 'WhatsApp', href: 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK', icon: null, isWhatsApp: true, external: true },

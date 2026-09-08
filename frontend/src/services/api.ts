@@ -43,6 +43,8 @@ export const api = {
   tags: (categoryId?: number, signal?: AbortSignal) => http.get<Tag[]>('/tags', { categoryId }, signal),
   me: (signal?: AbortSignal) => http.get<UserProfile>('/me', undefined, signal),
   updateProfile: (body: Pick<UserProfile, 'firstName' | 'lastName'>) => http.patch<UserProfile>('/me', body),
+  changePassword: (body: { currentPassword: string; newPassword: string; confirmPassword: string }) =>
+    http.post<void>('/me/password', body),
   newsletterStatus: (signal?: AbortSignal) => http.get<NewsletterStatus>('/newsletter', undefined, signal),
   newsletterSubscribe: () => http.post<NewsletterStatus>('/newsletter/subscribe'),
   verifyEmail: (token: string) => http.post<void>('/auth/verify-email', undefined, { token }),
