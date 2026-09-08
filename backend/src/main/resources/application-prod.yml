@@ -41,6 +41,9 @@ springdoc:
     enabled: false
 
 app:
+  admin:
+    bootstrap-username: ${ADMIN_USERNAME:admin}
+    bootstrap-password: ${ADMIN_PASSWORD:admin}
   site:
     url: ${SITE_URL}
   cors:
