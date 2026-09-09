@@ -11,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+
 @Service
 @Transactional
 public class UserProfileServiceImpl implements UserProfileService {
@@ -34,6 +36,14 @@ public class UserProfileServiceImpl implements UserProfileService {
         User user = require(email);
         user.setFirstName(request.firstName().trim());
         user.setLastName(request.lastName().trim());
+        user.setUsername(request.username() == null ? null : request.username().trim().toLowerCase());
+        user.setAvatarUrl(request.avatarUrl() == null ? null : request.avatarUrl().trim());
+        user.setBio(request.bio() == null ? null : request.bio().trim());
+        user.setLocation(request.location() == null ? null : request.location().trim());
+        if (request.socialLinks() != null) {
+            user.setSocialLinks(request.socialLinks());
+        }
+        user.setUpdatedAt(Instant.now());
         return user;
     }
 

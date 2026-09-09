@@ -48,6 +48,7 @@ public class UserProfileController {
     private UserProfileResponse response(User user) {
         return new UserProfileResponse(user.getId(), user.getEmail(), user.getFirstName(),
                 user.getLastName(), user.getStatus(), user.isEmailVerified(), user.getProvider(), user.getCreatedAt(),
+                user.getUsername(), user.getAvatarUrl(), user.getBio(), user.getLocation(), user.getSocialLinks(),
                 identities.list(user.getEmail()));
     }
 }
