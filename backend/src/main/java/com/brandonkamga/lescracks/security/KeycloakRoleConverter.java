@@ -2,10 +2,10 @@ package com.brandonkamga.lescracks.security;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -41,8 +41,9 @@ public class KeycloakRoleConverter implements Converter<Jwt, AbstractAuthenticat
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase(Locale.ROOT)))
                 .collect(Collectors.toList());
 
-        String email = jwt.getClaimAsString("email");
-        String principal = (email != null && !email.isBlank()) ? email : jwt.getSubject();
-        return new UsernamePasswordAuthenticationToken(principal, jwt, authorities);
+        // Use the email as the principal so controllers can look users up by getName().
+        // JwtAuthenticationToken keeps the raw Jwt intact even after ProviderManager clears credentials.
+        String principalClaimName = jwt.getClaimAsString("email") != null ? "email" : "sub";
+        return new JwtAuthenticationToken(jwt, authorities, principalClaimName);
     }
 }
