@@ -42,6 +42,8 @@ export const api = {
   categories: (signal?: AbortSignal) => http.get<Category[]>('/categories', undefined, signal),
   tags: (categoryId?: number, signal?: AbortSignal) => http.get<Tag[]>('/tags', { categoryId }, signal),
   me: (signal?: AbortSignal) => http.get<UserProfile>('/me', undefined, signal),
+  syncOidc: (provider: 'google' | 'github') =>
+    http.post<UserProfile>('/oidc/sync', { provider: provider.toUpperCase() }),
   updateProfile: (body: Pick<UserProfile, 'firstName' | 'lastName'>) => http.patch<UserProfile>('/me', body),
   changePassword: (body: { currentPassword: string; newPassword: string; confirmPassword: string }) =>
     http.post<void>('/me/password', body),

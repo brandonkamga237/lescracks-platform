@@ -66,7 +66,18 @@ export function SessionProvider({ children }: SessionProviderProps) {
         const oidcProfile = authRef.current.user?.profile;
         const missingLocalProfile = member.status === 'rejected' && member.reason instanceof ApiError && member.reason.status === 404;
         if (mode === 'oidc' && currentAccessToken() && missingLocalProfile && oidcProfile) {
-          setIdentity({ ...anonymous, isSignedIn: true, name: oidcProfile.name ?? oidcProfile.preferred_username ?? null, email: oidcProfile.email ?? null });
+          const oidcProvider = sessionStorage.getItem('lescracks.oidc.provider');
+          if (oidcProvider === 'google' || oidcProvider === 'github') {
+            try {
+              const user = await api.syncOidc(oidcProvider);
+              setIdentity({ isSignedIn: true, isAdmin: false, user, name: `${user.firstName} ${user.lastName}`.trim(), email: user.email });
+            } catch (cause) {
+              setIdentity({ ...anonymous, isSignedIn: true, name: oidcProfile.name ?? oidcProfile.preferred_username ?? null, email: oidcProfile.email ?? null });
+              setError(unavailable(cause));
+            }
+          } else {
+            setIdentity({ ...anonymous, isSignedIn: true, name: oidcProfile.name ?? oidcProfile.preferred_username ?? null, email: oidcProfile.email ?? null });
+          }
         } else {
           setIdentity(anonymous);
         }
@@ -143,6 +154,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
     setAuthTransport('oidc');
     authRef.current.startSilentRenew();
     try {
+      sessionStorage.setItem('lescracks.oidc.provider', provider);
       await authRef.current.signinRedirect({
         state: { from: safeReturnPath(returnTo ?? currentPath()) },
         extraQueryParams: { kc_idp_hint: provider },
