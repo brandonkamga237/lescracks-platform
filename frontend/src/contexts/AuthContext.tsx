@@ -50,6 +50,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
     const syncOidcProfile = async (provider: 'google' | 'github', oidcProfile: OidcProfile | null | undefined) => {
       try {
         const profile = await api.syncOidc(provider);
+        sessionStorage.removeItem('lescracks.oidc.provider');
         setIdentity({ isSignedIn: true, isAdmin: false, user: profile, name: `${profile.firstName} ${profile.lastName}`.trim(), email: profile.email });
       } catch (cause) {
         setIdentity({ ...anonymous, isSignedIn: true, name: oidcProfile?.name ?? oidcProfile?.preferred_username ?? null, email: oidcProfile?.email ?? null });
