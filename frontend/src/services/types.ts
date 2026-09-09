@@ -141,3 +141,11 @@ export interface UserProfile {
   location?: string;
   socialLinks?: Record<string, string>;
 }
+
+export interface UserProfileUpdate {
+  firstName: string;
+  lastName: string;
+  username?: string;
+  bio?: string;
+  location?: string;
+}

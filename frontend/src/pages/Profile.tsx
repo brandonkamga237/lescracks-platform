@@ -24,7 +24,7 @@ const identityProviders: { provider: IdentityProvider; label: string }[] = [
 export default function Profile() {
   const { name, email, user, isAdmin, refresh, signOut, socialSignIn } = useSession();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ firstName: user?.firstName ?? '', lastName: user?.lastName ?? '' });
+  const [form, setForm] = useState({ firstName: user?.firstName ?? '', lastName: user?.lastName ?? '', username: user?.username ?? '', bio: user?.bio ?? '', location: user?.location ?? '' });
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState<'save' | 'logout' | null>(null);
   const [error, setError] = useState('');
@@ -43,8 +43,14 @@ export default function Profile() {
   const [identityNotice, setIdentityNotice] = useState('');
 
   useEffect(() => {
-    setForm({ firstName: user?.firstName ?? '', lastName: user?.lastName ?? '' });
-  }, [user?.firstName, user?.lastName]);
+    setForm({
+      firstName: user?.firstName ?? '',
+      lastName: user?.lastName ?? '',
+      username: user?.username ?? '',
+      bio: user?.bio ?? '',
+      location: user?.location ?? '',
+    });
+  }, [user?.firstName, user?.lastName, user?.username, user?.bio, user?.location]);
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -57,7 +63,13 @@ export default function Profile() {
     }
     setBusy('save');
     try {
-      await api.updateProfile({ firstName: form.firstName.trim(), lastName: form.lastName.trim() });
+      await api.updateProfile({
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        username: form.username.trim() || undefined,
+        bio: form.bio.trim() || undefined,
+        location: form.location.trim() || undefined,
+      });
       await refresh();
       setEditing(false);
       setNotice('Tes informations ont bien été mises à jour.');
@@ -158,14 +170,18 @@ export default function Profile() {
           {editing && user ? <form onSubmit={save} className="mt-7" aria-busy={busy === 'save'}>
             <fieldset disabled={Boolean(busy)} className="space-y-5"><legend className="sr-only">Modifier tes informations</legend>
               {(['firstName', 'lastName'] as const).map((key) => <div key={key}><label htmlFor={`profile-${key}`} className="text-sm font-medium text-t2">{key === 'firstName' ? 'Prénom' : 'Nom'}</label><input id={`profile-${key}`} name={key} autoComplete={key === 'firstName' ? 'given-name' : 'family-name'} required value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} className="input mt-2" aria-invalid={Boolean(fields[key])} aria-describedby={fields[key] ? `profile-${key}-error` : undefined} />{fields[key] && <p id={`profile-${key}-error`} className="mt-2 text-sm text-red-400">{fields[key]}</p>}</div>)}
-              <div className="flex flex-wrap gap-3"><button type="submit" className="btn-primary">{busy === 'save' && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}{busy === 'save' ? 'Enregistrement…' : 'Enregistrer'}</button><button type="button" onClick={() => { setEditing(false); setForm({ firstName: user.firstName, lastName: user.lastName }); setError(''); setFields({}); }} className="btn-secondary">Annuler</button></div>
+              <div><label htmlFor="profile-username" className="text-sm font-medium text-t2">Nom d'utilisateur</label><input id="profile-username" name="username" value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value })} className="input mt-2" /></div>
+              <div><label htmlFor="profile-bio" className="text-sm font-medium text-t2">Bio</label><textarea id="profile-bio" name="bio" rows={3} value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} className="input mt-2" /></div>
+              <div><label htmlFor="profile-location" className="text-sm font-medium text-t2">Localisation</label><input id="profile-location" name="location" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} className="input mt-2" /></div>
+              <div className="flex flex-wrap gap-3"><button type="submit" className="btn-primary">{busy === 'save' && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}{busy === 'save' ? 'Enregistrement…' : 'Enregistrer'}</button><button type="button" onClick={() => { setEditing(false); setForm({ firstName: user.firstName, lastName: user.lastName, username: user.username ?? '', bio: user.bio ?? '', location: user.location ?? '' }); setError(''); setFields({}); }} className="btn-secondary">Annuler</button></div>
             </fieldset>
           </form> : <dl className="mt-7 space-y-5">
             <div><dt className="text-xs tracking-wide text-t4">Nom complet</dt><dd className="mt-1 text-t1">{name || 'Non renseigné'}</dd></div>
             <div><dt className="text-xs tracking-wide text-t4">Adresse email</dt><dd className="mt-1 break-all text-t1">{email || 'Non disponible pour ce compte'}</dd></div>
-            {user && <div className="flex flex-wrap gap-x-12 gap-y-5"><div><dt className="text-xs tracking-wide text-t4">Statut du compte</dt><dd className="mt-1 text-t1">{statusLabels[user.status] ?? user.status}</dd></div><div><dt className="text-xs tracking-wide text-t4">Connexion</dt><dd className="mt-1 text-t1">{providerLabels[user.provider] ?? user.provider}</dd></div>{joinedLabel && <div><dt className="text-xs tracking-wide text-t4">Membre depuis le</dt><dd className="mt-1 text-t1"><time dateTime={user.createdAt}>{joinedLabel}</time></dd></div>}</div>}
+            {user && <div className="flex flex-wrap gap-x-12 gap-y-5"><div><dt className="text-xs tracking-wide text-t4">Nom d'utilisateur</dt><dd className="mt-1 text-t1">{user.username || '—'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Localisation</dt><dd className="mt-1 text-t1">{user.location || '—'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Statut du compte</dt><dd className="mt-1 text-t1">{statusLabels[user.status] ?? user.status}</dd></div><div><dt className="text-xs tracking-wide text-t4">Connexion</dt><dd className="mt-1 text-t1">{providerLabels[user.provider] ?? user.provider}</dd></div>{joinedLabel && <div><dt className="text-xs tracking-wide text-t4">Membre depuis le</dt><dd className="mt-1 text-t1"><time dateTime={user.createdAt}>{joinedLabel}</time></dd></div>}</div>}
+            {user?.bio && <div><dt className="text-xs tracking-wide text-t4">Bio</dt><dd className="mt-1 whitespace-pre-line text-t1">{user.bio}</dd></div>}
           </dl>}
-          <div className="mt-7 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-400" /><p>{user ? 'Tu peux modifier ton prénom et ton nom ici. Ton adresse email reste liée à ton compte et ne peut pas être modifiée depuis cet espace.' : isAdmin ? 'Tu utilises un compte administrateur. La gestion des contenus est accessible depuis ton tableau de bord.' : 'Tu es connecté avec un fournisseur externe. Aucun profil membre modifiable n’est disponible pour cette connexion. Ton identité et ton mot de passe se gèrent auprès de ton fournisseur.'}</p></div>
+          <div className="mt-7 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-400" /><p>{user ? 'Tu peux modifier tes informations ici. Ton adresse email reste liée à ton compte et ne peut pas être modifiée depuis cet espace.' : isAdmin ? 'Tu utilises un compte administrateur. La gestion des contenus est accessible depuis ton tableau de bord.' : 'Tu es connecté avec un fournisseur externe. Aucun profil membre modifiable n’est disponible pour cette connexion. Ton identité et ton mot de passe se gèrent auprès de ton fournisseur.'}</p></div>
           {isAdmin && <Link to="/admin" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-gold-400">Ouvrir l’administration<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>}
 
           <div className="mt-10 border-t border-line-soft pt-6">
