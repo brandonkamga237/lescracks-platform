@@ -225,7 +225,7 @@ export default function Profile() {
                 </li>
                 {identityProviders.map(({ provider, label }) => {
                   const linked = user.identities?.some((identity) => identity.provider === provider);
-                  const onlyMethod = !linked ? false : user.provider === 'LOCAL' ? user.identities?.length === 1 : user.identities?.length === 1 && user.provider === provider;
+                  const onlyMethod = linked && user.provider !== 'LOCAL' && user.identities?.length === 1 && user.identities[0]?.provider === provider;
                   return (
                     <li key={provider} className="flex items-center justify-between gap-4 rounded-2xl border border-white/[0.06] bg-[#0b0b0b] px-4 py-3">
                       <span className="text-sm text-t1">{label}</span>
