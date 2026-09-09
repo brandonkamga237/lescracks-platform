@@ -50,6 +50,7 @@ public class StatsServiceImpl implements StatsService {
         Map<String, Long> resourcesByKind = new LinkedHashMap<>();
         resourcesByKind.put("EXTERNAL_VIDEO", resources.countExternalVideos());
         resourcesByKind.put("EBOOK", resources.countEbooks());
+        resourcesByKind.put("ARTICLE", resources.countArticles());
 
         return new StatsOverviewResponse(
                 total(usersByStatus), usersByStatus, usersByProvider, users.countByEmailVerifiedTrue(),

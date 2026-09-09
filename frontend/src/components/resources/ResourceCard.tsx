@@ -11,7 +11,7 @@ interface ResourceCardProps {
   resource: ResourceSummary;
 }
 
-const KIND_LABEL = { EXTERNAL_VIDEO: 'Vidéo', EBOOK: 'Ebook' } as const;
+const KIND_LABEL = { EXTERNAL_VIDEO: 'Vidéo', EBOOK: 'Ebook', ARTICLE: 'Article' } as const;
 
 function formatSize(bytes?: number): string {
   if (bytes == null || bytes <= 0) return '';

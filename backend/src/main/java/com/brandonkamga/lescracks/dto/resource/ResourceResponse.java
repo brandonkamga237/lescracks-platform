@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.dto.resource;
 
 import com.brandonkamga.lescracks.domain.ResourceStatus;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.time.Instant;
 import java.util.Set;
@@ -22,5 +23,7 @@ public record ResourceResponse(
         Set<String> tags,
         Long likeCount,
         Instant createdAt,
-        Instant updatedAt) {
+        Instant updatedAt,
+        JsonNode body,
+        Integer readingMinutes) {
 }
