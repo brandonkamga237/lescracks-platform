@@ -240,5 +240,14 @@ export default function AuthPage({ mode }: AuthPageProps) {
         </div>
       </DialogContent>
     </Dialog>
+    {busy === 'google' || busy === 'github' ? (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-[#0b0b0b]/95 text-white">
+        <Loader2 aria-hidden="true" className="h-10 w-10 animate-spin motion-reduce:animate-none text-gold-400" />
+        <div className="text-center">
+          <p className="font-display text-2xl">On prépare ton espace.</p>
+          <p className="mt-2 text-sm text-zinc-400">Connexion {busy === 'google' ? 'Google' : 'GitHub'} en cours…</p>
+        </div>
+      </div>
+    ) : null}
   </Layout>;
 }

@@ -12,14 +12,14 @@ import { api } from '@/services/api';
  * members get the action itself.
  */
 export default function NewsletterBar() {
-  const { isSignedIn, isAdmin, isLoading } = useSession();
+  const { isSignedIn, isAdmin, isLoading, user } = useSession();
   const [subscribed, setSubscribed] = useState<boolean | null>(null);
   const [visible, setVisible] = useState(true);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState('');
 
   useEffect(() => {
-    if (!isSignedIn || isAdmin) {
+    if (!user || isAdmin) {
       setSubscribed(null);
       return;
     }
@@ -28,9 +28,9 @@ export default function NewsletterBar() {
       .then((response) => setSubscribed(response.status === 'SUBSCRIBED'))
       .catch(() => setSubscribed(null));
     return () => controller.abort();
-  }, [isSignedIn, isAdmin]);
+  }, [user, isAdmin]);
 
-  if (!visible || isLoading || isAdmin || subscribed === true) return null;
+  if (!visible || isLoading || isAdmin || (isSignedIn && !user) || subscribed === true) return null;
 
   async function subscribe() {
     setBusy(true);
@@ -52,7 +52,7 @@ export default function NewsletterBar() {
           Les nouveaux contenus et rendez-vous arrivent par email.
           {isSignedIn ? ' Ne manque rien.' : ' Crée ton compte pour les recevoir.'}
         </span>
-        {isSignedIn && subscribed === false && (
+        {isSignedIn && user && subscribed === false && (
           <button
             type="button"
             disabled={busy}
@@ -62,7 +62,7 @@ export default function NewsletterBar() {
             {busy ? 'Abonnement…' : 'M’abonner à la newsletter'}
           </button>
         )}
-        {isSignedIn && subscribed === null && <span className="sr-only">Vérification de ton abonnement…</span>}
+        {isSignedIn && user && subscribed === null && <span className="sr-only">Vérification de ton abonnement…</span>}
         {!isSignedIn && (
           <Link to="/inscription" className="font-medium text-gold-300 underline underline-offset-4 transition-colors hover:text-gold-400">
             Rejoindre LesCracks

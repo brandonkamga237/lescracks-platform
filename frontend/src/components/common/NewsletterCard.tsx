@@ -1,19 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Check, Mail } from 'lucide-react';
 
+import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
 
 export default function NewsletterCard() {
+  const { user } = useSession();
   const [subscribed, setSubscribed] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
+    if (!user) {
+      setSubscribed(null);
+      return;
+    }
     const controller = new AbortController();
     api.newsletterStatus(controller.signal)
       .then((response) => setSubscribed(response.status === 'SUBSCRIBED'))
       .catch(() => setSubscribed(null));
     return () => controller.abort();
-  }, []);
+  }, [user]);
+
+  if (!user) return null;
 
   async function toggle() {
     if (subscribed == null || busy) return;
