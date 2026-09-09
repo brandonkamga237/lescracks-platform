@@ -17,6 +17,7 @@ import type { ResourceKind } from '@/services/types';
 const KIND_OPTIONS: Array<[ResourceKind, string]> = [
   ['EXTERNAL_VIDEO', 'Vidéos'],
   ['EBOOK', 'Ebooks'],
+  ['ARTICLE', 'Articles'],
 ];
 
 function positiveInteger(value: string | null): number | undefined {
@@ -32,7 +33,7 @@ export default function Ressources() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const routeKind = location.pathname.endsWith('/ebooks') ? 'EBOOK' : location.pathname.endsWith('/videos') ? 'EXTERNAL_VIDEO' : undefined;
+  const routeKind = location.pathname.endsWith('/ebooks') ? 'EBOOK' : location.pathname.endsWith('/videos') ? 'EXTERNAL_VIDEO' : location.pathname.endsWith('/articles') ? 'ARTICLE' : undefined;
   const requestedKind = params.get('kind');
   const kind = routeKind ?? KIND_OPTIONS.map(([value]) => value).find((value) => value === requestedKind);
   const search = params.get('q') ?? '';
