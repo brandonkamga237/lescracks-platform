@@ -36,7 +36,7 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
     return () => { ignore = true; signal.abort(); };
   }, [resource.id]);
 
-  const cataloguePath = /^\/ressources(?:\/(?:ebooks|videos))?$/.test(location.pathname)
+  const cataloguePath = /^\/ressources(?:\/(?:ebooks|videos|articles))?$/.test(location.pathname)
     ? `${location.pathname}${location.search}`
     : '/ressources';
 
@@ -66,7 +66,9 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
 
   const detail = resource.kind === 'EBOOK'
     ? `${resource.fileFormat ?? 'Document'}${resource.fileSize ? ` · ${formatSize(resource.fileSize)}` : ''}`
-    : (resource.platform ?? 'Vidéo externe');
+    : resource.kind === 'ARTICLE'
+      ? `${resource.readingMinutes ?? 1} min`
+      : (resource.platform ?? 'Vidéo externe');
 
   return (
     <article
@@ -119,7 +121,7 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
         <div className="mt-auto pt-5">
           <div className="flex items-center justify-between border-t border-line-soft/50 pt-4 text-xs text-t4">
             <div className="flex items-center gap-1.5">
-              {resource.kind === 'EBOOK' ? <FileText className="h-3.5 w-3.5 text-t4" aria-hidden /> : <PlayCircle className="h-3.5 w-3.5 text-t4" aria-hidden />}
+              {resource.kind === 'EXTERNAL_VIDEO' ? <PlayCircle className="h-3.5 w-3.5 text-t4" aria-hidden /> : <FileText className="h-3.5 w-3.5 text-t4" aria-hidden />}
               <span className="text-t3">{detail}</span>
             </div>
             {resource.kind === 'EBOOK' && resource.downloadUrl ? (

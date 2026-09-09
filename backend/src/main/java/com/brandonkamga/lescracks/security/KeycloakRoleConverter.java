@@ -43,7 +43,10 @@ public class KeycloakRoleConverter implements Converter<Jwt, AbstractAuthenticat
 
         // Use the email as the principal so controllers can look users up by getName().
         // JwtAuthenticationToken keeps the raw Jwt intact even after ProviderManager clears credentials.
-        String principalClaimName = jwt.getClaimAsString("email") != null ? "email" : "sub";
-        return new JwtAuthenticationToken(jwt, authorities, principalClaimName);
+        String name = jwt.getClaimAsString("email");
+        if (name == null || name.isBlank()) {
+            name = jwt.getSubject();
+        }
+        return new JwtAuthenticationToken(jwt, authorities, name);
     }
 }

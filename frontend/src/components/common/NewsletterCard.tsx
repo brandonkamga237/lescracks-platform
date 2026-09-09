@@ -17,7 +17,7 @@ export default function NewsletterCard() {
     const controller = new AbortController();
     api.newsletterStatus(controller.signal)
       .then((response) => setSubscribed(response.status === 'SUBSCRIBED'))
-      .catch(() => setSubscribed(null));
+      .catch(() => setSubscribed(false));
     return () => controller.abort();
   }, [user]);
 
