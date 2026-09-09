@@ -1,8 +1,8 @@
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
 import type {
-  Category, EventFormat, EventSummary, EventType, PageResponse, ResourceKind,
-  NewsletterStatus, ResourceLikeStatus, ResourceSummary, Tag, UserProfile,
+  AuthProvider, Category, EventFormat, EventSummary, EventType, PageResponse, ResourceKind,
+  NewsletterStatus, ResourceLikeStatus, ResourceSummary, Tag, UserIdentity, UserProfile,
 } from '@/services/types';
 
 export interface CatalogueFilters extends Query {
@@ -44,6 +44,10 @@ export const api = {
   me: (signal?: AbortSignal) => http.get<UserProfile>('/me', undefined, signal),
   syncOidc: (provider: 'google' | 'github') =>
     http.post<UserProfile>('/oidc/sync', { provider: provider.toUpperCase() }),
+  identities: (signal?: AbortSignal) => http.get<UserIdentity[]>('/me/identities', undefined, signal),
+  linkIdentity: (provider: AuthProvider, token: string) =>
+    http.post<UserIdentity>('/me/identities', { provider, token }),
+  unlinkIdentity: (provider: AuthProvider) => http.delete<void>(`/me/identities/${provider}`),
   updateProfile: (body: Pick<UserProfile, 'firstName' | 'lastName'>) => http.patch<UserProfile>('/me', body),
   changePassword: (body: { currentPassword: string; newPassword: string; confirmPassword: string }) =>
     http.post<void>('/me/password', body),
