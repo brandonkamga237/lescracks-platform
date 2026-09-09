@@ -50,6 +50,11 @@ export const api = {
     http.post<UserIdentity>('/me/identities', { provider, token }),
   unlinkIdentity: (provider: AuthProvider) => http.delete<void>(`/me/identities/${provider}`),
   updateProfile: (body: UserProfileUpdate) => http.patch<UserProfile>('/me', body),
+  uploadAvatar: (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return http.postForm<UserProfile>('/me/avatar', form);
+  },
   changePassword: (body: { currentPassword: string; newPassword: string; confirmPassword: string }) =>
     http.post<void>('/me/password', body),
   newsletterStatus: (signal?: AbortSignal) => http.get<NewsletterStatus>('/newsletter', undefined, signal),

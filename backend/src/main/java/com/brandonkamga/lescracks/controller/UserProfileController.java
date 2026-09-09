@@ -8,9 +8,11 @@ import com.brandonkamga.lescracks.service.interfaces.UserIdentityService;
 import com.brandonkamga.lescracks.service.interfaces.UserProfileService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/me")
@@ -32,6 +34,12 @@ public class UserProfileController {
     public UserProfileResponse update(Authentication authentication,
                                       @Valid @RequestBody UserProfileUpdateRequest request) {
         return response(profiles.update(authentication.getName(), request));
+    }
+
+    @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public UserProfileResponse updateAvatar(Authentication authentication,
+                                            @RequestParam("file") MultipartFile file) {
+        return response(profiles.updateAvatar(authentication.getName(), file));
     }
 
     @PostMapping("/password")

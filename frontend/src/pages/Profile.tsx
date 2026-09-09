@@ -24,7 +24,15 @@ const identityProviders: { provider: IdentityProvider; label: string }[] = [
 export default function Profile() {
   const { name, email, user, isAdmin, refresh, signOut, socialSignIn } = useSession();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ firstName: user?.firstName ?? '', lastName: user?.lastName ?? '', username: user?.username ?? '', bio: user?.bio ?? '', location: user?.location ?? '' });
+  const [form, setForm] = useState({
+    firstName: user?.firstName ?? '',
+    lastName: user?.lastName ?? '',
+    username: user?.username ?? '',
+    bio: user?.bio ?? '',
+    location: user?.location ?? '',
+    socialLinks: user?.socialLinks ?? {},
+  });
+  const [newSocial, setNewSocial] = useState({ platform: '', url: '' });
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState<'save' | 'logout' | null>(null);
   const [error, setError] = useState('');
@@ -41,6 +49,7 @@ export default function Profile() {
   const [unlinkBusy, setUnlinkBusy] = useState<AuthProvider | null>(null);
   const [identityError, setIdentityError] = useState('');
   const [identityNotice, setIdentityNotice] = useState('');
+  const [avatarBusy, setAvatarBusy] = useState(false);
 
   useEffect(() => {
     setForm({
@@ -49,8 +58,9 @@ export default function Profile() {
       username: user?.username ?? '',
       bio: user?.bio ?? '',
       location: user?.location ?? '',
+      socialLinks: user?.socialLinks ?? {},
     });
-  }, [user?.firstName, user?.lastName, user?.username, user?.bio, user?.location]);
+  }, [user?.firstName, user?.lastName, user?.username, user?.bio, user?.location, user?.socialLinks]);
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -69,6 +79,7 @@ export default function Profile() {
         username: form.username.trim() || undefined,
         bio: form.bio.trim() || undefined,
         location: form.location.trim() || undefined,
+        socialLinks: Object.keys(form.socialLinks).length ? form.socialLinks : undefined,
       });
       await refresh();
       setEditing(false);
@@ -125,6 +136,20 @@ export default function Profile() {
     }
   }
 
+  async function uploadAvatar(file: File) {
+    setAvatarBusy(true);
+    setError('');
+    try {
+      await api.uploadAvatar(file);
+      await refresh();
+      setNotice('Ton avatar a été mis à jour.');
+    } catch (cause) {
+      setError(cause instanceof ApiError ? cause.message : 'L’upload de l’avatar a échoué.');
+    } finally {
+      setAvatarBusy(false);
+    }
+  }
+
   async function linkProvider(provider: IdentityProvider) {
     setIdentityError('');
     setIdentityNotice('');
@@ -159,7 +184,7 @@ export default function Profile() {
     <SEO title="Ton espace" description="Retrouve tes informations et les ressources de la communauté LesCracks." url="/profil" />
     <Section spacing="normal">
       <header className="flex flex-col gap-6 border-b border-line-soft/50 pb-10 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-5"><div aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center rounded-3xl border border-gold-400/30 bg-gold-400/10 font-display text-2xl text-gold-400">{name ? name.charAt(0).toUpperCase() : <UserRound className="h-7 w-7" />}</div><div><p className="text-sm font-medium tracking-wide text-gold-400">Ton espace personnel</p><h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-t1 sm:text-4xl">Bonjour{user?.firstName ? `, ${user.firstName}` : name ? `, ${name}` : ''}.</h1><p className="mt-2 text-sm text-t4">Un point de départ pour ta prochaine découverte.</p></div></div>
+        <div className="flex items-center gap-5"><div aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-gold-400/30 bg-gold-400/10 font-display text-2xl text-gold-400">{user?.avatarUrl ? <img src={`/api/files/${user.avatarUrl}`} alt="" className="h-full w-full object-cover" /> : name ? name.charAt(0).toUpperCase() : <UserRound className="h-7 w-7" />}</div><div><p className="text-sm font-medium tracking-wide text-gold-400">Ton espace personnel</p><h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-t1 sm:text-4xl">Bonjour{user?.firstName ? `, ${user.firstName}` : name ? `, ${name}` : ''}.</h1><p className="mt-2 text-sm text-t4">Un point de départ pour ta prochaine découverte.</p></div></div>
         <button type="button" disabled={Boolean(busy)} onClick={() => void logout()} className="btn-secondary self-start"><LogOut aria-hidden="true" className="h-4 w-4" />{busy === 'logout' ? 'Déconnexion…' : 'Me déconnecter'}</button>
       </header>
       <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.2fr_1fr]">
@@ -168,18 +193,39 @@ export default function Profile() {
           {error && <p role="alert" className="mt-5 rounded-xl border border-red-400/25 bg-red-400/5 p-3 text-sm text-red-400">{error}</p>}
           {notice && <p role="status" className="mt-5 rounded-xl border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-400">{notice}</p>}
           {editing && user ? <form onSubmit={save} className="mt-7" aria-busy={busy === 'save'}>
-            <fieldset disabled={Boolean(busy)} className="space-y-5"><legend className="sr-only">Modifier tes informations</legend>
+            <fieldset disabled={Boolean(busy) || avatarBusy} className="space-y-5"><legend className="sr-only">Modifier tes informations</legend>
+              <div>
+                <label htmlFor="profile-avatar" className="text-sm font-medium text-t2">Avatar</label>
+                <input id="profile-avatar" type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadAvatar(file); event.target.value = ''; }} className="mt-2 text-sm text-t2 file:mr-4 file:rounded-xl file:border-0 file:bg-gold-400 file:px-4 file:py-2 file:font-medium file:text-black" />
+                {avatarBusy && <p className="mt-2 text-sm text-gold-400">Envoi en cours…</p>}
+              </div>
               {(['firstName', 'lastName'] as const).map((key) => <div key={key}><label htmlFor={`profile-${key}`} className="text-sm font-medium text-t2">{key === 'firstName' ? 'Prénom' : 'Nom'}</label><input id={`profile-${key}`} name={key} autoComplete={key === 'firstName' ? 'given-name' : 'family-name'} required value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} className="input mt-2" aria-invalid={Boolean(fields[key])} aria-describedby={fields[key] ? `profile-${key}-error` : undefined} />{fields[key] && <p id={`profile-${key}-error`} className="mt-2 text-sm text-red-400">{fields[key]}</p>}</div>)}
               <div><label htmlFor="profile-username" className="text-sm font-medium text-t2">Nom d'utilisateur</label><input id="profile-username" name="username" value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value })} className="input mt-2" /></div>
               <div><label htmlFor="profile-bio" className="text-sm font-medium text-t2">Bio</label><textarea id="profile-bio" name="bio" rows={3} value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} className="input mt-2" /></div>
               <div><label htmlFor="profile-location" className="text-sm font-medium text-t2">Localisation</label><input id="profile-location" name="location" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} className="input mt-2" /></div>
-              <div className="flex flex-wrap gap-3"><button type="submit" className="btn-primary">{busy === 'save' && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}{busy === 'save' ? 'Enregistrement…' : 'Enregistrer'}</button><button type="button" onClick={() => { setEditing(false); setForm({ firstName: user.firstName, lastName: user.lastName, username: user.username ?? '', bio: user.bio ?? '', location: user.location ?? '' }); setError(''); setFields({}); }} className="btn-secondary">Annuler</button></div>
+              <div className="space-y-3">
+                <span className="text-sm font-medium text-t2">Liens sociaux</span>
+                {Object.entries(form.socialLinks).map(([platform, url]) => (
+                  <div key={platform} className="flex items-center gap-2">
+                    <span className="w-24 shrink-0 text-sm text-t2 capitalize">{platform}</span>
+                    <input type="url" value={url} onChange={(event) => setForm({ ...form, socialLinks: { ...form.socialLinks, [platform]: event.target.value } })} className="input" placeholder="https://..." />
+                    <button type="button" onClick={() => { const next = { ...form.socialLinks }; delete next[platform]; setForm({ ...form, socialLinks: next }); }} className="text-sm text-red-400">Retirer</button>
+                  </div>
+                ))}
+                <div className="flex items-center gap-2">
+                  <input value={newSocial.platform} onChange={(event) => setNewSocial({ ...newSocial, platform: event.target.value })} className="input" placeholder="Plateforme" />
+                  <input type="url" value={newSocial.url} onChange={(event) => setNewSocial({ ...newSocial, url: event.target.value })} className="input" placeholder="https://..." />
+                  <button type="button" disabled={!newSocial.platform.trim() || !newSocial.url.trim()} onClick={() => { if (!newSocial.platform.trim() || !newSocial.url.trim()) return; setForm({ ...form, socialLinks: { ...form.socialLinks, [newSocial.platform.trim().toLowerCase()]: newSocial.url.trim() } }); setNewSocial({ platform: '', url: '' }); }} className="text-sm text-gold-400 disabled:opacity-50">Ajouter</button>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-3"><button type="submit" className="btn-primary">{busy === 'save' && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}{busy === 'save' ? 'Enregistrement…' : 'Enregistrer'}</button><button type="button" onClick={() => { setEditing(false); setForm({ firstName: user.firstName, lastName: user.lastName, username: user.username ?? '', bio: user.bio ?? '', location: user.location ?? '', socialLinks: user.socialLinks ?? {} }); setNewSocial({ platform: '', url: '' }); setError(''); setFields({}); }} className="btn-secondary">Annuler</button></div>
             </fieldset>
           </form> : <dl className="mt-7 space-y-5">
             <div><dt className="text-xs tracking-wide text-t4">Nom complet</dt><dd className="mt-1 text-t1">{name || 'Non renseigné'}</dd></div>
             <div><dt className="text-xs tracking-wide text-t4">Adresse email</dt><dd className="mt-1 break-all text-t1">{email || 'Non disponible pour ce compte'}</dd></div>
             {user && <div className="flex flex-wrap gap-x-12 gap-y-5"><div><dt className="text-xs tracking-wide text-t4">Nom d'utilisateur</dt><dd className="mt-1 text-t1">{user.username || '—'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Localisation</dt><dd className="mt-1 text-t1">{user.location || '—'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Statut du compte</dt><dd className="mt-1 text-t1">{statusLabels[user.status] ?? user.status}</dd></div><div><dt className="text-xs tracking-wide text-t4">Connexion</dt><dd className="mt-1 text-t1">{providerLabels[user.provider] ?? user.provider}</dd></div>{joinedLabel && <div><dt className="text-xs tracking-wide text-t4">Membre depuis le</dt><dd className="mt-1 text-t1"><time dateTime={user.createdAt}>{joinedLabel}</time></dd></div>}</div>}
             {user?.bio && <div><dt className="text-xs tracking-wide text-t4">Bio</dt><dd className="mt-1 whitespace-pre-line text-t1">{user.bio}</dd></div>}
+            {user?.socialLinks && Object.keys(user.socialLinks).length > 0 && <div><dt className="text-xs tracking-wide text-t4">Liens sociaux</dt><dd className="mt-1 space-y-1">{Object.entries(user.socialLinks).map(([platform, url]) => <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="block capitalize text-gold-400 underline-offset-4 hover:underline">{platform}</a>)}</dd></div>}
           </dl>}
           <div className="mt-7 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-400" /><p>{user ? 'Tu peux modifier tes informations ici. Ton adresse email reste liée à ton compte et ne peut pas être modifiée depuis cet espace.' : isAdmin ? 'Tu utilises un compte administrateur. La gestion des contenus est accessible depuis ton tableau de bord.' : 'Tu es connecté avec un fournisseur externe. Aucun profil membre modifiable n’est disponible pour cette connexion. Ton identité et ton mot de passe se gèrent auprès de ton fournisseur.'}</p></div>
           {isAdmin && <Link to="/admin" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-gold-400">Ouvrir l’administration<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>}

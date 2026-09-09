@@ -148,4 +148,5 @@ export interface UserProfileUpdate {
   username?: string;
   bio?: string;
   location?: string;
+  socialLinks?: Record<string, string>;
 }

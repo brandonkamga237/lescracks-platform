@@ -6,11 +6,14 @@ import com.brandonkamga.lescracks.dto.user.UserProfileUpdateRequest;
 import com.brandonkamga.lescracks.exception.BadRequestException;
 import com.brandonkamga.lescracks.exception.NotFoundException;
 import com.brandonkamga.lescracks.repository.UserRepository;
+import com.brandonkamga.lescracks.service.interfaces.StorageService;
 import com.brandonkamga.lescracks.service.interfaces.UserProfileService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Instant;
 
 @Service
@@ -18,10 +21,12 @@ import java.time.Instant;
 public class UserProfileServiceImpl implements UserProfileService {
     private final UserRepository users;
     private final PasswordEncoder passwords;
+    private final StorageService storage;
 
-    public UserProfileServiceImpl(UserRepository users, PasswordEncoder passwords) {
+    public UserProfileServiceImpl(UserRepository users, PasswordEncoder passwords, StorageService storage) {
         this.users = users;
         this.passwords = passwords;
+        this.storage = storage;
     }
 
     @Override
@@ -45,6 +50,22 @@ public class UserProfileServiceImpl implements UserProfileService {
         }
         user.setUpdatedAt(Instant.now());
         return user;
+    }
+
+    @Override
+    public User updateAvatar(String email, MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new BadRequestException("Aucun fichier reçu.");
+        }
+        User user = require(email);
+        try {
+            String key = storage.store(file.getOriginalFilename(), file.getBytes(), file.getContentType());
+            user.setAvatarUrl(key);
+            user.setUpdatedAt(Instant.now());
+            return user;
+        } catch (IOException cause) {
+            throw new BadRequestException("Impossible de lire le fichier.");
+        }
     }
 
     @Override
