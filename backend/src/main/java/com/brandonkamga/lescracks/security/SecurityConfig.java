@@ -64,6 +64,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/categories", "/api/tags").permitAll()
                 .requestMatchers("/api/files/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/resources/*/likes").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/newsletter/public/subscribe").permitAll()
 
                 .anyRequest().authenticated())
             // The resource server keeps its own pair, or a bad token would answer with the

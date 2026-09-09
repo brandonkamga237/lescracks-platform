@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.service.impl;
 
+import com.brandonkamga.lescracks.domain.AuthProvider;
 import com.brandonkamga.lescracks.domain.EmailVerificationToken;
 import com.brandonkamga.lescracks.domain.PasswordResetToken;
 import com.brandonkamga.lescracks.domain.User;
@@ -46,17 +47,28 @@ public class UserAuthServiceImpl implements UserAuthService {
     @Override
     public User register(UserRegisterRequest request) {
         String email = request.email().trim().toLowerCase();
-        if (users.findByEmailIgnoreCase(email).isPresent()) {
+        User existing = users.findByEmailIgnoreCase(email).orElse(null);
+        if (existing != null && (existing.getPasswordHash() != null || existing.getProvider() != AuthProvider.LOCAL)) {
             throw new BadRequestException("Cette adresse email est déjà utilisée.");
         }
-        User user = users.save(User.builder()
-                .email(email)
-                .passwordHash(passwords.encode(request.password()))
-                .firstName(request.firstName().trim())
-                .lastName(request.lastName().trim())
-                .status(UserStatus.ACTIVE)
-                .emailVerified(false)
-                .build());
+        User user;
+        if (existing != null) {
+            user = existing;
+            user.setPasswordHash(passwords.encode(request.password()));
+            user.setFirstName(request.firstName().trim());
+            user.setLastName(request.lastName().trim());
+            user.setEmailVerified(false);
+        } else {
+            user = users.save(User.builder()
+                    .email(email)
+                    .passwordHash(passwords.encode(request.password()))
+                    .firstName(request.firstName().trim())
+                    .lastName(request.lastName().trim())
+                    .status(UserStatus.ACTIVE)
+                    .emailVerified(false)
+                    .provider(AuthProvider.LOCAL)
+                    .build());
+        }
         sendVerificationEmail(user);
         return user;
     }
