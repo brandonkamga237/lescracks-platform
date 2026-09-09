@@ -59,6 +59,7 @@ export const api = {
     http.post<void>('/me/password', body),
   newsletterStatus: (signal?: AbortSignal) => http.get<NewsletterStatus>('/newsletter', undefined, signal),
   newsletterSubscribe: () => http.post<NewsletterStatus>('/newsletter/subscribe'),
+  newsletterPublicSubscribe: (body: { email: string }) => http.post<NewsletterStatus>('/newsletter/public/subscribe', body),
   newsletterUnsubscribe: () => http.delete<NewsletterStatus>('/newsletter/unsubscribe'),
   verifyEmail: (token: string) => http.post<void>('/auth/verify-email', undefined, { token }),
   resendVerification: (email: string) => http.post<void>('/auth/resend-verification', { email }),

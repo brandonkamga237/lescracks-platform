@@ -7,6 +7,7 @@ import com.brandonkamga.lescracks.domain.User;
 import com.brandonkamga.lescracks.dto.newsletter.AdminSubscriberResponse;
 import com.brandonkamga.lescracks.dto.newsletter.BroadcastRequest;
 import com.brandonkamga.lescracks.dto.newsletter.NewsletterCampaignResponse;
+import com.brandonkamga.lescracks.dto.newsletter.NewsletterPublicSubscribeRequest;
 import com.brandonkamga.lescracks.dto.newsletter.NewsletterResponse;
 import com.brandonkamga.lescracks.repository.NewsletterSubscriptionRepository;
 import com.brandonkamga.lescracks.service.interfaces.NewsletterService;
@@ -43,6 +44,11 @@ public class NewsletterController {
     @PostMapping("/subscribe")
     public NewsletterResponse subscribe(Authentication authentication) {
         return response(newsletter.subscribe(authentication.getName()));
+    }
+
+    @PostMapping("/public/subscribe")
+    public NewsletterResponse subscribePublic(@Valid @RequestBody NewsletterPublicSubscribeRequest request) {
+        return response(newsletter.subscribePublic(request.email(), request.firstName(), request.lastName()));
     }
 
     @DeleteMapping("/unsubscribe")

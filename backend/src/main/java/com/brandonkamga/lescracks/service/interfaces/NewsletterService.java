@@ -10,6 +10,7 @@ import java.util.List;
 public interface NewsletterService {
     NewsletterSubscription status(String username);
     NewsletterSubscription subscribe(String username);
+    NewsletterSubscription subscribePublic(String email, String firstName, String lastName);
     NewsletterSubscription unsubscribe(String username);
     NewsletterSubscription unsubscribeById(Long userId);
     NewsletterSubscription subscribeById(Long userId);
