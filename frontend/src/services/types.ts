@@ -120,6 +120,11 @@ export interface NewsletterStatus {
 
 export type AuthProvider = 'LOCAL' | 'GOOGLE' | 'GITHUB';
 
+export interface UserIdentity {
+  provider: AuthProvider;
+  linkedAt: string;
+}
+
 export interface UserProfile {
   id: number;
   email: string;
@@ -129,4 +134,5 @@ export interface UserProfile {
   verified: boolean;
   provider: AuthProvider;
   createdAt: string;
+  identities: UserIdentity[];
 }
