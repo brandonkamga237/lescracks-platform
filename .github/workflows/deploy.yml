@@ -152,6 +152,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Add VPS host key
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+
       - name: Upload docker-compose.prod.yml
         uses: appleboy/scp-action@v0.1.7
         with:
