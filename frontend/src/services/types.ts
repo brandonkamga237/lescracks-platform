@@ -1,4 +1,4 @@
-export type ResourceKind = 'EBOOK' | 'EXTERNAL_VIDEO';
+export type ResourceKind = 'EBOOK' | 'EXTERNAL_VIDEO' | 'ARTICLE';
 export type ResourceStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 export type EventType = 'BOOTCAMP' | 'WORKSHOP' | 'WEBINAR' | 'CONFERENCE';
 export type EventFormat = 'ONLINE' | 'OFFLINE' | 'HYBRID';
@@ -29,6 +29,8 @@ export interface ResourceSummary {
   downloadUrl?: string;
   fileFormat?: string;
   fileSize?: number;
+  body?: unknown;
+  readingMinutes?: number;
   createdAt: string;
   updatedAt: string;
   tags: string[];

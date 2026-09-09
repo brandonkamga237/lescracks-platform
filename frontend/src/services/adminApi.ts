@@ -15,6 +15,9 @@ export interface VideoRequest extends EbookRequest {
   videoUrl: string;
   platform: string;
 }
+export interface ArticleRequest extends EbookRequest {
+  body: unknown;
+}
 export interface EventRequest {
   title: string;
   description: string;
@@ -76,6 +79,13 @@ function videoForm(data: VideoRequest, coverImageFile?: File) {
   return form;
 }
 
+function articleForm(data: ArticleRequest, coverImageFile?: File) {
+  const form = new FormData();
+  form.append('data', dataBlob(data));
+  if (coverImageFile) form.append('coverImageFile', coverImageFile);
+  return form;
+}
+
 async function downloadCsv(path: string, filename: string) {
   const response = await fetch(`${ENV.API_BASE_URL}${path}`, { credentials: 'include' });
   if (!response.ok) {
@@ -104,6 +114,8 @@ export const adminApi = {
   updateVideo: (id: number, body: VideoRequest, coverImageFile?: File) => http.putForm<ResourceSummary>(`/resources/admin/videos/${id}`, videoForm(body, coverImageFile)),
   createEbook: (data: EbookRequest, file: File, coverImageFile: File) => http.postForm<ResourceSummary>('/resources/admin/ebooks', ebookForm(data, file, coverImageFile)),
   updateEbook: (id: number, data: EbookRequest, file?: File, coverImageFile?: File) => http.putForm<ResourceSummary>(`/resources/admin/ebooks/${id}`, ebookForm(data, file, coverImageFile)),
+  createArticle: (data: ArticleRequest, coverImageFile: File) => http.postForm<ResourceSummary>('/resources/admin/articles', articleForm(data, coverImageFile)),
+  updateArticle: (id: number, data: ArticleRequest, coverImageFile?: File) => http.putForm<ResourceSummary>(`/resources/admin/articles/${id}`, articleForm(data, coverImageFile)),
   deleteResource: (id: number) => http.delete<void>(`/resources/admin/${id}`),
   events: (page = 0, signal?: AbortSignal) => http.get<PageResponse<EventSummary>>('/events/admin', { page, size: 12, sort: 'startDate,desc' }, signal),
   createEvent: (body: EventRequest, coverImageFile: File) => http.postForm<EventSummary>('/events/admin', eventForm(body, coverImageFile)),

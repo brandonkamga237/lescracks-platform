@@ -116,6 +116,22 @@ public class ResourceController {
         return mapper.toResponse(resources.updateEbook(id, request, file, coverImageFile));
     }
 
+    @PostMapping(value = "/admin/articles", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResourceResponse createArticle(@Valid @RequestPart("data") ArticleResourceRequest request,
+                                          @RequestPart(value = "coverImageFile", required = false) MultipartFile coverImageFile) {
+        return mapper.toResponse(resources.createArticle(request, coverImageFile));
+    }
+
+    @PutMapping(value = "/admin/articles/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResourceResponse updateArticle(@PathVariable Long id,
+                                          @Valid @RequestPart("data") ArticleResourceRequest request,
+                                          @RequestPart(value = "coverImageFile", required = false) MultipartFile coverImageFile) {
+        return mapper.toResponse(resources.updateArticle(id, request, coverImageFile));
+    }
+
     @DeleteMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.service.impl;
 
 import com.brandonkamga.lescracks.domain.*;
+import com.brandonkamga.lescracks.dto.resource.ArticleResourceRequest;
 import com.brandonkamga.lescracks.dto.resource.EbookResourceRequest;
 import com.brandonkamga.lescracks.dto.resource.VideoResourceRequest;
 import com.brandonkamga.lescracks.exception.BadRequestException;
@@ -10,6 +11,9 @@ import com.brandonkamga.lescracks.service.interfaces.ResourceService;
 import com.brandonkamga.lescracks.service.interfaces.StorageService;
 import com.brandonkamga.lescracks.service.interfaces.TaxonomyService;
 import com.brandonkamga.lescracks.service.interfaces.NewsletterService;
+import com.brandonkamga.lescracks.util.ArticleBody;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,25 +31,31 @@ public class ResourceServiceImpl implements ResourceService {
     private final ResourceRepository resources;
     private final EbookRepository ebooks;
     private final ExternalVideoReferenceRepository videos;
+    private final ArticleRepository articles;
     private final DocumentRepository documents;
     private final TagRepository tags;
     private final StorageService storage;
     private final TaxonomyService taxonomy;
     private final NewsletterService newsletter;
+    private final ArticleBody articleBody;
+    private final ObjectMapper mapper;
 
     public ResourceServiceImpl(ResourceRepository resources, EbookRepository ebooks,
-                               ExternalVideoReferenceRepository videos, DocumentRepository documents,
-                               TagRepository tags,
+                               ExternalVideoReferenceRepository videos, ArticleRepository articles,
+                               DocumentRepository documents, TagRepository tags,
                                StorageService storage, TaxonomyService taxonomy,
-                               NewsletterService newsletter) {
+                               NewsletterService newsletter, ArticleBody articleBody, ObjectMapper mapper) {
         this.resources = resources;
         this.ebooks = ebooks;
         this.videos = videos;
+        this.articles = articles;
         this.documents = documents;
         this.tags = tags;
         this.storage = storage;
         this.taxonomy = taxonomy;
         this.newsletter = newsletter;
+        this.articleBody = articleBody;
+        this.mapper = mapper;
     }
 
     @Override
@@ -141,6 +151,28 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
+    public Resource createArticle(ArticleResourceRequest request, MultipartFile coverImageFile) {
+        String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, null);
+        Resource resource = base(request.title(), request.description(), coverImage,
+                request.categoryId(), request.status(), request.tagIds());
+        Resource saved = resources.save(resource);
+        persistArticle(saved, request.body());
+        if (saved.getStatus() == ResourceStatus.PUBLISHED) newsletter.notifyResourceSubscribers(saved);
+        return saved;
+    }
+
+    @Override
+    public Resource updateArticle(Long id, ArticleResourceRequest request, MultipartFile coverImageFile) {
+        Resource resource = require(id);
+        ensureArticle(resource);
+        String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, resource.getCoverImage());
+        apply(resource, request.title(), request.description(), coverImage, request.categoryId(), request.status(), request.tagIds());
+        Article article = articles.findByResourceId(id).orElseThrow();
+        persistArticleBody(article, request.body());
+        return resource;
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Page<Resource> all(Pageable pageable) { return resources.findAll(pageable); }
 
@@ -154,6 +186,7 @@ public class ResourceServiceImpl implements ResourceService {
             documents.delete(ebook.getDocument());
         });
         videos.findByResourceId(id).ifPresent(videos::delete);
+        articles.findByResourceId(id).ifPresent(articles::delete);
         resources.delete(resource);
     }
 
@@ -224,5 +257,30 @@ public class ResourceServiceImpl implements ResourceService {
 
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) throw new BadRequestException("Le fichier ebook est obligatoire.");
+    }
+
+    private void persistArticle(Resource resource, com.fasterxml.jackson.databind.JsonNode body) {
+        Article article = Article.builder().resource(resource).body(body).build();
+        persistArticleBody(article, body);
+        articles.save(article);
+    }
+
+    private void persistArticleBody(Article article, com.fasterxml.jackson.databind.JsonNode body) {
+        String bodyJson = toJson(body);
+        article.setBody(body);
+        article.setPlainText(articleBody.toPlainText(bodyJson));
+        article.setReadingMinutes(articleBody.readingMinutes(article.getPlainText()));
+    }
+
+    private String toJson(com.fasterxml.jackson.databind.JsonNode body) {
+        try {
+            return mapper.writeValueAsString(body);
+        } catch (JsonProcessingException malformed) {
+            throw new BadRequestException("Le corps de l'article n'est pas un JSON valide.");
+        }
+    }
+
+    private void ensureArticle(Resource resource) {
+        if (!articles.existsById(resource.getId())) throw new BadRequestException("Cette ressource n'est pas un article.");
     }
 }

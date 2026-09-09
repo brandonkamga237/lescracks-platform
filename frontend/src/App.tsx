@@ -101,6 +101,7 @@ function AppRoutes() {
       <Route path="/ressources" element={<Ressources />} />
       <Route path="/ressources/ebooks" element={<Ressources />} />
       <Route path="/ressources/videos" element={<Ressources />} />
+      <Route path="/ressources/articles" element={<Ressources />} />
       <Route path="/ressources/:id" element={<RessourceDetail />} />
       <Route path="/evenements" element={<Evenements />} />
       <Route path="/evenements/:id" element={<EvenementDetail />} />

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminModal } from '@/components/admin/AdminTable';
+import ArticleEditor from '@/components/admin/ArticleEditor';
 import { useApi } from '@/hooks/useApi';
-import { adminApi, type EbookRequest, type VideoRequest } from '@/services/adminApi';
+import { adminApi, type ArticleRequest, type EbookRequest, type VideoRequest } from '@/services/adminApi';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
 import type { ResourceKind, ResourceStatus, ResourceSummary, Tag } from '@/services/types';
@@ -31,6 +32,7 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
     videoUrl: resource?.videoUrl ?? '',
     platform: resource?.platform ?? 'YouTube',
     status: resource?.status ?? 'DRAFT' as ResourceStatus,
+    body: (resource?.body ?? []) as unknown[],
   });
   const categories = useApi((signal) => api.categories(signal), []);
   const tags = useApi((signal) => (form.categoryId ? api.tags(Number(form.categoryId), signal) : Promise.resolve([] as Tag[])), [form.categoryId]);
@@ -70,6 +72,10 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
       setFailure('Renseigne le titre, la description, la catégorie et une image de couverture.');
       return;
     }
+    if (kind === 'ARTICLE' && (!Array.isArray(form.body) || form.body.length === 0)) {
+      setFailure("Ajoute au moins un bloc au contenu de l'article.");
+      return;
+    }
     if (kind === 'EXTERNAL_VIDEO' && (!form.videoUrl.trim() || !form.platform.trim())) {
       setFailure('Renseigne le lien de la vidéo et sa plateforme.');
       return;
@@ -92,6 +98,10 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
         const video: VideoRequest = { ...base, videoUrl: form.videoUrl.trim(), platform: form.platform.trim() };
         if (resource) await adminApi.updateVideo(resource.id, video, coverImageFile ?? undefined);
         else await adminApi.createVideo(video, coverImageFile!);
+      } else if (kind === 'ARTICLE') {
+        const article: ArticleRequest = { ...base, body: form.body };
+        if (resource) await adminApi.updateArticle(resource.id, article, coverImageFile ?? undefined);
+        else await adminApi.createArticle(article, coverImageFile!);
       } else if (resource) {
         await adminApi.updateEbook(resource.id, base, ebookFile ?? undefined, coverImageFile ?? undefined);
       } else if (ebookFile) {
@@ -108,7 +118,7 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
     <form onSubmit={submit} className="space-y-6">
       <fieldset disabled={busy} className="space-y-5">
         <legend className="mb-4 font-display text-lg font-medium">01 — Le contenu</legend>
-        <label className="block text-sm text-t2">Type de ressource<select disabled={!!resource} value={kind} onChange={(event) => setKind(event.target.value as ResourceKind)} className={field}><option value="EXTERNAL_VIDEO">Vidéo externe</option><option value="EBOOK">Ebook</option></select></label>
+        <label className="block text-sm text-t2">Type de ressource<select disabled={!!resource} value={kind} onChange={(event) => setKind(event.target.value as ResourceKind)} className={field}><option value="EXTERNAL_VIDEO">Vidéo externe</option><option value="EBOOK">Ebook</option><option value="ARTICLE">Article</option></select></label>
         {resource && <p className="text-xs text-t4">Le type d’une ressource existante ne peut pas être modifié.</p>}
         <label className="block text-sm text-t2">Titre<input required maxLength={200} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} className={field} /></label>
         <label className="block text-sm text-t2">Description<textarea required rows={5} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className={area} /></label>
@@ -123,11 +133,15 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
       </fieldset>
 
       <fieldset disabled={busy} className="space-y-5 border-t border-line-soft pt-5">
-        <legend className="pr-3 font-display text-lg font-medium">02 — {kind === 'EBOOK' ? 'Le fichier' : 'La vidéo'}</legend>
-        {kind === 'EXTERNAL_VIDEO' ? <div className="grid gap-5 sm:grid-cols-2">
+        <legend className="pr-3 font-display text-lg font-medium">02 — {kind === 'ARTICLE' ? "Le contenu de l'article" : kind === 'EBOOK' ? 'Le fichier' : 'La vidéo'}</legend>
+        {kind === 'ARTICLE' && (
+          <ArticleEditor value={form.body} onChange={(body) => setForm({ ...form, body })} />
+        )}
+        {kind === 'EXTERNAL_VIDEO' && <div className="grid gap-5 sm:grid-cols-2">
           <label className="block text-sm text-t2">Lien de la vidéo<input required type="url" maxLength={1000} placeholder="https://…" value={form.videoUrl} onChange={(event) => setForm({ ...form, videoUrl: event.target.value })} className={field} /></label>
           <label className="block text-sm text-t2">Plateforme<select required value={form.platform} onChange={(event) => setForm({ ...form, platform: event.target.value })} className={field}><option value="">Choisir une plateforme</option>{VIDEO_PLATFORMS.map((platform) => <option key={platform} value={platform}>{platform}</option>)}</select></label>
-        </div> : <div className="rounded-2xl border border-dashed border-line p-5">
+        </div>}
+        {kind === 'EBOOK' && <div className="rounded-2xl border border-dashed border-line p-5">
           <label className="block text-sm text-t2">{resource ? 'Remplacer le fichier (facultatif)' : 'Fichier ebook'}<input required={!resource} type="file" onChange={(event) => setEbookFile(event.target.files?.[0] ?? null)} className="mt-3 block w-full text-sm text-t3 file:mr-4 file:rounded-full file:border-0 file:bg-noir-700 file:px-4 file:py-2 file:text-t1" /></label>
           {resource && <p className="mt-3 text-xs leading-relaxed text-t3">Sans nouveau fichier, le document actuel est conservé{resource.fileFormat ? ` (${resource.fileFormat})` : ''}{resource.fileSize ? ` · ${(resource.fileSize / 1024 / 1024).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} Mo` : ''}.</p>}
         </div>}
