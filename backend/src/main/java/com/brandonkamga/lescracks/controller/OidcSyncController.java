@@ -4,6 +4,7 @@ import com.brandonkamga.lescracks.dto.auth.OidcSyncRequest;
 import com.brandonkamga.lescracks.dto.user.UserProfileResponse;
 import com.brandonkamga.lescracks.exception.BadRequestException;
 import com.brandonkamga.lescracks.service.interfaces.OidcSyncService;
+import com.brandonkamga.lescracks.service.interfaces.UserIdentityService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,8 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class OidcSyncController {
 
     private final OidcSyncService oidc;
+    private final UserIdentityService identities;
 
-    public OidcSyncController(OidcSyncService oidc) { this.oidc = oidc; }
+    public OidcSyncController(OidcSyncService oidc, UserIdentityService identities) {
+        this.oidc = oidc;
+        this.identities = identities;
+    }
 
     @PostMapping("/sync")
     public ResponseEntity<UserProfileResponse> sync(Authentication authentication,
@@ -31,7 +36,8 @@ public class OidcSyncController {
         }
         var user = oidc.sync(jwt, request.provider());
         return ResponseEntity.ok(new UserProfileResponse(user.getId(), user.getEmail(), user.getFirstName(),
-                user.getLastName(), user.getStatus(), user.isEmailVerified(), user.getProvider(), user.getCreatedAt()));
+                user.getLastName(), user.getStatus(), user.isEmailVerified(), user.getProvider(), user.getCreatedAt(),
+                identities.list(user.getEmail())));
     }
 
     private static Jwt extractJwt(Authentication authentication) {

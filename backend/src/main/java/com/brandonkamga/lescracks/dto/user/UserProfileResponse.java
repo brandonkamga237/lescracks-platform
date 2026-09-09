@@ -4,7 +4,9 @@ import com.brandonkamga.lescracks.domain.AuthProvider;
 import com.brandonkamga.lescracks.domain.UserStatus;
 
 import java.time.Instant;
+import java.util.List;
 
 public record UserProfileResponse(Long id, String email, String firstName, String lastName,
-                                  UserStatus status, boolean verified, AuthProvider provider, Instant createdAt) {
+                                  UserStatus status, boolean verified, AuthProvider provider, Instant createdAt,
+                                  List<UserIdentityResponse> identities) {
 }

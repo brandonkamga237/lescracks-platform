@@ -9,12 +9,20 @@ import NewsletterCard from '@/components/common/NewsletterCard';
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
+import type { AuthProvider } from '@/services/types';
 
 const statusLabels = { ACTIVE: 'Actif', INACTIVE: 'Inactif', BANNED: 'Suspendu' };
 const providerLabels = { LOCAL: 'Email / mot de passe', GOOGLE: 'Google', GITHUB: 'GitHub' };
 
+type IdentityProvider = Exclude<AuthProvider, 'LOCAL'>;
+
+const identityProviders: { provider: IdentityProvider; label: string }[] = [
+  { provider: 'GOOGLE', label: 'Google' },
+  { provider: 'GITHUB', label: 'GitHub' },
+];
+
 export default function Profile() {
-  const { name, email, user, isAdmin, refresh, signOut } = useSession();
+  const { name, email, user, isAdmin, refresh, signOut, socialSignIn } = useSession();
   const navigate = useNavigate();
   const [form, setForm] = useState({ firstName: user?.firstName ?? '', lastName: user?.lastName ?? '' });
   const [editing, setEditing] = useState(false);
@@ -28,6 +36,11 @@ export default function Profile() {
   const [passwordBusy, setPasswordBusy] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordNotice, setPasswordNotice] = useState('');
+
+  const [identityBusy, setIdentityBusy] = useState(false);
+  const [unlinkBusy, setUnlinkBusy] = useState<AuthProvider | null>(null);
+  const [identityError, setIdentityError] = useState('');
+  const [identityNotice, setIdentityNotice] = useState('');
 
   useEffect(() => {
     setForm({ firstName: user?.firstName ?? '', lastName: user?.lastName ?? '' });
@@ -100,6 +113,33 @@ export default function Profile() {
     }
   }
 
+  async function linkProvider(provider: IdentityProvider) {
+    setIdentityError('');
+    setIdentityNotice('');
+    setIdentityBusy(true);
+    try {
+      await socialSignIn(provider.toLowerCase() as 'google' | 'github', '/profil');
+    } catch (cause) {
+      setIdentityBusy(false);
+      setIdentityError(cause instanceof Error ? cause.message : 'Impossible d’ouvrir la fenêtre de connexion.');
+    }
+  }
+
+  async function unlinkProvider(provider: IdentityProvider) {
+    setIdentityError('');
+    setIdentityNotice('');
+    setUnlinkBusy(provider);
+    try {
+      await api.unlinkIdentity(provider);
+      setIdentityNotice('La méthode de connexion a été retirée.');
+      await refresh();
+    } catch (cause) {
+      setIdentityError(cause instanceof ApiError ? cause.message : 'Le retrait a échoué. Réessaie dans un instant.');
+    } finally {
+      setUnlinkBusy(null);
+    }
+  }
+
   const joined = user?.createdAt ? new Date(user.createdAt) : null;
   const joinedLabel = joined && !Number.isNaN(joined.getTime()) ? joined.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
 
@@ -161,6 +201,59 @@ export default function Profile() {
               </form>
             )}
           </div>
+          {user && (
+            <div className="mt-10 border-t border-line-soft pt-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gold-400/25 bg-gold-400/10 text-gold-400"><KeyRound className="h-5 w-5" aria-hidden="true" /></div>
+                  <div>
+                    <h3 className="font-display text-lg font-semibold text-t1">Méthodes de connexion</h3>
+                    <p className="text-sm text-t4">Gère les façons de te connecter à ton compte.</p>
+                  </div>
+                </div>
+              </div>
+              {identityError && <p role="alert" className="mt-5 rounded-xl border border-red-400/25 bg-red-400/5 p-3 text-sm text-red-400">{identityError}</p>}
+              {identityNotice && <p role="status" className="mt-5 rounded-xl border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-400">{identityNotice}</p>}
+              <ul className="mt-5 space-y-3">
+                <li className="flex items-center justify-between gap-4 rounded-2xl border border-white/[0.06] bg-[#0b0b0b] px-4 py-3">
+                  <span className="text-sm text-t1">{providerLabels.LOCAL}</span>
+                  {user.provider === 'LOCAL' ? (
+                    <span className="text-xs font-medium text-gold-400">Actif</span>
+                  ) : (
+                    <span className="text-xs text-t4">—</span>
+                  )}
+                </li>
+                {identityProviders.map(({ provider, label }) => {
+                  const linked = user.identities?.some((identity) => identity.provider === provider);
+                  const onlyMethod = linked && user.provider !== 'LOCAL' && user.identities?.length === 1 && user.identities[0]?.provider === provider;
+                  return (
+                    <li key={provider} className="flex items-center justify-between gap-4 rounded-2xl border border-white/[0.06] bg-[#0b0b0b] px-4 py-3">
+                      <span className="text-sm text-t1">{label}</span>
+                      {linked ? (
+                        <button
+                          type="button"
+                          disabled={Boolean(unlinkBusy) || onlyMethod}
+                          onClick={() => void unlinkProvider(provider)}
+                          className="text-xs font-medium text-red-400 disabled:opacity-50"
+                        >
+                          {unlinkBusy === provider ? 'Retrait…' : onlyMethod ? 'Obligatoire' : 'Retirer'}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          disabled={identityBusy}
+                          onClick={() => void linkProvider(provider)}
+                          className="text-xs font-medium text-gold-400 disabled:opacity-50"
+                        >
+                          {identityBusy ? 'Redirection…' : 'Lier'}
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </section>
         <section aria-labelledby="quick-links-heading">
           <h2 id="quick-links-heading" className="font-display text-xl font-semibold text-t1">Et maintenant ?</h2>

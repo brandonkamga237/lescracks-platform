@@ -9,6 +9,7 @@ import { api } from '@/services/api';
 import { adminApi } from '@/services/adminApi';
 import { currentAccessToken, safeReturnPath } from '@/services/auth';
 import { ApiError, getAuthTransport, setAuthTransport } from '@/services/http';
+import type { UserProfile } from '@/services/types';
 
 const anonymous: SessionIdentity = { isSignedIn: false, isAdmin: false, name: null, email: null, user: null };
 
@@ -18,6 +19,12 @@ function unavailable(cause: unknown): Error {
 
 function isMissingIdentity(cause: unknown) {
   return cause instanceof ApiError && [401, 403, 404].includes(cause.status);
+}
+
+interface OidcProfile {
+  name?: string;
+  preferred_username?: string;
+  email?: string;
 }
 
 interface SessionProviderProps {
@@ -37,6 +44,20 @@ export function SessionProvider({ children }: SessionProviderProps) {
   const revision = useRef(0);
 
   const reload = useCallback(async () => {
+    const hasOidcIdentity = (profile: UserProfile, provider: string | null) =>
+      !!provider && profile.identities?.some((identity) => identity.provider === provider.toUpperCase());
+
+    const syncOidcProfile = async (provider: 'google' | 'github', oidcProfile: OidcProfile | null | undefined) => {
+      try {
+        const profile = await api.syncOidc(provider);
+        sessionStorage.removeItem('lescracks.oidc.provider');
+        setIdentity({ isSignedIn: true, isAdmin: false, user: profile, name: `${profile.firstName} ${profile.lastName}`.trim(), email: profile.email });
+      } catch (cause) {
+        setIdentity({ ...anonymous, isSignedIn: true, name: oidcProfile?.name ?? oidcProfile?.preferred_username ?? null, email: oidcProfile?.email ?? null });
+        setError(unavailable(cause));
+      }
+    };
+
     const requestId = ++revision.current;
     if (!identityRef.current.isSignedIn) setLoading(true);
     setError(null);
@@ -57,27 +78,22 @@ export function SessionProvider({ children }: SessionProviderProps) {
       } else if (admin.status === 'rejected' && !isMissingIdentity(admin.reason)) {
         throw admin.reason;
       } else if (member.status === 'fulfilled' && typeof member.value.id === 'number' && typeof member.value.email === 'string') {
-        const user = member.value;
-        setIdentity({ isSignedIn: true, isAdmin: false, user, name: `${user.firstName} ${user.lastName}`.trim(), email: user.email });
+        const profile = member.value;
+        const oidcProvider = sessionStorage.getItem('lescracks.oidc.provider');
+        if (mode === 'oidc' && currentAccessToken() && oidcProvider && (oidcProvider === 'google' || oidcProvider === 'github') && !hasOidcIdentity(profile, oidcProvider)) {
+          await syncOidcProfile(oidcProvider, authRef.current.user?.profile);
+        } else {
+          setIdentity({ isSignedIn: true, isAdmin: false, user: profile, name: `${profile.firstName} ${profile.lastName}`.trim(), email: profile.email });
+        }
       } else {
         const failed = results.find((result) => result.status === 'rejected' && !isMissingIdentity(result.reason));
         if (failed?.status === 'rejected') throw failed.reason;
         if (results.some((result) => result.status === 'fulfilled')) throw new ApiError(502, { message: 'Le serveur a renvoyé une session invalide.' });
         const oidcProfile = authRef.current.user?.profile;
         const missingLocalProfile = member.status === 'rejected' && member.reason instanceof ApiError && member.reason.status === 404;
-        if (mode === 'oidc' && currentAccessToken() && missingLocalProfile && oidcProfile) {
-          const oidcProvider = sessionStorage.getItem('lescracks.oidc.provider');
-          if (oidcProvider === 'google' || oidcProvider === 'github') {
-            try {
-              const user = await api.syncOidc(oidcProvider);
-              setIdentity({ isSignedIn: true, isAdmin: false, user, name: `${user.firstName} ${user.lastName}`.trim(), email: user.email });
-            } catch (cause) {
-              setIdentity({ ...anonymous, isSignedIn: true, name: oidcProfile.name ?? oidcProfile.preferred_username ?? null, email: oidcProfile.email ?? null });
-              setError(unavailable(cause));
-            }
-          } else {
-            setIdentity({ ...anonymous, isSignedIn: true, name: oidcProfile.name ?? oidcProfile.preferred_username ?? null, email: oidcProfile.email ?? null });
-          }
+        const oidcProvider = sessionStorage.getItem('lescracks.oidc.provider');
+        if (mode === 'oidc' && currentAccessToken() && missingLocalProfile && oidcProvider && (oidcProvider === 'google' || oidcProvider === 'github') && oidcProfile) {
+          await syncOidcProfile(oidcProvider, oidcProfile);
         } else {
           setIdentity(anonymous);
         }

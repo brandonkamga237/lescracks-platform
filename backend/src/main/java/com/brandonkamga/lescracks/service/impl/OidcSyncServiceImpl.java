@@ -2,7 +2,10 @@ package com.brandonkamga.lescracks.service.impl;
 
 import com.brandonkamga.lescracks.domain.AuthProvider;
 import com.brandonkamga.lescracks.domain.User;
+import com.brandonkamga.lescracks.domain.UserIdentity;
 import com.brandonkamga.lescracks.exception.BadRequestException;
+import com.brandonkamga.lescracks.exception.ConflictException;
+import com.brandonkamga.lescracks.repository.UserIdentityRepository;
 import com.brandonkamga.lescracks.repository.UserRepository;
 import com.brandonkamga.lescracks.service.interfaces.OidcSyncService;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -16,8 +19,12 @@ import java.util.Arrays;
 public class OidcSyncServiceImpl implements OidcSyncService {
 
     private final UserRepository users;
+    private final UserIdentityRepository identities;
 
-    public OidcSyncServiceImpl(UserRepository users) { this.users = users; }
+    public OidcSyncServiceImpl(UserRepository users, UserIdentityRepository identities) {
+        this.users = users;
+        this.identities = identities;
+    }
 
     @Override
     public User sync(Jwt jwt, AuthProvider provider) {
@@ -29,8 +36,10 @@ public class OidcSyncServiceImpl implements OidcSyncService {
             throw new BadRequestException("Adresse email manquante dans le token.");
         }
         String normalized = email.trim().toLowerCase();
-        return users.findByEmailIgnoreCase(normalized)
+        User user = users.findByEmailIgnoreCase(normalized)
                 .orElseGet(() -> createFromToken(jwt, normalized, provider));
+        ensureIdentity(user, provider, jwt.getSubject());
+        return user;
     }
 
     private User createFromToken(Jwt jwt, String email, AuthProvider provider) {
@@ -50,6 +59,24 @@ public class OidcSyncServiceImpl implements OidcSyncService {
                 .provider(provider)
                 .build();
         return users.save(user);
+    }
+
+    private void ensureIdentity(User user, AuthProvider provider, String externalId) {
+        if (externalId == null || externalId.isBlank()) {
+            return;
+        }
+        identities.findByProviderAndExternalId(provider, externalId).ifPresent(existing -> {
+            if (!existing.getUser().getId().equals(user.getId())) {
+                throw new ConflictException("Cette identité externe est déjà associée à un autre compte.");
+            }
+        });
+        if (!identities.existsByUserAndProvider(user, provider)) {
+            identities.save(UserIdentity.builder()
+                    .user(user)
+                    .provider(provider)
+                    .externalId(externalId)
+                    .build());
+        }
     }
 
     private String firstNonBlank(String... values) {
