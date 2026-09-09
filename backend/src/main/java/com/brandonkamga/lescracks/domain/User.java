@@ -5,8 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A registered user of the platform.
@@ -37,6 +41,23 @@ public class User {
 
     @Column(name = "last_name", nullable = false, length = 120)
     private String lastName;
+
+    @Column(unique = true, length = 50)
+    private String username;
+
+    @Column(name = "avatar_url", length = 255)
+    private String avatarUrl;
+
+    @Column(columnDefinition = "text")
+    private String bio;
+
+    @Column(length = 100)
+    private String location;
+
+    @Column(name = "social_links", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Builder.Default
+    private Map<String, String> socialLinks = new HashMap<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
