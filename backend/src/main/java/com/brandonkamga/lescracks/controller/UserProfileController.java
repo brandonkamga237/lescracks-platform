@@ -4,6 +4,7 @@ import com.brandonkamga.lescracks.domain.User;
 import com.brandonkamga.lescracks.dto.user.UserPasswordChangeRequest;
 import com.brandonkamga.lescracks.dto.user.UserProfileResponse;
 import com.brandonkamga.lescracks.dto.user.UserProfileUpdateRequest;
+import com.brandonkamga.lescracks.service.interfaces.UserIdentityService;
 import com.brandonkamga.lescracks.service.interfaces.UserProfileService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -15,8 +16,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/me")
 public class UserProfileController {
     private final UserProfileService profiles;
+    private final UserIdentityService identities;
 
-    public UserProfileController(UserProfileService profiles) { this.profiles = profiles; }
+    public UserProfileController(UserProfileService profiles, UserIdentityService identities) {
+        this.profiles = profiles;
+        this.identities = identities;
+    }
 
     @GetMapping
     public UserProfileResponse get(Authentication authentication) {
@@ -42,6 +47,7 @@ public class UserProfileController {
 
     private UserProfileResponse response(User user) {
         return new UserProfileResponse(user.getId(), user.getEmail(), user.getFirstName(),
-                user.getLastName(), user.getStatus(), user.isEmailVerified(), user.getProvider(), user.getCreatedAt());
+                user.getLastName(), user.getStatus(), user.isEmailVerified(), user.getProvider(), user.getCreatedAt(),
+                identities.list(user.getEmail()));
     }
 }
