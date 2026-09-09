@@ -1,11 +1,14 @@
 package com.brandonkamga.lescracks.service.impl;
 
+import com.brandonkamga.lescracks.domain.AuthProvider;
 import com.brandonkamga.lescracks.domain.NewsletterCampaign;
 import com.brandonkamga.lescracks.domain.NewsletterStatus;
 import com.brandonkamga.lescracks.domain.NewsletterSubscription;
 import com.brandonkamga.lescracks.domain.Event;
 import com.brandonkamga.lescracks.domain.Resource;
 import com.brandonkamga.lescracks.domain.User;
+import com.brandonkamga.lescracks.domain.UserStatus;
+import com.brandonkamga.lescracks.exception.BadRequestException;
 import com.brandonkamga.lescracks.exception.NotFoundException;
 import com.brandonkamga.lescracks.repository.NewsletterCampaignRepository;
 import com.brandonkamga.lescracks.repository.NewsletterSubscriptionRepository;
@@ -48,6 +51,31 @@ public class NewsletterServiceImpl implements NewsletterService {
     @Override
     public NewsletterSubscription subscribe(String username) {
         User user = user(username);
+        return subscribe(user);
+    }
+
+    @Override
+    public NewsletterSubscription subscribePublic(String email, String firstName, String lastName) {
+        String normalizedEmail = email.trim().toLowerCase();
+        User user = users.findByEmailIgnoreCase(normalizedEmail).orElse(null);
+        if (user != null && (user.getPasswordHash() != null || user.getProvider() != AuthProvider.LOCAL)) {
+            throw new BadRequestException("Cette adresse email est déjà associée à un compte. Connecte-toi pour gérer ton abonnement.");
+        }
+        if (user == null) {
+            user = users.save(User.builder()
+                    .email(normalizedEmail)
+                    .firstName(firstName == null ? "" : firstName.trim())
+                    .lastName(lastName == null ? "" : lastName.trim())
+                    .passwordHash(null)
+                    .status(UserStatus.ACTIVE)
+                    .emailVerified(false)
+                    .provider(AuthProvider.LOCAL)
+                    .build());
+        }
+        return subscribe(user);
+    }
+
+    private NewsletterSubscription subscribe(User user) {
         NewsletterSubscription subscription = subscriptions.findByUserId(user.getId())
                 .orElseGet(() -> NewsletterSubscription.builder().user(user).build());
         subscription.setStatus(NewsletterStatus.SUBSCRIBED);
