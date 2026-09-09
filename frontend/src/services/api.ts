@@ -3,6 +3,7 @@ import type { Query } from '@/services/http';
 import type {
   AuthProvider, Category, EventFormat, EventSummary, EventType, PageResponse, ResourceKind,
   NewsletterStatus, ResourceLikeStatus, ResourceSummary, Tag, UserIdentity, UserProfile,
+  UserProfileUpdate,
 } from '@/services/types';
 
 export interface CatalogueFilters extends Query {
@@ -48,7 +49,12 @@ export const api = {
   linkIdentity: (provider: AuthProvider, token: string) =>
     http.post<UserIdentity>('/me/identities', { provider, token }),
   unlinkIdentity: (provider: AuthProvider) => http.delete<void>(`/me/identities/${provider}`),
-  updateProfile: (body: Pick<UserProfile, 'firstName' | 'lastName'>) => http.patch<UserProfile>('/me', body),
+  updateProfile: (body: UserProfileUpdate) => http.patch<UserProfile>('/me', body),
+  uploadAvatar: (file: File) => {
+    const form = new FormData();
+    form.append('file', file);
+    return http.postForm<UserProfile>('/me/avatar', form);
+  },
   changePassword: (body: { currentPassword: string; newPassword: string; confirmPassword: string }) =>
     http.post<void>('/me/password', body),
   newsletterStatus: (signal?: AbortSignal) => http.get<NewsletterStatus>('/newsletter', undefined, signal),
