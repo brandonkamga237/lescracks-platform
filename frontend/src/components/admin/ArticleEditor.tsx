@@ -4,6 +4,20 @@ import 'suneditor/src/themes/dark.css';
 
 import { useEffect, useRef } from 'react';
 import SUNEDITOR from 'suneditor';
+import {
+  align,
+  backgroundColor,
+  blockStyle,
+  font,
+  fontColor,
+  fontSize,
+  hr,
+  image,
+  link,
+  list,
+  table,
+  video,
+} from 'suneditor/plugins';
 import { adminApi } from '@/services/adminApi';
 
 interface SunEditorInstance {
@@ -38,17 +52,33 @@ export default function ArticleEditor({ value, onChange }: ArticleEditorProps) {
         .catch(() => uploadHandler({ result: [{ url: '', name: file.name, size: file.size }] }));
     };
 
+    const plugins = [
+      align,
+      backgroundColor,
+      blockStyle,
+      font,
+      fontColor,
+      fontSize,
+      hr,
+      image,
+      link,
+      list,
+      table,
+      video,
+    ];
+
     const options: Record<string, unknown> = {
       height: 'auto',
       minHeight: '300px',
       theme: 'dark',
       value: value ?? '',
+      plugins,
       buttonList: [
         ['undo', 'redo'],
-        ['font', 'fontSize', 'formatBlock'],
+        ['font', 'fontSize'],
         ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript'],
-        ['fontColor', 'hiliteColor'],
-        ['align', 'horizontalRule', 'list', 'table'],
+        ['fontColor', 'backgroundColor'],
+        ['align', 'list', 'table', 'hr', 'blockStyle'],
         ['link', 'image', 'video'],
         ['fullScreen', 'codeView'],
       ],
