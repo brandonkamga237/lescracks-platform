@@ -1,5 +1,7 @@
 import type { ResourceSummary } from '@/services/types';
 
+type ArticleBody = { html?: string } | Array<unknown>;
+
 type ArticleBlock =
   | { type: 'paragraph'; text: string }
   | { type: 'heading'; level: 2 | 3; text: string }
@@ -12,8 +14,28 @@ function isBlock(candidate: unknown): candidate is ArticleBlock {
   return typeof candidate === 'object' && candidate !== null && 'type' in (candidate as Record<string, unknown>);
 }
 
+function hasHtml(body: unknown): body is { html: string } {
+  return typeof body === 'object' && body !== null && !Array.isArray(body) && 'html' in (body as { html?: string }) && typeof (body as { html?: string }).html === 'string';
+}
+
+function isBlockArray(body: unknown): body is ArticleBlock[] {
+  return Array.isArray(body);
+}
+
 export default function ArticleRenderer({ resource }: { resource: ResourceSummary }) {
-  const blocks = Array.isArray(resource.body) ? (resource.body as ArticleBlock[]).filter(isBlock) : [];
+  const body = resource.body as ArticleBody;
+
+  if (hasHtml(body)) {
+    return (
+      <article
+        className="prose prose-invert prose-gold max-w-none article-body"
+        dangerouslySetInnerHTML={{ __html: body.html }}
+      />
+    );
+  }
+
+  if (!isBlockArray(body)) return <p className="text-t3">Aucun contenu pour cet article.</p>;
+  const blocks = body.filter(isBlock);
   if (blocks.length === 0) return <p className="text-t3">Aucun contenu pour cet article.</p>;
 
   return (

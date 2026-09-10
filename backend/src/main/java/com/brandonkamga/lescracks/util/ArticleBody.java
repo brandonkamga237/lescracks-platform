@@ -2,6 +2,8 @@ package com.brandonkamga.lescracks.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -26,8 +28,13 @@ public final class ArticleBody {
 
     /** Every piece of text in the document, flattened, for search and for the SEO snapshot. */
     public String toPlainText(String bodyJson) {
+        JsonNode root = read(bodyJson);
+        if (root.isObject() && root.has("html")) {
+            String html = root.get("html").asText("");
+            return Jsoup.parse(html).text().strip();
+        }
         StringBuilder out = new StringBuilder();
-        collectText(read(bodyJson), out);
+        collectText(root, out);
         return out.toString().strip();
     }
 

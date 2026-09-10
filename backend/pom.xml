@@ -140,6 +140,13 @@
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
 
+		<!-- ✅ HTML parsing for article SEO -->
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.17.2</version>
+		</dependency>
+
 		<!-- ✅ Tests : corrigé (les 4 faux artifacts remplacés) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -32,7 +32,9 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
     videoUrl: resource?.videoUrl ?? '',
     platform: resource?.platform ?? 'YouTube',
     status: resource?.status ?? 'DRAFT' as ResourceStatus,
-    body: (resource?.body ?? []) as unknown[],
+    body: (resource?.body && typeof resource.body === 'object' && !Array.isArray(resource.body) && (resource.body as { html?: string }).html)
+      ? (resource.body as { html: string }).html
+      : '',
   });
   const categories = useApi((signal) => api.categories(signal), []);
   const tags = useApi((signal) => (form.categoryId ? api.tags(Number(form.categoryId), signal) : Promise.resolve([] as Tag[])), [form.categoryId]);
@@ -72,8 +74,8 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
       setFailure('Renseigne le titre, la description, la catégorie et une image de couverture.');
       return;
     }
-    if (kind === 'ARTICLE' && (!Array.isArray(form.body) || form.body.length === 0)) {
-      setFailure("Ajoute au moins un bloc au contenu de l'article.");
+    if (kind === 'ARTICLE' && (!form.body.trim() || form.body.trim() === '<p><br></p>')) {
+      setFailure("Rédige le contenu de l'article.");
       return;
     }
     if (kind === 'EXTERNAL_VIDEO' && (!form.videoUrl.trim() || !form.platform.trim())) {
@@ -99,7 +101,7 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
         if (resource) await adminApi.updateVideo(resource.id, video, coverImageFile ?? undefined);
         else await adminApi.createVideo(video, coverImageFile!);
       } else if (kind === 'ARTICLE') {
-        const article: ArticleRequest = { ...base, body: form.body };
+        const article: ArticleRequest = { ...base, body: { html: form.body } };
         if (resource) await adminApi.updateArticle(resource.id, article, coverImageFile ?? undefined);
         else await adminApi.createArticle(article, coverImageFile!);
       } else if (resource) {
@@ -135,7 +137,7 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
       <fieldset disabled={busy} className="space-y-5 border-t border-line-soft pt-5">
         <legend className="pr-3 font-display text-lg font-medium">02 — {kind === 'ARTICLE' ? "Le contenu de l'article" : kind === 'EBOOK' ? 'Le fichier' : 'La vidéo'}</legend>
         {kind === 'ARTICLE' && (
-          <ArticleEditor value={form.body} onChange={(body) => setForm({ ...form, body })} />
+          <ArticleEditor value={form.body} onChange={(html) => setForm({ ...form, body: html })} />
         )}
         {kind === 'EXTERNAL_VIDEO' && <div className="grid gap-5 sm:grid-cols-2">
           <label className="block text-sm text-t2">Lien de la vidéo<input required type="url" maxLength={1000} placeholder="https://…" value={form.videoUrl} onChange={(event) => setForm({ ...form, videoUrl: event.target.value })} className={field} /></label>

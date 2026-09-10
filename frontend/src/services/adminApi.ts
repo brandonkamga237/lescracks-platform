@@ -133,6 +133,11 @@ export const adminApi = {
   updateUserStatus: (id: number, status: AdminUser['status']) =>
     http.patch<AdminUser>(`/admin/users/${id}/status`, { status }),
   deleteUser: (id: number) => http.delete<void>(`/admin/users/${id}`),
+  uploadImage: (image: File) => {
+    const form = new FormData();
+    form.append('image', image);
+    return http.postForm<{ url: string }>('/admin/upload/image', form);
+  },
   newsletterStats: (signal?: AbortSignal) => http.get<NewsletterStats>('/newsletter/admin/stats', undefined, signal),
   newsletterSubscriptions: (status: string | '', signal?: AbortSignal) =>
     http.get<AdminSubscriber[]>('/newsletter/admin/subscriptions', status ? { status } : undefined, signal),
