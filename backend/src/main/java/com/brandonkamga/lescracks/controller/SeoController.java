@@ -84,14 +84,14 @@ public class SeoController {
         };
     }
 
-    @GetMapping(value = "/evenements/{id}", produces = MediaType.TEXT_HTML_VALUE)
-    public ResponseEntity<String> event(@PathVariable Long id, HttpServletRequest request) {
-        Event event = events.require(id);
+    @GetMapping(value = "/evenements/{slug}", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<String> event(@PathVariable String slug, HttpServletRequest request) {
+        Event event = events.requireBySlugOrId(slug);
         if (event.getStatus() != EventStatus.PUBLISHED) {
-            throw new NotFoundException("Event", "id", id);
+            throw new NotFoundException("Event", "slug", slug);
         }
 
-        String canonical = canonical(request, "/evenements/" + id);
+        String canonical = canonical(request, "/evenements/" + (event.getSlug() != null ? event.getSlug() : event.getId()));
         SeoHtml html = new SeoHtml(event.getTitle() + " — LesCracks", event.getDescription(), canonical)
                 .type("website")
                 .image(absolute(request, event.getCoverImage()), event.getTitle(), null, null);
@@ -182,16 +182,9 @@ public class SeoController {
     }
 
     private String buildResourceDetail(String slug, HttpServletRequest request) {
-        long id;
-        try {
-            id = Long.parseLong(slug);
-        } catch (NumberFormatException e) {
-            throw new NotFoundException("Resource", "slug", slug);
-        }
-
-        Resource resource = resources.requirePublished(id);
+        Resource resource = resources.requirePublishedBySlugOrId(slug);
         ResourceResponse response = mapper.toResponse(resource);
-        String canonical = canonical(request, "/ressources/" + id);
+        String canonical = canonical(request, "/ressources/" + (response.slug() != null ? response.slug() : response.id()));
         SeoHtml html = new SeoHtml(response.title() + " — LesCracks", response.description(), canonical)
                 .image(absolute(request, response.coverImage()), response.title(), null, null);
 
@@ -285,7 +278,8 @@ public class SeoController {
         List<SeoHtml.Link> links = new ArrayList<>();
         published.forEach(resource -> {
             ResourceResponse response = mapper.toResponse(resource);
-            links.add(new SeoHtml.Link(canonical(request, "/ressources/" + response.id()), response.title()));
+            String resourceSlug = response.slug() != null ? response.slug() : String.valueOf(response.id());
+            links.add(new SeoHtml.Link(canonical(request, "/ressources/" + resourceSlug), response.title()));
         });
         if (links.isEmpty()) {
             html.paragraph("Aucun contenu publié dans cette section pour le moment.");
@@ -296,10 +290,11 @@ public class SeoController {
         List<Map<String, Object>> items = new ArrayList<>();
         published.forEach(resource -> {
             ResourceResponse response = mapper.toResponse(resource);
+            String resourceSlug = response.slug() != null ? response.slug() : String.valueOf(response.id());
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("@type", "ListItem");
             item.put("position", items.size() + 1);
-            item.put("url", canonical(request, "/ressources/" + response.id()));
+            item.put("url", canonical(request, "/ressources/" + resourceSlug));
             item.put("name", response.title());
             items.add(item);
         });
@@ -330,7 +325,7 @@ public class SeoController {
 
         List<SeoHtml.Link> links = new ArrayList<>();
         published.forEach(event -> links.add(new SeoHtml.Link(
-                canonical(request, "/evenements/" + event.getId()), event.getTitle())));
+                canonical(request, "/evenements/" + (event.getSlug() != null ? event.getSlug() : event.getId())), event.getTitle())));
         html.links("Prochains événements", links);
     }
 
@@ -344,7 +339,8 @@ public class SeoController {
         List<SeoHtml.Link> links = new ArrayList<>();
         published.forEach(resource -> {
             ResourceResponse response = mapper.toResponse(resource);
-            links.add(new SeoHtml.Link(canonical(request, "/ressources/" + response.id()), response.title()));
+            String slug = response.slug() != null ? response.slug() : String.valueOf(response.id());
+            links.add(new SeoHtml.Link(canonical(request, "/ressources/" + slug), response.title()));
         });
         html.links("Ressources récentes", links);
     }
@@ -403,8 +399,9 @@ public class SeoController {
     }
 
     private Map<String, Object> buildEventLocation(Event event) {
+        String slug = event.getSlug() != null ? event.getSlug() : String.valueOf(event.getId());
         if (event.getFormat() == EventFormat.ONLINE) {
-            return Map.of("@type", "VirtualLocation", "url", event.getLocation() != null ? event.getLocation() : "https://lescracks.com/evenements/" + event.getId());
+            return Map.of("@type", "VirtualLocation", "url", event.getLocation() != null ? event.getLocation() : "https://lescracks.com/evenements/" + slug);
         }
         if (event.getLocation() != null && !event.getLocation().isBlank()) {
             return Map.of("@type", "Place", "name", event.getLocation());

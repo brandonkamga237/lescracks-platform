@@ -8,6 +8,7 @@ import java.util.Set;
 
 public record ResourceResponse(
         Long id,
+        String slug,
         String title,
         String description,
         String coverImage,

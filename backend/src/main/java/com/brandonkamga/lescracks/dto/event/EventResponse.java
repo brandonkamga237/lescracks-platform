@@ -8,6 +8,7 @@ import java.time.Instant;
 
 public record EventResponse(
         Long id,
+        String slug,
         String title,
         String description,
         EventType type,

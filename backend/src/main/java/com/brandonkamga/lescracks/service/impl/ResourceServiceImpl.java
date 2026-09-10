@@ -12,6 +12,7 @@ import com.brandonkamga.lescracks.service.interfaces.StorageService;
 import com.brandonkamga.lescracks.service.interfaces.TaxonomyService;
 import com.brandonkamga.lescracks.service.interfaces.NewsletterService;
 import com.brandonkamga.lescracks.util.ArticleBody;
+import com.brandonkamga.lescracks.util.Slugs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
@@ -83,6 +84,39 @@ public class ResourceServiceImpl implements ResourceService {
     @Transactional(readOnly = true)
     public Resource require(Long id) {
         return resources.findById(id).orElseThrow(() -> new NotFoundException("Resource", "id", id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Resource requirePublishedBySlugOrId(String slugOrId) {
+        Resource resource = findBySlugOrId(slugOrId);
+        if (resource.getStatus() != ResourceStatus.PUBLISHED) {
+            throw new NotFoundException("Resource", "slug", slugOrId);
+        }
+        return resource;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Resource requireBySlugOrId(String slugOrId) {
+        return findBySlugOrId(slugOrId);
+    }
+
+    private Resource findBySlugOrId(String slugOrId) {
+        if (slugOrId == null || slugOrId.isBlank()) {
+            throw new NotFoundException("Resource", "slug", slugOrId);
+        }
+        return resources.findBySlug(slugOrId)
+                .or(() -> parseId(slugOrId).flatMap(resources::findById))
+                .orElseThrow(() -> new NotFoundException("Resource", "slug", slugOrId));
+    }
+
+    private java.util.Optional<Long> parseId(String value) {
+        try {
+            return java.util.Optional.of(Long.parseLong(value));
+        } catch (NumberFormatException ignored) {
+            return java.util.Optional.empty();
+        }
     }
 
     @Override
@@ -201,6 +235,7 @@ public class ResourceServiceImpl implements ResourceService {
         Resource resource = Resource.builder().category(taxonomy.requireCategory(categoryId)).title(title.trim())
                 .description(description.trim()).coverImage(coverImage.trim())
                 .status(status == null ? ResourceStatus.DRAFT : status).build();
+        resource.setSlug(Slugs.uniqueFrom(resource.getTitle(), resources::existsBySlug));
         applyTags(resource, tagIds);
         return resources.save(resource);
     }
@@ -212,6 +247,9 @@ public class ResourceServiceImpl implements ResourceService {
         resource.setCoverImage(coverImage.trim());
         resource.setCategory(taxonomy.requireCategory(categoryId));
         resource.setStatus(status == null ? resource.getStatus() : status);
+        if (resource.getSlug() == null || resource.getSlug().isBlank()) {
+            resource.setSlug(Slugs.uniqueFrom(resource.getTitle(), resources::existsBySlug));
+        }
         applyTags(resource, tagIds);
     }
 

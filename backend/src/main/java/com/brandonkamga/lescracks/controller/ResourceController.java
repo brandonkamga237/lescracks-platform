@@ -50,10 +50,10 @@ public class ResourceController {
         return PageResponse.of(resources.search(ResourceStatus.PUBLISHED, search, kind, categoryId, tagId, pageable), mapper::toResponse);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{slug}")
     @Operation(summary = "Consulter une ressource publiée")
-    public ResourceResponse get(@PathVariable Long id) {
-        return mapper.toResponse(resources.requirePublished(id));
+    public ResourceResponse get(@PathVariable String slug) {
+        return mapper.toResponse(resources.requirePublishedBySlugOrId(slug));
     }
 
     @GetMapping("/{id}/download")

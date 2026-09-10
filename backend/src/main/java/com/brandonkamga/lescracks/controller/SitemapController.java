@@ -48,8 +48,9 @@ public class SitemapController {
         var published = resources.search(ResourceStatus.PUBLISHED, null, null, null, null, PageRequest.of(0, 10_000));
         published.forEach(resource -> {
             String lastmod = W3C.format(resource.getUpdatedAt().atOffset(ZoneOffset.UTC));
+            String slug = resource.getSlug() != null ? resource.getSlug() : String.valueOf(resource.getId());
             xml.append("  <url>\n");
-            xml.append("    <loc>").append(escape(base + "/ressources/" + resource.getId())).append("</loc>\n");
+            xml.append("    <loc>").append(escape(base + "/ressources/" + slug)).append("</loc>\n");
             xml.append("    <lastmod>").append(escape(lastmod)).append("</lastmod>\n");
             xml.append("    <priority>0.7</priority>\n");
             xml.append("    <changefreq>weekly</changefreq>\n");
@@ -59,8 +60,9 @@ public class SitemapController {
         var upcoming = events.published(null, null, PageRequest.of(0, 10_000));
         upcoming.forEach(event -> {
             String lastmod = W3C.format(event.getUpdatedAt().atOffset(ZoneOffset.UTC));
+            String slug = event.getSlug() != null ? event.getSlug() : String.valueOf(event.getId());
             xml.append("  <url>\n");
-            xml.append("    <loc>").append(escape(base + "/evenements/" + event.getId())).append("</loc>\n");
+            xml.append("    <loc>").append(escape(base + "/evenements/" + slug)).append("</loc>\n");
             xml.append("    <lastmod>").append(escape(lastmod)).append("</lastmod>\n");
             xml.append("    <priority>0.7</priority>\n");
             xml.append("    <changefreq>weekly</changefreq>\n");

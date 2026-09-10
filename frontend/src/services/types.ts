@@ -17,6 +17,7 @@ export interface Tag { id: number; name: string; categoryId: number; categoryNam
 
 export interface ResourceSummary {
   id: number;
+  slug?: string;
   title: string;
   description: string;
   coverImage: string;
@@ -46,6 +47,7 @@ export interface ResourceLikeStatus {
 
 export interface EventSummary {
   id: number;
+  slug?: string;
   title: string;
   description: string;
   type: EventType;
