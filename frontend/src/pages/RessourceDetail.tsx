@@ -9,6 +9,7 @@ import Layout from '@/components/layout/Layout';
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
+import { resourcePath } from '@/lib/slugs';
 import { ENV } from '@/config/env';
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' });
@@ -21,10 +22,10 @@ export default function RessourceDetail() {
   const { id = '' } = useParams();
   const location = useLocation();
   const { isSignedIn, signIn } = useSession();
-  const validId = /^[1-9]\d*$/.test(id) && Number.isSafeInteger(Number(id));
-  const resource = useApi((signal) => validId ? api.resource(Number(id), signal) : Promise.resolve(null), [id, validId]);
-  const likes = useApi((signal) => validId ? api.resourceLikes(Number(id), signal) : Promise.resolve(null), [id, validId, isSignedIn]);
-  const loaded = validId && !resource.loading && !resource.error && resource.data?.id === Number(id) ? resource.data : null;
+  const hasParam = id.trim().length > 0;
+  const resource = useApi((signal) => hasParam ? api.resource(id, signal) : Promise.resolve(null), [id, hasParam]);
+  const likes = useApi((signal) => hasParam && resource.data?.id ? api.resourceLikes(resource.data.id, signal) : Promise.resolve(null), [resource.data?.id, hasParam, isSignedIn]);
+  const loaded = hasParam && !resource.loading && !resource.error && resource.data ? resource.data : null;
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const [liking, setLiking] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -38,15 +39,15 @@ export default function RessourceDetail() {
   }, [likes.data]);
   const previousPath: unknown = location.state?.cataloguePath;
   const cataloguePath = typeof previousPath === 'string' && /^\/ressources(?:\/(?:ebooks|videos|articles))?(?:\?.*)?$/.test(previousPath) ? previousPath : '/ressources';
-  const missing = !validId || resource.error?.status === 404;
+  const missing = !hasParam || resource.error?.status === 404;
 
   async function toggleLike() {
-    if (!validId) return;
-    if (!isSignedIn) { signIn(`/ressources/${id}`); return; }
+    if (!loaded) return;
+    if (!isSignedIn) { signIn(resourcePath(loaded)); return; }
     if (liking) return;
     setLiking(true);
     try {
-      const status = liked ? await api.unlikeResource(Number(id)) : await api.likeResource(Number(id));
+      const status = liked ? await api.unlikeResource(loaded.id) : await api.likeResource(loaded.id);
       setLiked(status.liked);
       setLikeCount(status.count);
     } finally { setLiking(false); }
@@ -54,14 +55,14 @@ export default function RessourceDetail() {
 
   return (
     <Layout>
-      <SEO title={loaded?.title ?? (missing ? 'Ressource introuvable' : 'Ressource')} description={loaded?.description ?? 'Découvre les ebooks et vidéos de la bibliothèque LesCracks.'} image={loaded?.coverImage || undefined} url={validId ? `/ressources/${id}` : '/ressources'} />
+      <SEO title={loaded?.title ?? (missing ? 'Ressource introuvable' : 'Ressource')} description={loaded?.description ?? 'Découvre les ebooks et vidéos de la bibliothèque LesCracks.'} image={loaded?.coverImage || undefined} url={loaded ? resourcePath(loaded) : '/ressources'} />
       <article className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-16">
         <nav aria-label="Fil d’Ariane" className="flex flex-wrap items-center gap-3 text-sm text-t3">
           <Link to={cataloguePath} className="inline-flex min-h-11 items-center gap-2 rounded-lg transition-colors hover:text-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"><ArrowLeft className="h-4 w-4" aria-hidden />La bibliothèque</Link>
           {loaded && <><span aria-hidden>/</span><span className="min-w-0 truncate text-t2" aria-current="page">{loaded.title}</span></>}
         </nav>
 
-        {validId && resource.loading && <p className="py-24 text-center text-t3" role="status">Chargement de la ressource…</p>}
+        {hasParam && resource.loading && <p className="py-24 text-center text-t3" role="status">Chargement de la ressource…</p>}
         {(missing || resource.error) && <div className="my-12 rounded-2xl border border-line bg-noir-900 px-6 py-16 text-center" role="alert"><h1 className="font-display text-3xl text-t1">{missing ? 'Cette ressource est introuvable.' : 'Impossible de charger cette ressource.'}</h1><p className="mx-auto mt-4 max-w-lg text-t3">{missing ? 'Elle n’est peut-être plus publiée. La bibliothèque reste ouverte pour découvrir un autre sujet.' : resource.error?.message}</p>{!missing && <button type="button" onClick={resource.reload} className="mt-6 min-h-11 rounded-xl bg-gold-400 px-5 font-medium text-noir-950">Réessayer</button>}<Link to={cataloguePath} className="mx-auto mt-5 block w-fit py-2 text-sm text-gold-400 underline underline-offset-4">Retour à la bibliothèque</Link></div>}
 
         {loaded && <>
@@ -109,7 +110,7 @@ export default function RessourceDetail() {
               {loaded && (
                 <div className="mb-4 flex items-center justify-between rounded-xl border border-line-soft bg-noir-950 px-4 py-3">
                   <span className="text-sm text-t3">Partager</span>
-                  <ResourceShare resourceId={loaded.id} title={loaded.title} />
+                  <ResourceShare resource={loaded} />
                 </div>
               )}
 

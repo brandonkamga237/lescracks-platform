@@ -17,6 +17,7 @@ public interface EventService {
     Page<Event> past(Pageable pageable);
     Page<Event> all(Pageable pageable);
     Event require(Long id);
+    Event requireBySlugOrId(String slugOrId);
     Event create(EventRequest request, MultipartFile coverImageFile);
     Event update(Long id, EventRequest request, MultipartFile coverImageFile);
     void delete(Long id);

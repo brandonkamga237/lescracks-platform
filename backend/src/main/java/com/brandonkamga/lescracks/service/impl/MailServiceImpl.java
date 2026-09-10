@@ -6,10 +6,13 @@ import com.brandonkamga.lescracks.domain.Resource;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 @Service
 public class MailServiceImpl implements MailService {
@@ -18,10 +21,10 @@ public class MailServiceImpl implements MailService {
     private final String from;
 
     public MailServiceImpl(JavaMailSender sender,
-                           @Value("${app.site.url:http://localhost:5173}") String frontendUrl,
-                           @Value("${app.mail.from:LesCracks <contact@lescracks.com>}") String from) {
+                           @org.springframework.beans.factory.annotation.Value("${app.site.url:http://localhost:5173}") String frontendUrl,
+                           @org.springframework.beans.factory.annotation.Value("${app.mail.from:LesCracks <contact@lescracks.com>}") String from) {
         this.sender = sender;
-        this.frontendUrl = frontendUrl;
+        this.frontendUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
         this.from = from;
     }
 
@@ -44,26 +47,29 @@ public class MailServiceImpl implements MailService {
 
     @Override
     public void sendEventNotification(String recipient, Event event) {
-        send(recipient, "Nouvel événement LesCracks : " + event.getTitle(),
-                "Un nouvel événement est disponible :\n\n" + event.getTitle()
-                        + "\n" + event.getDescription()
-                        + "\n\nDate : " + event.getStartDate());
+        String slug = event.getSlug() != null ? event.getSlug() : String.valueOf(event.getId());
+        String url = frontendUrl + "/evenements/" + slug;
+        String cover = absoluteImage(event.getCoverImage());
+        String html = eventHtml(event.getTitle(), event.getDescription(), url, cover, event.getStartDate());
+        sendHtml(recipient, "Nouvel événement LesCracks : " + event.getTitle(), html);
     }
 
     @Override
     public void sendResourceNotification(String recipient, Resource resource) {
-        send(recipient, "Nouvelle ressource LesCracks : " + resource.getTitle(),
-                "Une nouvelle ressource est disponible :\n\n" + resource.getTitle()
-                        + "\n" + resource.getDescription());
+        String slug = resource.getSlug() != null ? resource.getSlug() : String.valueOf(resource.getId());
+        String url = frontendUrl + "/ressources/" + slug;
+        String cover = absoluteImage(resource.getCoverImage());
+        String html = resourceHtml(resource.getTitle(), resource.getDescription(), url, cover);
+        sendHtml(recipient, "Nouvelle ressource LesCracks : " + resource.getTitle(), html);
     }
 
     @Override
     public void sendBroadcast(String recipient, String subject, String message,
                               String firstName, String lastName) {
-        String personalized = message.replace("{{firstName}}", firstName == null ? "" : firstName)
-                .replace("{{lastName}}", lastName == null ? "" : lastName)
+        String personalized = message.replace("{{firstName}}", firstName == null ? "" : escapeHtml(firstName))
+                .replace("{{lastName}}", lastName == null ? "" : escapeHtml(lastName))
                 .replace("{{email}}", recipient);
-        send(recipient, subject, personalized);
+        sendHtml(recipient, subject, wrapper(personalized));
     }
 
     private SimpleMailMessage message(String recipient) {
@@ -71,13 +77,6 @@ public class MailServiceImpl implements MailService {
         message.setFrom(from);
         message.setTo(recipient);
         return message;
-    }
-
-    private void send(String recipient, String subject, String text) {
-        SimpleMailMessage message = message(recipient);
-        message.setSubject(subject);
-        message.setText(text);
-        sender.send(message);
     }
 
     private void sendHtml(String recipient, String subject, String html) {
@@ -93,9 +92,20 @@ public class MailServiceImpl implements MailService {
         }
     }
 
-    private String verificationHtml(String firstName, String email, String token) {
-        String link = frontendUrl + "/verifier-email?token=" + token;
-        String greeting = firstName.isBlank() ? "Bonjour," : "Bonjour " + escapeHtml(firstName) + ",";
+    private String absoluteImage(String coverImage) {
+        if (coverImage == null || coverImage.isBlank()) {
+            return frontendUrl + "/preview.png";
+        }
+        if (coverImage.startsWith("http://") || coverImage.startsWith("https://")) {
+            return coverImage;
+        }
+        if (coverImage.startsWith("/")) {
+            return frontendUrl + coverImage;
+        }
+        return frontendUrl + "/" + coverImage;
+    }
+
+    private String wrapper(String body) {
         return """
                 <!DOCTYPE html>
                 <html lang="fr">
@@ -112,18 +122,7 @@ public class MailServiceImpl implements MailService {
                           </tr>
                           <tr>
                             <td style="padding:40px;">
-                              <h1 style="margin:0 0 20px 0;font-size:24px;font-weight:600;color:#ffffff;">Confirme ton adresse email</h1>
-                              <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#a1a1a1;">%s</p>
-                              <p style="margin:0 0 32px 0;font-size:16px;line-height:1.6;color:#a1a1a1;">Pour activer ton compte et accéder à toutes les ressources LesCracks, clique sur le bouton ci-dessous.</p>
-                              <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 32px 0;">
-                                <tr>
-                                  <td style="border-radius:12px;background-color:#d4af37;text-align:center;">
-                                    <a href="%s" style="display:inline-block;padding:16px 32px;font-size:16px;font-weight:600;color:#000000;text-decoration:none;border-radius:12px;">Confirmer mon email</a>
-                                  </td>
-                                </tr>
-                              </table>
-                              <p style="margin:0 0 16px 0;font-size:14px;line-height:1.5;color:#737373;">Ce lien expire dans 24 heures. Si tu n'as pas créé de compte LesCracks, ignore simplement cet email.</p>
-                              <p style="margin:0;font-size:13px;line-height:1.5;color:#525252;word-break:break-all;">Lien de secours : %s</p>
+                              %s
                             </td>
                           </tr>
                           <tr>
@@ -137,7 +136,67 @@ public class MailServiceImpl implements MailService {
                   </table>
                 </body>
                 </html>
-                """.formatted(greeting, link, link);
+                """.formatted(body);
+    }
+
+    private String resourceHtml(String title, String description, String url, String cover) {
+        String escapedTitle = escapeHtml(title);
+        String escapedDescription = escapeHtml(description);
+        return wrapper("""
+                <h1 style="margin:0 0 20px 0;font-size:24px;font-weight:600;color:#ffffff;">%s</h1>
+                <img src="%s" alt="%s" style="display:block;width:100%%;max-width:520px;border-radius:12px;margin-bottom:24px;" />
+                <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#a1a1a1;">%s</p>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 32px 0;">
+                  <tr>
+                    <td style="border-radius:12px;background-color:#d4af37;text-align:center;">
+                      <a href="%s" style="display:inline-block;padding:16px 32px;font-size:16px;font-weight:600;color:#000000;text-decoration:none;border-radius:12px;">Découvrir la ressource</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0;font-size:13px;line-height:1.5;color:#525252;word-break:break-all;">Lien direct : %s</p>
+                """.formatted(escapedTitle, cover, escapedTitle, escapedDescription, url, url));
+    }
+
+    private String eventHtml(String title, String description, String url, String cover, java.time.Instant startDate) {
+        String escapedTitle = escapeHtml(title);
+        String escapedDescription = escapeHtml(description);
+        String date = startDate == null ? "" : "<p style=\"margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#a1a1a1;\">"
+                + "<strong style=\"color:#d4af37;\">Date :</strong> "
+                + escapeHtml(DateTimeFormatter.ofPattern("EEEE d MMMM à HH:mm", Locale.FRANCE).format(startDate.atZone(ZoneId.of("Europe/Paris"))))
+                + "</p>";
+        return wrapper("""
+                <h1 style="margin:0 0 20px 0;font-size:24px;font-weight:600;color:#ffffff;">%s</h1>
+                <img src="%s" alt="%s" style="display:block;width:100%%;max-width:520px;border-radius:12px;margin-bottom:24px;" />
+                <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#a1a1a1;">%s</p>
+                %s
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 32px 0;">
+                  <tr>
+                    <td style="border-radius:12px;background-color:#d4af37;text-align:center;">
+                      <a href="%s" style="display:inline-block;padding:16px 32px;font-size:16px;font-weight:600;color:#000000;text-decoration:none;border-radius:12px;">Voir l'événement</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0;font-size:13px;line-height:1.5;color:#525252;word-break:break-all;">Lien direct : %s</p>
+                """.formatted(escapedTitle, cover, escapedTitle, escapedDescription, date, url, url));
+    }
+
+    private String verificationHtml(String firstName, String email, String token) {
+        String link = frontendUrl + "/verifier-email?token=" + token;
+        String greeting = firstName.isBlank() ? "Bonjour," : "Bonjour " + escapeHtml(firstName) + ",";
+        return wrapper("""
+                <h1 style="margin:0 0 20px 0;font-size:24px;font-weight:600;color:#ffffff;">Confirme ton adresse email</h1>
+                <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#a1a1a1;">%s</p>
+                <p style="margin:0 0 32px 0;font-size:16px;line-height:1.6;color:#a1a1a1;">Pour activer ton compte et accéder à toutes les ressources LesCracks, clique sur le bouton ci-dessous.</p>
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 32px 0;">
+                  <tr>
+                    <td style="border-radius:12px;background-color:#d4af37;text-align:center;">
+                      <a href="%s" style="display:inline-block;padding:16px 32px;font-size:16px;font-weight:600;color:#000000;text-decoration:none;border-radius:12px;">Confirmer mon email</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 16px 0;font-size:14px;line-height:1.5;color:#737373;">Ce lien expire dans 24 heures. Si tu n'as pas créé de compte LesCracks, ignore simplement cet email.</p>
+                <p style="margin:0;font-size:13px;line-height:1.5;color:#525252;word-break:break-all;">Lien de secours : %s</p>
+                """.formatted(greeting, link, link));
     }
 
     private String escapeHtml(String value) {

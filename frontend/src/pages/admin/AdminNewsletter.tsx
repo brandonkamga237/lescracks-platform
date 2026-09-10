@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Clock, Download, Send } from 'lucide-react';
+import { Clock, Download, Mail, Send, User } from 'lucide-react';
 
 import { AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
+import ArticleEditor from '@/components/admin/ArticleEditor';
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
 import type { AdminSubscriber } from '@/services/types';
@@ -16,6 +17,7 @@ export default function AdminNewsletter() {
   const [notice, setNotice] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+  const [editorKey, setEditorKey] = useState(0);
 
   const stats = useApi((signal) => adminApi.newsletterStats(signal), []);
   const subscriptions = useApi((signal) => adminApi.newsletterSubscriptions(filter, signal), [filter]);
@@ -39,6 +41,11 @@ export default function AdminNewsletter() {
     }
   }
 
+  function insertVariable(variable: string) {
+    setMessage((previous) => (previous ? previous + ' ' + variable : variable));
+    setEditorKey((key) => key + 1);
+  }
+
   async function broadcast(event: React.FormEvent) {
     event.preventDefault();
     setError('');
@@ -53,6 +60,7 @@ export default function AdminNewsletter() {
       setNotice(`Campagne envoyée à ${count} abonné${count > 1 ? 's' : ''}.`);
       setSubject('');
       setMessage('');
+      setEditorKey((key) => key + 1);
       await campaigns.reload();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'L’envoi a échoué.');
@@ -151,7 +159,20 @@ export default function AdminNewsletter() {
             </div>
             <div>
               <label htmlFor="broadcast-message" className="text-sm font-medium text-t2">Message</label>
-              <textarea id="broadcast-message" value={message} onChange={(event) => setMessage(event.target.value)} required maxLength={10000} rows={8} className="input mt-2 h-auto py-3" />
+              <div className="mt-2">
+                <ArticleEditor key={editorKey} value={message} onChange={setMessage} />
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button type="button" onClick={() => insertVariable('{{firstName}}')} className="inline-flex items-center gap-1 rounded-full border border-line-soft bg-noir-950 px-3 py-1.5 text-xs font-medium text-t3 hover:border-gold-400/30 hover:text-gold-400">
+                  <User className="h-3.5 w-3.5" aria-hidden /> Prénom
+                </button>
+                <button type="button" onClick={() => insertVariable('{{lastName}}')} className="inline-flex items-center gap-1 rounded-full border border-line-soft bg-noir-950 px-3 py-1.5 text-xs font-medium text-t3 hover:border-gold-400/30 hover:text-gold-400">
+                  <User className="h-3.5 w-3.5" aria-hidden /> Nom
+                </button>
+                <button type="button" onClick={() => insertVariable('{{email}}')} className="inline-flex items-center gap-1 rounded-full border border-line-soft bg-noir-950 px-3 py-1.5 text-xs font-medium text-t3 hover:border-gold-400/30 hover:text-gold-400">
+                  <Mail className="h-3.5 w-3.5" aria-hidden /> Email
+                </button>
+              </div>
             </div>
             <button type="submit" disabled={busyBroadcast} className="btn-primary w-full">
               {busyBroadcast ? 'Envoi…' : <><Send className="h-4 w-4" aria-hidden /> Envoyer</>}

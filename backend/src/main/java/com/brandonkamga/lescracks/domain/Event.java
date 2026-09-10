@@ -28,6 +28,9 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 220)
+    private String slug;
+
     @Column(nullable = false, length = 200)
     private String title;
 

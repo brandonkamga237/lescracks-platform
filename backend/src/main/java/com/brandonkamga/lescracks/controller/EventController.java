@@ -44,11 +44,11 @@ public class EventController {
         return PageResponse.of(events.past(pageable), EventController::response);
     }
 
-    @GetMapping("/{id}")
-    public EventResponse get(@PathVariable Long id) {
-        Event event = events.require(id);
+    @GetMapping("/{slug}")
+    public EventResponse get(@PathVariable String slug) {
+        Event event = events.requireBySlugOrId(slug);
         if (event.getStatus() != com.brandonkamga.lescracks.domain.EventStatus.PUBLISHED) {
-            throw new com.brandonkamga.lescracks.exception.NotFoundException("Event", "id", id);
+            throw new com.brandonkamga.lescracks.exception.NotFoundException("Event", "slug", slug);
         }
         return response(event);
     }
@@ -81,7 +81,7 @@ public class EventController {
     public void delete(@PathVariable Long id) { events.delete(id); }
 
     private static EventResponse response(Event event) {
-        return new EventResponse(event.getId(), event.getTitle(), event.getDescription(), event.getType(),
+        return new EventResponse(event.getId(), event.getSlug(), event.getTitle(), event.getDescription(), event.getType(),
                 event.getFormat(), event.getStartDate(), event.getEndDate(), event.getLocation(), event.getCoverImage(),
                 event.getStatus(), event.getCreatedAt(), event.getUpdatedAt());
     }

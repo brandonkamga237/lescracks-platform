@@ -11,6 +11,7 @@ import com.brandonkamga.lescracks.repository.EventRepository;
 import com.brandonkamga.lescracks.service.interfaces.EventService;
 import com.brandonkamga.lescracks.service.interfaces.NewsletterService;
 import com.brandonkamga.lescracks.service.interfaces.StorageService;
+import com.brandonkamga.lescracks.util.Slugs;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -74,6 +75,25 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Event requireBySlugOrId(String slugOrId) {
+        if (slugOrId == null || slugOrId.isBlank()) {
+            throw new NotFoundException("Event", "slug", slugOrId);
+        }
+        return events.findBySlug(slugOrId)
+                .or(() -> parseId(slugOrId).flatMap(events::findById))
+                .orElseThrow(() -> new NotFoundException("Event", "slug", slugOrId));
+    }
+
+    private java.util.Optional<Long> parseId(String value) {
+        try {
+            return java.util.Optional.of(Long.parseLong(value));
+        } catch (NumberFormatException ignored) {
+            return java.util.Optional.empty();
+        }
+    }
+
+    @Override
     public Event create(EventRequest request, MultipartFile coverImageFile) {
         validateDates(request.startDate(), request.endDate());
         Event event = events.save(apply(new Event(), request, coverImageFile));
@@ -104,6 +124,9 @@ public class EventServiceImpl implements EventService {
         event.setLocation(request.location() == null ? null : request.location().trim());
         event.setStatus(request.status() == null ? EventStatus.DRAFT : request.status());
         event.setCoverImage(resolveCoverImage(coverImageFile, event.getCoverImage()));
+        if (event.getSlug() == null || event.getSlug().isBlank()) {
+            event.setSlug(Slugs.uniqueFrom(event.getTitle(), events::existsBySlug));
+        }
         return event;
     }
 
