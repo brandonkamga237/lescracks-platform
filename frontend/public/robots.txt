@@ -1,3 +1,5 @@
+Sitemap: https://lescracks.com/sitemap.xml
+
 # robots.txt — LesCracks (https://lescracks.com)
 # Public content is open to everyone, including AI / generative engines (GEO):
 # we WANT to be crawled and cited. Only auth/admin/API surfaces are off-limits.

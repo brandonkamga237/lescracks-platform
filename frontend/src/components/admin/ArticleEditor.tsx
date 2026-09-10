@@ -35,7 +35,6 @@ export default function ArticleEditor({ value, onChange }: ArticleEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<SunEditorInstance | null>(null);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -100,6 +99,8 @@ export default function ArticleEditor({ value, onChange }: ArticleEditorProps) {
       }
       editorRef.current = null;
     };
+    // The editor is created once; value changes are handled by the second effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
