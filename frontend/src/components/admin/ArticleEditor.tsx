@@ -18,13 +18,6 @@ import {
   table,
   video,
 } from 'suneditor/plugins';
-import { adminApi } from '@/services/adminApi';
-
-interface SunEditorInstance {
-  getContents: () => string;
-  setContents: (html: string) => void;
-  destroy: () => void;
-}
 
 interface ArticleEditorProps {
   value?: string;
@@ -33,23 +26,13 @@ interface ArticleEditorProps {
 
 export default function ArticleEditor({ value, onChange }: ArticleEditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const editorRef = useRef<SunEditorInstance | null>(null);
+  const editorRef = useRef<{ destroy: () => void } | null>(null);
+  const onChangeRef = useRef(onChange);
+
+  onChangeRef.current = onChange;
 
   useEffect(() => {
     if (!containerRef.current) return;
-
-    const onImageUploadBefore = (
-      files: File[],
-      _info: object,
-      uploadHandler: (data: { result: Array<{ url: string; name: string; size: number }> }) => void,
-    ) => {
-      const file = files[0];
-      if (!file) return;
-      adminApi
-        .uploadImage(file)
-        .then(({ url }) => uploadHandler({ result: [{ url, name: file.name, size: file.size }] }))
-        .catch(() => uploadHandler({ result: [{ url: '', name: file.name, size: file.size }] }));
-    };
 
     const plugins = [
       align,
@@ -72,6 +55,9 @@ export default function ArticleEditor({ value, onChange }: ArticleEditorProps) {
       theme: 'dark',
       value: value ?? '',
       plugins,
+      image: {
+        uploadUrl: '/api/admin/upload/image',
+      },
       buttonList: [
         ['undo', 'redo'],
         ['font', 'fontSize'],
@@ -83,12 +69,14 @@ export default function ArticleEditor({ value, onChange }: ArticleEditorProps) {
       ],
       placeholder: 'Rédige ton article ici…',
       events: {
-        onChange: (content: string) => onChange(content),
-        onImageUploadBefore,
+        onChange: ({ data }: { data: string }) => onChangeRef.current(data),
       },
     };
 
-    const editor = SUNEDITOR.create(containerRef.current, options as unknown as Parameters<typeof SUNEDITOR.create>[1]) as unknown as SunEditorInstance;
+    const editor = SUNEDITOR.create(
+      containerRef.current,
+      options as unknown as Parameters<typeof SUNEDITOR.create>[1],
+    ) as unknown as { destroy: () => void };
     editorRef.current = editor;
 
     return () => {
@@ -99,15 +87,9 @@ export default function ArticleEditor({ value, onChange }: ArticleEditorProps) {
       }
       editorRef.current = null;
     };
-    // The editor is created once; value changes are handled by the second effect.
+    // The editor is recreated only on mount; value updates come from the editor itself.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (editorRef.current && value !== undefined && value !== editorRef.current.getContents()) {
-      editorRef.current.setContents(value);
-    }
-  }, [value]);
 
   return <div ref={containerRef} className="rounded-2xl border border-line bg-noir-900 p-2" />;
 }
