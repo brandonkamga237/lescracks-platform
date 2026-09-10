@@ -33,55 +33,24 @@ public class ProductionDataSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        if (categories.count() > 0) {
-            log.info("Categories already present, skipping production seed.");
-            return;
-        }
-
         Map<String, List<String>> taxonomy = new LinkedHashMap<>();
-        taxonomy.put("Développement web", List.of(
-                "JavaScript", "TypeScript", "React", "Next.js", "HTML & CSS", "Node.js",
-                "Performance web", "Accessibilité", "SEO technique", "API REST", "GraphQL"));
-        taxonomy.put("Mobile", List.of(
-                "React Native", "Flutter", "iOS", "Android", "Progressive Web App",
-                "Mobile first", "Notifications push"));
-        taxonomy.put("Data & IA", List.of(
-                "Python", "SQL", "Machine Learning", "Deep Learning", "Analyse de données",
-                "Data visualisation", "Big Data", "NLP"));
-        taxonomy.put("DevOps & Cloud", List.of(
-                "Docker", "Kubernetes", "CI/CD", "Linux", "AWS", "Azure", "GCP",
-                "Terraform", "Monitoring", "Observabilité"));
-        taxonomy.put("Cybersécurité", List.of(
-                "Pentest", "Cryptographie", "Sécurité web", "RGPD", "Gestion des accès",
-                "Threat intelligence", "Forensics"));
-        taxonomy.put("Architecture & Conception", List.of(
-                "Clean Code", "Architecture hexagonale", "DDD", "Microservices", "Clean Architecture",
-                "Patterns de conception", "Tests"));
-        taxonomy.put("Bases de données", List.of(
-                "PostgreSQL", "MySQL", "MongoDB", "Redis", "Modélisation", "Indexation",
-                "Migrations", "Optimisation"));
-        taxonomy.put("Carrière tech", List.of(
-                "CV & LinkedIn", "Entretien technique", "Freelance", "Négociation",
-                "Leadership technique", "Productivité", "Veille"));
-        taxonomy.put("Design & Produit", List.of(
-                "UI Design", "UX Research", "Figma", "Design system", "Wireframing",
-                "Prototypage", "Accessibilité design"));
-        taxonomy.put("Outils & Méthodo", List.of(
-                "Git", "GitHub", "VS Code", "Agile", "Scrum", "Kanban", "Documentation",
-                "Pair programming"));
+        taxonomy.put("Développement web", List.of("React", "TypeScript", "Node.js"));
+        taxonomy.put("Data & IA", List.of("Python", "SQL", "Machine Learning"));
+        taxonomy.put("Design & Produit", List.of("Figma", "UI Design", "UX Research"));
+        taxonomy.put("DevOps & Cloud", List.of("Docker", "CI/CD", "Linux"));
 
         taxonomy.forEach((categoryName, tagNames) -> {
-            Category category = categories.save(Category.builder()
-                    .name(categoryName)
-                    .slug(Slugs.uniqueFrom(categoryName, categories::existsBySlug))
-                    .build());
+            Category category = categories.findByNameIgnoreCase(categoryName)
+                    .orElseGet(() -> categories.save(Category.builder()
+                            .name(categoryName)
+                            .slug(Slugs.uniqueFrom(categoryName, categories::existsBySlug))
+                            .build()));
             tagNames.stream()
                     .filter(tagName -> !tags.existsByNameIgnoreCaseAndCategoryId(tagName, category.getId()))
                     .map(tagName -> Tag.builder().name(tagName).category(category).build())
                     .forEach(tags::save);
         });
 
-        log.info("Production taxonomy seeded: {} categories, {} tags", taxonomy.size(),
-                taxonomy.values().stream().mapToLong(List::size).sum());
+        log.info("Production taxonomy ensured: {} categories", taxonomy.size());
     }
 }
