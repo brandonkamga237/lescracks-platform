@@ -5,6 +5,7 @@ import { Download, ExternalLink, FileText, PlayCircle } from 'lucide-react';
 import ResourceShare from '@/components/resources/ResourceShare';
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
+import { resourcePath } from '@/lib/slugs';
 import type { ResourceSummary } from '@/services/types';
 
 interface ResourceCardProps {
@@ -44,7 +45,7 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
     event.stopPropagation();
     event.preventDefault();
     if (!isSignedIn) {
-      signIn(`/ressources/${resource.id}`);
+      signIn(resourcePath(resource));
       return;
     }
     if (liking) return;
@@ -61,7 +62,7 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
   }
 
   function open() {
-    navigate(`/ressources/${resource.id}`, { state: { cataloguePath } });
+    navigate(resourcePath(resource), { state: { cataloguePath } });
   }
 
   const detail = resource.kind === 'EBOOK'
@@ -134,7 +135,7 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
       </div>
 
       <div className="absolute right-4 top-4 z-10 flex items-center gap-2">
-        <ResourceShare resourceId={resource.id} title={resource.title} compact />
+        <ResourceShare resource={resource} compact />
         <button
           onClick={toggleLike}
           disabled={liking}

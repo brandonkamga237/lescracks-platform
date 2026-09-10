@@ -11,6 +11,7 @@ import ResourceCard from '@/components/resources/ResourceCard';
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
+import { eventPath } from '@/lib/slugs';
 
 const dayFormat = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -128,7 +129,7 @@ export default function Landing() {
               {upcoming.data.content.map((event) => (
                 <li key={event.id}>
                   {/* Date above the title on mobile: a fixed side column left the title barely readable at 375px. */}
-                  <Link to={`/evenements/${event.id}`} className="group block px-5 py-5 transition-colors hover:bg-white/[0.03] sm:px-6">
+                  <Link to={eventPath(event)} className="group block px-5 py-5 transition-colors hover:bg-white/[0.03] sm:px-6">
                     <time dateTime={event.startDate} className="block text-sm text-gold-300 sm:hidden">
                       {dayFormat.format(new Date(event.startDate))}
                     </time>

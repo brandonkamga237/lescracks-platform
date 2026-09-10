@@ -11,8 +11,13 @@ import org.springframework.data.domain.Pageable;
 import java.time.Instant;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
+
+    Optional<Event> findBySlug(String slug);
+
+    boolean existsBySlug(String slug);
     @Query("select e.status, count(e) from Event e group by e.status")
     List<Object[]> countGroupedByStatus();
 

@@ -30,16 +30,16 @@ export const api = {
   logout: () => http.post<void>('/auth/logout'),
   resources: (filters: CatalogueFilters = {}, signal?: AbortSignal) =>
     http.get<PageResponse<ResourceSummary>>('/resources', filters, signal),
-  resource: (id: number, signal?: AbortSignal) =>
-    http.get<ResourceSummary>(`/resources/${id}`, undefined, signal),
+  resource: (slugOrId: string | number, signal?: AbortSignal) =>
+    http.get<ResourceSummary>(`/resources/${slugOrId}`, undefined, signal),
   events: (filters: { type?: EventType; format?: EventFormat; page?: number; size?: number } = {}, signal?: AbortSignal) =>
     http.get<PageResponse<EventSummary>>('/events', filters, signal),
   upcomingEvents: (page = 0, size = 12, signal?: AbortSignal) =>
     http.get<PageResponse<EventSummary>>('/events/upcoming', { page, size }, signal),
   pastEvents: (page = 0, size = 12, signal?: AbortSignal) =>
     http.get<PageResponse<EventSummary>>('/events/past', { page, size }, signal),
-  event: (id: number, signal?: AbortSignal) =>
-    http.get<EventSummary>(`/events/${id}`, undefined, signal),
+  event: (slugOrId: string | number, signal?: AbortSignal) =>
+    http.get<EventSummary>(`/events/${slugOrId}`, undefined, signal),
   categories: (signal?: AbortSignal) => http.get<Category[]>('/categories', undefined, signal),
   tags: (categoryId?: number, signal?: AbortSignal) => http.get<Tag[]>('/tags', { categoryId }, signal),
   me: (signal?: AbortSignal) => http.get<UserProfile>('/me', undefined, signal),

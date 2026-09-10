@@ -11,6 +11,7 @@ import Layout from '@/components/layout/Layout';
 import { PageHeader, Section, Toolbar } from '@/components/layout/Page';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/services/api';
+import { eventPath } from '@/lib/slugs';
 import type { EventFormat, EventSummary, EventType } from '@/services/types';
 
 const types: Array<[EventType, string]> = [
@@ -36,7 +37,7 @@ function EventRow({ event }: EventRowProps) {
 
   return (
     <Link
-      to={`/evenements/${event.id}`}
+      to={eventPath(event)}
       state={{ cataloguePath: `${location.pathname}${location.search}` }}
       className="group flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-white/[0.06] bg-noir-900 shadow-sm transition-all duration-300 hover:border-white/[0.12] hover:shadow-2xl hover:shadow-black/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
     >

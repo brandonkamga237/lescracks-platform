@@ -5,6 +5,7 @@ import SEO from '@/components/common/SEO';
 import Layout from '@/components/layout/Layout';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/services/api';
+import { eventPath } from '@/lib/slugs';
 
 const typeLabels = { BOOTCAMP: 'Bootcamp', WORKSHOP: 'Atelier', WEBINAR: 'Webinaire', CONFERENCE: 'Conférence' } as const;
 const formatLabels = { ONLINE: 'En ligne', OFFLINE: 'Sur place', HYBRID: 'Hybride' } as const;
@@ -13,11 +14,11 @@ const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeSty
 export default function EvenementDetail() {
   const { id = '' } = useParams();
   const location = useLocation();
-  const validId = /^[1-9]\d*$/.test(id) && Number.isSafeInteger(Number(id));
-  const event = useApi((signal) => validId ? api.event(Number(id), signal) : Promise.resolve(null), [id, validId]);
-  const loaded = validId && !event.loading && !event.error && event.data?.id === Number(id) ? event.data : null;
+  const hasParam = id.trim().length > 0;
+  const event = useApi((signal) => hasParam ? api.event(id, signal) : Promise.resolve(null), [id, hasParam]);
+  const loaded = hasParam && !event.loading && !event.error && event.data ? event.data : null;
   const [failedImage, setFailedImage] = useState<string | undefined>(undefined);
-  const missing = !validId || event.error?.status === 404;
+  const missing = !hasParam || event.error?.status === 404;
   const previousPath: unknown = location.state?.cataloguePath;
   const cataloguePath = typeof previousPath === 'string' && /^\/evenements(?:\?.*)?$/.test(previousPath) ? previousPath : '/evenements';
   const start = loaded ? new Date(loaded.startDate) : null;
@@ -29,13 +30,13 @@ export default function EvenementDetail() {
 
   return (
     <Layout>
-      <SEO title={loaded?.title ?? (missing ? 'Événement introuvable' : 'Événement')} description={loaded?.description ?? 'Découvre les rendez-vous LesCracks pour apprendre et pratiquer la tech ensemble.'} image={loaded?.coverImage || undefined} url={validId ? `/evenements/${id}` : '/evenements'} />
+      <SEO title={loaded?.title ?? (missing ? 'Événement introuvable' : 'Événement')} description={loaded?.description ?? 'Découvre les rendez-vous LesCracks pour apprendre et pratiquer la tech ensemble.'} image={loaded?.coverImage || undefined} url={loaded ? eventPath(loaded) : '/evenements'} />
       <article className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-16">
         <nav aria-label="Fil d’Ariane" className="flex flex-wrap items-center gap-3 text-sm text-t3">
           <Link to={cataloguePath} className="inline-flex min-h-11 items-center gap-2 rounded-lg hover:text-gold-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"><ArrowLeft className="h-4 w-4" aria-hidden />Tous les événements</Link>
           {loaded && <><span aria-hidden>/</span><span className="min-w-0 truncate text-t2" aria-current="page">{loaded.title}</span></>}
         </nav>
-        {validId && event.loading && <p className="py-24 text-center text-t3" role="status">Chargement du rendez-vous…</p>}
+        {hasParam && event.loading && <p className="py-24 text-center text-t3" role="status">Chargement du rendez-vous…</p>}
         {(missing || event.error) && <div className="my-12 rounded-2xl border border-line bg-noir-900 px-6 py-16 text-center" role="alert"><h1 className="font-display text-3xl text-t1">{missing ? 'Ce rendez-vous est introuvable.' : 'Impossible de charger cet événement.'}</h1><p className="mx-auto mt-4 max-w-lg text-t3">{missing ? 'Il n’est peut-être plus publié. Retrouve les autres rendez-vous dans l’agenda.' : event.error?.message}</p>{!missing && <button type="button" onClick={event.reload} className="mt-6 min-h-11 rounded-xl bg-gold-400 px-5 font-medium text-noir-950">Réessayer</button>}<Link to={cataloguePath} className="mx-auto mt-5 block w-fit py-2 text-sm text-gold-400 underline underline-offset-4">Retour à l’agenda</Link></div>}
 
         {loaded && <>

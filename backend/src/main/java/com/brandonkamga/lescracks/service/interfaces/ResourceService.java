@@ -16,6 +16,8 @@ public interface ResourceService {
     Page<Resource> search(ResourceStatus status, String search, String kind, Long categoryId, Long tagId, Pageable pageable);
     Resource requirePublished(Long id);
     Resource require(Long id);
+    Resource requirePublishedBySlugOrId(String slugOrId);
+    Resource requireBySlugOrId(String slugOrId);
     Resource createVideo(VideoResourceRequest request, MultipartFile coverImageFile);
     Resource updateVideo(Long id, VideoResourceRequest request, MultipartFile coverImageFile);
     Resource createEbook(EbookResourceRequest request, MultipartFile file, MultipartFile coverImageFile);

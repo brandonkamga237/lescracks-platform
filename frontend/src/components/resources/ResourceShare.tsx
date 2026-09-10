@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Facebook, Link2, Linkedin, Mail, Share2, Twitter, X, type LucideIcon } from 'lucide-react';
 
+import { resourcePath } from '@/lib/slugs';
+import type { ResourceSummary } from '@/services/types';
+
 interface ResourceShareProps {
-  resourceId: number;
-  title: string;
+  resource: Pick<ResourceSummary, 'id' | 'slug' | 'title'>;
   compact?: boolean;
 }
 
@@ -14,11 +16,12 @@ const NETWORKS: { name: string; icon: LucideIcon; href: (url: string, title?: st
   { name: 'Email', icon: Mail, href: (url, title) => `mailto:?subject=${encodeURIComponent(title ?? '')}&body=${encodeURIComponent(url)}` },
 ];
 
-export default function ResourceShare({ resourceId, title, compact = false }: ResourceShareProps) {
+export default function ResourceShare({ resource, compact = false }: ResourceShareProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const container = useRef<HTMLDivElement>(null);
-  const url = `${window.location.origin}/ressources/${resourceId}`;
+  const title = resource.title;
+  const url = `${window.location.origin}${resourcePath(resource)}`;
 
   useEffect(() => {
     if (!open) return;

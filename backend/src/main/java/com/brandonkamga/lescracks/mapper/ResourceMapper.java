@@ -38,7 +38,7 @@ public class ResourceMapper {
         JsonNode body = article != null ? article.getBody() : null;
         Integer readingMinutes = article != null ? article.getReadingMinutes() : null;
         return new ResourceResponse(
-                resource.getId(), resource.getTitle(), resource.getDescription(), resource.getCoverImage(),
+                resource.getId(), resource.getSlug(), resource.getTitle(), resource.getDescription(), resource.getCoverImage(),
                 resource.getStatus(), resource.getCategory().getId(), resource.getCategory().getName(), kind,
                 video == null ? null : video.getVideoUrl(), video == null ? null : video.getPlatform(),
                 ebook == null ? null : "/api/resources/" + resource.getId() + "/download",
