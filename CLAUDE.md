@@ -3,15 +3,15 @@ French-language tech training platform: resources, events, participations, Accom
 Monorepo: `frontend/` React + Vite (SPA), `backend/` Spring Boot + PostgreSQL + MinIO.
 
 ## Structure
-- `backend/src/main/java/com/brandonkamga/lescracks/`
-  - `controller/` → REST under `/api/*` (plus `SeoController` under `/seo`, outside `/api`)
-  - `service/interfaces/` + `service/impl/` → all business logic (interface + Impl)
-  - `domain/` → JPA entities and enums
-  - `dto/` → exposed payloads (never entities)
-  - `repository/` → Spring Data JPA
-  - `security/` → SecurityConfig (route rules) + KeycloakRoleConverter. Identity is Keycloak's; the API only verifies tokens
-  - `config/` → OpenApiConfig, JacksonConfig, AppBeans
-  - `exception/` → business exceptions + `GlobalExceptionHandler`
+- `backend/src/main/java/com/brandonkamga/lescracks/` → **package by business domain**, one package per domain: `identity`, `resource`, `taxonomy`, `event`, `newsletter`, `stats`, `storage`, `mail`, `seo`. Each one holds its own entities, services, repositories and payloads, split into three layers:
+  - `<feature>/api/` → controllers (REST under `/api/*`; `seo/api` serves `/seo`, outside `/api`), and `<feature>/api/dto/` → exposed payloads (never entities)
+  - `<feature>/domain/` → JPA entities, enums, business logic (service interface + Impl), mappers
+  - `<feature>/infra/` → Spring Data JPA repositories and external adapters (MinIO, mail, Spring Security glue)
+  - `identity/` covers admins, members, identities and tokens: local sessions plus OIDC synchronisation
+  - `shared/` → cross-cutting code only, never business rules:
+    - `shared/security/` → SecurityConfig (route rules) + KeycloakRoleConverter. Identity is Keycloak's; the API only verifies tokens
+    - `shared/config/` → OpenApiConfig, JacksonConfig, AppBeans; `shared/bootstrap/` → startup seeders and backfills
+    - `shared/exception/` → business exceptions + `GlobalExceptionHandler`; `shared/dto/` → ApiError, PageResponse; `shared/util/` → Slugs
 - `backend/src/main/resources/`
   - `application.yaml` + `application-{dev,prod,test}.yml`
   - `db/migration/` → Flyway migrations `V{n}__description.sql`
@@ -59,9 +59,10 @@ Before any commit or PR:
 - Worth writing: a non-obvious workaround, an external constraint, a counter-intuitive decision, a known trap
 
 ### Backend
-- One service = interface in `service/interfaces/` + `XxxServiceImpl` class in `service/impl/`
+- New code goes into the package of the domain it belongs to, never into a layer-wide package: `<feature>/api` (controller + `api/dto`), `<feature>/domain` (entities, enums, service interface + `XxxServiceImpl`), `<feature>/infra` (repositories, external adapters)
+- Prefer calling another domain through its `domain` service rather than its repositories; `stats`, `seo` and `shared/bootstrap` are the existing exceptions, as read-only aggregation and seeding cut across every domain
 - Controllers return `ResponseEntity<ApiResponse<T>>` built with `ApiResponse.success(...)` / `.error(...)`
-- Never expose a `domain/` entity: always a DTO
+- Never expose a `<feature>/domain/` entity: always a DTO
 - Errors: throw `ResourceNotFoundException` / `BadRequestException` / `ForbiddenException`; do not set the status in the controller, `GlobalExceptionHandler` does it
 - DB schema: Flyway only (`ddl-auto: validate` everywhere). A new entity field means a new `V{n}__...sql` migration; never edit a migration that has already been applied
 - Lombok (`@Data`, `@Builder`) on DTOs and entities; logging through `slf4j`

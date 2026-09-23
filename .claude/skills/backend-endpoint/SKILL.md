@@ -10,17 +10,22 @@ description: Add or change a REST endpoint in the LesCracks backend, following t
 An endpoint always touches **four places**. Forgetting one is the most frequent
 mistake in this codebase.
 
-1. **DTO** — `dto/XxxRequest.java` / `dto/XxxResponse.java`
-   Never expose a `domain/` entity directly. Lombok `@Data @Builder`, `@Schema`
+Code is organised by business domain: everything below lives under
+`<feature>/` (`identity`, `resource`, `taxonomy`, `event`, `newsletter`, `stats`,
+`storage`, `mail`, `seo`), with `api/` for the outside world, `domain/` for entities and
+business logic, and `infra/` for repositories and external adapters.
+
+1. **DTO** — `<feature>/api/dto/XxxRequest.java` / `XxxResponse.java`
+   Never expose a `<feature>/domain/` entity directly. Lombok `@Data @Builder`, `@Schema`
    annotations for OpenAPI, and `@NotBlank` / `@NotNull` / `@Size` validation on
    request objects.
 
-2. **Service** — interface in `service/interfaces/XxxService.java`, implementation in
-   `service/impl/XxxServiceImpl.java`
+2. **Service** — interface `<feature>/domain/XxxService.java`, implementation
+   `<feature>/domain/XxxServiceImpl.java`
    All business logic lives here, never in the controller. Entity to DTO mapping
    happens in the implementation.
 
-3. **Controller** — `controller/XxxController.java`, `@RequestMapping("/api/...")`
+3. **Controller** — `<feature>/api/XxxController.java`, `@RequestMapping("/api/...")`
    Expected shape:
    ```java
    @PostMapping
@@ -32,7 +37,7 @@ mistake in this codebase.
    `BadRequestException` or `ForbiddenException` and let `GlobalExceptionHandler`
    produce the response.
 
-4. **SecurityConfig** — `config/SecurityConfig.java`
+4. **SecurityConfig** — `shared/security/SecurityConfig.java`
    The default rule is `.requestMatchers("/api/**").authenticated()`. **A new endpoint
    is therefore protected until it is declared `permitAll()` above that line.** Public
    routes are listed method by method:

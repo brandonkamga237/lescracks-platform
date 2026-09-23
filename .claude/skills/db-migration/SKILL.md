@@ -10,7 +10,7 @@ description: Change the LesCracks database schema through a Flyway migration. Us
 **Flyway owns the schema in every environment. Hibernate runs with
 `ddl-auto: validate` and never creates anything.**
 
-The direct consequence: adding a field to a `domain/` entity without the matching
+The direct consequence: adding a field to a `<feature>/domain/` entity without the matching
 migration makes the application **fail to start** — in development as well as in
 production. That is not a bug, it is the safety net.
 
