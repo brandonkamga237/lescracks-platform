@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { ArrowRight, BookOpen, CalendarDays, Info, LogOut, Menu, Shield, User } from 'lucide-react';
+import { ArrowRight, BookOpen, CalendarDays, Info, LogOut, Menu, Podcast, Shield, User } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -13,11 +14,21 @@ import { useSession } from '@/hooks/useSession';
  * distinction the catalogue itself no longer leads with. Nothing here needs a second level:
  * a site with four public sections does not have a navigation problem to solve.
  */
-const LINKS = [
+interface NavLinkDef {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  description: string;
+  /** The Talk tab is dressed in gold: it announces a show, not a section of the site. */
+  highlight?: boolean;
+}
+
+const LINKS: readonly NavLinkDef[] = [
   { to: '/ressources', label: 'Bibliothèque', icon: BookOpen, description: 'Vidéos et ebooks, à ton rythme' },
   { to: '/evenements', label: 'Événements', icon: CalendarDays, description: 'Les prochains rendez-vous tech' },
+  { to: '/talk', label: 'Talk', icon: Podcast, description: 'LesCracks Talk — la tech africaine en conversations', highlight: true },
   { to: '/a-propos', label: 'À propos', icon: Info, description: 'Pourquoi LesCracks existe' },
-] as const;
+];
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -68,8 +79,19 @@ export default function Header() {
         <span className="hidden h-6 w-px bg-line-strong lg:block" aria-hidden />
         <nav className="hidden items-center gap-1 md:flex" aria-label="Navigation principale">
           {LINKS.map((link) => (
-            <NavLink key={link.to} to={link.to} className={({ isActive }) => `rounded-full px-4 py-2.5 text-sm font-medium transition-colors ${isActive ? 'bg-white/[0.07] text-t1' : 'text-t3 hover:bg-white/5 hover:text-t1'}`}>
+            <NavLink key={link.to} to={link.to} className={({ isActive }) => `rounded-full px-4 py-2.5 text-sm font-medium transition-colors ${
+              link.highlight
+                ? isActive
+                  ? 'bg-gold-400 font-semibold text-noir-950'
+                  : 'border border-gold-400/40 text-gold-300 hover:bg-gold-400/10'
+                : isActive
+                  ? 'bg-white/[0.07] text-t1'
+                  : 'text-t3 hover:bg-white/5 hover:text-t1'
+            }`}>
               {link.label}
+              {link.highlight && (
+                <span className="ml-1.5 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-current align-middle motion-reduce:animate-none" aria-hidden />
+              )}
             </NavLink>
           ))}
         </nav>

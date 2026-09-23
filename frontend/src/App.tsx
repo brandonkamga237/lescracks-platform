@@ -21,6 +21,7 @@ import NotFound from '@/pages/NotFound';
 import Profile from '@/pages/Profile';
 import RessourceDetail from '@/pages/RessourceDetail';
 import Ressources from '@/pages/Ressources';
+import Talk from '@/pages/Talk';
 
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminCategories from '@/pages/admin/AdminCategories';
@@ -105,6 +106,7 @@ function AppRoutes() {
       <Route path="/ressources/:id" element={<RessourceDetail />} />
       <Route path="/evenements" element={<Evenements />} />
       <Route path="/evenements/:id" element={<EvenementDetail />} />
+      <Route path="/talk" element={<Talk />} />
       <Route path="/a-propos" element={<About />} />
       <Route path="/conditions-utilisation" element={<Terms />} />
       <Route path="/politique-confidentialite" element={<Privacy />} />
