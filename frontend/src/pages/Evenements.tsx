@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { CalendarDays, X } from 'lucide-react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 
@@ -23,11 +23,12 @@ const shortDate = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'num
 
 interface EventRowProps {
   event: EventSummary;
+  /** Where "back" should return to; a prop so cards do not subscribe to location. */
+  cataloguePath: string;
 }
 
-function EventRow({ event }: EventRowProps) {
+const EventRow = memo(function EventRow({ event, cataloguePath }: EventRowProps) {
   const [failedImage, setFailedImage] = useState<string | undefined>(undefined);
-  const location = useLocation();
   const start = new Date(event.startDate);
   const end = event.endDate ? new Date(event.endDate) : null;
   const hasDate = !Number.isNaN(start.getTime());
@@ -38,26 +39,26 @@ function EventRow({ event }: EventRowProps) {
   return (
     <Link
       to={eventPath(event)}
-      state={{ cataloguePath: `${location.pathname}${location.search}` }}
+      state={{ cataloguePath }}
       className="group flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-white/[0.06] bg-noir-900 shadow-sm transition-all duration-300 hover:border-white/[0.12] hover:shadow-2xl hover:shadow-black/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
     >
-      <div className="aspect-[16/10] w-full overflow-hidden bg-noir-800">
+      <div className="aspect-[16/9] w-full overflow-hidden bg-noir-800">
         {event.coverImage && failedImage !== event.coverImage ? (
           <img src={event.coverImage} alt="" loading="lazy" onError={() => setFailedImage(event.coverImage)} className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full w-full items-end bg-noir-800 p-6" aria-hidden>
-            <span className="font-display text-5xl font-semibold leading-none text-white/10">{types.find(([value]) => value === event.type)?.[1]}</span>
+          <div className="flex h-full w-full items-end bg-noir-800 p-4" aria-hidden>
+            <span className="font-display text-4xl font-semibold leading-none text-white/10">{types.find(([value]) => value === event.type)?.[1]}</span>
           </div>
         )}
       </div>
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex flex-1 flex-col p-4">
         <div className="flex items-center justify-between gap-4 text-sm">
           {hasDate ? <time dateTime={event.startDate} className="font-medium text-gold-300">{shortDate.format(start)}</time> : <span className="text-t4">Date non renseignée</span>}
           <span className="text-xs text-t4">{status}</span>
         </div>
-        <h2 className="mt-3 break-words font-display text-lg font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-300">{event.title}</h2>
+        <h2 className="mt-2 break-words font-display text-base font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-300">{event.title}</h2>
         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-t3">{event.description}</p>
-        <p className="mt-auto border-t border-line-soft/50 pt-4 text-xs text-t4">
+        <p className="mt-auto border-t border-line-soft/50 pt-3 text-xs text-t4">
           {types.find(([value]) => value === event.type)?.[1]}
           {' · '}
           {formats.find(([value]) => value === event.format)?.[1]}
@@ -67,9 +68,11 @@ function EventRow({ event }: EventRowProps) {
       </div>
     </Link>
   );
-}
+});
 
 export default function Evenements() {
+  const location = useLocation();
+  const cataloguePath = `${location.pathname}${location.search}`;
   const [params, setParams] = useSearchParams();
   const type = types.find(([value]) => value === params.get('type'))?.[0];
   const format = formats.find(([value]) => value === params.get('format'))?.[0];
@@ -111,7 +114,7 @@ export default function Evenements() {
         </Toolbar>
 
         <div aria-label="Événements" aria-live="polite" aria-busy={events.loading} role="region">
-          {events.loading && <CardSkeletonGrid count={6} />}
+          {events.loading && list.length === 0 && <CardSkeletonGrid count={8} />}
           {events.error && <ErrorState title="L’agenda est momentanément indisponible." message={events.error.message} onRetry={events.reload} />}
           {!events.loading && !events.error && list.length === 0 && (
             <EmptyState
@@ -125,11 +128,11 @@ export default function Evenements() {
               )}
             />
           )}
-          {!events.loading && !events.error && list.length > 0 && (
-            <>
-              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">{list.map((event) => <EventRow key={event.id} event={event} />)}</div>
+          {!events.error && list.length > 0 && (
+            <div className={`transition-opacity ${events.loading ? 'opacity-60' : ''}`}>
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{list.map((event) => <EventRow key={event.id} event={event} cataloguePath={cataloguePath} />)}</div>
               <Pagination page={page} totalPages={events.data?.totalPages ?? 0} onPageChange={(value) => setParam('page', value === 1 ? null : String(value))} />
-            </>
+            </div>
           )}
         </div>
       </Section>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Linkedin, Github, Youtube, Mail, BookOpen, Calendar } from 'lucide-react';
+import { Linkedin, Github, Youtube, Mail, BookOpen, Calendar, Podcast } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import LesCracksLogo from '@/components/common/LesCracksLogo';
@@ -20,6 +20,7 @@ const NAV: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: 'Toutes les ressources', href: '/ressources', icon: BookOpen },
       { label: 'Événements', href: '/evenements', icon: Calendar },
+      { label: 'LesCracks Talk', href: '/talk', icon: Podcast, highlight: true },
       { label: 'À propos', href: '/a-propos', icon: null },
     ],
   },

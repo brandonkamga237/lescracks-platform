@@ -13,10 +13,10 @@ export const Skeleton = ({ className = '' }: SkeletonProps) => (
 /** Placeholder shaped like a resource / event card: thumbnail, title, meta, tags. */
 export const CardSkeleton = () => (
   <div className="card overflow-hidden">
-    <Skeleton className="mb-5 h-44 w-full rounded-2xl" />
+    <Skeleton className="mb-4 h-32 w-full rounded-2xl" />
     <Skeleton className="mb-3 h-4 w-3/4" />
     <Skeleton className="mb-2 h-3 w-full" />
-    <Skeleton className="mb-5 h-3 w-5/6" />
+    <Skeleton className="mb-4 h-3 w-5/6" />
     <div className="flex gap-2">
       <Skeleton className="h-5 w-16 rounded-full" />
       <Skeleton className="h-5 w-12 rounded-full" />
@@ -32,7 +32,7 @@ export const CardSkeleton = () => (
  */
 export const CardSkeletonGrid = ({ count = 6 }: { count?: number }) => (
   <div
-    className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+    className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
     role="status"
     aria-label="Chargement en cours"
   >

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { memo, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Download, ExternalLink, FileText, PlayCircle } from 'lucide-react';
 
 import ResourceShare from '@/components/resources/ResourceShare';
@@ -10,6 +10,9 @@ import type { ResourceSummary } from '@/services/types';
 
 interface ResourceCardProps {
   resource: ResourceSummary;
+  /** Where "back" should return to. Passed down because subscribing every card to
+   *  useLocation would re-render the whole grid on each keystroke of the search. */
+  cataloguePath: string;
 }
 
 const KIND_LABEL = { EXTERNAL_VIDEO: 'Vidéo', EBOOK: 'Ebook', ARTICLE: 'Article' } as const;
@@ -19,8 +22,7 @@ function formatSize(bytes?: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1).replace('.', ',')} Mo`;
 }
 
-export default function ResourceCard({ resource }: ResourceCardProps) {
-  const location = useLocation();
+function ResourceCard({ resource, cataloguePath }: ResourceCardProps) {
   const navigate = useNavigate();
   const { isSignedIn, signIn } = useSession();
   const [failedImage, setFailedImage] = useState<string | null>(null);
@@ -28,18 +30,16 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
   const [likeCount, setLikeCount] = useState(resource.likeCount ?? 0);
   const [liking, setLiking] = useState(false);
 
+  // Anonymous visitors cannot have liked anything: skip the extra request per card.
   useEffect(() => {
+    if (!isSignedIn) return;
     let ignore = false;
     const signal = new AbortController();
     api.resourceLikes(resource.id, signal.signal)
       .then((status) => { if (!ignore) { setLiked(status.liked); setLikeCount(status.count); } })
       .catch(() => { /* count comes from the summary; keep defaults on error */ });
     return () => { ignore = true; signal.abort(); };
-  }, [resource.id]);
-
-  const cataloguePath = /^\/ressources(?:\/(?:ebooks|videos|articles))?$/.test(location.pathname)
-    ? `${location.pathname}${location.search}`
-    : '/ressources';
+  }, [resource.id, isSignedIn]);
 
   async function toggleLike(event: React.MouseEvent) {
     event.stopPropagation();
@@ -78,7 +78,7 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
       tabIndex={0}
       onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } }}
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-noir-800">
+      <div className="relative aspect-[16/9] overflow-hidden bg-noir-800">
         {resource.coverImage && failedImage !== resource.coverImage ? (
           <img
             src={resource.coverImage}
@@ -88,8 +88,8 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full items-end bg-noir-800 p-6" aria-hidden>
-            <span className="font-display text-6xl font-semibold leading-none text-white/10">{KIND_LABEL[resource.kind]}</span>
+          <div className="flex h-full items-end bg-noir-800 p-4" aria-hidden>
+            <span className="font-display text-5xl font-semibold leading-none text-white/10">{KIND_LABEL[resource.kind]}</span>
           </div>
         )}
         <div className="absolute left-4 top-4 flex items-center gap-2">
@@ -104,14 +104,14 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col p-5">
-        <h3 className="break-words font-display text-lg font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-300">{resource.title}</h3>
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="break-words font-display text-base font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-300">{resource.title}</h3>
 
         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-t3">{resource.description}</p>
 
         {resource.tags?.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {resource.tags.slice(0, 4).map((tag) => (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {resource.tags.slice(0, 3).map((tag) => (
               <span key={tag} className="rounded-full border border-line-soft bg-noir-950 px-3 py-1 text-[11px] font-medium text-t4">
                 {tag}
               </span>
@@ -119,8 +119,8 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
           </div>
         )}
 
-        <div className="mt-auto pt-5">
-          <div className="flex items-center justify-between border-t border-line-soft/50 pt-4 text-xs text-t4">
+        <div className="mt-auto pt-4">
+          <div className="flex items-center justify-between border-t border-line-soft/50 pt-3 text-xs text-t4">
             <div className="flex items-center gap-1.5">
               {resource.kind === 'EXTERNAL_VIDEO' ? <PlayCircle className="h-3.5 w-3.5 text-t4" aria-hidden /> : <FileText className="h-3.5 w-3.5 text-t4" aria-hidden />}
               <span className="text-t3">{detail}</span>
@@ -149,6 +149,8 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
     </article>
   );
 }
+
+export default memo(ResourceCard);
 
 function Heart({ filled }: { filled: boolean }) {
   return (
