@@ -1,6 +1,5 @@
 package com.brandonkamga.lescracks.taxonomy.domain;
 
-import com.brandonkamga.lescracks.identity.domain.Admin;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

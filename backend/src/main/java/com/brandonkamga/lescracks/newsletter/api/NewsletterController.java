@@ -6,7 +6,6 @@ import com.brandonkamga.lescracks.newsletter.api.dto.BroadcastRequest;
 import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterCampaignResponse;
 import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterPublicSubscribeRequest;
 import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterResponse;
-import com.brandonkamga.lescracks.newsletter.domain.NewsletterCampaign;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterStatus;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterSubscription;

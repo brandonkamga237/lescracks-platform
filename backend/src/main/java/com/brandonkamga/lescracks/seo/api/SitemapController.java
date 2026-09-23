@@ -1,6 +1,5 @@
 package com.brandonkamga.lescracks.seo.api;
 
-import com.brandonkamga.lescracks.event.domain.Event;
 import com.brandonkamga.lescracks.event.domain.EventService;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
