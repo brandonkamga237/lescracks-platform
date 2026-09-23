@@ -1,0 +1,84 @@
+package com.brandonkamga.lescracks.identity.domain;
+
+import com.brandonkamga.lescracks.identity.api.dto.UserPasswordChangeRequest;
+import com.brandonkamga.lescracks.identity.api.dto.UserProfileUpdateRequest;
+import com.brandonkamga.lescracks.identity.infra.UserRepository;
+import com.brandonkamga.lescracks.shared.exception.BadRequestException;
+import com.brandonkamga.lescracks.shared.exception.NotFoundException;
+import com.brandonkamga.lescracks.storage.domain.StorageService;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.time.Instant;
+
+@Service
+@Transactional
+public class UserProfileServiceImpl implements UserProfileService {
+    private final UserRepository users;
+    private final PasswordEncoder passwords;
+    private final StorageService storage;
+
+    public UserProfileServiceImpl(UserRepository users, PasswordEncoder passwords, StorageService storage) {
+        this.users = users;
+        this.passwords = passwords;
+        this.storage = storage;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User require(String email) {
+        return users.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new NotFoundException("Utilisateur", "email", email));
+    }
+
+    @Override
+    public User update(String email, UserProfileUpdateRequest request) {
+        User user = require(email);
+        user.setFirstName(request.firstName().trim());
+        user.setLastName(request.lastName().trim());
+        user.setUsername(request.username() == null ? null : request.username().trim().toLowerCase());
+        user.setAvatarUrl(request.avatarUrl() == null ? null : request.avatarUrl().trim());
+        user.setBio(request.bio() == null ? null : request.bio().trim());
+        user.setLocation(request.location() == null ? null : request.location().trim());
+        if (request.socialLinks() != null) {
+            user.setSocialLinks(request.socialLinks());
+        }
+        user.setUpdatedAt(Instant.now());
+        return user;
+    }
+
+    @Override
+    public User updateAvatar(String email, MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new BadRequestException("Aucun fichier reçu.");
+        }
+        User user = require(email);
+        try {
+            String key = storage.store(file.getOriginalFilename(), file.getBytes(), file.getContentType());
+            user.setAvatarUrl(key);
+            user.setUpdatedAt(Instant.now());
+            return user;
+        } catch (IOException cause) {
+            throw new BadRequestException("Impossible de lire le fichier.");
+        }
+    }
+
+    @Override
+    public void changePassword(String email, UserPasswordChangeRequest request) {
+        User user = require(email);
+        if (user.getPasswordHash() == null || !passwords.matches(request.currentPassword(), user.getPasswordHash())) {
+            throw new BadRequestException("Le mot de passe actuel est incorrect.");
+        }
+        if (!request.newPassword().equals(request.confirmPassword())) {
+            throw new BadRequestException("Le nouveau mot de passe et sa confirmation ne correspondent pas.");
+        }
+        user.setPasswordHash(passwords.encode(request.newPassword()));
+    }
+
+    @Override
+    public void delete(String email) { users.delete(require(email)); }
+}
