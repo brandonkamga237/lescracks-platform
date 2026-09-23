@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, BookOpen, CalendarDays, Podcast } from 'lucide-react';
 
 import SEO from '@/components/common/SEO';
 import { CardSkeletonGrid } from '@/components/common/Skeleton';
@@ -14,6 +14,27 @@ import { api } from '@/services/api';
 import { eventPath } from '@/lib/slugs';
 
 const dayFormat = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+const PILLARS = [
+  {
+    to: '/ressources',
+    icon: BookOpen,
+    title: 'Une bibliothèque ouverte',
+    body: 'Vidéos, ebooks et articles en français, en accès libre et sans compte. Tu choisis un sujet, tu avances à ton rythme.',
+  },
+  {
+    to: '/evenements',
+    icon: CalendarDays,
+    title: 'Des rendez-vous réguliers',
+    body: 'Ateliers, webinaires et conférences pour pratiquer en groupe, poser tes questions et rencontrer la communauté.',
+  },
+  {
+    to: '/talk',
+    icon: Podcast,
+    title: 'Une voix pour la tech africaine',
+    body: 'LesCracks Talk donne la parole à celles et ceux qui construisent sur le continent. Bientôt sur YouTube.',
+  },
+] as const;
 
 const reveal = (reduced: boolean | null) => (reduced ? {} : { initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.55, ease: 'easeOut' } });
 
@@ -67,6 +88,35 @@ export default function Landing() {
           />
         </div>
       </Section>
+
+      <motion.div {...reveal(reduced)}>
+        <Section aria-labelledby="mission-heading">
+          <SectionHeader
+            id="mission-heading"
+            title="Pourquoi LesCracks existe"
+            description="La tech s’apprend en construisant, pas en regardant passer les cours. Que tu découvres le métier ou que tu changes de voie, on rassemble ce qu’il faut pour y arriver."
+          />
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {PILLARS.map(({ to, icon: Icon, title, body }) => (
+              <Link
+                key={to}
+                to={to}
+                className="group rounded-3xl border border-white/[0.06] bg-noir-900 p-6 transition-colors hover:border-gold-400/30 hover:bg-noir-900/80"
+              >
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-gold-400/25 bg-gold-400/10 text-gold-400">
+                  <Icon className="h-5 w-5" aria-hidden />
+                </span>
+                <h3 className="mt-5 font-display text-lg font-semibold text-t1 transition-colors group-hover:text-gold-300">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-t3">{body}</p>
+                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-gold-400">
+                  Découvrir
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </Section>
+      </motion.div>
 
       <motion.div {...reveal(reduced)}>
         <Section aria-labelledby="latest-heading">
