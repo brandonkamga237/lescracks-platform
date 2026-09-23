@@ -15,7 +15,7 @@ backend**, while humans get the normal SPA.
 A public page is therefore only really indexable once all **three** points below are
 done. Missing one leaves the page invisible to engines, with no visible error.
 
-## 1. Backend snapshot — `controller/SeoController.java`
+## 1. Backend snapshot — `seo/api/SeoController.java`
 
 - Route under `/seo` (outside `/api`), already `permitAll` through
   `.requestMatchers(HttpMethod.GET, "/seo/**")`.
@@ -37,7 +37,7 @@ done. Missing one leaves the page invisible to engines, with no visible error.
   `location` (`evenements|ressources|apprenants`).
 - The `location ^~ /_seo/` block is internal and proxies to the backend: leave it alone.
 
-## 3. Sitemap — `controller/SitemapController.java`
+## 3. Sitemap — `seo/api/SitemapController.java`
 
 Add the URL to the sitemap with a `priority` consistent with the existing ones.
 Slug-based pages are generated in a loop from the database; a static page is added by
