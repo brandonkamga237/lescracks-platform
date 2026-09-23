@@ -168,7 +168,7 @@ export default function Ressources() {
           )}
           {visible.length > 0 && !catalogue.loading && !catalogue.error && (
             <>
-              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">{visible.map((resource) => <ResourceCard key={resource.id} resource={resource} />)}</div>
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{visible.map((resource) => <ResourceCard key={resource.id} resource={resource} />)}</div>
               <Pagination page={page} totalPages={catalogue.data?.totalPages ?? 0} onPageChange={(value) => setParam('page', value === 1 ? null : String(value))} />
             </>
           )}

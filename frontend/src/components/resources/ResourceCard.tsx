@@ -78,7 +78,7 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
       tabIndex={0}
       onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } }}
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-noir-800">
+      <div className="relative aspect-[16/9] overflow-hidden bg-noir-800">
         {resource.coverImage && failedImage !== resource.coverImage ? (
           <img
             src={resource.coverImage}
@@ -88,8 +88,8 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full items-end bg-noir-800 p-6" aria-hidden>
-            <span className="font-display text-6xl font-semibold leading-none text-white/10">{KIND_LABEL[resource.kind]}</span>
+          <div className="flex h-full items-end bg-noir-800 p-4" aria-hidden>
+            <span className="font-display text-5xl font-semibold leading-none text-white/10">{KIND_LABEL[resource.kind]}</span>
           </div>
         )}
         <div className="absolute left-4 top-4 flex items-center gap-2">
@@ -104,14 +104,14 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col p-5">
-        <h3 className="break-words font-display text-lg font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-300">{resource.title}</h3>
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="break-words font-display text-base font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-300">{resource.title}</h3>
 
         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-t3">{resource.description}</p>
 
         {resource.tags?.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {resource.tags.slice(0, 4).map((tag) => (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {resource.tags.slice(0, 3).map((tag) => (
               <span key={tag} className="rounded-full border border-line-soft bg-noir-950 px-3 py-1 text-[11px] font-medium text-t4">
                 {tag}
               </span>
@@ -119,8 +119,8 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
           </div>
         )}
 
-        <div className="mt-auto pt-5">
-          <div className="flex items-center justify-between border-t border-line-soft/50 pt-4 text-xs text-t4">
+        <div className="mt-auto pt-4">
+          <div className="flex items-center justify-between border-t border-line-soft/50 pt-3 text-xs text-t4">
             <div className="flex items-center gap-1.5">
               {resource.kind === 'EXTERNAL_VIDEO' ? <PlayCircle className="h-3.5 w-3.5 text-t4" aria-hidden /> : <FileText className="h-3.5 w-3.5 text-t4" aria-hidden />}
               <span className="text-t3">{detail}</span>
