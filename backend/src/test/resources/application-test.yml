@@ -4,8 +4,8 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
-    # Each class gets the schema rebuilt from V1, so one test's rows never explain
-    # another's result.
+    # Enabled so PostgresIT.resetSchema() can replay from V1. Isolation normally comes from
+    # a rolled-back transaction; this is the escape hatch for tests that commit.
     clean-disabled: false
 
   jpa:

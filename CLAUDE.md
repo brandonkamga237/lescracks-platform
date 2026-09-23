@@ -68,6 +68,7 @@ Before any commit or PR:
 - Lombok (`@Data`, `@Builder`) on DTOs and entities; logging through `slf4j`
 - Public vs protected endpoints are declared in `SecurityConfig`, plus `@PreAuthorize` on each admin method; roles come from the Keycloak realm: `user`, `admin`
 - Text shown to users (emails, API errors) in French; everything else in English
+- Tests mirror the production layout: `src/test/.../<feature>/{api,domain,infra}/`, never a global `controller`/`service`/`repository` split. Shared fixtures live in `support/`; domain fixtures stay in their feature package. The suffix picks the suite: `*Test` runs without Docker via `./mvnw test` (pure unit tests plus light slices like `@WebMvcTest`), `*IT` runs via `./mvnw verify` against real PostgreSQL through Testcontainers (extend `support/PostgresIT`)
 
 ### Frontend
 - Import through the `@/...` alias (never deep relative paths)

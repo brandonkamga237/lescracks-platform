@@ -196,10 +196,12 @@
 				</configuration>
 			</plugin>
 
-			<!-- Two families, split by what they need to run.
-			     *Test  : no Spring, no Docker, milliseconds  -> ./mvnw test
-			     *IT    : real PostgreSQL through Testcontainers -> ./mvnw verify
-			     So a machine without Docker still runs the fast suite in full. -->
+			<!-- Two families, split by the one thing that actually gates a machine: Docker.
+			     *Test : runs without Docker -> ./mvnw test. Plain unit tests, plus the light
+			             Spring slices (@WebMvcTest) that need no database.
+			     *IT   : needs real PostgreSQL through Testcontainers -> ./mvnw verify
+			     Tests live in the package of the domain they cover, never in a package named
+			     after a layer; the suffix, not the directory, says which family a test is in. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
