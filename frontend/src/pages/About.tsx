@@ -29,15 +29,13 @@ export default function About() {
       </Section>
 
       <Section>
-        <div className="grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-center">
-          <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+          <figure className="max-w-md">
             <div className="aspect-[4/5] overflow-hidden rounded-3xl border border-white/[0.06]">
-              <img src="/images/photo-brandon.jpeg" alt="Brandon, fondateur de LesCracks" className="h-full w-full object-cover" loading="lazy" />
+              <img src="/images/photo-brandon.jpeg" alt="Brandon Kamga, fondateur de LesCracks" className="h-full w-full object-cover" loading="lazy" />
             </div>
-            <div className="aspect-[3/4] overflow-hidden rounded-3xl border border-white/[0.06] sm:mt-12">
-              <img src="/images/about.jpg" alt="Des apprenants LesCracks en session de travail" className="h-full w-full object-cover" loading="lazy" />
-            </div>
-          </div>
+            <figcaption className="mt-3 text-sm text-t4">Brandon Kamga — fondateur de LesCracks</figcaption>
+          </figure>
 
           <div>
             <h2 className="font-display text-3xl font-semibold tracking-tight text-t1 sm:text-4xl">
@@ -45,6 +43,9 @@ export default function About() {
             </h2>
             <p className="mt-5 text-base leading-relaxed text-t3">
               Le métier de la tech ne s’apprend pas dans une bibliothèque. Il s’apprend en réalisant des projets, en demandant de l’aide, en montrant son travail. Sur LesCracks, chaque ressource est pensée comme un tremplin vers un exercice, un rendez-vous ou une discussion avec la communauté.
+            </p>
+            <p className="mt-4 text-base leading-relaxed text-t3">
+              Lancée en 2024 par Brandon Kamga, la plateforme est née d’une conviction : la tech africaine a besoin de gens qui font — et d’un endroit où apprendre en faisant, en français.
             </p>
 
             <div className="mt-10 grid gap-6 sm:grid-cols-2">
