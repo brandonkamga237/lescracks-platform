@@ -62,7 +62,10 @@ public class SeoController {
                     "/evenements", "Événements"),
             "ressources", new PageMeta("Bibliothèque — LesCracks",
                     "Ebooks et vidéos pour apprendre la tech en français. Filtre par format, catégorie et sujet.",
-                    "/ressources", "Bibliothèque")
+                    "/ressources", "Bibliothèque"),
+            "talk", new PageMeta("LesCracks Talk — La tech africaine en conversations",
+                    "Des conversations avec celles et ceux qui construisent la tech africaine : produits, parcours et réalisations, pensées pour les jeunes et les personnes en reconversion. Bientôt sur YouTube.",
+                    "/talk", "LesCracks Talk")
     );
 
     public SeoController(ResourceService resources, EventService events, ResourceMapper mapper,
@@ -162,6 +165,7 @@ public class SeoController {
                 new SeoHtml.Link(canonical(request, "/"), "Accueil"),
                 new SeoHtml.Link(canonical(request, "/ressources"), "Bibliothèque"),
                 new SeoHtml.Link(canonical(request, "/evenements"), "Événements"),
+                new SeoHtml.Link(canonical(request, "/talk"), "LesCracks Talk"),
                 new SeoHtml.Link(canonical(request, "/a-propos"), "À propos")
         );
         html.navigation("Navigation principale", nav);
