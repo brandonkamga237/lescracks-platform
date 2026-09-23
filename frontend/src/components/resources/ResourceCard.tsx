@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { memo, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Download, ExternalLink, FileText, PlayCircle } from 'lucide-react';
 
 import ResourceShare from '@/components/resources/ResourceShare';
@@ -10,6 +10,9 @@ import type { ResourceSummary } from '@/services/types';
 
 interface ResourceCardProps {
   resource: ResourceSummary;
+  /** Where "back" should return to. Passed down because subscribing every card to
+   *  useLocation would re-render the whole grid on each keystroke of the search. */
+  cataloguePath: string;
 }
 
 const KIND_LABEL = { EXTERNAL_VIDEO: 'Vidéo', EBOOK: 'Ebook', ARTICLE: 'Article' } as const;
@@ -19,8 +22,7 @@ function formatSize(bytes?: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1).replace('.', ',')} Mo`;
 }
 
-export default function ResourceCard({ resource }: ResourceCardProps) {
-  const location = useLocation();
+function ResourceCard({ resource, cataloguePath }: ResourceCardProps) {
   const navigate = useNavigate();
   const { isSignedIn, signIn } = useSession();
   const [failedImage, setFailedImage] = useState<string | null>(null);
@@ -28,18 +30,16 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
   const [likeCount, setLikeCount] = useState(resource.likeCount ?? 0);
   const [liking, setLiking] = useState(false);
 
+  // Anonymous visitors cannot have liked anything: skip the extra request per card.
   useEffect(() => {
+    if (!isSignedIn) return;
     let ignore = false;
     const signal = new AbortController();
     api.resourceLikes(resource.id, signal.signal)
       .then((status) => { if (!ignore) { setLiked(status.liked); setLikeCount(status.count); } })
       .catch(() => { /* count comes from the summary; keep defaults on error */ });
     return () => { ignore = true; signal.abort(); };
-  }, [resource.id]);
-
-  const cataloguePath = /^\/ressources(?:\/(?:ebooks|videos|articles))?$/.test(location.pathname)
-    ? `${location.pathname}${location.search}`
-    : '/ressources';
+  }, [resource.id, isSignedIn]);
 
   async function toggleLike(event: React.MouseEvent) {
     event.stopPropagation();
@@ -149,6 +149,8 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
     </article>
   );
 }
+
+export default memo(ResourceCard);
 
 function Heart({ filled }: { filled: boolean }) {
   return (

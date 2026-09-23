@@ -133,7 +133,7 @@ export default function Landing() {
             <ErrorState title="La bibliothèque est momentanément indisponible." onRetry={recent.reload} />
           ) : recent.data?.content.length ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {recent.data.content.map((resource) => <ResourceCard key={resource.id} resource={resource} />)}
+              {recent.data.content.map((resource) => <ResourceCard key={resource.id} resource={resource} cataloguePath="/ressources" />)}
             </div>
           ) : (
             <EmptyState title="Les premières ressources arrivent." description="Les vidéos et les ebooks apparaîtront ici dès leur publication." />

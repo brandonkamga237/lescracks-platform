@@ -1,6 +1,6 @@
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import FilterChips from '@/components/common/FilterChips';
 import Pagination from '@/components/common/Pagination';
@@ -44,14 +44,7 @@ export default function Ressources() {
   const categories = useApi((signal) => api.categories(signal), []);
   const tags = useApi((signal) => api.tags(categoryId, signal), [categoryId]);
   const catalogue = useApi(
-    async (signal) => {
-      await new Promise<void>((resolve, reject) => {
-        const cancel = () => { window.clearTimeout(timer); reject(new DOMException('Aborted', 'AbortError')); };
-        const timer = window.setTimeout(() => { signal.removeEventListener('abort', cancel); resolve(); }, 250);
-        signal.addEventListener('abort', cancel, { once: true });
-      });
-      return api.resources({ kind, search: search.trim() || undefined, categoryId, tagId, page: page - 1, size: 12 }, signal);
-    },
+    (signal) => api.resources({ kind, search: search.trim() || undefined, categoryId, tagId, page: page - 1, size: 12 }, signal),
     [kind, search, categoryId, tagId, page],
   );
   const visible = catalogue.data?.content ?? [];
@@ -59,7 +52,7 @@ export default function Ressources() {
   const total = catalogue.data?.totalElements ?? 0;
   const refineCount = (categoryId ? 1 : 0) + (tagId ? 1 : 0);
 
-  function setParam(key: string, value: string | null) {
+  const setParam = useCallback((key: string, value: string | null) => {
     const next = new URLSearchParams(params);
     if (kind) next.set('kind', kind);
     else next.delete('kind');
@@ -68,7 +61,27 @@ export default function Ressources() {
     if (key !== 'page') next.delete('page');
     if (key === 'categoryId') next.delete('tagId');
     navigate({ pathname: '/ressources', search: next.toString() }, { replace: key === 'q' });
-  }
+  }, [params, kind, navigate]);
+
+  // Typing stays local; the URL (and therefore the request) only follows after a pause.
+  const [draft, setDraft] = useState(search);
+  const lastSubmitted = useRef(search);
+  useEffect(() => {
+    if (draft === search) lastSubmitted.current = search;
+    if (draft === lastSubmitted.current) return;
+    const timer = window.setTimeout(() => {
+      lastSubmitted.current = draft;
+      setParam('q', draft.trim() || null);
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [draft, search, setParam]);
+
+  // External URL changes (Effacer, breadcrumb, back button) must refill the field.
+  useEffect(() => {
+    setDraft(search);
+  }, [search]);
+
+  const cataloguePath = `${location.pathname}${location.search}`;
 
   return (
     <Layout>
@@ -88,9 +101,15 @@ export default function Ressources() {
               <input
                 id="resource-search"
                 type="search"
-                value={search}
+                value={draft}
                 placeholder="Chercher un sujet, un outil…"
-                onChange={(event) => setParam('q', event.target.value || null)}
+                onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    lastSubmitted.current = draft;
+                    setParam('q', draft.trim() || null);
+                  }
+                }}
                 className="min-h-12 min-w-0 flex-1 bg-transparent text-sm text-t1 placeholder:text-t4 focus:outline-none"
               />
             </div>
@@ -151,7 +170,8 @@ export default function Ressources() {
         )}
 
         <div aria-label="Ressources" aria-live="polite" aria-busy={catalogue.loading} role="region">
-          {catalogue.loading && <CardSkeletonGrid count={6} />}
+          {/* Skeleton only before the first payload: a refetch dims the results it replaces. */}
+          {catalogue.loading && visible.length === 0 && <CardSkeletonGrid count={8} />}
           {catalogue.error && (
             <ErrorState title="La bibliothèque est momentanément indisponible." message={catalogue.error.message} onRetry={catalogue.reload} />
           )}
@@ -166,11 +186,11 @@ export default function Ressources() {
               )}
             />
           )}
-          {visible.length > 0 && !catalogue.loading && !catalogue.error && (
-            <>
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{visible.map((resource) => <ResourceCard key={resource.id} resource={resource} />)}</div>
+          {visible.length > 0 && !catalogue.error && (
+            <div className={`transition-opacity ${catalogue.loading ? 'opacity-60' : ''}`}>
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{visible.map((resource) => <ResourceCard key={resource.id} resource={resource} cataloguePath={cataloguePath} />)}</div>
               <Pagination page={page} totalPages={catalogue.data?.totalPages ?? 0} onPageChange={(value) => setParam('page', value === 1 ? null : String(value))} />
-            </>
+            </div>
           )}
         </div>
       </Section>
