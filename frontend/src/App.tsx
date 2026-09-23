@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { Link, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { MotionConfig } from 'framer-motion';
@@ -23,14 +23,15 @@ import RessourceDetail from '@/pages/RessourceDetail';
 import Ressources from '@/pages/Ressources';
 import Talk from '@/pages/Talk';
 
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import AdminCategories from '@/pages/admin/AdminCategories';
-import AdminEvents from '@/pages/admin/AdminEvents';
-import AdminResources from '@/pages/admin/AdminResources';
-import AdminNewsletter from '@/pages/admin/AdminNewsletter';
-import AdminAdmins from '@/pages/admin/AdminAdmins';
-import AdminTags from '@/pages/admin/AdminTags';
-import AdminUsers from '@/pages/admin/AdminUsers';
+// The back office is never part of a visitor's first load: it ships as its own chunk.
+const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
+const AdminCategories = lazy(() => import('@/pages/admin/AdminCategories'));
+const AdminEvents = lazy(() => import('@/pages/admin/AdminEvents'));
+const AdminResources = lazy(() => import('@/pages/admin/AdminResources'));
+const AdminNewsletter = lazy(() => import('@/pages/admin/AdminNewsletter'));
+const AdminAdmins = lazy(() => import('@/pages/admin/AdminAdmins'));
+const AdminTags = lazy(() => import('@/pages/admin/AdminTags'));
+const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
 
 function Waiting() {
   return (
@@ -77,7 +78,7 @@ function AdminRoute() {
   if (error) return <SessionFailure />;
   if (!isSignedIn) return <Navigate to={`/admin/connexion?retour=${encodeURIComponent(`${location.pathname}${location.search}${location.hash}`)}`} replace />;
   if (!isAdmin) return <Navigate to="/ressources" replace />;
-  return <AdminLayout><Outlet /></AdminLayout>;
+  return <AdminLayout><Suspense fallback={<Waiting />}><Outlet /></Suspense></AdminLayout>;
 }
 
 function AppRoutes() {
