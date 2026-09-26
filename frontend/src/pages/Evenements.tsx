@@ -36,11 +36,12 @@ export default function Evenements() {
   const parsedPage = Number(rawPage);
   const page = /^[1-9]\d*$/.test(rawPage) && Number.isSafeInteger(parsedPage) && parsedPage <= 2147483647 ? parsedPage : 1;
   const events = useApi((signal) => api.events({ type, format, page: page - 1, size: 12 }, signal), [type, format, page]);
-  const past = useApi((signal) => api.pastEvents(0, 4, signal), []);
   const list = events.data?.content ?? [];
   const hasFilters = Boolean(type || format);
   const total = events.data?.totalElements ?? 0;
   const discovery = !hasFilters && page === 1;
+  // The archive only exists on the discovery view; no point fetching it under filters.
+  const past = useApi((signal) => discovery ? api.pastEvents(0, 4, signal) : Promise.resolve(null), [discovery]);
   const spotlight = discovery ? list[0] : undefined;
   const agenda = spotlight ? list.slice(1) : list;
   const spotlightDate = spotlight ? new Date(spotlight.startDate).getTime() : 0;
