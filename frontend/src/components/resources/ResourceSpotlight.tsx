@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
 import { resourcePath } from '@/lib/slugs';
-import { KIND_LABEL, resourceDetail } from '@/components/resources/ResourceIndexItem';
+import { KIND_LABEL, resourceDetail } from '@/lib/resources';
 import type { ResourceSummary } from '@/services/types';
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' });

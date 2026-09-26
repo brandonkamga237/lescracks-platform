@@ -5,11 +5,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import FilterChips from '@/components/common/FilterChips';
 import Pagination from '@/components/common/Pagination';
 import SEO from '@/components/common/SEO';
-import { CardSkeletonGrid } from '@/components/common/Skeleton';
+import { Skeleton } from '@/components/common/Skeleton';
 import { EmptyState, ErrorState } from '@/components/common/States';
 import Layout from '@/components/layout/Layout';
 import { PageHeader, Section, Toolbar } from '@/components/layout/Page';
-import ResourceCard from '@/components/resources/ResourceCard';
+import ResourceIndexItem from '@/components/resources/ResourceIndexItem';
+import ResourceSpotlight from '@/components/resources/ResourceSpotlight';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/services/api';
 import type { ResourceKind } from '@/services/types';
@@ -27,7 +28,10 @@ function positiveInteger(value: string | null): number | undefined {
 }
 
 /**
- * The catalogue of learning resources.
+ * The catalogue reads like a table of contents.
+ *
+ * Unfiltered, the page opens on the latest headline piece followed by the
+ * index; filtered, it collapses to a dense ruled list meant for scanning.
  */
 export default function Ressources() {
   const [params] = useSearchParams();
@@ -51,6 +55,9 @@ export default function Ressources() {
   const hasFilters = Boolean(kind || search.trim() || categoryId || tagId);
   const total = catalogue.data?.totalElements ?? 0;
   const refineCount = (categoryId ? 1 : 0) + (tagId ? 1 : 0);
+  const discovery = !hasFilters && page === 1;
+  const spotlight = discovery ? visible[0] : undefined;
+  const indexItems = spotlight ? visible.slice(1) : visible;
 
   const setParam = useCallback((key: string, value: string | null) => {
     const next = new URLSearchParams(params);
@@ -88,6 +95,7 @@ export default function Ressources() {
       <SEO title="Bibliothèque" description="Ebooks et vidéos pour apprendre la tech en français. Filtre par format, catégorie et sujet." url="/ressources" />
       <Section spacing="tight">
         <PageHeader
+          eyebrow="Le sommaire"
           title="Bibliothèque"
           description="Vidéos et ebooks pour apprendre la tech, en accès libre."
           meta={!catalogue.loading && !catalogue.error ? `${total} ressource${total > 1 ? 's' : ''}` : undefined}
@@ -95,8 +103,8 @@ export default function Ressources() {
 
         <Toolbar
           lead={
-            <div className="flex items-center gap-3 rounded-full border border-line/50 bg-noir-900/40 px-5 transition-colors focus-within:border-gold-400/50 focus-within:bg-noir-900/60">
-              <Search className="h-4 w-4 shrink-0 text-t4" aria-hidden />
+            <div className="flex items-center gap-3 border-b border-line/60 pb-3 transition-colors focus-within:border-gold-400/60">
+              <Search className="h-5 w-5 shrink-0 text-t4" aria-hidden />
               <label htmlFor="resource-search" className="sr-only">Rechercher une ressource</label>
               <input
                 id="resource-search"
@@ -110,7 +118,7 @@ export default function Ressources() {
                     setParam('q', draft.trim() || null);
                   }
                 }}
-                className="min-h-12 min-w-0 flex-1 bg-transparent text-sm text-t1 placeholder:text-t4 focus:outline-none"
+                className="min-w-0 flex-1 bg-transparent font-display text-xl font-medium text-t1 placeholder:text-t4 focus:outline-none sm:text-2xl"
               />
             </div>
           }
@@ -127,21 +135,21 @@ export default function Ressources() {
             onClick={() => setRefineOpen((open) => !open)}
             aria-expanded={refineOpen}
             aria-controls="resource-refine"
-            className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-medium transition-colors ${refineOpen || refineCount ? 'border-gold-400/50 bg-gold-400/10 text-gold-300' : 'border-line-soft/70 bg-noir-900/40 text-t3 hover:text-t1'}`}
+            className={`relative inline-flex min-h-11 items-center gap-2 pb-3 font-mono text-[11px] font-medium uppercase tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${refineOpen || refineCount ? 'text-gold-300' : 'text-t3 hover:text-t1'}`}
           >
             <SlidersHorizontal className="h-4 w-4" aria-hidden />
             Affiner
-            {refineCount > 0 && <span className="rounded-full bg-gold-400 px-1.5 text-xs font-semibold text-black">{refineCount}</span>}
+            {refineCount > 0 && <span className="text-gold-400">({refineCount})</span>}
           </button>
           {hasFilters && (
-            <button type="button" onClick={() => navigate('/ressources')} className="inline-flex min-h-11 items-center gap-1.5 px-2 text-sm text-t3 transition-colors hover:text-t1">
+            <button type="button" onClick={() => navigate('/ressources')} className="inline-flex min-h-11 items-center gap-1.5 pb-3 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-t3 transition-colors hover:text-t1">
               <X className="h-4 w-4" aria-hidden />Effacer
             </button>
           )}
         </Toolbar>
 
         {refineOpen && (
-          <div id="resource-refine" className="mb-10 grid gap-4 rounded-3xl border border-line-soft/50 bg-noir-900/40 p-5 sm:grid-cols-2 sm:p-6">
+          <div id="resource-refine" className="mb-10 grid gap-4 rounded-lg border border-line-soft/50 bg-noir-900/40 p-5 sm:grid-cols-2 sm:p-6">
             <label className="block text-sm font-medium text-t3">
               Catégorie
               <select value={categoryId ?? ''} onChange={(event) => setParam('categoryId', event.target.value || null)} className="input mt-2" disabled={categories.loading || Boolean(categories.error)}>
@@ -171,7 +179,13 @@ export default function Ressources() {
 
         <div aria-label="Ressources" aria-live="polite" aria-busy={catalogue.loading} role="region">
           {/* Skeleton only before the first payload: a refetch dims the results it replaces. */}
-          {catalogue.loading && visible.length === 0 && <CardSkeletonGrid count={8} />}
+          {catalogue.loading && visible.length === 0 && (
+            <div role="status" className="space-y-5">
+              {discovery && <Skeleton className="aspect-[16/10] sm:aspect-[21/9]" />}
+              {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-16" />)}
+              <span className="sr-only">Chargement du contenu…</span>
+            </div>
+          )}
           {catalogue.error && (
             <ErrorState title="La bibliothèque est momentanément indisponible." message={catalogue.error.message} onRetry={catalogue.reload} />
           )}
@@ -188,7 +202,12 @@ export default function Ressources() {
           )}
           {visible.length > 0 && !catalogue.error && (
             <div className={`transition-opacity ${catalogue.loading ? 'opacity-60' : ''}`}>
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{visible.map((resource) => <ResourceCard key={resource.id} resource={resource} cataloguePath={cataloguePath} />)}</div>
+              {spotlight && <ResourceSpotlight resource={spotlight} kicker="Dernière parution" cataloguePath={cataloguePath} />}
+              <ul className={spotlight ? 'mt-12' : ''}>
+                {indexItems.map((resource, i) => (
+                  <ResourceIndexItem key={resource.id} resource={resource} index={String(i + (spotlight ? 2 : 1)).padStart(2, '0')} cataloguePath={cataloguePath} />
+                ))}
+              </ul>
               <Pagination page={page} totalPages={catalogue.data?.totalPages ?? 0} onPageChange={(value) => setParam('page', value === 1 ? null : String(value))} />
             </div>
           )}
