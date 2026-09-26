@@ -63,6 +63,21 @@ export interface EventSummary {
 
 export type EventDetail = EventSummary;
 
+export type TalkStatus = 'DRAFT' | 'PUBLISHED';
+
+export interface TalkVideo {
+  id: number;
+  title: string;
+  description: string;
+  guest?: string;
+  youtubeUrl: string;
+  durationMinutes?: number;
+  publishedAt?: string;
+  status: TalkStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AdminUser {
   id: number;
   email: string;

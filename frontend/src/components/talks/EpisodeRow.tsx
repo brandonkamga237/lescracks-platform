@@ -1,0 +1,61 @@
+import { memo, useState } from 'react';
+import { ArrowUpRight, Play } from 'lucide-react';
+
+import { youtubeThumbnail, youtubeWatchUrl } from '@/lib/youtube';
+import type { TalkVideo } from '@/services/types';
+
+const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' });
+
+interface EpisodeRowProps {
+  video: TalkVideo;
+  /** Folio label, e.g. "ÉP. 04". */
+  index: string;
+}
+
+/**
+ * One episode in the playlist: number, thumbnail, title and guest.
+ * It opens the YouTube video in a new tab — talks live there, not on the site.
+ */
+function EpisodeRow({ video, index }: EpisodeRowProps) {
+  const [failedThumb, setFailedThumb] = useState(false);
+  const thumbnail = youtubeThumbnail(video.youtubeUrl);
+  const meta = [
+    video.guest ? `avec ${video.guest}` : null,
+    video.durationMinutes ? `${video.durationMinutes} min` : null,
+    video.publishedAt ? dateFormat.format(new Date(video.publishedAt)) : null,
+  ].filter(Boolean).join('  ·  ');
+
+  return (
+    <li>
+      <a
+        href={youtubeWatchUrl(video.youtubeUrl)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group grid grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-x-4 border-t border-line-soft/50 px-1 py-5 transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[3.5rem_9rem_minmax(0,1fr)_auto] sm:gap-x-6"
+      >
+        <span className="kicker-muted hidden sm:block" aria-hidden>{index}</span>
+        <span className="relative aspect-[16/9] overflow-hidden rounded border border-line-soft/60 bg-noir-900">
+          {thumbnail && !failedThumb ? (
+            <img src={thumbnail} alt="" loading="lazy" onError={() => setFailedThumb(true)} className="h-full w-full object-cover" />
+          ) : (
+            <span className="flex h-full items-center justify-center text-t4" aria-hidden>
+              <Play className="h-4 w-4" />
+            </span>
+          )}
+          <span className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100" aria-hidden>
+            <Play className="h-5 w-5 text-white" />
+          </span>
+        </span>
+        <span className="min-w-0">
+          <span className="block break-words font-display text-lg font-medium leading-snug text-t1 transition-colors group-hover:text-gold-300 sm:text-xl">
+            {video.title}
+          </span>
+          {meta && <span className="mt-2 block font-mono text-[11px] uppercase tracking-[0.14em] text-t4">{meta}</span>}
+        </span>
+        <ArrowUpRight className="h-5 w-5 text-t4 opacity-0 transition-opacity group-hover:text-gold-300 group-hover:opacity-100" aria-hidden />
+      </a>
+    </li>
+  );
+}
+
+export default memo(EpisodeRow);
