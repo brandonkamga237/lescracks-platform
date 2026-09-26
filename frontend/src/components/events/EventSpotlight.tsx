@@ -12,6 +12,8 @@ const timeFormat = new Intl.DateTimeFormat('fr-FR', { hour: 'numeric', minute: '
 
 interface EventSpotlightProps {
   event: EventSummary;
+  /** Gold label above the title, e.g. "Prochain rendez-vous". */
+  kicker?: string;
   cataloguePath: string;
 }
 
@@ -19,7 +21,7 @@ interface EventSpotlightProps {
  * The next rendez-vous, announced like the headline of an issue:
  * a monumental date rail facing the editorial block.
  */
-function EventSpotlight({ event, cataloguePath }: EventSpotlightProps) {
+function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath }: EventSpotlightProps) {
   const start = new Date(event.startDate);
   const hasDate = !Number.isNaN(start.getTime());
   const meta = [TYPE_LABEL[event.type], FORMAT_LABEL[event.format], event.location]
@@ -48,7 +50,7 @@ function EventSpotlight({ event, cataloguePath }: EventSpotlightProps) {
 
       <div className="min-w-0 self-end">
         <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-          <span className="kicker">Prochain rendez-vous</span>
+          <span className="kicker">{kicker}</span>
           <span className="kicker-muted">{meta}</span>
         </p>
         <h3 className="mt-5 max-w-3xl break-words font-display text-3xl font-medium leading-[1.1] tracking-tight text-t1 sm:text-5xl">
