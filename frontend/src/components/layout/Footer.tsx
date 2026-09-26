@@ -132,7 +132,7 @@ const Footer = () => {
             © {currentYear} LesCracks. Tous droits réservés.
           </p>
           <p className="text-xs text-t4">
-            Conçu &amp; développé avec <span className="text-gold/70">♥</span> depuis Yaoundé, Cameroun
+            Fait avec <span className="text-gold/70">♥</span> par la communauté
           </p>
         </div>
       </div>

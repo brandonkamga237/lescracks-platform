@@ -29,11 +29,11 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
     .join('  ·  ');
 
   return (
-    <article className="grid gap-8 border-b border-line-soft/50 pb-12 sm:pb-16 lg:grid-cols-[12rem_minmax(0,1fr)] lg:gap-16">
-      <div aria-hidden className="lg:border-r lg:border-line-soft/50 lg:pr-12">
+    <article className="grid gap-8 border-b border-line-soft/50 pb-12 sm:pb-16 lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-14">
+      <div aria-hidden className="lg:border-r lg:border-line-soft/50 lg:pr-10">
         {hasDate ? (
           <>
-            <span className="block font-display text-7xl font-medium leading-[0.95] text-t1 sm:text-8xl lg:text-9xl">
+            <span className="block font-display text-7xl font-medium leading-[0.95] text-t1 lg:text-8xl">
               {start.getDate()}
             </span>
             <span className="mt-3 block font-mono text-xs uppercase tracking-[0.2em] text-gold-400">
@@ -48,7 +48,7 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
         )}
       </div>
 
-      <div className="min-w-0 self-end">
+      <div className="min-w-0 self-center">
         <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
           <span className="kicker">{kicker}</span>
           <span className="kicker-muted">{meta}</span>

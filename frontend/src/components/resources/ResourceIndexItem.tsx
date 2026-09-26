@@ -28,9 +28,9 @@ function ResourceIndexItem({ resource, index, cataloguePath }: ResourceIndexItem
       <Link
         to={resourcePath(resource)}
         state={{ cataloguePath }}
-        className="group grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-baseline gap-x-4 border-t border-line-soft/50 px-1 py-5 transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[3.5rem_minmax(0,1fr)_auto] sm:gap-x-6"
+        className="group grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-start gap-x-4 border-t border-line-soft/50 px-1 py-5 transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[3.5rem_minmax(0,1fr)_auto] sm:gap-x-6"
       >
-        <span className="kicker-muted pt-1" aria-hidden>{index}</span>
+        <span className="kicker-muted pt-1.5" aria-hidden>{index}</span>
         <span className="min-w-0">
           <span className="block break-words font-display text-xl font-medium leading-snug text-t1 transition-colors group-hover:text-gold-300 sm:text-2xl">
             {resource.title}

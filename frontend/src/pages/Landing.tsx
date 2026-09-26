@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowRight, ArrowUpRight } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BookOpen, CalendarDays, Users } from 'lucide-react';
 
 import SEO from '@/components/common/SEO';
 import { Skeleton } from '@/components/common/Skeleton';
@@ -23,9 +23,9 @@ import { api } from '@/services/api';
  */
 
 const PROMISES = [
-  { index: '01', title: 'Une bibliothèque ouverte', body: 'Vidéos, ebooks et articles en accès libre, sans compte.' },
-  { index: '02', title: 'Des rendez-vous réguliers', body: 'Ateliers et conférences pour pratiquer en groupe.' },
-  { index: '03', title: 'Une communauté francophone', body: 'La tech africaine en conversations, sur WhatsApp et au Talk.' },
+  { index: '01', icon: BookOpen, title: 'Bibliothèque ouverte', body: 'Vidéos, ebooks, articles — sans compte.' },
+  { index: '02', icon: CalendarDays, title: 'Rendez-vous réguliers', body: 'Ateliers et conférences, en ligne ou sur place.' },
+  { index: '03', icon: Users, title: 'Communauté francophone', body: 'On avance ensemble, sur WhatsApp et au Talk.' },
 ] as const;
 
 const reveal = (reduced: boolean | null) => (reduced ? {} : { initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.55, ease: 'easeOut' } });
@@ -47,19 +47,16 @@ export default function Landing() {
 
       {/* ── Masthead ─────────────────────────────────────────────── */}
       <Section spacing="loose" className="border-b border-line-soft/50">
-        <p className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
-          <span className="kicker">Revue tech francophone</span>
-          <span className="kicker-muted hidden sm:block">Yaoundé — partout où la tech se parle en français</span>
-        </p>
-        <h1 className="mt-10 max-w-4xl font-display text-5xl font-medium leading-[1.02] tracking-tight text-t1 sm:text-7xl xl:text-[5.5rem]">
+        <p className="kicker">La plateforme tech francophone</p>
+        <h1 className="mt-8 max-w-4xl font-display text-5xl font-medium leading-[1.02] tracking-tight text-t1 sm:text-7xl xl:text-[5.5rem]">
           {isSignedIn
             ? <>Bon retour{firstName ? <>, {firstName}</> : ''}. <em className="italic text-gold-300">La suite</em> est dans la bibliothèque.</>
             : <>Deviens aussi un <em className="italic text-gold-300">crack</em> de la tech.</>}
         </h1>
         <p className="mt-8 max-w-xl text-lg leading-relaxed text-t3">
           {isSignedIn
-            ? 'Reprends ta lecture, découvre les derniers contenus publiés ou trouve le prochain rendez-vous de la communauté.'
-            : 'Des vidéos, des ebooks et des ateliers conçus par des gens qui font. Tu choisis un sujet, tu apprends à ton rythme, tu pratiques en communauté.'}
+            ? 'Reprends ta lecture ou trouve le prochain rendez-vous.'
+            : 'Vidéos, ebooks et ateliers pour apprendre la tech en français — en accès libre.'}
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-4">
           <Link to="/ressources" className="btn-primary">
@@ -74,13 +71,16 @@ export default function Landing() {
 
         {/* The promises as a numbered strip — not cards. */}
         <dl className="mt-16 grid gap-x-10 gap-y-6 border-t border-line-soft/50 pt-8 sm:grid-cols-3">
-          {PROMISES.map(({ index, title, body }) => (
-            <div key={index}>
-              <dt className="flex items-baseline gap-3 text-sm font-medium text-t1">
-                <span className="kicker-muted">{index}</span>
-                {title}
-              </dt>
-              <dd className="mt-2 pl-9 text-sm leading-relaxed text-t4">{body}</dd>
+          {PROMISES.map(({ index, icon: Icon, title, body }) => (
+            <div key={index} className="flex gap-4">
+              <Icon className="mt-0.5 h-5 w-5 shrink-0 text-gold-400" aria-hidden />
+              <div>
+                <dt className="flex items-baseline gap-3 text-sm font-medium text-t1">
+                  <span className="kicker-muted">{index}</span>
+                  {title}
+                </dt>
+                <dd className="mt-2 pl-9 text-sm leading-relaxed text-t4">{body}</dd>
+              </div>
             </div>
           ))}
         </dl>
@@ -135,7 +135,7 @@ export default function Landing() {
             eyebrow="En ligne et sur place"
             id="agenda-heading"
             title="L’agenda"
-            description="Ateliers, webinaires, conférences — les prochains rendez-vous pour pratiquer ensemble."
+            description="Les prochains rendez-vous pour pratiquer ensemble."
             action={<Link to="/evenements" className="text-sm font-medium text-gold-400 underline-offset-4 hover:text-gold-300 hover:underline">Tout l’agenda</Link>}
           />
 
@@ -186,18 +186,14 @@ export default function Landing() {
         </motion.div>
       )}
 
-      {/* ── Manifeste ────────────────────────────────────────────── */}
+      {/* ── Action ───────────────────────────────────────────────── */}
       <motion.div {...reveal(reduced)}>
-        <Section bordered>
-          <div className="max-w-3xl">
-            <p className="kicker">Pourquoi LesCracks</p>
-            <h2 className="mt-6 font-display text-4xl font-medium leading-[1.08] tracking-tight text-t1 sm:text-5xl">
-              La tech s’apprend <em className="italic text-gold-300">en construisant</em>, pas en regardant passer les cours.
+        <Section bordered spacing="tight">
+          <div className="flex flex-wrap items-center justify-between gap-x-10 gap-y-6">
+            <h2 className="font-display text-3xl font-medium tracking-tight text-t1 sm:text-4xl">
+              Passe à la <em className="italic text-gold-300">pratique</em>.
             </h2>
-            <p className="mt-6 max-w-xl text-base leading-relaxed text-t3">
-              Que tu découvres le métier ou que tu changes de voie, on rassemble ce qu’il faut pour y arriver : les contenus, les rendez-vous et les gens.
-            </p>
-            <div className="mt-9 flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <Link to="/inscription" className="btn-primary">Créer un compte</Link>
               <Link to="/ressources" className="btn-secondary">Explorer sans compte</Link>
             </div>

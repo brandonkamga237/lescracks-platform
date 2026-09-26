@@ -26,7 +26,7 @@ function ResourceSpotlight({ resource, kicker = 'À la une', cataloguePath }: Re
     .join('  ·  ');
 
   return (
-    <article className="grid items-end gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
+    <article className="grid items-center gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
       <Link
         to={resourcePath(resource)}
         state={{ cataloguePath }}
