@@ -8,10 +8,11 @@ interface FilterChipsProps<T extends string> {
 }
 
 /**
- * The single filter control for the whole site.
+ * The single filter control for the whole site: editorial tabs.
  *
- * Catalogue pages each had their own pill style — underlined tabs here, left-rail buttons
- * there — and all of them fell under the 44px touch target that most of our traffic needs.
+ * A hairline rule carries mono uppercase labels; the active tab is marked by a
+ * gold underline — the same grammar magazines use for their table of contents.
+ * Buttons keep a 44px target for touch.
  */
 export default function FilterChips<T extends string>({
   legend,
@@ -23,7 +24,7 @@ export default function FilterChips<T extends string>({
   const entries: Array<[T | undefined, string]> = [[undefined, allLabel], ...options];
 
   return (
-    <fieldset className="flex flex-wrap items-center gap-2">
+    <fieldset className="flex flex-wrap items-end gap-x-7 border-b border-line-soft/50">
       <legend className="sr-only">{legend}</legend>
       {entries.map(([option, label]) => {
         const active = value === option;
@@ -33,13 +34,12 @@ export default function FilterChips<T extends string>({
             type="button"
             aria-pressed={active}
             onClick={() => onChange(option)}
-            className={`inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${
-              active
-                ? 'border-gold-400/50 bg-gold-400/10 text-gold-300'
-                : 'border-line-soft/70 bg-noir-900/40 text-t3 hover:border-line hover:text-t1'
+            className={`relative inline-flex min-h-11 items-center pb-3 font-mono text-[11px] font-medium uppercase tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${
+              active ? 'text-gold-300' : 'text-t3 hover:text-t1'
             }`}
           >
             {label}
+            {active && <span aria-hidden className="absolute inset-x-0 -bottom-px h-px bg-gold-400" />}
           </button>
         );
       })}

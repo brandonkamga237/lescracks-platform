@@ -16,12 +16,10 @@ export default {
     'sans-serif'
   ],
   display: [
-    '-apple-system',
-    'BlinkMacSystemFont',
-    'Inter',
-    'Space Grotesk',
-    'system-ui',
-    'sans-serif'
+    'Fraunces',
+    'Georgia',
+    'Times New Roman',
+    'serif'
   ],
   mono: [
     'JetBrains Mono',
