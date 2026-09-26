@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Podcast, Youtube } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
 
 import EpisodeRow from '@/components/talks/EpisodeRow';
 import TalkSpotlight from '@/components/talks/TalkSpotlight';
