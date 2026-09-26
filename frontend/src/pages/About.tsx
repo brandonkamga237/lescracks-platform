@@ -1,79 +1,93 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, BookOpen, CalendarDays, MessageCircle, Podcast } from 'lucide-react';
 
 import SEO from '@/components/common/SEO';
 import Layout from '@/components/layout/Layout';
 import { PageHeader, Section } from '@/components/layout/Page';
 
-const PILLARS = [
-  { title: 'Des ressources concrètes', body: 'Pas de théorie creuse. Des vidéos et des ebooks directement utilisables sur un vrai projet.' },
-  { title: 'Des ateliers et des bootcamps', body: 'Des rendez-vous pour poser ses questions, pratiquer en groupe et avancer plus vite.' },
-  { title: 'Une communauté francophone', body: 'Apprendre seul, c’est difficile. Avancer avec des personnes qui partagent le même objectif, c’est plus simple.' },
-  { title: 'Accessible dès le début', body: 'La bibliothèque est ouverte sans compte. Tu crées un compte quand tu veux aller plus loin.' },
+const ACTIONS = [
+  {
+    index: '01',
+    icon: BookOpen,
+    title: 'La bibliothèque',
+    body: 'Des vidéos, des ebooks et des articles en français, en accès libre. Tu choisis un sujet, tu avances à ton rythme.',
+    to: '/ressources',
+    link: 'Explorer la bibliothèque',
+  },
+  {
+    index: '02',
+    icon: CalendarDays,
+    title: 'Les rendez-vous',
+    body: 'Ateliers, webinaires, bootcamps et conférences pour pratiquer en groupe et poser tes questions en direct.',
+    to: '/evenements',
+    link: 'Voir l’agenda',
+  },
+  {
+    index: '03',
+    icon: Podcast,
+    title: 'Le Talk',
+    body: 'Des conversations vidéo avec celles et ceux qui construisent la tech africaine — des parcours réels, pas des légendes.',
+    to: '/talk',
+    link: 'Regarder les épisodes',
+  },
+  {
+    index: '04',
+    icon: MessageCircle,
+    title: 'La communauté',
+    body: 'Apprendre seul, c’est difficile. La conversation continue sur WhatsApp, entre personnes qui partagent le même objectif.',
+    to: 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK',
+    link: 'Rejoindre la communauté',
+    external: true,
+  },
 ] as const;
 
 /**
- * The story behind the platform: why it exists, how it works, who it is for.
+ * About the work, not the founder: what the platform does, in four moves.
  */
 export default function About() {
   return (
     <Layout>
-      <SEO title="À propos" description="LesCracks, c’est une école en ligne tech pensée pour celles et ceux qui apprennent mieux en construisant, avec une communauté francophone." url="/a-propos" />
+      <SEO title="À propos" description="LesCracks est une plateforme tech francophone : une bibliothèque ouverte, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant." url="/a-propos" />
 
-      <Section spacing="loose" className="border-b border-line-soft/50">
+      <Section spacing="tight">
         <PageHeader
-          eyebrow="Notre histoire"
-          title="Une école en ligne qui récompense ceux qui font."
-          description="LesCracks naît d’un constat : trop de plateformes vendent des cours sans jamais faire passer à la pratique. Nous rassemblons des ressources concrètes — vidéos, ebooks, ateliers — autour d’une communauté qui apprend en public et construit en commun."
+          eyebrow="À propos"
+          title="Ce que nous faisons."
+          description="Une plateforme pour apprendre la tech en français — en accès libre, à ton rythme, entouré."
         />
-      </Section>
 
-      <Section>
-        <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
-          <figure className="max-w-md">
-            <div className="aspect-[4/5] overflow-hidden rounded-3xl border border-white/[0.06]">
-              <img src="/images/photo-brandon.jpeg" alt="Brandon Kamga, fondateur de LesCracks" className="h-full w-full object-cover" loading="lazy" />
-            </div>
-            <figcaption className="mt-3 text-sm text-t4">Brandon Kamga — fondateur de LesCracks</figcaption>
-          </figure>
-
-          <div>
-            <h2 className="font-display text-3xl font-semibold tracking-tight text-t1 sm:text-4xl">
-              Apprendre, puis passer à l’action.
-            </h2>
-            <p className="mt-5 text-base leading-relaxed text-t3">
-              Le métier de la tech ne s’apprend pas dans une bibliothèque. Il s’apprend en réalisant des projets, en demandant de l’aide, en montrant son travail. Sur LesCracks, chaque ressource est pensée comme un tremplin vers un exercice, un rendez-vous ou une discussion avec la communauté.
-            </p>
-            <p className="mt-4 text-base leading-relaxed text-t3">
-              Lancée en 2024 par Brandon Kamga, la plateforme est née d’une conviction : la tech africaine a besoin de gens qui font — et d’un endroit où apprendre en faisant, en français.
-            </p>
-
-            <div className="mt-10 grid gap-6 sm:grid-cols-2">
-              {PILLARS.map(({ title, body }, index) => (
-                <div key={title} className="border-l-2 border-gold-400 pl-5">
-                  <p className="text-sm font-medium text-gold-400">{String(index + 1).padStart(2, '0')}</p>
-                  <h3 className="mt-2 font-display text-lg font-semibold text-t1">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-t3">{body}</p>
+        <ul className="grid gap-x-14 sm:grid-cols-2">
+          {ACTIONS.map(({ index, icon: Icon, title, body, to, link, ...rest }) => {
+            const external = 'external' in rest && rest.external;
+            return (
+            <li key={index} className="border-t border-line-soft/50 py-8">
+              <div className="flex items-center gap-4">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded border border-gold-400/25 bg-gold-400/10 text-gold-400">
+                  <Icon className="h-5 w-5" aria-hidden />
+                </span>
+                <div className="flex items-baseline gap-3">
+                  <span className="kicker-muted" aria-hidden>{index}</span>
+                  <h2 className="font-display text-2xl font-medium text-t1">{title}</h2>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </Section>
+              </div>
+              <p className="mt-4 max-w-md text-sm leading-relaxed text-t3">{body}</p>
+              {external ? (
+                <a href={to} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gold-400 transition-colors hover:text-gold-300">
+                  {link}<ArrowRight className="h-4 w-4" aria-hidden />
+                </a>
+              ) : (
+                <Link to={to} className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gold-400 transition-colors hover:text-gold-300">
+                  {link}<ArrowRight className="h-4 w-4" aria-hidden />
+                </Link>
+              )}
+            </li>
+            );
+          })}
+        </ul>
 
-      <Section muted bordered>
-        <div className="text-center">
-          <h2 className="font-display text-3xl font-semibold tracking-tight text-t1 sm:text-4xl">
-            Prêt à monter en compétence ?
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-t3">
-            Parcours les ressources publiques, inscris-toi à un prochain événement et rejoins la communauté pour ne plus apprendre seul.
-          </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link to="/ressources" className="btn-primary">Explorer la bibliothèque<ArrowRight className="h-4 w-4" aria-hidden /></Link>
-            <Link to="/evenements" className="btn-secondary">Voir les événements</Link>
-          </div>
-        </div>
+        <p className="mt-14 border-t border-line-soft/50 pt-8 text-sm text-t4">
+          Lancée par Brandon Kamga — <a href="mailto:contact@lescracks.com" className="text-t3 underline underline-offset-4 transition-colors hover:text-gold-300">contact@lescracks.com</a>
+        </p>
       </Section>
     </Layout>
   );
