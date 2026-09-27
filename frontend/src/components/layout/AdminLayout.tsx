@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import * as Dialog from '@radix-ui/react-dialog';
-import { ArrowUpRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, LayoutDashboard, LogOut, Mail, Menu, Podcast, Shield, Tags, Users, X } from 'lucide-react';
+import { ArrowUpRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, Globe2, LayoutDashboard, LogOut, Mail, Menu, Podcast, Shield, Tags, Users, X } from 'lucide-react';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import { useSession } from '@/hooks/useSession';
@@ -15,7 +15,8 @@ import { ApiError } from '@/services/http';
  * a dashboard is a screen you look at instead of doing the work.
  */
 const SECTIONS = [
-  { to: '/admin', label: 'Vue d’ensemble', group: 'Espace de travail', icon: LayoutDashboard },
+  { to: '/admin', label: 'Pilotage', group: 'Espace de travail', icon: LayoutDashboard },
+  { to: '/admin/audience', label: 'Audience', group: 'Espace de travail', icon: Globe2 },
   { to: '/admin/utilisateurs', label: 'Utilisateurs', group: 'Espace de travail', icon: Users },
   { to: '/admin/newsletter', label: 'Newsletter', group: 'Espace de travail', icon: Mail },
   { to: '/admin/ressources', label: 'Ressources', group: 'Contenu', icon: BookOpen },

@@ -21,6 +21,7 @@ export default function AdminEvents() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<EventStatus | ''>('');
   const events = useApi((signal) => adminApi.events(page, signal), [page]);
+  const overview = useApi((signal) => adminApi.overview(signal), []);
   const list = (events.data?.content ?? []).filter((event) => (!status || event.status === status) && `${event.title} ${event.description} ${event.location ?? ''}`.toLocaleLowerCase('fr').includes(search.trim().toLocaleLowerCase('fr')));
   const actionClass = 'rounded-full border border-line px-3 py-2 text-xs font-medium text-t2 hover:border-gold-400/40 hover:text-gold-400 disabled:opacity-40';
 
@@ -49,6 +50,22 @@ export default function AdminEvents() {
   }
 
   return <AdminSection title="Événements" description="Préparer les rendez-vous qui font avancer la communauté." action={<button type="button" onClick={() => setEditor('new')} className="inline-flex items-center gap-2 rounded-full bg-gold-400 px-5 py-3 text-sm font-semibold text-black"><Plus className="h-4 w-4" aria-hidden />Nouvel événement</button>}>
+    {overview.data && (
+      <div className="mb-6 flex flex-wrap gap-2 text-xs">
+        <span className="rounded-full border border-gold-400/30 bg-gold-400/10 px-3 py-1.5 font-medium text-gold-400">
+          {overview.data.eventsUpcoming} à venir
+        </span>
+        <span className="rounded-full border border-line px-3 py-1.5 text-t3">
+          {overview.data.eventsOngoing} en cours
+        </span>
+        <span className="rounded-full border border-line px-3 py-1.5 text-t3">
+          {overview.data.eventsPast} passés
+        </span>
+        <span className="rounded-full border border-line px-3 py-1.5 text-t3">
+          {overview.data.eventsByStatus.DRAFT ?? 0} brouillon{(overview.data.eventsByStatus.DRAFT ?? 0) > 1 ? 's' : ''}
+        </span>
+      </div>
+    )}
     <div className="mb-6 rounded-3xl border border-white/[0.06] bg-card p-5">
       <div className="grid items-end gap-4 sm:grid-cols-[1fr_14rem]">
         <label className="text-xs text-t3">Rechercher dans cette page<span className="relative mt-2 block"><Search className="pointer-events-none absolute left-4 top-3.5 h-4 w-4 text-t4" aria-hidden /><input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Titre, description ou lieu…" aria-describedby="event-filter-scope" className="w-full rounded-2xl border border-line bg-noir-900 py-3 pl-11 pr-4 text-sm text-t1 focus:border-gold-400 focus:outline-none" /></span></label>
