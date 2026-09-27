@@ -128,7 +128,7 @@ public class MailServiceImpl implements MailService {
                           </tr>
                           <tr>
                             <td style="padding:24px 40px;text-align:center;background-color:#111111;border-top:1px solid #2a2a2a;">
-                              <p style="margin:0;font-size:12px;color:#525252;">LesCracks — Deviens aussi un crack de la tech.</p>
+                              <p style="margin:0;font-size:12px;color:#525252;">LesCracks · Deviens aussi un crack de la tech.</p>
                             </td>
                           </tr>
                         </table>

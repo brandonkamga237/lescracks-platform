@@ -3,19 +3,30 @@ package com.brandonkamga.lescracks.identity.domain;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AdminAuthServiceImpl implements AdminAuthService {
-    private final AuthenticationManager authenticationManager;
 
-    public AdminAuthServiceImpl(AuthenticationManager authenticationManager) {
+    private final AuthenticationManager authenticationManager;
+    private final AuthMetrics metrics;
+
+    public AdminAuthServiceImpl(AuthenticationManager authenticationManager, AuthMetrics metrics) {
         this.authenticationManager = authenticationManager;
+        this.metrics = metrics;
     }
 
     @Override
     public Authentication authenticate(String username, String password) {
-        return authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken.unauthenticated(username, password));
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    UsernamePasswordAuthenticationToken.unauthenticated(username, password));
+            metrics.login("admin", "local", true);
+            return authentication;
+        } catch (AuthenticationException rejected) {
+            metrics.login("admin", "local", false);
+            throw rejected;
+        }
     }
 }

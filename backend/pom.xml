@@ -194,6 +194,12 @@
 						</exclude>
 					</excludes>
 				</configuration>
+				<executions>
+					<execution>
+						<!-- info.build.version feeds /actuator/info: dashboards can mark deploys. -->
+						<goals><goal>build-info</goal></goals>
+					</execution>
+				</executions>
 			</plugin>
 
 			<!-- Two families, split by the one thing that actually gates a machine: Docker.

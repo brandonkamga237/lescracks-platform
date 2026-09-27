@@ -223,7 +223,7 @@ export default function Profile() {
           </form> : <dl className="mt-7 space-y-5">
             <div><dt className="text-xs tracking-wide text-t4">Nom complet</dt><dd className="mt-1 text-t1">{name || 'Non renseigné'}</dd></div>
             <div><dt className="text-xs tracking-wide text-t4">Adresse email</dt><dd className="mt-1 break-all text-t1">{email || 'Non disponible pour ce compte'}</dd></div>
-            {user && <div className="flex flex-wrap gap-x-12 gap-y-5"><div><dt className="text-xs tracking-wide text-t4">Nom d'utilisateur</dt><dd className="mt-1 text-t1">{user.username || '—'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Localisation</dt><dd className="mt-1 text-t1">{user.location || '—'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Statut du compte</dt><dd className="mt-1 text-t1">{statusLabels[user.status] ?? user.status}</dd></div><div><dt className="text-xs tracking-wide text-t4">Connexion</dt><dd className="mt-1 text-t1">{providerLabels[user.provider] ?? user.provider}</dd></div>{joinedLabel && <div><dt className="text-xs tracking-wide text-t4">Membre depuis le</dt><dd className="mt-1 text-t1"><time dateTime={user.createdAt}>{joinedLabel}</time></dd></div>}</div>}
+            {user && <div className="flex flex-wrap gap-x-12 gap-y-5"><div><dt className="text-xs tracking-wide text-t4">Nom d'utilisateur</dt><dd className="mt-1 text-t1">{user.username || 'Non renseigné'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Localisation</dt><dd className="mt-1 text-t1">{user.location || 'Non renseigné'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Statut du compte</dt><dd className="mt-1 text-t1">{statusLabels[user.status] ?? user.status}</dd></div><div><dt className="text-xs tracking-wide text-t4">Connexion</dt><dd className="mt-1 text-t1">{providerLabels[user.provider] ?? user.provider}</dd></div>{joinedLabel && <div><dt className="text-xs tracking-wide text-t4">Membre depuis le</dt><dd className="mt-1 text-t1"><time dateTime={user.createdAt}>{joinedLabel}</time></dd></div>}</div>}
             {user?.bio && <div><dt className="text-xs tracking-wide text-t4">Bio</dt><dd className="mt-1 whitespace-pre-line text-t1">{user.bio}</dd></div>}
             {user?.socialLinks && Object.keys(user.socialLinks).length > 0 && <div><dt className="text-xs tracking-wide text-t4">Liens sociaux</dt><dd className="mt-1 space-y-1">{Object.entries(user.socialLinks).map(([platform, url]) => <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="block capitalize text-gold-400 underline-offset-4 hover:underline">{platform}</a>)}</dd></div>}
           </dl>}
@@ -282,7 +282,7 @@ export default function Profile() {
                   {user.provider === 'LOCAL' ? (
                     <span className="text-xs font-medium text-gold-400">Actif</span>
                   ) : (
-                    <span className="text-xs text-t4">—</span>
+                    <span className="text-xs text-t4">Inactif</span>
                   )}
                 </li>
                 {identityProviders.map(({ provider, label }) => {

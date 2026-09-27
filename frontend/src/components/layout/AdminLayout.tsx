@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import * as Dialog from '@radix-ui/react-dialog';
-import { ArrowUpRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, LayoutDashboard, LogOut, Mail, Menu, Shield, Tags, Users, X } from 'lucide-react';
+import { ArrowUpRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, LayoutDashboard, LogOut, Mail, Menu, Podcast, Shield, Tags, Users, X } from 'lucide-react';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import { useSession } from '@/hooks/useSession';
@@ -20,6 +20,7 @@ const SECTIONS = [
   { to: '/admin/newsletter', label: 'Newsletter', group: 'Espace de travail', icon: Mail },
   { to: '/admin/ressources', label: 'Ressources', group: 'Contenu', icon: BookOpen },
   { to: '/admin/evenements', label: 'Événements', group: 'Contenu', icon: CalendarDays },
+  { to: '/admin/talks', label: 'Talk', group: 'Contenu', icon: Podcast },
   { to: '/admin/categories', label: 'Catégories', group: 'Organisation', icon: FolderOpen },
   { to: '/admin/tags', label: 'Tags', group: 'Organisation', icon: Tags },
   { to: '/admin/admins', label: 'Administrateurs', group: 'Sécurité', icon: Shield },

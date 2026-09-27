@@ -1,7 +1,7 @@
 import { ENV } from '@/config/env';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminSubscriber, AdminSummary, AdminUser, AuthProvider, Category, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag, TopResource, UserGrowthPoint } from '@/services/types';
+import type { AdminSubscriber, AdminSummary, AdminUser, AuthProvider, Category, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint } from '@/services/types';
 
 export interface EbookRequest {
   title: string;
@@ -27,6 +27,15 @@ export interface EventRequest {
   endDate?: string;
   location?: string;
   status?: EventStatus;
+}
+export interface TalkRequest {
+  title: string;
+  description: string;
+  guest?: string;
+  youtubeUrl: string;
+  durationMinutes?: number;
+  publishedAt?: string;
+  status?: TalkStatus;
 }
 export interface AdminResourceFilters extends Query {
   page?: number;
@@ -121,6 +130,10 @@ export const adminApi = {
   createEvent: (body: EventRequest, coverImageFile: File) => http.postForm<EventSummary>('/events/admin', eventForm(body, coverImageFile)),
   updateEvent: (id: number, body: EventRequest, coverImageFile?: File) => http.putForm<EventSummary>(`/events/admin/${id}`, eventForm(body, coverImageFile)),
   deleteEvent: (id: number) => http.delete<void>(`/events/admin/${id}`),
+  talks: (page = 0, signal?: AbortSignal) => http.get<PageResponse<TalkVideo>>('/talks/admin', { page, size: 12, sort: 'createdAt,desc' }, signal),
+  createTalk: (body: TalkRequest) => http.post<TalkVideo>('/talks/admin', body),
+  updateTalk: (id: number, body: TalkRequest) => http.put<TalkVideo>(`/talks/admin/${id}`, body),
+  deleteTalk: (id: number) => http.delete<void>(`/talks/admin/${id}`),
   createCategory: (name: string) => http.post<Category>('/admin/categories', { name }),
   renameCategory: (id: number, name: string) => http.put<Category>(`/admin/categories/${id}`, { name }),
   deleteCategory: (id: number) => http.delete<void>(`/admin/categories/${id}`),

@@ -65,7 +65,7 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
   return <AdminModal open onClose={onCancel} title={initial ? 'Modifier l’événement' : 'Nouvel événement'} description="Prépare le programme, ajoute une couverture et choisis sa visibilité." busy={busy} wide>
     <form onSubmit={submit} className="space-y-6">
       <fieldset disabled={busy} className="space-y-5">
-        <legend className="mb-4 font-display text-lg font-medium">01 — Le programme</legend>
+        <legend className="mb-4 font-display text-lg font-medium">01 · Le programme</legend>
         <label className="block text-sm text-t2">Titre<input required maxLength={200} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} className={field} /></label>
         <label className="block text-sm text-t2">Description<textarea required rows={5} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className={area} /></label>
         <div className="grid gap-5 sm:grid-cols-2">
@@ -75,7 +75,7 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
       </fieldset>
 
       <fieldset disabled={busy} className="space-y-5 border-t border-line-soft pt-5">
-        <legend className="pr-3 font-display text-lg font-medium">02 — Image de couverture{!initial && <span className="ml-2 text-sm font-normal text-gold-400">obligatoire</span>}</legend>
+        <legend className="pr-3 font-display text-lg font-medium">02 · Image de couverture{!initial && <span className="ml-2 text-sm font-normal text-gold-400">obligatoire</span>}</legend>
         <div className="rounded-3xl border border-dashed border-line p-5">
           {coverPreview ? <div className="mb-4 aspect-video w-full overflow-hidden rounded-2xl border border-line bg-noir-800"><img src={coverPreview} alt="Aperçu de la couverture" className="h-full w-full object-cover" /></div> : null}
           <input type="file" accept="image/*" required={!initial} onChange={(event) => handleCoverFile(event.target.files?.[0] ?? null)} className="block w-full text-sm text-t3 file:mr-4 file:min-h-11 file:rounded-full file:border-0 file:bg-noir-700 file:px-4 file:text-t1" />
@@ -84,7 +84,7 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
       </fieldset>
 
       <fieldset disabled={busy} className="space-y-5 border-t border-line-soft pt-5">
-        <legend className="pr-3 font-display text-lg font-medium">03 — Informations pratiques</legend>
+        <legend className="pr-3 font-display text-lg font-medium">03 · Informations pratiques</legend>
         <p id="event-timezone" className="text-xs leading-relaxed text-t3">Dates et heures dans ton fuseau horaire : {timezone}. Elles seront enregistrées en temps universel.</p>
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="block text-sm text-t2">Début<input required type="datetime-local" step="1" aria-describedby="event-timezone" value={form.startDate} onChange={(event) => setForm({ ...form, startDate: event.target.value })} className={field} /></label>
@@ -93,7 +93,7 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
         <label className="block text-sm text-t2">Lieu ou lien de connexion (facultatif)<input maxLength={200} value={form.location ?? ''} onChange={(event) => setForm({ ...form, location: event.target.value })} className={field} /></label>
       </fieldset>
       <fieldset disabled={busy} className="space-y-4 border-t border-line-soft pt-5">
-        <legend className="pr-3 font-display text-lg font-medium">04 — Visibilité</legend>
+        <legend className="pr-3 font-display text-lg font-medium">04 · Visibilité</legend>
         <label className="block text-sm text-t2">Statut<select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as EventStatus })} className={field}><option value="DRAFT">Brouillon</option><option value="PUBLISHED">Publié</option><option value="COMPLETED">Terminé</option><option value="CANCELLED">Annulé</option></select></label>
         <p className="text-xs text-t3">{form.status === 'PUBLISHED' ? 'En enregistrant, cet événement sera visible sur le site public.' : 'Seuls les événements publiés sont visibles sur le site public.'}</p>
       </fieldset>

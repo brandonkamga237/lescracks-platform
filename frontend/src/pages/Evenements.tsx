@@ -1,75 +1,31 @@
-import { memo, useState } from 'react';
 import { CalendarDays, X } from 'lucide-react';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 
+import AgendaItem from '@/components/events/AgendaItem';
+import EventSpotlight from '@/components/events/EventSpotlight';
 import FilterChips from '@/components/common/FilterChips';
 import Pagination from '@/components/common/Pagination';
 import SEO from '@/components/common/SEO';
-import { CardSkeletonGrid } from '@/components/common/Skeleton';
+import { Skeleton } from '@/components/common/Skeleton';
 import { EmptyState, ErrorState } from '@/components/common/States';
 import Layout from '@/components/layout/Layout';
 import { PageHeader, Section, Toolbar } from '@/components/layout/Page';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/services/api';
-import { eventPath } from '@/lib/slugs';
-import type { EventFormat, EventSummary, EventType } from '@/services/types';
+import type { EventFormat, EventType } from '@/services/types';
 
 const types: Array<[EventType, string]> = [
   ['BOOTCAMP', 'Bootcamp'], ['WORKSHOP', 'Atelier'], ['WEBINAR', 'Webinaire'], ['CONFERENCE', 'Conférence'],
 ];
 const formats: Array<[EventFormat, string]> = [['ONLINE', 'En ligne'], ['OFFLINE', 'Sur place'], ['HYBRID', 'Hybride']];
-const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' });
-const shortDate = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
 
-interface EventRowProps {
-  event: EventSummary;
-  /** Where "back" should return to; a prop so cards do not subscribe to location. */
-  cataloguePath: string;
-}
-
-const EventRow = memo(function EventRow({ event, cataloguePath }: EventRowProps) {
-  const [failedImage, setFailedImage] = useState<string | undefined>(undefined);
-  const start = new Date(event.startDate);
-  const end = event.endDate ? new Date(event.endDate) : null;
-  const hasDate = !Number.isNaN(start.getTime());
-  const hasEndDate = end && !Number.isNaN(end.getTime());
-  const now = Date.now();
-  const status = event.status === 'CANCELLED' ? 'Annulé' : event.status === 'COMPLETED' || (hasEndDate && end.getTime() < now) ? 'Terminé' : hasDate && start.getTime() > now ? 'À venir' : hasEndDate ? 'En cours' : 'Date passée';
-
-  return (
-    <Link
-      to={eventPath(event)}
-      state={{ cataloguePath }}
-      className="group flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-white/[0.06] bg-noir-900 shadow-sm transition-all duration-300 hover:border-white/[0.12] hover:shadow-2xl hover:shadow-black/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
-    >
-      <div className="aspect-[16/9] w-full overflow-hidden bg-noir-800">
-        {event.coverImage && failedImage !== event.coverImage ? (
-          <img src={event.coverImage} alt="" loading="lazy" onError={() => setFailedImage(event.coverImage)} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-end bg-noir-800 p-4" aria-hidden>
-            <span className="font-display text-4xl font-semibold leading-none text-white/10">{types.find(([value]) => value === event.type)?.[1]}</span>
-          </div>
-        )}
-      </div>
-      <div className="flex flex-1 flex-col p-4">
-        <div className="flex items-center justify-between gap-4 text-sm">
-          {hasDate ? <time dateTime={event.startDate} className="font-medium text-gold-300">{shortDate.format(start)}</time> : <span className="text-t4">Date non renseignée</span>}
-          <span className="text-xs text-t4">{status}</span>
-        </div>
-        <h2 className="mt-2 break-words font-display text-base font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-300">{event.title}</h2>
-        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-t3">{event.description}</p>
-        <p className="mt-auto border-t border-line-soft/50 pt-3 text-xs text-t4">
-          {types.find(([value]) => value === event.type)?.[1]}
-          {' · '}
-          {formats.find(([value]) => value === event.format)?.[1]}
-          {event.location ? ` · ${event.location}` : ''}
-          {hasEndDate && <> · jusqu’au <time dateTime={event.endDate}>{dateFormat.format(end)}</time></>}
-        </p>
-      </div>
-    </Link>
-  );
-});
-
+/**
+ * The events page as a magazine agenda.
+ *
+ * Unfiltered, it announces the next rendez-vous like a headline, then lists the
+ * rest chronologically; the archive sits quietly at the bottom. Filtered, the
+ * page collapses to the ruled agenda list alone.
+ */
 export default function Evenements() {
   const location = useLocation();
   const cataloguePath = `${location.pathname}${location.search}`;
@@ -83,6 +39,12 @@ export default function Evenements() {
   const list = events.data?.content ?? [];
   const hasFilters = Boolean(type || format);
   const total = events.data?.totalElements ?? 0;
+  const discovery = !hasFilters && page === 1;
+  // The archive only exists on the discovery view; no point fetching it under filters.
+  const past = useApi((signal) => discovery ? api.pastEvents(0, 4, signal) : Promise.resolve(null), [discovery]);
+  const spotlight = discovery ? list[0] : undefined;
+  const agenda = spotlight ? list.slice(1) : list;
+  const spotlightDate = spotlight ? new Date(spotlight.startDate).getTime() : 0;
 
   function setParam(key: string, value: string | null) {
     const next = new URLSearchParams(params);
@@ -97,24 +59,30 @@ export default function Evenements() {
       <SEO title="Événements et ateliers tech" description="Bootcamps, ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble." url="/evenements" />
       <Section spacing="tight">
         <PageHeader
-          title="Événements"
+          eyebrow="En ligne et sur place"
+          title="Agenda"
           description="Des rendez-vous pour pratiquer, poser tes questions et rencontrer la communauté."
           meta={!events.loading && !events.error ? `${total} événement${total > 1 ? 's' : ''}` : undefined}
         />
 
         <Toolbar>
           <FilterChips legend="Type de rendez-vous" allLabel="Tous les types" options={types} value={type} onChange={(value) => setParam('type', value ?? null)} />
-          <span className="hidden h-6 w-px bg-line-soft sm:block" aria-hidden />
           <FilterChips legend="Format" allLabel="Tous les formats" options={formats} value={format} onChange={(value) => setParam('format', value ?? null)} />
           {hasFilters && (
-            <button type="button" onClick={() => setParams({})} className="inline-flex min-h-11 items-center gap-1.5 px-2 text-sm text-t3 transition-colors hover:text-t1">
+            <button type="button" onClick={() => setParams({})} className="inline-flex min-h-11 items-center gap-1.5 pb-3 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-t3 transition-colors hover:text-t1">
               <X className="h-4 w-4" aria-hidden />Effacer
             </button>
           )}
         </Toolbar>
 
         <div aria-label="Événements" aria-live="polite" aria-busy={events.loading} role="region">
-          {events.loading && list.length === 0 && <CardSkeletonGrid count={8} />}
+          {events.loading && list.length === 0 && (
+            <div role="status" className="space-y-5">
+              {discovery && <Skeleton className="h-40 sm:h-56" />}
+              {[0, 1, 2].map((i) => <Skeleton key={i} className="h-16" />)}
+              <span className="sr-only">Chargement des événements…</span>
+            </div>
+          )}
           {events.error && <ErrorState title="L’agenda est momentanément indisponible." message={events.error.message} onRetry={events.reload} />}
           {!events.loading && !events.error && list.length === 0 && (
             <EmptyState
@@ -130,12 +98,38 @@ export default function Evenements() {
           )}
           {!events.error && list.length > 0 && (
             <div className={`transition-opacity ${events.loading ? 'opacity-60' : ''}`}>
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{list.map((event) => <EventRow key={event.id} event={event} cataloguePath={cataloguePath} />)}</div>
+              {spotlight && (
+                <div className="mb-12">
+                  <EventSpotlight
+                    event={spotlight}
+                    kicker={spotlightDate > Date.now() ? 'Prochain rendez-vous' : 'À l’affiche'}
+                    cataloguePath={cataloguePath}
+                  />
+                </div>
+              )}
+              {agenda.length > 0 && (
+                <ul>
+                  {agenda.map((event) => <AgendaItem key={event.id} event={event} cataloguePath={cataloguePath} />)}
+                </ul>
+              )}
               <Pagination page={page} totalPages={events.data?.totalPages ?? 0} onPageChange={(value) => setParam('page', value === 1 ? null : String(value))} />
             </div>
           )}
         </div>
       </Section>
+
+      {/* The archive: quiet, unfiltered view only — the past never competes with what's next. */}
+      {discovery && !!past.data?.content.length && (
+        <Section bordered spacing="tight" aria-labelledby="past-events-heading">
+          <div className="mb-8 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-b border-line-soft/50 pb-6">
+            <h2 id="past-events-heading" className="font-display text-2xl font-medium tracking-tight text-t2">Déjà passés</h2>
+            <span className="kicker-muted">Les rendez-vous précédents</span>
+          </div>
+          <ul aria-label="Événements passés" className="opacity-70">
+            {past.data.content.map((event) => <AgendaItem key={event.id} event={event} cataloguePath={cataloguePath} />)}
+          </ul>
+        </Section>
+      )}
     </Layout>
   );
 }
