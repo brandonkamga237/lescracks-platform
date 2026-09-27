@@ -1,12 +1,13 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Mic, Rocket, Video, Wrench } from 'lucide-react';
 
 import { eventPath } from '@/lib/slugs';
 import type { EventSummary } from '@/services/types';
 
 export const TYPE_LABEL = { BOOTCAMP: 'Bootcamp', WORKSHOP: 'Atelier', WEBINAR: 'Webinaire', CONFERENCE: 'Conférence' } as const;
 export const FORMAT_LABEL = { ONLINE: 'En ligne', OFFLINE: 'Sur place', HYBRID: 'Hybride' } as const;
+export const TYPE_ICON = { BOOTCAMP: Rocket, WORKSHOP: Wrench, WEBINAR: Video, CONFERENCE: Mic } as const;
 
 const monthFormat = new Intl.DateTimeFormat('fr-FR', { month: 'short' });
 const weekdayFormat = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' });
@@ -26,6 +27,7 @@ function AgendaItem({ event, cataloguePath }: AgendaItemProps) {
   const meta = [TYPE_LABEL[event.type], FORMAT_LABEL[event.format], event.location]
     .filter(Boolean)
     .join('  ·  ');
+  const TypeIcon = TYPE_ICON[event.type];
 
   return (
     <li>
@@ -45,14 +47,15 @@ function AgendaItem({ event, cataloguePath }: AgendaItemProps) {
               </span>
             </>
           ) : (
-            <span className="block font-display text-3xl leading-none text-t4">—</span>
+            <span className="block font-display text-3xl leading-none text-t4">·</span>
           )}
         </span>
         <span className="min-w-0">
           <span className="block break-words font-display text-xl font-medium leading-snug text-t1 transition-colors group-hover:text-gold-300 sm:text-2xl">
             {event.title}
           </span>
-          <span className="mt-2 block font-mono text-[11px] uppercase tracking-[0.14em] text-t4">
+          <span className="mt-2 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-t4">
+            <TypeIcon className="h-3.5 w-3.5 shrink-0 text-gold-400/70" aria-hidden />
             {meta}
           </span>
         </span>

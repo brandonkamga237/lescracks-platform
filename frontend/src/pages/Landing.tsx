@@ -23,7 +23,7 @@ import { api } from '@/services/api';
  */
 
 const PROMISES = [
-  { index: '01', icon: BookOpen, title: 'Bibliothèque ouverte', body: 'Vidéos, ebooks, articles — sans compte.' },
+  { index: '01', icon: BookOpen, title: 'Bibliothèque ouverte', body: 'Vidéos, ebooks, articles. Sans compte.' },
   { index: '02', icon: CalendarDays, title: 'Rendez-vous réguliers', body: 'Ateliers et conférences, en ligne ou sur place.' },
   { index: '03', icon: Users, title: 'Communauté francophone', body: 'On avance ensemble, sur WhatsApp et au Talk.' },
 ] as const;
@@ -46,8 +46,13 @@ export default function Landing() {
       <SEO title="Apprendre la tech, concrètement" description="Des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme. Une bibliothèque ouverte, une communauté francophone." url="/" />
 
       {/* ── Masthead ─────────────────────────────────────────────── */}
-      <Section spacing="loose" className="border-b border-line-soft/50">
-        <p className="kicker">La plateforme tech francophone</p>
+      <Section bleed className="relative overflow-hidden border-b border-line-soft/50">
+        <div aria-hidden className="absolute inset-0">
+          <img src="/images/community-1.jpg" alt="" className="h-full w-full object-cover opacity-[0.18]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black" />
+        </div>
+        <div className="relative mx-auto w-full max-w-7xl px-5 py-20 sm:px-8 sm:py-28">
+          <p className="kicker">La plateforme tech francophone</p>
         <h1 className="mt-8 max-w-4xl font-display text-5xl font-medium leading-[1.02] tracking-tight text-t1 sm:text-7xl xl:text-[5.5rem]">
           {isSignedIn
             ? <>Bon retour{firstName ? <>, {firstName}</> : ''}. <em className="italic text-gold-300">La suite</em> est dans la bibliothèque.</>
@@ -56,7 +61,7 @@ export default function Landing() {
         <p className="mt-8 max-w-xl text-lg leading-relaxed text-t3">
           {isSignedIn
             ? 'Reprends ta lecture ou trouve le prochain rendez-vous.'
-            : 'Vidéos, ebooks et ateliers pour apprendre la tech en français — en accès libre.'}
+            : 'Vidéos, ebooks et ateliers pour apprendre la tech en français, en accès libre.'}
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-4">
           <Link to="/ressources" className="btn-primary">
@@ -84,6 +89,7 @@ export default function Landing() {
             </div>
           ))}
         </dl>
+        </div>
       </Section>
 
       {/* ── 01 · À la une ────────────────────────────────────────── */}
@@ -153,6 +159,19 @@ export default function Landing() {
           ) : (
             <EmptyState title="Le prochain rendez-vous se prépare." description="Aucun événement n’est publié pour le moment. Les dates seront annoncées ici." />
           )}
+        </Section>
+      </motion.div>
+
+      {/* ── La communauté en image ───────────────────────────────── */}
+      <motion.div {...reveal(reduced)}>
+        <Section spacing="tight" bordered>
+          <figure className="overflow-hidden rounded-lg border border-line-soft/60">
+            <img src="/images/community-2.jpg" alt="La communauté LesCracks réunie" className="aspect-[21/8] w-full object-cover" loading="lazy" />
+            <figcaption className="flex items-baseline justify-between gap-4 border-t border-line-soft/50 px-4 py-3">
+              <span className="kicker-muted">La communauté</span>
+              <a href="https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gold-400 underline-offset-4 hover:text-gold-300 hover:underline">Rejoindre sur WhatsApp</a>
+            </figcaption>
+          </figure>
         </Section>
       </motion.div>
 

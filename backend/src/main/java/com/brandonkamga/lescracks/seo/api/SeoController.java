@@ -47,25 +47,25 @@ public class SeoController {
     private final ObjectMapper objectMapper;
 
     private final Map<String, PageMeta> pageMeta = Map.of(
-            "home", new PageMeta("LesCracks — Comprends la tech. Passe à la pratique.",
+            "home", new PageMeta("LesCracks · Comprends la tech. Passe à la pratique.",
                     "Explore des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme. Une bibliothèque ouverte et une communauté francophone.",
                     "/", "Accueil"),
-            "a-propos", new PageMeta("À propos — LesCracks",
+            "a-propos", new PageMeta("À propos · LesCracks",
                     "Ce que fait LesCracks : une bibliothèque tech ouverte en français, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant.",
                     "/a-propos", "Ce que nous faisons"),
-            "conditions-utilisation", new PageMeta("Conditions d’utilisation — LesCracks",
+            "conditions-utilisation", new PageMeta("Conditions d’utilisation · LesCracks",
                     "Les conditions d’utilisation de la plateforme LesCracks.",
                     "/conditions-utilisation", "Conditions d’utilisation"),
-            "politique-confidentialite", new PageMeta("Politique de confidentialité — LesCracks",
+            "politique-confidentialite", new PageMeta("Politique de confidentialité · LesCracks",
                     "Comment LesCracks protège et utilise tes données personnelles.",
                     "/politique-confidentialite", "Politique de confidentialité"),
-            "evenements", new PageMeta("Événements et ateliers tech — LesCracks",
+            "evenements", new PageMeta("Événements et ateliers tech · LesCracks",
                     "Bootcamps, ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble.",
                     "/evenements", "Événements"),
-            "ressources", new PageMeta("Bibliothèque — LesCracks",
+            "ressources", new PageMeta("Bibliothèque · LesCracks",
                     "Ebooks et vidéos pour apprendre la tech en français. Filtre par format, catégorie et sujet.",
                     "/ressources", "Bibliothèque"),
-            "talk", new PageMeta("LesCracks Talk — La tech africaine en conversations",
+            "talk", new PageMeta("LesCracks Talk · La tech africaine en conversations",
                     "Les épisodes du LesCracks Talk : des conversations vidéo avec celles et ceux qui construisent la tech africaine, publiées sur YouTube.",
                     "/talk", "Le Talk")
     );
@@ -98,7 +98,7 @@ public class SeoController {
         }
 
         String canonical = canonical(request, "/evenements/" + (event.getSlug() != null ? event.getSlug() : event.getId()));
-        SeoHtml html = new SeoHtml(event.getTitle() + " — LesCracks", event.getDescription(), canonical)
+        SeoHtml html = new SeoHtml(event.getTitle() + " · LesCracks", event.getDescription(), canonical)
                 .type("website")
                 .image(absolute(request, event.getCoverImage()), event.getTitle(), null, null);
 
@@ -194,7 +194,7 @@ public class SeoController {
         Resource resource = resources.requirePublishedBySlugOrId(slug);
         ResourceResponse response = mapper.toResponse(resource);
         String canonical = canonical(request, "/ressources/" + (response.slug() != null ? response.slug() : response.id()));
-        SeoHtml html = new SeoHtml(response.title() + " — LesCracks", response.description(), canonical)
+        SeoHtml html = new SeoHtml(response.title() + " · LesCracks", response.description(), canonical)
                 .image(absolute(request, response.coverImage()), response.title(), null, null);
 
         html.breadcrumbs(List.of(
@@ -276,7 +276,7 @@ public class SeoController {
         String slug = kindToSlug(kind);
         String canonical = canonical(request, "/ressources/" + slug);
 
-        SeoHtml html = new SeoHtml(heading + " — LesCracks", description, canonical)
+        SeoHtml html = new SeoHtml(heading + " · LesCracks", description, canonical)
                 .image(absolute(request, PREVIEW_IMAGE), "LesCracks", PREVIEW_WIDTH, PREVIEW_HEIGHT);
 
         html.heading(heading);
@@ -311,7 +311,7 @@ public class SeoController {
         Map<String, Object> jsonLd = new LinkedHashMap<>();
         jsonLd.put("@context", "https://schema.org");
         jsonLd.put("@type", "CollectionPage");
-        jsonLd.put("name", heading + " — LesCracks");
+        jsonLd.put("name", heading + " · LesCracks");
         jsonLd.put("url", canonical);
         jsonLd.put("mainEntity", Map.of("@type", "ItemList", "itemListElement", items));
         html.jsonLd(writeJson(jsonLd));

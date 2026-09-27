@@ -26,7 +26,7 @@ interface NavLinkDef {
 const LINKS: readonly NavLinkDef[] = [
   { to: '/ressources', index: '01', label: 'Bibliothèque', icon: BookOpen, description: 'Vidéos et ebooks, à ton rythme' },
   { to: '/evenements', index: '02', label: 'Événements', icon: CalendarDays, description: 'Les prochains rendez-vous tech' },
-  { to: '/talk', index: '03', label: 'Talk', icon: Podcast, description: 'LesCracks Talk — la tech africaine en conversations', highlight: true },
+  { to: '/talk', index: '03', label: 'Talk', icon: Podcast, description: 'LesCracks Talk, la tech africaine en conversations', highlight: true },
   { to: '/a-propos', index: '04', label: 'À propos', icon: Info, description: 'Pourquoi LesCracks existe' },
 ];
 

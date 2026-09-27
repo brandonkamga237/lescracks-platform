@@ -26,7 +26,7 @@ const ACTIONS = [
     index: '03',
     icon: Podcast,
     title: 'Le Talk',
-    body: 'Des conversations vidéo avec celles et ceux qui construisent la tech africaine — des parcours réels, pas des légendes.',
+    body: 'Des conversations vidéo avec celles et ceux qui construisent la tech africaine : des parcours réels, pas des légendes.',
     to: '/talk',
     link: 'Regarder les épisodes',
   },
@@ -53,8 +53,12 @@ export default function About() {
         <PageHeader
           eyebrow="À propos"
           title="Ce que nous faisons."
-          description="Une plateforme pour apprendre la tech en français — en accès libre, à ton rythme, entouré."
+          description="Une plateforme pour apprendre la tech en français. En accès libre, à ton rythme, entouré."
         />
+
+        <div className="mb-14 aspect-[21/9] overflow-hidden rounded-lg border border-line-soft/60 bg-noir-900">
+          <img src="/images/community-2.jpg" alt="La communauté LesCracks réunie en atelier" className="h-full w-full object-cover" loading="lazy" />
+        </div>
 
         <ul className="grid gap-x-14 sm:grid-cols-2">
           {ACTIONS.map(({ index, icon: Icon, title, body, to, link, ...rest }) => {
@@ -85,9 +89,16 @@ export default function About() {
           })}
         </ul>
 
-        <p className="mt-14 border-t border-line-soft/50 pt-8 text-sm text-t4">
-          Lancée par Brandon Kamga — <a href="mailto:contact@lescracks.com" className="text-t3 underline underline-offset-4 transition-colors hover:text-gold-300">contact@lescracks.com</a>
-        </p>
+        <div className="mt-14 flex items-center gap-5 border-t border-line-soft/50 pt-8">
+          <img src="/images/photo-brandon.jpeg" alt="Brandon Kamga, fondateur de LesCracks" className="h-16 w-16 shrink-0 rounded-lg border border-line-soft/60 object-cover" loading="lazy" />
+          <div className="min-w-0">
+            <p className="font-display text-base font-medium text-t1">Brandon Kamga</p>
+            <p className="mt-1 text-sm leading-relaxed text-t3">
+              Il a lancé LesCracks et lit tout :{' '}
+              <a href="mailto:contact@lescracks.com" className="text-gold-400 underline-offset-4 transition-colors hover:text-gold-300 hover:underline">contact@lescracks.com</a>
+            </p>
+          </div>
+        </div>
       </Section>
     </Layout>
   );

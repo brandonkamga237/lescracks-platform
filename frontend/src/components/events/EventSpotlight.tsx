@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
 import { eventPath } from '@/lib/slugs';
-import { FORMAT_LABEL, TYPE_LABEL } from '@/components/events/AgendaItem';
+import { FORMAT_LABEL, TYPE_ICON, TYPE_LABEL } from '@/components/events/AgendaItem';
 import type { EventSummary } from '@/services/types';
 
 const monthYearFormat = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' });
@@ -27,6 +27,7 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
   const meta = [TYPE_LABEL[event.type], FORMAT_LABEL[event.format], event.location]
     .filter(Boolean)
     .join('  ·  ');
+  const TypeIcon = TYPE_ICON[event.type];
 
   return (
     <article className="grid gap-8 border-b border-line-soft/50 pb-12 sm:pb-16 lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-14">
@@ -44,14 +45,17 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
             </span>
           </>
         ) : (
-          <span className="block font-display text-6xl text-t4">—</span>
+          <span className="block font-display text-4xl text-t4">Bientôt</span>
         )}
       </div>
 
       <div className="min-w-0 self-center">
         <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
           <span className="kicker">{kicker}</span>
-          <span className="kicker-muted">{meta}</span>
+          <span className="kicker-muted inline-flex items-center gap-2">
+            <TypeIcon className="h-3.5 w-3.5 text-gold-400/70" aria-hidden />
+            {meta}
+          </span>
         </p>
         <h3 className="mt-5 max-w-3xl break-words font-display text-3xl font-medium leading-[1.1] tracking-tight text-t1 sm:text-5xl">
           <Link

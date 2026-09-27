@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, BookOpen, FileText, PlayCircle } from 'lucide-react';
 
 import { resourcePath } from '@/lib/slugs';
 import { KIND_LABEL, resourceDetail } from '@/lib/resources';
@@ -14,11 +14,14 @@ interface ResourceIndexItemProps {
   cataloguePath: string;
 }
 
+const KIND_ICON = { EBOOK: BookOpen, EXTERNAL_VIDEO: PlayCircle, ARTICLE: FileText } as const;
+
 /**
  * A catalogue row: folio number, serif title, mono metadata.
  * Rows are ruled by hairlines, not boxed — the list is the composition.
  */
 function ResourceIndexItem({ resource, index, cataloguePath }: ResourceIndexItemProps) {
+  const KindIcon = KIND_ICON[resource.kind];
   const meta = [KIND_LABEL[resource.kind], resource.categoryName, resourceDetail(resource)]
     .filter(Boolean)
     .join('  ·  ');
@@ -35,7 +38,8 @@ function ResourceIndexItem({ resource, index, cataloguePath }: ResourceIndexItem
           <span className="block break-words font-display text-xl font-medium leading-snug text-t1 transition-colors group-hover:text-gold-300 sm:text-2xl">
             {resource.title}
           </span>
-          <span className="mt-2 block font-mono text-[11px] uppercase tracking-[0.14em] text-t4">
+          <span className="mt-2 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-t4">
+            <KindIcon className="h-3.5 w-3.5 shrink-0 text-gold-400/70" aria-hidden />
             {meta}
           </span>
         </span>
