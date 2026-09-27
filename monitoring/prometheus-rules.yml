@@ -29,6 +29,63 @@ groups:
           summary: "PostgreSQL injoignable"
           description: "L'exporteur ne répond plus : la base est probablement tombée."
 
+      - alert: PublicEndpointDown
+        expr: probe_success{job="blackbox-public"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Endpoint public inaccessible"
+          description: "{{ $labels.instance }} ne répond plus en 2xx depuis l'extérieur."
+
+  - name: lescracks-capacity
+    interval: 15s
+    rules:
+      - alert: DiskAlmostFull
+        expr: 1 - (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"} / node_filesystem_size_bytes) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disque presque plein"
+          description: "Il reste moins de 15 % d'espace sur {{ $labels.mountpoint }}."
+
+      - alert: NodeMemoryHigh
+        expr: 1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 0.9
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Mémoire serveur élevée"
+          description: "Le VPS utilise plus de 90 % de sa RAM."
+
+      - alert: NodeCpuHigh
+        expr: 1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU serveur élevé"
+          description: "Le VPS a moins de 15 % de CPU libre depuis 5 minutes."
+
+      - alert: ConnectionPoolSaturated
+        expr: hikaricp_connections_pending > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pool PostgreSQL saturé"
+          description: "Des threads attendent une connexion : la base est un goulot d'étranglement."
+
+      - alert: ContainerRestartingFrequently
+        expr: changes(container_start_time_seconds{name=~"lescracks-.*"}[15m]) > 3
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Conteneur en boucle de redémarrage"
+          description: "{{ $labels.name }} a redémarré plus de 3 fois en 15 minutes."
+
   - name: lescracks-security
     interval: 15s
     rules:
@@ -49,6 +106,15 @@ groups:
         annotations:
           summary: "Pic de requêtes refusées"
           description: "Beaucoup de réponses 401/403 : possible scan ou problème d'authentification."
+
+      - alert: LoginFailuresSpike
+        expr: sum(rate(auth_login_total{outcome="failure"}[10m])) > 0.05
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pic d'échecs de connexion"
+          description: "Les échecs de login dépassent 3 par minute : possible brute-force ou panne auth."
 
       - alert: SlowResponses
         expr: histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket[5m])) by (le)) > 2

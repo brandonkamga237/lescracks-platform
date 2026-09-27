@@ -181,6 +181,9 @@ services:
     image: brandoniscoding/frontend-lescracks:latest
     container_name: lescracks-frontend
     restart: unless-stopped
+    environment:
+      # Fed into the nginx sub_filter that injects the Umami tracker.
+      UMAMI_WEBSITE_ID: ${UMAMI_WEBSITE_ID:-}
     depends_on:
       backend:
         condition: service_healthy
@@ -219,6 +222,51 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - lescracks-internal
+
+  # ---------------------------------------------------------------------------
+  # Node exporter - host CPU/RAM/disk/network of the VPS itself
+  # ---------------------------------------------------------------------------
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: lescracks-node-exporter
+    restart: unless-stopped
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      - lescracks-internal
+
+  # ---------------------------------------------------------------------------
+  # cAdvisor - per-container CPU, memory and restart churn
+  # ---------------------------------------------------------------------------
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: lescracks-cadvisor
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    networks:
+      - lescracks-internal
+
+  # ---------------------------------------------------------------------------
+  # Blackbox exporter - probes the public endpoints the way a visitor reaches them
+  # ---------------------------------------------------------------------------
+  blackbox:
+    image: prom/blackbox-exporter:v0.25.0
+    container_name: lescracks-blackbox
+    restart: unless-stopped
+    command: ['--config.file=/etc/blackbox_exporter/config.yml']
+    volumes:
+      - ./monitoring/blackbox.yml:/etc/blackbox_exporter/config.yml:ro
     networks:
       - lescracks-internal
 
@@ -274,6 +322,34 @@ services:
       - "traefik.http.routers.lescracks-grafana-http.rule=Host(`grafana.lescracks.com`)"
       - "traefik.http.routers.lescracks-grafana-http.entrypoints=web"
       - "traefik.http.routers.lescracks-grafana-http.middlewares=lescracks-https-redirect"
+    networks:
+      - lescracks-internal
+      - traefik-public
+
+  # ---------------------------------------------------------------------------
+  # Umami - privacy-friendly web analytics (visitors, sources, pages, sessions)
+  # URL: https://umami.lescracks.com — create the site once, put the generated
+  # website id in .env as UMAMI_WEBSITE_ID and the frontend picks it up.
+  # ---------------------------------------------------------------------------
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-v2
+    container_name: lescracks-umami
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/umami
+      HASH_SALT: ${UMAMI_HASH_SALT}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lescracks-umami.rule=Host(`umami.lescracks.com`)"
+      - "traefik.http.routers.lescracks-umami.entrypoints=websecure"
+      - "traefik.http.routers.lescracks-umami.tls.certresolver=le"
+      - "traefik.http.services.lescracks-umami.loadbalancer.server.port=3000"
+      - "traefik.http.routers.lescracks-umami-http.rule=Host(`umami.lescracks.com`)"
+      - "traefik.http.routers.lescracks-umami-http.entrypoints=web"
+      - "traefik.http.routers.lescracks-umami-http.middlewares=lescracks-https-redirect"
     networks:
       - lescracks-internal
       - traefik-public

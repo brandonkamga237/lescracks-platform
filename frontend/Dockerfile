@@ -14,6 +14,8 @@ RUN pnpm build
 
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# A template, not a final conf: the nginx entrypoint substitutes ${UMAMI_WEBSITE_ID}
+# (and only defined env vars) before writing conf.d/default.conf.
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
 EXPOSE 80
