@@ -30,16 +30,18 @@ public class UserAuthServiceImpl implements UserAuthService {
     private final EmailVerificationTokenRepository emailTokens;
     private final PasswordEncoder passwords;
     private final MailService mail;
+    private final AuthMetrics metrics;
     private final SecureRandom random = new SecureRandom();
 
     public UserAuthServiceImpl(UserRepository users, PasswordResetTokenRepository passwordTokens,
                                EmailVerificationTokenRepository emailTokens,
-                               PasswordEncoder passwords, MailService mail) {
+                               PasswordEncoder passwords, MailService mail, AuthMetrics metrics) {
         this.users = users;
         this.passwordTokens = passwordTokens;
         this.emailTokens = emailTokens;
         this.passwords = passwords;
         this.mail = mail;
+        this.metrics = metrics;
     }
 
     @Override
@@ -47,6 +49,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         String email = request.email().trim().toLowerCase();
         User existing = users.findByEmailIgnoreCase(email).orElse(null);
         if (existing != null && (existing.getPasswordHash() != null || existing.getProvider() != AuthProvider.LOCAL)) {
+            metrics.register(false);
             throw new BadRequestException("Cette adresse email est déjà utilisée.");
         }
         User user;
@@ -68,6 +71,7 @@ public class UserAuthServiceImpl implements UserAuthService {
                     .build());
         }
         sendVerificationEmail(user);
+        metrics.register(true);
         return user;
     }
 
@@ -78,10 +82,15 @@ public class UserAuthServiceImpl implements UserAuthService {
                 .filter(candidate -> candidate.getPasswordHash() != null
                         && passwords.matches(request.password(), candidate.getPasswordHash())
                         && candidate.getStatus() == UserStatus.ACTIVE)
-                .orElseThrow(() -> new BadRequestException("Email ou mot de passe incorrect."));
+                .orElseThrow(() -> {
+                    metrics.login("member", "local", false);
+                    return new BadRequestException("Email ou mot de passe incorrect.");
+                });
         if (!user.isEmailVerified()) {
+            metrics.login("member", "local", false);
             throw new BadRequestException("Ton adresse email n’a pas encore été vérifiée. Consulte ta boîte de réception ou demande un nouveau lien.");
         }
+        metrics.login("member", "local", true);
         return user;
     }
 

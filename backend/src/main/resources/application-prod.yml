@@ -69,11 +69,20 @@ logging:
     name: /var/log/lescracks/app.log
 
 management:
+  server:
+    # Actuator lives on an internal port Traefik never routes: /actuator/prometheus
+    # stays reachable inside lescracks-internal without carrying API credentials.
+    port: ${MANAGEMENT_PORT:9090}
   endpoints:
     web:
       exposure:
         include: health, info, prometheus
       base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
   metrics:
     tags:
       application: lescracks-backend

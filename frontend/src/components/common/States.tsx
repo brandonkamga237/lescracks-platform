@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
  * different button shapes — which made otherwise identical situations look unrelated.
  */
 
-const PANEL = 'rounded-3xl px-6 py-16 text-center';
+const PANEL = 'rounded-lg px-6 py-16 text-center';
 
 interface EmptyStateProps {
   title: string;
@@ -21,7 +21,7 @@ export function EmptyState({ title, description, icon, action }: EmptyStateProps
   return (
     <div role="status" className={`${PANEL} border border-dashed border-line-strong bg-card`}>
       {icon && <div className="mb-5 flex justify-center text-gold-400">{icon}</div>}
-      <p className="font-display text-xl text-t1 sm:text-2xl">{title}</p>
+      <p className="font-display text-2xl text-t1 sm:text-3xl">{title}</p>
       {description && <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-t3">{description}</p>}
       {action && <div className="mt-6 flex flex-wrap justify-center gap-3">{action}</div>}
     </div>

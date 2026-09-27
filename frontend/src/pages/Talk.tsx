@@ -1,128 +1,113 @@
-import { Link } from 'react-router-dom';
-import { ArrowRight, Mic, Podcast, Users, Youtube } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Podcast, Youtube } from 'lucide-react';
 
-import NewsletterCard from '@/components/common/NewsletterCard';
+import EpisodeRow from '@/components/talks/EpisodeRow';
+import TalkSpotlight from '@/components/talks/TalkSpotlight';
+import Pagination from '@/components/common/Pagination';
 import SEO from '@/components/common/SEO';
+import { Skeleton } from '@/components/common/Skeleton';
+import { EmptyState, ErrorState } from '@/components/common/States';
 import Layout from '@/components/layout/Layout';
-import { PageHeader, Section, SectionHeader } from '@/components/layout/Page';
+import { PageHeader, Section } from '@/components/layout/Page';
+import { useApi } from '@/hooks/useApi';
+import { api } from '@/services/api';
 
-const FORMATS = [
-  {
-    icon: Mic,
-    title: 'Des invités qui font',
-    body: 'Développeurs, fondateurs, designers, bâtisseurs de produits. Chaque épisode donne la parole à quelqu’un qui construit — et qui raconte comment il en est arrivé là.',
-  },
-  {
-    icon: Youtube,
-    title: 'La tech africaine en avant',
-    body: 'Sensibiliser et promouvoir ce qui se fait sur le continent : les produits, les réalisations et les initiatives qui méritent d’être connus.',
-  },
-  {
-    icon: Users,
-    title: 'Des parcours réels',
-    body: 'On parle autant de réussites que de débuts difficiles. L’objectif : montrer des chemins concrets, pas des légendes.',
-  },
-] as const;
+const CHANNEL_URL = 'https://youtube.com/@lescracks';
+
+function positiveInteger(value: string | null): number {
+  if (!value || !/^[1-9]\d*$/.test(value)) return 1;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed <= 2147483647 ? parsed : 1;
+}
 
 /**
- * LesCracks Talk: the announcement page for the upcoming YouTube series.
- * Conversations about African tech, made for the young and the career-switchers.
+ * LesCracks Talk: the episode catalogue.
+ * Conversations about African tech, hosted on YouTube and referenced here.
  */
 export default function Talk() {
+  const [params, setParams] = useSearchParams();
+  const page = positiveInteger(params.get('page'));
+  const talks = useApi((signal) => api.talks(page - 1, 12, signal), [page]);
+  const list = talks.data?.content ?? [];
+  const total = talks.data?.totalElements ?? 0;
+  const latest = page === 1 ? list[0] : undefined;
+  const episodes = latest ? list.slice(1) : list;
+
+  function goToPage(value: number) {
+    const next = new URLSearchParams(params);
+    if (value === 1) next.delete('page');
+    else next.set('page', String(value));
+    setParams(next);
+  }
+
   return (
     <Layout>
       <SEO
         title="LesCracks Talk"
-        description="LesCracks Talk, le rendez-vous vidéo qui met en lumière la tech africaine : des conversations avec celles et ceux qui construisent, des produits et des parcours réels. Bientôt sur YouTube."
+        description="LesCracks Talk, le rendez-vous vidéo qui met en lumière la tech africaine : des conversations avec celles et ceux qui construisent, des produits et des parcours réels."
         url="/talk"
       />
 
-      <Section spacing="loose" className="border-b border-line-soft/50">
-        <div className="max-w-3xl">
-          <PageHeader
-            eyebrow="Nouveau · bientôt sur YouTube"
-            title="LesCracks Talk"
-            description="Un rendez-vous vidéo pour sensibiliser, promouvoir et raconter la tech africaine — avec celles et ceux qui la construisent."
-          />
-          <div className="flex flex-wrap items-center gap-4">
-            <a
-              href="https://youtube.com/@lescracks"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary"
-            >
+      <Section spacing="tight">
+        <PageHeader
+          eyebrow="Sur YouTube"
+          title="Le Talk"
+          description="Des conversations avec celles et ceux qui construisent la tech africaine."
+          meta={!talks.loading && !talks.error ? `${total} épisode${total > 1 ? 's' : ''}` : undefined}
+          actions={
+            <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" className="btn-secondary !px-4 !py-2 !text-sm">
               <Youtube className="h-4 w-4" aria-hidden />
               Suivre la chaîne
             </a>
-            <Link to="/ressources" className="btn-secondary">Explorer la bibliothèque</Link>
-          </div>
-        </div>
-      </Section>
-
-      <Section aria-labelledby="concept-heading">
-        <SectionHeader
-          id="concept-heading"
-          title="Le concept"
-          description="Des conversations filmées, publiées sur YouTube, autour de trois idées simples."
+          }
         />
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {FORMATS.map(({ icon: Icon, title, body }) => (
-            <div key={title} className="rounded-3xl border border-white/[0.06] bg-noir-900 p-6">
-              <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-gold-400/25 bg-gold-400/10 text-gold-400">
-                <Icon className="h-5 w-5" aria-hidden />
-              </span>
-              <h3 className="mt-5 font-display text-lg font-semibold text-t1">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-t3">{body}</p>
+
+        <div aria-label="Épisodes" aria-live="polite" aria-busy={talks.loading} role="region">
+          {talks.loading && list.length === 0 && (
+            <div role="status" className="space-y-5">
+              <Skeleton className="aspect-[16/10] sm:aspect-[21/9]" />
+              {[0, 1, 2].map((i) => <Skeleton key={i} className="h-16" />)}
+              <span className="sr-only">Chargement des épisodes…</span>
             </div>
-          ))}
-        </div>
-      </Section>
-
-      <Section muted bordered aria-labelledby="audience-heading">
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-          <div>
-            <SectionHeader
-              id="audience-heading"
-              title="Pensé pour toi"
-              description="Deux publics au centre de chaque épisode."
+          )}
+          {talks.error && <ErrorState title="Les épisodes sont momentanément indisponibles." message={talks.error.message} onRetry={talks.reload} />}
+          {!talks.loading && !talks.error && list.length === 0 && (
+            <EmptyState
+              icon={<Podcast className="h-8 w-8" aria-hidden />}
+              title={page > 1 ? 'Cette page est vide.' : 'Le premier épisode se prépare.'}
+              description={page > 1 ? 'Reviens à la première page pour retrouver les épisodes.' : 'Les conversations seront publiées sur YouTube et référencées ici.'}
+              action={
+                <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" className="btn-secondary">
+                  <Youtube className="h-4 w-4" aria-hidden />
+                  Suivre la chaîne
+                </a>
+              }
             />
-            <ul className="space-y-4">
-              <li className="flex gap-4">
-                <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold-400/10 text-gold-400"><Podcast className="h-4 w-4" aria-hidden /></span>
-                <p className="text-sm leading-relaxed text-t3"><strong className="font-medium text-t1">Les jeunes qui découvrent la tech.</strong> Des modèles accessibles, des métiers expliqués, des portes d’entrée concrètes pour commencer.</p>
-              </li>
-              <li className="flex gap-4">
-                <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold-400/10 text-gold-400"><Users className="h-4 w-4" aria-hidden /></span>
-                <p className="text-sm leading-relaxed text-t3"><strong className="font-medium text-t1">Les personnes en reconversion.</strong> Des invités qui ont changé de voie racontent leur transition, leurs erreurs et ce qui a vraiment marché.</p>
-              </li>
-            </ul>
-          </div>
-          <div className="rounded-3xl border border-gold-400/20 bg-gradient-to-br from-gold-400/[0.08] to-transparent p-8 sm:p-10">
-            <p className="font-display text-xl font-semibold leading-relaxed text-t1 sm:text-2xl">
-              « La tech africaine manque de projecteurs. LesCracks Talk en est un. »
-            </p>
-            <p className="mt-4 text-sm text-t3">Le premier épisode est en préparation. Abonne-toi à la chaîne pour ne pas le rater.</p>
-            <a
-              href="https://youtube.com/@lescracks"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-gold-400 underline-offset-4 hover:text-gold-300 hover:underline"
-            >
-              youtube.com/@lescracks
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </a>
-          </div>
+          )}
+          {!talks.error && list.length > 0 && (
+            <div className={`transition-opacity ${talks.loading ? 'opacity-60' : ''}`}>
+              {latest && <TalkSpotlight video={latest} />}
+              {episodes.length > 0 && (
+                <ul className={latest ? 'mt-12' : ''}>
+                  {episodes.map((video, i) => (
+                    <EpisodeRow
+                      key={video.id}
+                      video={video}
+                      index={`ÉP. ${String(total - ((page - 1) * 12 + (latest ? i + 1 : i))).padStart(2, '0')}`}
+                    />
+                  ))}
+                </ul>
+              )}
+              <Pagination page={page} totalPages={talks.data?.totalPages ?? 0} onPageChange={goToPage} />
+            </div>
+          )}
         </div>
-      </Section>
 
-      <Section>
-        <div className="mx-auto max-w-2xl">
-          <NewsletterCard />
-          <p className="mt-6 text-center text-sm text-t4">
-            Tu construis quelque chose et tu veux en parler dans un épisode ?{' '}
-            <a href="mailto:contact@lescracks.com" className="text-gold-400 underline-offset-4 hover:text-gold-300 hover:underline">Écris-nous</a>.
-          </p>
-        </div>
+        <p className="mt-14 border-t border-line-soft/50 pt-8 text-sm text-t4">
+          Tu construis quelque chose et tu veux en parler dans un épisode ?{' '}
+          <a href="mailto:contact@lescracks.com" className="text-t3 underline underline-offset-4 transition-colors hover:text-gold-300">Écris-nous</a>.
+          {' '}Ou <Link to="/ressources" className="text-t3 underline underline-offset-4 transition-colors hover:text-gold-300">explore la bibliothèque</Link> en attendant.
+        </p>
       </Section>
     </Layout>
   );

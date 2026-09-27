@@ -2,7 +2,9 @@ package com.brandonkamga.lescracks.identity.api;
 
 import com.brandonkamga.lescracks.identity.api.dto.OidcSyncRequest;
 import com.brandonkamga.lescracks.identity.api.dto.UserProfileResponse;
+import com.brandonkamga.lescracks.identity.domain.AuthMetrics;
 import com.brandonkamga.lescracks.identity.domain.OidcSyncService;
+import com.brandonkamga.lescracks.identity.domain.User;
 import com.brandonkamga.lescracks.identity.domain.UserIdentityService;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 
@@ -22,10 +24,12 @@ public class OidcSyncController {
 
     private final OidcSyncService oidc;
     private final UserIdentityService identities;
+    private final AuthMetrics metrics;
 
-    public OidcSyncController(OidcSyncService oidc, UserIdentityService identities) {
+    public OidcSyncController(OidcSyncService oidc, UserIdentityService identities, AuthMetrics metrics) {
         this.oidc = oidc;
         this.identities = identities;
+        this.metrics = metrics;
     }
 
     @PostMapping("/sync")
@@ -35,7 +39,14 @@ public class OidcSyncController {
         if (jwt == null) {
             throw new BadRequestException("La synchronisation de ton profil a échoué.");
         }
-        var user = oidc.sync(jwt, request.provider());
+        User user;
+        try {
+            user = oidc.sync(jwt, request.provider());
+        } catch (RuntimeException failed) {
+            metrics.login("member", request.provider().name().toLowerCase(), false);
+            throw failed;
+        }
+        metrics.login("member", request.provider().name().toLowerCase(), true);
         return ResponseEntity.ok(new UserProfileResponse(user.getId(), user.getEmail(), user.getFirstName(),
                 user.getLastName(), user.getStatus(), user.isEmailVerified(), user.getProvider(), user.getCreatedAt(),
                 user.getUsername(), user.getAvatarUrl(), user.getBio(), user.getLocation(), user.getSocialLinks(),

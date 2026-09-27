@@ -11,7 +11,7 @@ interface SEOProps {
 
 const SITE = 'https://lescracks.com';
 const DEFAULT_IMAGE = `${SITE}/preview.png`;
-const DEFAULT_TITLE = 'LesCracks — Comprends la tech. Passe à la pratique.';
+const DEFAULT_TITLE = 'LesCracks · Comprends la tech. Passe à la pratique.';
 const DEFAULT_DESC = 'Des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme.';
 
 const setMeta = (selector: string, value: string) => {
@@ -26,7 +26,7 @@ const SEO = ({
   url,
   jsonLd,
 }: SEOProps) => {
-  const fullTitle = title ? `${title} — LesCracks` : DEFAULT_TITLE;
+  const fullTitle = title ? `${title} · LesCracks` : DEFAULT_TITLE;
   const canonicalUrl = url ? `${SITE}${url}` : SITE;
 
   useEffect(() => {

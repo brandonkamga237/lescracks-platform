@@ -75,6 +75,15 @@ public class MinioStorageService implements StorageService {
     }
 
     @Override
+    public boolean reachable() {
+        try {
+            return client.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
+        } catch (Exception unreachable) {
+            return false;
+        }
+    }
+
+    @Override
     public void delete(String key) {
         try {
             client.removeObject(RemoveObjectArgs.builder().bucket(bucket).object(key).build());

@@ -2,7 +2,7 @@ import { http } from '@/services/http';
 import type { Query } from '@/services/http';
 import type {
   AuthProvider, Category, EventFormat, EventSummary, EventType, PageResponse, ResourceKind,
-  NewsletterStatus, ResourceLikeStatus, ResourceSummary, Tag, UserIdentity, UserProfile,
+  NewsletterStatus, ResourceLikeStatus, ResourceSummary, Tag, TalkVideo, UserIdentity, UserProfile,
   UserProfileUpdate,
 } from '@/services/types';
 
@@ -40,6 +40,8 @@ export const api = {
     http.get<PageResponse<EventSummary>>('/events/past', { page, size }, signal),
   event: (slugOrId: string | number, signal?: AbortSignal) =>
     http.get<EventSummary>(`/events/${slugOrId}`, undefined, signal),
+  talks: (page = 0, size = 12, signal?: AbortSignal) =>
+    http.get<PageResponse<TalkVideo>>('/talks', { page, size }, signal),
   categories: (signal?: AbortSignal) => http.get<Category[]>('/categories', undefined, signal),
   tags: (categoryId?: number, signal?: AbortSignal) => http.get<Tag[]>('/tags', { categoryId }, signal),
   me: (signal?: AbortSignal) => http.get<UserProfile>('/me', undefined, signal),

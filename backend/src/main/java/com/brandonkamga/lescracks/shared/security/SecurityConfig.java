@@ -45,7 +45,7 @@ public class SecurityConfig {
                     .authenticationEntryPoint(errors)
                     .accessDeniedHandler(errors))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/actuator/health", "/error").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/prometheus", "/error").permitAll()
                 .requestMatchers("/api/admin/auth/login", "/api/admin/auth/logout").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/seo/**", "/api/sitemap.xml").permitAll()
@@ -59,6 +59,7 @@ public class SecurityConfig {
                 // Anyone may read the catalogue and check an attestation. Reading is what
                 // brings people in; asking them to sign up first is what keeps them out.
                 .requestMatchers(HttpMethod.GET, "/api/events", "/api/events/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/talks", "/api/talks/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/resources", "/api/resources/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/resources/*/download").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories", "/api/tags").permitAll()

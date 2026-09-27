@@ -119,7 +119,7 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
   return <AdminModal open onClose={onCancel} title={resource ? 'Modifier la ressource' : 'Nouvelle ressource'} description="Prépare le contenu, ajoute sa couverture, puis choisis sa visibilité." busy={busy} wide>
     <form onSubmit={submit} className="space-y-6">
       <fieldset disabled={busy} className="space-y-5">
-        <legend className="mb-4 font-display text-lg font-medium">01 — Le contenu</legend>
+        <legend className="mb-4 font-display text-lg font-medium">01 · Le contenu</legend>
         <label className="block text-sm text-t2">Type de ressource<select disabled={!!resource} value={kind} onChange={(event) => setKind(event.target.value as ResourceKind)} className={field}><option value="EXTERNAL_VIDEO">Vidéo externe</option><option value="EBOOK">Ebook</option><option value="ARTICLE">Article</option></select></label>
         {resource && <p className="text-xs text-t4">Le type d’une ressource existante ne peut pas être modifié.</p>}
         <label className="block text-sm text-t2">Titre<input required maxLength={200} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} className={field} /></label>
@@ -135,7 +135,7 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
       </fieldset>
 
       <fieldset disabled={busy} className="space-y-5 border-t border-line-soft pt-5">
-        <legend className="pr-3 font-display text-lg font-medium">02 — {kind === 'ARTICLE' ? "Le contenu de l'article" : kind === 'EBOOK' ? 'Le fichier' : 'La vidéo'}</legend>
+        <legend className="pr-3 font-display text-lg font-medium">02 · {kind === 'ARTICLE' ? "Le contenu de l'article" : kind === 'EBOOK' ? 'Le fichier' : 'La vidéo'}</legend>
         {kind === 'ARTICLE' && (
           <ArticleEditor value={form.body} onChange={(html) => setForm({ ...form, body: html })} />
         )}
@@ -150,7 +150,7 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
       </fieldset>
 
       <fieldset disabled={busy} className="space-y-5 border-t border-line-soft pt-5">
-        <legend className="pr-3 font-display text-lg font-medium">03 — Organisation et visibilité</legend>
+        <legend className="pr-3 font-display text-lg font-medium">03 · Organisation et visibilité</legend>
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="block text-sm text-t2">Catégorie<select required disabled={categories.loading || !!categories.error} value={form.categoryId} onChange={(event) => setForm({ ...form, categoryId: event.target.value ? Number(event.target.value) : '', tagIds: [] })} className={field}><option value="">{categories.loading ? 'Chargement…' : 'Choisir une catégorie'}</option>{categories.data?.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
           <label className="block text-sm text-t2">Statut<select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as ResourceStatus })} className={field}><option value="DRAFT">Brouillon</option><option value="PUBLISHED">Publiée</option><option value="ARCHIVED">Archivée</option></select></label>

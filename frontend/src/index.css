@@ -3,42 +3,43 @@
 @tailwind utilities;
 
 /* ============================================
-   NOUVEAU DESIGN SYSTEM - LESCRACKS PREMIUM
-   Dark Mode uniquement
+   DESIGN SYSTEM — LESCRACKS « LA REVUE »
+   Publication tech francophone : papier noir,
+   encre or, serif éditorial, filets, angles droits.
    ============================================ */
 
 @layer base {
   /* ========== DARK MODE ========== */
   .dark {
-    --radius: 0.75rem;
+    --radius: 0.25rem;
     --background: #000000;
     --foreground: #ffffff;
-    
+
     --card: #111111;
     --card-foreground: #ffffff;
-    
+
     --popover: #111111;
     --popover-foreground: #ffffff;
-    
+
     --primary: #d4af37;
     --primary-foreground: #000000;
-    
+
     --secondary: #1a1a1a;
     --secondary-foreground: #ffffff;
-    
+
     --muted: #1a1a1a;
     --muted-foreground: #a3a3a3;
-    
+
     --accent: #d4af37;
     --accent-foreground: #000000;
-    
+
     --destructive: #ef4444;
     --destructive-foreground: #ffffff;
-    
+
     --border: rgba(255, 255, 255, 0.08);
     --input: rgba(255, 255, 255, 0.08);
     --ring: #d4af37;
-    
+
     --success: #22c55e;
     --warning: #f59e0b;
     --error: #ef4444;
@@ -70,11 +71,12 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    /* Fraunces picks the right optical cut for each size when available. */
+    font-optical-sizing: auto;
+    text-rendering: optimizeLegibility;
   }
 
-  /* ========== KEYBOARD FOCUS — one rule, every interactive element ==========
-     Previously only 4 of 154 buttons had any focus style, which made keyboard
-     navigation effectively blind. This restores it globally.                  */
+  /* ========== KEYBOARD FOCUS — one rule, every interactive element ========== */
   :focus-visible {
     outline: 2px solid #d4af37;
     outline-offset: 2px;
@@ -101,7 +103,7 @@
     }
   }
 
-  /* ========== CUSTOM SCROLLBAR — Apple-like, subtle ========== */
+  /* ========== CUSTOM SCROLLBAR — subtle ========== */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -130,19 +132,21 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-display tracking-tight;
   }
-  
+
+  /* Display type is Fraunces: a serif needs a looser line-height and
+     slightly less negative tracking than a grotesk at display sizes. */
   h1 {
-    @apply text-4xl md:text-5xl lg:text-6xl font-semibold leading-tight;
+    @apply text-4xl md:text-5xl lg:text-6xl font-medium leading-[1.05];
   }
-  
+
   h2 {
-    @apply text-3xl md:text-4xl font-semibold leading-tight;
+    @apply text-3xl md:text-4xl font-medium leading-[1.1];
   }
-  
+
   h3 {
-    @apply text-xl md:text-2xl font-semibold;
+    @apply text-xl md:text-2xl font-medium;
   }
-  
+
   p {
     @apply text-base leading-relaxed;
   }
@@ -155,154 +159,44 @@
 }
 
 @layer components {
-  /* ========== GOLD GLOW EFFECT ========== */
-  .gold-glow {
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3),
-                0 0 40px rgba(212, 175, 55, 0.1);
-  }
-  
-  .gold-glow-hover:hover {
-    box-shadow: 0 0 25px rgba(212, 175, 55, 0.4),
-                0 0 50px rgba(212, 175, 55, 0.2);
-  }
-  
-  .gold-border {
-    border: 1px solid rgba(212, 175, 55, 0.3);
-  }
-  
-  .gold-text {
-    color: #d4af37;
-  }
-  
-  .gold-gradient-text {
-    background: linear-gradient(135deg, #d4af37 0%, #e8c547 50%, #d4af37 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  /* ========== KICKER — the editorial signature label ==========
+     Mono, uppercase, letterspaced. Marks sections, kinds and metadata. */
+  .kicker {
+    @apply font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-gold-400;
   }
 
-  /* ========== BUTTONS ========== */
+  .kicker-muted {
+    @apply font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-t4;
+  }
+
+  /* ========== BUTTONS — squared, like print UI ========== */
   .btn-primary {
-    @apply inline-flex min-h-11 items-center justify-center rounded-full bg-gold px-6 py-3
-           text-sm font-semibold text-black transition-all duration-200 ease-out
-           hover:bg-gold-300 active:scale-[0.98]
+    @apply inline-flex min-h-11 items-center justify-center rounded bg-gold px-6 py-3
+           text-sm font-semibold text-black transition-colors duration-200 ease-out
+           hover:bg-gold-300 active:scale-[0.99]
            focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold
            disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-secondary {
-    @apply inline-flex min-h-11 items-center justify-center rounded-full border border-line-strong
-           bg-white/[0.02] px-6 py-3 text-sm font-medium text-t2 transition-all duration-200 ease-out
-           hover:border-line-strong hover:bg-white/[0.06] hover:text-t1 active:scale-[0.98]
+    @apply inline-flex min-h-11 items-center justify-center rounded border border-line-strong
+           bg-white/[0.02] px-6 py-3 text-sm font-medium text-t2 transition-colors duration-200 ease-out
+           hover:bg-white/[0.06] hover:text-t1 active:scale-[0.99]
            focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold
            disabled:cursor-not-allowed disabled:opacity-50;
   }
 
-  /* ========== CARDS ========== */
-  .card {
-    @apply bg-card rounded-3xl border border-white/[0.06] p-6
-           transition-all duration-300;
-  }
-
-  .card-hover:hover {
-    @apply border-gold/30;
-    box-shadow: 0 0 30px rgba(212, 175, 55, 0.1);
-  }
-
   /* ========== INPUTS ========== */
   .input {
-    @apply w-full h-12 px-5 py-3 bg-noir-900/40 text-foreground text-sm
-           border border-white/[0.10] rounded-2xl
-           placeholder:text-muted-foreground
-           focus:outline-none focus:ring-2 focus:ring-gold-400/20 focus:border-gold-400/50
-           transition-all duration-200;
+    @apply h-12 w-full rounded border border-white/[0.10] bg-noir-900/40 px-4 py-3
+           text-sm text-foreground placeholder:text-muted-foreground
+           transition-colors duration-200
+           focus:border-gold-400/50 focus:outline-none focus:ring-2 focus:ring-gold-400/20;
   }
 
   /* ========== LINKS ========== */
   .link {
-    @apply text-gold hover:text-gold-light 
-           transition-colors duration-200
+    @apply text-gold transition-colors duration-200 hover:text-gold-light
            underline-offset-4 hover:underline;
-  }
-
-  /* ========== SECTIONS ========== */
-  .section {
-    @apply py-16 md:py-24 lg:py-32;
-  }
-  
-  .section-dark {
-    @apply bg-noir-900;
-  }
-  
-  .container-custom {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
-}
-
-@layer utilities {
-  /* ========== ANIMATIONS ========== */
-  .animate-fade-in-up {
-    animation: fadeInUp 0.6s ease-out forwards;
-  }
-  
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-  
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
-  }
-
-  /* ========== TEXT GRADIENTS ========== */
-  .text-gradient-gold {
-    background: linear-gradient(135deg, #d4af37 0%, #f5d98b 50%, #d4af37 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* ========== SCROLLBAR ========== */
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(212, 175, 55, 0.3);
-    border-radius: 3px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(212, 175, 55, 0.5);
-  }
-
-  /* ========== RESPONSIVE UTILITIES ========== */
-  .hide-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;
   }
 }
