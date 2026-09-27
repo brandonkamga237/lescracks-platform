@@ -80,4 +80,7 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     @Builder.Default
     private Instant updatedAt = Instant.now();
+
+    @Column(name = "last_seen_at")
+    private Instant lastSeenAt;
 }

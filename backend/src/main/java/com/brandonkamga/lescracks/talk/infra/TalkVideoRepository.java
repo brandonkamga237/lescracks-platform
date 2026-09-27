@@ -10,4 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface TalkVideoRepository extends JpaRepository<TalkVideo, Long> {
 
     Page<TalkVideo> findByStatusOrderByPublishedAtDesc(TalkStatus status, Pageable pageable);
+
+    long countByStatus(TalkStatus status);
 }
