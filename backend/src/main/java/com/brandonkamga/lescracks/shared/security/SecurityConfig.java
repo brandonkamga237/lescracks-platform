@@ -1,5 +1,8 @@
 package com.brandonkamga.lescracks.shared.security;
 
+import com.brandonkamga.lescracks.identity.infra.LastSeenFilter;
+import com.brandonkamga.lescracks.identity.infra.UserRepository;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +11,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -33,8 +37,10 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, KeycloakRoleConverter roleConverter,
-                                    SecurityErrorWriter errors) throws Exception {
+                                    SecurityErrorWriter errors, LastSeenFilter lastSeen) throws Exception {
         http
+            // Runs once auth is settled; harmless for anonymous and admin principals.
+            .addFilterAfter(lastSeen, AuthorizationFilter.class)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             // No cookie, no session: every request carries its own bearer token.
             .csrf(csrf -> csrf.disable())
@@ -76,6 +82,11 @@ public class SecurityConfig {
                     .accessDeniedHandler(errors));
 
         return http.build();
+    }
+
+    @Bean
+    LastSeenFilter lastSeenFilter(UserRepository users) {
+        return new LastSeenFilter(users);
     }
 
     @Bean

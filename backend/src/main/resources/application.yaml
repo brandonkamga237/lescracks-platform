@@ -68,6 +68,14 @@ app:
     secret-key: ${MINIO_SECRET_KEY:minioadmin}
     bucket: ${MINIO_BUCKET:lescracks}
 
+  # Internal address of the Umami container, used by the admin audience stats.
+  # Audience endpoints return available=false when any of these is unset.
+  umami:
+    base-url: ${UMAMI_INTERNAL_URL:}
+    website-id: ${UMAMI_WEBSITE_ID:}
+    username: ${UMAMI_API_USERNAME:}
+    password: ${UMAMI_API_PASSWORD:}
+
   swagger:
     title: LesCracks API
     version: 1.0.0

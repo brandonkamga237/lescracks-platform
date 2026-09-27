@@ -25,6 +25,7 @@ import Talk from '@/pages/Talk';
 
 // The back office is never part of a visitor's first load: it ships as its own chunk.
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
+const AdminAudience = lazy(() => import('@/pages/admin/AdminAudience'));
 const AdminCategories = lazy(() => import('@/pages/admin/AdminCategories'));
 const AdminEvents = lazy(() => import('@/pages/admin/AdminEvents'));
 const AdminResources = lazy(() => import('@/pages/admin/AdminResources'));
@@ -117,6 +118,7 @@ function AppRoutes() {
 
       <Route path="/admin" element={<AdminRoute />}>
         <Route index element={<AdminDashboard />} />
+        <Route path="audience" element={<AdminAudience />} />
         <Route path="ressources" element={<AdminResources />} />
         <Route path="evenements" element={<AdminEvents />} />
         <Route path="talks" element={<AdminTalks />} />

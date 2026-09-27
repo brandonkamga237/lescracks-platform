@@ -1,6 +1,9 @@
 package com.brandonkamga.lescracks.stats.api;
 
+import com.brandonkamga.lescracks.stats.api.dto.AudienceResponse;
+import com.brandonkamga.lescracks.stats.api.dto.ContentViewsResponse;
 import com.brandonkamga.lescracks.stats.api.dto.StatsOverviewResponse;
+import com.brandonkamga.lescracks.stats.api.dto.WatchResponse;
 import com.brandonkamga.lescracks.stats.domain.StatsService;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -31,14 +34,44 @@ public class StatsController {
     public Map<String, Object> userGrowth(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        Instant fromInstant = from.atStartOfDay(ZoneId.of("UTC")).toInstant();
-        Instant toInstant = to.plusDays(1).atStartOfDay(ZoneId.of("UTC")).toInstant();
         return Map.of("from", from.toString(), "to", to.toString(),
-                "points", stats.userGrowth(fromInstant, toInstant));
+                "points", stats.userGrowth(startOf(from), endOf(to)));
+    }
+
+    @GetMapping("/newsletter-growth")
+    public Map<String, Object> newsletterGrowth(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return Map.of("from", from.toString(), "to", to.toString(),
+                "points", stats.newsletterGrowth(startOf(from), endOf(to)));
     }
 
     @GetMapping("/top-resources")
     public Map<String, Object> topResources(@RequestParam(defaultValue = "5") int limit) {
         return Map.of("limit", limit, "resources", stats.topResources(limit));
+    }
+
+    /** Visitors, visits and pageviews from Umami, re-exposed in our own shape. */
+    @GetMapping("/audience")
+    public AudienceResponse audience(@RequestParam(defaultValue = "30") int days) {
+        return stats.audience(days);
+    }
+
+    /** Pageviews per resource and per event, matched on their public slugs. */
+    @GetMapping("/content-views")
+    public ContentViewsResponse contentViews(@RequestParam(defaultValue = "30") int days) {
+        return stats.contentViews(days);
+    }
+
+    /** Product signals worth an administrator's attention. */
+    @GetMapping("/watch")
+    public WatchResponse watch() { return stats.watch(); }
+
+    private Instant startOf(LocalDate date) {
+        return date.atStartOfDay(ZoneId.of("UTC")).toInstant();
+    }
+
+    private Instant endOf(LocalDate date) {
+        return date.plusDays(1).atStartOfDay(ZoneId.of("UTC")).toInstant();
     }
 }

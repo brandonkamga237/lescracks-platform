@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Download, Search, Trash2 } from 'lucide-react';
 
 import { AdminConfirm, AdminModal, AdminPagination, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
+import { Kpi } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
 import type { AdminUser, AuthProvider } from '@/services/types';
@@ -69,6 +70,7 @@ export default function AdminUsers() {
   const [deleteError, setDeleteError] = useState('');
 
   const users = useApi((signal) => adminApi.users(page, debounced, signal), [page, debounced]);
+  const overview = useApi((signal) => adminApi.overview(signal), []);
   const list = users.data?.content ?? [];
   const totalPages = users.data?.totalPages ?? 1;
   const totalElements = users.data?.totalElements ?? 0;
@@ -140,6 +142,19 @@ export default function AdminUsers() {
     <AdminSection title="Utilisateurs" description="Gère les comptes enregistrés et leur statut." action={headerAction}>
       {error && <p role="alert" className="mb-5 rounded-xl border border-red-500/25 bg-red-500/5 p-3 text-sm text-red-400">{error}</p>}
       {notice && <p role="status" className="mb-5 rounded-xl border border-green-500/25 bg-green-500/5 p-3 text-sm text-green-400">{notice}</p>}
+
+      {overview.data && (
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Kpi label="Membres" value={overview.data.users.toLocaleString('fr-FR')}
+            hint={`${overview.data.verifiedUsers.toLocaleString('fr-FR')} emails vérifiés`} />
+          <Kpi label="Nouveaux · 30 jours" value={overview.data.usersNewLast30d.toLocaleString('fr-FR')}
+            hint="inscriptions récentes" />
+          <Kpi label="Actifs · 7 jours" value={overview.data.usersActiveLast7d.toLocaleString('fr-FR')}
+            hint="ont utilisé la plateforme cette semaine" />
+          <Kpi label="Actifs · 30 jours" value={overview.data.usersActiveLast30d.toLocaleString('fr-FR')}
+            hint="ont utilisé la plateforme ce mois-ci" />
+        </div>
+      )}
 
       <AdminState
         loading={users.loading}
