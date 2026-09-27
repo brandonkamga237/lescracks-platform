@@ -8,7 +8,7 @@ import { EmptyState, ErrorState } from '@/components/common/States';
 import AgendaItem from '@/components/events/AgendaItem';
 import Layout from '@/components/layout/Layout';
 import { Section, SectionHeader } from '@/components/layout/Page';
-import ResourceIndexItem from '@/components/resources/ResourceIndexItem';
+import ResourceCard from '@/components/resources/ResourceCard';
 import ResourceSpotlight from '@/components/resources/ResourceSpotlight';
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
@@ -23,9 +23,9 @@ import { api } from '@/services/api';
  */
 
 const PROMISES = [
-  { index: '01', icon: BookOpen, title: 'Bibliothèque ouverte', body: 'Vidéos, ebooks, articles. Sans compte.' },
-  { index: '02', icon: CalendarDays, title: 'Rendez-vous réguliers', body: 'Ateliers et conférences, en ligne ou sur place.' },
-  { index: '03', icon: Users, title: 'Communauté francophone', body: 'On avance ensemble, sur WhatsApp et au Talk.' },
+  { icon: BookOpen, title: 'Bibliothèque ouverte', body: 'Vidéos, ebooks, articles. Sans compte.' },
+  { icon: CalendarDays, title: 'Rendez-vous réguliers', body: 'Ateliers et conférences, en ligne ou sur place.' },
+  { icon: Users, title: 'Communauté francophone', body: 'On avance ensemble, sur WhatsApp et au Talk.' },
 ] as const;
 
 const reveal = (reduced: boolean | null) => (reduced ? {} : { initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.55, ease: 'easeOut' } });
@@ -76,15 +76,12 @@ export default function Landing() {
 
         {/* The promises as a numbered strip — not cards. */}
         <dl className="mt-16 grid gap-x-10 gap-y-6 border-t border-line-soft/50 pt-8 sm:grid-cols-3">
-          {PROMISES.map(({ index, icon: Icon, title, body }) => (
-            <div key={index} className="flex gap-4">
+          {PROMISES.map(({ icon: Icon, title, body }) => (
+            <div key={title} className="flex gap-4">
               <Icon className="mt-0.5 h-5 w-5 shrink-0 text-gold-400" aria-hidden />
               <div>
-                <dt className="flex items-baseline gap-3 text-sm font-medium text-t1">
-                  <span className="kicker-muted">{index}</span>
-                  {title}
-                </dt>
-                <dd className="mt-2 pl-9 text-sm leading-relaxed text-t4">{body}</dd>
+                <dt className="text-sm font-medium text-t1">{title}</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-t4">{body}</dd>
               </div>
             </div>
           ))}
@@ -92,11 +89,10 @@ export default function Landing() {
         </div>
       </Section>
 
-      {/* ── 01 · À la une ────────────────────────────────────────── */}
+      {/* ── À la une ─────────────────────────────────────────────── */}
       <motion.div {...reveal(reduced)}>
         <Section aria-labelledby="featured-heading">
           <SectionHeader
-            index="01"
             eyebrow="La bibliothèque"
             id="featured-heading"
             title="À la une"
@@ -120,9 +116,9 @@ export default function Landing() {
             <>
               <ResourceSpotlight resource={featured} cataloguePath="/ressources" />
               {next.length > 0 && (
-                <ul className="mt-12">
-                  {next.map((resource, i) => (
-                    <ResourceIndexItem key={resource.id} resource={resource} index={String(i + 2).padStart(2, '0')} cataloguePath="/ressources" />
+                <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {next.map((resource) => (
+                    <ResourceCard key={resource.id} resource={resource} cataloguePath="/ressources" />
                   ))}
                 </ul>
               )}
@@ -133,11 +129,10 @@ export default function Landing() {
         </Section>
       </motion.div>
 
-      {/* ── 02 · L'agenda ────────────────────────────────────────── */}
+      {/* ── L'agenda ─────────────────────────────────────────────── */}
       <motion.div {...reveal(reduced)}>
         <Section aria-labelledby="agenda-heading" bordered>
           <SectionHeader
-            index="02"
             eyebrow="En ligne et sur place"
             id="agenda-heading"
             title="L’agenda"
@@ -175,28 +170,26 @@ export default function Landing() {
         </Section>
       </motion.div>
 
-      {/* ── 03 · Par sujet ───────────────────────────────────────── */}
+      {/* ── Par sujet ────────────────────────────────────────────── */}
       {!!categories.data?.length && (
         <motion.div {...reveal(reduced)}>
           <Section aria-labelledby="subjects-heading" bordered>
             <SectionHeader
-              index="03"
               eyebrow="Le sommaire"
               id="subjects-heading"
               title="Explorer par sujet"
             />
-            <ul className="grid gap-x-14 sm:grid-cols-2">
-              {categories.data.slice(0, 8).map((category, i) => (
+            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {categories.data.slice(0, 8).map((category) => (
                 <li key={category.id}>
                   <Link
                     to={`/ressources?categoryId=${category.id}`}
-                    className="group flex items-baseline gap-5 border-t border-line-soft/50 px-1 py-5 transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+                    className="group flex h-full items-center justify-between gap-4 rounded-lg border border-line-soft/60 bg-noir-900/40 px-5 py-4 transition-colors hover:border-gold-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
                   >
-                    <span className="kicker-muted" aria-hidden>{String(i + 1).padStart(2, '0')}</span>
-                    <span className="min-w-0 flex-1 break-words font-display text-xl font-medium text-t1 transition-colors group-hover:text-gold-300 sm:text-2xl">
+                    <span className="min-w-0 break-words font-display text-lg font-medium text-t1 transition-colors group-hover:text-gold-300">
                       {category.name}
                     </span>
-                    <ArrowUpRight className="h-5 w-5 shrink-0 text-t4 opacity-0 transition-opacity group-hover:text-gold-300 group-hover:opacity-100" aria-hidden />
+                    <ArrowUpRight className="h-5 w-5 shrink-0 text-t4 transition-colors group-hover:text-gold-300" aria-hidden />
                   </Link>
                 </li>
               ))}
