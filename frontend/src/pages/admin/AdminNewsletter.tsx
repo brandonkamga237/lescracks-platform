@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Clock, Download, Mail, Send, User } from 'lucide-react';
 
 import { AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
-import ArticleEditor from '@/components/admin/ArticleEditor';
+
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
 import type { AdminSubscriber } from '@/services/types';
@@ -159,9 +159,14 @@ export default function AdminNewsletter() {
             </div>
             <div>
               <label htmlFor="broadcast-message" className="text-sm font-medium text-t2">Message</label>
-              <div className="mt-2">
-                <ArticleEditor key={editorKey} value={message} onChange={setMessage} />
-              </div>
+              <textarea
+                key={editorKey}
+                value={message}
+                onChange={(event) => setMessage(event.target.value)}
+                rows={8}
+                className="input mt-2 h-auto py-3"
+                placeholder="Écris le message de la campagne…"
+              />
               <div className="mt-3 flex flex-wrap gap-2">
                 <button type="button" onClick={() => insertVariable('{{firstName}}')} className="inline-flex items-center gap-1 rounded-full border border-line-soft bg-noir-950 px-3 py-1.5 text-xs font-medium text-t3 hover:border-gold-400/30 hover:text-gold-400">
                   <User className="h-3.5 w-3.5" aria-hidden /> Prénom
