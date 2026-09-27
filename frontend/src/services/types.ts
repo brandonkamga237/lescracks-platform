@@ -174,6 +174,16 @@ export interface WatchSignal {
   actionTo: string;
 }
 
+// Inline marks inside a text field: **bold**, *italic*, `code`, [label](url).
+export type ArticleBlock =
+  | { type: 'paragraph'; text: string }
+  | { type: 'heading'; level: 2 | 3; text: string }
+  | { type: 'quote'; text: string }
+  | { type: 'list'; items: { text: string }[] }
+  | { type: 'image'; url: string; alt?: string; caption?: string }
+  | { type: 'link'; url: string; text: string }
+  | { type: 'divider' };
+
 export interface NewsletterCampaign {
   id: number;
   subject: string;

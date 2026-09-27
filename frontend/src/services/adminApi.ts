@@ -1,7 +1,7 @@
 import { ENV } from '@/config/env';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminSubscriber, AdminSummary, AdminUser, AudienceStats, AuthProvider, Category, ContentViews, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
+import type { AdminSubscriber, AdminSummary, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
 
 export interface EbookRequest {
   title: string;
@@ -163,8 +163,8 @@ export const adminApi = {
   newsletterStats: (signal?: AbortSignal) => http.get<NewsletterStats>('/newsletter/admin/stats', undefined, signal),
   newsletterSubscriptions: (status: string | '', signal?: AbortSignal) =>
     http.get<AdminSubscriber[]>('/newsletter/admin/subscriptions', status ? { status } : undefined, signal),
-  newsletterBroadcast: (subject: string, message: string) =>
-    http.post<number>('/newsletter/admin/broadcast', { subject, message }),
+  newsletterBroadcast: (subject: string, body: ArticleBlock[]) =>
+    http.post<number>('/newsletter/admin/broadcast', { subject, body }),
   newsletterUnsubscribe: (userId: number) => http.post<AdminSubscriber>(`/newsletter/admin/subscriptions/${userId}/unsubscribe`),
   newsletterSubscribe: (userId: number) => http.post<AdminSubscriber>(`/newsletter/admin/subscriptions/${userId}/subscribe`),
   newsletterCampaigns: (signal?: AbortSignal) => http.get<NewsletterCampaign[]>('/newsletter/admin/campaigns', undefined, signal),

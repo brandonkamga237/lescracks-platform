@@ -23,7 +23,7 @@ public class NewsletterCampaign {
     @Column(nullable = false, length = 200)
     private String subject;
 
-    @Column(nullable = false, length = 10000)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
 
     @Column(name = "recipient_count", nullable = false)

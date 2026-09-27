@@ -1,13 +1,39 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Clock, Download, Mail, Send, User } from 'lucide-react';
 
 import { AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
-import ArticleEditor from '@/components/admin/ArticleEditor';
+import BlockEditor, { type BlockEditorHandle } from '@/components/admin/BlockEditor';
+import { ArticleBlocks } from '@/components/resources/ArticleRenderer';
+
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
-import type { AdminSubscriber } from '@/services/types';
+import type { AdminSubscriber, ArticleBlock } from '@/services/types';
 
 const statusLabels = { SUBSCRIBED: 'Abonné', UNSUBSCRIBED: 'Désabonné' };
+
+const SAMPLE: Record<string, string> = {
+  '{{firstName}}': 'Marie',
+  '{{lastName}}': 'Kamga',
+  '{{email}}': 'marie@example.com',
+};
+
+/** Replaces personalisation tokens with sample values so the preview reads naturally. */
+function sample(blocks: ArticleBlock[]): ArticleBlock[] {
+  const fill = (text: string) => Object.entries(SAMPLE).reduce((t, [k, v]) => t.split(k).join(v), text);
+  return blocks.map((block) => {
+    if ('text' in block) return { ...block, text: fill(block.text ?? '') };
+    if (block.type === 'list') return { ...block, items: block.items.map((i) => ({ text: fill(i.text) })) };
+    return block;
+  });
+}
+
+function hasBody(blocks: ArticleBlock[]) {
+  return blocks.some((block) => {
+    if (block.type === 'image' || block.type === 'link') return !!block.url;
+    if (block.type === 'list') return block.items.some((item) => item.text.trim());
+    return 'text' in block && block.text.trim().length > 0;
+  });
+}
 
 export default function AdminNewsletter() {
   const [filter, setFilter] = useState<'' | 'SUBSCRIBED' | 'UNSUBSCRIBED'>('');
@@ -16,8 +42,8 @@ export default function AdminNewsletter() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
-  const [editorKey, setEditorKey] = useState(0);
+  const [blocks, setBlocks] = useState<ArticleBlock[]>([{ type: 'paragraph', text: '' }]);
+  const editorRef = useRef<BlockEditorHandle>(null);
 
   const stats = useApi((signal) => adminApi.newsletterStats(signal), []);
   const subscriptions = useApi((signal) => adminApi.newsletterSubscriptions(filter, signal), [filter]);
@@ -42,25 +68,23 @@ export default function AdminNewsletter() {
   }
 
   function insertVariable(variable: string) {
-    setMessage((previous) => (previous ? previous + ' ' + variable : variable));
-    setEditorKey((key) => key + 1);
+    editorRef.current?.insertText(variable);
   }
 
   async function broadcast(event: React.FormEvent) {
     event.preventDefault();
     setError('');
     setNotice('');
-    if (!subject.trim() || !message.trim()) {
+    if (!subject.trim() || !hasBody(blocks)) {
       setError('Renseigne un objet et un message.');
       return;
     }
     setBusyBroadcast(true);
     try {
-      const count = await adminApi.newsletterBroadcast(subject.trim(), message.trim());
+      const count = await adminApi.newsletterBroadcast(subject.trim(), blocks);
       setNotice(`Campagne envoyée à ${count} abonné${count > 1 ? 's' : ''}.`);
       setSubject('');
-      setMessage('');
-      setEditorKey((key) => key + 1);
+      setBlocks([{ type: 'paragraph', text: '' }]);
       await campaigns.reload();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'L’envoi a échoué.');
@@ -103,7 +127,78 @@ export default function AdminNewsletter() {
         </div>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+      <form onSubmit={broadcast} className="mb-10 rounded-3xl border border-white/[0.06] bg-card p-6 sm:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="font-display text-lg font-semibold text-t1">Envoyer une campagne</h2>
+            <p className="mt-2 max-w-lg text-sm leading-relaxed text-t4">
+              Tu écris seulement le corps du message — l’en-tête LesCracks et le pied de page
+              (contacts, devise, liens) sont appliqués automatiquement.
+            </p>
+          </div>
+          <button type="submit" disabled={busyBroadcast} className="btn-primary shrink-0">
+            {busyBroadcast ? 'Envoi…' : <><Send className="h-4 w-4" aria-hidden /> Envoyer aux abonnés</>}
+          </button>
+        </div>
+
+        <div className="mt-6">
+          <label htmlFor="broadcast-subject" className="text-sm font-medium text-t2">Objet de l’email</label>
+          <input id="broadcast-subject" value={subject} onChange={(event) => setSubject(event.target.value)} required maxLength={200} className="input mt-2" placeholder="Le sujet que les abonnés verront dans leur boîte" />
+        </div>
+
+        <div className="mt-6 grid gap-6 xl:grid-cols-2">
+          <div>
+            <p className="mb-3 text-sm font-medium text-t2">Corps du message</p>
+            <BlockEditor ref={editorRef} value={blocks} onChange={setBlocks} />
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <span className="text-xs text-t4">Insérer une variable :</span>
+              {[
+                { token: '{{firstName}}', label: 'Prénom', icon: User },
+                { token: '{{lastName}}', label: 'Nom', icon: User },
+                { token: '{{email}}', label: 'Email', icon: Mail },
+              ].map(({ token, label, icon: Icon }) => (
+                <button key={token} type="button" onClick={() => insertVariable(token)}
+                  className="inline-flex items-center gap-1 rounded-full border border-line-soft bg-noir-950 px-3 py-1.5 text-xs font-medium text-t3 transition-colors hover:border-gold-400/30 hover:text-gold-400">
+                  <Icon className="h-3.5 w-3.5" aria-hidden /> {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div aria-label="Aperçu de l’email">
+            <p className="mb-3 text-sm font-medium text-t2">Aperçu <span className="font-normal text-t4">— tel que reçu</span></p>
+            <div className="rounded-3xl bg-[#0a0a0a] p-4 sm:p-6">
+              <div className="overflow-hidden rounded-2xl bg-[#141414]">
+                <div className="h-[3px] bg-gold-400" aria-hidden />
+                <div className="px-6 pb-6 pt-8 text-center sm:px-10">
+                  <p className="font-display text-lg font-bold uppercase tracking-[0.22em] text-gold-400">LesCracks</p>
+                  <p className="mt-2 text-[11px] uppercase tracking-widest text-t4">Ressources · Événements · Communauté</p>
+                </div>
+                <div className="px-6 pb-10 sm:px-10">
+                  {hasBody(blocks)
+                    ? <ArticleBlocks blocks={sample(blocks)} />
+                    : <p className="py-8 text-center text-sm text-t4">Le corps du message apparaîtra ici.</p>}
+                </div>
+                <div className="border-t border-white/[0.08] bg-[#101010] px-6 py-6 text-center sm:px-10">
+                  <p className="text-xs">
+                    <span className="font-semibold uppercase tracking-wider text-gold-400">lescracks.com</span>
+                    <span className="mx-2 text-t4">·</span>
+                    <span className="text-t3">Événements</span>
+                    <span className="mx-2 text-t4">·</span>
+                    <span className="text-t3">Ressources</span>
+                  </p>
+                  <p className="mt-3 text-xs italic text-gold-400">Deviens aussi un crack de la tech.</p>
+                  <p className="mt-3 text-[11px] leading-relaxed text-t4">
+                    Tu reçois cet email parce que tu es inscrit à la lettre LesCracks.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <div className="grid gap-8 lg:grid-cols-2">
         <div>
           <div className="mb-4 flex flex-wrap items-center gap-3">
             <h2 className="font-display text-lg font-semibold text-t1">Abonnements</h2>
@@ -149,60 +244,29 @@ export default function AdminNewsletter() {
           </AdminState>
         </div>
 
-        <form onSubmit={broadcast} className="rounded-3xl border border-white/[0.06] bg-card p-6">
-          <h2 className="font-display text-lg font-semibold text-t1">Envoyer une campagne</h2>
-          <p className="mt-2 text-sm text-t4">Message personnalisé aux abonnés. Variables : {'{{firstName}}'}, {'{{lastName}}'}, {'{{email}}'}.</p>
-          <div className="mt-5 space-y-4">
-            <div>
-              <label htmlFor="broadcast-subject" className="text-sm font-medium text-t2">Objet</label>
-              <input id="broadcast-subject" value={subject} onChange={(event) => setSubject(event.target.value)} required maxLength={200} className="input mt-2" />
-            </div>
-            <div>
-              <label htmlFor="broadcast-message" className="text-sm font-medium text-t2">Message</label>
-              <div className="mt-2">
-                <ArticleEditor key={editorKey} value={message} onChange={setMessage} />
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button type="button" onClick={() => insertVariable('{{firstName}}')} className="inline-flex items-center gap-1 rounded-full border border-line-soft bg-noir-950 px-3 py-1.5 text-xs font-medium text-t3 hover:border-gold-400/30 hover:text-gold-400">
-                  <User className="h-3.5 w-3.5" aria-hidden /> Prénom
-                </button>
-                <button type="button" onClick={() => insertVariable('{{lastName}}')} className="inline-flex items-center gap-1 rounded-full border border-line-soft bg-noir-950 px-3 py-1.5 text-xs font-medium text-t3 hover:border-gold-400/30 hover:text-gold-400">
-                  <User className="h-3.5 w-3.5" aria-hidden /> Nom
-                </button>
-                <button type="button" onClick={() => insertVariable('{{email}}')} className="inline-flex items-center gap-1 rounded-full border border-line-soft bg-noir-950 px-3 py-1.5 text-xs font-medium text-t3 hover:border-gold-400/30 hover:text-gold-400">
-                  <Mail className="h-3.5 w-3.5" aria-hidden /> Email
-                </button>
-              </div>
-            </div>
-            <button type="submit" disabled={busyBroadcast} className="btn-primary w-full">
-              {busyBroadcast ? 'Envoi…' : <><Send className="h-4 w-4" aria-hidden /> Envoyer</>}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <div className="mt-10">
-        <h2 className="font-display text-lg font-semibold text-t1">Historique des campagnes</h2>
-        <AdminState
-          loading={campaigns.loading}
-          error={campaigns.error}
-          empty={!(campaigns.data ?? []).length}
-          emptyMessage="Aucune campagne envoyée pour le moment."
-          onRetry={campaigns.reload}
-        >
-          {(campaigns.data ?? []).map((c) => (
-            <AdminRow key={c.id}>
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-noir-800 text-gold-400">
-                <Clock className="h-5 w-5" aria-hidden />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="break-words font-display font-medium text-t1">{c.subject}</p>
-                <p className="mt-1 text-xs text-t3">{new Date(c.sentAt).toLocaleString('fr-FR')}</p>
-              </div>
-              <span className="text-sm text-t3">{c.recipientCount} destinataire{c.recipientCount > 1 ? 's' : ''}</span>
-            </AdminRow>
-          ))}
-        </AdminState>
+        <div>
+          <h2 className="mb-4 font-display text-lg font-semibold text-t1">Historique des campagnes</h2>
+          <AdminState
+            loading={campaigns.loading}
+            error={campaigns.error}
+            empty={!(campaigns.data ?? []).length}
+            emptyMessage="Aucune campagne envoyée pour le moment."
+            onRetry={campaigns.reload}
+          >
+            {(campaigns.data ?? []).map((c) => (
+              <AdminRow key={c.id}>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-noir-800 text-gold-400">
+                  <Clock className="h-5 w-5" aria-hidden />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="break-words font-display font-medium text-t1">{c.subject}</p>
+                  <p className="mt-1 text-xs text-t3">{new Date(c.sentAt).toLocaleString('fr-FR')}</p>
+                </div>
+                <span className="text-sm text-t3">{c.recipientCount} destinataire{c.recipientCount > 1 ? 's' : ''}</span>
+              </AdminRow>
+            ))}
+          </AdminState>
+        </div>
       </div>
     </AdminSection>
   );

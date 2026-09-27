@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminModal } from '@/components/admin/AdminTable';
-import ArticleEditor from '@/components/admin/ArticleEditor';
+import BlockEditor, { htmlToBlocks } from '@/components/admin/BlockEditor';
 import { useApi } from '@/hooks/useApi';
 import { adminApi, type ArticleRequest, type EbookRequest, type VideoRequest } from '@/services/adminApi';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
-import type { ResourceKind, ResourceStatus, ResourceSummary, Tag } from '@/services/types';
+import type { ArticleBlock, ResourceKind, ResourceStatus, ResourceSummary, Tag } from '@/services/types';
 
 interface ResourceFormProps {
   resource?: ResourceSummary;
@@ -15,6 +15,31 @@ interface ResourceFormProps {
 }
 
 const VIDEO_PLATFORMS = ['YouTube', 'Vimeo', 'Dailymotion', 'Twitch', 'Loom', 'TikTok', 'Autre'] as const;
+
+/** A block counts as content when it carries visible text, items or an image. */
+function hasContent(blocks: ArticleBlock[]) {
+  return blocks.some((block) => {
+    if (block.type === 'image') return !!block.url;
+    if (block.type === 'link') return !!block.url || !!block.text?.trim();
+    if (block.type === 'list') return block.items.some((item) => item.text.trim());
+    return 'text' in block && block.text.trim().length > 0;
+  });
+}
+
+/** Empty paragraphs, headings without text and empty links do not ship. */
+function clean(blocks: ArticleBlock[]): ArticleBlock[] {
+  return blocks
+    .map((block) => (block.type === 'list'
+      ? { ...block, items: block.items.filter((item) => item.text.trim()) }
+      : block))
+    .filter((block) => {
+      if (block.type === 'divider') return true;
+      if (block.type === 'image') return !!block.url;
+      if (block.type === 'link') return !!block.url;
+      if (block.type === 'list') return block.items.length > 0;
+      return block.text.trim().length > 0;
+    });
+}
 
 export default function ResourceForm({ resource, onCreated, onCancel }: ResourceFormProps) {
   const [kind, setKind] = useState<ResourceKind>(resource?.kind ?? 'EXTERNAL_VIDEO');
@@ -32,9 +57,15 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
     videoUrl: resource?.videoUrl ?? '',
     platform: resource?.platform ?? 'YouTube',
     status: resource?.status ?? 'DRAFT' as ResourceStatus,
-    body: (resource?.body && typeof resource.body === 'object' && !Array.isArray(resource.body) && (resource.body as { html?: string }).html)
-      ? (resource.body as { html: string }).html
-      : '',
+  });
+  const [blocks, setBlocks] = useState<ArticleBlock[]>(() => {
+    const body = resource?.body;
+    if (Array.isArray(body)) return body as ArticleBlock[];
+    if (body && typeof body === 'object' && typeof (body as { html?: string }).html === 'string') {
+      const converted = htmlToBlocks((body as { html: string }).html);
+      return converted.length ? converted : [{ type: 'paragraph', text: '' }];
+    }
+    return [{ type: 'paragraph', text: '' }];
   });
   const categories = useApi((signal) => api.categories(signal), []);
   const tags = useApi((signal) => (form.categoryId ? api.tags(Number(form.categoryId), signal) : Promise.resolve([] as Tag[])), [form.categoryId]);
@@ -74,7 +105,7 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
       setFailure('Renseigne le titre, la description, la catégorie et une image de couverture.');
       return;
     }
-    if (kind === 'ARTICLE' && (!form.body.trim() || form.body.trim() === '<p><br></p>')) {
+    if (kind === 'ARTICLE' && !hasContent(blocks)) {
       setFailure("Rédige le contenu de l'article.");
       return;
     }
@@ -101,7 +132,7 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
         if (resource) await adminApi.updateVideo(resource.id, video, coverImageFile ?? undefined);
         else await adminApi.createVideo(video, coverImageFile!);
       } else if (kind === 'ARTICLE') {
-        const article: ArticleRequest = { ...base, body: { html: form.body } };
+        const article: ArticleRequest = { ...base, body: clean(blocks) };
         if (resource) await adminApi.updateArticle(resource.id, article, coverImageFile ?? undefined);
         else await adminApi.createArticle(article, coverImageFile!);
       } else if (resource) {
@@ -137,7 +168,7 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
       <fieldset disabled={busy} className="space-y-5 border-t border-line-soft pt-5">
         <legend className="pr-3 font-display text-lg font-medium">02 · {kind === 'ARTICLE' ? "Le contenu de l'article" : kind === 'EBOOK' ? 'Le fichier' : 'La vidéo'}</legend>
         {kind === 'ARTICLE' && (
-          <ArticleEditor value={form.body} onChange={(html) => setForm({ ...form, body: html })} />
+          <BlockEditor value={blocks} onChange={setBlocks} />
         )}
         {kind === 'EXTERNAL_VIDEO' && <div className="grid gap-5 sm:grid-cols-2">
           <label className="block text-sm text-t2">Lien de la vidéo<input required type="url" maxLength={1000} placeholder="https://…" value={form.videoUrl} onChange={(event) => setForm({ ...form, videoUrl: event.target.value })} className={field} /></label>
