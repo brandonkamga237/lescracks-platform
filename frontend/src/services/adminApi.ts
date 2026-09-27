@@ -1,7 +1,7 @@
 import { ENV } from '@/config/env';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminSubscriber, AdminSummary, AdminUser, AuthProvider, Category, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint } from '@/services/types';
+import type { AdminSubscriber, AdminSummary, AdminUser, AudienceStats, AuthProvider, Category, ContentViews, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
 
 export interface EbookRequest {
   title: string;
@@ -51,15 +51,24 @@ export interface StatsOverview {
   usersByStatus: Partial<Record<'ACTIVE' | 'INACTIVE' | 'BANNED', number>>;
   usersByProvider: Partial<Record<AuthProvider, number>>;
   verifiedUsers: number;
+  usersNewLast30d: number;
+  usersActiveLast7d: number;
+  usersActiveLast30d: number;
   events: number;
   eventsByStatus: Partial<Record<EventStatus, number>>;
   eventsByType: Partial<Record<EventType, number>>;
+  eventsUpcoming: number;
+  eventsOngoing: number;
+  eventsPast: number;
   resources: number;
   resourcesByStatus: Partial<Record<ResourceStatus, number>>;
   resourcesByKind: Partial<Record<ResourceKind, number>>;
   resourcesByCategory: Record<string, number>;
   newsletterSubscribers: number;
   newsletterUnsubscribed: number;
+  newsletterNewLast30d: number;
+  talks: number;
+  talksPublished: number;
 }
 
 function dataBlob(data: EbookRequest | VideoRequest) {
@@ -163,6 +172,14 @@ export const adminApi = {
   exportNewsletter: () => downloadCsv('/newsletter/admin/subscriptions/export', 'lescracks-newsletter.csv'),
   userGrowth: (from: string, to: string, signal?: AbortSignal) =>
     http.get<{ from: string; to: string; points: UserGrowthPoint[] }>('/admin/stats/user-growth', { from, to }, signal),
+  newsletterGrowth: (from: string, to: string, signal?: AbortSignal) =>
+    http.get<{ from: string; to: string; points: UserGrowthPoint[] }>('/admin/stats/newsletter-growth', { from, to }, signal),
+  audience: (days = 30, signal?: AbortSignal) =>
+    http.get<AudienceStats>('/admin/stats/audience', { days }, signal),
+  contentViews: (days = 30, signal?: AbortSignal) =>
+    http.get<ContentViews>('/admin/stats/content-views', { days }, signal),
+  watch: (signal?: AbortSignal) =>
+    http.get<{ signals: WatchSignal[] }>('/admin/stats/watch', undefined, signal),
   newsletterSubscribers: (signal?: AbortSignal) => http.get<AdminSubscriber[]>('/newsletter/admin/subscribers', undefined, signal),
   topResources: (limit = 5, signal?: AbortSignal) =>
     http.get<{ limit: number; resources: TopResource[] }>('/admin/stats/top-resources', { limit }, signal),

@@ -9,12 +9,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 public interface ResourceRepository extends JpaRepository<Resource, Long> {
 
     Optional<Resource> findBySlug(String slug);
+
+    List<Resource> findBySlugIn(Collection<String> slugs);
 
     boolean existsBySlug(String slug);
 

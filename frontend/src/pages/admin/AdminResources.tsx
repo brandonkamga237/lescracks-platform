@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, FileText, Heart, Plus, Search, TrendingUp, Video } from 'lucide-react';
+import { BookOpen, Eye, FileText, Heart, Plus, Search, TrendingUp, Video } from 'lucide-react';
 import { AdminConfirm, AdminPagination, AdminRow, AdminSection, AdminState, StatusBadge } from '@/components/admin/AdminTable';
 import ResourceForm from '@/components/admin/ResourceForm';
 import { useApi } from '@/hooks/useApi';
@@ -28,6 +28,8 @@ export default function AdminResources() {
   const resources = useApi((signal) => adminApi.resources(filters, signal), [filters]);
   const categories = useApi((signal) => api.categories(signal), []);
   const tags = useApi((signal) => filters.categoryId ? api.tags(filters.categoryId, signal) : Promise.resolve([]), [filters.categoryId]);
+  const views = useApi((signal) => adminApi.contentViews(30, signal), []);
+  const viewsBySlug = new Map((views.data?.resources ?? []).map((r) => [r.slug, r.views]));
   const list = resources.data?.content ?? [];
   const field = 'input';
   const actionClass = 'rounded-full border border-line px-3 py-2 text-xs font-medium text-t2 hover:border-gold-400/40 hover:text-gold-400 disabled:opacity-40';
@@ -84,6 +86,9 @@ export default function AdminResources() {
       {list.map((resource) => <AdminRow key={resource.id}>
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-noir-800 text-gold-400">{resource.kind === 'EBOOK' ? <BookOpen className="h-5 w-5" aria-hidden /> : resource.kind === 'ARTICLE' ? <FileText className="h-5 w-5" aria-hidden /> : <Video className="h-5 w-5" aria-hidden />}</span>
         <div className="min-w-0 flex-1 basis-48"><h2 className="break-words font-display font-medium text-t1">{resource.title}</h2><p className="mt-1 text-xs leading-relaxed text-t3">{resource.kind === 'EBOOK' ? 'Ebook' : resource.kind === 'ARTICLE' ? 'Article' : 'Vidéo externe'} · {resource.categoryName} · {dateFormat.format(new Date(resource.createdAt))}</p></div>
+        {resource.slug && viewsBySlug.has(resource.slug) && (
+          <div className="flex items-center gap-1.5 rounded-full border border-line-soft bg-noir-950 px-2.5 py-1.5 text-xs text-t2" title="Consultations sur 30 jours"><Eye className="h-3.5 w-3.5 text-t3" aria-hidden />{viewsBySlug.get(resource.slug)}</div>
+        )}
         <div className="flex items-center gap-1.5 rounded-full border border-line-soft bg-noir-950 px-2.5 py-1.5 text-xs text-t2"><Heart className="h-3.5 w-3.5 text-gold-400" aria-hidden />{resource.likeCount ?? 0}</div>
         <StatusBadge status={resource.status} resource />
         <div className="flex flex-wrap gap-2" role="group" aria-label={`Actions pour ${resource.title}`}>

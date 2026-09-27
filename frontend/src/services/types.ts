@@ -123,6 +123,57 @@ export interface TopResource {
   likes: number;
 }
 
+export interface AudienceStats {
+  available: boolean;
+  days: number;
+  visitors: number | null;
+  previousVisitors: number | null;
+  visits: number | null;
+  previousVisits: number | null;
+  pageviews: number | null;
+  previousPageviews: number | null;
+  bounceRate: number | null;
+  avgVisitSeconds: number | null;
+  series: { date: string; pageviews: number; visits: number }[];
+  sources: { name: string; count: number }[];
+  countries: { name: string; count: number }[];
+  topPages: { name: string; count: number }[];
+}
+
+export interface ViewedResource {
+  id: number;
+  slug: string;
+  title: string;
+  coverImage: string | null;
+  category: string | null;
+  views: number;
+}
+
+export interface ViewedEvent {
+  id: number;
+  slug: string;
+  title: string;
+  startDate: string;
+  status: string;
+  views: number;
+}
+
+export interface ContentViews {
+  available: boolean;
+  days: number;
+  resources: ViewedResource[];
+  events: ViewedEvent[];
+}
+
+export interface WatchSignal {
+  key: string;
+  severity: 'info' | 'warning';
+  title: string;
+  detail: string;
+  actionLabel: string;
+  actionTo: string;
+}
+
 export interface NewsletterCampaign {
   id: number;
   subject: string;

@@ -4,6 +4,7 @@ import com.brandonkamga.lescracks.resource.api.ResourceController;
 import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.resource.domain.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
+import com.brandonkamga.lescracks.identity.infra.UserRepository;
 import com.brandonkamga.lescracks.resource.infra.EbookRepository;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 
@@ -48,6 +49,8 @@ class SecurityConfigTest {
     @MockitoBean private ResourceMapper mapper;
     @MockitoBean private EbookRepository ebooks;
     @MockitoBean private StorageService storage;
+    // The security chain registers the last-seen touch, which needs the users table.
+    @MockitoBean private UserRepository users;
 
     @Test
     @DisplayName("reading the catalogue needs no account: that is what brings people in")
