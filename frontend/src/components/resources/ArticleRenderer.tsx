@@ -41,22 +41,9 @@ function InlineText({ text }: { text: string }) {
   );
 }
 
-export default function ArticleRenderer({ resource }: { resource: ResourceSummary }) {
-  const body = resource.body as ArticleBody;
-
-  if (hasHtml(body)) {
-    return (
-      <article
-        className="prose prose-invert prose-gold max-w-none article-body"
-        dangerouslySetInnerHTML={{ __html: body.html }}
-      />
-    );
-  }
-
-  if (!Array.isArray(body)) return <p className="text-t3">Aucun contenu pour cet article.</p>;
-  const blocks = body.filter(isBlock);
-  if (blocks.length === 0) return <p className="text-t3">Aucun contenu pour cet article.</p>;
-
+/** Renders a validated block document — shared by the public page and the email preview. */
+export function ArticleBlocks({ blocks }: { blocks: ArticleBlock[] }) {
+  if (!blocks.length) return <p className="text-t3">Aucun contenu.</p>;
   return (
     <article className="prose prose-invert prose-gold max-w-none space-y-6">
       {blocks.map((block, index) => {
@@ -105,4 +92,23 @@ export default function ArticleRenderer({ resource }: { resource: ResourceSummar
       })}
     </article>
   );
+}
+
+export default function ArticleRenderer({ resource }: { resource: ResourceSummary }) {
+  const body = resource.body as ArticleBody;
+
+  if (hasHtml(body)) {
+    return (
+      <article
+        className="prose prose-invert prose-gold max-w-none article-body"
+        dangerouslySetInnerHTML={{ __html: body.html }}
+      />
+    );
+  }
+
+  if (!Array.isArray(body)) return <p className="text-t3">Aucun contenu pour cet article.</p>;
+  const blocks = body.filter(isBlock);
+  if (blocks.length === 0) return <p className="text-t3">Aucun contenu pour cet article.</p>;
+
+  return <ArticleBlocks blocks={blocks} />;
 }

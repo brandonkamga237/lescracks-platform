@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import {
   Bold, ChevronDown, ChevronUp, Code, Heading1, Heading2, ImagePlus,
   Italic, Link2, List, Minus, Plus, Quote, Trash2, Type,
@@ -10,6 +10,11 @@ import type { ArticleBlock } from '@/services/types';
 interface BlockEditorProps {
   value: ArticleBlock[];
   onChange: (blocks: ArticleBlock[]) => void;
+}
+
+/** Lets the host page drop a token (a {{variable}}, a snippet) where the writer's cursor is. */
+export interface BlockEditorHandle {
+  insertText: (token: string) => void;
 }
 
 type MenuInsert =
@@ -69,12 +74,32 @@ export function htmlToBlocks(html: string): ArticleBlock[] {
 
 const AREA = 'w-full resize-none border-0 bg-transparent p-0 text-t1 placeholder:text-t4 focus:outline-none focus:ring-0';
 
-export default function BlockEditor({ value, onChange }: BlockEditorProps) {
+const BlockEditor = forwardRef<BlockEditorHandle, BlockEditorProps>(function BlockEditor({ value, onChange }, ref) {
   const blocks = value;
-  const [focus, setFocus] = useState(-1);
+  const [focus, setFocusState] = useState(-1);
+  const focusRef = useRef(-1);
+  const setFocus = (index: number) => {
+    focusRef.current = index;
+    setFocusState(index);
+  };
   const [menuAt, setMenuAt] = useState<number | null>(null);
   const [linkFor, setLinkFor] = useState<number | null>(null);
   const refs = useRef(new Map<number, HTMLTextAreaElement | HTMLInputElement>());
+
+  useImperativeHandle(ref, () => ({
+    insertText: (token: string) => {
+      // No focus: drop the token at the end of the last text block.
+      const index = focusRef.current >= 0 ? focusRef.current
+        : blocks.reduce((last, b, i) => ('text' in b ? i : last), -1);
+      const area = refs.current.get(index);
+      const block = blocks[index];
+      if (!block || !('text' in block)) return;
+      const start = area ? (area.selectionStart ?? block.text.length) : block.text.length;
+      const end = area ? (area.selectionEnd ?? start) : start;
+      update(index, { ...block, text: block.text.slice(0, start) + token + block.text.slice(end) });
+      requestAnimationFrame(() => area?.focus());
+    },
+  }));
 
   const setRef = (index: number) => (el: HTMLTextAreaElement | HTMLInputElement | null) => {
     if (el) {
@@ -373,4 +398,6 @@ export default function BlockEditor({ value, onChange }: BlockEditorProps) {
       </p>
     </div>
   );
-}
+});
+
+export default BlockEditor;

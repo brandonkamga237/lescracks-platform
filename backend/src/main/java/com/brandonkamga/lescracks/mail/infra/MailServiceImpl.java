@@ -4,6 +4,7 @@ import com.brandonkamga.lescracks.event.domain.Event;
 import com.brandonkamga.lescracks.mail.domain.MailService;
 import com.brandonkamga.lescracks.resource.domain.Resource;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
@@ -18,13 +19,16 @@ import java.util.Locale;
 @Service
 public class MailServiceImpl implements MailService {
     private final JavaMailSender sender;
+    private final EmailBodyRenderer bodies;
     private final String frontendUrl;
     private final String from;
 
     public MailServiceImpl(JavaMailSender sender,
+                           EmailBodyRenderer bodies,
                            @org.springframework.beans.factory.annotation.Value("${app.site.url:http://localhost:5173}") String frontendUrl,
                            @org.springframework.beans.factory.annotation.Value("${app.mail.from:LesCracks <contact@lescracks.com>}") String from) {
         this.sender = sender;
+        this.bodies = bodies;
         this.frontendUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
         this.from = from;
     }
@@ -65,12 +69,13 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
-    public void sendBroadcast(String recipient, String subject, String message,
+    public void sendBroadcast(String recipient, String subject, JsonNode body,
                               String firstName, String lastName) {
-        String personalized = message.replace("{{firstName}}", firstName == null ? "" : escapeHtml(firstName))
-                .replace("{{lastName}}", lastName == null ? "" : escapeHtml(lastName))
-                .replace("{{email}}", recipient);
-        sendHtml(recipient, subject, wrapper(personalized));
+        String html = bodies.render(body, text -> text
+                .replace("{{firstName}}", firstName == null ? "" : firstName)
+                .replace("{{lastName}}", lastName == null ? "" : lastName)
+                .replace("{{email}}", recipient));
+        sendHtml(recipient, subject, wrapper(html));
     }
 
     private SimpleMailMessage message(String recipient) {
@@ -106,29 +111,48 @@ public class MailServiceImpl implements MailService {
         return frontendUrl + "/" + coverImage;
     }
 
+    /**
+     * The fixed LesCracks frame. Every email — broadcast, notification, verification — is this
+     * envelope with a different body slot. Admins never touch it: identity is not personalisable.
+     */
     private String wrapper(String body) {
         return """
                 <!DOCTYPE html>
                 <html lang="fr">
                 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-                <body style="margin:0;padding:0;background-color:#0f0f0f;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#e5e5e5;">
-                  <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" border="0" style="background-color:#0f0f0f;padding:40px 0;">
+                <body style="margin:0;padding:0;background-color:#0a0a0a;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#e5e5e5;">
+                  <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" border="0" style="background-color:#0a0a0a;padding:48px 16px;">
                     <tr>
                       <td align="center">
-                        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="background-color:#171717;border-radius:16px;overflow:hidden;max-width:600px;width:100%%;">
+                        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="background-color:#141414;border-radius:20px;overflow:hidden;max-width:600px;width:100%%;">
                           <tr>
-                            <td style="padding:40px 40px 24px 40px;text-align:center;border-bottom:1px solid #2a2a2a;">
-                              <span style="color:#d4af37;font-size:14px;letter-spacing:0.15em;text-transform:uppercase;font-weight:600;">LesCracks</span>
+                            <td style="height:3px;background-color:#d4af37;font-size:0;line-height:0;">&nbsp;</td>
+                          </tr>
+                          <tr>
+                            <td style="padding:36px 48px 28px 48px;text-align:center;">
+                              <p style="margin:0;color:#d4af37;font-size:22px;letter-spacing:0.22em;text-transform:uppercase;font-weight:700;">LesCracks</p>
+                              <p style="margin:10px 0 0 0;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#737373;">Ressources · Événements · Communauté</p>
                             </td>
                           </tr>
                           <tr>
-                            <td style="padding:40px;">
+                            <td style="padding:8px 48px 48px 48px;">
                               %s
                             </td>
                           </tr>
                           <tr>
-                            <td style="padding:24px 40px;text-align:center;background-color:#111111;border-top:1px solid #2a2a2a;">
-                              <p style="margin:0;font-size:12px;color:#525252;">LesCracks · Deviens aussi un crack de la tech.</p>
+                            <td style="padding:28px 48px;text-align:center;background-color:#101010;border-top:1px solid #262626;">
+                              <p style="margin:0 0 14px 0;">
+                                <a href="%s" style="color:#d4af37;font-size:12px;font-weight:600;letter-spacing:0.06em;text-decoration:none;text-transform:uppercase;">lescracks.com</a>
+                                <span style="color:#3f3f3f;font-size:12px;">&nbsp;·&nbsp;</span>
+                                <a href="%s/evenements" style="color:#a3a3a3;font-size:12px;text-decoration:none;">Événements</a>
+                                <span style="color:#3f3f3f;font-size:12px;">&nbsp;·&nbsp;</span>
+                                <a href="%s/ressources" style="color:#a3a3a3;font-size:12px;text-decoration:none;">Ressources</a>
+                              </p>
+                              <p style="margin:0 0 14px 0;font-size:12px;font-style:italic;color:#d4af37;">Deviens aussi un crack de la tech.</p>
+                              <p style="margin:0;font-size:11px;line-height:1.6;color:#525252;">
+                                Tu reçois cet email parce que tu es inscrit à la lettre LesCracks.<br />
+                                Une question ? Réponds directement à cet email — on lit tout.
+                              </p>
                             </td>
                           </tr>
                         </table>
@@ -137,7 +161,7 @@ public class MailServiceImpl implements MailService {
                   </table>
                 </body>
                 </html>
-                """.formatted(body);
+                """.formatted(body, frontendUrl, frontendUrl, frontendUrl);
     }
 
     private String resourceHtml(String title, String description, String url, String cover) {
