@@ -56,10 +56,6 @@ export default function About() {
           description="Une plateforme pour apprendre la tech en français. En accès libre, à ton rythme, entouré."
         />
 
-        <div className="mb-14 aspect-[21/9] overflow-hidden rounded-lg border border-line-soft/60 bg-noir-900">
-          <img src="/images/community-2.jpg" alt="La communauté LesCracks réunie en atelier" className="h-full w-full object-cover" loading="lazy" />
-        </div>
-
         <ul className="grid gap-x-14 sm:grid-cols-2">
           {ACTIONS.map(({ index, icon: Icon, title, body, to, link, ...rest }) => {
             const external = 'external' in rest && rest.external;
