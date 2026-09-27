@@ -3,6 +3,8 @@ package com.brandonkamga.lescracks.newsletter.domain;
 import com.brandonkamga.lescracks.event.domain.Event;
 import com.brandonkamga.lescracks.resource.domain.Resource;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import java.util.List;
 
 public interface NewsletterService {
@@ -14,6 +16,6 @@ public interface NewsletterService {
     NewsletterSubscription subscribeById(Long userId);
     void notifyEventSubscribers(Event event);
     void notifyResourceSubscribers(Resource resource);
-    int broadcast(String subject, String message);
+    int broadcast(String subject, JsonNode body);
     List<NewsletterCampaign> campaigns();
 }

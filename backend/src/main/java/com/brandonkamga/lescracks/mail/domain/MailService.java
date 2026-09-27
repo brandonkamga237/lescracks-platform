@@ -3,6 +3,8 @@ package com.brandonkamga.lescracks.mail.domain;
 import com.brandonkamga.lescracks.event.domain.Event;
 import com.brandonkamga.lescracks.resource.domain.Resource;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 public interface MailService {
     void sendPasswordReset(String recipient, String token);
 
@@ -12,6 +14,6 @@ public interface MailService {
 
     void sendResourceNotification(String recipient, Resource resource);
 
-    void sendBroadcast(String recipient, String subject, String message, String firstName,
+    void sendBroadcast(String recipient, String subject, JsonNode body, String firstName,
                        String lastName);
 }

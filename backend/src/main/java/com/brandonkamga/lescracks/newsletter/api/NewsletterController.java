@@ -62,7 +62,7 @@ public class NewsletterController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Integer> broadcast(@Valid @RequestBody BroadcastRequest request) {
         return ResponseEntity.status(HttpStatus.ACCEPTED)
-                .body(newsletter.broadcast(request.subject().trim(), request.message().trim()));
+                .body(newsletter.broadcast(request.subject().trim(), request.body()));
     }
 
     @GetMapping("/admin/campaigns")

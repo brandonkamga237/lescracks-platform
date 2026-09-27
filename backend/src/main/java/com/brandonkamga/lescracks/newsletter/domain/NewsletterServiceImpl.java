@@ -12,6 +12,8 @@ import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -124,15 +126,15 @@ public class NewsletterServiceImpl implements NewsletterService {
     }
 
     @Override
-    public int broadcast(String subject, String message) {
+    public int broadcast(String subject, JsonNode body) {
         var active = subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED);
         active.forEach(subscription -> {
             User user = subscription.getUser();
-            mail.sendBroadcast(user.getEmail(), subject, message, user.getFirstName(), user.getLastName());
+            mail.sendBroadcast(user.getEmail(), subject, body, user.getFirstName(), user.getLastName());
         });
         campaigns.save(NewsletterCampaign.builder()
                 .subject(subject)
-                .message(message)
+                .message(body.toString())
                 .recipientCount(active.size())
                 .build());
         return active.size();
