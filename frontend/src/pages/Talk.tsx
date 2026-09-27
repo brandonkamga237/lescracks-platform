@@ -89,12 +89,8 @@ export default function Talk() {
               {latest && <TalkSpotlight video={latest} />}
               {episodes.length > 0 && (
                 <ul className={latest ? 'mt-12' : ''}>
-                  {episodes.map((video, i) => (
-                    <EpisodeRow
-                      key={video.id}
-                      video={video}
-                      index={`ÉP. ${String(total - ((page - 1) * 12 + (latest ? i + 1 : i))).padStart(2, '0')}`}
-                    />
+                  {episodes.map((video) => (
+                    <EpisodeRow key={video.id} video={video} />
                   ))}
                 </ul>
               )}

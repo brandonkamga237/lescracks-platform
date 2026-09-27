@@ -8,15 +8,13 @@ const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' });
 
 interface EpisodeRowProps {
   video: TalkVideo;
-  /** Folio label, e.g. "ÉP. 04". */
-  index: string;
 }
 
 /**
- * One episode in the playlist: number, thumbnail, title and guest.
+ * One episode in the playlist: thumbnail, title and guest.
  * It opens the YouTube video in a new tab — talks live there, not on the site.
  */
-function EpisodeRow({ video, index }: EpisodeRowProps) {
+function EpisodeRow({ video }: EpisodeRowProps) {
   const [failedThumb, setFailedThumb] = useState(false);
   const thumbnail = youtubeThumbnail(video.youtubeUrl);
   const meta = [
@@ -31,9 +29,8 @@ function EpisodeRow({ video, index }: EpisodeRowProps) {
         href={youtubeWatchUrl(video.youtubeUrl)}
         target="_blank"
         rel="noopener noreferrer"
-        className="group grid grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-x-4 border-t border-line-soft/50 px-1 py-5 transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[3.5rem_9rem_minmax(0,1fr)_auto] sm:gap-x-6"
+        className="group grid grid-cols-[6rem_minmax(0,1fr)_auto] items-center gap-x-4 border-t border-line-soft/50 px-1 py-5 transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[9rem_minmax(0,1fr)_auto] sm:gap-x-6"
       >
-        <span className="kicker-muted hidden sm:block" aria-hidden>{index}</span>
         <span className="relative aspect-[16/9] overflow-hidden rounded border border-line-soft/60 bg-noir-900">
           {thumbnail && !failedThumb ? (
             <img src={thumbnail} alt="" loading="lazy" onError={() => setFailedThumb(true)} className="h-full w-full object-cover" />

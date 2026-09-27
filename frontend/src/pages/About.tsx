@@ -7,7 +7,6 @@ import { PageHeader, Section } from '@/components/layout/Page';
 
 const ACTIONS = [
   {
-    index: '01',
     icon: BookOpen,
     title: 'La bibliothèque',
     body: 'Des vidéos, des ebooks et des articles en français, en accès libre. Tu choisis un sujet, tu avances à ton rythme.',
@@ -15,7 +14,6 @@ const ACTIONS = [
     link: 'Explorer la bibliothèque',
   },
   {
-    index: '02',
     icon: CalendarDays,
     title: 'Les rendez-vous',
     body: 'Ateliers, webinaires, bootcamps et conférences pour pratiquer en groupe et poser tes questions en direct.',
@@ -23,7 +21,6 @@ const ACTIONS = [
     link: 'Voir l’agenda',
   },
   {
-    index: '03',
     icon: Podcast,
     title: 'Le Talk',
     body: 'Des conversations vidéo avec celles et ceux qui construisent la tech africaine : des parcours réels, pas des légendes.',
@@ -31,7 +28,6 @@ const ACTIONS = [
     link: 'Regarder les épisodes',
   },
   {
-    index: '04',
     icon: MessageCircle,
     title: 'La communauté',
     body: 'Apprendre seul, c’est difficile. La conversation continue sur WhatsApp, entre personnes qui partagent le même objectif.',
@@ -57,18 +53,15 @@ export default function About() {
         />
 
         <ul className="grid gap-x-14 sm:grid-cols-2">
-          {ACTIONS.map(({ index, icon: Icon, title, body, to, link, ...rest }) => {
+          {ACTIONS.map(({ icon: Icon, title, body, to, link, ...rest }) => {
             const external = 'external' in rest && rest.external;
             return (
-            <li key={index} className="border-t border-line-soft/50 py-8">
+            <li key={title} className="border-t border-line-soft/50 py-8">
               <div className="flex items-center gap-4">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded border border-gold-400/25 bg-gold-400/10 text-gold-400">
                   <Icon className="h-5 w-5" aria-hidden />
                 </span>
-                <div className="flex items-baseline gap-3">
-                  <span className="kicker-muted" aria-hidden>{index}</span>
-                  <h2 className="font-display text-2xl font-medium text-t1">{title}</h2>
-                </div>
+                <h2 className="font-display text-2xl font-medium text-t1">{title}</h2>
               </div>
               <p className="mt-4 max-w-md text-sm leading-relaxed text-t3">{body}</p>
               {external ? (
