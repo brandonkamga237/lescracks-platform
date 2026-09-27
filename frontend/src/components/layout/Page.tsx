@@ -66,23 +66,16 @@ interface PageHeaderProps {
   title: string;
   /** Small gold label above the title. Positions the page, never repeats the title. */
   eyebrow?: string;
-  /** Folio number — the editorial signature, e.g. "01". */
-  index?: string;
   description?: string;
   /** Result count or status, aligned with the title on wide screens. */
   meta?: ReactNode;
   actions?: ReactNode;
 }
 
-export function PageHeader({ title, eyebrow, index, description, meta, actions }: PageHeaderProps) {
+export function PageHeader({ title, eyebrow, description, meta, actions }: PageHeaderProps) {
   return (
     <header className="mb-10 sm:mb-14">
-      {(eyebrow || index) && (
-        <p className="mb-5 flex items-baseline gap-3">
-          {index && <span className="kicker-muted">{index}</span>}
-          {eyebrow && <span className="kicker">{eyebrow}</span>}
-        </p>
-      )}
+      {eyebrow && <p className="kicker mb-5">{eyebrow}</p>}
       <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
         <div className="min-w-0">
           <h1 className="font-display text-4xl font-medium leading-[1.05] tracking-tight text-t1 sm:text-6xl">{title}</h1>
@@ -101,9 +94,7 @@ export function PageHeader({ title, eyebrow, index, description, meta, actions }
 
 interface SectionHeaderProps {
   title: string;
-  /** Folio number — e.g. "02". Renders above the title with the kicker. */
-  index?: string;
-  /** Optional gold label next to the folio number. */
+  /** Optional gold label above the title. */
   eyebrow?: string;
   description?: string;
   /** Usually a "see everything" link. */
@@ -111,15 +102,10 @@ interface SectionHeaderProps {
   id?: string;
 }
 
-export function SectionHeader({ title, index, eyebrow, description, action, id }: SectionHeaderProps) {
+export function SectionHeader({ title, eyebrow, description, action, id }: SectionHeaderProps) {
   return (
     <div className="mb-10 sm:mb-12">
-      {(index || eyebrow) && (
-        <p className="mb-4 flex items-baseline gap-3">
-          {index && <span className="kicker-muted">{index}</span>}
-          {eyebrow && <span className="kicker">{eyebrow}</span>}
-        </p>
-      )}
+      {eyebrow && <p className="kicker mb-4">{eyebrow}</p>}
       <div className="flex flex-wrap items-baseline justify-between gap-x-10 gap-y-3 border-b border-line-soft/50 pb-6">
         <div className="min-w-0">
           <h2 id={id} className="font-display text-3xl font-medium tracking-tight text-t1 sm:text-4xl">{title}</h2>

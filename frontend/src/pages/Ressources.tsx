@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/common/Skeleton';
 import { EmptyState, ErrorState } from '@/components/common/States';
 import Layout from '@/components/layout/Layout';
 import { PageHeader, Section, Toolbar } from '@/components/layout/Page';
-import ResourceIndexItem from '@/components/resources/ResourceIndexItem';
+import ResourceCard from '@/components/resources/ResourceCard';
 import ResourceSpotlight from '@/components/resources/ResourceSpotlight';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/services/api';
@@ -182,7 +182,9 @@ export default function Ressources() {
           {catalogue.loading && visible.length === 0 && (
             <div role="status" className="space-y-5">
               {discovery && <Skeleton className="aspect-[16/10] sm:aspect-[21/9]" />}
-              {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-16" />)}
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {[0, 1, 2].map((i) => <Skeleton key={i} className="aspect-[16/10]" />)}
+              </div>
               <span className="sr-only">Chargement du contenu…</span>
             </div>
           )}
@@ -203,9 +205,9 @@ export default function Ressources() {
           {visible.length > 0 && !catalogue.error && (
             <div className={`transition-opacity ${catalogue.loading ? 'opacity-60' : ''}`}>
               {spotlight && <ResourceSpotlight resource={spotlight} kicker="Dernière parution" cataloguePath={cataloguePath} />}
-              <ul className={spotlight ? 'mt-12' : ''}>
-                {indexItems.map((resource, i) => (
-                  <ResourceIndexItem key={resource.id} resource={resource} index={String(i + (spotlight ? 2 : 1)).padStart(2, '0')} cataloguePath={cataloguePath} />
+              <ul className={`grid gap-5 sm:grid-cols-2 lg:grid-cols-3 ${spotlight ? 'mt-12' : ''}`}>
+                {indexItems.map((resource) => (
+                  <ResourceCard key={resource.id} resource={resource} cataloguePath={cataloguePath} />
                 ))}
               </ul>
               <Pagination page={page} totalPages={catalogue.data?.totalPages ?? 0} onPageChange={(value) => setParam('page', value === 1 ? null : String(value))} />
