@@ -104,6 +104,8 @@ services:
       # and the API rejects every token it signs.
       KC_PROXY_HEADERS: xforwarded
       KC_HEALTH_ENABLED: "true"
+      # Keycloak's /metrics on the management port feeds the prometheus keycloak job.
+      KC_METRICS_ENABLED: "true"
     volumes:
       - ./keycloak/realm:/opt/keycloak/data/import:ro
     depends_on:
@@ -151,7 +153,7 @@ services:
     volumes:
       - backend_logs:/var/log/lescracks
     healthcheck:
-      test:         ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      test:         ["CMD", "wget", "-qO-", "http://localhost:9090/actuator/health"]
       interval:     30s
       timeout:      10s
       retries:      5
@@ -203,6 +205,22 @@ services:
     networks:
       - lescracks-internal
       - traefik-public
+
+  # ---------------------------------------------------------------------------
+  # Postgres exporter - database metrics for the prometheus postgres job
+  # Internal only: never routed.
+  # ---------------------------------------------------------------------------
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: lescracks-postgres-exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: postgresql://${DB_USERNAME}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - lescracks-internal
 
   # ---------------------------------------------------------------------------
   # Prometheus - metrics storage

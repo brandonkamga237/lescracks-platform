@@ -18,6 +18,9 @@ public interface StorageService {
 
     void delete(String key);
 
+    /** Cheap liveness check for the /actuator/health indicator. */
+    boolean reachable();
+
     /** A stored object and enough about it to serve it back honestly. */
     record StoredObject(InputStream content, String contentType, long size) {
     }

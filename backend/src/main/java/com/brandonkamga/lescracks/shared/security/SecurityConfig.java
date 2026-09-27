@@ -45,7 +45,7 @@ public class SecurityConfig {
                     .authenticationEntryPoint(errors)
                     .accessDeniedHandler(errors))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/actuator/health", "/error").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/prometheus", "/error").permitAll()
                 .requestMatchers("/api/admin/auth/login", "/api/admin/auth/logout").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/seo/**", "/api/sitemap.xml").permitAll()

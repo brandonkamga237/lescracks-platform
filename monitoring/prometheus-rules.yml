@@ -1,4 +1,34 @@
 groups:
+  - name: lescracks-availability
+    interval: 15s
+    rules:
+      - alert: BackendDown
+        expr: up{job="lescracks-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backend injoignable"
+          description: "Prometheus ne parvient plus à scraper l'API depuis plus d'une minute."
+
+      - alert: KeycloakDown
+        expr: up{job="keycloak"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Keycloak injoignable"
+          description: "Le fournisseur d'identité ne répond plus : connexions OIDC bloquées."
+
+      - alert: PostgresDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL injoignable"
+          description: "L'exporteur ne répond plus : la base est probablement tombée."
+
   - name: lescracks-security
     interval: 15s
     rules:
