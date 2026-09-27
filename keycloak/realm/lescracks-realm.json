@@ -64,11 +64,19 @@
       "publicClient": false
     }
   ],
+  "authenticatorConfig": [
+    {
+      "alias": "review profile config",
+      "config": {
+        "update.profile.on.first.login": "off"
+      }
+    }
+  ],
   "identityProviders": [
     {
       "alias": "google",
       "providerId": "google",
-      "enabled": false,
+      "enabled": true,
       "trustEmail": true,
       "config": {
         "clientId": "",
@@ -79,7 +87,7 @@
     {
       "alias": "github",
       "providerId": "github",
-      "enabled": false,
+      "enabled": true,
       "trustEmail": true,
       "config": {
         "clientId": "",
