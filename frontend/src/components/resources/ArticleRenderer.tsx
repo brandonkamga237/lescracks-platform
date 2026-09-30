@@ -24,7 +24,7 @@ function InlineText({ text }: { text: string }) {
           return <em key={i}>{part.slice(1, -1)}</em>;
         }
         if (part.startsWith('`') && part.endsWith('`') && part.length > 2) {
-          return <code key={i} className="rounded bg-noir-800 px-1.5 py-0.5 font-mono text-[0.9em] text-gold-300">{part.slice(1, -1)}</code>;
+          return <code key={i} className="rounded bg-noir-800 px-1.5 py-0.5 font-mono text-[0.9em] text-gold-ink">{part.slice(1, -1)}</code>;
         }
         const link = part.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
         if (link) {

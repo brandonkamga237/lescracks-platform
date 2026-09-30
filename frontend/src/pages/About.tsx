@@ -61,7 +61,7 @@ export default function About() {
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded border border-gold-400/25 bg-gold-400/10 text-gold-ink">
                   <Icon className="h-5 w-5" aria-hidden />
                 </span>
-                <h2 className="font-display text-2xl font-medium text-t1">{title}</h2>
+                <h2 className="font-display text-2xl font-bold text-t1">{title}</h2>
               </div>
               <p className="mt-4 max-w-md text-sm leading-relaxed text-t3">{body}</p>
               {external ? (
@@ -81,7 +81,7 @@ export default function About() {
         <div className="mt-14 flex items-center gap-5 border-t border-line-soft pt-8">
           <img src="/images/photo-brandon.jpeg" alt="Brandon Kamga, fondateur de LesCracks" className="h-16 w-16 shrink-0 rounded-lg border border-line-soft object-cover" loading="lazy" />
           <div className="min-w-0">
-            <p className="font-display text-base font-medium text-t1">Brandon Kamga</p>
+            <p className="font-display text-base font-bold text-t1">Brandon Kamga</p>
             <p className="mt-1 text-sm leading-relaxed text-t3">
               Il a lancé LesCracks et lit tout :{' '}
               <a href="mailto:contact@lescracks.com" className="text-gold-ink underline-offset-4 transition-colors hover:text-gold-ink hover:underline">contact@lescracks.com</a>

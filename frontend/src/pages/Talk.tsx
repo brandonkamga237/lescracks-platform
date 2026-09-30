@@ -48,20 +48,22 @@ export default function Talk() {
         url="/talk"
       />
 
-      <Section spacing="tight">
+      <Section tone="light" spacing="tight">
         <PageHeader
           eyebrow="Sur YouTube"
           title="Le Talk"
           description="Des conversations avec celles et ceux qui construisent la tech africaine."
           meta={!talks.loading && !talks.error ? `${total} épisode${total > 1 ? 's' : ''}` : undefined}
           actions={
-            <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" className="btn-secondary !px-4 !py-2 !text-sm">
+            <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" className="btn-primary">
               <Youtube className="h-4 w-4" aria-hidden />
               Suivre la chaîne
             </a>
           }
         />
+      </Section>
 
+      <Section>
         <div aria-label="Épisodes" aria-live="polite" aria-busy={talks.loading} role="region">
           {talks.loading && list.length === 0 && (
             <div role="status" className="space-y-5">
@@ -99,11 +101,18 @@ export default function Talk() {
           )}
         </div>
 
-        <p className="mt-14 border-t border-line-soft pt-8 text-sm text-t4">
-          Tu construis quelque chose et tu veux en parler dans un épisode ?{' '}
-          <a href="mailto:contact@lescracks.com" className="text-t3 underline underline-offset-4 transition-colors hover:text-gold-ink">Écris-nous</a>.
-          {' '}Ou <Link to="/ressources" className="text-t3 underline underline-offset-4 transition-colors hover:text-gold-ink">explore la bibliothèque</Link> en attendant.
-        </p>
+      </Section>
+
+      <Section tone="light">
+        <div className="flex flex-col items-start gap-8 lg:flex-row lg:items-end lg:justify-between">
+          <h2 className="max-w-2xl font-display text-4xl font-bold leading-[0.94] tracking-tight text-t1 sm:text-5xl lg:text-6xl lg:leading-[0.9]">
+            Tu construis quelque chose ? Viens en parler.
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            <a href="mailto:contact@lescracks.com" className="btn-primary">Écris-nous</a>
+            <Link to="/ressources" className="btn-secondary">Explorer la bibliothèque</Link>
+          </div>
+        </div>
       </Section>
     </Layout>
   );

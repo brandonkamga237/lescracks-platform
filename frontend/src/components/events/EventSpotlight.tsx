@@ -30,17 +30,17 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
   const TypeIcon = TYPE_ICON[event.type];
 
   return (
-    <article className="grid gap-8 border-b border-line-soft pb-12 sm:pb-16 lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-14">
-      <div aria-hidden className="lg:border-r lg:border-line-soft lg:pr-10">
+    <article className="grid gap-8 border-b border-line pb-12 sm:pb-16 lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-14">
+      <div aria-hidden className="lg:border-r lg:border-line lg:pr-10">
         {hasDate ? (
           <>
-            <span className="block font-display text-7xl font-medium leading-[0.95] text-t1 lg:text-8xl">
+            <span className="block font-display text-7xl font-bold leading-[0.88] tracking-tight text-t1 lg:text-8xl">
               {start.getDate()}
             </span>
-            <span className="mt-3 block font-mono text-xs uppercase tracking-[0.2em] text-gold-ink">
+            <span className="mt-3 block kicker">
               {monthYearFormat.format(start)}
             </span>
-            <span className="mt-1.5 block font-mono text-[11px] uppercase tracking-[0.16em] text-t4">
+            <span className="mt-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-t4">
               {weekdayFormat.format(start)}  ·  {timeFormat.format(start)}
             </span>
           </>
@@ -53,11 +53,11 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
         <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
           <span className="kicker">{kicker}</span>
           <span className="kicker-muted inline-flex items-center gap-2">
-            <TypeIcon className="h-3.5 w-3.5 text-gold-400/70" aria-hidden />
+            <TypeIcon className="h-3.5 w-3.5 text-gold-ink" aria-hidden />
             {meta}
           </span>
         </p>
-        <h3 className="mt-5 max-w-3xl break-words font-display text-3xl font-medium leading-[1.1] tracking-tight text-t1 sm:text-5xl">
+        <h3 className="mt-5 max-w-3xl break-words font-display text-4xl font-bold leading-[0.98] tracking-tight text-t1 sm:text-5xl xl:text-[3.25rem] xl:leading-[0.94]">
           <Link
             to={eventPath(event)}
             state={{ cataloguePath }}
@@ -66,13 +66,13 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
             {event.title}
           </Link>
         </h3>
-        <p className="mt-5 line-clamp-3 max-w-2xl text-base leading-relaxed text-t3">
+        <p className="mt-6 line-clamp-3 max-w-2xl text-base leading-normal text-t3">
           {event.description}
         </p>
         <Link
           to={eventPath(event)}
           state={{ cataloguePath }}
-          className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-ink"
+          className="btn-primary mt-8"
         >
           Voir le rendez-vous
           <ArrowRight className="h-4 w-4" aria-hidden />

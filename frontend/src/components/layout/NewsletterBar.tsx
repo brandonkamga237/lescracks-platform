@@ -68,7 +68,7 @@ export default function NewsletterBar() {
             type="button"
             disabled={busy}
             onClick={() => void subscribe()}
-            className="font-medium text-gold-300 underline underline-offset-4 transition-colors hover:text-gold-ink disabled:opacity-50"
+            className="font-medium text-gold-ink underline underline-offset-4 transition-colors hover:text-gold-ink disabled:opacity-50"
           >
             {busy ? 'Abonnement…' : 'M’abonner à la newsletter'}
           </button>
@@ -95,7 +95,7 @@ export default function NewsletterBar() {
           </form>
         )}
         {!isSignedIn && emailSuccess && (
-          <span className="font-medium text-gold-300">Merci, tu es bien inscrit.</span>
+          <span className="font-medium text-gold-ink">Merci, tu es bien inscrit.</span>
         )}
         {failure && <span role="alert" className="text-red-300">{failure}</span>}
         <button type="button" onClick={() => setVisible(false)} aria-label="Masquer ce message" className="ml-1 rounded px-1 text-t4 transition-colors hover:text-t1">×</button>

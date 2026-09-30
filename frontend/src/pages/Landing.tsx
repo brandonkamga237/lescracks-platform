@@ -218,7 +218,7 @@ export default function Landing() {
           <ul className="space-y-5 self-center">
             {WHY.map((reason) => (
               <li key={reason} className="flex gap-4 text-base leading-normal text-t1 sm:text-lg">
-                <Check className="mt-1 h-5 w-5 shrink-0 text-gold-300" strokeWidth={3} aria-hidden />
+                <Check className="mt-1 h-5 w-5 shrink-0 text-gold-ink" strokeWidth={3} aria-hidden />
                 {reason}
               </li>
             ))}

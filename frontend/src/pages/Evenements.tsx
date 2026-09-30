@@ -57,7 +57,7 @@ export default function Evenements() {
   return (
     <Layout>
       <SEO title="Événements et ateliers tech" description="Bootcamps, ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble." url="/evenements" />
-      <Section spacing="tight">
+      <Section tone="light" spacing="tight">
         <PageHeader
           eyebrow="En ligne et sur place"
           title="Agenda"
@@ -69,12 +69,14 @@ export default function Evenements() {
           <FilterChips legend="Type de rendez-vous" allLabel="Tous les types" options={types} value={type} onChange={(value) => setParam('type', value ?? null)} />
           <FilterChips legend="Format" allLabel="Tous les formats" options={formats} value={format} onChange={(value) => setParam('format', value ?? null)} />
           {hasFilters && (
-            <button type="button" onClick={() => setParams({})} className="inline-flex min-h-11 items-center gap-1.5 pb-3 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-t3 transition-colors hover:text-t1">
+            <button type="button" onClick={() => setParams({})} className="inline-flex min-h-11 items-center gap-1.5 pb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-t3 transition-colors hover:text-t1">
               <X className="h-4 w-4" aria-hidden />Effacer
             </button>
           )}
         </Toolbar>
+      </Section>
 
+      <Section>
         <div aria-label="Événements" aria-live="polite" aria-busy={events.loading} role="region">
           {events.loading && list.length === 0 && (
             <div role="status" className="space-y-5">
@@ -108,7 +110,7 @@ export default function Evenements() {
                 </div>
               )}
               {agenda.length > 0 && (
-                <ul>
+                <ul className="border-b border-line">
                   {agenda.map((event) => <AgendaItem key={event.id} event={event} cataloguePath={cataloguePath} />)}
                 </ul>
               )}
@@ -120,12 +122,12 @@ export default function Evenements() {
 
       {/* The archive: quiet, unfiltered view only — the past never competes with what's next. */}
       {discovery && !!past.data?.content.length && (
-        <Section bordered spacing="tight" aria-labelledby="past-events-heading">
-          <div className="mb-8 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-b border-line-soft pb-6">
-            <h2 id="past-events-heading" className="font-display text-2xl font-medium tracking-tight text-t2">Déjà passés</h2>
-            <span className="kicker-muted">Les rendez-vous précédents</span>
+        <Section tone="light" aria-labelledby="past-events-heading">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+            <h2 id="past-events-heading" className="font-display text-4xl font-bold leading-[0.96] tracking-tight text-t1 sm:text-5xl">Déjà passés</h2>
+            <span className="label">Les rendez-vous précédents</span>
           </div>
-          <ul aria-label="Événements passés" className="opacity-70">
+          <ul aria-label="Événements passés" className="border-b border-line opacity-80">
             {past.data.content.map((event) => <AgendaItem key={event.id} event={event} cataloguePath={cataloguePath} />)}
           </ul>
         </Section>
