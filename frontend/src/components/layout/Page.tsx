@@ -45,10 +45,12 @@ export function Section({
   muted = false,
   bordered = false,
   bleed = false,
+  tone = 'dark',
   className = '',
   ...rest
 }: SectionProps) {
   const surface = [
+    tone === 'light' ? 'mode-light' : 'bg-black',
     muted ? 'bg-noir-900' : '',
     bordered && tone === 'dark' ? 'border-t border-line-soft' : '',
   ].filter(Boolean).join(' ');
