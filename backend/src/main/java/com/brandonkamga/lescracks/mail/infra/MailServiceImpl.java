@@ -100,7 +100,7 @@ public class MailServiceImpl implements MailService {
 
     private String absoluteImage(String coverImage) {
         if (coverImage == null || coverImage.isBlank()) {
-            return frontendUrl + "/preview.png";
+            return frontendUrl + "/preview.jpg";
         }
         if (coverImage.startsWith("http://") || coverImage.startsWith("https://")) {
             return coverImage;
