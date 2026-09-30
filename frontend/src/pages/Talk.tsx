@@ -48,7 +48,7 @@ export default function Talk() {
         url="/talk"
       />
 
-      <Section tone="raised" spacing="tight">
+      <Section tone="raised" spacing="tight" backdrop="/images/headers/talk.webp">
         <PageHeader
           eyebrow="Sur YouTube"
           title="Le Talk"

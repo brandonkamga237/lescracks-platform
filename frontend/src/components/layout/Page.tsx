@@ -35,6 +35,8 @@ interface SectionProps extends Omit<ComponentPropsWithoutRef<'section'>, 'childr
   bordered?: boolean;
   /** Pure black or a raised black band. The shade change is the separator: no border needed. */
   tone?: 'dark' | 'raised';
+  /** Faint photo behind the band, greyscale so it never competes with the single gold accent. */
+  backdrop?: string;
   /** Escape hatch for full-bleed content that manages its own container. */
   bleed?: boolean;
 }
@@ -46,6 +48,7 @@ export function Section({
   bordered = false,
   bleed = false,
   tone = 'dark',
+  backdrop,
   className = '',
   ...rest
 }: SectionProps) {
@@ -60,8 +63,14 @@ export function Section({
   }
 
   return (
-    <section className={`${surface} ${className}`} {...rest}>
-      <div className={`${CONTAINER} ${SPACING[spacing]}`}>{children}</div>
+    <section className={`${surface} ${backdrop ? 'relative overflow-hidden' : ''} ${className}`} {...rest}>
+      {backdrop && (
+        <>
+          <img src={backdrop} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.16] grayscale" />
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 to-[var(--surface-0)]" />
+        </>
+      )}
+      <div className={`${backdrop ? 'relative ' : ''}${CONTAINER} ${SPACING[spacing]}`}>{children}</div>
     </section>
   );
 }
