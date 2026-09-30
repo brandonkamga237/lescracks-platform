@@ -233,7 +233,7 @@ export default function AdminDashboard() {
           <ul className="grid gap-3 md:grid-cols-2">
             {signals.map((signal) => (
               <li key={signal.key}
-                className={`rounded-2xl border p-5 ${signal.severity === 'warning' ? 'border-gold-400/25 bg-gold-400/[0.04]' : 'border-line-soft bg-noir-900/50'}`}>
+                className={`rounded-2xl border p-5 ${signal.severity === 'warning' ? 'border-gold-400/25 bg-gold-400/[0.04]' : 'border-line-soft bg-noir-900'}`}>
                 <div className="flex items-start gap-3">
                   <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${signal.severity === 'warning' ? 'bg-gold-400/15 text-gold-400' : 'bg-noir-800 text-t3'}`}>
                     {signal.severity === 'warning' ? <AlertTriangle className="h-4 w-4" aria-hidden /> : <Info className="h-4 w-4" aria-hidden />}

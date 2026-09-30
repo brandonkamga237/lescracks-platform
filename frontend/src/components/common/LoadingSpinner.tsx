@@ -68,7 +68,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
             size === 'sm' ? 'text-sm' : 
             size === 'md' ? 'text-base' : 
             size === 'lg' ? 'text-lg' : 'text-xl'
-          } text-gold font-medium ${fullScreen ? 'mt-4' : ''}`}
+          } text-gold-ink font-medium ${fullScreen ? 'mt-4' : ''}`}
         >
           {text}
         </motion.span>

@@ -227,7 +227,7 @@ export default function AdminNewsletter() {
                   <p className="mt-1 text-xs text-t3">{[s.firstName, s.lastName].filter(Boolean).join(' ')}</p>
                 </div>
                 <span
-                  className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${s.status === 'SUBSCRIBED' ? 'border-green-500/30 bg-green-500/10 text-green-400' : 'border-t3/30 bg-t3/10 text-t3'}`}
+                  className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${s.status === 'SUBSCRIBED' ? 'border-green-500/30 bg-green-500/10 text-green-400' : 'border-line bg-noir-800 text-t3'}`}
                 >
                   {statusLabels[s.status]}
                 </span>

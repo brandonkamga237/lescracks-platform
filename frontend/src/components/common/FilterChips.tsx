@@ -24,7 +24,7 @@ export default function FilterChips<T extends string>({
   const entries: Array<[T | undefined, string]> = [[undefined, allLabel], ...options];
 
   return (
-    <fieldset className="flex flex-wrap items-end gap-x-7 border-b border-line-soft/50">
+    <fieldset className="flex flex-wrap items-end gap-x-7 border-b border-line-soft">
       <legend className="sr-only">{legend}</legend>
       {entries.map(([option, label]) => {
         const active = value === option;
@@ -34,8 +34,8 @@ export default function FilterChips<T extends string>({
             type="button"
             aria-pressed={active}
             onClick={() => onChange(option)}
-            className={`relative inline-flex min-h-11 items-center pb-3 font-mono text-[11px] font-medium uppercase tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${
-              active ? 'text-gold-300' : 'text-t3 hover:text-t1'
+            className={`relative inline-flex min-h-11 items-center pb-3 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${
+              active ? 'text-gold-ink' : 'text-t3 hover:text-t1'
             }`}
           >
             {label}

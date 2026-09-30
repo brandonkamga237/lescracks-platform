@@ -27,17 +27,17 @@ export default function VerifyEmail() {
   return <Layout>
     <SEO title="Vérification d’email" description="Confirme ton adresse email pour activer ton compte LesCracks." url="/verifier-email" />
     <div className="mx-auto max-w-lg px-5 py-16 sm:py-24">
-      <section className="rounded-3xl border border-white/10 bg-[#171717] p-6 text-white shadow-2xl sm:p-9">
-        <p className="text-xs font-semibold tracking-wide text-gold-400">LesCracks / Sécurité</p>
-        <h1 className="mt-4 font-display text-3xl font-semibold">Confirmation de ton email</h1>
-        {busy ? <p className="mt-6 flex items-center gap-3 text-sm text-zinc-400"><Loader2 className="h-4 w-4 animate-spin" aria-hidden />Vérification en cours…</p> : verified ? (
-          <div className="mt-6 rounded-xl border border-gold-400/25 p-4 text-sm text-gold-400">
+      <section className="mode-raised rounded-lg p-6 sm:p-9">
+        <p className="kicker">LesCracks / Sécurité</p>
+        <h1 className="mt-4 font-display text-3xl font-bold">Confirmation de ton email</h1>
+        {busy ? <p className="mt-6 flex items-center gap-3 text-sm text-t3"><Loader2 className="h-4 w-4 animate-spin" aria-hidden />Vérification en cours…</p> : verified ? (
+          <div className="mt-6 rounded border border-gold-400/25 p-4 text-sm text-gold-ink">
             Ton adresse email est confirmée. Tu peux maintenant te connecter.
           </div>
         ) : (
-          <div className="mt-6 rounded-xl border border-red-400/20 p-4 text-sm text-red-300">{error || 'Ce lien est invalide ou a expiré.'}</div>
+          <div className="mt-6 rounded border border-red-400/20 p-4 text-sm text-red-600">{error || 'Ce lien est invalide ou a expiré.'}</div>
         )}
-        <Link to="/connexion" replace className="mt-7 block text-center text-sm font-medium text-gold-400 underline-offset-4 hover:underline">Revenir à la connexion</Link>
+        <Link to="/connexion" replace className="mt-7 block text-center text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Revenir à la connexion</Link>
       </section>
     </div>
   </Layout>;

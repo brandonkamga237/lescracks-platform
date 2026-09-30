@@ -93,9 +93,9 @@ export default function Ressources() {
   return (
     <Layout>
       <SEO title="Bibliothèque" description="Ebooks et vidéos pour apprendre la tech en français. Filtre par format, catégorie et sujet." url="/ressources" />
-      <Section spacing="tight">
+      <Section tone="raised" spacing="tight" backdrop="/images/headers/library.jpg">
         <PageHeader
-          eyebrow="Le sommaire"
+          eyebrow="Apprendre à ton rythme"
           title="Bibliothèque"
           description="Vidéos et ebooks pour apprendre la tech, en accès libre."
           meta={!catalogue.loading && !catalogue.error ? `${total} ressource${total > 1 ? 's' : ''}` : undefined}
@@ -103,7 +103,7 @@ export default function Ressources() {
 
         <Toolbar
           lead={
-            <div className="flex items-center gap-3 border-b border-line/60 pb-3 transition-colors focus-within:border-gold-400/60">
+            <div className="flex h-14 items-center gap-3 rounded border border-line px-4 transition-colors focus-within:border-gold-400 focus-within:ring-2 focus-within:ring-gold-400/25">
               <Search className="h-5 w-5 shrink-0 text-t4" aria-hidden />
               <label htmlFor="resource-search" className="sr-only">Rechercher une ressource</label>
               <input
@@ -118,7 +118,7 @@ export default function Ressources() {
                     setParam('q', draft.trim() || null);
                   }
                 }}
-                className="min-w-0 flex-1 bg-transparent font-display text-xl font-medium text-t1 placeholder:text-t4 focus:outline-none sm:text-2xl"
+                className="min-w-0 flex-1 bg-transparent text-base font-medium text-t1 placeholder:text-t4 focus:outline-none sm:text-lg"
               />
             </div>
           }
@@ -135,21 +135,21 @@ export default function Ressources() {
             onClick={() => setRefineOpen((open) => !open)}
             aria-expanded={refineOpen}
             aria-controls="resource-refine"
-            className={`relative inline-flex min-h-11 items-center gap-2 pb-3 font-mono text-[11px] font-medium uppercase tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${refineOpen || refineCount ? 'text-gold-300' : 'text-t3 hover:text-t1'}`}
+            className={`relative inline-flex min-h-11 items-center gap-2 pb-3 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${refineOpen || refineCount ? 'text-gold-ink' : 'text-t3 hover:text-t1'}`}
           >
             <SlidersHorizontal className="h-4 w-4" aria-hidden />
             Affiner
-            {refineCount > 0 && <span className="text-gold-400">({refineCount})</span>}
+            {refineCount > 0 && <span className="text-gold-ink">({refineCount})</span>}
           </button>
           {hasFilters && (
-            <button type="button" onClick={() => navigate('/ressources')} className="inline-flex min-h-11 items-center gap-1.5 pb-3 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-t3 transition-colors hover:text-t1">
+            <button type="button" onClick={() => navigate('/ressources')} className="inline-flex min-h-11 items-center gap-1.5 pb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-t3 transition-colors hover:text-t1">
               <X className="h-4 w-4" aria-hidden />Effacer
             </button>
           )}
         </Toolbar>
 
         {refineOpen && (
-          <div id="resource-refine" className="mb-10 grid gap-4 rounded-lg border border-line-soft/50 bg-noir-900/40 p-5 sm:grid-cols-2 sm:p-6">
+          <div id="resource-refine" className="grid gap-4 rounded border border-line bg-noir-900 p-5 sm:grid-cols-2 sm:p-6">
             <label className="block text-sm font-medium text-t3">
               Catégorie
               <select value={categoryId ?? ''} onChange={(event) => setParam('categoryId', event.target.value || null)} className="input mt-2" disabled={categories.loading || Boolean(categories.error)}>
@@ -171,18 +171,20 @@ export default function Ressources() {
             {(categories.error || tags.error) && (
               <p className="text-sm text-t3 sm:col-span-2">
                 Certains filtres sont indisponibles.{' '}
-                <button type="button" onClick={() => { categories.reload(); tags.reload(); }} className="text-gold-400 underline underline-offset-4">Réessayer</button>
+                <button type="button" onClick={() => { categories.reload(); tags.reload(); }} className="text-gold-ink underline underline-offset-4">Réessayer</button>
               </p>
             )}
           </div>
         )}
+      </Section>
 
+      <Section>
         <div aria-label="Ressources" aria-live="polite" aria-busy={catalogue.loading} role="region">
           {/* Skeleton only before the first payload: a refetch dims the results it replaces. */}
           {catalogue.loading && visible.length === 0 && (
             <div role="status" className="space-y-5">
               {discovery && <Skeleton className="aspect-[16/10] sm:aspect-[21/9]" />}
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {[0, 1, 2].map((i) => <Skeleton key={i} className="aspect-[16/10]" />)}
               </div>
               <span className="sr-only">Chargement du contenu…</span>
@@ -205,7 +207,7 @@ export default function Ressources() {
           {visible.length > 0 && !catalogue.error && (
             <div className={`transition-opacity ${catalogue.loading ? 'opacity-60' : ''}`}>
               {spotlight && <ResourceSpotlight resource={spotlight} kicker="Dernière parution" cataloguePath={cataloguePath} />}
-              <ul className={`grid gap-5 sm:grid-cols-2 lg:grid-cols-3 ${spotlight ? 'mt-12' : ''}`}>
+              <ul className={`grid gap-4 sm:grid-cols-2 lg:grid-cols-3 ${spotlight ? 'mt-16' : ''}`}>
                 {indexItems.map((resource) => (
                   <ResourceCard key={resource.id} resource={resource} cataloguePath={cataloguePath} />
                 ))}

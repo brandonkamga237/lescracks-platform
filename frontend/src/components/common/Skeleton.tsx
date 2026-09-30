@@ -6,7 +6,7 @@ interface SkeletonProps {
 export const Skeleton = ({ className = '' }: SkeletonProps) => (
   <div
     aria-hidden="true"
-    className={`animate-pulse rounded bg-white/[0.04] ${className}`}
+    className={`animate-pulse rounded bg-noir-800 ${className}`}
   />
 );
 

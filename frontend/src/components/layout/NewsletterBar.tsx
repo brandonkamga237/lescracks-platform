@@ -57,7 +57,7 @@ export default function NewsletterBar() {
   }
 
   return (
-    <div className="border-b border-gold-400/20 bg-gold-400/[0.08] px-4 py-2 text-center text-xs text-t2 sm:text-sm">
+    <div className="border-b border-line-soft bg-black px-4 py-2 text-center text-xs text-t2 sm:text-sm">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1">
         <span>
           Les nouveaux contenus et rendez-vous arrivent par email.
@@ -68,7 +68,7 @@ export default function NewsletterBar() {
             type="button"
             disabled={busy}
             onClick={() => void subscribe()}
-            className="font-medium text-gold-300 underline underline-offset-4 transition-colors hover:text-gold-400 disabled:opacity-50"
+            className="font-medium text-gold-ink underline underline-offset-4 transition-colors hover:text-gold-ink disabled:opacity-50"
           >
             {busy ? 'Abonnement…' : 'M’abonner à la newsletter'}
           </button>
@@ -82,20 +82,20 @@ export default function NewsletterBar() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="ton@email.com"
-              className="w-48 rounded-xl border border-gold-400/30 bg-noir-900 px-3 py-1.5 text-sm text-t1 placeholder:text-t4 focus:border-gold-400 focus:outline-none"
+              className="w-48 rounded border border-line bg-noir-900 px-3 py-1.5 text-sm text-t1 placeholder:text-t4 focus:border-gold-400 focus:outline-none"
               disabled={emailBusy}
             />
             <button
               type="submit"
               disabled={emailBusy}
-              className="rounded-xl bg-gold-400 px-3 py-1.5 text-sm font-medium text-noir-950 transition-colors hover:bg-gold-300 disabled:opacity-50"
+              className="rounded bg-gold-400 px-3 py-1.5 text-sm font-medium text-noir-950 transition-colors hover:bg-gold-300 disabled:opacity-50"
             >
               {emailBusy ? '…' : 'M’abonner'}
             </button>
           </form>
         )}
         {!isSignedIn && emailSuccess && (
-          <span className="font-medium text-gold-300">Merci, tu es bien inscrit.</span>
+          <span className="font-medium text-gold-ink">Merci, tu es bien inscrit.</span>
         )}
         {failure && <span role="alert" className="text-red-300">{failure}</span>}
         <button type="button" onClick={() => setVisible(false)} aria-label="Masquer ce message" className="ml-1 rounded px-1 text-t4 transition-colors hover:text-t1">×</button>

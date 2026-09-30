@@ -29,9 +29,9 @@ function EpisodeRow({ video }: EpisodeRowProps) {
         href={youtubeWatchUrl(video.youtubeUrl)}
         target="_blank"
         rel="noopener noreferrer"
-        className="group grid grid-cols-[6rem_minmax(0,1fr)_auto] items-center gap-x-4 border-t border-line-soft/50 px-1 py-5 transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[9rem_minmax(0,1fr)_auto] sm:gap-x-6"
+        className="group grid grid-cols-[6rem_minmax(0,1fr)_auto] items-center gap-x-4 border-t border-line px-2 py-5 transition-colors hover:bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[9rem_minmax(0,1fr)_auto] sm:gap-x-6"
       >
-        <span className="relative aspect-[16/9] overflow-hidden rounded border border-line-soft/60 bg-noir-900">
+        <span className="relative aspect-[16/9] overflow-hidden rounded bg-noir-700">
           {thumbnail && !failedThumb ? (
             <img src={thumbnail} alt="" loading="lazy" onError={() => setFailedThumb(true)} className="h-full w-full object-cover" />
           ) : (
@@ -44,12 +44,12 @@ function EpisodeRow({ video }: EpisodeRowProps) {
           </span>
         </span>
         <span className="min-w-0">
-          <span className="block break-words font-display text-lg font-medium leading-snug text-t1 transition-colors group-hover:text-gold-300 sm:text-xl">
+          <span className="block break-words font-display text-lg font-bold leading-tight text-t1 transition-colors group-hover:text-gold-ink sm:text-xl">
             {video.title}
           </span>
-          {meta && <span className="mt-2 block font-mono text-[11px] uppercase tracking-[0.14em] text-t4">{meta}</span>}
+          {meta && <span className="mt-2 block text-[11px] font-semibold uppercase tracking-[0.1em] text-t4">{meta}</span>}
         </span>
-        <ArrowUpRight className="h-5 w-5 text-t4 opacity-0 transition-opacity group-hover:text-gold-300 group-hover:opacity-100" aria-hidden />
+        <ArrowUpRight className="h-5 w-5 text-t4 opacity-0 transition-opacity group-hover:text-gold-ink group-hover:opacity-100" aria-hidden />
       </a>
     </li>
   );
