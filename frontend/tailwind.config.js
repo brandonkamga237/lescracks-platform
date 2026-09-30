@@ -9,6 +9,7 @@ export default {
   	extend: {
  fontFamily: {
   sans: [
+    'DM Sans',
     'Inter',
     '-apple-system',
     'BlinkMacSystemFont',
@@ -16,10 +17,10 @@ export default {
     'sans-serif'
   ],
   display: [
-    'Fraunces',
-    'Georgia',
-    'Times New Roman',
-    'serif'
+    'DM Sans',
+    'Inter',
+    'system-ui',
+    'sans-serif'
   ],
   mono: [
     'JetBrains Mono',
@@ -39,17 +40,24 @@ export default {
   colors: {
     // ── TEXT RAMP — the only tints allowed for text. All WCAG AA on #000.
     //    t1 21:1 · t2 12.5:1 · t3 7.4:1 · t4 5.3:1 (floor)
-    t1: '#ffffff',
-    t2: 'rgba(255, 255, 255, 0.78)',
-    t3: 'rgba(255, 255, 255, 0.60)',
-    t4: 'rgba(255, 255, 255, 0.50)',
+    t1: 'var(--text-1)',
+    t2: 'var(--text-2)',
+    t3: 'var(--text-3)',
+    t4: 'var(--text-4)',
 
     // ── BORDER RAMP — decorative only, never used for text.
     line: {
-      soft: 'rgba(255, 255, 255, 0.08)',
-      DEFAULT: 'rgba(255, 255, 255, 0.12)',
-      strong: 'rgba(255, 255, 255, 0.20)',
+      soft: 'var(--line-soft)',
+      DEFAULT: 'var(--line)',
+      strong: 'var(--line-strong)',
     },
+
+    // Section-aware surfaces: they flip inside .mode-light.
+    ink: '#0b1215',
+    graphite: '#394649',
+    fog: '#e0e0e0',
+    ash: '#757575',
+    charcoal: '#232424',
 
     // Jaune Or / Hirki (Accent principal)
     gold: {
@@ -66,14 +74,16 @@ export default {
       DEFAULT: '#d4af37',
       light: '#e8c547',
       dark: '#b8962e',
+      // Accent text that stays AA on both black and white sections.
+      ink: 'var(--gold-ink)',
     },
     // Noir pur pour fond
     noir: {
       950: '#000000',
-      900: '#0a0a0a',
-      800: '#111111',
-      700: '#1a1a1a',
-      600: '#222222',
+      900: 'var(--surface-1)',
+      800: 'var(--surface-2)',
+      700: 'var(--surface-3)',
+      600: 'var(--surface-4)',
       DEFAULT: '#000000',
     },
     // Blanc pour texte en mode sombre
@@ -113,8 +123,8 @@ export default {
     background: '#000000',
     foreground: '#ffffff',
     card: {
-      DEFAULT: '#111111',
-      foreground: '#ffffff',
+      DEFAULT: 'var(--card)',
+      foreground: 'var(--text-1)',
     },
     popover: {
       DEFAULT: '#111111',
@@ -136,8 +146,8 @@ export default {
       DEFAULT: '#ef4444',
       foreground: '#ffffff',
     },
-    border: 'rgba(255, 255, 255, 0.08)',
-    input: 'rgba(255, 255, 255, 0.08)',
+    border: 'var(--line-soft)',
+    input: 'var(--line)',
     ring: '#d4af37',
   },
     animation: {
@@ -253,6 +263,9 @@ export default {
           backgroundPosition: '200% 0'
         }
       }
+    },
+    boxShadow: {
+      sm: '0 2px 4px 0 rgba(0, 0, 0, 0.1)',
     },
     backdropBlur: {
       xs: '2px'

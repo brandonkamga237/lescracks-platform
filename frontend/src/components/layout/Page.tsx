@@ -12,9 +12,9 @@ const CONTAINER = 'mx-auto w-full max-w-7xl px-5 sm:px-8';
 
 /** Vertical rhythm scale. Pages pick an intent, never raw padding values. */
 const SPACING = {
-  tight: 'py-12 sm:py-16',
-  normal: 'py-16 sm:py-24',
-  loose: 'py-20 sm:py-28',
+  tight: 'py-14 sm:py-16',
+  normal: 'py-20 lg:py-28',
+  loose: 'py-24 lg:py-32',
 } as const;
 
 type Spacing = keyof typeof SPACING;
@@ -33,6 +33,10 @@ interface SectionProps extends Omit<ComponentPropsWithoutRef<'section'>, 'childr
   /** Sets the section apart from the page background without adding a card. */
   muted?: boolean;
   bordered?: boolean;
+  /** Pure black or a raised black band. The shade change is the separator: no border needed. */
+  tone?: 'dark' | 'raised';
+  /** Faint photo behind the band, greyscale so it never competes with the single gold accent. */
+  backdrop?: string;
   /** Escape hatch for full-bleed content that manages its own container. */
   bleed?: boolean;
 }
@@ -43,12 +47,15 @@ export function Section({
   muted = false,
   bordered = false,
   bleed = false,
+  tone = 'dark',
+  backdrop,
   className = '',
   ...rest
 }: SectionProps) {
   const surface = [
-    muted ? 'bg-noir-900/30' : '',
-    bordered ? 'border-t border-line-soft/50' : '',
+    tone === 'raised' ? 'mode-raised' : 'bg-black',
+    muted ? 'bg-noir-900' : '',
+    bordered && tone === 'dark' ? 'border-t border-line-soft' : '',
   ].filter(Boolean).join(' ');
 
   if (bleed) {
@@ -56,8 +63,14 @@ export function Section({
   }
 
   return (
-    <section className={`${surface} ${className}`} {...rest}>
-      <div className={`${CONTAINER} ${SPACING[spacing]}`}>{children}</div>
+    <section className={`${surface} ${backdrop ? 'relative overflow-hidden' : ''} ${className}`} {...rest}>
+      {backdrop && (
+        <>
+          <img src={backdrop} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.16] grayscale" />
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 to-[var(--surface-0)]" />
+        </>
+      )}
+      <div className={`${backdrop ? 'relative ' : ''}${CONTAINER} ${SPACING[spacing]}`}>{children}</div>
     </section>
   );
 }
@@ -78,12 +91,12 @@ export function PageHeader({ title, eyebrow, description, meta, actions }: PageH
       {eyebrow && <p className="kicker mb-5">{eyebrow}</p>}
       <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
         <div className="min-w-0">
-          <h1 className="font-display text-4xl font-medium leading-[1.05] tracking-tight text-t1 sm:text-6xl">{title}</h1>
-          {description && <p className="mt-5 max-w-2xl text-base leading-relaxed text-t3">{description}</p>}
+          <h1 className="font-display text-[2.75rem] font-bold leading-[0.94] tracking-tight text-t1 sm:text-6xl lg:text-7xl lg:leading-[0.9]">{title}</h1>
+          {description && <p className="mt-6 max-w-2xl text-lg leading-normal text-t3">{description}</p>}
         </div>
         {(meta || actions) && (
           <div className="flex flex-wrap items-center gap-3 pb-1">
-            {meta && <span className="kicker-muted">{meta}</span>}
+            {meta && <span className="label">{meta}</span>}
             {actions}
           </div>
         )}
@@ -106,10 +119,10 @@ export function SectionHeader({ title, eyebrow, description, action, id }: Secti
   return (
     <div className="mb-10 sm:mb-12">
       {eyebrow && <p className="kicker mb-4">{eyebrow}</p>}
-      <div className="flex flex-wrap items-baseline justify-between gap-x-10 gap-y-3 border-b border-line-soft/50 pb-6">
+      <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
         <div className="min-w-0">
-          <h2 id={id} className="font-display text-3xl font-medium tracking-tight text-t1 sm:text-4xl">{title}</h2>
-          {description && <p className="mt-3 max-w-xl text-sm leading-relaxed text-t3">{description}</p>}
+          <h2 id={id} className="font-display text-4xl font-bold leading-[0.96] tracking-tight text-t1 sm:text-5xl">{title}</h2>
+          {description && <p className="mt-4 max-w-xl text-base leading-normal text-t3">{description}</p>}
         </div>
         {action}
       </div>

@@ -19,9 +19,9 @@ interface EmptyStateProps {
 
 export function EmptyState({ title, description, icon, action }: EmptyStateProps) {
   return (
-    <div role="status" className={`${PANEL} border border-dashed border-line-strong bg-card`}>
-      {icon && <div className="mb-5 flex justify-center text-gold-400">{icon}</div>}
-      <p className="font-display text-2xl text-t1 sm:text-3xl">{title}</p>
+    <div role="status" className={`${PANEL} border border-dashed border-line bg-card`}>
+      {icon && <div className="mb-5 flex justify-center text-gold-ink">{icon}</div>}
+      <p className="font-display text-2xl font-bold leading-tight text-t1 sm:text-3xl">{title}</p>
       {description && <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-t3">{description}</p>}
       {action && <div className="mt-6 flex flex-wrap justify-center gap-3">{action}</div>}
     </div>

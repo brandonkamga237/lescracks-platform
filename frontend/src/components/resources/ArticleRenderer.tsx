@@ -24,13 +24,13 @@ function InlineText({ text }: { text: string }) {
           return <em key={i}>{part.slice(1, -1)}</em>;
         }
         if (part.startsWith('`') && part.endsWith('`') && part.length > 2) {
-          return <code key={i} className="rounded bg-noir-800 px-1.5 py-0.5 font-mono text-[0.9em] text-gold-300">{part.slice(1, -1)}</code>;
+          return <code key={i} className="rounded bg-noir-800 px-1.5 py-0.5 font-mono text-[0.9em] text-gold-ink">{part.slice(1, -1)}</code>;
         }
         const link = part.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
         if (link) {
           return (
             <a key={i} href={link[2]} target="_blank" rel="noopener noreferrer"
-              className="text-gold-400 underline underline-offset-4 hover:text-gold-300">
+              className="text-gold-ink underline underline-offset-4 hover:text-gold-ink">
               {link[1]}
             </a>
           );
@@ -63,7 +63,7 @@ export function ArticleBlocks({ blocks }: { blocks: ArticleBlock[] }) {
         }
         if (block.type === 'list') {
           return (
-            <ul key={index} className="list-disc space-y-2 pl-6 text-t2 marker:text-gold-400">
+            <ul key={index} className="list-disc space-y-2 pl-6 text-t2 marker:text-gold-ink">
               {block.items.map((item, j) => (
                 <li key={j} className="leading-relaxed"><InlineText text={item.text} /></li>
               ))}
@@ -73,14 +73,14 @@ export function ArticleBlocks({ blocks }: { blocks: ArticleBlock[] }) {
         if (block.type === 'image') {
           return (
             <figure key={index} className="space-y-2">
-              {block.url && <img src={block.url} alt={block.alt ?? ''} className="w-full rounded-2xl" />}
+              {block.url && <img src={block.url} alt={block.alt ?? ''} className="w-full rounded-lg" />}
               {block.caption && <figcaption className="text-center text-sm text-t3">{block.caption}</figcaption>}
             </figure>
           );
         }
         if (block.type === 'link') {
           return (
-            <a key={index} href={block.url} target="_blank" rel="noopener noreferrer" className="inline-block text-gold-400 underline-offset-4 hover:underline">
+            <a key={index} href={block.url} target="_blank" rel="noopener noreferrer" className="inline-block text-gold-ink underline-offset-4 hover:underline">
               {block.text || block.url}
             </a>
           );
