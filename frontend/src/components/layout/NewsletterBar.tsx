@@ -57,7 +57,7 @@ export default function NewsletterBar() {
   }
 
   return (
-    <div className="border-b border-gold-400/20 bg-gold-400/[0.08] px-4 py-2 text-center text-xs text-t2 sm:text-sm">
+    <div className="border-b border-line-soft bg-black px-4 py-2 text-center text-xs text-t2 sm:text-sm">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1">
         <span>
           Les nouveaux contenus et rendez-vous arrivent par email.
@@ -82,7 +82,7 @@ export default function NewsletterBar() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="ton@email.com"
-              className="w-48 rounded border border-gold-400/30 bg-noir-900 px-3 py-1.5 text-sm text-t1 placeholder:text-t4 focus:border-gold-400 focus:outline-none"
+              className="w-48 rounded border border-line bg-noir-900 px-3 py-1.5 text-sm text-t1 placeholder:text-t4 focus:border-gold-400 focus:outline-none"
               disabled={emailBusy}
             />
             <button
