@@ -15,8 +15,8 @@ import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
 
 /**
- * Poster-studio landing: a white/black split hero, then full-bleed bands that alternate
- * MODE WHITE and MODE BLACK. The colour change is the only section separator.
+ * Poster-studio landing: a split hero, then full-bleed bands that alternate pure black and
+ * raised black. The shade change is the only section separator.
  */
 
 const PROMISES = [
@@ -61,9 +61,9 @@ export default function Landing() {
     <Layout>
       <SEO title="Apprendre la tech, concrètement" description="Des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme. Une bibliothèque ouverte, une communauté francophone." url="/" />
 
-      {/* ── Hero: white headline panel · black action panel ─────── */}
+      {/* ── Hero: raised headline panel · photo action panel ────── */}
       <section className="grid lg:grid-cols-[55fr_45fr]">
-        <div className="mode-light flex items-center px-5 py-20 sm:px-8 lg:py-28 lg:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:pr-16">
+        <div className="mode-raised flex items-center px-5 py-20 sm:px-8 lg:py-28 lg:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:pr-16">
           <div className="max-w-2xl">
             <p className="kicker">La plateforme tech francophone</p>
             <h1 className="mt-6 font-display text-5xl font-bold leading-[0.92] tracking-tight text-t1 sm:text-6xl xl:text-[5.25rem] xl:leading-[0.9]">
@@ -88,7 +88,7 @@ export default function Landing() {
         <div className="relative flex items-center justify-center overflow-hidden bg-black px-5 py-16 sm:px-8 lg:py-28">
           <img aria-hidden src="/images/community-1.jpg" alt="" className="absolute inset-0 h-full w-full object-cover opacity-30" />
           <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
-          <div className="mode-light relative w-full max-w-sm rounded-lg p-7 sm:p-8">
+          <div className="mode-raised relative w-full max-w-sm rounded-lg p-7 sm:p-8">
             {isSignedIn ? (
               <>
                 <h2 className="text-2xl font-bold leading-tight text-t1">Ton espace</h2>
@@ -129,13 +129,13 @@ export default function Landing() {
           <Stat value={count(recent.data?.totalElements)} label="Ressources" />
           <Stat value={count(categories.data?.length)} label="Sujets" />
           <Stat value={count(upcoming.data?.totalElements)} label="Rendez-vous à venir" />
-          <Stat value="0 €" label="Accès à la bibliothèque" />
+          <Stat value="Gratuit" label="Accès à la bibliothèque" />
         </div>
       </Section>
 
-      {/* ── À la une — MODE WHITE ───────────────────────────────── */}
+      {/* ── À la une — noir relevé ───────────────────────────────── */}
       <motion.div {...reveal(reduced)}>
-        <Section tone="light" aria-labelledby="featured-heading">
+        <Section tone="raised" aria-labelledby="featured-heading">
           <SectionHeader
             eyebrow="La bibliothèque"
             id="featured-heading"
@@ -173,7 +173,7 @@ export default function Landing() {
         </Section>
       </motion.div>
 
-      {/* ── L'agenda — MODE BLACK ───────────────────────────────── */}
+      {/* ── L'agenda — noir ───────────────────────────────── */}
       <motion.div {...reveal(reduced)}>
         <Section aria-labelledby="agenda-heading">
           <SectionHeader
@@ -226,10 +226,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Par sujet — MODE WHITE ──────────────────────────────── */}
+      {/* ── Par sujet — noir relevé ──────────────────────────────── */}
       {!!categories.data?.length && (
         <motion.div {...reveal(reduced)}>
-          <Section tone="light" aria-labelledby="subjects-heading">
+          <Section tone="raised" aria-labelledby="subjects-heading">
             <SectionHeader eyebrow="Trouver son sujet" id="subjects-heading" title="Explorer par sujet" />
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {categories.data.slice(0, 12).map((category) => (
@@ -248,7 +248,7 @@ export default function Landing() {
         </motion.div>
       )}
 
-      {/* ── Action — MODE BLACK ─────────────────────────────────── */}
+      {/* ── Action — noir ─────────────────────────────────── */}
       <Section spacing="loose">
         <div className="flex flex-col items-start gap-10 lg:flex-row lg:items-end lg:justify-between">
           <h2 className="max-w-3xl font-display text-5xl font-bold leading-[0.92] tracking-tight text-t1 sm:text-6xl lg:text-7xl lg:leading-[0.9]">
