@@ -35,9 +35,9 @@ import java.util.Map;
 public class SeoController {
 
     private static final DateTimeFormatter ISO = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-    private static final String PREVIEW_IMAGE = "/preview.png";
+    private static final String PREVIEW_IMAGE = "/preview.jpg";
     private static final int PREVIEW_WIDTH = 1296;
-    private static final int PREVIEW_HEIGHT = 682;
+    private static final int PREVIEW_HEIGHT = 614;
 
     private final ResourceService resources;
     private final EventService events;
