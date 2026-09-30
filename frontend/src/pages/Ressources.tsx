@@ -93,7 +93,7 @@ export default function Ressources() {
   return (
     <Layout>
       <SEO title="Bibliothèque" description="Ebooks et vidéos pour apprendre la tech en français. Filtre par format, catégorie et sujet." url="/ressources" />
-      <Section tone="light" spacing="tight">
+      <Section tone="raised" spacing="tight">
         <PageHeader
           eyebrow="Apprendre à ton rythme"
           title="Bibliothèque"

@@ -26,7 +26,7 @@ export default function AuthCallback() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black px-6 text-white">
-      <div className="mode-light max-w-md rounded-lg p-8 text-center">
+      <div className="mode-raised max-w-md rounded-lg p-8 text-center">
         {failed ? <>
           <h1 className="font-display text-2xl font-bold">La connexion n’a pas abouti</h1>
           <p role="alert" className="mt-4 text-sm leading-relaxed text-t2">{error?.message ?? 'La connexion sécurisée a été interrompue ou a expiré. Tu peux réessayer sans perdre ta destination.'}</p>

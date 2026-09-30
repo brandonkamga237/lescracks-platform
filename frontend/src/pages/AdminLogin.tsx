@@ -39,7 +39,7 @@ export default function AdminLogin() {
   return <main className="flex min-h-screen flex-col items-center justify-center bg-black px-5 py-12 text-white">
     <SEO title="Connexion administration" description="Accès à l’administration LesCracks." url="/admin/connexion" />
     <Link to="/" className="mb-8 inline-flex items-center gap-2 text-sm text-t3 hover:text-gold-ink"><ArrowLeft aria-hidden="true" className="h-4 w-4" />Retour au site</Link>
-    <section className="mode-light w-full max-w-md rounded-lg p-6 sm:p-9">
+    <section className="mode-raised w-full max-w-md rounded-lg p-6 sm:p-9">
       <div className="mb-7 flex h-12 w-12 items-center justify-center rounded-lg border border-gold-400/25 bg-gold-400/5 text-gold-ink"><ShieldCheck aria-hidden="true" className="h-6 w-6" /></div>
       <p className="kicker">LesCracks / Administration</p>
       <h1 className="mt-4 font-display text-3xl font-bold">Ton espace de pilotage.</h1>

@@ -32,7 +32,7 @@ export default function EvenementDetail() {
     <Layout>
       <SEO title={loaded?.title ?? (missing ? 'Événement introuvable' : 'Événement')} description={loaded?.description ?? 'Découvre les rendez-vous LesCracks pour apprendre et pratiquer la tech ensemble.'} image={loaded?.coverImage || undefined} url={loaded ? eventPath(loaded) : '/evenements'} />
       <article>
-        <div className="mode-light">
+        <div className="mode-raised">
         <div className="mx-auto max-w-7xl px-5 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-10">
         <nav aria-label="Fil d’Ariane" className="flex flex-wrap items-center gap-3 text-sm text-t3">
           <Link to={cataloguePath} className="inline-flex min-h-11 items-center gap-2 rounded-lg hover:text-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"><ArrowLeft className="h-4 w-4" aria-hidden />Tous les événements</Link>

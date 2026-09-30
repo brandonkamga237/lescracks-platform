@@ -4,8 +4,8 @@
 
 /* ============================================
    DESIGN SYSTEM — LESCRACKS « POSTER STUDIO »
-   Black/white duality, one gold accent, bold
-   stacked type, flat 4px geometry.
+   Black and its variants only, one gold accent,
+   bold stacked type, flat 4px geometry.
    See .devin/skills/design-system/SKILL.md
    ============================================ */
 
@@ -51,36 +51,21 @@
     --gold-ink: #d4af37;
   }
 
-  /* ========== MODE WHITE — flips every ramp token ==========
-     Wrap a section in .mode-light and components written with
-     text-t*, border-line*, bg-card, bg-noir-8xx, text-gold-ink
-     render correctly without a second variant. */
-  .mode-light {
-    --background: #ffffff;
-    --foreground: #0b1215;
+  /* ========== MODE RAISED — a lifted black band ==========
+     Alternates with pure black so sections read apart without any white.
+     Ramps stay the dark ones; only the surfaces step up one notch. */
+  .mode-raised {
+    --surface-0: #111111;
+    --surface-1: #161616;
+    --surface-2: #262727;
+    --surface-3: #303131;
+    --surface-4: #3a3b3b;
+    --card: #1c1c1c;
+    --line-soft: rgba(255, 255, 255, 0.07);
+    --line: rgba(255, 255, 255, 0.11);
 
-    /* On #fff: t1 19:1 · t2 13:1 · t3 7.6:1 · t4 5.3:1 */
-    --text-1: #0b1215;
-    --text-2: #263033;
-    --text-3: #4a5557;
-    --text-4: #6b6b6b;
-
-    --line-soft:   #eeeeee;
-    --line:        #e0e0e0;
-    --line-strong: #394649;
-
-    --surface-0: #ffffff;
-    --surface-1: #fafafa;
-    --surface-2: #f4f4f4;
-    --surface-3: #ebebeb;
-    --surface-4: #e0e0e0;
-    --card: #ffffff;
-
-    /* Raw gold is 2:1 on white — accent text darkens to stay AA (5:1). */
-    --gold-ink: #8a6a1c;
-
-    background-color: #ffffff;
-    color: #0b1215;
+    background-color: #111111;
+    color: #ffffff;
   }
 
   /* ========== BASE STYLES ========== */
@@ -233,13 +218,9 @@
     @apply font-medium text-gold-ink underline-offset-4 transition-colors duration-200 hover:underline;
   }
 
-  /* ========== STAT TILE — lift on black, card on white ========== */
+  /* ========== STAT TILE — charcoal lift, never a shadow ========== */
   .stat-tile {
     @apply rounded-lg bg-card p-4;
   }
 
-  .mode-light .stat-tile,
-  .mode-light .card-lift {
-    @apply shadow-sm ring-1 ring-line;
-  }
 }

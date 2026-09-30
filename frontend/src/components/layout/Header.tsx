@@ -7,7 +7,7 @@ import LesCracksLogo from '@/components/common/LesCracksLogo';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useSession } from '@/hooks/useSession';
 
-/** White sticky bar: the one permanent MODE WHITE surface, above black and white bands alike. */
+/** Sticky bar on raised black, so it separates from pure-black bands as they scroll under it. */
 interface NavLinkDef {
   to: string;
   label: string;
@@ -73,7 +73,7 @@ export default function Header() {
   );
 
   return (
-    <header className="mode-light sticky top-0 z-40 border-b border-line">
+    <header className="mode-raised sticky top-0 z-40 border-b border-line">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-8 px-5 sm:px-8">
         <Link to="/" className="shrink-0" aria-label="LesCracks, accueil">
           <LesCracksLogo height={32} className="w-auto" />
@@ -118,7 +118,7 @@ export default function Header() {
           <DialogTrigger asChild>
             <button type="button" className="ml-auto flex h-10 w-10 items-center justify-center rounded border border-line text-t1 transition-colors hover:bg-noir-800 lg:hidden" aria-label="Ouvrir le menu"><Menu className="h-5 w-5" aria-hidden /></button>
           </DialogTrigger>
-          <DialogContent className="mode-light top-2 w-[calc(100%_-_1rem)] translate-y-0 rounded-lg border-line bg-card p-4 sm:top-4 sm:w-[calc(100%_-_2rem)] sm:p-6">
+          <DialogContent className="mode-raised top-2 w-[calc(100%_-_1rem)] translate-y-0 rounded-lg border-line bg-card p-4 sm:top-4 sm:w-[calc(100%_-_2rem)] sm:p-6">
             <DialogTitle className="font-display text-xl font-bold text-t1">Menu</DialogTitle>
             <DialogDescription className="text-sm text-t3">Un sujet, une ressource, un prochain pas.</DialogDescription>
             <nav aria-label="Navigation mobile" className="my-2">

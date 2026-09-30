@@ -33,8 +33,8 @@ interface SectionProps extends Omit<ComponentPropsWithoutRef<'section'>, 'childr
   /** Sets the section apart from the page background without adding a card. */
   muted?: boolean;
   bordered?: boolean;
-  /** MODE BLACK or MODE WHITE band. The colour change is the separator: no border needed. */
-  tone?: 'dark' | 'light';
+  /** Pure black or a raised black band. The shade change is the separator: no border needed. */
+  tone?: 'dark' | 'raised';
   /** Escape hatch for full-bleed content that manages its own container. */
   bleed?: boolean;
 }
@@ -50,7 +50,7 @@ export function Section({
   ...rest
 }: SectionProps) {
   const surface = [
-    tone === 'light' ? 'mode-light' : 'bg-black',
+    tone === 'raised' ? 'mode-raised' : 'bg-black',
     muted ? 'bg-noir-900' : '',
     bordered && tone === 'dark' ? 'border-t border-line-soft' : '',
   ].filter(Boolean).join(' ');

@@ -4,7 +4,7 @@ import SEO from '@/components/common/SEO';
 export default function Terms() {
   return <Layout>
     <SEO title="Conditions d'utilisation" description="Les conditions d'utilisation de la plateforme LesCracks." url="/conditions-utilisation" />
-    <div className="mode-light"><div className="mx-auto max-w-3xl px-5 py-16 sm:py-24">
+    <div className="mode-raised"><div className="mx-auto max-w-3xl px-5 py-16 sm:py-24">
       <div className="rounded-lg border border-line-soft bg-card p-6 sm:p-10">
         <p className="text-sm font-medium tracking-wide text-gold-ink">LesCracks / Conditions</p>
         <h1 className="mt-4 font-display text-3xl font-bold tracking-tight text-t1 sm:text-4xl">Conditions d'utilisation</h1>

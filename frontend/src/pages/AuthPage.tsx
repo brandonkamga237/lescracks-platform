@@ -57,7 +57,7 @@ export function ResetPasswordPage() {
   return <Layout>
     <SEO title="Nouveau mot de passe" description="Choisis un nouveau mot de passe pour ton compte LesCracks." url="/reset-password" />
     <div className="mx-auto max-w-lg px-5 py-16 sm:py-24">
-      <section className="mode-light rounded-lg p-6 sm:p-9">
+      <section className="mode-raised rounded-lg p-6 sm:p-9">
         <p className="kicker">LesCracks / Sécurité</p>
         <h1 className="mt-4 font-display text-3xl font-bold">Un nouveau départ.</h1>
         <p className="mt-3 text-sm leading-relaxed text-t3">Choisis un nouveau mot de passe pour retrouver ton compte.</p>
@@ -184,7 +184,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
         <p className="mt-4 max-w-md text-base leading-relaxed text-t3 sm:text-lg">{registering ? 'Crée ton compte, explore les ressources et trouve ton prochain rendez-vous tech.' : 'Retrouve ton espace personnel. Les ressources et les événements t’attendent, à ton rythme.'}</p>
         <div className="mt-6 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" /><p>Tu peux aussi découvrir le catalogue sans compte.<br /><Link to="/ressources" className="mt-2 inline-flex items-center gap-2 text-t2 underline underline-offset-4">Explorer les ressources <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link></p></div>
       </section>
-      <section className="order-1 mode-light rounded-lg p-5 sm:p-9 lg:order-2" aria-labelledby="auth-heading">
+      <section className="order-1 mode-raised rounded-lg p-5 sm:p-9 lg:order-2" aria-labelledby="auth-heading">
         <p className="text-xs tracking-wide text-gold-ink">{registering ? 'Bienvenue dans la communauté' : 'Heureux de te retrouver'}</p>
         <h2 id="auth-heading" className="mt-3 font-display text-3xl font-bold">{registering ? 'Créer ton compte' : 'Te connecter'}</h2>
         <p className="mt-2 text-sm text-t3">{registering ? 'Quelques informations, et c’est parti.' : 'Entre tes identifiants pour continuer.'}</p>
@@ -221,7 +221,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
       </section>
     </div>
     <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
-      <DialogContent className="mode-light border-line sm:max-w-md" aria-describedby="verify-desc">
+      <DialogContent className="mode-raised border-line sm:max-w-md" aria-describedby="verify-desc">
         <DialogHeader>
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-gold-400/25 bg-gold-400/10 text-gold-ink">
             <Mail className="h-5 w-5" aria-hidden="true" />
