@@ -50,8 +50,11 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-black border-t border-line-soft/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
+    <footer className="bg-black">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-8">
+        <p className="mb-16 max-w-3xl font-display text-4xl font-bold leading-[0.94] tracking-tight text-t1 sm:text-5xl lg:text-6xl lg:leading-[0.9]">
+          Deviens aussi un crack <span className="text-gold-400">de la tech.</span>
+        </p>
 
         {/* ── Main grid ──────────────────────────────────────────── */}
         <div className="grid grid-cols-2 gap-10 md:grid-cols-[2fr_1fr_1fr] md:gap-12">
@@ -62,7 +65,7 @@ const Footer = () => {
               <LesCracksLogo
                 height={52}
                 lesColor="#000000"
-                className="w-auto opacity-90"
+                className="w-auto"
               />
             </Link>
             <p className="text-sm text-t3 leading-relaxed mb-6 max-w-[220px]">
@@ -78,7 +81,7 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="w-9 h-9 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-t3 hover:text-gold-ink hover:border-gold/30 hover:bg-gold/10 transition-all"
+                  className="flex h-10 w-10 items-center justify-center rounded bg-card text-t3 transition-colors hover:text-gold-400"
                 >
                   <Icon className="w-4 h-4" />
                 </a>
@@ -89,7 +92,7 @@ const Footer = () => {
           {/* Nav columns */}
           {NAV.map((col) => (
             <div key={col.title}>
-              <p className="text-[11px] font-semibold text-t4 tracking-wide mb-4">
+              <p className="label mb-4">
                 {col.title}
               </p>
               <ul className="space-y-3">
@@ -97,7 +100,7 @@ const Footer = () => {
                   const content = (
                     <span className={`flex items-center gap-2 text-sm transition-colors ${
                       link.highlight
-                        ? 'text-gold-ink hover:text-gold-light font-medium'
+                        ? 'font-medium text-gold-400 hover:text-gold-300'
                         : 'text-t3 hover:text-t1'
                     }`}>
                       {link.isWhatsApp ? (
