@@ -34,15 +34,15 @@ function AgendaItem({ event, cataloguePath }: AgendaItemProps) {
       <Link
         to={eventPath(event)}
         state={{ cataloguePath }}
-        className="group grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-start gap-x-4 border-t border-line-soft px-1 py-5 transition-colors hover:bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[6rem_minmax(0,1fr)_auto] sm:gap-x-8"
+        className="group grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-start gap-x-4 border-t border-line px-2 py-6 transition-colors hover:bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[6rem_minmax(0,1fr)_auto] sm:gap-x-8"
       >
         <span aria-hidden className="pt-0.5">
           {hasDate ? (
             <>
-              <span className="block font-display text-3xl font-medium leading-none text-t1 sm:text-4xl">
+              <span className="block font-display text-4xl font-bold leading-[0.9] text-t1 sm:text-5xl">
                 {start.getDate()}
               </span>
-              <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-[0.16em] text-gold-ink">
+              <span className="kicker mt-2 block">
                 {weekdayFormat.format(start)} {monthFormat.format(start)}
               </span>
             </>
@@ -51,11 +51,11 @@ function AgendaItem({ event, cataloguePath }: AgendaItemProps) {
           )}
         </span>
         <span className="min-w-0">
-          <span className="block break-words font-display text-xl font-medium leading-snug text-t1 transition-colors group-hover:text-gold-ink sm:text-2xl">
+          <span className="block break-words font-display text-xl font-bold leading-tight text-t1 transition-colors group-hover:text-gold-ink sm:text-2xl">
             {event.title}
           </span>
-          <span className="mt-2 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-t4">
-            <TypeIcon className="h-3.5 w-3.5 shrink-0 text-gold-400/70" aria-hidden />
+          <span className="label mt-2 flex items-center gap-2">
+            <TypeIcon className="h-3.5 w-3.5 shrink-0 text-gold-ink" aria-hidden />
             {meta}
           </span>
         </span>

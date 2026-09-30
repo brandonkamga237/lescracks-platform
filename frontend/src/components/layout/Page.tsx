@@ -12,9 +12,9 @@ const CONTAINER = 'mx-auto w-full max-w-7xl px-5 sm:px-8';
 
 /** Vertical rhythm scale. Pages pick an intent, never raw padding values. */
 const SPACING = {
-  tight: 'py-12 sm:py-16',
-  normal: 'py-16 sm:py-24',
-  loose: 'py-20 sm:py-28',
+  tight: 'py-14 sm:py-16',
+  normal: 'py-20 lg:py-28',
+  loose: 'py-24 lg:py-32',
 } as const;
 
 type Spacing = keyof typeof SPACING;
@@ -33,6 +33,8 @@ interface SectionProps extends Omit<ComponentPropsWithoutRef<'section'>, 'childr
   /** Sets the section apart from the page background without adding a card. */
   muted?: boolean;
   bordered?: boolean;
+  /** MODE BLACK or MODE WHITE band. The colour change is the separator: no border needed. */
+  tone?: 'dark' | 'light';
   /** Escape hatch for full-bleed content that manages its own container. */
   bleed?: boolean;
 }
@@ -48,7 +50,7 @@ export function Section({
 }: SectionProps) {
   const surface = [
     muted ? 'bg-noir-900' : '',
-    bordered ? 'border-t border-line-soft' : '',
+    bordered && tone === 'dark' ? 'border-t border-line-soft' : '',
   ].filter(Boolean).join(' ');
 
   if (bleed) {
@@ -78,12 +80,12 @@ export function PageHeader({ title, eyebrow, description, meta, actions }: PageH
       {eyebrow && <p className="kicker mb-5">{eyebrow}</p>}
       <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
         <div className="min-w-0">
-          <h1 className="font-display text-4xl font-medium leading-[1.05] tracking-tight text-t1 sm:text-6xl">{title}</h1>
-          {description && <p className="mt-5 max-w-2xl text-base leading-relaxed text-t3">{description}</p>}
+          <h1 className="font-display text-[2.75rem] font-bold leading-[0.94] tracking-tight text-t1 sm:text-6xl lg:text-7xl lg:leading-[0.9]">{title}</h1>
+          {description && <p className="mt-6 max-w-2xl text-lg leading-normal text-t3">{description}</p>}
         </div>
         {(meta || actions) && (
           <div className="flex flex-wrap items-center gap-3 pb-1">
-            {meta && <span className="kicker-muted">{meta}</span>}
+            {meta && <span className="label">{meta}</span>}
             {actions}
           </div>
         )}
@@ -106,10 +108,10 @@ export function SectionHeader({ title, eyebrow, description, action, id }: Secti
   return (
     <div className="mb-10 sm:mb-12">
       {eyebrow && <p className="kicker mb-4">{eyebrow}</p>}
-      <div className="flex flex-wrap items-baseline justify-between gap-x-10 gap-y-3 border-b border-line-soft pb-6">
+      <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
         <div className="min-w-0">
-          <h2 id={id} className="font-display text-3xl font-medium tracking-tight text-t1 sm:text-4xl">{title}</h2>
-          {description && <p className="mt-3 max-w-xl text-sm leading-relaxed text-t3">{description}</p>}
+          <h2 id={id} className="font-display text-4xl font-bold leading-[0.96] tracking-tight text-t1 sm:text-5xl">{title}</h2>
+          {description && <p className="mt-4 max-w-xl text-base leading-normal text-t3">{description}</p>}
         </div>
         {action}
       </div>

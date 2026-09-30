@@ -30,7 +30,7 @@ function ResourceSpotlight({ resource, kicker = 'À la une', cataloguePath }: Re
       <Link
         to={resourcePath(resource)}
         state={{ cataloguePath }}
-        className="block aspect-[16/10] overflow-hidden rounded border border-line-soft bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+        className="block aspect-[16/10] overflow-hidden bg-noir-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
         aria-label={resource.title}
       >
         {resource.coverImage && failedImage !== resource.coverImage ? (
@@ -42,7 +42,7 @@ function ResourceSpotlight({ resource, kicker = 'À la une', cataloguePath }: Re
           />
         ) : (
           <div className="flex h-full items-end p-6" aria-hidden>
-            <span className="font-display text-6xl font-medium leading-none text-white/[0.07] sm:text-8xl">
+            <span className="font-display text-6xl font-bold leading-none text-t4 opacity-20 sm:text-8xl">
               {KIND_LABEL[resource.kind]}
             </span>
           </div>
@@ -52,9 +52,9 @@ function ResourceSpotlight({ resource, kicker = 'À la une', cataloguePath }: Re
       <div className="min-w-0">
         <p className="flex items-baseline gap-3">
           <span className="kicker">{kicker}</span>
-          <span className="kicker-muted">{KIND_LABEL[resource.kind]}</span>
+          <span className="label">{KIND_LABEL[resource.kind]}</span>
         </p>
-        <h3 className="mt-5 break-words font-display text-3xl font-medium leading-[1.12] tracking-tight text-t1 sm:text-4xl xl:text-[2.75rem]">
+        <h3 className="mt-5 break-words font-display text-4xl font-bold leading-[0.98] tracking-tight text-t1 sm:text-5xl xl:text-[3.25rem] xl:leading-[0.94]">
           <Link
             to={resourcePath(resource)}
             state={{ cataloguePath }}
@@ -63,17 +63,17 @@ function ResourceSpotlight({ resource, kicker = 'À la une', cataloguePath }: Re
             {resource.title}
           </Link>
         </h3>
-        <p className="mt-5 line-clamp-3 max-w-xl text-base leading-relaxed text-t3">
+        <p className="mt-6 line-clamp-3 max-w-xl text-base leading-normal text-t3">
           {resource.description}
         </p>
-        <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-t4">
+        <p className="label mt-6">
           {meta}
           {resource.createdAt && `  ·  Publié le ${dateFormat.format(new Date(resource.createdAt))}`}
         </p>
         <Link
           to={resourcePath(resource)}
           state={{ cataloguePath }}
-          className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-ink"
+          className="btn-primary mt-8"
         >
           Ouvrir la ressource
           <ArrowRight className="h-4 w-4" aria-hidden />

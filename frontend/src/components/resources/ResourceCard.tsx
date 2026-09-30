@@ -28,9 +28,9 @@ function ResourceCard({ resource, cataloguePath }: ResourceCardProps) {
       <Link
         to={resourcePath(resource)}
         state={{ cataloguePath }}
-        className="group flex h-full flex-col overflow-hidden rounded-lg border border-line-soft bg-noir-900 transition-colors hover:border-gold-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+        className="card-lift group flex h-full flex-col overflow-hidden rounded bg-card transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 motion-reduce:hover:translate-y-0"
       >
-        <span className="relative block aspect-[16/9] overflow-hidden bg-noir-900">
+        <span className="relative block aspect-[16/9] overflow-hidden bg-noir-700">
           {resource.coverImage && failedImage !== resource.coverImage ? (
             <img
               src={resource.coverImage}
@@ -46,11 +46,11 @@ function ResourceCard({ resource, cataloguePath }: ResourceCardProps) {
           )}
         </span>
         <span className="flex flex-1 flex-col gap-2 p-4">
-          <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-t4">
-            <KindIcon className="h-3.5 w-3.5 shrink-0 text-gold-400/70" aria-hidden />
+          <span className="label flex items-center gap-2">
+            <KindIcon className="h-3.5 w-3.5 shrink-0 text-gold-ink" aria-hidden />
             {KIND_LABEL[resource.kind]}
           </span>
-          <span className="line-clamp-2 break-words font-display text-base font-medium leading-snug text-t1 transition-colors group-hover:text-gold-ink">
+          <span className="line-clamp-2 break-words font-display text-base font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-ink">
             {resource.title}
           </span>
           {meta && <span className="mt-auto pt-1 text-xs text-t4">{meta}</span>}
