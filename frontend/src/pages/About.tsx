@@ -3,7 +3,7 @@ import { ArrowRight, BookOpen, CalendarDays, MessageCircle, Podcast } from 'luci
 
 import SEO from '@/components/common/SEO';
 import Layout from '@/components/layout/Layout';
-import { PageHeader, Section } from '@/components/layout/Page';
+import { Section } from '@/components/layout/Page';
 
 const ACTIONS = [
   {
@@ -37,56 +37,63 @@ const ACTIONS = [
   },
 ] as const;
 
-/**
- * About the work, not the founder: what the platform does, in four moves.
- */
+/** About the work, not the founder: a white poster band, four moves on black, a short signature. */
 export default function About() {
   return (
     <Layout>
       <SEO title="À propos" description="LesCracks est une plateforme tech francophone : une bibliothèque ouverte, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant." url="/a-propos" />
 
-      <Section spacing="tight">
-        <PageHeader
-          eyebrow="À propos"
-          title="Ce que nous faisons."
-          description="Une plateforme pour apprendre la tech en français. En accès libre, à ton rythme, entouré."
-        />
+      <section className="mode-light grid lg:grid-cols-2">
+        <div className="flex items-center px-5 py-20 sm:px-8 lg:py-28 lg:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:pr-16">
+          <div className="max-w-xl">
+            <p className="kicker">À propos</p>
+            <h1 className="mt-6 font-display text-5xl font-bold leading-[0.92] tracking-tight text-t1 sm:text-6xl xl:text-7xl xl:leading-[0.9]">
+              Apprendre la tech, en français, entouré.
+            </h1>
+            <p className="mt-8 text-lg leading-normal text-t3">
+              Une plateforme en accès libre : des ressources choisies, des rendez-vous pour pratiquer, une communauté qui avance ensemble.
+            </p>
+          </div>
+        </div>
+        <img src="/images/about.jpg" alt="Des membres de LesCracks en atelier" className="h-72 w-full object-cover sm:h-96 lg:h-full" loading="eager" />
+      </section>
 
-        <ul className="grid gap-x-14 sm:grid-cols-2">
+      <Section aria-labelledby="actions-heading">
+        <h2 id="actions-heading" className="mb-12 max-w-2xl font-display text-4xl font-bold leading-[0.96] tracking-tight text-t1 sm:text-5xl">
+          Quatre façons d’avancer.
+        </h2>
+        <ul className="grid gap-3 sm:grid-cols-2">
           {ACTIONS.map(({ icon: Icon, title, body, to, link, ...rest }) => {
             const external = 'external' in rest && rest.external;
+            const linkClass = 'link mt-6 inline-flex items-center gap-2 text-sm';
             return (
-            <li key={title} className="border-t border-line-soft py-8">
-              <div className="flex items-center gap-4">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded border border-gold-400/25 bg-gold-400/10 text-gold-ink">
-                  <Icon className="h-5 w-5" aria-hidden />
+              <li key={title} className="flex flex-col rounded-lg bg-card p-6 sm:p-8">
+                <Icon className="h-6 w-6 text-gold-400" aria-hidden />
+                <h3 className="mt-5 font-display text-2xl font-bold leading-tight text-t1">{title}</h3>
+                <p className="mt-3 max-w-md text-base leading-normal text-t3">{body}</p>
+                <span className="mt-auto">
+                  {external ? (
+                    <a href={to} target="_blank" rel="noopener noreferrer" className={linkClass}>{link}<ArrowRight className="h-4 w-4" aria-hidden /></a>
+                  ) : (
+                    <Link to={to} className={linkClass}>{link}<ArrowRight className="h-4 w-4" aria-hidden /></Link>
+                  )}
                 </span>
-                <h2 className="font-display text-2xl font-bold text-t1">{title}</h2>
-              </div>
-              <p className="mt-4 max-w-md text-sm leading-relaxed text-t3">{body}</p>
-              {external ? (
-                <a href={to} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-ink">
-                  {link}<ArrowRight className="h-4 w-4" aria-hidden />
-                </a>
-              ) : (
-                <Link to={to} className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-ink">
-                  {link}<ArrowRight className="h-4 w-4" aria-hidden />
-                </Link>
-              )}
-            </li>
+              </li>
             );
           })}
         </ul>
+      </Section>
 
-        <div className="mt-14 flex items-center gap-5 border-t border-line-soft pt-8">
-          <img src="/images/photo-brandon.jpeg" alt="Brandon Kamga, fondateur de LesCracks" className="h-16 w-16 shrink-0 rounded-lg border border-line-soft object-cover" loading="lazy" />
-          <div className="min-w-0">
-            <p className="font-display text-base font-bold text-t1">Brandon Kamga</p>
-            <p className="mt-1 text-sm leading-relaxed text-t3">
-              Il a lancé LesCracks et lit tout :{' '}
-              <a href="mailto:contact@lescracks.com" className="text-gold-ink underline-offset-4 transition-colors hover:text-gold-ink hover:underline">contact@lescracks.com</a>
-            </p>
+      <Section tone="light" spacing="tight">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-5">
+            <img src="/images/photo-brandon.jpeg" alt="Brandon Kamga, fondateur de LesCracks" className="h-16 w-16 shrink-0 rounded-full object-cover" loading="lazy" />
+            <div className="min-w-0">
+              <p className="text-base font-bold text-t1">Brandon Kamga</p>
+              <p className="label mt-1">Fondateur</p>
+            </div>
           </div>
+          <a href="mailto:contact@lescracks.com" className="btn-primary">Écrire à l’équipe</a>
         </div>
       </Section>
     </Layout>
