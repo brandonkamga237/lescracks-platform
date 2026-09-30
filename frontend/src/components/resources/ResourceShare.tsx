@@ -77,7 +77,7 @@ export default function ResourceShare({ resource, compact = false }: ResourceSha
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => setOpen(false)}
-                className="flex flex-col items-center gap-1 rounded p-2 text-t3 transition hover:bg-white/5 hover:text-t1"
+                className="flex flex-col items-center gap-1 rounded p-2 text-t3 transition hover:bg-noir-900 hover:text-t1"
                 aria-label={`Partager sur ${name}`}
               >
                 <Icon className="h-5 w-5" aria-hidden />
@@ -87,7 +87,7 @@ export default function ResourceShare({ resource, compact = false }: ResourceSha
           </div>
           <div className="mt-3 space-y-2">
             {typeof navigator.share === 'function' && (
-              <button type="button" onClick={nativeShare} className="w-full rounded border border-line-soft py-2 text-sm text-t2 transition hover:bg-white/5">
+              <button type="button" onClick={nativeShare} className="w-full rounded border border-line-soft py-2 text-sm text-t2 transition hover:bg-noir-900">
                 Partager nativement
               </button>
             )}

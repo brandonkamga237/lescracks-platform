@@ -56,7 +56,7 @@ export default function About() {
           {ACTIONS.map(({ icon: Icon, title, body, to, link, ...rest }) => {
             const external = 'external' in rest && rest.external;
             return (
-            <li key={title} className="border-t border-line-soft/50 py-8">
+            <li key={title} className="border-t border-line-soft py-8">
               <div className="flex items-center gap-4">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded border border-gold-400/25 bg-gold-400/10 text-gold-ink">
                   <Icon className="h-5 w-5" aria-hidden />
@@ -65,11 +65,11 @@ export default function About() {
               </div>
               <p className="mt-4 max-w-md text-sm leading-relaxed text-t3">{body}</p>
               {external ? (
-                <a href={to} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-300">
+                <a href={to} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-ink">
                   {link}<ArrowRight className="h-4 w-4" aria-hidden />
                 </a>
               ) : (
-                <Link to={to} className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-300">
+                <Link to={to} className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-ink">
                   {link}<ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               )}
@@ -78,13 +78,13 @@ export default function About() {
           })}
         </ul>
 
-        <div className="mt-14 flex items-center gap-5 border-t border-line-soft/50 pt-8">
-          <img src="/images/photo-brandon.jpeg" alt="Brandon Kamga, fondateur de LesCracks" className="h-16 w-16 shrink-0 rounded-lg border border-line-soft/60 object-cover" loading="lazy" />
+        <div className="mt-14 flex items-center gap-5 border-t border-line-soft pt-8">
+          <img src="/images/photo-brandon.jpeg" alt="Brandon Kamga, fondateur de LesCracks" className="h-16 w-16 shrink-0 rounded-lg border border-line-soft object-cover" loading="lazy" />
           <div className="min-w-0">
             <p className="font-display text-base font-medium text-t1">Brandon Kamga</p>
             <p className="mt-1 text-sm leading-relaxed text-t3">
               Il a lancé LesCracks et lit tout :{' '}
-              <a href="mailto:contact@lescracks.com" className="text-gold-ink underline-offset-4 transition-colors hover:text-gold-300 hover:underline">contact@lescracks.com</a>
+              <a href="mailto:contact@lescracks.com" className="text-gold-ink underline-offset-4 transition-colors hover:text-gold-ink hover:underline">contact@lescracks.com</a>
             </p>
           </div>
         </div>

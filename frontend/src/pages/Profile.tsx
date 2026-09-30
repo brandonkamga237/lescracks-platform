@@ -183,12 +183,12 @@ export default function Profile() {
   return <Layout>
     <SEO title="Ton espace" description="Retrouve tes informations et les ressources de la communauté LesCracks." url="/profil" />
     <Section spacing="normal">
-      <header className="flex flex-col gap-6 border-b border-line-soft/50 pb-10 sm:flex-row sm:items-center sm:justify-between">
+      <header className="flex flex-col gap-6 border-b border-line-soft pb-10 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-5"><div aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gold-400/30 bg-gold-400/10 font-display text-2xl text-gold-ink">{user?.avatarUrl ? <img src={`/api/files/${user.avatarUrl}`} alt="" className="h-full w-full object-cover" /> : name ? name.charAt(0).toUpperCase() : <UserRound className="h-7 w-7" />}</div><div><p className="text-sm font-medium tracking-wide text-gold-ink">Ton espace personnel</p><h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-t1 sm:text-4xl">Bonjour{user?.firstName ? `, ${user.firstName}` : name ? `, ${name}` : ''}.</h1><p className="mt-2 text-sm text-t4">Un point de départ pour ta prochaine découverte.</p></div></div>
         <button type="button" disabled={Boolean(busy)} onClick={() => void logout()} className="btn-secondary self-start"><LogOut aria-hidden="true" className="h-4 w-4" />{busy === 'logout' ? 'Déconnexion…' : 'Me déconnecter'}</button>
       </header>
       <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.2fr_1fr]">
-        <section className="rounded-lg border border-white/[0.06] bg-card p-6 sm:p-8" aria-labelledby="profile-heading">
+        <section className="rounded-lg border border-line-soft bg-card p-6 sm:p-8" aria-labelledby="profile-heading">
           <div className="flex items-start justify-between gap-4"><div><h2 id="profile-heading" className="font-display text-xl font-semibold text-t1">Mes informations</h2><p className="mt-2 text-sm text-t4">Les informations liées à ton compte.</p></div>{user && !editing && <button type="button" disabled={Boolean(busy)} onClick={() => { setEditing(true); setNotice(''); }} className="min-h-11 px-2 text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Modifier</button>}</div>
           {error && <p role="alert" className="mt-5 rounded border border-red-400/25 bg-red-400/5 p-3 text-sm text-red-400">{error}</p>}
           {notice && <p role="status" className="mt-5 rounded border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-ink">{notice}</p>}
@@ -277,7 +277,7 @@ export default function Profile() {
               {identityError && <p role="alert" className="mt-5 rounded border border-red-400/25 bg-red-400/5 p-3 text-sm text-red-400">{identityError}</p>}
               {identityNotice && <p role="status" className="mt-5 rounded border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-ink">{identityNotice}</p>}
               <ul className="mt-5 space-y-3">
-                <li className="flex items-center justify-between gap-4 rounded-lg border border-white/[0.06] bg-[#0b0b0b] px-4 py-3">
+                <li className="flex items-center justify-between gap-4 rounded-lg border border-line-soft bg-[#0b0b0b] px-4 py-3">
                   <span className="text-sm text-t1">{providerLabels.LOCAL}</span>
                   {user.provider === 'LOCAL' ? (
                     <span className="text-xs font-medium text-gold-ink">Actif</span>
@@ -289,7 +289,7 @@ export default function Profile() {
                   const linked = user.identities?.some((identity) => identity.provider === provider);
                   const onlyMethod = linked && user.provider !== 'LOCAL' && user.identities?.length === 1 && user.identities[0]?.provider === provider;
                   return (
-                    <li key={provider} className="flex items-center justify-between gap-4 rounded-lg border border-white/[0.06] bg-[#0b0b0b] px-4 py-3">
+                    <li key={provider} className="flex items-center justify-between gap-4 rounded-lg border border-line-soft bg-[#0b0b0b] px-4 py-3">
                       <span className="text-sm text-t1">{label}</span>
                       {linked ? (
                         <button
@@ -321,8 +321,8 @@ export default function Profile() {
           <h2 id="quick-links-heading" className="font-display text-xl font-semibold text-t1">Et maintenant ?</h2>
           <p className="mt-2 text-sm text-t4">Choisis ce que tu veux explorer aujourd’hui.</p>
           <div className="mt-5 space-y-4">
-            <Link to="/ressources" className="group flex gap-4 rounded-lg border border-white/[0.06] bg-card p-6 transition-all hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20"><BookOpen aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-semibold text-t1">Explorer les ressources</h3><p className="mt-2 text-sm leading-relaxed text-t4">Des ebooks et des vidéos pour approfondir les sujets qui t’intéressent.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
-            <Link to="/evenements" className="group flex gap-4 rounded-lg border border-white/[0.06] bg-card p-6 transition-all hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20"><CalendarDays aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-semibold text-t1">Trouver un événement</h3><p className="mt-2 text-sm leading-relaxed text-t4">Découvre les prochains rendez-vous pour apprendre et échanger.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
+            <Link to="/ressources" className="group flex gap-4 rounded-lg border border-line-soft bg-card p-6 transition-all hover:border-line hover:shadow-lg hover:shadow-black/20"><BookOpen aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-semibold text-t1">Explorer les ressources</h3><p className="mt-2 text-sm leading-relaxed text-t4">Des ebooks et des vidéos pour approfondir les sujets qui t’intéressent.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
+            <Link to="/evenements" className="group flex gap-4 rounded-lg border border-line-soft bg-card p-6 transition-all hover:border-line hover:shadow-lg hover:shadow-black/20"><CalendarDays aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-semibold text-t1">Trouver un événement</h3><p className="mt-2 text-sm leading-relaxed text-t4">Découvre les prochains rendez-vous pour apprendre et échanger.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
           </div>
           <div className="mt-6">
             <NewsletterCard />

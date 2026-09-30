@@ -10,7 +10,7 @@ import type { AdminUser, AuthProvider } from '@/services/types';
 const statusLabels = { ACTIVE: 'Actif', INACTIVE: 'Inactif', BANNED: 'Suspendu' };
 const statusStyles = {
   ACTIVE: 'border-green-500/30 bg-green-500/10 text-green-400',
-  INACTIVE: 'border-t3/30 bg-t3/10 text-t3',
+  INACTIVE: 'border-line bg-noir-800 text-t3',
   BANNED: 'border-red-500/30 bg-red-500/10 text-red-400',
 };
 const providerLabels: Record<AuthProvider, string> = { LOCAL: 'Email', GOOGLE: 'Google', GITHUB: 'GitHub' };
@@ -179,7 +179,7 @@ export default function AdminUsers() {
             </thead>
             <tbody>
               {list.map((user) => (
-                <tr key={user.id} className="border-b border-line-soft/50 last:border-b-0">
+                <tr key={user.id} className="border-b border-line-soft last:border-b-0">
                   <td className="px-5 py-3 text-t1">{fullName(user)}</td>
                   <td className="px-5 py-3 text-t3">{user.email}</td>
                   <td className="px-5 py-3">

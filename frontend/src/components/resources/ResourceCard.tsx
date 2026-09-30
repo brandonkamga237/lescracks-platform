@@ -28,7 +28,7 @@ function ResourceCard({ resource, cataloguePath }: ResourceCardProps) {
       <Link
         to={resourcePath(resource)}
         state={{ cataloguePath }}
-        className="group flex h-full flex-col overflow-hidden rounded-lg border border-line-soft/60 bg-noir-900/40 transition-colors hover:border-gold-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+        className="group flex h-full flex-col overflow-hidden rounded-lg border border-line-soft bg-noir-900 transition-colors hover:border-gold-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
       >
         <span className="relative block aspect-[16/9] overflow-hidden bg-noir-900">
           {resource.coverImage && failedImage !== resource.coverImage ? (
@@ -50,7 +50,7 @@ function ResourceCard({ resource, cataloguePath }: ResourceCardProps) {
             <KindIcon className="h-3.5 w-3.5 shrink-0 text-gold-400/70" aria-hidden />
             {KIND_LABEL[resource.kind]}
           </span>
-          <span className="line-clamp-2 break-words font-display text-base font-medium leading-snug text-t1 transition-colors group-hover:text-gold-300">
+          <span className="line-clamp-2 break-words font-display text-base font-medium leading-snug text-t1 transition-colors group-hover:text-gold-ink">
             {resource.title}
           </span>
           {meta && <span className="mt-auto pt-1 text-xs text-t4">{meta}</span>}

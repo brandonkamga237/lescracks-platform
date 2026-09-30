@@ -62,7 +62,7 @@ const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutPro
         <aside aria-label="La communauté LesCracks" className="mx-auto w-full max-w-7xl px-5 py-10 sm:px-8">
           <div className="flex flex-col items-start justify-between gap-4 border-t border-line-soft pt-8 sm:flex-row sm:items-center">
             <p className="text-sm text-t3"><span className="font-medium text-t1">La conversation continue.</span> La communauté est sur WhatsApp.</p>
-            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-gold-ink underline-offset-4 hover:text-gold-300 hover:underline" aria-label="Rejoindre la communauté sur WhatsApp, nouvel onglet"><WhatsAppSVG />Rejoindre la communauté</a>
+            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-gold-ink underline-offset-4 hover:text-gold-ink hover:underline" aria-label="Rejoindre la communauté sur WhatsApp, nouvel onglet"><WhatsAppSVG />Rejoindre la communauté</a>
           </div>
         </aside>
       )}

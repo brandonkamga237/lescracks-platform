@@ -24,7 +24,7 @@ export default function FilterChips<T extends string>({
   const entries: Array<[T | undefined, string]> = [[undefined, allLabel], ...options];
 
   return (
-    <fieldset className="flex flex-wrap items-end gap-x-7 border-b border-line-soft/50">
+    <fieldset className="flex flex-wrap items-end gap-x-7 border-b border-line-soft">
       <legend className="sr-only">{legend}</legend>
       {entries.map(([option, label]) => {
         const active = value === option;

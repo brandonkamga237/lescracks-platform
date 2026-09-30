@@ -30,7 +30,7 @@ function ResourceSpotlight({ resource, kicker = 'À la une', cataloguePath }: Re
       <Link
         to={resourcePath(resource)}
         state={{ cataloguePath }}
-        className="block aspect-[16/10] overflow-hidden rounded border border-line-soft/60 bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+        className="block aspect-[16/10] overflow-hidden rounded border border-line-soft bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
         aria-label={resource.title}
       >
         {resource.coverImage && failedImage !== resource.coverImage ? (
@@ -58,7 +58,7 @@ function ResourceSpotlight({ resource, kicker = 'À la une', cataloguePath }: Re
           <Link
             to={resourcePath(resource)}
             state={{ cataloguePath }}
-            className="transition-colors hover:text-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+            className="transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
           >
             {resource.title}
           </Link>
@@ -73,7 +73,7 @@ function ResourceSpotlight({ resource, kicker = 'À la une', cataloguePath }: Re
         <Link
           to={resourcePath(resource)}
           state={{ cataloguePath }}
-          className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-300"
+          className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-ink"
         >
           Ouvrir la ressource
           <ArrowRight className="h-4 w-4" aria-hidden />

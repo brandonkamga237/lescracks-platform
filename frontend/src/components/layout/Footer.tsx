@@ -100,7 +100,7 @@ const Footer = () => {
                   const content = (
                     <span className={`flex items-center gap-2 text-sm transition-colors ${
                       link.highlight
-                        ? 'font-medium text-gold-400 hover:text-gold-300'
+                        ? 'font-medium text-gold-400 hover:text-gold-ink'
                         : 'text-t3 hover:text-t1'
                     }`}>
                       {link.isWhatsApp ? (

@@ -30,7 +30,7 @@ function InlineText({ text }: { text: string }) {
         if (link) {
           return (
             <a key={i} href={link[2]} target="_blank" rel="noopener noreferrer"
-              className="text-gold-ink underline underline-offset-4 hover:text-gold-300">
+              className="text-gold-ink underline underline-offset-4 hover:text-gold-ink">
               {link[1]}
             </a>
           );

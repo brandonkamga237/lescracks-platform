@@ -99,10 +99,10 @@ export default function Talk() {
           )}
         </div>
 
-        <p className="mt-14 border-t border-line-soft/50 pt-8 text-sm text-t4">
+        <p className="mt-14 border-t border-line-soft pt-8 text-sm text-t4">
           Tu construis quelque chose et tu veux en parler dans un épisode ?{' '}
-          <a href="mailto:contact@lescracks.com" className="text-t3 underline underline-offset-4 transition-colors hover:text-gold-300">Écris-nous</a>.
-          {' '}Ou <Link to="/ressources" className="text-t3 underline underline-offset-4 transition-colors hover:text-gold-300">explore la bibliothèque</Link> en attendant.
+          <a href="mailto:contact@lescracks.com" className="text-t3 underline underline-offset-4 transition-colors hover:text-gold-ink">Écris-nous</a>.
+          {' '}Ou <Link to="/ressources" className="text-t3 underline underline-offset-4 transition-colors hover:text-gold-ink">explore la bibliothèque</Link> en attendant.
         </p>
       </Section>
     </Layout>

@@ -103,7 +103,7 @@ export default function Ressources() {
 
         <Toolbar
           lead={
-            <div className="flex items-center gap-3 border-b border-line/60 pb-3 transition-colors focus-within:border-gold-400/60">
+            <div className="flex items-center gap-3 border-b border-line pb-3 transition-colors focus-within:border-gold-400/60">
               <Search className="h-5 w-5 shrink-0 text-t4" aria-hidden />
               <label htmlFor="resource-search" className="sr-only">Rechercher une ressource</label>
               <input
@@ -149,7 +149,7 @@ export default function Ressources() {
         </Toolbar>
 
         {refineOpen && (
-          <div id="resource-refine" className="mb-10 grid gap-4 rounded-lg border border-line-soft/50 bg-noir-900/40 p-5 sm:grid-cols-2 sm:p-6">
+          <div id="resource-refine" className="mb-10 grid gap-4 rounded-lg border border-line-soft bg-noir-900 p-5 sm:grid-cols-2 sm:p-6">
             <label className="block text-sm font-medium text-t3">
               Catégorie
               <select value={categoryId ?? ''} onChange={(event) => setParam('categoryId', event.target.value || null)} className="input mt-2" disabled={categories.loading || Boolean(categories.error)}>

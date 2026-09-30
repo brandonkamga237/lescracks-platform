@@ -121,7 +121,7 @@ export default function Evenements() {
       {/* The archive: quiet, unfiltered view only — the past never competes with what's next. */}
       {discovery && !!past.data?.content.length && (
         <Section bordered spacing="tight" aria-labelledby="past-events-heading">
-          <div className="mb-8 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-b border-line-soft/50 pb-6">
+          <div className="mb-8 flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-b border-line-soft pb-6">
             <h2 id="past-events-heading" className="font-display text-2xl font-medium tracking-tight text-t2">Déjà passés</h2>
             <span className="kicker-muted">Les rendez-vous précédents</span>
           </div>

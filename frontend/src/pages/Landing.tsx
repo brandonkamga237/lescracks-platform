@@ -46,7 +46,7 @@ export default function Landing() {
       <SEO title="Apprendre la tech, concrètement" description="Des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme. Une bibliothèque ouverte, une communauté francophone." url="/" />
 
       {/* ── Masthead ─────────────────────────────────────────────── */}
-      <Section bleed className="relative overflow-hidden border-b border-line-soft/50">
+      <Section bleed className="relative overflow-hidden border-b border-line-soft">
         <div aria-hidden className="absolute inset-0">
           <img src="/images/community-1.jpg" alt="" className="h-full w-full object-cover opacity-[0.18]" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black" />
@@ -75,7 +75,7 @@ export default function Landing() {
         </div>
 
         {/* The promises as a numbered strip — not cards. */}
-        <dl className="mt-16 grid gap-x-10 gap-y-6 border-t border-line-soft/50 pt-8 sm:grid-cols-3">
+        <dl className="mt-16 grid gap-x-10 gap-y-6 border-t border-line-soft pt-8 sm:grid-cols-3">
           {PROMISES.map(({ icon: Icon, title, body }) => (
             <div key={title} className="flex gap-4">
               <Icon className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" aria-hidden />
@@ -96,7 +96,7 @@ export default function Landing() {
             eyebrow="La bibliothèque"
             id="featured-heading"
             title="À la une"
-            action={<Link to="/ressources" className="text-sm font-medium text-gold-ink underline-offset-4 hover:text-gold-300 hover:underline">Toute la bibliothèque</Link>}
+            action={<Link to="/ressources" className="text-sm font-medium text-gold-ink underline-offset-4 hover:text-gold-ink hover:underline">Toute la bibliothèque</Link>}
           />
 
           {recent.loading ? (
@@ -137,7 +137,7 @@ export default function Landing() {
             id="agenda-heading"
             title="L’agenda"
             description="Les prochains rendez-vous pour pratiquer ensemble."
-            action={<Link to="/evenements" className="text-sm font-medium text-gold-ink underline-offset-4 hover:text-gold-300 hover:underline">Tout l’agenda</Link>}
+            action={<Link to="/evenements" className="text-sm font-medium text-gold-ink underline-offset-4 hover:text-gold-ink hover:underline">Tout l’agenda</Link>}
           />
 
           {upcoming.loading ? (
@@ -160,11 +160,11 @@ export default function Landing() {
       {/* ── La communauté en image ───────────────────────────────── */}
       <motion.div {...reveal(reduced)}>
         <Section spacing="tight" bordered>
-          <figure className="overflow-hidden rounded-lg border border-line-soft/60">
+          <figure className="overflow-hidden rounded-lg border border-line-soft">
             <img src="/images/community-2.jpg" alt="La communauté LesCracks réunie" className="aspect-[21/8] w-full object-cover" loading="lazy" />
-            <figcaption className="flex items-baseline justify-between gap-4 border-t border-line-soft/50 px-4 py-3">
+            <figcaption className="flex items-baseline justify-between gap-4 border-t border-line-soft px-4 py-3">
               <span className="kicker-muted">La communauté</span>
-              <a href="https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gold-ink underline-offset-4 hover:text-gold-300 hover:underline">Rejoindre sur WhatsApp</a>
+              <a href="https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gold-ink underline-offset-4 hover:text-gold-ink hover:underline">Rejoindre sur WhatsApp</a>
             </figcaption>
           </figure>
         </Section>
@@ -184,12 +184,12 @@ export default function Landing() {
                 <li key={category.id}>
                   <Link
                     to={`/ressources?categoryId=${category.id}`}
-                    className="group flex h-full items-center justify-between gap-4 rounded-lg border border-line-soft/60 bg-noir-900/40 px-5 py-4 transition-colors hover:border-gold-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+                    className="group flex h-full items-center justify-between gap-4 rounded-lg border border-line-soft bg-noir-900 px-5 py-4 transition-colors hover:border-gold-400/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
                   >
-                    <span className="min-w-0 break-words font-display text-lg font-medium text-t1 transition-colors group-hover:text-gold-300">
+                    <span className="min-w-0 break-words font-display text-lg font-medium text-t1 transition-colors group-hover:text-gold-ink">
                       {category.name}
                     </span>
-                    <ArrowUpRight className="h-5 w-5 shrink-0 text-t4 transition-colors group-hover:text-gold-300" aria-hidden />
+                    <ArrowUpRight className="h-5 w-5 shrink-0 text-t4 transition-colors group-hover:text-gold-ink" aria-hidden />
                   </Link>
                 </li>
               ))}

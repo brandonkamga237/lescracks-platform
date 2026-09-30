@@ -64,7 +64,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <Link to="/" className="mt-auto flex items-center justify-between rounded-2xl border border-line-soft px-4 py-3 text-sm text-t3 hover:border-gold-400/40 hover:text-t1">Voir le site public<ArrowUpRight className="h-4 w-4" aria-hidden /></Link>
     </aside>
     <div className="lg:pl-64">
-      <header className="border-b border-line-soft bg-noir-900/70 px-4 py-4 sm:px-8">
+      <header className="border-b border-line-soft bg-noir-900 px-4 py-4 sm:px-8">
         <div className="mx-auto flex max-w-7xl items-center gap-4">
           <Dialog.Root open={mobileOpen} onOpenChange={setMobileOpen}>
             <Dialog.Trigger aria-label="Ouvrir la navigation" className="rounded-2xl border border-line p-3 text-t2 lg:hidden"><Menu className="h-5 w-5" aria-hidden /></Dialog.Trigger>

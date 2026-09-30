@@ -121,7 +121,7 @@ export default function RessourceDetail() {
               <button
                 onClick={toggleLike}
                 disabled={liking}
-                className={`mt-4 flex w-full items-center justify-center gap-2 rounded border px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-50 ${liked ? 'border-gold-400 bg-gold-400/10 text-gold-300' : 'border-line text-t3 hover:text-gold-300'}`}
+                className={`mt-4 flex w-full items-center justify-center gap-2 rounded border px-4 py-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:opacity-50 ${liked ? 'border-gold-400 bg-gold-400/10 text-gold-300' : 'border-line text-t3 hover:text-gold-ink'}`}
                 aria-pressed={liked}
               >
                 <Heart filled={liked} />
@@ -130,7 +130,7 @@ export default function RessourceDetail() {
               </button>
             </aside>
           </div>
-          <div className="mt-14 border-t border-line-soft pt-7"><Link to={cataloguePath} className="inline-flex min-h-11 items-center gap-3 text-sm font-medium text-gold-ink hover:text-gold-300">Continuer à explorer la bibliothèque<ArrowUpRight className="h-4 w-4" aria-hidden /></Link></div>
+          <div className="mt-14 border-t border-line-soft pt-7"><Link to={cataloguePath} className="inline-flex min-h-11 items-center gap-3 text-sm font-medium text-gold-ink hover:text-gold-ink">Continuer à explorer la bibliothèque<ArrowUpRight className="h-4 w-4" aria-hidden /></Link></div>
         </>}
       </article>
     </Layout>

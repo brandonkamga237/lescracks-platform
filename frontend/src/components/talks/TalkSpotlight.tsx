@@ -27,7 +27,7 @@ function TalkSpotlight({ video }: TalkSpotlightProps) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Regarder « ${video.title} » sur YouTube`}
-        className="group relative block aspect-[16/10] overflow-hidden rounded border border-line-soft/60 bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+        className="group relative block aspect-[16/10] overflow-hidden rounded border border-line-soft bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
       >
         {thumbnail && !failedThumb ? (
           <img
@@ -58,7 +58,7 @@ function TalkSpotlight({ video }: TalkSpotlightProps) {
             href={youtubeWatchUrl(video.youtubeUrl)}
             target="_blank"
             rel="noopener noreferrer"
-            className="transition-colors hover:text-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+            className="transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
           >
             {video.title}
           </a>
@@ -69,7 +69,7 @@ function TalkSpotlight({ video }: TalkSpotlightProps) {
           href={youtubeWatchUrl(video.youtubeUrl)}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-300"
+          className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-ink"
         >
           Regarder l’épisode
           <Play className="h-4 w-4" aria-hidden />

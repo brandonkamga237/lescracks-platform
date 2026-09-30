@@ -34,7 +34,7 @@ function AgendaItem({ event, cataloguePath }: AgendaItemProps) {
       <Link
         to={eventPath(event)}
         state={{ cataloguePath }}
-        className="group grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-start gap-x-4 border-t border-line-soft/50 px-1 py-5 transition-colors hover:bg-white/[0.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[6rem_minmax(0,1fr)_auto] sm:gap-x-8"
+        className="group grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-start gap-x-4 border-t border-line-soft px-1 py-5 transition-colors hover:bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[6rem_minmax(0,1fr)_auto] sm:gap-x-8"
       >
         <span aria-hidden className="pt-0.5">
           {hasDate ? (
@@ -51,7 +51,7 @@ function AgendaItem({ event, cataloguePath }: AgendaItemProps) {
           )}
         </span>
         <span className="min-w-0">
-          <span className="block break-words font-display text-xl font-medium leading-snug text-t1 transition-colors group-hover:text-gold-300 sm:text-2xl">
+          <span className="block break-words font-display text-xl font-medium leading-snug text-t1 transition-colors group-hover:text-gold-ink sm:text-2xl">
             {event.title}
           </span>
           <span className="mt-2 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-t4">
@@ -59,7 +59,7 @@ function AgendaItem({ event, cataloguePath }: AgendaItemProps) {
             {meta}
           </span>
         </span>
-        <ArrowUpRight className="mt-1 h-5 w-5 text-t4 opacity-0 transition-opacity group-hover:text-gold-300 group-hover:opacity-100" aria-hidden />
+        <ArrowUpRight className="mt-1 h-5 w-5 text-t4 opacity-0 transition-opacity group-hover:text-gold-ink group-hover:opacity-100" aria-hidden />
       </Link>
     </li>
   );

@@ -30,8 +30,8 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
   const TypeIcon = TYPE_ICON[event.type];
 
   return (
-    <article className="grid gap-8 border-b border-line-soft/50 pb-12 sm:pb-16 lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-14">
-      <div aria-hidden className="lg:border-r lg:border-line-soft/50 lg:pr-10">
+    <article className="grid gap-8 border-b border-line-soft pb-12 sm:pb-16 lg:grid-cols-[11rem_minmax(0,1fr)] lg:gap-14">
+      <div aria-hidden className="lg:border-r lg:border-line-soft lg:pr-10">
         {hasDate ? (
           <>
             <span className="block font-display text-7xl font-medium leading-[0.95] text-t1 lg:text-8xl">
@@ -61,7 +61,7 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
           <Link
             to={eventPath(event)}
             state={{ cataloguePath }}
-            className="transition-colors hover:text-gold-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
+            className="transition-colors hover:text-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
           >
             {event.title}
           </Link>
@@ -72,7 +72,7 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
         <Link
           to={eventPath(event)}
           state={{ cataloguePath }}
-          className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-300"
+          className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-ink"
         >
           Voir le rendez-vous
           <ArrowRight className="h-4 w-4" aria-hidden />
