@@ -78,7 +78,7 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="w-9 h-9 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-t3 hover:text-gold hover:border-gold/30 hover:bg-gold/10 transition-all"
+                  className="w-9 h-9 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-t3 hover:text-gold-ink hover:border-gold/30 hover:bg-gold/10 transition-all"
                 >
                   <Icon className="w-4 h-4" />
                 </a>
@@ -97,7 +97,7 @@ const Footer = () => {
                   const content = (
                     <span className={`flex items-center gap-2 text-sm transition-colors ${
                       link.highlight
-                        ? 'text-gold hover:text-gold-light font-medium'
+                        ? 'text-gold-ink hover:text-gold-light font-medium'
                         : 'text-t3 hover:text-t1'
                     }`}>
                       {link.isWhatsApp ? (

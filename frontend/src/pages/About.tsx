@@ -58,18 +58,18 @@ export default function About() {
             return (
             <li key={title} className="border-t border-line-soft/50 py-8">
               <div className="flex items-center gap-4">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded border border-gold-400/25 bg-gold-400/10 text-gold-400">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded border border-gold-400/25 bg-gold-400/10 text-gold-ink">
                   <Icon className="h-5 w-5" aria-hidden />
                 </span>
                 <h2 className="font-display text-2xl font-medium text-t1">{title}</h2>
               </div>
               <p className="mt-4 max-w-md text-sm leading-relaxed text-t3">{body}</p>
               {external ? (
-                <a href={to} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gold-400 transition-colors hover:text-gold-300">
+                <a href={to} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-300">
                   {link}<ArrowRight className="h-4 w-4" aria-hidden />
                 </a>
               ) : (
-                <Link to={to} className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gold-400 transition-colors hover:text-gold-300">
+                <Link to={to} className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-300">
                   {link}<ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               )}
@@ -84,7 +84,7 @@ export default function About() {
             <p className="font-display text-base font-medium text-t1">Brandon Kamga</p>
             <p className="mt-1 text-sm leading-relaxed text-t3">
               Il a lancé LesCracks et lit tout :{' '}
-              <a href="mailto:contact@lescracks.com" className="text-gold-400 underline-offset-4 transition-colors hover:text-gold-300 hover:underline">contact@lescracks.com</a>
+              <a href="mailto:contact@lescracks.com" className="text-gold-ink underline-offset-4 transition-colors hover:text-gold-300 hover:underline">contact@lescracks.com</a>
             </p>
           </div>
         </div>

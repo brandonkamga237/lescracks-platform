@@ -69,7 +69,7 @@ function TalkSpotlight({ video }: TalkSpotlightProps) {
           href={youtubeWatchUrl(video.youtubeUrl)}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gold-400 transition-colors hover:text-gold-300"
+          className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-300"
         >
           Regarder l’épisode
           <Play className="h-4 w-4" aria-hidden />

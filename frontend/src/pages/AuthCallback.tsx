@@ -26,12 +26,12 @@ export default function AuthCallback() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#0b0b0b] px-6 text-white">
-      <div className="max-w-md rounded-3xl border border-white/10 bg-[#171717] p-8 text-center">
+      <div className="max-w-md rounded-lg border border-white/10 bg-[#171717] p-8 text-center">
         {failed ? <>
           <h1 className="font-display text-2xl font-semibold">La connexion n’a pas abouti</h1>
           <p role="alert" className="mt-4 text-sm leading-relaxed text-zinc-300">{error?.message ?? 'La connexion sécurisée a été interrompue ou a expiré. Tu peux réessayer sans perdre ta destination.'}</p>
-          {error && <button type="button" onClick={() => void reload().catch(() => undefined)} className="mt-6 w-full rounded-xl border border-gold-400/40 px-5 py-3 text-gold-400">Réessayer la vérification</button>}
-          <Link to={`/connexion?retour=${encodeURIComponent(from)}`} replace className="mt-4 block rounded-xl bg-gold-400 px-5 py-3 font-semibold text-black">Revenir à la connexion</Link>
+          {error && <button type="button" onClick={() => void reload().catch(() => undefined)} className="mt-6 w-full rounded border border-gold-400/40 px-5 py-3 text-gold-ink">Réessayer la vérification</button>}
+          <Link to={`/connexion?retour=${encodeURIComponent(from)}`} replace className="mt-4 block rounded bg-gold-400 px-5 py-3 font-semibold text-black">Revenir à la connexion</Link>
           <Link to="/ressources" className="mt-5 block text-sm text-zinc-400 underline">Explorer les ressources</Link>
         </> : <div role="status">
           <div aria-hidden="true" className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gold-400 border-t-transparent motion-reduce:animate-none" />

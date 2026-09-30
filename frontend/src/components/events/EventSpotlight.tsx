@@ -37,7 +37,7 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
             <span className="block font-display text-7xl font-medium leading-[0.95] text-t1 lg:text-8xl">
               {start.getDate()}
             </span>
-            <span className="mt-3 block font-mono text-xs uppercase tracking-[0.2em] text-gold-400">
+            <span className="mt-3 block font-mono text-xs uppercase tracking-[0.2em] text-gold-ink">
               {monthYearFormat.format(start)}
             </span>
             <span className="mt-1.5 block font-mono text-[11px] uppercase tracking-[0.16em] text-t4">
@@ -72,7 +72,7 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
         <Link
           to={eventPath(event)}
           state={{ cataloguePath }}
-          className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gold-400 transition-colors hover:text-gold-300"
+          className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-300"
         >
           Voir le rendez-vous
           <ArrowRight className="h-4 w-4" aria-hidden />

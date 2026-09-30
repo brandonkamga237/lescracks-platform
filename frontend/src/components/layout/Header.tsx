@@ -67,7 +67,7 @@ export default function Header() {
   const accountActions = (
     <div className="space-y-2">
       <Link to={isAdmin ? '/admin' : '/profil'} onClick={() => setOpen(false)} className="flex min-h-10 items-center gap-2 rounded bg-white/5 px-3 text-sm text-t1 transition-colors hover:bg-white/10">
-        {isAdmin ? <Shield className="h-4 w-4 text-gold" aria-hidden /> : <User className="h-4 w-4 text-gold" aria-hidden />}
+        {isAdmin ? <Shield className="h-4 w-4 text-gold-ink" aria-hidden /> : <User className="h-4 w-4 text-gold-ink" aria-hidden />}
         {isAdmin ? 'Administration' : 'Mon espace'}
         <ArrowRight className="ml-auto h-4 w-4" aria-hidden />
       </Link>
@@ -92,7 +92,7 @@ export default function Header() {
                 ? isActive ? 'font-medium text-gold-300' : 'text-gold-400/80 hover:text-gold-300'
                 : isActive ? 'font-medium text-t1' : 'text-t3 hover:text-t1'
             }`}>
-              <span aria-hidden className="kicker-muted text-[10px] transition-colors group-hover:text-gold-400">{link.index}</span>
+              <span aria-hidden className="kicker-muted text-[10px] transition-colors group-hover:text-gold-ink">{link.index}</span>
               {link.label}
             </NavLink>
           ))}
@@ -113,7 +113,7 @@ export default function Header() {
           </form>
           {isLoading ? <span role="status" className="h-9 w-24 animate-pulse rounded bg-white/5"><span className="sr-only">Vérification de la session…</span></span> : isSignedIn ? (
             <Link to={isAdmin ? '/admin' : '/profil'} className="flex items-center gap-2.5 text-sm text-t2 transition-colors hover:text-t1">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full border border-gold-400/30 bg-gold-400/10 font-semibold text-gold">{name?.trim().charAt(0).toLocaleUpperCase('fr') || <User className="h-4 w-4" aria-hidden />}</span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-full border border-gold-400/30 bg-gold-400/10 font-semibold text-gold-ink">{name?.trim().charAt(0).toLocaleUpperCase('fr') || <User className="h-4 w-4" aria-hidden />}</span>
               <span className="max-w-32 truncate">{isAdmin ? 'Administration' : 'Mon espace'}</span>
             </Link>
           ) : (

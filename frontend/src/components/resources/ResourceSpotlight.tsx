@@ -73,7 +73,7 @@ function ResourceSpotlight({ resource, kicker = 'À la une', cataloguePath }: Re
         <Link
           to={resourcePath(resource)}
           state={{ cataloguePath }}
-          className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gold-400 transition-colors hover:text-gold-300"
+          className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gold-ink transition-colors hover:text-gold-300"
         >
           Ouvrir la ressource
           <ArrowRight className="h-4 w-4" aria-hidden />

@@ -41,7 +41,7 @@ const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutPro
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <a href="#main-content" className="sr-only z-[60] rounded-xl bg-gold px-5 py-3 font-medium text-black focus:not-sr-only focus:fixed focus:left-5 focus:top-3">Aller au contenu</a>
+      <a href="#main-content" className="sr-only z-[60] rounded bg-gold px-5 py-3 font-medium text-black focus:not-sr-only focus:fixed focus:left-5 focus:top-3">Aller au contenu</a>
       <NewsletterBar />
       <Header />
 
@@ -62,7 +62,7 @@ const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutPro
         <aside aria-label="La communauté LesCracks" className="mx-auto w-full max-w-7xl px-5 py-10 sm:px-8">
           <div className="flex flex-col items-start justify-between gap-4 border-t border-line-soft pt-8 sm:flex-row sm:items-center">
             <p className="text-sm text-t3"><span className="font-medium text-t1">La conversation continue.</span> La communauté est sur WhatsApp.</p>
-            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-gold-400 underline-offset-4 hover:text-gold-300 hover:underline" aria-label="Rejoindre la communauté sur WhatsApp, nouvel onglet"><WhatsAppSVG />Rejoindre la communauté</a>
+            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-medium text-gold-ink underline-offset-4 hover:text-gold-300 hover:underline" aria-label="Rejoindre la communauté sur WhatsApp, nouvel onglet"><WhatsAppSVG />Rejoindre la communauté</a>
           </div>
         </aside>
       )}
@@ -75,7 +75,7 @@ const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutPro
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onClick={scrollToTop}
-          className="fixed bottom-5 right-5 z-30 hidden h-11 w-11 items-center justify-center rounded-full border border-line-strong bg-card text-t2 shadow-lg transition-colors hover:border-gold/40 hover:text-gold lg:flex"
+          className="fixed bottom-5 right-5 z-30 hidden h-11 w-11 items-center justify-center rounded-full border border-line-strong bg-card text-t2 shadow-lg transition-colors hover:border-gold/40 hover:text-gold-ink lg:flex"
           aria-label="Remonter en haut"
         >
           <ArrowUp className="h-4 w-4" aria-hidden />

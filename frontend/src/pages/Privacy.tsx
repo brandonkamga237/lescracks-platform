@@ -5,8 +5,8 @@ export default function Privacy() {
   return <Layout>
     <SEO title="Politique de confidentialité" description="Comment LesCracks protège et utilise tes données personnelles." url="/politique-confidentialite" />
     <div className="mx-auto max-w-3xl px-5 py-16 sm:py-24">
-      <div className="rounded-3xl border border-line-soft/50 bg-card p-6 sm:p-10">
-        <p className="text-sm font-medium tracking-wide text-gold-400">LesCracks / Confidentialité</p>
+      <div className="rounded-lg border border-line-soft/50 bg-card p-6 sm:p-10">
+        <p className="text-sm font-medium tracking-wide text-gold-ink">LesCracks / Confidentialité</p>
         <h1 className="mt-4 font-display text-3xl font-semibold tracking-tight text-t1 sm:text-4xl">Politique de confidentialité</h1>
         <p className="mt-6 text-t3 leading-relaxed">
           LesCracks respecte ta vie privée. Cette politique explique quelles données sont collectées, comment elles sont utilisées et comment elles sont protégées.

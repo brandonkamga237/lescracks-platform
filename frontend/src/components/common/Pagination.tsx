@@ -12,7 +12,7 @@ export default function Pagination({ page, totalPages, onPageChange }: Paginatio
   const pages = Array.from(new Set([1, page - 1, page, page + 1, totalPages]))
     .filter((value) => value >= 1 && value <= totalPages)
     .sort((left, right) => left - right);
-  const buttonClass = 'inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-line px-3 text-sm text-t2 transition-colors hover:border-gold-400 hover:text-t1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:cursor-not-allowed disabled:opacity-40';
+  const buttonClass = 'inline-flex min-h-11 min-w-11 items-center justify-center rounded border border-line px-3 text-sm text-t2 transition-colors hover:border-gold-400 hover:text-t1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 disabled:cursor-not-allowed disabled:opacity-40';
 
   return (
     <nav aria-label="Pagination" className="mt-10 flex flex-wrap items-center justify-center gap-2 border-t border-line-soft pt-8">
@@ -27,7 +27,7 @@ export default function Pagination({ page, totalPages, onPageChange }: Paginatio
             aria-label={`Page ${value}`}
             aria-current={page === value ? 'page' : undefined}
             onClick={() => onPageChange(value)}
-            className={`${buttonClass} ${page === value ? 'border-gold-400 bg-gold-400/10 text-gold-400' : ''}`}
+            className={`${buttonClass} ${page === value ? 'border-gold-400 bg-gold-400/10 text-gold-ink' : ''}`}
           >
             {value}
           </button>

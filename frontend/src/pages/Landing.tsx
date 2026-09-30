@@ -70,7 +70,7 @@ export default function Landing() {
           </Link>
           <Link to="/evenements" className="btn-secondary">Voir l’agenda</Link>
           {isSignedIn && isAdmin && (
-            <Link to="/admin" className="btn-secondary border-gold-400/30 text-gold-400 hover:bg-gold-400/10">Administration</Link>
+            <Link to="/admin" className="btn-secondary border-gold-400/30 text-gold-ink hover:bg-gold-400/10">Administration</Link>
           )}
         </div>
 
@@ -78,7 +78,7 @@ export default function Landing() {
         <dl className="mt-16 grid gap-x-10 gap-y-6 border-t border-line-soft/50 pt-8 sm:grid-cols-3">
           {PROMISES.map(({ icon: Icon, title, body }) => (
             <div key={title} className="flex gap-4">
-              <Icon className="mt-0.5 h-5 w-5 shrink-0 text-gold-400" aria-hidden />
+              <Icon className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" aria-hidden />
               <div>
                 <dt className="text-sm font-medium text-t1">{title}</dt>
                 <dd className="mt-2 text-sm leading-relaxed text-t4">{body}</dd>
@@ -96,7 +96,7 @@ export default function Landing() {
             eyebrow="La bibliothèque"
             id="featured-heading"
             title="À la une"
-            action={<Link to="/ressources" className="text-sm font-medium text-gold-400 underline-offset-4 hover:text-gold-300 hover:underline">Toute la bibliothèque</Link>}
+            action={<Link to="/ressources" className="text-sm font-medium text-gold-ink underline-offset-4 hover:text-gold-300 hover:underline">Toute la bibliothèque</Link>}
           />
 
           {recent.loading ? (
@@ -137,7 +137,7 @@ export default function Landing() {
             id="agenda-heading"
             title="L’agenda"
             description="Les prochains rendez-vous pour pratiquer ensemble."
-            action={<Link to="/evenements" className="text-sm font-medium text-gold-400 underline-offset-4 hover:text-gold-300 hover:underline">Tout l’agenda</Link>}
+            action={<Link to="/evenements" className="text-sm font-medium text-gold-ink underline-offset-4 hover:text-gold-300 hover:underline">Tout l’agenda</Link>}
           />
 
           {upcoming.loading ? (
@@ -164,7 +164,7 @@ export default function Landing() {
             <img src="/images/community-2.jpg" alt="La communauté LesCracks réunie" className="aspect-[21/8] w-full object-cover" loading="lazy" />
             <figcaption className="flex items-baseline justify-between gap-4 border-t border-line-soft/50 px-4 py-3">
               <span className="kicker-muted">La communauté</span>
-              <a href="https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gold-400 underline-offset-4 hover:text-gold-300 hover:underline">Rejoindre sur WhatsApp</a>
+              <a href="https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gold-ink underline-offset-4 hover:text-gold-300 hover:underline">Rejoindre sur WhatsApp</a>
             </figcaption>
           </figure>
         </Section>

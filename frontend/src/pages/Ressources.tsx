@@ -139,7 +139,7 @@ export default function Ressources() {
           >
             <SlidersHorizontal className="h-4 w-4" aria-hidden />
             Affiner
-            {refineCount > 0 && <span className="text-gold-400">({refineCount})</span>}
+            {refineCount > 0 && <span className="text-gold-ink">({refineCount})</span>}
           </button>
           {hasFilters && (
             <button type="button" onClick={() => navigate('/ressources')} className="inline-flex min-h-11 items-center gap-1.5 pb-3 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-t3 transition-colors hover:text-t1">
@@ -171,7 +171,7 @@ export default function Ressources() {
             {(categories.error || tags.error) && (
               <p className="text-sm text-t3 sm:col-span-2">
                 Certains filtres sont indisponibles.{' '}
-                <button type="button" onClick={() => { categories.reload(); tags.reload(); }} className="text-gold-400 underline underline-offset-4">Réessayer</button>
+                <button type="button" onClick={() => { categories.reload(); tags.reload(); }} className="text-gold-ink underline underline-offset-4">Réessayer</button>
               </p>
             )}
           </div>

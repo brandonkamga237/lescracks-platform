@@ -37,8 +37,8 @@ export default function NewsletterCard() {
   }
 
   return (
-    <div className="flex gap-4 rounded-2xl border border-gold-400/20 bg-gold-400/[0.06] p-6">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-gold-400/25 bg-gold-400/10 text-gold-400"><Mail className="h-5 w-5" aria-hidden /></div>
+    <div className="flex gap-4 rounded-lg border border-gold-400/20 bg-gold-400/[0.06] p-6">
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded border border-gold-400/25 bg-gold-400/10 text-gold-ink"><Mail className="h-5 w-5" aria-hidden /></div>
       <div className="flex-1">
         <h3 className="font-display text-lg font-semibold text-t1">Newsletter LesCracks</h3>
         <p className="mt-1 text-sm leading-relaxed text-t4">Soyez informé des nouveaux contenus, événements et ressources directement par email.</p>
@@ -46,7 +46,7 @@ export default function NewsletterCard() {
           type="button"
           onClick={() => void toggle()}
           disabled={busy || subscribed == null}
-          className={`mt-4 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition disabled:opacity-50 ${subscribed ? 'border border-line text-t3 hover:text-t1' : 'bg-gold-400 text-noir-950 hover:bg-gold-300'}`}
+          className={`mt-4 inline-flex items-center gap-2 rounded px-5 py-2.5 text-sm font-semibold transition disabled:opacity-50 ${subscribed ? 'border border-line text-t3 hover:text-t1' : 'bg-gold-400 text-noir-950 hover:bg-gold-300'}`}
         >
           {subscribed ? <Check className="h-4 w-4" aria-hidden /> : <Mail className="h-4 w-4" aria-hidden />}
           {subscribed ? (busy ? 'Mise à jour…' : 'Abonné · Se désabonner') : (busy ? 'Abonnement…' : 'M’abonner')}

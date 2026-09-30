@@ -42,7 +42,7 @@ function AgendaItem({ event, cataloguePath }: AgendaItemProps) {
               <span className="block font-display text-3xl font-medium leading-none text-t1 sm:text-4xl">
                 {start.getDate()}
               </span>
-              <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-[0.16em] text-gold-400">
+              <span className="mt-1.5 block font-mono text-[10px] uppercase tracking-[0.16em] text-gold-ink">
                 {weekdayFormat.format(start)} {monthFormat.format(start)}
               </span>
             </>

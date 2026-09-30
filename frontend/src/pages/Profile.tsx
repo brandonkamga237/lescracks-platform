@@ -184,20 +184,20 @@ export default function Profile() {
     <SEO title="Ton espace" description="Retrouve tes informations et les ressources de la communauté LesCracks." url="/profil" />
     <Section spacing="normal">
       <header className="flex flex-col gap-6 border-b border-line-soft/50 pb-10 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-5"><div aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-gold-400/30 bg-gold-400/10 font-display text-2xl text-gold-400">{user?.avatarUrl ? <img src={`/api/files/${user.avatarUrl}`} alt="" className="h-full w-full object-cover" /> : name ? name.charAt(0).toUpperCase() : <UserRound className="h-7 w-7" />}</div><div><p className="text-sm font-medium tracking-wide text-gold-400">Ton espace personnel</p><h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-t1 sm:text-4xl">Bonjour{user?.firstName ? `, ${user.firstName}` : name ? `, ${name}` : ''}.</h1><p className="mt-2 text-sm text-t4">Un point de départ pour ta prochaine découverte.</p></div></div>
+        <div className="flex items-center gap-5"><div aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gold-400/30 bg-gold-400/10 font-display text-2xl text-gold-ink">{user?.avatarUrl ? <img src={`/api/files/${user.avatarUrl}`} alt="" className="h-full w-full object-cover" /> : name ? name.charAt(0).toUpperCase() : <UserRound className="h-7 w-7" />}</div><div><p className="text-sm font-medium tracking-wide text-gold-ink">Ton espace personnel</p><h1 className="mt-2 font-display text-3xl font-semibold tracking-tight text-t1 sm:text-4xl">Bonjour{user?.firstName ? `, ${user.firstName}` : name ? `, ${name}` : ''}.</h1><p className="mt-2 text-sm text-t4">Un point de départ pour ta prochaine découverte.</p></div></div>
         <button type="button" disabled={Boolean(busy)} onClick={() => void logout()} className="btn-secondary self-start"><LogOut aria-hidden="true" className="h-4 w-4" />{busy === 'logout' ? 'Déconnexion…' : 'Me déconnecter'}</button>
       </header>
       <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.2fr_1fr]">
-        <section className="rounded-3xl border border-white/[0.06] bg-card p-6 sm:p-8" aria-labelledby="profile-heading">
-          <div className="flex items-start justify-between gap-4"><div><h2 id="profile-heading" className="font-display text-xl font-semibold text-t1">Mes informations</h2><p className="mt-2 text-sm text-t4">Les informations liées à ton compte.</p></div>{user && !editing && <button type="button" disabled={Boolean(busy)} onClick={() => { setEditing(true); setNotice(''); }} className="min-h-11 px-2 text-sm font-medium text-gold-400 underline-offset-4 hover:underline">Modifier</button>}</div>
-          {error && <p role="alert" className="mt-5 rounded-xl border border-red-400/25 bg-red-400/5 p-3 text-sm text-red-400">{error}</p>}
-          {notice && <p role="status" className="mt-5 rounded-xl border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-400">{notice}</p>}
+        <section className="rounded-lg border border-white/[0.06] bg-card p-6 sm:p-8" aria-labelledby="profile-heading">
+          <div className="flex items-start justify-between gap-4"><div><h2 id="profile-heading" className="font-display text-xl font-semibold text-t1">Mes informations</h2><p className="mt-2 text-sm text-t4">Les informations liées à ton compte.</p></div>{user && !editing && <button type="button" disabled={Boolean(busy)} onClick={() => { setEditing(true); setNotice(''); }} className="min-h-11 px-2 text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Modifier</button>}</div>
+          {error && <p role="alert" className="mt-5 rounded border border-red-400/25 bg-red-400/5 p-3 text-sm text-red-400">{error}</p>}
+          {notice && <p role="status" className="mt-5 rounded border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-ink">{notice}</p>}
           {editing && user ? <form onSubmit={save} className="mt-7" aria-busy={busy === 'save'}>
             <fieldset disabled={Boolean(busy) || avatarBusy} className="space-y-5"><legend className="sr-only">Modifier tes informations</legend>
               <div>
                 <label htmlFor="profile-avatar" className="text-sm font-medium text-t2">Avatar</label>
-                <input id="profile-avatar" type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadAvatar(file); event.target.value = ''; }} className="mt-2 text-sm text-t2 file:mr-4 file:rounded-xl file:border-0 file:bg-gold-400 file:px-4 file:py-2 file:font-medium file:text-black" />
-                {avatarBusy && <p className="mt-2 text-sm text-gold-400">Envoi en cours…</p>}
+                <input id="profile-avatar" type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadAvatar(file); event.target.value = ''; }} className="mt-2 text-sm text-t2 file:mr-4 file:rounded file:border-0 file:bg-gold-400 file:px-4 file:py-2 file:font-medium file:text-black" />
+                {avatarBusy && <p className="mt-2 text-sm text-gold-ink">Envoi en cours…</p>}
               </div>
               {(['firstName', 'lastName'] as const).map((key) => <div key={key}><label htmlFor={`profile-${key}`} className="text-sm font-medium text-t2">{key === 'firstName' ? 'Prénom' : 'Nom'}</label><input id={`profile-${key}`} name={key} autoComplete={key === 'firstName' ? 'given-name' : 'family-name'} required value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} className="input mt-2" aria-invalid={Boolean(fields[key])} aria-describedby={fields[key] ? `profile-${key}-error` : undefined} />{fields[key] && <p id={`profile-${key}-error`} className="mt-2 text-sm text-red-400">{fields[key]}</p>}</div>)}
               <div><label htmlFor="profile-username" className="text-sm font-medium text-t2">Nom d'utilisateur</label><input id="profile-username" name="username" value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value })} className="input mt-2" /></div>
@@ -215,7 +215,7 @@ export default function Profile() {
                 <div className="flex items-center gap-2">
                   <input value={newSocial.platform} onChange={(event) => setNewSocial({ ...newSocial, platform: event.target.value })} className="input" placeholder="Plateforme" />
                   <input type="url" value={newSocial.url} onChange={(event) => setNewSocial({ ...newSocial, url: event.target.value })} className="input" placeholder="https://..." />
-                  <button type="button" disabled={!newSocial.platform.trim() || !newSocial.url.trim()} onClick={() => { if (!newSocial.platform.trim() || !newSocial.url.trim()) return; setForm({ ...form, socialLinks: { ...form.socialLinks, [newSocial.platform.trim().toLowerCase()]: newSocial.url.trim() } }); setNewSocial({ platform: '', url: '' }); }} className="text-sm text-gold-400 disabled:opacity-50">Ajouter</button>
+                  <button type="button" disabled={!newSocial.platform.trim() || !newSocial.url.trim()} onClick={() => { if (!newSocial.platform.trim() || !newSocial.url.trim()) return; setForm({ ...form, socialLinks: { ...form.socialLinks, [newSocial.platform.trim().toLowerCase()]: newSocial.url.trim() } }); setNewSocial({ platform: '', url: '' }); }} className="text-sm text-gold-ink disabled:opacity-50">Ajouter</button>
                 </div>
               </div>
               <div className="flex flex-wrap gap-3"><button type="submit" className="btn-primary">{busy === 'save' && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}{busy === 'save' ? 'Enregistrement…' : 'Enregistrer'}</button><button type="button" onClick={() => { setEditing(false); setForm({ firstName: user.firstName, lastName: user.lastName, username: user.username ?? '', bio: user.bio ?? '', location: user.location ?? '', socialLinks: user.socialLinks ?? {} }); setNewSocial({ platform: '', url: '' }); setError(''); setFields({}); }} className="btn-secondary">Annuler</button></div>
@@ -225,15 +225,15 @@ export default function Profile() {
             <div><dt className="text-xs tracking-wide text-t4">Adresse email</dt><dd className="mt-1 break-all text-t1">{email || 'Non disponible pour ce compte'}</dd></div>
             {user && <div className="flex flex-wrap gap-x-12 gap-y-5"><div><dt className="text-xs tracking-wide text-t4">Nom d'utilisateur</dt><dd className="mt-1 text-t1">{user.username || 'Non renseigné'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Localisation</dt><dd className="mt-1 text-t1">{user.location || 'Non renseigné'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Statut du compte</dt><dd className="mt-1 text-t1">{statusLabels[user.status] ?? user.status}</dd></div><div><dt className="text-xs tracking-wide text-t4">Connexion</dt><dd className="mt-1 text-t1">{providerLabels[user.provider] ?? user.provider}</dd></div>{joinedLabel && <div><dt className="text-xs tracking-wide text-t4">Membre depuis le</dt><dd className="mt-1 text-t1"><time dateTime={user.createdAt}>{joinedLabel}</time></dd></div>}</div>}
             {user?.bio && <div><dt className="text-xs tracking-wide text-t4">Bio</dt><dd className="mt-1 whitespace-pre-line text-t1">{user.bio}</dd></div>}
-            {user?.socialLinks && Object.keys(user.socialLinks).length > 0 && <div><dt className="text-xs tracking-wide text-t4">Liens sociaux</dt><dd className="mt-1 space-y-1">{Object.entries(user.socialLinks).map(([platform, url]) => <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="block capitalize text-gold-400 underline-offset-4 hover:underline">{platform}</a>)}</dd></div>}
+            {user?.socialLinks && Object.keys(user.socialLinks).length > 0 && <div><dt className="text-xs tracking-wide text-t4">Liens sociaux</dt><dd className="mt-1 space-y-1">{Object.entries(user.socialLinks).map(([platform, url]) => <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="block capitalize text-gold-ink underline-offset-4 hover:underline">{platform}</a>)}</dd></div>}
           </dl>}
-          <div className="mt-7 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-400" /><p>{user ? 'Tu peux modifier tes informations ici. Ton adresse email reste liée à ton compte et ne peut pas être modifiée depuis cet espace.' : isAdmin ? 'Tu utilises un compte administrateur. La gestion des contenus est accessible depuis ton tableau de bord.' : 'Tu es connecté avec un fournisseur externe. Aucun profil membre modifiable n’est disponible pour cette connexion. Ton identité et ton mot de passe se gèrent auprès de ton fournisseur.'}</p></div>
-          {isAdmin && <Link to="/admin" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-gold-400">Ouvrir l’administration<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>}
+          <div className="mt-7 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" /><p>{user ? 'Tu peux modifier tes informations ici. Ton adresse email reste liée à ton compte et ne peut pas être modifiée depuis cet espace.' : isAdmin ? 'Tu utilises un compte administrateur. La gestion des contenus est accessible depuis ton tableau de bord.' : 'Tu es connecté avec un fournisseur externe. Aucun profil membre modifiable n’est disponible pour cette connexion. Ton identité et ton mot de passe se gèrent auprès de ton fournisseur.'}</p></div>
+          {isAdmin && <Link to="/admin" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-gold-ink">Ouvrir l’administration<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>}
 
           <div className="mt-10 border-t border-line-soft pt-6">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gold-400/25 bg-gold-400/10 text-gold-400">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded border border-gold-400/25 bg-gold-400/10 text-gold-ink">
                   {user?.provider === 'LOCAL' ? <Lock className="h-5 w-5" aria-hidden="true" /> : <KeyRound className="h-5 w-5" aria-hidden="true" />}
                 </div>
                 <div>
@@ -246,11 +246,11 @@ export default function Profile() {
                 </div>
               </div>
               {user?.provider === 'LOCAL' && !editingPassword && (
-                <button type="button" onClick={() => { setEditingPassword(true); setPasswordNotice(''); setPasswordError(''); }} className="min-h-11 px-2 text-sm font-medium text-gold-400 underline-offset-4 hover:underline">Modifier</button>
+                <button type="button" onClick={() => { setEditingPassword(true); setPasswordNotice(''); setPasswordError(''); }} className="min-h-11 px-2 text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Modifier</button>
               )}
             </div>
-            {passwordNotice && <p role="status" className="mt-5 rounded-xl border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-400">{passwordNotice}</p>}
-            {passwordError && <p role="alert" className="mt-5 rounded-xl border border-red-400/25 bg-red-400/5 p-3 text-sm text-red-400">{passwordError}</p>}
+            {passwordNotice && <p role="status" className="mt-5 rounded border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-ink">{passwordNotice}</p>}
+            {passwordError && <p role="alert" className="mt-5 rounded border border-red-400/25 bg-red-400/5 p-3 text-sm text-red-400">{passwordError}</p>}
             {editingPassword && user?.provider === 'LOCAL' && (
               <form onSubmit={savePassword} className="mt-5 space-y-5" aria-busy={passwordBusy}>
                 <fieldset disabled={passwordBusy}>
@@ -267,20 +267,20 @@ export default function Profile() {
             <div className="mt-10 border-t border-line-soft pt-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gold-400/25 bg-gold-400/10 text-gold-400"><KeyRound className="h-5 w-5" aria-hidden="true" /></div>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded border border-gold-400/25 bg-gold-400/10 text-gold-ink"><KeyRound className="h-5 w-5" aria-hidden="true" /></div>
                   <div>
                     <h3 className="font-display text-lg font-semibold text-t1">Méthodes de connexion</h3>
                     <p className="text-sm text-t4">Gère les façons de te connecter à ton compte.</p>
                   </div>
                 </div>
               </div>
-              {identityError && <p role="alert" className="mt-5 rounded-xl border border-red-400/25 bg-red-400/5 p-3 text-sm text-red-400">{identityError}</p>}
-              {identityNotice && <p role="status" className="mt-5 rounded-xl border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-400">{identityNotice}</p>}
+              {identityError && <p role="alert" className="mt-5 rounded border border-red-400/25 bg-red-400/5 p-3 text-sm text-red-400">{identityError}</p>}
+              {identityNotice && <p role="status" className="mt-5 rounded border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-ink">{identityNotice}</p>}
               <ul className="mt-5 space-y-3">
-                <li className="flex items-center justify-between gap-4 rounded-2xl border border-white/[0.06] bg-[#0b0b0b] px-4 py-3">
+                <li className="flex items-center justify-between gap-4 rounded-lg border border-white/[0.06] bg-[#0b0b0b] px-4 py-3">
                   <span className="text-sm text-t1">{providerLabels.LOCAL}</span>
                   {user.provider === 'LOCAL' ? (
-                    <span className="text-xs font-medium text-gold-400">Actif</span>
+                    <span className="text-xs font-medium text-gold-ink">Actif</span>
                   ) : (
                     <span className="text-xs text-t4">Inactif</span>
                   )}
@@ -289,7 +289,7 @@ export default function Profile() {
                   const linked = user.identities?.some((identity) => identity.provider === provider);
                   const onlyMethod = linked && user.provider !== 'LOCAL' && user.identities?.length === 1 && user.identities[0]?.provider === provider;
                   return (
-                    <li key={provider} className="flex items-center justify-between gap-4 rounded-2xl border border-white/[0.06] bg-[#0b0b0b] px-4 py-3">
+                    <li key={provider} className="flex items-center justify-between gap-4 rounded-lg border border-white/[0.06] bg-[#0b0b0b] px-4 py-3">
                       <span className="text-sm text-t1">{label}</span>
                       {linked ? (
                         <button
@@ -305,7 +305,7 @@ export default function Profile() {
                           type="button"
                           disabled={identityBusy}
                           onClick={() => void linkProvider(provider)}
-                          className="text-xs font-medium text-gold-400 disabled:opacity-50"
+                          className="text-xs font-medium text-gold-ink disabled:opacity-50"
                         >
                           {identityBusy ? 'Redirection…' : 'Lier'}
                         </button>
@@ -321,8 +321,8 @@ export default function Profile() {
           <h2 id="quick-links-heading" className="font-display text-xl font-semibold text-t1">Et maintenant ?</h2>
           <p className="mt-2 text-sm text-t4">Choisis ce que tu veux explorer aujourd’hui.</p>
           <div className="mt-5 space-y-4">
-            <Link to="/ressources" className="group flex gap-4 rounded-3xl border border-white/[0.06] bg-card p-6 transition-all hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20"><BookOpen aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-gold-400" /><div className="flex-1"><h3 className="font-semibold text-t1">Explorer les ressources</h3><p className="mt-2 text-sm leading-relaxed text-t4">Des ebooks et des vidéos pour approfondir les sujets qui t’intéressent.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-400" /></Link>
-            <Link to="/evenements" className="group flex gap-4 rounded-3xl border border-white/[0.06] bg-card p-6 transition-all hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20"><CalendarDays aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-gold-400" /><div className="flex-1"><h3 className="font-semibold text-t1">Trouver un événement</h3><p className="mt-2 text-sm leading-relaxed text-t4">Découvre les prochains rendez-vous pour apprendre et échanger.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-400" /></Link>
+            <Link to="/ressources" className="group flex gap-4 rounded-lg border border-white/[0.06] bg-card p-6 transition-all hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20"><BookOpen aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-semibold text-t1">Explorer les ressources</h3><p className="mt-2 text-sm leading-relaxed text-t4">Des ebooks et des vidéos pour approfondir les sujets qui t’intéressent.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
+            <Link to="/evenements" className="group flex gap-4 rounded-lg border border-white/[0.06] bg-card p-6 transition-all hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20"><CalendarDays aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-semibold text-t1">Trouver un événement</h3><p className="mt-2 text-sm leading-relaxed text-t4">Découvre les prochains rendez-vous pour apprendre et échanger.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
           </div>
           <div className="mt-6">
             <NewsletterCard />

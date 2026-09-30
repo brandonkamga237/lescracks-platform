@@ -68,7 +68,7 @@ export default function NewsletterBar() {
             type="button"
             disabled={busy}
             onClick={() => void subscribe()}
-            className="font-medium text-gold-300 underline underline-offset-4 transition-colors hover:text-gold-400 disabled:opacity-50"
+            className="font-medium text-gold-300 underline underline-offset-4 transition-colors hover:text-gold-ink disabled:opacity-50"
           >
             {busy ? 'Abonnement…' : 'M’abonner à la newsletter'}
           </button>
@@ -82,13 +82,13 @@ export default function NewsletterBar() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="ton@email.com"
-              className="w-48 rounded-xl border border-gold-400/30 bg-noir-900 px-3 py-1.5 text-sm text-t1 placeholder:text-t4 focus:border-gold-400 focus:outline-none"
+              className="w-48 rounded border border-gold-400/30 bg-noir-900 px-3 py-1.5 text-sm text-t1 placeholder:text-t4 focus:border-gold-400 focus:outline-none"
               disabled={emailBusy}
             />
             <button
               type="submit"
               disabled={emailBusy}
-              className="rounded-xl bg-gold-400 px-3 py-1.5 text-sm font-medium text-noir-950 transition-colors hover:bg-gold-300 disabled:opacity-50"
+              className="rounded bg-gold-400 px-3 py-1.5 text-sm font-medium text-noir-950 transition-colors hover:bg-gold-300 disabled:opacity-50"
             >
               {emailBusy ? '…' : 'M’abonner'}
             </button>
