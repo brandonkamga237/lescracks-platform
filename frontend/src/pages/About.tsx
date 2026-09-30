@@ -9,7 +9,7 @@ const ACTIONS = [
   {
     icon: BookOpen,
     title: 'La bibliothèque',
-    body: 'Des vidéos, des ebooks et des articles en français, en accès libre. Tu choisis un sujet, tu avances à ton rythme.',
+    body: 'Des vidéos, des ebooks et des articles en accès libre. Tu choisis un sujet, tu avances à ton rythme.',
     to: '/ressources',
     link: 'Explorer la bibliothèque',
   },
@@ -37,18 +37,18 @@ const ACTIONS = [
   },
 ] as const;
 
-/** About the work, not the founder: a white poster band, four moves on black, a short signature. */
+/** About the work, not the founder: a raised poster band, four moves on black, a short signature. */
 export default function About() {
   return (
     <Layout>
-      <SEO title="À propos" description="LesCracks est une plateforme tech francophone : une bibliothèque ouverte, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant." url="/a-propos" />
+      <SEO title="À propos" description="LesCracks est une plateforme tech : une bibliothèque ouverte, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant." url="/a-propos" />
 
-      <section className="mode-light grid lg:grid-cols-2">
+      <section className="mode-raised grid lg:grid-cols-2">
         <div className="flex items-center px-5 py-20 sm:px-8 lg:py-28 lg:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:pr-16">
           <div className="max-w-xl">
             <p className="kicker">À propos</p>
             <h1 className="mt-6 font-display text-5xl font-bold leading-[0.92] tracking-tight text-t1 sm:text-6xl xl:text-7xl xl:leading-[0.9]">
-              Apprendre la tech, en français, entouré.
+              Apprendre la tech, entouré.
             </h1>
             <p className="mt-8 text-lg leading-normal text-t3">
               Une plateforme en accès libre : des ressources choisies, des rendez-vous pour pratiquer, une communauté qui avance ensemble.
@@ -84,7 +84,7 @@ export default function About() {
         </ul>
       </Section>
 
-      <Section tone="light" spacing="tight">
+      <Section tone="raised" spacing="tight">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-5">
             <img src="/images/photo-brandon.jpeg" alt="Brandon Kamga, fondateur de LesCracks" className="h-16 w-16 shrink-0 rounded-full object-cover" loading="lazy" />
