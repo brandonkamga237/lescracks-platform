@@ -127,7 +127,8 @@ export function AdminModal({ open, onClose, title, description, busy = false, wi
         onCloseAutoFocus={(event) => { event.preventDefault(); if (previousFocus.current?.isConnected) previousFocus.current.focus(); else document.getElementById('admin-content')?.focus(); }}
         onEscapeKeyDown={(event) => { if (busy) event.preventDefault(); }}
         onPointerDownOutside={(event) => event.preventDefault()}
-        className={`fixed left-1/2 top-1/2 z-50 max-h-[90dvh] w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border border-line-soft bg-card p-6 text-t1 shadow-2xl sm:p-8 ${wide ? 'max-w-3xl' : 'max-w-lg'}`}
+        // On a phone a form is a sheet anchored to the bottom edge: full width for typing, actions near the thumb.
+        className={`fixed inset-x-0 bottom-0 z-50 max-h-[92dvh] w-full overflow-y-auto rounded-t-lg border border-line-soft bg-card p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] text-t1 shadow-2xl sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-h-[90dvh] sm:w-[calc(100%-2rem)] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-lg sm:p-8 ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
       >
         <Dialog.Title className="pr-10 font-display text-2xl font-semibold">{title}</Dialog.Title>
         <Dialog.Description className="mb-6 mt-2 text-sm leading-relaxed text-t3">{description}</Dialog.Description>
