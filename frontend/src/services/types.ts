@@ -175,11 +175,15 @@ export interface WatchSignal {
 }
 
 // Inline marks inside a text field: **bold**, *italic*, `code`, [label](url).
+export type CalloutTone = 'tip' | 'note' | 'warning';
+
 export type ArticleBlock =
   | { type: 'paragraph'; text: string }
   | { type: 'heading'; level: 2 | 3; text: string }
   | { type: 'quote'; text: string }
-  | { type: 'list'; items: { text: string }[] }
+  | { type: 'list'; items: { text: string }[]; ordered?: boolean }
+  | { type: 'code'; text: string; language?: string }
+  | { type: 'callout'; tone: CalloutTone; text: string }
   | { type: 'image'; url: string; alt?: string; caption?: string }
   | { type: 'link'; url: string; text: string }
   | { type: 'divider' };

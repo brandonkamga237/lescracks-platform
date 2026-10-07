@@ -87,9 +87,16 @@ export default function RessourceDetail() {
                 {loaded.coverImage && failedImage !== loaded.coverImage ? <img src={loaded.coverImage} alt={`Couverture de ${loaded.title}`} onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center bg-gradient-to-br from-gold-400/10 via-noir-800 to-noir-950" aria-hidden><span className="font-display text-3xl font-bold text-t4 opacity-30">{loaded.kind === 'EBOOK' ? 'Ebook' : loaded.kind === 'ARTICLE' ? 'Article' : 'Vidéo'}</span></div>}
               </div>
               <section className="mt-10" aria-labelledby="resource-description">
-                <h2 id="resource-description" className="font-display text-3xl font-bold leading-tight text-t1">{loaded.kind === 'ARTICLE' ? 'Contenu de l’article' : 'À propos de cette ressource'}</h2>
-                <p className="mt-5 whitespace-pre-line break-words text-base leading-relaxed text-t2 sm:text-lg">{loaded.description}</p>
-                {loaded.kind === 'ARTICLE' && <div className="mt-8"><ArticleRenderer resource={loaded} /></div>}
+                {/* An article opens on its standfirst and reads straight on; other resources get a short « about ». */}
+                {loaded.kind === 'ARTICLE' ? <>
+                  <h2 id="resource-description" className="sr-only">Article</h2>
+                  <p className="max-w-[42rem] whitespace-pre-line break-words text-xl font-medium leading-relaxed text-t1 sm:text-[1.375rem]">{loaded.description}</p>
+                  <hr className="my-10 max-w-[42rem] border-line-soft" />
+                  <ArticleRenderer resource={loaded} />
+                </> : <>
+                  <h2 id="resource-description" className="font-display text-3xl font-bold leading-tight text-t1">À propos de cette ressource</h2>
+                  <p className="mt-5 whitespace-pre-line break-words text-base leading-relaxed text-t2 sm:text-lg">{loaded.description}</p>
+                </>}
                 {loaded.tags?.length > 0 && (
                   <div className="mt-7">
                     <h3 className="label">Sujets abordés</h3>
