@@ -39,7 +39,7 @@ function ResourceSpotlight({ resource, kicker = 'À la une', cataloguePath }: Re
             src={resource.coverImage}
             alt=""
             onError={() => setFailedImage(resource.coverImage)}
-            className="h-full w-full object-cover transition-transform duration-500 ease-out hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100"
+            className="h-full w-full object-cover transition-transform duration-300 ease-out hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100"
           />
         ) : (
           <KindCover kind={resource.kind} size="spotlight" />

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ArrowRight, ArrowUpRight, Check } from 'lucide-react';
 
 import SEO from '@/components/common/SEO';
@@ -36,7 +36,8 @@ const WHY = [
 
 const WHATSAPP = 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK';
 
-const reveal = (reduced: boolean | null) => (reduced ? {} : { initial: { opacity: 0, y: 24 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.55, ease: 'easeOut' } });
+// Marketing surface, fired once. Full transform strings stay on the GPU; MotionConfig drops the movement under reduced motion and keeps the fade.
+const REVEAL = { initial: { opacity: 0, transform: 'translateY(16px)' }, whileInView: { opacity: 1, transform: 'translateY(0px)' }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.5, ease: [0.23, 1, 0.32, 1] } } as const;
 
 function Stat({ value, label }: { value: React.ReactNode; label: string }) {
   return (
@@ -48,7 +49,6 @@ function Stat({ value, label }: { value: React.ReactNode; label: string }) {
 }
 
 export default function Landing() {
-  const reduced = useReducedMotion();
   const recent = useApi((signal) => api.resources({ size: 4 }, signal), []);
   const upcoming = useApi((signal) => api.upcomingEvents(0, 5, signal), []);
   const categories = useApi((signal) => api.categories(signal), []);
@@ -67,18 +67,18 @@ export default function Landing() {
       <section className="grid lg:grid-cols-[55fr_45fr]">
         <div className="mode-raised flex items-center px-5 py-20 sm:px-8 lg:py-28 lg:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:pr-16">
           <div className="max-w-2xl">
-            <p className="kicker">La plateforme tech francophone</p>
-            <h1 className="mt-6 font-display text-5xl font-bold leading-[0.92] tracking-tight text-t1 sm:text-6xl xl:text-[5.25rem] xl:leading-[0.9]">
+            <p className="kicker animate-rise">La plateforme tech francophone</p>
+            <h1 className="mt-6 animate-rise font-display text-5xl font-bold leading-[0.92] tracking-tight text-t1 sm:text-6xl xl:text-[5.25rem] xl:leading-[0.9] [animation-delay:50ms]">
               {isSignedIn
                 ? <>Bon retour{firstName ? <>, {firstName}</> : ''}. La suite t’attend.</>
                 : <>Deviens aussi un crack de la tech.</>}
             </h1>
-            <p className="mt-8 max-w-lg text-lg leading-normal text-t3">
+            <p className="mt-8 max-w-lg animate-rise text-lg leading-normal text-t3 [animation-delay:100ms]">
               {isSignedIn
                 ? 'Reprends ta lecture ou trouve le prochain rendez-vous.'
                 : 'Vidéos, ebooks et ateliers pour apprendre la tech en français, en accès libre.'}
             </p>
-            <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
+            <div className="mt-10 flex animate-rise flex-wrap items-center gap-x-6 gap-y-4 [animation-delay:150ms]">
               <Link to="/ressources" className="btn-primary">
                 Explorer la bibliothèque <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
@@ -91,7 +91,7 @@ export default function Landing() {
         <div className="relative bg-black pb-12 lg:pb-0">
           <DuotonePhoto src="/images/community-1.webp" loading="eager" className="h-72 sm:h-96 lg:absolute lg:inset-0 lg:h-auto" />
           <div className="relative mx-5 -mt-20 sm:mx-8 lg:absolute lg:bottom-12 lg:-left-16 lg:mx-0 lg:mt-0 lg:w-[22rem]">
-            <div className="mode-raised rounded-lg border border-line p-7 sm:max-w-sm lg:max-w-none">
+            <div className="mode-raised animate-rise rounded-lg border border-line p-7 [animation-delay:200ms] sm:max-w-sm lg:max-w-none">
               {isSignedIn ? (
                 <>
                   <h2 className="text-2xl font-bold leading-tight text-t1">Ton espace</h2>
@@ -134,7 +134,7 @@ export default function Landing() {
       </Section>
 
       {/* ── À la une — noir relevé ───────────────────────────────── */}
-      <motion.div {...reveal(reduced)}>
+      <motion.div {...REVEAL}>
         <Section tone="raised" aria-labelledby="featured-heading">
           <SectionHeader
             eyebrow="La bibliothèque"
@@ -174,7 +174,7 @@ export default function Landing() {
       </motion.div>
 
       {/* ── L'agenda — noir ───────────────────────────────── */}
-      <motion.div {...reveal(reduced)}>
+      <motion.div {...REVEAL}>
         <Section aria-labelledby="agenda-heading">
           <SectionHeader
             eyebrow="En ligne et sur place"
@@ -227,7 +227,7 @@ export default function Landing() {
 
       {/* ── Par sujet — noir relevé ──────────────────────────────── */}
       {!!categories.data?.length && (
-        <motion.div {...reveal(reduced)}>
+        <motion.div {...REVEAL}>
           <Section tone="raised" aria-labelledby="subjects-heading">
             <SectionHeader eyebrow="Trouver son sujet" id="subjects-heading" title="Explorer par sujet" />
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
