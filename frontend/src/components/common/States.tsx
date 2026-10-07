@@ -15,13 +15,15 @@ interface EmptyStateProps {
   /** Icon element, already sized by the caller. */
   icon?: ReactNode;
   action?: ReactNode;
+  /** Inside a dense screen (the back office, a dashboard card), the title stays body-sized. */
+  compact?: boolean;
 }
 
-export function EmptyState({ title, description, icon, action }: EmptyStateProps) {
+export function EmptyState({ title, description, icon, action, compact = false }: EmptyStateProps) {
   return (
-    <div role="status" className={`${PANEL} border border-dashed border-line bg-card`}>
+    <div role="status" className={`${compact ? 'rounded-lg px-5 py-10 text-center' : PANEL} border border-dashed border-line bg-card`}>
       {icon && <div className="mb-5 flex justify-center text-gold-ink">{icon}</div>}
-      <p className="font-display text-2xl font-bold leading-tight text-t1 sm:text-3xl">{title}</p>
+      <p className={compact ? 'text-sm font-medium text-t2' : 'font-display text-2xl font-bold leading-tight text-t1 sm:text-3xl'}>{title}</p>
       {description && <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-t3">{description}</p>}
       {action && <div className="mt-6 flex flex-wrap justify-center gap-3">{action}</div>}
     </div>

@@ -123,10 +123,10 @@ export default function AdminDashboard() {
         title="Comment ça évolue"
         subtitle="Lecture sur la période choisie, comparée à la précédente."
         action={
-          <div className="inline-flex rounded-full border border-line bg-noir-900 p-1" role="group" aria-label="Indicateur">
+          <div className="inline-flex rounded border border-line bg-noir-900 p-1" role="group" aria-label="Indicateur">
             {METRICS.map((m) => (
               <button key={m.key} type="button" onClick={() => setMetric(m.key)}
-                className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${metric === m.key ? 'bg-gold-400 text-black' : 'text-t3 hover:text-t1'}`}>
+                className={`rounded px-3.5 py-1.5 text-xs font-medium transition-colors ${metric === m.key ? 'bg-gold-400 text-black' : 'text-t3 hover:text-t1'}`}>
                 {m.label}
               </button>
             ))}
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
               {views.data?.resources.slice(0, 6).map((resource) => (
                 <li key={resource.id}>
                   <Link to={resourcePath(resource)}
-                    className="group flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-noir-800">
+                    className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-noir-800">
                     <span className="h-10 w-14 shrink-0 overflow-hidden rounded-lg bg-noir-800">
                       {resource.coverImage && <img src={resource.coverImage} alt="" className="h-full w-full object-cover" loading="lazy" />}
                     </span>
@@ -184,11 +184,11 @@ export default function AdminDashboard() {
             {stats && (
               <>
                 <div className="mb-4 flex flex-wrap gap-2 text-xs">
-                  <span className="rounded-full border border-gold-400/30 bg-gold-400/10 px-3 py-1 font-medium text-gold-400">
+                  <span className="rounded border border-gold-400/30 bg-gold-400/10 px-3 py-1 font-medium text-gold-ink">
                     {stats.eventsUpcoming} à venir
                   </span>
-                  <span className="rounded-full border border-line px-3 py-1 text-t3">{stats.eventsOngoing} en cours</span>
-                  <span className="rounded-full border border-line px-3 py-1 text-t3">{stats.eventsPast} passés</span>
+                  <span className="rounded border border-line px-3 py-1 text-t3">{stats.eventsOngoing} en cours</span>
+                  <span className="rounded border border-line px-3 py-1 text-t3">{stats.eventsPast} passés</span>
                 </div>
                 <AdminState loading={views.loading} error={null}
                   empty={!views.data?.events.length}
@@ -199,7 +199,7 @@ export default function AdminDashboard() {
                       return (
                         <li key={event.id}>
                           <Link to={eventPath(event)}
-                            className="group flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-colors hover:bg-noir-800">
+                            className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-noir-800">
                             <span className="min-w-0 flex-1">
                               <span className="block truncate text-sm font-medium text-t1">{event.title}</span>
                               <span className="text-xs text-t4">
@@ -233,16 +233,16 @@ export default function AdminDashboard() {
           <ul className="grid gap-3 md:grid-cols-2">
             {signals.map((signal) => (
               <li key={signal.key}
-                className={`rounded-2xl border p-5 ${signal.severity === 'warning' ? 'border-gold-400/25 bg-gold-400/[0.04]' : 'border-line-soft bg-noir-900'}`}>
+                className={`rounded-lg border p-5 ${signal.severity === 'warning' ? 'border-gold-400/25 bg-gold-400/[0.04]' : 'border-line-soft bg-noir-900'}`}>
                 <div className="flex items-start gap-3">
-                  <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${signal.severity === 'warning' ? 'bg-gold-400/15 text-gold-400' : 'bg-noir-800 text-t3'}`}>
+                  <span className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${signal.severity === 'warning' ? 'bg-gold-400/15 text-gold-ink' : 'bg-noir-800 text-t3'}`}>
                     {signal.severity === 'warning' ? <AlertTriangle className="h-4 w-4" aria-hidden /> : <Info className="h-4 w-4" aria-hidden />}
                   </span>
                   <div className="min-w-0">
                     <h3 className="text-sm font-semibold text-t1">{signal.title}</h3>
                     <p className="mt-1 text-sm leading-relaxed text-t3">{signal.detail}</p>
                     {signal.actionTo && (
-                      <Link to={signal.actionTo} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-gold-400">
+                      <Link to={signal.actionTo} className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-gold-ink">
                         {signal.actionLabel} <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
                       </Link>
                     )}
@@ -262,7 +262,7 @@ export default function AdminDashboard() {
             <ul className="divide-y divide-line-soft">
               {recent.data?.content.slice(0, 6).map((user) => (
                 <li key={user.id} className="flex items-center gap-3 py-3">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-noir-800 text-xs font-semibold text-gold-400">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-noir-800 text-xs font-semibold text-gold-ink">
                     {(user.firstName?.[0] ?? '')}{(user.lastName?.[0] ?? '')}
                   </span>
                   <span className="min-w-0 flex-1">
@@ -276,7 +276,7 @@ export default function AdminDashboard() {
               ))}
             </ul>
           </AdminState>
-          <Link to="/admin/utilisateurs" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-gold-400">
+          <Link to="/admin/utilisateurs" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-gold-ink">
             Tous les utilisateurs <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
           </Link>
         </Panel>
@@ -294,7 +294,7 @@ export default function AdminDashboard() {
                   { label: 'Emails vérifiés', value: stats.verifiedUsers, to: '/admin/utilisateurs' },
                 ].map(({ label, value, to }) => (
                   <Link key={label} to={to} className="group">
-                    <dd className="font-display text-3xl font-semibold tabular-nums text-t1 group-hover:text-gold-400">{value.toLocaleString('fr-FR')}</dd>
+                    <dd className="font-display text-3xl font-semibold tabular-nums text-t1 group-hover:text-gold-ink">{value.toLocaleString('fr-FR')}</dd>
                     <dt className="mt-1 text-xs text-t3">{label}</dt>
                   </Link>
                 ))}

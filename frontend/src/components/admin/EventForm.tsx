@@ -75,10 +75,10 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
       </fieldset>
 
       <fieldset disabled={busy} className="space-y-5 border-t border-line-soft pt-5">
-        <legend className="pr-3 font-display text-lg font-medium">02 · Image de couverture{!initial && <span className="ml-2 text-sm font-normal text-gold-400">obligatoire</span>}</legend>
-        <div className="rounded-3xl border border-dashed border-line p-5">
-          {coverPreview ? <div className="mb-4 aspect-video w-full overflow-hidden rounded-2xl border border-line bg-noir-800"><img src={coverPreview} alt="Aperçu de la couverture" className="h-full w-full object-cover" /></div> : null}
-          <input type="file" accept="image/*" required={!initial} onChange={(event) => handleCoverFile(event.target.files?.[0] ?? null)} className="block w-full text-sm text-t3 file:mr-4 file:min-h-11 file:rounded-full file:border-0 file:bg-noir-700 file:px-4 file:text-t1" />
+        <legend className="pr-3 font-display text-lg font-medium">02 · Image de couverture{!initial && <span className="ml-2 text-sm font-normal text-gold-ink">obligatoire</span>}</legend>
+        <div className="rounded-lg border border-dashed border-line p-5">
+          {coverPreview ? <div className="mb-4 aspect-video w-full overflow-hidden rounded-lg border border-line bg-noir-800"><img src={coverPreview} alt="Aperçu de la couverture" className="h-full w-full object-cover" /></div> : null}
+          <input type="file" accept="image/*" required={!initial} onChange={(event) => handleCoverFile(event.target.files?.[0] ?? null)} className="block w-full text-sm text-t3 file:mr-4 file:min-h-11 file:rounded file:border-0 file:bg-noir-700 file:px-4 file:text-t1" />
           {initial && !coverImageFile && <p className="mt-2 text-xs text-t3">Laisse vide pour conserver l’image actuelle.</p>}
         </div>
       </fieldset>
@@ -97,7 +97,7 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
         <label className="block text-sm text-t2">Statut<select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as EventStatus })} className={field}><option value="DRAFT">Brouillon</option><option value="PUBLISHED">Publié</option><option value="COMPLETED">Terminé</option><option value="CANCELLED">Annulé</option></select></label>
         <p className="text-xs text-t3">{form.status === 'PUBLISHED' ? 'En enregistrant, cet événement sera visible sur le site public.' : 'Seuls les événements publiés sont visibles sur le site public.'}</p>
       </fieldset>
-      {failure && <div role="alert" className="rounded-2xl border border-gold-400/40 bg-gold-400/10 p-4 text-sm text-t1"><p>{failure}</p>{fieldErrors.length > 0 && <ul className="mt-2 list-inside list-disc">{fieldErrors.map((error, index) => <li key={index}>{error}</li>)}</ul>}</div>}
+      {failure && <div role="alert" className="rounded-lg border border-error/30 bg-error/10 p-4 text-sm text-t1"><p>{failure}</p>{fieldErrors.length > 0 && <ul className="mt-2 list-inside list-disc">{fieldErrors.map((error, index) => <li key={index}>{error}</li>)}</ul>}</div>}
       <div className="flex flex-wrap justify-end gap-3 border-t border-line-soft pt-5"><button type="button" disabled={busy} onClick={onCancel} className="btn-secondary">Annuler</button><button disabled={busy} className="btn-primary">{busy ? 'Enregistrement…' : form.status === 'PUBLISHED' ? 'Enregistrer et publier' : 'Enregistrer'}</button></div>
     </form>
   </AdminModal>;
