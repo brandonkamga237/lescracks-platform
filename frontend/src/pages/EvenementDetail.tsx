@@ -3,6 +3,7 @@ import { ArrowLeft, ArrowUpRight, CalendarDays, CalendarPlus, Clock3, Download, 
 import { Link, useLocation, useParams } from 'react-router-dom';
 import SEO from '@/components/common/SEO';
 import ShareButton from '@/components/common/ShareButton';
+import LineArt from '@/components/illustrations/LineArt';
 import Layout from '@/components/layout/Layout';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/services/api';
@@ -54,8 +55,8 @@ export default function EvenementDetail() {
         </div>
 
         {loaded && <>
-          <div className="aspect-[21/9] w-full overflow-hidden bg-noir-800">
-            {loaded.coverImage && failedImage !== loaded.coverImage ? <img src={loaded.coverImage} alt="" onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center"><span className="font-display text-5xl font-bold text-t4 opacity-30">{typeLabels[loaded.type]}</span></div>}
+          <div className="aspect-[16/9] w-full overflow-hidden bg-noir-800 sm:aspect-[21/9]">
+            {loaded.coverImage && failedImage !== loaded.coverImage ? <img src={loaded.coverImage} alt="" onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" /> : <div aria-hidden className="relative flex h-full w-full items-center justify-end bg-noir-900 pr-[10%]"><span className="absolute bottom-4 left-5 font-display text-6xl font-bold leading-none text-t4 opacity-20 sm:left-8 sm:text-8xl">{typeLabels[loaded.type]}</span><LineArt motif="calendar" className="relative h-3/5 text-gold-400" /></div>}
           </div>
           <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
 

@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowUpRight, Download, ExternalLink } from 'lucide-react';
 
 import ArticleRenderer from '@/components/resources/ArticleRenderer';
 import ShareButton from '@/components/common/ShareButton';
+import KindCover from '@/components/illustrations/KindCover';
 import SEO from '@/components/common/SEO';
 import Layout from '@/components/layout/Layout';
 import { useApi } from '@/hooks/useApi';
@@ -84,7 +85,7 @@ export default function RessourceDetail() {
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-12">
             <div className="min-w-0">
               <div className="aspect-[16/9] overflow-hidden bg-noir-800">
-                {loaded.coverImage && failedImage !== loaded.coverImage ? <img src={loaded.coverImage} alt={`Couverture de ${loaded.title}`} onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" /> : <div className="flex h-full items-center justify-center bg-gradient-to-br from-gold-400/10 via-noir-800 to-noir-950" aria-hidden><span className="font-display text-3xl font-bold text-t4 opacity-30">{loaded.kind === 'EBOOK' ? 'Ebook' : loaded.kind === 'ARTICLE' ? 'Article' : 'Vidéo'}</span></div>}
+                {loaded.coverImage && failedImage !== loaded.coverImage ? <img src={loaded.coverImage} alt={`Couverture de ${loaded.title}`} onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" /> : <KindCover kind={loaded.kind} size="spotlight" />}
               </div>
               <section className="mt-10" aria-labelledby="resource-description">
                 {/* An article opens on its standfirst and reads straight on; other resources get a short « about ». */}
