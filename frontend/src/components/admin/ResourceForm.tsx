@@ -157,9 +157,9 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
         <label className="block text-sm text-t2">Description<textarea required rows={5} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className={area} /></label>
 
         <label className="block text-sm text-t2">Image de couverture
-          <div className="mt-2 rounded-2xl border border-dashed border-line p-5">
-            {coverPreview ? <div className="mb-4 aspect-video w-full overflow-hidden rounded-xl border border-line bg-noir-800"><img src={coverPreview} alt="Aperçu de la couverture" className="h-full w-full object-cover" /></div> : null}
-            <input required={!resource} type="file" accept="image/*" onChange={(event) => handleCoverFile(event.target.files?.[0] ?? null)} className="block w-full text-sm text-t3 file:mr-4 file:rounded-full file:border-0 file:bg-noir-700 file:px-4 file:py-2 file:text-t1" />
+          <div className="mt-2 rounded-lg border border-dashed border-line p-5">
+            {coverPreview ? <div className="mb-4 aspect-video w-full overflow-hidden rounded-lg border border-line bg-noir-800"><img src={coverPreview} alt="Aperçu de la couverture" className="h-full w-full object-cover" /></div> : null}
+            <input required={!resource} type="file" accept="image/*" onChange={(event) => handleCoverFile(event.target.files?.[0] ?? null)} className="block w-full text-sm text-t3 file:mr-4 file:rounded file:border-0 file:bg-noir-700 file:px-4 file:py-2 file:text-t1" />
             {resource && !coverImageFile && <p className="mt-2 text-xs text-t3">Laisse vide pour conserver l’image actuelle.</p>}
           </div>
         </label>
@@ -174,8 +174,8 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
           <label className="block text-sm text-t2">Lien de la vidéo<input required type="url" maxLength={1000} placeholder="https://…" value={form.videoUrl} onChange={(event) => setForm({ ...form, videoUrl: event.target.value })} className={field} /></label>
           <label className="block text-sm text-t2">Plateforme<select required value={form.platform} onChange={(event) => setForm({ ...form, platform: event.target.value })} className={field}><option value="">Choisir une plateforme</option>{VIDEO_PLATFORMS.map((platform) => <option key={platform} value={platform}>{platform}</option>)}</select></label>
         </div>}
-        {kind === 'EBOOK' && <div className="rounded-2xl border border-dashed border-line p-5">
-          <label className="block text-sm text-t2">{resource ? 'Remplacer le fichier (facultatif)' : 'Fichier ebook'}<input required={!resource} type="file" onChange={(event) => setEbookFile(event.target.files?.[0] ?? null)} className="mt-3 block w-full text-sm text-t3 file:mr-4 file:rounded-full file:border-0 file:bg-noir-700 file:px-4 file:py-2 file:text-t1" /></label>
+        {kind === 'EBOOK' && <div className="rounded-lg border border-dashed border-line p-5">
+          <label className="block text-sm text-t2">{resource ? 'Remplacer le fichier (facultatif)' : 'Fichier ebook'}<input required={!resource} type="file" onChange={(event) => setEbookFile(event.target.files?.[0] ?? null)} className="mt-3 block w-full text-sm text-t3 file:mr-4 file:rounded file:border-0 file:bg-noir-700 file:px-4 file:py-2 file:text-t1" /></label>
           {resource && <p className="mt-3 text-xs leading-relaxed text-t3">Sans nouveau fichier, le document actuel est conservé{resource.fileFormat ? ` (${resource.fileFormat})` : ''}{resource.fileSize ? ` · ${(resource.fileSize / 1024 / 1024).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} Mo` : ''}.</p>}
         </div>}
       </fieldset>
@@ -190,10 +190,10 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
         {form.categoryId && !tags.loading && !tags.error && (
           <div>
             <p className="text-sm text-t2">Sujets de la catégorie {categories.data?.find((c) => c.id === Number(form.categoryId))?.name}</p>
-            {tags.data?.length === 0 ? <p className="mt-2 text-xs text-t3">Aucun sujet pour cette catégorie. <Link to="/admin/tags" className="text-gold-400 underline">Créer un sujet</Link>.</p> : (
+            {tags.data?.length === 0 ? <p className="mt-2 text-xs text-t3">Aucun sujet pour cette catégorie. <Link to="/admin/tags" className="text-gold-ink underline">Créer un sujet</Link>.</p> : (
               <div className="mt-2 flex flex-wrap gap-2">
                 {tags.data?.map((tag) => (
-                  <button key={tag.id} type="button" onClick={() => toggleTag(tag.id)} aria-pressed={form.tagIds.includes(tag.id)} className={`rounded-full border px-3 py-1.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${form.tagIds.includes(tag.id) ? 'border-gold-400 bg-gold-400/10 text-gold-300' : 'border-line text-t3 hover:text-t1'}`}>
+                  <button key={tag.id} type="button" onClick={() => toggleTag(tag.id)} aria-pressed={form.tagIds.includes(tag.id)} className={`rounded border px-3 py-1.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${form.tagIds.includes(tag.id) ? 'border-gold-400 bg-gold-400/10 text-gold-300' : 'border-line text-t3 hover:text-t1'}`}>
                     {tag.name}
                   </button>
                 ))}
@@ -201,14 +201,14 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
             )}
           </div>
         )}
-        {tags.error && <p role="alert" className="text-sm text-gold-400">{tags.error.message} <button type="button" onClick={tags.reload} className="underline">Réessayer</button></p>}
-        {categories.error && <p role="alert" className="text-sm text-gold-400">{categories.error.message} <button type="button" onClick={categories.reload} className="underline">Réessayer</button></p>}
-        {!categories.loading && !categories.error && !categories.data?.length && <p className="text-sm text-t3">Crée d’abord une catégorie dans <Link to="/admin/categories" className="text-gold-400 underline">Organisation</Link>.</p>}
+        {tags.error && <p role="alert" className="text-sm text-error-ink">{tags.error.message} <button type="button" onClick={tags.reload} className="underline">Réessayer</button></p>}
+        {categories.error && <p role="alert" className="text-sm text-error-ink">{categories.error.message} <button type="button" onClick={categories.reload} className="underline">Réessayer</button></p>}
+        {!categories.loading && !categories.error && !categories.data?.length && <p className="text-sm text-t3">Crée d’abord une catégorie dans <Link to="/admin/categories" className="text-gold-ink underline">Organisation</Link>.</p>}
         <p className="text-xs leading-relaxed text-t3">{form.status === 'PUBLISHED' ? 'En enregistrant, cette ressource sera visible sur le site public.' : 'Cette ressource ne sera pas visible sur le site public.'}</p>
       </fieldset>
 
-      {failure && <div role="alert" className="rounded-2xl border border-gold-400/40 bg-gold-400/10 p-4 text-sm text-t1"><p>{failure}</p>{fieldErrors.length > 0 && <ul className="mt-2 list-inside list-disc">{fieldErrors.map((error, index) => <li key={index}>{error}</li>)}</ul>}</div>}
-      <div className="flex flex-wrap justify-end gap-3 border-t border-line-soft pt-5"><button type="button" disabled={busy} onClick={onCancel} className="rounded-full border border-line px-5 py-3 text-sm text-t2 disabled:opacity-50">Annuler</button><button disabled={busy || categories.loading || !!categories.error || !categories.data?.length} className="rounded-full bg-gold-400 px-6 py-3 text-sm font-semibold text-black disabled:opacity-50">{busy ? 'Enregistrement…' : form.status === 'PUBLISHED' ? 'Enregistrer et publier' : 'Enregistrer'}</button></div>
+      {failure && <div role="alert" className="rounded-lg border border-error/30 bg-error/10 p-4 text-sm text-t1"><p>{failure}</p>{fieldErrors.length > 0 && <ul className="mt-2 list-inside list-disc">{fieldErrors.map((error, index) => <li key={index}>{error}</li>)}</ul>}</div>}
+      <div className="flex flex-wrap justify-end gap-3 border-t border-line-soft pt-5"><button type="button" disabled={busy} onClick={onCancel} className="btn-secondary">Annuler</button><button disabled={busy || categories.loading || !!categories.error || !categories.data?.length} className="btn-primary">{busy ? 'Enregistrement…' : form.status === 'PUBLISHED' ? 'Enregistrer et publier' : 'Enregistrer'}</button></div>
     </form>
   </AdminModal>;
 }

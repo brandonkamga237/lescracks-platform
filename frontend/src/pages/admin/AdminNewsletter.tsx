@@ -109,25 +109,25 @@ export default function AdminNewsletter() {
         </button>
       }
     >
-      {error && <p role="alert" className="mb-5 rounded-xl border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
-      {notice && <p role="status" className="mb-5 rounded-xl border border-success/25 bg-success/5 p-3 text-sm text-success-ink">{notice}</p>}
+      {error && <p role="alert" className="mb-5 rounded-lg border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
+      {notice && <p role="status" className="mb-5 rounded-lg border border-success/25 bg-success/5 p-3 text-sm text-success-ink">{notice}</p>}
 
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-3xl border border-white/[0.06] bg-card p-5">
+        <div className="rounded-lg border border-line-soft bg-card p-5">
           <p className="text-xs tracking-wide text-t4">Abonnés</p>
           <p className="mt-2 font-display text-2xl font-semibold text-t1">{stats.data?.subscribed ?? '…'}</p>
         </div>
-        <div className="rounded-3xl border border-white/[0.06] bg-card p-5">
+        <div className="rounded-lg border border-line-soft bg-card p-5">
           <p className="text-xs tracking-wide text-t4">Désabonnés</p>
           <p className="mt-2 font-display text-2xl font-semibold text-t1">{stats.data?.unsubscribed ?? '…'}</p>
         </div>
-        <div className="rounded-3xl border border-white/[0.06] bg-card p-5">
+        <div className="rounded-lg border border-line-soft bg-card p-5">
           <p className="text-xs tracking-wide text-t4">Campagnes envoyées</p>
           <p className="mt-2 font-display text-2xl font-semibold text-t1">{campaigns.data?.length ?? '…'}</p>
         </div>
       </div>
 
-      <form onSubmit={broadcast} className="mb-10 rounded-3xl border border-white/[0.06] bg-card p-6 sm:p-8">
+      <form onSubmit={broadcast} className="mb-10 rounded-lg border border-line-soft bg-card p-6 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="font-display text-lg font-semibold text-t1">Envoyer une campagne</h2>
@@ -158,7 +158,7 @@ export default function AdminNewsletter() {
                 { token: '{{email}}', label: 'Email', icon: Mail },
               ].map(({ token, label, icon: Icon }) => (
                 <button key={token} type="button" onClick={() => insertVariable(token)}
-                  className="inline-flex items-center gap-1 rounded-full border border-line-soft bg-noir-950 px-3 py-1.5 text-xs font-medium text-t3 transition-colors hover:border-gold-400/30 hover:text-gold-400">
+                  className="inline-flex items-center gap-1 rounded border border-line-soft bg-noir-950 px-3 py-1.5 text-xs font-medium text-t3 transition-colors hover:border-gold-400/30 hover:text-gold-ink">
                   <Icon className="h-3.5 w-3.5" aria-hidden /> {label}
                 </button>
               ))}
@@ -167,11 +167,11 @@ export default function AdminNewsletter() {
 
           <div aria-label="Aperçu de l’email">
             <p className="mb-3 text-sm font-medium text-t2">Aperçu <span className="font-normal text-t4">— tel que reçu</span></p>
-            <div className="rounded-3xl bg-[#0a0a0a] p-4 sm:p-6">
-              <div className="overflow-hidden rounded-2xl bg-[#141414]">
+            <div className="rounded-lg bg-[#0a0a0a] p-4 sm:p-6">
+              <div className="overflow-hidden rounded-lg bg-[#141414]">
                 <div className="h-[3px] bg-gold-400" aria-hidden />
                 <div className="px-6 pb-6 pt-8 text-center sm:px-10">
-                  <p className="font-display text-lg font-bold uppercase tracking-[0.22em] text-gold-400">LesCracks</p>
+                  <p className="font-display text-lg font-bold uppercase tracking-[0.22em] text-gold-ink">LesCracks</p>
                   <p className="mt-2 text-[11px] uppercase tracking-widest text-t4">Ressources · Événements · Communauté</p>
                 </div>
                 <div className="px-6 pb-10 sm:px-10">
@@ -179,15 +179,15 @@ export default function AdminNewsletter() {
                     ? <ArticleBlocks blocks={sample(blocks)} />
                     : <p className="py-8 text-center text-sm text-t4">Le corps du message apparaîtra ici.</p>}
                 </div>
-                <div className="border-t border-white/[0.08] bg-[#101010] px-6 py-6 text-center sm:px-10">
+                <div className="border-t border-line-soft bg-[#101010] px-6 py-6 text-center sm:px-10">
                   <p className="text-xs">
-                    <span className="font-semibold uppercase tracking-wider text-gold-400">lescracks.com</span>
+                    <span className="font-semibold uppercase tracking-wider text-gold-ink">lescracks.com</span>
                     <span className="mx-2 text-t4">·</span>
                     <span className="text-t3">Événements</span>
                     <span className="mx-2 text-t4">·</span>
                     <span className="text-t3">Ressources</span>
                   </p>
-                  <p className="mt-3 text-xs italic text-gold-400">Deviens aussi un crack de la tech.</p>
+                  <p className="mt-3 text-xs italic text-gold-ink">Deviens aussi un crack de la tech.</p>
                   <p className="mt-3 text-[11px] leading-relaxed text-t4">
                     Tu reçois cet email parce que tu es inscrit à la lettre LesCracks.
                   </p>
@@ -227,7 +227,7 @@ export default function AdminNewsletter() {
                   <p className="mt-1 text-xs text-t3">{[s.firstName, s.lastName].filter(Boolean).join(' ')}</p>
                 </div>
                 <span
-                  className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${s.status === 'SUBSCRIBED' ? 'border-success/30 bg-success/10 text-success-ink' : 'border-line bg-noir-800 text-t3'}`}
+                  className={`inline-flex shrink-0 rounded border px-2.5 py-1 text-xs font-medium ${s.status === 'SUBSCRIBED' ? 'border-success/30 bg-success/10 text-success-ink' : 'border-line bg-noir-800 text-t3'}`}
                 >
                   {statusLabels[s.status]}
                 </span>
@@ -255,7 +255,7 @@ export default function AdminNewsletter() {
           >
             {(campaigns.data ?? []).map((c) => (
               <AdminRow key={c.id}>
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-noir-800 text-gold-400">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-noir-800 text-gold-ink">
                   <Clock className="h-5 w-5" aria-hidden />
                 </span>
                 <div className="min-w-0 flex-1">

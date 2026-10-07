@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Eye, FileText, Heart, Plus, Search, TrendingUp, Video } from 'lucide-react';
-import { AdminConfirm, AdminPagination, AdminRow, AdminSection, AdminState, StatusBadge } from '@/components/admin/AdminTable';
+import { Archive, BookOpen, Eye, FileText, Heart, Pencil, Plus, Search, Send, SlidersHorizontal, Trash2, TrendingUp, Video } from 'lucide-react';
+import { AdminAction, AdminConfirm, AdminPagination, AdminRow, AdminSection, AdminState, StatusBadge } from '@/components/admin/AdminTable';
 import ResourceForm from '@/components/admin/ResourceForm';
 import { useApi } from '@/hooks/useApi';
 import { adminApi, type AdminResourceFilters, type ArticleRequest, type EbookRequest } from '@/services/adminApi';
@@ -25,6 +25,7 @@ export default function AdminResources() {
   const [pending, setPending] = useState<{ resource: ResourceSummary; action: 'delete' | 'archive' } | null>(null);
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<AdminResourceFilters>({ page: 0 });
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const resources = useApi((signal) => adminApi.resources(filters, signal), [filters]);
   const categories = useApi((signal) => api.categories(signal), []);
   const tags = useApi((signal) => filters.categoryId ? api.tags(filters.categoryId, signal) : Promise.resolve([]), [filters.categoryId]);
@@ -32,7 +33,7 @@ export default function AdminResources() {
   const viewsBySlug = new Map((views.data?.resources ?? []).map((r) => [r.slug, r.views]));
   const list = resources.data?.content ?? [];
   const field = 'input';
-  const actionClass = 'rounded-full border border-line px-3 py-2 text-xs font-medium text-t2 hover:border-gold-400/40 hover:text-gold-400 disabled:opacity-40';
+  const activeFilters = [filters.status, filters.kind, filters.categoryId, filters.tagId].filter(Boolean).length;
 
   async function changeStatus(resource: ResourceSummary, status: ResourceStatus) {
     const data: EbookRequest = { title: resource.title, description: resource.description, coverImage: resource.coverImage, categoryId: resource.categoryId, status };
@@ -66,38 +67,40 @@ export default function AdminResources() {
     setPending({ resource, action });
   }
 
-  return <AdminSection title="Ressources" description="Un catalogue utile, de la première idée à la publication." action={<div className="flex items-center gap-3"><Link to="/admin" className="inline-flex items-center gap-2 rounded-full border border-gold-400/30 px-4 py-3 text-sm font-medium text-gold-400 transition hover:bg-gold-400/10"><TrendingUp className="h-4 w-4" aria-hidden />Les plus likés</Link><button type="button" onClick={() => setEditor('new')} className="inline-flex items-center gap-2 rounded-full bg-gold-400 px-5 py-3 text-sm font-semibold text-black"><Plus className="h-4 w-4" aria-hidden />Nouvelle ressource</button></div>}>
-    <div className="mb-6 rounded-3xl border border-white/[0.06] bg-card p-5">
+  return <AdminSection title="Ressources" description="Un catalogue utile, de la première idée à la publication." action={<div className="flex items-center gap-3"><Link to="/admin" className="btn-secondary"><TrendingUp className="h-4 w-4" aria-hidden />Les plus likés</Link><button type="button" onClick={() => setEditor('new')} className="btn-primary"><Plus className="h-4 w-4" aria-hidden />Nouvelle ressource</button></div>}>
+    <div className="mb-6 rounded-lg border border-line-soft bg-card p-5">
       <form onSubmit={(event) => { event.preventDefault(); setFilters({ ...filters, search: search.trim() || undefined, page: 0 }); }} className="flex flex-wrap items-end gap-3">
         <label className="min-w-48 flex-1 text-xs text-t3">Rechercher dans le catalogue<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Titre ou description…" className={`mt-2 ${field}`} /></label>
-        <button type="submit" className="inline-flex items-center gap-2 rounded-full border border-line px-5 py-3 text-sm text-t2"><Search className="h-4 w-4" aria-hidden />Rechercher</button>
+        <button type="submit" className="btn-secondary"><Search className="h-4 w-4" aria-hidden />Rechercher</button>
       </form>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {/* On a phone the four selects would fill the first screen before any result. */}
+      <button type="button" onClick={() => setFiltersOpen((open) => !open)} aria-expanded={filtersOpen} aria-controls="resource-filters" className="btn-secondary mt-3 w-full sm:hidden"><SlidersHorizontal className="h-4 w-4" aria-hidden />Filtres{activeFilters > 0 && ` (${activeFilters})`}</button>
+      <div id="resource-filters" className={`mt-4 gap-3 sm:grid sm:grid-cols-2 xl:grid-cols-4 ${filtersOpen ? 'grid' : 'hidden'}`}>
         <label className="text-xs text-t3">Statut<select value={filters.status ?? ''} onChange={(event) => setFilters({ ...filters, page: 0, status: event.target.value as ResourceStatus || undefined })} className={`mt-2 ${field}`}><option value="">Tous les statuts</option><option value="DRAFT">Brouillon</option><option value="PUBLISHED">Publiée</option><option value="ARCHIVED">Archivée</option></select></label>
         <label className="text-xs text-t3">Type<select value={filters.kind ?? ''} onChange={(event) => setFilters({ ...filters, page: 0, kind: event.target.value as ResourceKind || undefined })} className={`mt-2 ${field}`}><option value="">Tous les types</option><option value="EBOOK">Ebook</option><option value="EXTERNAL_VIDEO">Vidéo externe</option><option value="ARTICLE">Article</option></select></label>
         <label className="text-xs text-t3">Catégorie<select disabled={categories.loading || !!categories.error} value={filters.categoryId ?? ''} onChange={(event) => setFilters({ ...filters, page: 0, categoryId: Number(event.target.value) || undefined, tagId: undefined })} className={`mt-2 ${field}`}><option value="">Toutes les catégories</option>{categories.data?.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
         <label className="text-xs text-t3">Tag<select disabled={!filters.categoryId || tags.loading || !!tags.error} value={filters.tagId ?? ''} onChange={(event) => setFilters({ ...filters, page: 0, tagId: Number(event.target.value) || undefined })} className={`mt-2 ${field} disabled:opacity-40`}><option value="">{filters.categoryId ? 'Tous les tags' : 'Choisir une catégorie d’abord'}</option>{tags.data?.map((tag) => <option key={tag.id} value={tag.id}>{tag.name}</option>)}</select></label>
       </div>
-      {(categories.error || tags.error) && <p role="alert" className="mt-3 text-sm text-gold-400">{categories.error?.message || tags.error?.message} <button type="button" onClick={() => { categories.reload(); tags.reload(); }} className="underline">Réessayer les filtres</button></p>}
-      {(filters.search || filters.status || filters.kind || filters.categoryId) && <button type="button" onClick={() => { setSearch(''); setFilters({ page: 0 }); }} className="mt-4 text-xs text-gold-400 underline underline-offset-4">Réinitialiser les filtres</button>}
+      {(categories.error || tags.error) && <p role="alert" className="mt-3 text-sm text-error-ink">{categories.error?.message || tags.error?.message} <button type="button" onClick={() => { categories.reload(); tags.reload(); }} className="underline">Réessayer les filtres</button></p>}
+      {(filters.search || filters.status || filters.kind || filters.categoryId) && <button type="button" onClick={() => { setSearch(''); setFilters({ page: 0 }); }} className="mt-4 text-xs text-gold-ink underline underline-offset-4">Réinitialiser les filtres</button>}
     </div>
-    {notice && <p role="status" className="mb-5 text-sm text-gold-400">{notice}</p>}
+    {notice && <p role="status" className="mb-5 text-sm text-gold-ink">{notice}</p>}
     <AdminState loading={resources.loading} error={resources.error} empty={!list.length} emptyMessage="Aucune ressource ici. Crée une ressource ou ajuste les filtres." onRetry={resources.reload}>
       {list.map((resource) => <AdminRow key={resource.id}>
-        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-noir-800 text-gold-400">{resource.kind === 'EBOOK' ? <BookOpen className="h-5 w-5" aria-hidden /> : resource.kind === 'ARTICLE' ? <FileText className="h-5 w-5" aria-hidden /> : <Video className="h-5 w-5" aria-hidden />}</span>
-        <div className="min-w-0 flex-1 basis-48"><h2 className="break-words font-display font-medium text-t1">{resource.title}</h2><p className="mt-1 text-xs leading-relaxed text-t3">{resource.kind === 'EBOOK' ? 'Ebook' : resource.kind === 'ARTICLE' ? 'Article' : 'Vidéo externe'} · {resource.categoryName} · {dateFormat.format(new Date(resource.createdAt))}</p></div>
+        <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded bg-noir-800 text-gold-ink sm:flex">{resource.kind === 'EBOOK' ? <BookOpen className="h-5 w-5" aria-hidden /> : resource.kind === 'ARTICLE' ? <FileText className="h-5 w-5" aria-hidden /> : <Video className="h-5 w-5" aria-hidden />}</span>
+        <div className="min-w-0 flex-1 basis-48"><h2 className="break-words text-base font-semibold leading-snug tracking-normal text-t1 sm:text-lg">{resource.title}</h2><p className="mt-1 text-xs leading-relaxed text-t3">{resource.kind === 'EBOOK' ? 'Ebook' : resource.kind === 'ARTICLE' ? 'Article' : 'Vidéo externe'} · {resource.categoryName} · {dateFormat.format(new Date(resource.createdAt))}</p></div>
         {resource.slug && viewsBySlug.has(resource.slug) && (
-          <div className="flex items-center gap-1.5 rounded-full border border-line-soft bg-noir-950 px-2.5 py-1.5 text-xs text-t2" title="Consultations sur 30 jours"><Eye className="h-3.5 w-3.5 text-t3" aria-hidden />{viewsBySlug.get(resource.slug)}</div>
+          <div className="flex items-center gap-1.5 rounded border border-line-soft bg-noir-950 px-2.5 py-1.5 text-xs text-t2" title="Consultations sur 30 jours"><Eye className="h-3.5 w-3.5 text-t3" aria-hidden />{viewsBySlug.get(resource.slug)}</div>
         )}
-        <div className="flex items-center gap-1.5 rounded-full border border-line-soft bg-noir-950 px-2.5 py-1.5 text-xs text-t2"><Heart className="h-3.5 w-3.5 text-gold-400" aria-hidden />{resource.likeCount ?? 0}</div>
+        <div className="flex items-center gap-1.5 rounded border border-line-soft bg-noir-950 px-2.5 py-1.5 text-xs text-t2"><Heart className="h-3.5 w-3.5 text-gold-ink" aria-hidden />{resource.likeCount ?? 0}</div>
         <StatusBadge status={resource.status} resource />
         <div className="flex flex-wrap gap-2" role="group" aria-label={`Actions pour ${resource.title}`}>
-          <button type="button" disabled={!!busy[resource.id]} onClick={() => setEditor(resource)} className={actionClass}>Modifier</button>
-          {resource.status !== 'PUBLISHED' && <button type="button" disabled={!!busy[resource.id]} onClick={() => void act(resource, 'publish')} className={actionClass}>{busy[resource.id] === 'publish' ? 'Publication…' : 'Publier'}</button>}
-          {resource.status !== 'ARCHIVED' && <button type="button" disabled={!!busy[resource.id]} onClick={() => confirm(resource, 'archive')} className={actionClass}>Archiver</button>}
-          <button type="button" disabled={!!busy[resource.id]} onClick={() => confirm(resource, 'delete')} className={actionClass}>Supprimer</button>
+          <AdminAction icon={Pencil} label="Modifier" disabled={!!busy[resource.id]} onClick={() => setEditor(resource)} />
+          {resource.status !== 'PUBLISHED' && <AdminAction icon={Send} label={busy[resource.id] === 'publish' ? 'Publication…' : 'Publier'} disabled={!!busy[resource.id]} onClick={() => void act(resource, 'publish')} />}
+          {resource.status !== 'ARCHIVED' && <AdminAction icon={Archive} label="Archiver" disabled={!!busy[resource.id]} onClick={() => confirm(resource, 'archive')} />}
+          <AdminAction icon={Trash2} label="Supprimer" danger disabled={!!busy[resource.id]} onClick={() => confirm(resource, 'delete')} />
         </div>
-        {errors[resource.id] && !pending && <p role="alert" className="w-full text-sm text-gold-400">{errors[resource.id]}</p>}
+        {errors[resource.id] && !pending && <p role="alert" className="w-full text-sm text-error-ink">{errors[resource.id]}</p>}
       </AdminRow>)}
     </AdminState>
     {resources.data && !resources.error && <AdminPagination page={filters.page ?? 0} totalPages={resources.data.totalPages} totalElements={resources.data.totalElements} busy={resources.loading} onChange={(page) => setFilters({ ...filters, page })} />}

@@ -25,7 +25,7 @@ function UserDetail({ id, onClose }: { id: number; onClose: () => void }) {
   return (
     <AdminModal open onClose={onClose} title="Fiche utilisateur" description="Détails du compte" busy={loading}>
       {loading ? <p className="py-8 text-center text-t3">Chargement…</p> : null}
-      {error ? <p role="alert" className="rounded-2xl border border-gold-400/40 bg-gold-400/10 p-4 text-sm text-t1">{error.message}</p> : null}
+      {error ? <p role="alert" className="rounded-lg border border-error/30 bg-error/10 p-4 text-sm text-t1">{error.message}</p> : null}
       {data && (
         <dl className="mt-2 grid gap-5 sm:grid-cols-2">
           <div>
@@ -140,8 +140,8 @@ export default function AdminUsers() {
 
   return (
     <AdminSection title="Utilisateurs" description="Gère les comptes enregistrés et leur statut." action={headerAction}>
-      {error && <p role="alert" className="mb-5 rounded-xl border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
-      {notice && <p role="status" className="mb-5 rounded-xl border border-success/25 bg-success/5 p-3 text-sm text-success-ink">{notice}</p>}
+      {error && <p role="alert" className="mb-5 rounded-lg border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
+      {notice && <p role="status" className="mb-5 rounded-lg border border-success/25 bg-success/5 p-3 text-sm text-success-ink">{notice}</p>}
 
       {overview.data && (
         <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -164,7 +164,7 @@ export default function AdminUsers() {
         onRetry={users.reload}
       >
         {/* Desktop table */}
-        <div className="hidden overflow-x-auto rounded-3xl border border-white/[0.06] bg-card sm:block">
+        <div className="hidden overflow-x-auto rounded-lg border border-line-soft bg-card sm:block">
           <table className="w-full min-w-[680px] text-left text-sm">
             <thead className="border-b border-line-soft bg-noir-950/50 text-t4">
               <tr>
@@ -187,7 +187,7 @@ export default function AdminUsers() {
                       value={user.status}
                       disabled={busy === user.id}
                       onChange={(event) => void updateStatus(user.id, event.target.value as AdminUser['status'])}
-                      className={`rounded-full border px-2.5 py-1 text-xs font-medium outline-none focus:border-gold-400 ${statusStyles[user.status]}`}
+                      className={`rounded border px-2.5 py-1 text-xs font-medium outline-none focus:border-gold-400 ${statusStyles[user.status]}`}
                     >
                       {Object.entries(statusLabels).map(([value, label]) => (
                         <option key={value} value={value}>{label}</option>
@@ -202,7 +202,7 @@ export default function AdminUsers() {
                       <button
                         type="button"
                         onClick={() => setSelected(user.id)}
-                        className="text-sm text-gold-400 hover:underline"
+                        className="text-sm text-gold-ink hover:underline"
                       >
                         Détails
                       </button>
@@ -235,7 +235,7 @@ export default function AdminUsers() {
                     value={user.status}
                     disabled={busy === user.id}
                     onChange={(event) => void updateStatus(user.id, event.target.value as AdminUser['status'])}
-                    className={`rounded-full border px-2.5 py-1 text-xs font-medium outline-none focus:border-gold-400 ${statusStyles[user.status]}`}
+                    className={`rounded border px-2.5 py-1 text-xs font-medium outline-none focus:border-gold-400 ${statusStyles[user.status]}`}
                   >
                     {Object.entries(statusLabels).map(([value, label]) => (
                       <option key={value} value={value}>{label}</option>
@@ -249,7 +249,7 @@ export default function AdminUsers() {
                 <button
                   type="button"
                   onClick={() => setSelected(user.id)}
-                  className="text-sm text-gold-400 hover:underline"
+                  className="text-sm text-gold-ink hover:underline"
                 >
                   Détails
                 </button>

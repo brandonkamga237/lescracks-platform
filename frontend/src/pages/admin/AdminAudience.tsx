@@ -23,7 +23,7 @@ export default function AdminAudience() {
       <AdminState loading={audience.loading} error={audience.error}
         empty={!data} emptyMessage="Les statistiques d’audience ne sont pas disponibles.">
         {data && !data.available && (
-          <div className="rounded-3xl border border-line-soft bg-card px-6 py-16 text-center">
+          <div className="rounded-lg border border-line-soft bg-card px-6 py-16 text-center">
             <Globe2 className="mx-auto h-8 w-8 text-t4" aria-hidden />
             <h2 className="mt-4 font-display text-lg font-semibold text-t1">L’audience n’est pas encore mesurée</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-t3">

@@ -59,10 +59,10 @@ export default function AdminAdmins() {
 
   return (
     <AdminSection title="Administrateurs" description="Créer et gérer les accès au tableau de bord.">
-      {error && <p role="alert" className="mb-5 rounded-xl border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
-      {notice && <p role="status" className="mb-5 rounded-xl border border-success/25 bg-success/5 p-3 text-sm text-success-ink">{notice}</p>}
+      {error && <p role="alert" className="mb-5 rounded-lg border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
+      {notice && <p role="status" className="mb-5 rounded-lg border border-success/25 bg-success/5 p-3 text-sm text-success-ink">{notice}</p>}
 
-      <form onSubmit={create} className="mb-6 rounded-3xl border border-white/[0.06] bg-card p-6">
+      <form onSubmit={create} className="mb-6 rounded-lg border border-line-soft bg-card p-6">
         <h2 className="font-display text-lg font-semibold text-t1">Nouvel administrateur</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div>
@@ -87,7 +87,7 @@ export default function AdminAdmins() {
       >
         {list.map((admin) => (
           <AdminRow key={admin.id}>
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-noir-800 text-gold-400">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-noir-800 text-gold-ink">
               <Shield className="h-5 w-5" aria-hidden />
             </span>
             <div className="min-w-0 flex-1">
