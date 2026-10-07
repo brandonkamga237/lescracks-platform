@@ -182,13 +182,13 @@ export default function Profile() {
 
   return <Layout>
     <SEO title="Ton espace" description="Retrouve tes informations et les ressources de la communauté LesCracks." url="/profil" />
-    <Section spacing="normal">
-      <header className="flex flex-col gap-6 border-b border-line-soft pb-10 sm:flex-row sm:items-center sm:justify-between">
+    <Section spacing="tight">
+      <header className="flex flex-col gap-6 border-b border-line-soft pb-8 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-5"><div aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gold-400/30 bg-gold-400/10 font-display text-2xl text-gold-ink">{user?.avatarUrl ? <img src={`/api/files/${user.avatarUrl}`} alt="" className="h-full w-full object-cover" /> : name ? name.charAt(0).toUpperCase() : <UserRound className="h-7 w-7" />}</div><div><p className="text-sm font-medium tracking-wide text-gold-ink">Ton espace personnel</p><h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-t1 sm:text-4xl">Bonjour{user?.firstName ? `, ${user.firstName}` : name ? `, ${name}` : ''}.</h1><p className="mt-2 text-sm text-t4">Un point de départ pour ta prochaine découverte.</p></div></div>
-        <button type="button" disabled={Boolean(busy)} onClick={() => void logout()} className="btn-secondary self-start"><LogOut aria-hidden="true" className="h-4 w-4" />{busy === 'logout' ? 'Déconnexion…' : 'Me déconnecter'}</button>
+        <button type="button" disabled={Boolean(busy)} onClick={() => void logout()} className="btn-secondary hidden self-start lg:inline-flex"><LogOut aria-hidden="true" className="h-4 w-4" />{busy === 'logout' ? 'Déconnexion…' : 'Me déconnecter'}</button>
       </header>
       <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.2fr_1fr]">
-        <section className="rounded-lg border border-line-soft bg-card p-6 sm:p-8" aria-labelledby="profile-heading">
+        <section className="rounded-lg border border-line-soft bg-card p-5 sm:p-8" aria-labelledby="profile-heading">
           <div className="flex items-start justify-between gap-4"><div><h2 id="profile-heading" className="font-display text-xl font-bold text-t1">Mes informations</h2><p className="mt-2 text-sm text-t4">Les informations liées à ton compte.</p></div>{user && !editing && <button type="button" disabled={Boolean(busy)} onClick={() => { setEditing(true); setNotice(''); }} className="min-h-11 px-2 text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Modifier</button>}</div>
           {error && <p role="alert" className="mt-5 rounded border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
           {notice && <p role="status" className="mt-5 rounded border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-ink">{notice}</p>}
