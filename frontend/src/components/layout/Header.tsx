@@ -118,7 +118,7 @@ export default function Header() {
           <DialogTrigger asChild>
             <button type="button" className="ml-auto flex h-10 w-10 items-center justify-center rounded border border-line text-t1 transition-colors hover:bg-noir-800 lg:hidden" aria-label="Ouvrir le menu"><Menu className="h-5 w-5" aria-hidden /></button>
           </DialogTrigger>
-          <DialogContent className="mode-raised top-2 w-[calc(100%_-_1rem)] translate-y-0 rounded-lg border-line bg-card p-4 sm:top-4 sm:w-[calc(100%_-_2rem)] sm:p-6">
+          <DialogContent position="top" className="mode-raised w-[calc(100%_-_1rem)] rounded-lg border-line bg-card p-4 sm:w-[calc(100%_-_2rem)] sm:p-6">
             <DialogTitle className="font-display text-xl font-bold text-t1">Menu</DialogTitle>
             <DialogDescription className="text-sm text-t3">Un sujet, une ressource, un prochain pas.</DialogDescription>
             <nav aria-label="Navigation mobile" className="my-2">
