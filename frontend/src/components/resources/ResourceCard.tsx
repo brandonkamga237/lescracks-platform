@@ -2,6 +2,7 @@ import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen, FileText, PlayCircle } from 'lucide-react';
 
+import KindCover from '@/components/illustrations/KindCover';
 import { resourcePath } from '@/lib/slugs';
 import { KIND_LABEL, resourceDetail } from '@/lib/resources';
 import type { ResourceSummary } from '@/services/types';
@@ -40,9 +41,7 @@ function ResourceCard({ resource, cataloguePath }: ResourceCardProps) {
               className="h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             />
           ) : (
-            <span className="flex h-full items-center justify-center text-t4" aria-hidden>
-              <KindIcon className="h-7 w-7" />
-            </span>
+            <KindCover kind={resource.kind} />
           )}
         </span>
         <span className="flex flex-1 flex-col gap-2 p-4">
