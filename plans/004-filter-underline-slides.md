@@ -110,7 +110,7 @@ One underline element per `FilterChips`, positioned under the active button and 
          {indicator && (
            <span
              aria-hidden
-             className={`pointer-events-none absolute left-0 top-0 h-px w-px origin-left bg-gold-400 ${ready ? 'transition-transform duration-[250ms] ease-in-out motion-reduce:transition-none' : ''}`}
+             className={`pointer-events-none absolute left-0 top-0 h-px w-px origin-left bg-gold-400 ${ready ? 'transition-transform [transition-duration:250ms] ease-in-out motion-reduce:transition-none' : ''}`}
              // Measured at runtime: position and width come from the active button.
              style={{ transform: `translate(${indicator.x}px, ${indicator.y}px) scaleX(${indicator.width})` }}
            />
