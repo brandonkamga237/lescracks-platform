@@ -28,7 +28,7 @@ function ResourceCard({ resource, cataloguePath }: ResourceCardProps) {
       <Link
         to={resourcePath(resource)}
         state={{ cataloguePath }}
-        className="card-lift group flex h-full flex-col overflow-hidden rounded bg-card transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 motion-reduce:hover:translate-y-0"
+        className="group flex h-full flex-col overflow-hidden rounded bg-card transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 motion-reduce:hover:translate-y-0"
       >
         <span className="relative block aspect-[16/9] overflow-hidden bg-noir-700">
           {resource.coverImage && failedImage !== resource.coverImage ? (

@@ -277,7 +277,7 @@ export default function Profile() {
               {identityError && <p role="alert" className="mt-5 rounded border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{identityError}</p>}
               {identityNotice && <p role="status" className="mt-5 rounded border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-ink">{identityNotice}</p>}
               <ul className="mt-5 space-y-3">
-                <li className="flex items-center justify-between gap-4 rounded-lg border border-line-soft bg-[#0b0b0b] px-4 py-3">
+                <li className="flex items-center justify-between gap-4 rounded-lg border border-line-soft bg-noir-900 px-4 py-3">
                   <span className="text-sm text-t1">{providerLabels.LOCAL}</span>
                   {user.provider === 'LOCAL' ? (
                     <span className="text-xs font-medium text-gold-ink">Actif</span>
@@ -289,7 +289,7 @@ export default function Profile() {
                   const linked = user.identities?.some((identity) => identity.provider === provider);
                   const onlyMethod = linked && user.provider !== 'LOCAL' && user.identities?.length === 1 && user.identities[0]?.provider === provider;
                   return (
-                    <li key={provider} className="flex items-center justify-between gap-4 rounded-lg border border-line-soft bg-[#0b0b0b] px-4 py-3">
+                    <li key={provider} className="flex items-center justify-between gap-4 rounded-lg border border-line-soft bg-noir-900 px-4 py-3">
                       <span className="text-sm text-t1">{label}</span>
                       {linked ? (
                         <button

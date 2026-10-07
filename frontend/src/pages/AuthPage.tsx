@@ -234,14 +234,14 @@ export default function AuthPage({ mode }: AuthPageProps) {
         </DialogHeader>
         <div className="mt-4 space-y-3">
           <p className="text-center text-sm text-t4">Le lien expire dans 24 heures. Pense à vérifier tes indésirables.</p>
-          <Link to="/connexion" onClick={() => setSuccessOpen(false)} className="block rounded bg-gold-400 px-5 py-3 text-center font-semibold text-black transition hover:bg-[#e4c45d]">
+          <Link to="/connexion" onClick={() => setSuccessOpen(false)} className="btn-primary w-full">
             Aller à la connexion
           </Link>
         </div>
       </DialogContent>
     </Dialog>
     {busy === 'google' || busy === 'github' ? (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-[#0b0b0b]/95 text-white">
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-black/95 text-t1">
         <Loader2 aria-hidden="true" className="h-10 w-10 animate-spin motion-reduce:animate-none text-gold-ink" />
         <div className="text-center">
           <p className="font-display text-2xl font-bold">On prépare ton espace.</p>
