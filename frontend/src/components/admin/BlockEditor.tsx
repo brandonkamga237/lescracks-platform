@@ -252,7 +252,7 @@ const BlockEditor = forwardRef<BlockEditorHandle, BlockEditorProps>(function Blo
               <ChevronDown className="h-3 w-3" aria-hidden />
             </button>
             <button type="button" aria-label="Supprimer le bloc" onClick={() => remove(index)}
-              className="p-0.5 text-t4 hover:text-red-400">
+              className="p-0.5 text-t4 hover:text-error-ink">
               <Trash2 className="h-3 w-3" aria-hidden />
             </button>
           </div>

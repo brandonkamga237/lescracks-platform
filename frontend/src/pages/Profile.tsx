@@ -190,7 +190,7 @@ export default function Profile() {
       <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.2fr_1fr]">
         <section className="rounded-lg border border-line-soft bg-card p-6 sm:p-8" aria-labelledby="profile-heading">
           <div className="flex items-start justify-between gap-4"><div><h2 id="profile-heading" className="font-display text-xl font-bold text-t1">Mes informations</h2><p className="mt-2 text-sm text-t4">Les informations liées à ton compte.</p></div>{user && !editing && <button type="button" disabled={Boolean(busy)} onClick={() => { setEditing(true); setNotice(''); }} className="min-h-11 px-2 text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Modifier</button>}</div>
-          {error && <p role="alert" className="mt-5 rounded border border-red-400/25 bg-red-400/5 p-3 text-sm text-red-400">{error}</p>}
+          {error && <p role="alert" className="mt-5 rounded border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
           {notice && <p role="status" className="mt-5 rounded border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-ink">{notice}</p>}
           {editing && user ? <form onSubmit={save} className="mt-7" aria-busy={busy === 'save'}>
             <fieldset disabled={Boolean(busy) || avatarBusy} className="space-y-5"><legend className="sr-only">Modifier tes informations</legend>
@@ -199,7 +199,7 @@ export default function Profile() {
                 <input id="profile-avatar" type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadAvatar(file); event.target.value = ''; }} className="mt-2 text-sm text-t2 file:mr-4 file:rounded file:border-0 file:bg-gold-400 file:px-4 file:py-2 file:font-medium file:text-black" />
                 {avatarBusy && <p className="mt-2 text-sm text-gold-ink">Envoi en cours…</p>}
               </div>
-              {(['firstName', 'lastName'] as const).map((key) => <div key={key}><label htmlFor={`profile-${key}`} className="text-sm font-medium text-t2">{key === 'firstName' ? 'Prénom' : 'Nom'}</label><input id={`profile-${key}`} name={key} autoComplete={key === 'firstName' ? 'given-name' : 'family-name'} required value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} className="input mt-2" aria-invalid={Boolean(fields[key])} aria-describedby={fields[key] ? `profile-${key}-error` : undefined} />{fields[key] && <p id={`profile-${key}-error`} className="mt-2 text-sm text-red-400">{fields[key]}</p>}</div>)}
+              {(['firstName', 'lastName'] as const).map((key) => <div key={key}><label htmlFor={`profile-${key}`} className="text-sm font-medium text-t2">{key === 'firstName' ? 'Prénom' : 'Nom'}</label><input id={`profile-${key}`} name={key} autoComplete={key === 'firstName' ? 'given-name' : 'family-name'} required value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} className="input mt-2" aria-invalid={Boolean(fields[key])} aria-describedby={fields[key] ? `profile-${key}-error` : undefined} />{fields[key] && <p id={`profile-${key}-error`} className="mt-2 text-sm text-error-ink">{fields[key]}</p>}</div>)}
               <div><label htmlFor="profile-username" className="text-sm font-medium text-t2">Nom d'utilisateur</label><input id="profile-username" name="username" value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value })} className="input mt-2" /></div>
               <div><label htmlFor="profile-bio" className="text-sm font-medium text-t2">Bio</label><textarea id="profile-bio" name="bio" rows={3} value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} className="input mt-2" /></div>
               <div><label htmlFor="profile-location" className="text-sm font-medium text-t2">Localisation</label><input id="profile-location" name="location" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} className="input mt-2" /></div>
@@ -209,7 +209,7 @@ export default function Profile() {
                   <div key={platform} className="flex items-center gap-2">
                     <span className="w-24 shrink-0 text-sm text-t2 capitalize">{platform}</span>
                     <input type="url" value={url} onChange={(event) => setForm({ ...form, socialLinks: { ...form.socialLinks, [platform]: event.target.value } })} className="input" placeholder="https://..." />
-                    <button type="button" onClick={() => { const next = { ...form.socialLinks }; delete next[platform]; setForm({ ...form, socialLinks: next }); }} className="text-sm text-red-400">Retirer</button>
+                    <button type="button" onClick={() => { const next = { ...form.socialLinks }; delete next[platform]; setForm({ ...form, socialLinks: next }); }} className="text-sm text-error-ink">Retirer</button>
                   </div>
                 ))}
                 <div className="flex items-center gap-2">
@@ -250,7 +250,7 @@ export default function Profile() {
               )}
             </div>
             {passwordNotice && <p role="status" className="mt-5 rounded border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-ink">{passwordNotice}</p>}
-            {passwordError && <p role="alert" className="mt-5 rounded border border-red-400/25 bg-red-400/5 p-3 text-sm text-red-400">{passwordError}</p>}
+            {passwordError && <p role="alert" className="mt-5 rounded border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{passwordError}</p>}
             {editingPassword && user?.provider === 'LOCAL' && (
               <form onSubmit={savePassword} className="mt-5 space-y-5" aria-busy={passwordBusy}>
                 <fieldset disabled={passwordBusy}>
@@ -274,10 +274,10 @@ export default function Profile() {
                   </div>
                 </div>
               </div>
-              {identityError && <p role="alert" className="mt-5 rounded border border-red-400/25 bg-red-400/5 p-3 text-sm text-red-400">{identityError}</p>}
+              {identityError && <p role="alert" className="mt-5 rounded border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{identityError}</p>}
               {identityNotice && <p role="status" className="mt-5 rounded border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-ink">{identityNotice}</p>}
               <ul className="mt-5 space-y-3">
-                <li className="flex items-center justify-between gap-4 rounded-lg border border-line-soft bg-[#0b0b0b] px-4 py-3">
+                <li className="flex items-center justify-between gap-4 rounded-lg border border-line-soft bg-noir-900 px-4 py-3">
                   <span className="text-sm text-t1">{providerLabels.LOCAL}</span>
                   {user.provider === 'LOCAL' ? (
                     <span className="text-xs font-medium text-gold-ink">Actif</span>
@@ -289,14 +289,14 @@ export default function Profile() {
                   const linked = user.identities?.some((identity) => identity.provider === provider);
                   const onlyMethod = linked && user.provider !== 'LOCAL' && user.identities?.length === 1 && user.identities[0]?.provider === provider;
                   return (
-                    <li key={provider} className="flex items-center justify-between gap-4 rounded-lg border border-line-soft bg-[#0b0b0b] px-4 py-3">
+                    <li key={provider} className="flex items-center justify-between gap-4 rounded-lg border border-line-soft bg-noir-900 px-4 py-3">
                       <span className="text-sm text-t1">{label}</span>
                       {linked ? (
                         <button
                           type="button"
                           disabled={Boolean(unlinkBusy) || onlyMethod}
                           onClick={() => void unlinkProvider(provider)}
-                          className="text-xs font-medium text-red-400 disabled:opacity-50"
+                          className="text-xs font-medium text-error-ink disabled:opacity-50"
                         >
                           {unlinkBusy === provider ? 'Retrait…' : onlyMethod ? 'Obligatoire' : 'Retirer'}
                         </button>

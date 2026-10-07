@@ -62,7 +62,7 @@ export const Delta = ({ pct, invert = false }: { pct: number | null; invert?: bo
     <span className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium tabular-nums ${
       pct === 0 ? 'bg-noir-800 text-t3'
         : good ? 'bg-emerald-400/10 text-emerald-400'
-        : 'bg-red-400/10 text-red-400'
+        : 'bg-error/10 text-error-ink'
     }`}>
       <Icon className="h-3 w-3" aria-hidden />
       {pct > 0 ? '+' : ''}{pct} %

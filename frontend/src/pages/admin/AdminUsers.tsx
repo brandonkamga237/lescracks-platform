@@ -9,9 +9,9 @@ import type { AdminUser, AuthProvider } from '@/services/types';
 
 const statusLabels = { ACTIVE: 'Actif', INACTIVE: 'Inactif', BANNED: 'Suspendu' };
 const statusStyles = {
-  ACTIVE: 'border-green-500/30 bg-green-500/10 text-green-400',
+  ACTIVE: 'border-success/30 bg-success/10 text-success-ink',
   INACTIVE: 'border-line bg-noir-800 text-t3',
-  BANNED: 'border-red-500/30 bg-red-500/10 text-red-400',
+  BANNED: 'border-error/30 bg-error/10 text-error-ink',
 };
 const providerLabels: Record<AuthProvider, string> = { LOCAL: 'Email', GOOGLE: 'Google', GITHUB: 'GitHub' };
 
@@ -140,8 +140,8 @@ export default function AdminUsers() {
 
   return (
     <AdminSection title="Utilisateurs" description="Gère les comptes enregistrés et leur statut." action={headerAction}>
-      {error && <p role="alert" className="mb-5 rounded-xl border border-red-500/25 bg-red-500/5 p-3 text-sm text-red-400">{error}</p>}
-      {notice && <p role="status" className="mb-5 rounded-xl border border-green-500/25 bg-green-500/5 p-3 text-sm text-green-400">{notice}</p>}
+      {error && <p role="alert" className="mb-5 rounded-xl border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
+      {notice && <p role="status" className="mb-5 rounded-xl border border-success/25 bg-success/5 p-3 text-sm text-success-ink">{notice}</p>}
 
       {overview.data && (
         <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -210,7 +210,7 @@ export default function AdminUsers() {
                         type="button"
                         disabled={busy === user.id}
                         onClick={() => askRemove(user)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 p-2 text-red-400 transition hover:bg-red-500/10 disabled:opacity-50"
+                        className="inline-flex items-center gap-1 rounded-lg border border-error/30 p-2 text-error-ink transition hover:bg-error/10 disabled:opacity-50"
                         aria-label="Supprimer"
                       >
                         <Trash2 className="h-4 w-4" aria-hidden />
@@ -257,7 +257,7 @@ export default function AdminUsers() {
                   type="button"
                   disabled={busy === user.id}
                   onClick={() => askRemove(user)}
-                  className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 p-2 text-red-400 transition hover:bg-red-500/10 disabled:opacity-50"
+                  className="inline-flex items-center gap-1 rounded-lg border border-error/30 p-2 text-error-ink transition hover:bg-error/10 disabled:opacity-50"
                   aria-label="Supprimer"
                 >
                   <Trash2 className="h-4 w-4" aria-hidden />
