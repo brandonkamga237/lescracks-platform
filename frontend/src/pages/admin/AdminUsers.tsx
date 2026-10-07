@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Download, Search, Trash2 } from 'lucide-react';
+import { Download, Eye, Search, Trash2 } from 'lucide-react';
 
-import { AdminConfirm, AdminModal, AdminPagination, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
+import { AdminAction, AdminConfirm, AdminModal, AdminPagination, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
 import { Kpi } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
@@ -210,8 +210,9 @@ export default function AdminUsers() {
                         type="button"
                         disabled={busy === user.id}
                         onClick={() => askRemove(user)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-error/30 p-2 text-error-ink transition hover:bg-error/10 disabled:opacity-50"
-                        aria-label="Supprimer"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded border border-line text-t3 transition-colors hover:border-error/40 hover:text-error-ink disabled:opacity-40"
+                        aria-label={`Supprimer ${fullName(user)}`}
+                        title="Supprimer"
                       >
                         <Trash2 className="h-4 w-4" aria-hidden />
                       </button>
@@ -224,7 +225,7 @@ export default function AdminUsers() {
         </div>
 
         {/* Mobile cards */}
-        <div className="space-y-4 sm:hidden">
+        <div className="sm:hidden">
           {list.map((user) => (
             <AdminRow key={user.id}>
               <div className="min-w-0 flex-1">
@@ -245,23 +246,9 @@ export default function AdminUsers() {
                   <span className="text-xs text-t3">{user.verified ? 'Vérifié' : 'Non vérifié'}</span>
                 </div>
               </div>
-              <div className="ml-auto flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelected(user.id)}
-                  className="text-sm text-gold-ink hover:underline"
-                >
-                  Détails
-                </button>
-                <button
-                  type="button"
-                  disabled={busy === user.id}
-                  onClick={() => askRemove(user)}
-                  className="inline-flex items-center gap-1 rounded-lg border border-error/30 p-2 text-error-ink transition hover:bg-error/10 disabled:opacity-50"
-                  aria-label="Supprimer"
-                >
-                  <Trash2 className="h-4 w-4" aria-hidden />
-                </button>
+              <div className="ml-auto flex items-center gap-2" role="group" aria-label={`Actions pour ${fullName(user)}`}>
+                <AdminAction icon={Eye} label="Détails" onClick={() => setSelected(user.id)} />
+                <AdminAction icon={Trash2} label="Supprimer" danger disabled={busy === user.id} onClick={() => askRemove(user)} />
               </div>
             </AdminRow>
           ))}

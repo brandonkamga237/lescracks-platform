@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Plus, Shield, Trash2 } from 'lucide-react';
 
-import { AdminConfirm, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
+import { AdminAction, AdminConfirm, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
 import type { AdminSummary } from '@/services/types';
@@ -87,21 +87,14 @@ export default function AdminAdmins() {
       >
         {list.map((admin) => (
           <AdminRow key={admin.id}>
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-noir-800 text-gold-ink">
+            <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded bg-noir-800 text-gold-ink sm:flex">
               <Shield className="h-5 w-5" aria-hidden />
             </span>
             <div className="min-w-0 flex-1">
               <p className="break-words font-display font-medium text-t1">{admin.username}</p>
               <p className="text-xs text-t3">{admin.role}</p>
             </div>
-            <button
-              type="button"
-              onClick={() => { setDeleteError(''); setDeletePending(admin); }}
-              className="inline-flex items-center gap-1 rounded-lg border border-error/30 p-2 text-error-ink transition hover:bg-error/10"
-              aria-label="Supprimer"
-            >
-              <Trash2 className="h-4 w-4" aria-hidden />
-            </button>
+            <AdminAction icon={Trash2} label="Supprimer" danger onClick={() => { setDeleteError(''); setDeletePending(admin); }} />
           </AdminRow>
         ))}
       </AdminState>

@@ -235,7 +235,7 @@ export default function AdminNewsletter() {
                   type="button"
                   disabled={busyId === s.userId}
                   onClick={() => void toggle(s)}
-                  className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition disabled:opacity-50 ${s.status === 'SUBSCRIBED' ? 'border-error/30 text-error-ink hover:bg-error/10' : 'border-success/30 text-success-ink hover:bg-success/10'}`}
+                  className={`inline-flex min-h-11 items-center rounded border px-3 text-xs font-medium transition-colors disabled:opacity-50 sm:min-h-9 ${s.status === 'SUBSCRIBED' ? 'border-error/30 text-error-ink hover:bg-error/10' : 'border-success/30 text-success-ink hover:bg-success/10'}`}
                 >
                   {s.status === 'SUBSCRIBED' ? 'Désabonner' : 'Réabonner'}
                 </button>

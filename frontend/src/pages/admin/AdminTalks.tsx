@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Play, Plus } from 'lucide-react';
+import { Pencil, Play, Plus, Trash2 } from 'lucide-react';
 
-import { AdminConfirm, AdminModal, AdminPagination, AdminRow, AdminSection, AdminState, StatusBadge } from '@/components/admin/AdminTable';
+import { AdminAction, AdminConfirm, AdminModal, AdminPagination, AdminRow, AdminSection, AdminState, StatusBadge } from '@/components/admin/AdminTable';
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
 import type { TalkRequest } from '@/services/adminApi';
@@ -123,7 +123,7 @@ export default function AdminTalks() {
       <AdminState loading={talks.loading} error={talks.error} empty={!list.length} emptyMessage="Aucun épisode. Ajoute le premier rendez-vous vidéo." onRetry={talks.reload}>
         {list.map((video) => (
           <AdminRow key={video.id}>
-            <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-noir-800 text-gold-ink"><Play className="h-5 w-5" aria-hidden /></span>
+            <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded bg-noir-800 text-gold-ink sm:flex"><Play className="h-5 w-5" aria-hidden /></span>
             <div className="min-w-0 flex-1">
               <h2 className="break-words text-base font-semibold leading-snug tracking-normal text-t1 sm:text-lg">{video.title}</h2>
               <p className="mt-1 text-xs text-t3">
@@ -133,8 +133,8 @@ export default function AdminTalks() {
             </div>
             <StatusBadge status={video.status} />
             <div className="flex gap-2" role="group" aria-label={`Actions pour ${video.title}`}>
-              <button type="button" disabled={!!busy} onClick={() => { setFailure(null); setEditForm(toForm(video)); setEditing(video); }} className="inline-flex min-h-9 items-center rounded border border-line px-3 text-xs font-medium text-t2 transition-colors hover:border-gold-400/40 hover:text-gold-ink disabled:opacity-40">Modifier</button>
-              <button type="button" disabled={!!busy} onClick={() => { setFailure(null); setPending(video); }} className="inline-flex min-h-9 items-center rounded border border-line px-3 text-xs font-medium text-t2 transition-colors hover:border-gold-400/40 hover:text-gold-ink disabled:opacity-40">Supprimer</button>
+              <AdminAction icon={Pencil} label="Modifier" disabled={!!busy} onClick={() => { setFailure(null); setEditForm(toForm(video)); setEditing(video); }} />
+              <AdminAction icon={Trash2} label="Supprimer" danger disabled={!!busy} onClick={() => { setFailure(null); setPending(video); }} />
             </div>
           </AdminRow>
         ))}

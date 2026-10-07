@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { FolderOpen, Plus } from 'lucide-react';
+import { FolderOpen, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { AdminConfirm, AdminModal, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
+import { AdminAction, AdminConfirm, AdminModal, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
 import { api } from '@/services/api';
@@ -41,7 +41,7 @@ export default function AdminCategories() {
     <label className="mb-6 block max-w-md text-xs text-t3">Rechercher une catégorie<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} className={field} placeholder="Nom de la catégorie…" /></label>
     <AdminState loading={categories.loading} error={categories.error} empty={!list.length} emptyMessage={search ? 'Aucune catégorie correspondante.' : 'Aucune catégorie. Ajoute le premier repère du catalogue.'} onRetry={categories.reload}>
       <p className="mb-4 text-xs text-t4">{list.length} catégorie{list.length !== 1 ? 's' : ''}</p>
-      {list.map((category) => <AdminRow key={category.id}><span className="flex h-11 w-11 items-center justify-center rounded-lg bg-noir-800 text-gold-ink"><FolderOpen className="h-5 w-5" aria-hidden /></span><h2 className="min-w-0 flex-1 break-words text-base font-semibold leading-snug tracking-normal text-t1 sm:text-lg">{category.name}</h2><div className="flex gap-2" role="group" aria-label={`Actions pour ${category.name}`}><button type="button" disabled={!!busy} onClick={() => { setFailure(null); setEditName(category.name); setEditing(category); }} className="inline-flex min-h-9 items-center rounded border border-line px-3 text-xs font-medium text-t2 transition-colors hover:border-gold-400/40 hover:text-gold-ink disabled:opacity-40">Renommer</button><button type="button" disabled={!!busy} onClick={() => { setFailure(null); setPending(category); }} className="inline-flex min-h-9 items-center rounded border border-line px-3 text-xs font-medium text-t2 transition-colors hover:border-gold-400/40 hover:text-gold-ink disabled:opacity-40">Supprimer</button></div></AdminRow>)}
+      {list.map((category) => <AdminRow key={category.id}><span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded bg-noir-800 text-gold-ink sm:flex"><FolderOpen className="h-5 w-5" aria-hidden /></span><h2 className="min-w-0 flex-1 break-words text-base font-semibold leading-snug tracking-normal text-t1 sm:text-lg">{category.name}</h2><div className="flex gap-2" role="group" aria-label={`Actions pour ${category.name}`}><AdminAction icon={Pencil} label="Renommer" disabled={!!busy} onClick={() => { setFailure(null); setEditName(category.name); setEditing(category); }} /><AdminAction icon={Trash2} label="Supprimer" danger disabled={!!busy} onClick={() => { setFailure(null); setPending(category); }} /></div></AdminRow>)}
     </AdminState>
     <AdminModal open={!!editing} onClose={() => { setEditing(null); setFailure(null); }} title="Renommer la catégorie" description="Le nouveau nom sera utilisé dans le catalogue et pour ses tags." busy={!!busy}>
       <form onSubmit={(event) => { event.preventDefault(); if (editing && editName.trim()) void act(`edit-${editing.id}`, () => adminApi.renameCategory(editing.id, editName.trim()), () => { setEditing(null); setNotice('La catégorie a été renommée.'); }); }} className="space-y-5">
