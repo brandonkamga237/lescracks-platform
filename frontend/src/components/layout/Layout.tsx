@@ -1,7 +1,7 @@
 // src/components/layout/Layout.tsx
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { motion, useReducedMotion } from 'framer-motion';
+import { useReducedMotion } from 'framer-motion';
 import Header from '@/components/layout/Header';
 import NewsletterBar from '@/components/layout/NewsletterBar';
 import Footer from '@/components/layout/Footer';
@@ -45,17 +45,10 @@ const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutPro
       <NewsletterBar />
       <Header />
 
-      <motion.main
-        id="main-content"
-        tabIndex={-1}
-        key={location.pathname}
-        initial={reducedMotion ? false : { opacity: 0, y: 12 }}
-        animate={reducedMotion ? false : { opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, ease: 'easeOut' }}
-        className="flex-1 scroll-mt-24"
-      >
+      {/* Opacity only: navigation happens dozens of times a session, movement would get tiring. */}
+      <main id="main-content" tabIndex={-1} key={location.pathname} className="flex-1 scroll-mt-24 animate-page-in">
         {children}
-      </motion.main>
+      </main>
 
       {/* WhatsApp flottant — canal principal de conversion */}
       {showFooter && (
@@ -75,26 +68,25 @@ const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutPro
         rel="noopener noreferrer"
         aria-label="Rejoindre la communauté LesCracks sur WhatsApp, nouvel onglet"
         title="Rejoindre la communauté WhatsApp"
-        className="group fixed bottom-5 right-5 z-40 flex h-14 items-center rounded-full bg-gold-400 px-4 text-black shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-colors hover:bg-gold-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400 sm:bottom-6 sm:right-6"
+        className="group fixed bottom-5 right-5 z-40 flex h-14 items-center rounded-full bg-gold-400 px-4 text-black shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-[background-color,transform] duration-150 ease-out hover:bg-gold-300 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400 sm:bottom-6 sm:right-6"
       >
         <WhatsAppSVG className="h-6 w-6 shrink-0" />
-        <span className="hidden max-w-0 overflow-hidden whitespace-nowrap text-sm font-semibold transition-all duration-300 group-hover:max-w-[12rem] group-hover:pl-2 group-focus-visible:max-w-[12rem] group-focus-visible:pl-2 sm:inline">
+        <span className="hidden max-w-0 overflow-hidden whitespace-nowrap text-sm font-semibold transition-[max-width,padding-left] duration-200 ease-out group-hover:max-w-[12rem] group-hover:pl-2 group-focus-visible:max-w-[12rem] group-focus-visible:pl-2 sm:inline">
           Rejoindre la communauté
         </span>
       </a>
 
       {/* Scroll to Top — au-dessus du bouton WhatsApp */}
-      {showScrollTop && showScrollToTop && (
-        <motion.button
+      {/* Stays mounted so it can leave the way it came; `invisible` takes it out of the tab order. */}
+      {showScrollTop && (
+        <button
           type="button"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
           onClick={scrollToTop}
-          className="fixed bottom-24 right-7 z-30 hidden h-11 w-11 items-center justify-center rounded-full border border-line-strong bg-card text-t2 transition-colors hover:border-gold-400 hover:text-gold-ink lg:flex"
+          className={`fixed bottom-24 right-7 z-30 hidden h-11 w-11 items-center justify-center rounded-full border border-line-strong bg-card text-t2 transition-[opacity,transform,visibility,color,border-color] duration-200 ease-out hover:border-gold-400 hover:text-gold-ink active:scale-[0.97] lg:flex ${showScrollToTop ? 'opacity-100' : 'invisible translate-y-2 opacity-0'}`}
           aria-label="Remonter en haut"
         >
           <ArrowUp className="h-4 w-4" aria-hidden />
-        </motion.button>
+        </button>
       )}
     </div>
   );

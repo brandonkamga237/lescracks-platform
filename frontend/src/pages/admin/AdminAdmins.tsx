@@ -59,8 +59,8 @@ export default function AdminAdmins() {
 
   return (
     <AdminSection title="Administrateurs" description="Créer et gérer les accès au tableau de bord.">
-      {error && <p role="alert" className="mb-5 rounded-xl border border-red-500/25 bg-red-500/5 p-3 text-sm text-red-400">{error}</p>}
-      {notice && <p role="status" className="mb-5 rounded-xl border border-green-500/25 bg-green-500/5 p-3 text-sm text-green-400">{notice}</p>}
+      {error && <p role="alert" className="mb-5 rounded-xl border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
+      {notice && <p role="status" className="mb-5 rounded-xl border border-success/25 bg-success/5 p-3 text-sm text-success-ink">{notice}</p>}
 
       <form onSubmit={create} className="mb-6 rounded-3xl border border-white/[0.06] bg-card p-6">
         <h2 className="font-display text-lg font-semibold text-t1">Nouvel administrateur</h2>
@@ -97,7 +97,7 @@ export default function AdminAdmins() {
             <button
               type="button"
               onClick={() => { setDeleteError(''); setDeletePending(admin); }}
-              className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 p-2 text-red-400 transition hover:bg-red-500/10"
+              className="inline-flex items-center gap-1 rounded-lg border border-error/30 p-2 text-error-ink transition hover:bg-error/10"
               aria-label="Supprimer"
             >
               <Trash2 className="h-4 w-4" aria-hidden />
