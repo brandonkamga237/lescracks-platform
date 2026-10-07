@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Archive, BookOpen, Eye, FileText, Heart, Pencil, Plus, Search, Send, SlidersHorizontal, Trash2, TrendingUp, Video } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Archive, BookOpen, Eye, FileText, Heart, PenLine, Pencil, Plus, Search, Send, SlidersHorizontal, Trash2, TrendingUp, Video } from 'lucide-react';
 import { AdminAction, AdminConfirm, AdminPagination, AdminRow, AdminSection, AdminState, StatusBadge } from '@/components/admin/AdminTable';
 import ResourceForm from '@/components/admin/ResourceForm';
 import { useApi } from '@/hooks/useApi';
@@ -26,6 +26,7 @@ export default function AdminResources() {
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState<AdminResourceFilters>({ page: 0 });
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const navigate = useNavigate();
   const resources = useApi((signal) => adminApi.resources(filters, signal), [filters]);
   const categories = useApi((signal) => api.categories(signal), []);
   const tags = useApi((signal) => filters.categoryId ? api.tags(filters.categoryId, signal) : Promise.resolve([]), [filters.categoryId]);
@@ -67,7 +68,7 @@ export default function AdminResources() {
     setPending({ resource, action });
   }
 
-  return <AdminSection title="Ressources" description="Un catalogue utile, de la première idée à la publication." action={<div className="flex items-center gap-3"><Link to="/admin" className="btn-secondary"><TrendingUp className="h-4 w-4" aria-hidden />Les plus likés</Link><button type="button" onClick={() => setEditor('new')} className="btn-primary"><Plus className="h-4 w-4" aria-hidden />Nouvelle ressource</button></div>}>
+  return <AdminSection title="Ressources" description="Un catalogue utile, de la première idée à la publication." action={<div className="flex flex-wrap items-center gap-3"><Link to="/admin" className="btn-secondary"><TrendingUp className="h-4 w-4" aria-hidden />Les plus likés</Link><Link to="/admin/articles/nouveau" className="btn-primary"><PenLine className="h-4 w-4" aria-hidden />Écrire un article</Link><button type="button" onClick={() => setEditor('new')} className="btn-secondary"><Plus className="h-4 w-4" aria-hidden />Vidéo ou ebook</button></div>}>
     <div className="mb-6 rounded-lg border border-line-soft bg-card p-5">
       <form onSubmit={(event) => { event.preventDefault(); setFilters({ ...filters, search: search.trim() || undefined, page: 0 }); }} className="flex flex-wrap items-end gap-3">
         <label className="min-w-48 flex-1 text-xs text-t3">Rechercher dans le catalogue<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Titre ou description…" className={`mt-2 ${field}`} /></label>
@@ -95,7 +96,7 @@ export default function AdminResources() {
         <div className="flex items-center gap-1.5 rounded border border-line-soft bg-noir-950 px-2.5 py-1.5 text-xs text-t2"><Heart className="h-3.5 w-3.5 text-gold-ink" aria-hidden />{resource.likeCount ?? 0}</div>
         <StatusBadge status={resource.status} resource />
         <div className="flex flex-wrap gap-2" role="group" aria-label={`Actions pour ${resource.title}`}>
-          <AdminAction icon={Pencil} label="Modifier" disabled={!!busy[resource.id]} onClick={() => setEditor(resource)} />
+          <AdminAction icon={Pencil} label="Modifier" disabled={!!busy[resource.id]} onClick={() => (resource.kind === 'ARTICLE' ? navigate(`/admin/articles/${resource.id}`, { state: { resource } }) : setEditor(resource))} />
           {resource.status !== 'PUBLISHED' && <AdminAction icon={Send} label={busy[resource.id] === 'publish' ? 'Publication…' : 'Publier'} disabled={!!busy[resource.id]} onClick={() => void act(resource, 'publish')} />}
           {resource.status !== 'ARCHIVED' && <AdminAction icon={Archive} label="Archiver" disabled={!!busy[resource.id]} onClick={() => confirm(resource, 'archive')} />}
           <AdminAction icon={Trash2} label="Supprimer" danger disabled={!!busy[resource.id]} onClick={() => confirm(resource, 'delete')} />
