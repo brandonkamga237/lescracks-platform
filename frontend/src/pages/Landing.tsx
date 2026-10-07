@@ -6,6 +6,8 @@ import SEO from '@/components/common/SEO';
 import { Skeleton } from '@/components/common/Skeleton';
 import { EmptyState, ErrorState } from '@/components/common/States';
 import AgendaItem from '@/components/events/AgendaItem';
+import DuotonePhoto from '@/components/illustrations/DuotonePhoto';
+import LineArt from '@/components/illustrations/LineArt';
 import Layout from '@/components/layout/Layout';
 import { Section, SectionHeader } from '@/components/layout/Page';
 import ResourceCard from '@/components/resources/ResourceCard';
@@ -76,49 +78,47 @@ export default function Landing() {
                 ? 'Reprends ta lecture ou trouve le prochain rendez-vous.'
                 : 'Vidéos, ebooks et ateliers pour apprendre la tech en français, en accès libre.'}
             </p>
-            <div className="mt-10 flex flex-wrap items-center gap-3">
+            <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
               <Link to="/ressources" className="btn-primary">
                 Explorer la bibliothèque <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
-              <Link to="/evenements" className="btn-secondary">Voir l’agenda</Link>
+              <Link to="/evenements" className="link inline-flex items-center gap-1.5 text-sm">Voir l’agenda <ArrowRight className="h-4 w-4" aria-hidden /></Link>
             </div>
           </div>
         </div>
 
-        <div className="relative flex items-center justify-center overflow-hidden bg-black px-5 py-16 sm:px-8 lg:py-28">
-          <img aria-hidden src="/images/community-1.webp" alt="" className="absolute inset-0 h-full w-full object-cover opacity-30" />
-          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
-          <div className="mode-raised relative w-full max-w-sm rounded-lg p-7 sm:p-8">
-            {isSignedIn ? (
-              <>
-                <h2 className="text-2xl font-bold leading-tight text-t1">Ton espace</h2>
-                <p className="mt-2 text-sm text-t3">Tout ce qu’il te faut pour continuer.</p>
-                <div className="mt-6 grid gap-2">
-                  <Link to={isAdmin ? '/admin' : '/profil'} className="btn-primary w-full">{isAdmin ? 'Administration' : 'Mon espace'}</Link>
-                  <Link to="/ressources" className="btn-secondary w-full">La bibliothèque</Link>
-                  <Link to="/talk" className="btn-secondary w-full">LesCracks Talk</Link>
-                </div>
-              </>
-            ) : (
-              <>
-                <h2 className="text-2xl font-bold leading-tight text-t1">Rejoins la communauté</h2>
-                <ul className="mt-5 space-y-3">
-                  {PROMISES.map((promise) => (
-                    <li key={promise} className="flex gap-3 text-sm leading-normal text-t2">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-gold-ink" strokeWidth={3} aria-hidden />
-                      {promise}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-7 grid gap-2">
-                  <Link to="/inscription" className="btn-primary w-full">Créer un compte gratuit</Link>
-                  <Link to="/connexion" className="btn-secondary w-full">J’ai déjà un compte</Link>
-                </div>
-                <p className="mt-4 text-center text-xs text-t4">
-                  Ou <Link to="/ressources" className="link">explore sans compte</Link>
-                </p>
-              </>
-            )}
+        {/* The card straddles the seam on wide screens so the two halves read as one poster. */}
+        <div className="relative bg-black pb-12 lg:pb-0">
+          <DuotonePhoto src="/images/community-1.webp" loading="eager" className="h-72 sm:h-96 lg:absolute lg:inset-0 lg:h-auto" />
+          <div className="relative mx-5 -mt-20 sm:mx-8 lg:absolute lg:bottom-12 lg:-left-16 lg:mx-0 lg:mt-0 lg:w-[22rem]">
+            <div className="mode-raised rounded-lg border border-line p-7 sm:max-w-sm lg:max-w-none">
+              {isSignedIn ? (
+                <>
+                  <h2 className="text-2xl font-bold leading-tight text-t1">Ton espace</h2>
+                  <p className="mt-2 text-sm text-t3">Tout ce qu’il te faut pour continuer.</p>
+                  <Link to={isAdmin ? '/admin' : '/profil'} className="btn-secondary mt-6 w-full">{isAdmin ? 'Administration' : 'Mon espace'}</Link>
+                  <p className="mt-4 text-center text-sm text-t3">
+                    Ou regarde <Link to="/talk" className="link">LesCracks Talk</Link>
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-2xl font-bold leading-tight text-t1">Rejoins la communauté</h2>
+                  <ul className="mt-5 space-y-3">
+                    {PROMISES.map((promise) => (
+                      <li key={promise} className="flex gap-3 text-sm leading-normal text-t2">
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-gold-ink" strokeWidth={3} aria-hidden />
+                        {promise}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link to="/inscription" className="btn-secondary mt-7 w-full">Créer un compte gratuit</Link>
+                  <p className="mt-4 text-center text-sm text-t3">
+                    Déjà inscrit ? <Link to="/connexion" className="link">Se connecter</Link>
+                  </p>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -203,26 +203,25 @@ export default function Landing() {
 
       {/* ── Pourquoi — full-bleed photo + checklist on black ────── */}
       <section className="relative overflow-hidden bg-black">
-        <img src="/images/community-2.webp" alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-40" loading="lazy" />
-        <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-black via-black/85 to-black/40" />
-        <div className="relative mx-auto grid max-w-7xl gap-12 px-5 py-24 sm:px-8 lg:grid-cols-2 lg:py-32">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[1.2fr_1fr] lg:py-32">
           <div>
             <p className="kicker">Pourquoi LesCracks</p>
             <h2 className="mt-5 font-display text-4xl font-bold leading-[0.96] tracking-tight text-t1 sm:text-5xl lg:text-[3.5rem] lg:leading-[0.92]">
               Apprendre seul, c’est long. Ensemble, ça avance.
             </h2>
+            <ul className="mt-10 space-y-5">
+              {WHY.map((reason) => (
+                <li key={reason} className="flex gap-4 text-base leading-normal text-t2 sm:text-lg">
+                  <Check className="mt-1 h-5 w-5 shrink-0 text-gold-ink" strokeWidth={3} aria-hidden />
+                  {reason}
+                </li>
+              ))}
+            </ul>
             <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" className="btn-primary mt-10">
               Rejoindre sur WhatsApp <ArrowUpRight className="h-4 w-4" aria-hidden />
             </a>
           </div>
-          <ul className="space-y-5 self-center">
-            {WHY.map((reason) => (
-              <li key={reason} className="flex gap-4 text-base leading-normal text-t1 sm:text-lg">
-                <Check className="mt-1 h-5 w-5 shrink-0 text-gold-ink" strokeWidth={3} aria-hidden />
-                {reason}
-              </li>
-            ))}
-          </ul>
+          <LineArt motif="network" className="mx-auto hidden w-full max-w-md text-gold-400 lg:block" />
         </div>
       </section>
 
