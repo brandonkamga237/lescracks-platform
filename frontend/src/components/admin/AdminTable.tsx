@@ -68,7 +68,7 @@ interface AdminRowProps { children: React.ReactNode }
 
 export function AdminRow({ children }: AdminRowProps) {
   return (
-    <div className="mb-4 flex flex-wrap items-center gap-4 rounded-3xl border border-white/[0.06] bg-card p-6 transition-all hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20">
+    <div className="mb-4 flex flex-wrap items-center gap-4 rounded-3xl border border-white/[0.06] bg-card p-6 transition-[border-color,box-shadow] duration-200 hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/20">
       {children}
     </div>
   );
