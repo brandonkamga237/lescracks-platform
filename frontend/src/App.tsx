@@ -34,6 +34,7 @@ const AdminAdmins = lazy(() => import('@/pages/admin/AdminAdmins'));
 const AdminTags = lazy(() => import('@/pages/admin/AdminTags'));
 const AdminTalks = lazy(() => import('@/pages/admin/AdminTalks'));
 const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
+const ArticleStudio = lazy(() => import('@/pages/admin/ArticleStudio'));
 
 function Waiting() {
   return (
@@ -73,13 +74,19 @@ function MemberRoute({ children }: MemberRouteProps) {
  * A non-admin lands on the catalogue rather than on a refusal: they did nothing wrong,
  * they simply followed a link that was not for them.
  */
-function AdminRoute() {
+interface AdminRouteProps {
+  /** Full-screen tools (the writing studio) bring their own chrome. */
+  bare?: boolean;
+}
+
+function AdminRoute({ bare = false }: AdminRouteProps) {
   const { isLoading, isSignedIn, isAdmin, error } = useSession();
   const location = useLocation();
   if (isLoading) return <Waiting />;
   if (error) return <SessionFailure />;
   if (!isSignedIn) return <Navigate to={`/admin/connexion?retour=${encodeURIComponent(`${location.pathname}${location.search}${location.hash}`)}`} replace />;
   if (!isAdmin) return <Navigate to="/ressources" replace />;
+  if (bare) return <Suspense fallback={<Waiting />}><Outlet /></Suspense>;
   return <AdminLayout><Suspense fallback={<Waiting />}><Outlet /></Suspense></AdminLayout>;
 }
 
@@ -116,6 +123,10 @@ function AppRoutes() {
       {/* Verifying a code is done by a recruiter who has no account and wants none. */}
       <Route path="/profil" element={<MemberRoute><Profile /></MemberRoute>} />
 
+      <Route path="/admin/articles" element={<AdminRoute bare />}>
+        <Route path="nouveau" element={<ArticleStudio />} />
+        <Route path=":id" element={<ArticleStudio />} />
+      </Route>
       <Route path="/admin" element={<AdminRoute />}>
         <Route index element={<AdminDashboard />} />
         <Route path="audience" element={<AdminAudience />} />
