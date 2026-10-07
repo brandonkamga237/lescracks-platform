@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { ArrowLeft, ArrowUpRight, CalendarDays, Clock3, MapPin, Radio } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, CalendarDays, CalendarPlus, Clock3, Download, MapPin, Radio } from 'lucide-react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import SEO from '@/components/common/SEO';
+import ShareButton from '@/components/common/ShareButton';
 import Layout from '@/components/layout/Layout';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/services/api';
+import { downloadIcs, googleCalendarUrl } from '@/lib/calendar';
 import { eventPath } from '@/lib/slugs';
 
 const typeLabels = { BOOTCAMP: 'Bootcamp', WORKSHOP: 'Atelier', WEBINAR: 'Webinaire', CONFERENCE: 'Conférence' } as const;
@@ -61,7 +63,8 @@ export default function EvenementDetail() {
           {status === 'Terminé' && <p className="mb-10 rounded bg-card px-6 py-5 text-sm leading-relaxed text-t3">Cet événement est terminé. Explore l’agenda pour découvrir les prochains rendez-vous.</p>}
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-16">
             <section aria-labelledby="event-description" className="min-w-0"><h2 id="event-description" className="font-display text-3xl font-bold leading-tight text-t1">Au programme</h2><p className="mt-5 whitespace-pre-line break-words text-base leading-relaxed text-t2 sm:text-lg">{loaded.description}</p></section>
-            <aside className="rounded-lg bg-card p-6 sm:p-7" aria-label="Informations pratiques">
+            {/* On a phone the date and place come first: they are what someone opening a shared link looks for. */}
+            <aside className="-order-1 rounded-lg bg-card p-6 sm:p-7 lg:order-none" aria-label="Informations pratiques">
               <h2 className="font-display text-xl font-bold text-t1">Le rendez-vous en détail</h2>
               <dl className="mt-6 space-y-6">
                 <div className="flex gap-3"><CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" aria-hidden /><div><dt className="label">Début</dt><dd className="mt-2 text-sm leading-relaxed text-t1">{hasDate ? <time dateTime={loaded.startDate}>{dateFormat.format(start)}</time> : 'Date non renseignée'}</dd></div></div>
@@ -70,6 +73,13 @@ export default function EvenementDetail() {
                 {loaded.location && <div className="flex gap-3"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" aria-hidden /><div className="min-w-0"><dt className="label">Lieu</dt><dd className="mt-2 break-words text-sm leading-relaxed text-t1">{loaded.location}</dd></div></div>}
               </dl>
               <p className="mt-6 border-t border-line pt-4 text-xs leading-relaxed text-t3">Les horaires sont affichés dans ton fuseau horaire.</p>
+              <div className="mt-5 grid gap-2">
+                {hasDate && (status === 'À venir' || status === 'En cours') && <>
+                  <a href={googleCalendarUrl(loaded, `${window.location.origin}${eventPath(loaded)}`)} target="_blank" rel="noopener noreferrer" className="btn-primary w-full"><CalendarPlus className="h-4 w-4" aria-hidden />Ajouter à Google Agenda</a>
+                  <button type="button" onClick={() => downloadIcs(loaded, `${window.location.origin}${eventPath(loaded)}`)} className="btn-secondary w-full"><Download className="h-4 w-4" aria-hidden />Apple, Outlook (.ics)</button>
+                </>}
+                <ShareButton title={loaded.title} path={eventPath(loaded)} label="Partager le rendez-vous" />
+              </div>
             </aside>
           </div>
           <div className="mt-16 flex flex-col justify-between gap-5 rounded-lg bg-card p-6 sm:flex-row sm:items-center sm:p-8"><div><h2 className="font-display text-2xl font-bold text-t1">Un autre rendez-vous à découvrir ?</h2><p className="mt-2 text-sm text-t3">Retrouve tous les formats dans l’agenda LesCracks.</p></div><Link to={cataloguePath} className="btn-primary shrink-0">Explorer l’agenda<ArrowUpRight className="h-4 w-4" aria-hidden /></Link></div>

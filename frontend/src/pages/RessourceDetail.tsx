@@ -3,7 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, Download, ExternalLink } from 'lucide-react';
 
 import ArticleRenderer from '@/components/resources/ArticleRenderer';
-import ResourceShare from '@/components/resources/ResourceShare';
+import ShareButton from '@/components/common/ShareButton';
 import SEO from '@/components/common/SEO';
 import Layout from '@/components/layout/Layout';
 import { useApi } from '@/hooks/useApi';
@@ -120,17 +120,12 @@ export default function RessourceDetail() {
                 {loaded.platform && <div className="flex justify-between gap-4"><dt className="text-t3">Plateforme</dt><dd className="break-words text-right text-t1">{loaded.platform}</dd></div>}
               </dl>
 
-              {loaded && (
-                <div className="mb-4 flex items-center justify-between rounded bg-noir-950 px-4 py-3">
-                  <span className="text-sm text-t3">Partager</span>
-                  <ResourceShare resource={loaded} />
-                </div>
-              )}
 
               {loaded.kind === 'EXTERNAL_VIDEO' && loaded.videoUrl && <a href={loaded.videoUrl} target="_blank" rel="noreferrer noopener" className="btn-primary w-full">Regarder la vidéo<ExternalLink className="h-4 w-4 shrink-0" aria-hidden /><span className="sr-only"> (nouvel onglet)</span></a>}
               {loaded.kind === 'EBOOK' && loaded.downloadUrl && <a href={`${ENV.API_BASE_URL.replace(/\/$/, '')}${loaded.downloadUrl.replace(/^\/api(?=\/)/, '')}`} className="btn-primary w-full">Télécharger l’ebook<Download className="h-4 w-4 shrink-0" aria-hidden /></a>}
               {loaded.kind !== 'ARTICLE' && !(loaded.kind === 'EBOOK' ? loaded.downloadUrl : loaded.videoUrl) && <p className="text-sm text-t3">Le lien d’accès n’est pas disponible pour le moment.</p>}
 
+              <ShareButton title={loaded.title} path={resourcePath(loaded)} label="Partager la ressource" className="mt-3" />
               <button
                 onClick={toggleLike}
                 disabled={liking}
