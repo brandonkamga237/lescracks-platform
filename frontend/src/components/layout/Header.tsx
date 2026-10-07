@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowRight, BookOpen, CalendarDays, Info, LogOut, Menu, Podcast, Search, Shield, User } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { ArrowRight, Search, User } from 'lucide-react';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -11,70 +10,40 @@ import { useSession } from '@/hooks/useSession';
 interface NavLinkDef {
   to: string;
   label: string;
-  icon: LucideIcon;
-  description: string;
   /** The Talk tab is dressed in gold: it announces a show, not a section of the site. */
   highlight?: boolean;
 }
 
 const LINKS: readonly NavLinkDef[] = [
-  { to: '/ressources', label: 'Bibliothèque', icon: BookOpen, description: 'Vidéos et ebooks, à ton rythme' },
-  { to: '/evenements', label: 'Événements', icon: CalendarDays, description: 'Les prochains rendez-vous tech' },
-  { to: '/talk', label: 'Talk', icon: Podcast, description: 'LesCracks Talk, la tech africaine en conversations', highlight: true },
-  { to: '/a-propos', label: 'À propos', icon: Info, description: 'Pourquoi LesCracks existe' },
+  { to: '/ressources', label: 'Bibliothèque' },
+  { to: '/evenements', label: 'Événements' },
+  { to: '/talk', label: 'Talk', highlight: true },
+  { to: '/a-propos', label: 'À propos' },
 ];
 
+/** Phones navigate from the bottom tab bar; the header keeps the logo and the search. */
 export default function Header() {
-  const [open, setOpen] = useState(false);
-  const [leaving, setLeaving] = useState(false);
-  const [failure, setFailure] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const [draft, setDraft] = useState('');
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
-  const { isLoading, isSignedIn, isAdmin, name, signOut } = useSession();
+  const { isLoading, isSignedIn, isAdmin, name } = useSession();
   const destination = { from: `${pathname}${search}` };
 
-  // A menu that survives navigation traps the reader on the page they just left.
   useEffect(() => {
-    setOpen(false);
+    setSearchOpen(false);
   }, [pathname, search]);
 
   function submitSearch(event: React.FormEvent) {
     event.preventDefault();
     const term = draft.trim();
+    setSearchOpen(false);
     navigate(term ? `/ressources?q=${encodeURIComponent(term)}` : '/ressources');
   }
 
-  async function logout() {
-    setLeaving(true);
-    setFailure('');
-    try {
-      await signOut();
-      setOpen(false);
-    } catch {
-      setFailure('La déconnexion a échoué. Réessaie.');
-    } finally {
-      setLeaving(false);
-    }
-  }
-
-  const accountActions = (
-    <div className="space-y-2">
-      <Link to={isAdmin ? '/admin' : '/profil'} onClick={() => setOpen(false)} className="flex min-h-10 items-center gap-2 rounded bg-noir-800 px-3 text-sm text-t1 transition-colors hover:bg-noir-700">
-        {isAdmin ? <Shield className="h-4 w-4 text-gold-ink" aria-hidden /> : <User className="h-4 w-4 text-gold-ink" aria-hidden />}
-        {isAdmin ? 'Administration' : 'Mon espace'}
-        <ArrowRight className="ml-auto h-4 w-4" aria-hidden />
-      </Link>
-      <button type="button" disabled={leaving} onClick={() => void logout()} className="flex min-h-10 w-full items-center gap-2 rounded px-3 text-sm text-t3 transition-colors hover:bg-noir-800 hover:text-t1 disabled:opacity-50">
-        <LogOut className="h-4 w-4" aria-hidden />{leaving ? 'Déconnexion…' : 'Se déconnecter'}
-      </button>
-      {failure && <p role="alert" className="px-3 text-sm text-error-ink">{failure}</p>}
-    </div>
-  );
-
   return (
     <header className="mode-raised sticky top-0 z-40 border-b border-line">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-8 px-5 sm:px-8">
+      <div className="mx-auto flex h-14 max-w-7xl items-center gap-8 px-5 sm:px-8 lg:h-16">
         <Link to="/" className="shrink-0" aria-label="LesCracks, accueil">
           <LesCracksLogo height={32} className="w-auto" />
         </Link>
@@ -114,25 +83,19 @@ export default function Header() {
           )}
         </div>
 
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
           <DialogTrigger asChild>
-            <button type="button" className="ml-auto flex h-10 w-10 items-center justify-center rounded border border-line text-t1 transition-colors hover:bg-noir-800 lg:hidden" aria-label="Ouvrir le menu"><Menu className="h-5 w-5" aria-hidden /></button>
+            <button type="button" className="ml-auto flex h-11 w-11 items-center justify-center rounded border border-line text-t1 transition-colors hover:bg-noir-800 lg:hidden" aria-label="Rechercher dans la bibliothèque"><Search className="h-5 w-5" aria-hidden /></button>
           </DialogTrigger>
           <DialogContent position="top" className="mode-raised w-[calc(100%_-_1rem)] rounded-lg border-line bg-card p-4 sm:w-[calc(100%_-_2rem)] sm:p-6">
-            <DialogTitle className="font-display text-xl font-bold text-t1">Menu</DialogTitle>
-            <DialogDescription className="text-sm text-t3">Un sujet, une ressource, un prochain pas.</DialogDescription>
-            <nav aria-label="Navigation mobile" className="my-2">
-              {LINKS.map(({ to, label, icon: Icon, description }) => (
-                <NavLink key={to} to={to} onClick={() => setOpen(false)} className={({ isActive }) => `flex items-center gap-3 border-t border-line-soft p-3 transition-colors ${isActive ? 'text-gold-ink' : 'text-t1 hover:bg-noir-800'}`}>
-                  <Icon className="h-4 w-4 shrink-0 text-t4" aria-hidden />
-                  <span><span className="block text-sm font-medium">{label}</span><span className="mt-0.5 block text-xs text-t3">{description}</span></span>
-                  <ArrowRight className="ml-auto h-4 w-4 text-t4" aria-hidden />
-                </NavLink>
-              ))}
-            </nav>
-            <div className="border-t border-line-soft pt-3">
-              {isLoading ? <p role="status" className="text-sm text-t3">Vérification de la session…</p> : isSignedIn ? accountActions : <div className="grid gap-2"><Link to="/inscription" state={destination} onClick={() => setOpen(false)} className="btn-primary py-2 text-sm">Créer un compte</Link><Link to="/connexion" state={destination} onClick={() => setOpen(false)} className="btn-secondary py-2 text-sm">Se connecter</Link></div>}
-            </div>
+            <DialogTitle className="font-display text-xl font-bold text-t1">Rechercher</DialogTitle>
+            <DialogDescription className="text-sm text-t3">Un sujet, un outil, un titre de la bibliothèque.</DialogDescription>
+            <form onSubmit={submitSearch} role="search" className="flex gap-2">
+              <label htmlFor="mobile-search" className="sr-only">Rechercher dans la bibliothèque</label>
+              {/* 16px text: anything smaller makes iOS zoom the page on focus. */}
+              <input id="mobile-search" type="search" autoFocus value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Ex. Git, Python, API…" className="input min-w-0 flex-1 text-base" />
+              <button type="submit" className="btn-primary shrink-0 px-4" aria-label="Lancer la recherche"><ArrowRight className="h-4 w-4" aria-hidden /></button>
+            </form>
           </DialogContent>
         </Dialog>
       </div>
