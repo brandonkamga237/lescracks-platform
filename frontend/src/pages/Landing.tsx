@@ -86,7 +86,7 @@ export default function Landing() {
         </div>
 
         <div className="relative flex items-center justify-center overflow-hidden bg-black px-5 py-16 sm:px-8 lg:py-28">
-          <img aria-hidden src="/images/community-1.jpg" alt="" className="absolute inset-0 h-full w-full object-cover opacity-30" />
+          <img aria-hidden src="/images/community-1.webp" alt="" className="absolute inset-0 h-full w-full object-cover opacity-30" />
           <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
           <div className="mode-raised relative w-full max-w-sm rounded-lg p-7 sm:p-8">
             {isSignedIn ? (
@@ -203,7 +203,7 @@ export default function Landing() {
 
       {/* ── Pourquoi — full-bleed photo + checklist on black ────── */}
       <section className="relative overflow-hidden bg-black">
-        <img src="/images/community-2.jpg" alt="La communauté LesCracks réunie" className="absolute inset-0 h-full w-full object-cover opacity-40" loading="lazy" />
+        <img src="/images/community-2.webp" alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover opacity-40" loading="lazy" />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-black via-black/85 to-black/40" />
         <div className="relative mx-auto grid max-w-7xl gap-12 px-5 py-24 sm:px-8 lg:grid-cols-2 lg:py-32">
           <div>

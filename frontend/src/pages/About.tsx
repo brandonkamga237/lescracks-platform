@@ -55,7 +55,7 @@ export default function About() {
             </p>
           </div>
         </div>
-        <img src="/images/about.jpg" alt="Des membres de LesCracks en atelier" className="h-72 w-full object-cover sm:h-96 lg:h-full" loading="eager" />
+        <img src="/images/about.webp" alt="Un groupe réuni autour d’un ordinateur portable" className="h-72 w-full object-cover sm:h-96 lg:h-full" loading="eager" />
       </section>
 
       <Section aria-labelledby="actions-heading">
