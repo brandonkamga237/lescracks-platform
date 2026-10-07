@@ -44,13 +44,13 @@ export default function AdminLogin() {
       <p className="kicker">LesCracks / Administration</p>
       <h1 className="mt-4 font-display text-3xl font-bold">Ton espace de pilotage.</h1>
       <p className="mt-3 text-sm leading-relaxed text-t3">Connecte-toi avec ton compte administrateur pour gérer le contenu de la plateforme.</p>
-      {sessionError && <p role="alert" className="mt-5 text-sm text-amber-200">{sessionError.message}</p>}
+      {sessionError && <p role="alert" className="mt-5 text-sm text-warning-ink">{sessionError.message}</p>}
       <form onSubmit={submit} className="mt-8" aria-busy={busy}>
         <fieldset disabled={busy} className="space-y-5">
           <legend className="sr-only">Connexion administrateur</legend>
           <div><label htmlFor="admin-username" className="text-sm font-medium text-t1">Nom d’utilisateur</label><input id="admin-username" name="username" autoComplete="username" required value={username} onChange={(event) => setUsername(event.target.value)} className="input mt-2" /></div>
           <div><label htmlFor="admin-password" className="text-sm font-medium text-t1">Mot de passe</label><div className="relative"><input id="admin-password" name="password" autoComplete="current-password" required type={showPassword ? 'text' : 'password'} value={password} onChange={(event) => setPassword(event.target.value)} className="input mt-2 pr-14" /><button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} aria-pressed={showPassword} className="absolute right-2 top-2.5 flex h-9 w-9 items-center justify-center rounded-full text-t4 transition hover:text-t1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">{showPassword ? <EyeOff aria-hidden="true" className="h-5 w-5" /> : <Eye aria-hidden="true" className="h-5 w-5" />}</button></div></div>
-          {error && <p role="alert" className="rounded border border-red-400/20 bg-red-400/5 p-3 text-sm text-red-600">{error}</p>}
+          {error && <p role="alert" className="rounded border border-error/20 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
           <button type="submit" className="btn-primary w-full" disabled={busy}>{busy ? <><Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />Connexion en cours…</> : <>Accéder à l’administration<ArrowRight aria-hidden="true" className="h-4 w-4" /></>}</button>
         </fieldset>
       </form>

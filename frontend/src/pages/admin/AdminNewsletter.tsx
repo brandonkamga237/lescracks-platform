@@ -109,8 +109,8 @@ export default function AdminNewsletter() {
         </button>
       }
     >
-      {error && <p role="alert" className="mb-5 rounded-xl border border-red-500/25 bg-red-500/5 p-3 text-sm text-red-400">{error}</p>}
-      {notice && <p role="status" className="mb-5 rounded-xl border border-green-500/25 bg-green-500/5 p-3 text-sm text-green-400">{notice}</p>}
+      {error && <p role="alert" className="mb-5 rounded-xl border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
+      {notice && <p role="status" className="mb-5 rounded-xl border border-success/25 bg-success/5 p-3 text-sm text-success-ink">{notice}</p>}
 
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
         <div className="rounded-3xl border border-white/[0.06] bg-card p-5">
@@ -227,7 +227,7 @@ export default function AdminNewsletter() {
                   <p className="mt-1 text-xs text-t3">{[s.firstName, s.lastName].filter(Boolean).join(' ')}</p>
                 </div>
                 <span
-                  className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${s.status === 'SUBSCRIBED' ? 'border-green-500/30 bg-green-500/10 text-green-400' : 'border-line bg-noir-800 text-t3'}`}
+                  className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium ${s.status === 'SUBSCRIBED' ? 'border-success/30 bg-success/10 text-success-ink' : 'border-line bg-noir-800 text-t3'}`}
                 >
                   {statusLabels[s.status]}
                 </span>
@@ -235,7 +235,7 @@ export default function AdminNewsletter() {
                   type="button"
                   disabled={busyId === s.userId}
                   onClick={() => void toggle(s)}
-                  className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition disabled:opacity-50 ${s.status === 'SUBSCRIBED' ? 'border-red-500/30 text-red-400 hover:bg-red-500/10' : 'border-green-500/30 text-green-400 hover:bg-green-500/10'}`}
+                  className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition disabled:opacity-50 ${s.status === 'SUBSCRIBED' ? 'border-error/30 text-error-ink hover:bg-error/10' : 'border-success/30 text-success-ink hover:bg-success/10'}`}
                 >
                   {s.status === 'SUBSCRIBED' ? 'Désabonner' : 'Réabonner'}
                 </button>

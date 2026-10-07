@@ -68,7 +68,7 @@ export default function Header() {
       <button type="button" disabled={leaving} onClick={() => void logout()} className="flex min-h-10 w-full items-center gap-2 rounded px-3 text-sm text-t3 transition-colors hover:bg-noir-800 hover:text-t1 disabled:opacity-50">
         <LogOut className="h-4 w-4" aria-hidden />{leaving ? 'Déconnexion…' : 'Se déconnecter'}
       </button>
-      {failure && <p role="alert" className="px-3 text-sm text-error">{failure}</p>}
+      {failure && <p role="alert" className="px-3 text-sm text-error-ink">{failure}</p>}
     </div>
   );
 

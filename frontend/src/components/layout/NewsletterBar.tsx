@@ -97,7 +97,7 @@ export default function NewsletterBar() {
         {!isSignedIn && emailSuccess && (
           <span className="font-medium text-gold-ink">Merci, tu es bien inscrit.</span>
         )}
-        {failure && <span role="alert" className="text-red-300">{failure}</span>}
+        {failure && <span role="alert" className="text-error-ink">{failure}</span>}
         <button type="button" onClick={() => setVisible(false)} aria-label="Masquer ce message" className="ml-1 rounded px-1 text-t4 transition-colors hover:text-t1">×</button>
       </div>
     </div>

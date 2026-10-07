@@ -35,7 +35,7 @@ export default function VerifyEmail() {
             Ton adresse email est confirmée. Tu peux maintenant te connecter.
           </div>
         ) : (
-          <div className="mt-6 rounded border border-red-400/20 p-4 text-sm text-red-600">{error || 'Ce lien est invalide ou a expiré.'}</div>
+          <div className="mt-6 rounded border border-error/20 p-4 text-sm text-error-ink">{error || 'Ce lien est invalide ou a expiré.'}</div>
         )}
         <Link to="/connexion" replace className="mt-7 block text-center text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Revenir à la connexion</Link>
       </section>

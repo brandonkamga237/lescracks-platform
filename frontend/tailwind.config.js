@@ -101,17 +101,21 @@ export default {
       DEFAULT: '#ffffff',
     },
     // Couleurs semantiques
+    // `ink` is the text tint: DEFAULT red drops to ~4.2:1 on the #232424 card, ink stays above 5.5:1.
     success: {
       DEFAULT: '#22c55e',
       foreground: '#ffffff',
+      ink: '#4ade80',
     },
     error: {
       DEFAULT: '#ef4444',
       foreground: '#ffffff',
+      ink: '#f87171',
     },
     warning: {
       DEFAULT: '#f59e0b',
       foreground: '#000000',
+      ink: '#fcd34d',
     },
     // Legacy - garder pour compatibilite
     primary: {
