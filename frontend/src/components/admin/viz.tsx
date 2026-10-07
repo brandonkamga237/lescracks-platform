@@ -59,7 +59,7 @@ export const Delta = ({ pct, invert = false }: { pct: number | null; invert?: bo
   const good = invert ? pct < 0 : pct > 0;
   const Icon = pct > 0 ? ArrowUpRight : pct < 0 ? ArrowDownRight : Minus;
   return (
-    <span className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium tabular-nums ${
+    <span className={`inline-flex items-center gap-0.5 rounded px-2 py-0.5 text-xs font-medium tabular-nums ${
       pct === 0 ? 'bg-noir-800 text-t3'
         : good ? 'bg-emerald-400/10 text-emerald-400'
         : 'bg-error/10 text-error-ink'
@@ -96,7 +96,7 @@ export const Kpi = ({
   spark?: Record<string, number | string>[];
   sparkKey?: string;
 }) => (
-  <div className="rounded-3xl border border-white/[0.06] bg-card p-6">
+  <div className="rounded-lg border border-line-soft bg-card p-6">
     <p className="text-sm text-t3">{label}</p>
     <div className="mt-3 flex items-baseline gap-3">
       <p className="font-display text-4xl font-semibold tabular-nums">{value}</p>
@@ -119,7 +119,7 @@ type ChartTooltipProps = {
 export const ChartTooltip = ({ active, payload, label, labelFormatter, valueSuffix = '' }: ChartTooltipProps) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-line bg-noir-900 px-3 py-2 text-xs shadow-xl">
+    <div className="rounded-lg border border-line bg-noir-900 px-3 py-2 text-xs shadow-xl">
       {label != null && (
         <p className="mb-1 font-medium text-t2">
           {labelFormatter ? labelFormatter(label) : label}
@@ -212,7 +212,7 @@ export const Panel = ({
   title?: string; subtitle?: string; action?: React.ReactNode;
   className?: string; children: React.ReactNode;
 }) => (
-  <section className={`rounded-3xl border border-white/[0.06] bg-card p-6 ${className}`}>
+  <section className={`rounded-lg border border-line-soft bg-card p-6 ${className}`}>
     {(title || action) && (
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -236,10 +236,10 @@ export const PERIODS = [
 ] as const;
 
 export const PeriodSelect = ({ value, onChange }: { value: number; onChange: (days: number) => void }) => (
-  <div className="inline-flex rounded-full border border-line bg-noir-900 p-1" role="group" aria-label="Période">
+  <div className="inline-flex rounded border border-line bg-noir-900 p-1" role="group" aria-label="Période">
     {PERIODS.map((p) => (
       <button key={p.days} type="button" onClick={() => onChange(p.days)}
-        className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
+        className={`rounded px-3.5 py-1.5 text-xs font-medium transition-colors ${
           value === p.days ? 'bg-gold-400 text-black' : 'text-t3 hover:text-t1'
         }`}>
         {p.label}

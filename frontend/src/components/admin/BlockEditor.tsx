@@ -212,7 +212,7 @@ const BlockEditor = forwardRef<BlockEditorHandle, BlockEditorProps>(function Blo
   );
 
   const toolbar = (index: number) => (
-    <div className="absolute -top-10 left-0 z-20 flex items-center gap-0.5 rounded-full border border-line bg-noir-900 px-1.5 py-1 shadow-xl">
+    <div className="absolute -top-10 left-0 z-20 flex items-center gap-0.5 rounded border border-line bg-noir-900 px-1.5 py-1 shadow-xl">
       {[
         { icon: Bold, label: 'Gras', mark: '**' },
         { icon: Italic, label: 'Italique', mark: '*' },
@@ -220,13 +220,13 @@ const BlockEditor = forwardRef<BlockEditorHandle, BlockEditorProps>(function Blo
       ].map(({ icon: Icon, label, mark }) => (
         <button key={label} type="button" title={label} aria-label={label}
           onMouseDown={(e) => { e.preventDefault(); applyMark(index, mark); }}
-          className="rounded-full p-1.5 text-t3 transition-colors hover:bg-noir-800 hover:text-t1">
+          className="rounded p-1.5 text-t3 transition-colors hover:bg-noir-800 hover:text-t1">
           <Icon className="h-3.5 w-3.5" aria-hidden />
         </button>
       ))}
       <button type="button" title="Lien" aria-label="Lien"
         onMouseDown={(e) => { e.preventDefault(); setLinkFor(index); }}
-        className="rounded-full p-1.5 text-t3 transition-colors hover:bg-noir-800 hover:text-t1">
+        className="rounded p-1.5 text-t3 transition-colors hover:bg-noir-800 hover:text-t1">
         <Link2 className="h-3.5 w-3.5" aria-hidden />
       </button>
     </div>
@@ -239,7 +239,7 @@ const BlockEditor = forwardRef<BlockEditorHandle, BlockEditorProps>(function Blo
         <div className={`flex w-8 shrink-0 flex-col items-center pt-1.5 transition-opacity ${active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
           <button type="button" title="Insérer un bloc" aria-label="Insérer un bloc après celui-ci"
             onClick={() => setMenuAt(menuAt === index ? null : index)}
-            className="rounded-full border border-line p-1 text-t3 transition-colors hover:border-gold-400/50 hover:text-gold-400">
+            className="rounded border border-line p-1 text-t3 transition-colors hover:border-gold-400/50 hover:text-gold-ink">
             <Plus className="h-3.5 w-3.5" aria-hidden />
           </button>
           <div className="mt-1 flex flex-col">
@@ -262,12 +262,12 @@ const BlockEditor = forwardRef<BlockEditorHandle, BlockEditorProps>(function Blo
           {children}
         </div>
         {menuAt === index && (
-          <ul role="menu" className="absolute left-0 top-full z-30 mt-1 w-72 overflow-hidden rounded-2xl border border-line bg-noir-900 shadow-2xl">
+          <ul role="menu" className="absolute left-0 top-full z-30 mt-1 w-72 overflow-hidden rounded-lg border border-line bg-noir-900 shadow-2xl">
             {MENU.map(({ kind, level, label, hint, icon: Icon }) => (
               <li key={label}>
                 <button type="button" role="menuitem" onClick={() => insert(index, { kind, level })}
                   className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-noir-800">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line text-gold-400">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line text-gold-ink">
                     <Icon className="h-4 w-4" aria-hidden />
                   </span>
                   <span>
@@ -314,10 +314,10 @@ const BlockEditor = forwardRef<BlockEditorHandle, BlockEditorProps>(function Blo
         return blockShell(index, (
           <figure className="space-y-3">
             {block.url ? (
-              <img src={block.url} alt={block.alt ?? ''} className="w-full rounded-2xl border border-line" />
+              <img src={block.url} alt={block.alt ?? ''} className="w-full rounded-lg border border-line" />
             ) : (
-              <label className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl border border-dashed border-line py-10 text-t3 transition-colors hover:border-gold-400/40 hover:text-t1">
-                <ImagePlus className="h-6 w-6 text-gold-400" aria-hidden />
+              <label className="flex cursor-pointer flex-col items-center gap-3 rounded-lg border border-dashed border-line py-10 text-t3 transition-colors hover:border-gold-400/40 hover:text-t1">
+                <ImagePlus className="h-6 w-6 text-gold-ink" aria-hidden />
                 <span className="text-sm">Ajouter une image</span>
                 <input type="file" accept="image/*" className="sr-only"
                   onChange={async (e) => {
@@ -344,7 +344,7 @@ const BlockEditor = forwardRef<BlockEditorHandle, BlockEditorProps>(function Blo
         ), false);
       case 'link':
         return blockShell(index, (
-          <div className="grid gap-2 rounded-2xl border border-line p-4 sm:grid-cols-2">
+          <div className="grid gap-2 rounded-lg border border-line p-4 sm:grid-cols-2">
             <input value={block.text} placeholder="Texte du lien"
               onFocus={() => setFocus(index)} onBlur={() => setFocus(-1)}
               onChange={(e) => update(index, { ...block, text: e.target.value })}
@@ -369,7 +369,7 @@ const BlockEditor = forwardRef<BlockEditorHandle, BlockEditorProps>(function Blo
   };
 
   return (
-    <div className="rounded-3xl border border-line bg-noir-950/40 px-4 py-6 sm:px-8">
+    <div className="rounded-lg border border-line bg-noir-950/40 px-4 py-6 sm:px-8">
       {linkFor !== null && (
         <form
           className="mb-4 flex gap-2"
@@ -381,15 +381,15 @@ const BlockEditor = forwardRef<BlockEditorHandle, BlockEditorProps>(function Blo
         >
           <input name="url" type="url" required autoFocus placeholder="https://…"
             className="input flex-1 text-sm" />
-          <button type="submit" className="rounded-full bg-gold-400 px-4 text-sm font-semibold text-black">Ajouter</button>
-          <button type="button" onClick={() => setLinkFor(null)} className="rounded-full border border-line px-4 text-sm text-t3">Annuler</button>
+          <button type="submit" className="rounded bg-gold-400 px-4 text-sm font-semibold text-black">Ajouter</button>
+          <button type="button" onClick={() => setLinkFor(null)} className="rounded border border-line px-4 text-sm text-t3">Annuler</button>
         </form>
       )}
       <div className="space-y-1">
         {blocks.map((block, index) => renderBlock(block, index))}
       </div>
       <button type="button" onClick={() => insert(blocks.length - 1, { kind: 'paragraph' })}
-        className="mt-4 inline-flex items-center gap-2 text-sm text-t4 transition-colors hover:text-gold-400">
+        className="mt-4 inline-flex items-center gap-2 text-sm text-t4 transition-colors hover:text-gold-ink">
         <Plus className="h-4 w-4" aria-hidden /> Ajouter un bloc
       </button>
       <p className="mt-4 text-xs leading-relaxed text-t4">

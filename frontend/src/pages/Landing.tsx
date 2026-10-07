@@ -67,18 +67,18 @@ export default function Landing() {
       <section className="grid lg:grid-cols-[55fr_45fr]">
         <div className="mode-raised flex items-center px-5 py-20 sm:px-8 lg:py-28 lg:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:pr-16">
           <div className="max-w-2xl">
-            <p className="kicker animate-rise">La plateforme tech francophone</p>
-            <h1 className="mt-6 animate-rise font-display text-5xl font-bold leading-[0.92] tracking-tight text-t1 sm:text-6xl xl:text-[5.25rem] xl:leading-[0.9] [animation-delay:50ms]">
+            <p className="kicker animate-rise motion-reduce:animate-page-in">La plateforme tech francophone</p>
+            <h1 className="mt-6 animate-rise motion-reduce:animate-page-in font-display text-5xl font-bold leading-[0.92] tracking-tight text-t1 sm:text-6xl xl:text-[5.25rem] xl:leading-[0.9] [animation-delay:50ms]">
               {isSignedIn
                 ? <>Bon retour{firstName ? <>, {firstName}</> : ''}. La suite t’attend.</>
                 : <>Deviens aussi un crack de la tech.</>}
             </h1>
-            <p className="mt-8 max-w-lg animate-rise text-lg leading-normal text-t3 [animation-delay:100ms]">
+            <p className="mt-8 max-w-lg animate-rise motion-reduce:animate-page-in text-lg leading-normal text-t3 [animation-delay:100ms]">
               {isSignedIn
                 ? 'Reprends ta lecture ou trouve le prochain rendez-vous.'
                 : 'Vidéos, ebooks et ateliers pour apprendre la tech en français, en accès libre.'}
             </p>
-            <div className="mt-10 flex animate-rise flex-wrap items-center gap-x-6 gap-y-4 [animation-delay:150ms]">
+            <div className="mt-10 flex animate-rise motion-reduce:animate-page-in flex-wrap items-center gap-x-6 gap-y-4 [animation-delay:150ms]">
               <Link to="/ressources" className="btn-primary">
                 Explorer la bibliothèque <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
@@ -91,7 +91,7 @@ export default function Landing() {
         <div className="relative bg-black pb-12 lg:pb-0">
           <DuotonePhoto src="/images/community-1.webp" loading="eager" className="h-72 sm:h-96 lg:absolute lg:inset-0 lg:h-auto" />
           <div className="relative mx-5 -mt-20 sm:mx-8 lg:absolute lg:bottom-12 lg:-left-16 lg:mx-0 lg:mt-0 lg:w-[22rem]">
-            <div className="mode-raised animate-rise rounded-lg border border-line p-7 [animation-delay:200ms] sm:max-w-sm lg:max-w-none">
+            <div className="mode-raised animate-rise motion-reduce:animate-page-in rounded-lg border border-line p-7 [animation-delay:200ms] sm:max-w-sm lg:max-w-none">
               {isSignedIn ? (
                 <>
                   <h2 className="text-2xl font-bold leading-tight text-t1">Ton espace</h2>

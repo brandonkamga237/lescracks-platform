@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Play, Plus } from 'lucide-react';
+import { Pencil, Play, Plus, Trash2 } from 'lucide-react';
 
-import { AdminConfirm, AdminModal, AdminPagination, AdminRow, AdminSection, AdminState, StatusBadge } from '@/components/admin/AdminTable';
+import { AdminAction, AdminConfirm, AdminModal, AdminPagination, AdminRow, AdminSection, AdminState, StatusBadge } from '@/components/admin/AdminTable';
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
 import type { TalkRequest } from '@/services/adminApi';
@@ -107,25 +107,25 @@ export default function AdminTalks() {
           event.preventDefault();
           if (valid) void act('create', () => adminApi.createTalk(toRequest(createForm)), () => { setCreateForm(EMPTY); setNotice('L’épisode a été créé.'); });
         }}
-        className="mb-8 rounded-3xl border border-white/[0.06] bg-card p-6"
+        className="mb-8 rounded-lg border border-line-soft bg-card p-6"
       >
         {formFields(createForm, (key) => (event) => setCreateForm((form) => ({ ...form, [key]: event.target.value })))}
         <div className="mt-5 flex justify-end">
-          <button type="submit" disabled={!!busy || !valid} className="inline-flex items-center gap-2 rounded-full bg-gold-400 px-5 py-3 text-sm font-semibold text-black disabled:opacity-50">
+          <button type="submit" disabled={!!busy || !valid} className="btn-primary">
             <Plus className="h-4 w-4" aria-hidden />{busy === 'create' ? 'Ajout…' : 'Ajouter l’épisode'}
           </button>
         </div>
       </form>
 
-      {failure && !editing && !pending && <p role="alert" className="mb-5 rounded-2xl border border-gold-400/40 p-4 text-sm text-t1">{failure}</p>}
-      {notice && <p role="status" className="mb-5 text-sm text-gold-400">{notice}</p>}
+      {failure && !editing && !pending && <p role="alert" className="mb-5 rounded-lg border border-gold-400/40 p-4 text-sm text-t1">{failure}</p>}
+      {notice && <p role="status" className="mb-5 text-sm text-gold-ink">{notice}</p>}
 
       <AdminState loading={talks.loading} error={talks.error} empty={!list.length} emptyMessage="Aucun épisode. Ajoute le premier rendez-vous vidéo." onRetry={talks.reload}>
         {list.map((video) => (
           <AdminRow key={video.id}>
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-noir-800 text-gold-400"><Play className="h-5 w-5" aria-hidden /></span>
+            <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded bg-noir-800 text-gold-ink sm:flex"><Play className="h-5 w-5" aria-hidden /></span>
             <div className="min-w-0 flex-1">
-              <h2 className="break-words font-display font-medium">{video.title}</h2>
+              <h2 className="break-words text-base font-semibold leading-snug tracking-normal text-t1 sm:text-lg">{video.title}</h2>
               <p className="mt-1 text-xs text-t3">
                 {video.guest ? `${video.guest} · ` : ''}
                 {video.publishedAt ? dateFormat.format(new Date(video.publishedAt)) : 'Date non renseignée'}
@@ -133,8 +133,8 @@ export default function AdminTalks() {
             </div>
             <StatusBadge status={video.status} />
             <div className="flex gap-2" role="group" aria-label={`Actions pour ${video.title}`}>
-              <button type="button" disabled={!!busy} onClick={() => { setFailure(null); setEditForm(toForm(video)); setEditing(video); }} className="rounded-full border border-line px-4 py-2 text-xs text-t2 hover:text-gold-400 disabled:opacity-50">Modifier</button>
-              <button type="button" disabled={!!busy} onClick={() => { setFailure(null); setPending(video); }} className="rounded-full border border-line px-4 py-2 text-xs text-t2 hover:text-gold-400 disabled:opacity-50">Supprimer</button>
+              <AdminAction icon={Pencil} label="Modifier" disabled={!!busy} onClick={() => { setFailure(null); setEditForm(toForm(video)); setEditing(video); }} />
+              <AdminAction icon={Trash2} label="Supprimer" danger disabled={!!busy} onClick={() => { setFailure(null); setPending(video); }} />
             </div>
           </AdminRow>
         ))}
@@ -150,10 +150,10 @@ export default function AdminTalks() {
           className="space-y-5"
         >
           {formFields(editForm, (key) => (event) => setEditForm((form) => ({ ...form, [key]: event.target.value })))}
-          {failure && <p role="alert" className="text-sm text-gold-400">{failure}</p>}
+          {failure && <p role="alert" className="text-sm text-error-ink">{failure}</p>}
           <div className="flex flex-wrap justify-end gap-3">
-            <button type="button" disabled={!!busy} onClick={() => { setEditing(null); setFailure(null); }} className="rounded-full border border-line px-5 py-3 text-sm text-t2">Annuler</button>
-            <button disabled={!!busy || !editForm.title.trim() || !editForm.youtubeUrl.trim() || !editForm.description.trim()} className="rounded-full bg-gold-400 px-5 py-3 text-sm font-semibold text-black disabled:opacity-50">{busy ? 'Enregistrement…' : 'Enregistrer'}</button>
+            <button type="button" disabled={!!busy} onClick={() => { setEditing(null); setFailure(null); }} className="btn-secondary">Annuler</button>
+            <button disabled={!!busy || !editForm.title.trim() || !editForm.youtubeUrl.trim() || !editForm.description.trim()} className="btn-primary">{busy ? 'Enregistrement…' : 'Enregistrer'}</button>
           </div>
         </form>
       </AdminModal>
