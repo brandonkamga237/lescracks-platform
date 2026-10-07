@@ -98,16 +98,15 @@
     outline: none;
   }
 
+  /* Reduced motion keeps fades (they explain what changed) and drops movement, element by
+     element with `motion-reduce:`. The dialog's zoom lives in tailwindcss-animate variables,
+     so it is neutralised here. */
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
 
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
+    [role="dialog"][data-state] {
+      --tw-enter-scale: 1 !important;
+      --tw-exit-scale: 1 !important;
     }
   }
 
@@ -196,7 +195,7 @@
   .btn-primary {
     @apply inline-flex min-h-11 items-center justify-center gap-2 rounded bg-gold-400 px-5 py-2.5
            text-sm font-semibold text-black transition-[background-color,transform] duration-150 ease-out
-           hover:bg-gold-300 active:scale-[0.97] active:bg-gold-500 disabled:active:scale-100
+           hover:bg-gold-300 active:scale-[0.97] active:bg-gold-500 disabled:active:scale-100 motion-reduce:active:scale-100
            focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold
            disabled:cursor-not-allowed disabled:opacity-50;
   }
@@ -204,7 +203,7 @@
   .btn-secondary {
     @apply inline-flex min-h-11 items-center justify-center gap-2 rounded border border-line-strong
            bg-transparent px-5 py-2.5 text-sm font-medium text-t1 transition-[background-color,transform] duration-150 ease-out
-           hover:bg-noir-800 active:scale-[0.97] disabled:active:scale-100
+           hover:bg-noir-800 active:scale-[0.97] disabled:active:scale-100 motion-reduce:active:scale-100
            focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold
            disabled:cursor-not-allowed disabled:opacity-50;
   }
