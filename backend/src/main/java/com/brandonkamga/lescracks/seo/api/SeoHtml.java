@@ -68,7 +68,7 @@ public final class SeoHtml {
     }
 
     public SeoHtml image(String url) {
-        return url == null ? this : metaProperty("og:image", url);
+        return url == null ? this : image(url, null, null, null);
     }
 
     public SeoHtml image(String url, String alt, Integer width, Integer height) {
@@ -76,8 +76,13 @@ public final class SeoHtml {
             return this;
         }
         metaProperty("og:image", url);
+        if (url.startsWith("https://")) {
+            metaProperty("og:image:secure_url", url);
+        }
+        metaName("twitter:image", url);
         if (alt != null && !alt.isBlank()) {
             metaProperty("og:image:alt", alt);
+            metaName("twitter:image:alt", alt);
         }
         if (width != null) {
             metaProperty("og:image:width", String.valueOf(width));
@@ -175,6 +180,10 @@ public final class SeoHtml {
         out.append("<meta property=\"og:type\" content=\"").append(escape(ogType)).append("\">");
         out.append("<meta property=\"og:site_name\" content=\"LesCracks\">");
         out.append("<meta property=\"og:locale\" content=\"fr_FR\">");
+        // X, and the apps that borrow its tags, only show the large picture card when asked to.
+        out.append("<meta name=\"twitter:card\" content=\"summary_large_image\">");
+        out.append("<meta name=\"twitter:title\" content=\"").append(escape(title)).append("\">");
+        out.append("<meta name=\"twitter:description\" content=\"").append(escape(description)).append("\">");
         meta.forEach(out::append);
         jsonLd.forEach(script -> out.append("<script type=\"application/ld+json\">").append(script).append("</script>"));
         out.append("</head><body>");
