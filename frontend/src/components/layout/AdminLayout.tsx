@@ -110,7 +110,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <Link to="/" className="btn-secondary">Voir le site<ArrowUpRight className="h-4 w-4" aria-hidden /></Link>
-                <button type="button" disabled={busy} onClick={() => void logout()} className="btn-secondary text-t3"><LogOut className="h-4 w-4" aria-hidden />{busy ? 'Déconnexion…' : 'Se déconnecter'}</button>
+                <button type="button" disabled={busy} onClick={() => void logout()} className="btn-secondary text-t3"><LogOut className="h-4 w-4" aria-hidden />{busy ? 'Déconnexion…' : 'Déconnexion'}</button>
               </div>
               {failure && <p role="alert" className="text-sm text-error-ink">{failure}</p>}
               <div className="border-t border-line-soft pt-4"><WorkspaceNav onNavigate={() => setMoreOpen(false)} /></div>

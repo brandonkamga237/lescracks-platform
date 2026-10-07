@@ -47,7 +47,7 @@ export function AdminState({
   onRetry,
   children,
 }: AdminStateProps) {
-  if (loading) return <p role="status" className="rounded-lg border border-line-soft bg-card px-6 py-16 text-center text-t3">Chargement…</p>;
+  if (loading) return <p role="status" className="rounded-lg border border-line-soft bg-card px-5 py-10 text-center text-sm text-t3">Chargement…</p>;
 
   if (error) {
     return (
@@ -59,7 +59,7 @@ export function AdminState({
     );
   }
 
-  if (empty) return <EmptyState title={emptyMessage} />;
+  if (empty) return <EmptyState compact title={emptyMessage} />;
 
   return <>{children}</>;
 }
