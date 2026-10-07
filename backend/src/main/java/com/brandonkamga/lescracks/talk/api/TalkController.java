@@ -68,6 +68,6 @@ public class TalkController {
     private static TalkResponse response(TalkVideo video) {
         return new TalkResponse(video.getId(), video.getTitle(), video.getDescription(), video.getGuest(),
                 video.getYoutubeUrl(), video.getDurationMinutes(), video.getPublishedAt(), video.getStatus(),
-                video.getCreatedAt(), video.getUpdatedAt());
+                video.getCreatedAt(), video.getUpdatedAt(), video.getCoverImage());
     }
 }

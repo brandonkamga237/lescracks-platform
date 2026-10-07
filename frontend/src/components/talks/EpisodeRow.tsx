@@ -16,7 +16,7 @@ interface EpisodeRowProps {
  */
 function EpisodeRow({ video }: EpisodeRowProps) {
   const [failedThumb, setFailedThumb] = useState(false);
-  const thumbnail = youtubeThumbnail(video.youtubeUrl);
+  const thumbnail = video.coverImage || youtubeThumbnail(video.youtubeUrl);
   const meta = [
     video.guest ? `avec ${video.guest}` : null,
     video.durationMinutes ? `${video.durationMinutes} min` : null,
