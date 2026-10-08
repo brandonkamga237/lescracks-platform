@@ -3,6 +3,7 @@ package com.brandonkamga.lescracks.resource.domain;
 import com.brandonkamga.lescracks.resource.api.dto.ArticleResourceRequest;
 import com.brandonkamga.lescracks.resource.api.dto.EbookResourceRequest;
 import com.brandonkamga.lescracks.resource.api.dto.VideoResourceRequest;
+import com.brandonkamga.lescracks.shared.scheduling.ScheduledPublishing;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -10,7 +11,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface ResourceService {
+public interface ResourceService extends ScheduledPublishing {
     List<Resource> published();
     Page<Resource> search(ResourceStatus status, String search, String kind, Long categoryId, Long tagId, Pageable pageable);
     Resource requirePublished(Long id);

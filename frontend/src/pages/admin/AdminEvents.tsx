@@ -78,10 +78,10 @@ export default function AdminEvents() {
       {list.map((event) => <AdminRow key={event.id}>
         <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded bg-noir-800 text-gold-ink sm:flex"><CalendarDays className="h-5 w-5" aria-hidden /></span>
         <div className="min-w-0 flex-1 basis-48"><h2 className="break-words text-base font-semibold leading-snug tracking-normal text-t1 sm:text-lg">{event.title}</h2><p className="mt-1 text-xs leading-relaxed text-t3">{typeLabels[event.type]} · {formatLabels[event.format]}</p><p className="mt-1 text-xs text-t4"><time dateTime={event.startDate}>{dateFormat.format(new Date(event.startDate))}</time></p></div>
-        <StatusBadge status={event.status} />
+        <StatusBadge status={event.status} scheduledAt={event.scheduledAt} />
         <div className="flex flex-wrap gap-2" role="group" aria-label={`Actions pour ${event.title}`}>
           <AdminAction icon={Pencil} label="Modifier" disabled={!!busy[event.id]} onClick={() => setEditor(event)} />
-          {event.status !== 'PUBLISHED' && <AdminAction icon={Send} label={busy[event.id] === 'publish' ? 'Publication…' : 'Publier'} disabled={!!busy[event.id]} onClick={() => void act(event, 'publish')} />}
+          {event.status !== 'PUBLISHED' && <AdminAction icon={Send} label={busy[event.id] === 'publish' ? 'Publication…' : event.scheduledAt ? 'Publier maintenant' : 'Publier'} disabled={!!busy[event.id]} onClick={() => void act(event, 'publish')} />}
           {event.status === 'PUBLISHED' && <AdminAction icon={CheckCircle2} label={busy[event.id] === 'complete' ? 'En cours…' : 'Marquer terminé'} disabled={!!busy[event.id]} onClick={() => void act(event, 'complete')} />}
           {event.status !== 'CANCELLED' && <AdminAction icon={Ban} label="Annuler l’événement" disabled={!!busy[event.id]} onClick={() => confirm(event, 'cancel')} />}
           <AdminAction icon={Trash2} label="Supprimer" danger disabled={!!busy[event.id]} onClick={() => confirm(event, 'delete')} />

@@ -36,6 +36,9 @@ export interface ResourceSummary {
   updatedAt: string;
   tags: string[];
   likeCount: number;
+  /** Set on a draft that goes public automatically at that time. */
+  scheduledAt?: string;
+  publishedAt?: string;
 }
 
 export type ResourceDetail = ResourceSummary;
@@ -59,6 +62,8 @@ export interface EventSummary {
   status: EventStatus;
   createdAt: string;
   updatedAt: string;
+  /** Set on a draft that goes public automatically at that time. */
+  scheduledAt?: string;
 }
 
 export type EventDetail = EventSummary;
@@ -362,4 +367,5 @@ export interface AdminChallenge extends ChallengeDetail {
   gradingLocked: boolean;
   createdAt: string;
   updatedAt: string;
+  scheduledAt?: string;
 }

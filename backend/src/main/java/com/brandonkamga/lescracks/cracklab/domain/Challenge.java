@@ -68,6 +68,10 @@ public class Challenge {
     @Column(name = "published_at")
     private Instant publishedAt;
 
+    /** Set on a draft that the scheduler will publish at that time. */
+    @Column(name = "scheduled_at")
+    private Instant scheduledAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowDown, ArrowLeft, ArrowUp, Eye, Lock, PenLine, Plus, X } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowUp, CalendarClock, Eye, Lock, PenLine, Plus, X } from 'lucide-react';
 
 import { AdminSection } from '@/components/admin/AdminTable';
+import ScheduleDialog from '@/components/admin/ScheduleDialog';
 import Prose from '@/components/cracklab/Prose';
 import { CATEGORY_SUGGESTIONS, DIFFICULTY_LABEL } from '@/lib/cracklab';
+import { formatScheduleLong } from '@/lib/schedule';
 import { adminApi, type ChallengeRequest } from '@/services/adminApi';
 import { ApiError } from '@/services/http';
 import type { AdminChallenge, ChallengeDifficulty, ChallengeStatus } from '@/services/types';
@@ -91,7 +93,9 @@ export default function AdminCrackLabEditor() {
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [tagInput, setTagInput] = useState('');
   const [loading, setLoading] = useState(Boolean(challengeId));
-  const [busy, setBusy] = useState<ChallengeStatus | null>(null);
+  const [busy, setBusy] = useState<ChallengeStatus | 'SCHEDULE' | null>(null);
+  const [scheduling, setScheduling] = useState(false);
+  const scheduledAt = challenge?.status === 'DRAFT' ? challenge.scheduledAt : undefined;
   const [failure, setFailure] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -124,7 +128,8 @@ export default function AdminCrackLabEditor() {
     setTagInput('');
   }
 
-  async function save(status: ChallengeStatus) {
+  /** A plain draft save keeps the current schedule; publishing, archiving or passing null cancels it. */
+  async function save(status: ChallengeStatus, schedule: string | null = status === 'DRAFT' ? scheduledAt ?? null : null) {
     setFailure('');
     setNotice('');
     const missing = [!draft.title.trim() && 'le titre', !draft.category.trim() && 'la catégorie', !draft.problem.trim() && 'l’énoncé',
@@ -146,13 +151,16 @@ export default function AdminCrackLabEditor() {
       referenceSolution: draft.referenceSolution,
       criteria: draft.criteria.map((criterion) => ({ id: criterion.id, label: criterion.label.trim(), maxPoints: Number(criterion.maxPoints) })),
       status,
+      scheduledAt: schedule,
     };
-    setBusy(status);
+    setBusy(schedule !== (scheduledAt ?? null) ? 'SCHEDULE' : status);
     try {
       const saved = challengeId ? await adminApi.cracklab.update(challengeId, body) : await adminApi.cracklab.create(body);
       setChallenge(saved);
       setDraft(fromChallenge(saved));
-      setNotice(status === 'PUBLISHED' ? 'Le challenge est publié.' : status === 'ARCHIVED' ? 'Le challenge est archivé.' : 'Brouillon enregistré.');
+      setNotice(status === 'PUBLISHED' ? 'Le challenge est publié.' : status === 'ARCHIVED' ? 'Le challenge est archivé.'
+        : saved.scheduledAt ? `Programmé : en ligne le ${formatScheduleLong(saved.scheduledAt)}.` : 'Brouillon enregistré.');
+      setScheduling(false);
       if (!challengeId) navigate(`/admin/cracklab/challenges/${saved.id}`, { replace: true });
     } catch (error) {
       setFailure(error instanceof ApiError ? error.message : 'L’enregistrement a échoué. Réessaie.');
@@ -256,17 +264,21 @@ export default function AdminCrackLabEditor() {
 
           <section className="rounded-lg border border-line-soft bg-card p-5 sm:p-6" aria-labelledby="cl-publish">
             <h2 id="cl-publish" className={sectionTitle}>Publication</h2>
-            <p className="mt-2 text-sm text-t3">{status === 'PUBLISHED' ? 'Publié : visible par tout le monde, ouvert aux réponses.' : status === 'ARCHIVED' ? 'Archivé : caché du public, les réponses sont conservées.' : 'Brouillon : visible uniquement dans l’administration.'}</p>
+            <p className="mt-2 text-sm text-t3">{status === 'PUBLISHED' ? 'Publié : visible par tout le monde, ouvert aux réponses.' : status === 'ARCHIVED' ? 'Archivé : caché du public, les réponses sont conservées.'
+              : scheduledAt ? `Programmé : en ligne automatiquement le ${formatScheduleLong(scheduledAt)}.` : 'Brouillon : visible uniquement dans l’administration.'}</p>
             {failure && <p role="alert" className="mt-4 rounded border border-error/30 bg-error/10 p-3 text-sm text-t1">{failure}</p>}
             {notice && <p role="status" className="mt-4 text-sm text-gold-ink">{notice}</p>}
             <div className="mt-5 grid gap-2">
-              <button type="button" disabled={!!busy} onClick={() => void save('PUBLISHED')} className="btn-primary">{busy === 'PUBLISHED' ? 'Publication…' : status === 'PUBLISHED' ? 'Enregistrer' : 'Publier'}</button>
-              {status !== 'PUBLISHED' && <button type="button" disabled={!!busy} onClick={() => void save('DRAFT')} className="btn-secondary">{busy === 'DRAFT' ? 'Enregistrement…' : 'Enregistrer le brouillon'}</button>}
+              <button type="button" disabled={!!busy} onClick={() => void save('PUBLISHED')} className="btn-primary">{busy === 'PUBLISHED' ? 'Publication…' : status === 'PUBLISHED' ? 'Enregistrer' : scheduledAt ? 'Publier maintenant' : 'Publier'}</button>
+              {status !== 'PUBLISHED' && <button type="button" disabled={!!busy} onClick={() => setScheduling(true)} className={`btn-secondary ${scheduledAt ? 'border-dashed border-gold-400/60 text-gold-ink' : ''}`}><CalendarClock className="h-4 w-4" aria-hidden />{scheduledAt ? 'Changer la date de publication' : 'Programmer la publication'}</button>}
+              {status !== 'PUBLISHED' && <button type="button" disabled={!!busy} onClick={() => void save('DRAFT')} className="btn-secondary">{busy === 'DRAFT' ? 'Enregistrement…' : scheduledAt ? 'Enregistrer' : 'Enregistrer le brouillon'}</button>}
               {status === 'PUBLISHED' && <button type="button" disabled={!!busy} onClick={() => void save('ARCHIVED')} className="btn-secondary text-t3">{busy === 'ARCHIVED' ? 'Archivage…' : 'Archiver'}</button>}
             </div>
           </section>
         </div>
       </div>
+      <ScheduleDialog open={scheduling} onOpenChange={setScheduling} current={scheduledAt} busy={busy === 'SCHEDULE'} subject="ce challenge"
+        onConfirm={(value) => void save('DRAFT', value)} onUnschedule={() => void save('DRAFT', null)} />
     </AdminSection>
   );
 }

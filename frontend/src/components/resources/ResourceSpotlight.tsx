@@ -65,7 +65,7 @@ function ResourceSpotlight({ resource, kicker = 'À la une', cataloguePath }: Re
         </p>
         <p className="label mt-6">
           {meta}
-          {resource.createdAt && `  ·  Publié le ${dateFormat.format(new Date(resource.createdAt))}`}
+          {(resource.publishedAt ?? resource.createdAt) && `  ·  Publié le ${dateFormat.format(new Date(resource.publishedAt ?? resource.createdAt))}`}
         </p>
         <Link
           to={resourcePath(resource)}

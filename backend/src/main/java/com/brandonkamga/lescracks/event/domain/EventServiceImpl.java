@@ -5,6 +5,7 @@ import com.brandonkamga.lescracks.event.infra.EventRepository;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
+import com.brandonkamga.lescracks.shared.scheduling.Schedules;
 import com.brandonkamga.lescracks.shared.util.Slugs;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 
@@ -118,12 +119,41 @@ public class EventServiceImpl implements EventService {
         event.setStartDate(request.startDate());
         event.setEndDate(request.endDate());
         event.setLocation(request.location() == null ? null : request.location().trim());
-        event.setStatus(request.status() == null ? EventStatus.DRAFT : request.status());
+        event.setScheduledAt(Schedules.check(request.scheduledAt(), event.getScheduledAt()));
+        if (event.getScheduledAt() != null && !event.getScheduledAt().isBefore(request.startDate())) {
+            throw new BadRequestException("La publication programmée doit précéder le début de l'événement.");
+        }
+        // A scheduled event waits as a draft; the scheduler publishes it at the chosen time.
+        event.setStatus(event.getScheduledAt() != null || request.status() == null ? EventStatus.DRAFT : request.status());
         event.setCoverImage(resolveCoverImage(coverImageFile, event.getCoverImage()));
         if (event.getSlug() == null || event.getSlug().isBlank()) {
             event.setSlug(Slugs.uniqueFrom(event.getTitle(), events::existsBySlug));
         }
         return event;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Long> dueForPublication(Instant now) {
+        return events.findScheduledIds(EventStatus.DRAFT, now);
+    }
+
+    @Override
+    public boolean publishScheduled(Long id, Instant now) {
+        Event event = events.findById(id).orElse(null);
+        if (event == null || event.getStatus() != EventStatus.DRAFT
+                || event.getScheduledAt() == null || event.getScheduledAt().isAfter(now)) {
+            return false;
+        }
+        event.setStatus(EventStatus.PUBLISHED);
+        event.setScheduledAt(null);
+        event.setUpdatedAt(now);
+        return true;
+    }
+
+    @Override
+    public void announce(Long id) {
+        newsletter.notifyEventSubscribers(require(id));
     }
 
     private String resolveCoverImage(MultipartFile coverImageFile, String existingCoverImage) {

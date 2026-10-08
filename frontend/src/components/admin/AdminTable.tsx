@@ -1,9 +1,10 @@
 import { useRef } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { CalendarClock, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { EmptyState, ErrorState } from '@/components/common/States';
 import { PageHeader } from '@/components/layout/Page';
+import { formatScheduleLong, formatScheduleShort } from '@/lib/schedule';
 import type { ApiError } from '@/services/http';
 import type { EventStatus, ResourceStatus } from '@/services/types';
 
@@ -100,9 +101,10 @@ export function AdminAction({ icon: Icon, label, onClick, disabled = false, dang
   );
 }
 
-interface StatusBadgeProps { status: ResourceStatus | EventStatus; resource?: boolean }
+interface StatusBadgeProps { status: ResourceStatus | EventStatus; resource?: boolean; scheduledAt?: string }
 
-export function StatusBadge({ status, resource = false }: StatusBadgeProps) {
+export function StatusBadge({ status, resource = false, scheduledAt }: StatusBadgeProps) {
+  if (status === 'DRAFT' && scheduledAt) return <ScheduledBadge scheduledAt={scheduledAt} feminine={resource} />;
   const labels = { DRAFT: 'Brouillon', PUBLISHED: resource ? 'Publiée' : 'Publié', ARCHIVED: 'Archivée', CANCELLED: 'Annulé', COMPLETED: 'Terminé' };
   return <span className={`inline-flex shrink-0 rounded border px-3 py-1 text-xs font-medium ${status === 'PUBLISHED' ? 'border-gold-400/30 bg-gold-400/10 text-gold-ink' : 'border-line-soft bg-noir-800 text-t3'}`}>{labels[status]}</span>;
 }
@@ -176,4 +178,14 @@ export function AdminPagination({ page, totalPages, totalElements, busy, onChang
       <button type="button" disabled={busy || page + 1 >= totalPages} onClick={() => onChange(page + 1)} className="flex min-h-11 items-center gap-1 rounded border border-line px-4 text-t2 hover:bg-card disabled:opacity-40">Suivant<ChevronRight className="h-4 w-4" aria-hidden /></button>
     </div>
   </nav>;
+}
+
+/** A draft waiting for its publication date. */
+export function ScheduledBadge({ scheduledAt, feminine = false }: { scheduledAt: string; feminine?: boolean }) {
+  return (
+    <span title={`Publication automatique le ${formatScheduleLong(scheduledAt)}`}
+      className="inline-flex shrink-0 items-center gap-1.5 rounded border border-dashed border-gold-400/50 px-3 py-1 text-xs font-medium text-gold-ink">
+      <CalendarClock className="h-3.5 w-3.5" aria-hidden />{feminine ? 'Programmée' : 'Programmé'} · {formatScheduleShort(scheduledAt)}
+    </span>
+  );
 }

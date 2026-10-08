@@ -11,6 +11,7 @@ import com.brandonkamga.lescracks.resource.infra.ExternalVideoReferenceRepositor
 import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
+import com.brandonkamga.lescracks.shared.scheduling.Schedules;
 import com.brandonkamga.lescracks.shared.util.Slugs;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 import com.brandonkamga.lescracks.taxonomy.domain.Tag;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -127,7 +129,7 @@ public class ResourceServiceImpl implements ResourceService {
     public Resource createVideo(VideoResourceRequest request, MultipartFile coverImageFile) {
         String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, null);
         Resource resource = base(request.title(), request.description(), coverImage,
-                request.categoryId(), request.status(), request.tagIds());
+                request.categoryId(), request.status(), request.scheduledAt(), request.tagIds());
         Resource saved = resources.save(resource);
         videos.save(ExternalVideoReference.builder().resource(saved)
                 .videoUrl(request.videoUrl().trim()).platform(request.platform().trim()).build());
@@ -140,7 +142,7 @@ public class ResourceServiceImpl implements ResourceService {
         Resource resource = require(id);
         ensureVideo(resource);
         String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, resource.getCoverImage());
-        apply(resource, request.title(), request.description(), coverImage, request.categoryId(), request.status(), request.tagIds());
+        apply(resource, request.title(), request.description(), coverImage, request.categoryId(), request.status(), request.scheduledAt(), request.tagIds());
         ExternalVideoReference video = videos.findByResourceId(id).orElseThrow();
         video.setVideoUrl(request.videoUrl().trim());
         video.setPlatform(request.platform().trim());
@@ -152,7 +154,7 @@ public class ResourceServiceImpl implements ResourceService {
         validateFile(file);
         String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, null);
         Resource resource = base(request.title(), request.description(), coverImage,
-                request.categoryId(), request.status(), request.tagIds());
+                request.categoryId(), request.status(), request.scheduledAt(), request.tagIds());
         Resource saved = resources.save(resource);
         try {
             String key = storage.store(file.getOriginalFilename(), file.getBytes(), file.getContentType());
@@ -172,7 +174,7 @@ public class ResourceServiceImpl implements ResourceService {
         Resource resource = require(id);
         ensureEbook(resource);
         String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, resource.getCoverImage());
-        apply(resource, request.title(), request.description(), coverImage, request.categoryId(), request.status(), request.tagIds());
+        apply(resource, request.title(), request.description(), coverImage, request.categoryId(), request.status(), request.scheduledAt(), request.tagIds());
         if (file != null && !file.isEmpty()) {
             Ebook ebook = ebooks.findByResourceId(id).orElseThrow();
             Document old = ebook.getDocument();
@@ -192,7 +194,7 @@ public class ResourceServiceImpl implements ResourceService {
     public Resource createArticle(ArticleResourceRequest request, MultipartFile coverImageFile) {
         String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, null);
         Resource resource = base(request.title(), request.description(), coverImage,
-                request.categoryId(), request.status(), request.tagIds());
+                request.categoryId(), request.status(), request.scheduledAt(), request.tagIds());
         Resource saved = resources.save(resource);
         persistArticle(saved, request.body());
         if (saved.getStatus() == ResourceStatus.PUBLISHED) newsletter.notifyResourceSubscribers(saved);
@@ -204,7 +206,7 @@ public class ResourceServiceImpl implements ResourceService {
         Resource resource = require(id);
         ensureArticle(resource);
         String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, resource.getCoverImage());
-        apply(resource, request.title(), request.description(), coverImage, request.categoryId(), request.status(), request.tagIds());
+        apply(resource, request.title(), request.description(), coverImage, request.categoryId(), request.status(), request.scheduledAt(), request.tagIds());
         Article article = articles.findByResourceId(id).orElseThrow();
         persistArticleBody(article, request.body());
         return resource;
@@ -235,26 +237,65 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     private Resource base(String title, String description, String coverImage, Long categoryId,
-                          ResourceStatus status, Set<Long> tagIds) {
+                          ResourceStatus status, Instant scheduledAt, Set<Long> tagIds) {
         Resource resource = Resource.builder().category(taxonomy.requireCategory(categoryId)).title(title.trim())
-                .description(description.trim()).coverImage(coverImage.trim())
-                .status(status == null ? ResourceStatus.DRAFT : status).build();
+                .description(description.trim()).coverImage(coverImage.trim()).build();
+        applyPublication(resource, status, scheduledAt);
         resource.setSlug(Slugs.uniqueFrom(resource.getTitle(), resources::existsBySlug));
         applyTags(resource, tagIds);
         return resources.save(resource);
     }
 
     private void apply(Resource resource, String title, String description, String coverImage,
-                       Long categoryId, ResourceStatus status, Set<Long> tagIds) {
+                       Long categoryId, ResourceStatus status, Instant scheduledAt, Set<Long> tagIds) {
         resource.setTitle(title.trim());
         resource.setDescription(description.trim());
         resource.setCoverImage(coverImage.trim());
         resource.setCategory(taxonomy.requireCategory(categoryId));
-        resource.setStatus(status == null ? resource.getStatus() : status);
+        applyPublication(resource, status, scheduledAt);
         if (resource.getSlug() == null || resource.getSlug().isBlank()) {
             resource.setSlug(Slugs.uniqueFrom(resource.getTitle(), resources::existsBySlug));
         }
         applyTags(resource, tagIds);
+    }
+
+    /** A scheduled date keeps the resource a draft until the scheduler publishes it; no date cancels the schedule. */
+    private void applyPublication(Resource resource, ResourceStatus status, Instant scheduledAt) {
+        resource.setScheduledAt(Schedules.check(scheduledAt, resource.getScheduledAt()));
+        if (resource.getScheduledAt() != null) {
+            resource.setStatus(ResourceStatus.DRAFT);
+        } else if (status != null) {
+            resource.setStatus(status);
+        }
+        if (resource.getStatus() == ResourceStatus.PUBLISHED && resource.getPublishedAt() == null) {
+            resource.setPublishedAt(Instant.now());
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Long> dueForPublication(Instant now) {
+        return resources.findScheduledIds(ResourceStatus.DRAFT, now);
+    }
+
+    @Override
+    public boolean publishScheduled(Long id, Instant now) {
+        Resource resource = resources.findById(id).orElse(null);
+        if (resource == null || resource.getStatus() != ResourceStatus.DRAFT
+                || resource.getScheduledAt() == null || resource.getScheduledAt().isAfter(now)) {
+            return false;
+        }
+        resource.setStatus(ResourceStatus.PUBLISHED);
+        resource.setScheduledAt(null);
+        // Its publication day, not its drafting day, is what makes it "new" in the catalogue.
+        resource.setPublishedAt(now);
+        resource.setUpdatedAt(now);
+        return true;
+    }
+
+    @Override
+    public void announce(Long id) {
+        newsletter.notifyResourceSubscribers(require(id));
     }
 
     private void applyTags(Resource resource, Set<Long> tagIds) {

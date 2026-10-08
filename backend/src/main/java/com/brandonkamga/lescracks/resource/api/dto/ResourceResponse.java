@@ -27,5 +27,7 @@ public record ResourceResponse(
         Instant createdAt,
         Instant updatedAt,
         JsonNode body,
-        Integer readingMinutes) {
+        Integer readingMinutes,
+        Instant scheduledAt,
+        Instant publishedAt) {
 }

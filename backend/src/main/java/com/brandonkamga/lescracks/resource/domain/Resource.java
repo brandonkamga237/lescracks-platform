@@ -54,6 +54,14 @@ public class Resource {
     @Builder.Default
     private ResourceStatus status = ResourceStatus.DRAFT;
 
+    /** Set on a draft that the scheduler will publish at that time. */
+    @Column(name = "scheduled_at")
+    private Instant scheduledAt;
+
+    /** First time it went public; the catalogue's "newest first" follows it. */
+    @Column(name = "published_at")
+    private Instant publishedAt;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();

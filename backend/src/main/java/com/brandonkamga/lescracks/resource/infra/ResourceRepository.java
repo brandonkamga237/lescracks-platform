@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,9 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
 
     List<Resource> findByStatusOrderByCreatedAtDesc(ResourceStatus status);
 
+    @Query("select r.id from Resource r where r.status = :status and r.scheduledAt <= :now order by r.scheduledAt")
+    List<Long> findScheduledIds(@Param("status") ResourceStatus status, @Param("now") Instant now);
+
         @Query("""
                         select r from Resource r
                         where (:status is null or r.status = :status)
@@ -33,7 +37,7 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
                                      or (:kind = 'EBOOK' and exists (select e.resourceId from Ebook e where e.resourceId = r.id))
                                      or (:kind = 'EXTERNAL_VIDEO' and exists (select v.resourceId from ExternalVideoReference v where v.resourceId = r.id))
                                      or (:kind = 'ARTICLE' and exists (select a.resourceId from Article a where a.resourceId = r.id)))
-                        order by r.createdAt desc
+                        order by coalesce(r.publishedAt, r.createdAt) desc
                         """)
         Page<Resource> search(@Param("status") ResourceStatus status, @Param("search") String search,
                               @Param("kind") String kind, @Param("categoryId") Long categoryId,

@@ -56,7 +56,7 @@ class ResourceControllerTest {
                 "https://cdn.example/cover.png", ResourceStatus.PUBLISHED, 2L, "Backend",
                 "EXTERNAL_VIDEO", "https://youtu.be/abc", "YouTube", null, null, null,
                 Set.of("Java"), 3L, Instant.parse("2026-01-01T00:00:00Z"),
-                Instant.parse("2026-01-01T00:00:00Z"), null, null);
+                Instant.parse("2026-01-01T00:00:00Z"), null, null, null, null);
     }
 
     @Test
