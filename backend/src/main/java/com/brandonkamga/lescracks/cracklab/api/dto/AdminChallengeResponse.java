@@ -28,5 +28,6 @@ public record AdminChallengeResponse(
         boolean gradingLocked,
         Instant publishedAt,
         Instant createdAt,
-        Instant updatedAt) {
+        Instant updatedAt,
+        Instant scheduledAt) {
 }

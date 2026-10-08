@@ -18,6 +18,7 @@ import com.brandonkamga.lescracks.taxonomy.infra.TagRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -25,6 +26,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static com.brandonkamga.lescracks.resource.domain.ResourceFixtures.category;
@@ -67,9 +70,13 @@ class ResourceServiceTest {
     }
 
     private VideoResourceRequest videoRequest(ResourceStatus status) {
+        return videoRequest(status, null);
+    }
+
+    private VideoResourceRequest videoRequest(ResourceStatus status, Instant scheduledAt) {
         return new VideoResourceRequest("  Titre de la vidéo  ", "  Une description  ",
                 "https://cdn.example/cover.png", 1L, null,
-                "  https://youtu.be/abc  ", "  YouTube  ", status);
+                "  https://youtu.be/abc  ", "  YouTube  ", status, scheduledAt);
     }
 
     @Test
@@ -120,7 +127,7 @@ class ResourceServiceTest {
     @Test
     void refusesAResourceWithNoCoverImageAtAll() {
         VideoResourceRequest request = new VideoResourceRequest("Titre", "Description", null, 1L,
-                null, "https://youtu.be/abc", "YouTube", ResourceStatus.DRAFT);
+                null, "https://youtu.be/abc", "YouTube", ResourceStatus.DRAFT, null);
 
         assertThatThrownBy(() -> service.createVideo(request, null))
                 .isInstanceOf(BadRequestException.class)
@@ -165,7 +172,7 @@ class ResourceServiceTest {
     @Test
     void refusesAnEbookWithNoFile() {
         var request = new EbookResourceRequest("Titre", "Description", "https://cdn.example/c.png",
-                1L, null, ResourceStatus.DRAFT);
+                1L, null, ResourceStatus.DRAFT, null);
 
         assertThatThrownBy(() -> service.createEbook(request, new MockMultipartFile("file", new byte[0]), null))
                 .isInstanceOf(BadRequestException.class)
@@ -229,5 +236,87 @@ class ResourceServiceTest {
         service.delete(6L);
 
         verify(storage, never()).delete(anyString());
+    }
+
+    @Nested
+    @DisplayName("scheduled publication")
+    class Scheduling {
+
+        private final Instant tomorrow = Instant.now().plus(1, ChronoUnit.DAYS);
+
+        @Test
+        @DisplayName("a scheduled resource waits as a draft, even if the form said publish, and nobody is notified yet")
+        void scheduledStaysDraft() {
+            when(taxonomy.requireCategory(1L)).thenReturn(category);
+            when(resources.save(any(Resource.class))).thenAnswer(call -> call.getArgument(0));
+
+            Resource saved = service.createVideo(videoRequest(ResourceStatus.PUBLISHED, tomorrow), null);
+
+            assertThat(saved.getStatus()).isEqualTo(ResourceStatus.DRAFT);
+            assertThat(saved.getScheduledAt()).isEqualTo(tomorrow);
+            assertThat(saved.getPublishedAt()).isNull();
+            verify(newsletter, never()).notifyResourceSubscribers(any());
+        }
+
+        @Test
+        @DisplayName("a date in the past is refused")
+        void pastDateRefused() {
+            when(taxonomy.requireCategory(1L)).thenReturn(category);
+
+            assertThatThrownBy(() -> service.createVideo(videoRequest(ResourceStatus.DRAFT, Instant.now().minus(1, ChronoUnit.HOURS)), null))
+                    .isInstanceOf(BadRequestException.class)
+                    .hasMessageContaining("futur");
+        }
+
+        @Test
+        @DisplayName("once due, the scheduler publishes it and dates it from that moment")
+        void publishesWhenDue() {
+            Instant now = Instant.now();
+            Resource draft = resource(category, "Programmée", ResourceStatus.DRAFT);
+            draft.setId(1L);
+            draft.setScheduledAt(now.minusSeconds(30));
+            when(resources.findById(draft.getId())).thenReturn(Optional.of(draft));
+
+            assertThat(service.publishScheduled(draft.getId(), now)).isTrue();
+
+            assertThat(draft.getStatus()).isEqualTo(ResourceStatus.PUBLISHED);
+            assertThat(draft.getScheduledAt()).isNull();
+            assertThat(draft.getPublishedAt()).isEqualTo(now);
+        }
+
+        @Test
+        @DisplayName("a draft rescheduled later, or already published by hand, is left alone")
+        void skipsWhatIsNoLongerDue() {
+            Instant now = Instant.now();
+            Resource later = resource(category, "Plus tard", ResourceStatus.DRAFT);
+            later.setId(2L);
+            later.setScheduledAt(now.plusSeconds(3600));
+            Resource live = resource(category, "Déjà en ligne", ResourceStatus.PUBLISHED);
+            live.setId(99L);
+            when(resources.findById(later.getId())).thenReturn(Optional.of(later));
+            when(resources.findById(99L)).thenReturn(Optional.of(live));
+
+            assertThat(service.publishScheduled(later.getId(), now)).isFalse();
+            assertThat(service.publishScheduled(99L, now)).isFalse();
+            assertThat(later.getStatus()).isEqualTo(ResourceStatus.DRAFT);
+        }
+
+        @Test
+        @DisplayName("saving the form again keeps a date that has just passed, instead of refusing it")
+        void keepsTheStoredDateEvenIfJustPassed() {
+            Instant justPassed = Instant.now().minusSeconds(5);
+            Resource draft = resource(category, "Titre", ResourceStatus.DRAFT);
+            draft.setId(3L);
+            draft.setScheduledAt(justPassed);
+            when(resources.findById(draft.getId())).thenReturn(Optional.of(draft));
+            when(taxonomy.requireCategory(1L)).thenReturn(category);
+            when(videos.existsById(draft.getId())).thenReturn(true);
+            when(videos.findByResourceId(draft.getId())).thenReturn(Optional.of(ExternalVideoReference.builder().resource(draft).build()));
+
+            service.updateVideo(draft.getId(), videoRequest(ResourceStatus.DRAFT, justPassed), null);
+
+            assertThat(draft.getScheduledAt()).isEqualTo(justPassed);
+            assertThat(draft.getStatus()).isEqualTo(ResourceStatus.DRAFT);
+        }
     }
 }

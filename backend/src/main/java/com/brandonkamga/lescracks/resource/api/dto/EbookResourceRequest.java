@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.time.Instant;
 import java.util.Set;
 
 public record EbookResourceRequest(
@@ -14,5 +15,6 @@ public record EbookResourceRequest(
         @Size(max = 500) String coverImage,
         @NotNull Long categoryId,
         Set<Long> tagIds,
-        ResourceStatus status) {
+        ResourceStatus status,
+        Instant scheduledAt) {
 }

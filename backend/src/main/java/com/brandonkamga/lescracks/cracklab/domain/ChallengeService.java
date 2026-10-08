@@ -1,11 +1,12 @@
 package com.brandonkamga.lescracks.cracklab.domain;
 
 import com.brandonkamga.lescracks.cracklab.api.dto.ChallengeRequest;
+import com.brandonkamga.lescracks.shared.scheduling.ScheduledPublishing;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface ChallengeService {
+public interface ChallengeService extends ScheduledPublishing {
 
     Page<Challenge> published(ChallengeDifficulty difficulty, String category, String tag, Pageable pageable);
 

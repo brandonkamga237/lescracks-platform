@@ -18,5 +18,6 @@ public record EventRequest(
         @NotNull Instant startDate,
         Instant endDate,
         @Size(max = 200) String location,
-        EventStatus status) {
+        EventStatus status,
+        Instant scheduledAt) {
 }
