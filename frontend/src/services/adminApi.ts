@@ -11,6 +11,8 @@ export interface EbookRequest {
   categoryId: number;
   tagIds?: number[];
   status?: ResourceStatus;
+  /** A date keeps it a draft until then; null or absent cancels any schedule. */
+  scheduledAt?: string | null;
 }
 export interface VideoRequest extends EbookRequest {
   videoUrl: string;
@@ -28,6 +30,7 @@ export interface EventRequest {
   endDate?: string;
   location?: string;
   status?: EventStatus;
+  scheduledAt?: string | null;
 }
 export interface TalkRequest {
   title: string;
@@ -53,6 +56,7 @@ export interface ChallengeRequest {
   /** `id` keeps an existing criterion, so the grades given on it stay attached. */
   criteria: { id?: number; label: string; maxPoints: number }[];
   status: ChallengeStatus;
+  scheduledAt?: string | null;
 }
 export interface AdminResourceFilters extends Query {
   page?: number;

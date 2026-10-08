@@ -94,10 +94,10 @@ export default function AdminResources() {
           <div className="flex items-center gap-1.5 rounded border border-line-soft bg-noir-950 px-2.5 py-1.5 text-xs text-t2" title="Consultations sur 30 jours"><Eye className="h-3.5 w-3.5 text-t3" aria-hidden />{viewsBySlug.get(resource.slug)}</div>
         )}
         <div className="flex items-center gap-1.5 rounded border border-line-soft bg-noir-950 px-2.5 py-1.5 text-xs text-t2"><Heart className="h-3.5 w-3.5 text-gold-ink" aria-hidden />{resource.likeCount ?? 0}</div>
-        <StatusBadge status={resource.status} resource />
+        <StatusBadge status={resource.status} resource scheduledAt={resource.scheduledAt} />
         <div className="flex flex-wrap gap-2" role="group" aria-label={`Actions pour ${resource.title}`}>
           <AdminAction icon={Pencil} label="Modifier" disabled={!!busy[resource.id]} onClick={() => (resource.kind === 'ARTICLE' ? navigate(`/admin/articles/${resource.id}`, { state: { resource } }) : setEditor(resource))} />
-          {resource.status !== 'PUBLISHED' && <AdminAction icon={Send} label={busy[resource.id] === 'publish' ? 'Publication…' : 'Publier'} disabled={!!busy[resource.id]} onClick={() => void act(resource, 'publish')} />}
+          {resource.status !== 'PUBLISHED' && <AdminAction icon={Send} label={busy[resource.id] === 'publish' ? 'Publication…' : resource.scheduledAt ? 'Publier maintenant' : 'Publier'} disabled={!!busy[resource.id]} onClick={() => void act(resource, 'publish')} />}
           {resource.status !== 'ARCHIVED' && <AdminAction icon={Archive} label="Archiver" disabled={!!busy[resource.id]} onClick={() => confirm(resource, 'archive')} />}
           <AdminAction icon={Trash2} label="Supprimer" danger disabled={!!busy[resource.id]} onClick={() => confirm(resource, 'delete')} />
         </div>

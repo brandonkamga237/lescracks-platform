@@ -1,8 +1,13 @@
 import { useState } from 'react';
 import { AdminModal } from '@/components/admin/AdminTable';
+import ScheduleField from '@/components/admin/ScheduleField';
+import { scheduleIsValid } from '@/lib/schedule';
 import { adminApi, type EventRequest } from '@/services/adminApi';
 import { ApiError } from '@/services/http';
 import type { EventFormat, EventStatus, EventSummary, EventType } from '@/services/types';
+
+// 'SCHEDULED' exists only in this form: the API receives a draft with a publication date.
+type Visibility = EventStatus | 'SCHEDULED';
 
 interface EventFormProps {
   event?: EventSummary;
@@ -25,6 +30,10 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(initial?.coverImage ?? null);
   const [form, setForm] = useState<EventRequest>({ title: initial?.title ?? '', description: initial?.description ?? '', type: initial?.type ?? 'WORKSHOP', format: initial?.format ?? 'ONLINE', startDate: localDate(initial?.startDate), endDate: localDate(initial?.endDate), location: initial?.location ?? '', status: initial?.status ?? 'DRAFT' });
+  const [visibility, setVisibility] = useState<Visibility>(initial?.status === 'DRAFT' && initial.scheduledAt ? 'SCHEDULED' : initial?.status ?? 'DRAFT');
+  const [scheduledAt, setScheduledAt] = useState<string | null>(initial?.scheduledAt ?? null);
+  const scheduled = visibility === 'SCHEDULED';
+  const startInstant = form.startDate && !Number.isNaN(new Date(form.startDate).getTime()) ? new Date(form.startDate).toISOString() : undefined;
   const field = 'input mt-2';
   // The shared input is a fixed-height control; a textarea has to grow with its rows.
   const area = 'input mt-2 h-auto py-3';
@@ -50,9 +59,10 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
     if (Number.isNaN(start.getTime()) || (end && Number.isNaN(end.getTime()))) { setFailure('Renseigne des dates valides.'); return; }
     if (localDate(start.toISOString()).slice(0, 16) !== form.startDate.slice(0, 16) || (end && localDate(end.toISOString()).slice(0, 16) !== form.endDate?.slice(0, 16))) { setFailure('Cette heure n’existe pas dans ton fuseau horaire lors du changement d’heure. Choisis une autre heure.'); return; }
     if (end && end < start) { setFailure('La date de fin ne peut pas précéder la date de début.'); return; }
+    if (scheduled && !scheduleIsValid(scheduledAt, start.toISOString())) { setFailure('Choisis une date de publication à venir, avant le début de l’événement.'); return; }
     setBusy(true);
     try {
-      const body = { ...form, title: form.title.trim(), description: form.description.trim(), location: form.location?.trim() || undefined, startDate: initial && form.startDate === localDate(initial.startDate) ? initial.startDate : start.toISOString(), endDate: initial && form.endDate === localDate(initial.endDate) ? initial.endDate : end?.toISOString() };
+      const body = { ...form, status: scheduled ? 'DRAFT' as EventStatus : visibility as EventStatus, scheduledAt: scheduled ? scheduledAt : null, title: form.title.trim(), description: form.description.trim(), location: form.location?.trim() || undefined, startDate: initial && form.startDate === localDate(initial.startDate) ? initial.startDate : start.toISOString(), endDate: initial && form.endDate === localDate(initial.endDate) ? initial.endDate : end?.toISOString() };
       if (initial) await adminApi.updateEvent(initial.id, body, coverImageFile ?? undefined);
       else await adminApi.createEvent(body, coverImageFile!);
       onCreated();
@@ -94,11 +104,12 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
       </fieldset>
       <fieldset disabled={busy} className="space-y-4 border-t border-line-soft pt-5">
         <legend className="pr-3 font-display text-lg font-medium">04 · Visibilité</legend>
-        <label className="block text-sm text-t2">Statut<select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as EventStatus })} className={field}><option value="DRAFT">Brouillon</option><option value="PUBLISHED">Publié</option><option value="COMPLETED">Terminé</option><option value="CANCELLED">Annulé</option></select></label>
-        <p className="text-xs text-t3">{form.status === 'PUBLISHED' ? 'En enregistrant, cet événement sera visible sur le site public.' : 'Seuls les événements publiés sont visibles sur le site public.'}</p>
+        <label className="block text-sm text-t2">Statut<select value={visibility} onChange={(event) => setVisibility(event.target.value as Visibility)} className={field}><option value="DRAFT">Brouillon</option><option value="SCHEDULED">Programmé</option><option value="PUBLISHED">Publié</option><option value="COMPLETED">Terminé</option><option value="CANCELLED">Annulé</option></select></label>
+        {scheduled ? <ScheduleField value={scheduledAt} onChange={setScheduledAt} before={startInstant} />
+          : <p className="text-xs text-t3">{visibility === 'PUBLISHED' ? 'En enregistrant, cet événement sera visible sur le site public.' : 'Seuls les événements publiés sont visibles sur le site public.'}</p>}
       </fieldset>
       {failure && <div role="alert" className="rounded-lg border border-error/30 bg-error/10 p-4 text-sm text-t1"><p>{failure}</p>{fieldErrors.length > 0 && <ul className="mt-2 list-inside list-disc">{fieldErrors.map((error, index) => <li key={index}>{error}</li>)}</ul>}</div>}
-      <div className="flex flex-wrap justify-end gap-3 border-t border-line-soft pt-5"><button type="button" disabled={busy} onClick={onCancel} className="btn-secondary">Annuler</button><button disabled={busy} className="btn-primary">{busy ? 'Enregistrement…' : form.status === 'PUBLISHED' ? 'Enregistrer et publier' : 'Enregistrer'}</button></div>
+      <div className="flex flex-wrap justify-end gap-3 border-t border-line-soft pt-5"><button type="button" disabled={busy} onClick={onCancel} className="btn-secondary">Annuler</button><button disabled={busy} className="btn-primary">{busy ? 'Enregistrement…' : visibility === 'PUBLISHED' ? 'Enregistrer et publier' : scheduled ? 'Programmer' : 'Enregistrer'}</button></div>
     </form>
   </AdminModal>;
 }
