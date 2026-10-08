@@ -51,7 +51,7 @@ export default function FilterChips<T extends string>({
 
   // Phones scroll the chips sideways on one line; the 1px bottom padding keeps the gold underline inside the scroll box.
   return (
-    <fieldset ref={listRef} className="relative -mx-5 flex items-end gap-x-6 overflow-x-auto border-b border-line-soft px-5 pb-px [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-x-7 sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
+    <fieldset ref={listRef} className="relative -mx-5 flex min-w-0 items-end gap-x-6 overflow-x-auto border-b border-line-soft px-5 pb-px [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-x-7 sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
       <legend className="sr-only">{legend}</legend>
       {entries.map(([option, label]) => {
         const active = value === option;

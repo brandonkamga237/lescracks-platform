@@ -142,7 +142,8 @@ export function Toolbar({ children, lead }: ToolbarProps) {
   return (
     <div className="mb-10 flex flex-col gap-5 last:mb-0 sm:mb-12 sm:last:mb-0">
       {lead}
-      {children && <div className="flex flex-wrap items-center gap-x-8 gap-y-3">{children}</div>}
+      {/* A column on phones: each chip row then gets exactly the screen width and scrolls inside it instead of widening the page. */}
+      {children && <div className="flex flex-col items-stretch gap-y-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-8 sm:gap-y-3">{children}</div>}
     </div>
   );
 }
