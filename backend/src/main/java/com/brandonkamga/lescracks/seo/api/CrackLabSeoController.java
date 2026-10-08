@@ -90,7 +90,7 @@ public class CrackLabSeoController {
         String canonical = base + "/cracklab/challenges/" + challenge.getSlug();
         String statement = plain(challenge.getProblem());
         ChallengeStats stats = progress.statsFor(challenge.getId());
-        String crowd = stats.participants() == 0 ? "Sois le premier à répondre."
+        String crowd = stats.participants() == 0 ? "Personne n’a encore répondu : ouvre le bal."
                 : stats.participants() + " participant" + (stats.participants() > 1 ? "s" : "")
                 + (stats.averageScore() == null ? "." : ", moyenne " + stats.averageScore() + "/" + challenge.totalPoints() + ".");
         String description = LEVEL.get(challenge.getDifficulty()) + " · " + challenge.getCategory() + ". " + crowd + " "

@@ -60,7 +60,7 @@ public class CrackLabShareController {
         Challenge challenge = challenges.requirePublished(slug);
         ChallengeStats stats = progress.statsFor(challenge.getId());
         String line = stats.participants() == 0
-                ? "Sois le premier à répondre · " + challenge.totalPoints() + " pts en jeu"
+                ? "Aucune réponse encore : ouvre le bal · " + challenge.totalPoints() + " pts en jeu"
                 : stats.participants() + " participant" + (stats.participants() > 1 ? "s" : "")
                 + (stats.averageScore() == null ? "" : " · moyenne " + stats.averageScore() + "/" + challenge.totalPoints());
         return png(renderer.challenge(challenge.getTitle(), LEVEL_LABEL.get(challenge.getDifficulty()), BARS.get(challenge.getDifficulty()),
