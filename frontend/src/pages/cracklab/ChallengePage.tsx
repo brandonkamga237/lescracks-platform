@@ -1,16 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { ArrowLeft, ChevronDown, ChevronUp, Clock3, Eye, Lock, PenLine, Send } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronDown, ChevronUp, Clock3, Crown, Eye, Lock, PenLine, Send, Users } from 'lucide-react';
 
+import Avatar from '@/components/cracklab/Avatar';
+import Badges from '@/components/cracklab/Badges';
+import CountUp from '@/components/cracklab/CountUp';
 import CrackLabLayout from '@/components/cracklab/CrackLabLayout';
 import Difficulty from '@/components/cracklab/Difficulty';
+import LevelChip from '@/components/cracklab/LevelChip';
 import Prose from '@/components/cracklab/Prose';
+import XpBar from '@/components/cracklab/XpBar';
 import SEO from '@/components/common/SEO';
+import ShareButton from '@/components/common/ShareButton';
 import { ErrorState } from '@/components/common/States';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { useApi } from '@/hooks/useApi';
+import { useCrackLabProgress } from '@/hooks/useCrackLabProgress';
 import { useSession } from '@/hooks/useSession';
-import { challengePath, wordCount } from '@/lib/cracklab';
+import { challengePath, fillClass, memberPath, ordinal, percentOf, plural, resultPath, wordCount } from '@/lib/cracklab';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
 import type { ChallengeDetail, ChallengeSubmission } from '@/services/types';
@@ -74,7 +81,7 @@ function AnswerCard({ submission, onVoted }: { submission: ChallengeSubmission; 
       <Votes submission={submission} onVoted={onVoted} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-          <p className="text-sm font-semibold text-t1">{submission.author.displayName}{submission.mine && <span className="ml-2 rounded bg-gold-400/15 px-1.5 py-0.5 text-[11px] font-semibold text-gold-ink">toi</span>}</p>
+          <Link to={memberPath(submission.author.id)} className="flex items-center gap-2 text-sm font-semibold text-t1 hover:text-gold-ink"><Avatar member={submission.author} size="sm" />{submission.author.displayName}{submission.mine && <span className="rounded bg-gold-400/15 px-1.5 py-0.5 text-[11px] font-semibold text-gold-ink">toi</span>}</Link>
           <Score submission={submission} />
         </div>
         <p className="mt-0.5 text-xs text-t4">{dateFormat.format(new Date(submission.createdAt))} · {submission.wordCount} mots</p>
@@ -88,25 +95,85 @@ function AnswerCard({ submission, onVoted }: { submission: ChallengeSubmission; 
   );
 }
 
-function Result({ submission }: { submission: ChallengeSubmission }) {
-  if (submission.status !== 'GRADED') {
+/** The next unanswered challenge, so a finished one always leads somewhere. */
+function NextUp({ current }: { current: string }) {
+  const list = useApi((signal) => api.cracklab.challenges({ size: 100 }, signal), [current]);
+  const next = list.data?.content.find((challenge) => !challenge.answered && challenge.slug !== current);
+  if (!next) return null;
+  return (
+    <Link to={challengePath(next.slug)} className="group flex items-center gap-4 rounded-lg border border-line bg-noir-900 p-4 transition-colors hover:border-gold-400/40 sm:p-5">
+      <span className="min-w-0 flex-1">
+        <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-gold-ink">Challenge suivant</span>
+        <span className="mt-1 block truncate font-display text-lg font-bold text-t1 group-hover:text-gold-ink">{next.title}</span>
+        <span className="mt-1 flex flex-wrap items-center gap-x-3 text-xs text-t4"><Difficulty value={next.difficulty} />{next.submissionCount ? plural(next.submissionCount, 'participant') : 'Aucune réponse encore'}</span>
+      </span>
+      <ArrowRight className="h-5 w-5 shrink-0 text-gold-ink transition-transform group-hover:translate-x-0.5" aria-hidden />
+    </Link>
+  );
+}
+
+function Result({ submission, challenge }: { submission: ChallengeSubmission; challenge: ChallengeDetail }) {
+  const { progress } = useCrackLabProgress();
+  const graded = submission.status === 'GRADED';
+  const standing = useApi((signal) => (graded ? api.cracklab.result(submission.id, signal) : Promise.resolve(null)), [submission.id, graded]);
+  const share = (
+    <ShareButton variant="primary" className="sm:w-auto" title={challenge.title} path={resultPath(submission.id)} label={graded ? 'Partager mon score' : 'Partager mon défi'}
+      text={graded ? `J’ai obtenu ${submission.technicalScore}/${submission.totalPoints} sur « ${challenge.title} » sur CrackLab. Tu ferais mieux ?` : `Je viens de relever le challenge « ${challenge.title} » sur CrackLab. À toi :`} />
+  );
+
+  if (!graded) {
     return (
-      <div className="rounded-lg border border-line bg-noir-900 p-6">
-        <p className="flex items-center gap-2 font-display text-xl font-bold text-t1"><Clock3 className="h-5 w-5 text-gold-ink" aria-hidden />Ta réponse est en attente de notation</p>
-        <p className="mt-2 text-sm leading-relaxed text-t3">Elle est notée à la main, critère par critère. En attendant, découvre la solution de référence et les autres réponses.</p>
+      <div className="space-y-4">
+        <div className="rounded-xl border border-gold-400/30 bg-gold-400/[0.06] p-6 sm:p-8 motion-safe:animate-pop">
+          <p className="flex items-center gap-2 font-display text-2xl font-bold text-t1"><Clock3 className="h-6 w-6 text-gold-ink" aria-hidden />Réponse enregistrée</p>
+          <p className="mt-2 text-sm leading-relaxed text-t3">Elle est notée à la main, critère par critère : chaque point obtenu deviendra de l’XP et comptera au classement. En attendant, découvre la solution de référence et les autres réponses.</p>
+          {progress && <XpBar xp={progress.xp} level={progress.level} nextLevel={progress.nextLevel} className="mt-6 max-w-md" />}
+          <div className="mt-6">{share}</div>
+        </div>
+        <NextUp current={challenge.slug} />
       </div>
     );
   }
-  const percent = submission.totalPoints ? Math.round(((submission.technicalScore ?? 0) / submission.totalPoints) * 100) : 0;
+  const percent = percentOf(submission.technicalScore, submission.totalPoints);
+  const rank = standing.data;
+  const crowd = challenge.gradedCount;
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4 rounded-lg border border-gold-400/30 bg-gold-400/[0.06] p-6">
-        <div>
-          <p className="label">Score technique</p>
-          <p className="mt-2 font-display text-6xl font-bold leading-none tabular-nums text-t1">{submission.technicalScore}<span className="text-2xl text-t4"> / {submission.totalPoints}</span></p>
+      <div className="relative overflow-hidden rounded-xl border border-gold-400/40 bg-noir-900 p-6 shadow-gold sm:p-8">
+        <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gold-400/15 blur-3xl" />
+        <div className="relative">
+          <p className="label">Ton score</p>
+          <p className="mt-3 flex items-baseline gap-2 font-display font-bold leading-none text-t1">
+            <CountUp value={submission.technicalScore ?? 0} className="text-7xl sm:text-8xl" />
+            <span className="text-3xl text-t4">/ {submission.totalPoints}</span>
+            <span className="ml-auto rounded bg-gold-400 px-2 py-1 font-mono text-sm font-bold text-black motion-safe:animate-pop motion-safe:[animation-delay:700ms]">+{submission.technicalScore} XP</span>
+          </p>
+          <div aria-hidden className="mt-5 h-2.5 overflow-hidden rounded-full bg-noir-700">
+            <div className={`h-full origin-left rounded-full bg-gradient-to-r from-gold-500 to-gold-300 motion-safe:animate-grow-x ${fillClass(percent / 100)}`} />
+          </div>
+          <p className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-base">
+            {rank?.rankOnChallenge === 1 ? <span className="inline-flex items-center gap-1.5 font-semibold text-gold-ink"><Crown className="h-5 w-5" aria-hidden />Meilleur score du challenge</span>
+              : rank && crowd > 1 ? <span className="font-semibold text-t1">Mieux que {rank.betterThanPercent} % des participants</span>
+                : <span className="text-t3">{percent} % des points</span>}
+            {rank && crowd > 1 && <span className="font-mono text-sm text-t4">{ordinal(rank.rankOnChallenge)} sur {crowd}{challenge.averageScore != null ? ` · moyenne ${challenge.averageScore}` : ''}</span>}
+          </p>
+          {progress && (
+            <div className="mt-6 border-t border-line-soft pt-5">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <LevelChip level={progress.level} />
+                <Badges badges={progress.badges} compact />
+              </div>
+              <XpBar xp={progress.xp} level={progress.level} nextLevel={progress.nextLevel} />
+            </div>
+          )}
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
+            {share}
+            <Link to="/cracklab/classement" className="btn-secondary">Voir le classement</Link>
+          </div>
         </div>
-        <p className="font-mono text-sm text-gold-ink">{percent} %</p>
       </div>
+      <NextUp current={challenge.slug} />
+      <h2 className="label pt-2">Détail par critère</h2>
       <ol className="space-y-3">
         {submission.evaluations.map((evaluation) => (
           <li key={evaluation.criterionId} className="rounded-lg border border-line bg-noir-900 p-4 sm:p-5">
@@ -115,7 +182,7 @@ function Result({ submission }: { submission: ChallengeSubmission }) {
               <p className="font-mono text-sm tabular-nums text-t2">{evaluation.points} / {evaluation.maxPoints}</p>
             </div>
             <div aria-hidden className="mt-3 h-1.5 overflow-hidden rounded-full bg-noir-700">
-              <div className={`h-full rounded-full bg-gold-400 ${['w-0', 'w-[10%]', 'w-1/5', 'w-[30%]', 'w-2/5', 'w-1/2', 'w-3/5', 'w-[70%]', 'w-4/5', 'w-[90%]', 'w-full'][Math.round((evaluation.points / evaluation.maxPoints) * 10)]}`} />
+              <div className={`h-full rounded-full bg-gold-400 ${fillClass(evaluation.points / evaluation.maxPoints)}`} />
             </div>
             {evaluation.feedback && <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-t3">{evaluation.feedback}</p>}
           </li>
@@ -134,6 +201,7 @@ export default function ChallengeRoute() {
 function ChallengePage({ slug }: { slug: string }) {
   const { pathname } = useLocation();
   const { isLoading, isSignedIn, isAdmin } = useSession();
+  const { reload: reloadProgress } = useCrackLabProgress();
   const challenge = useApi((signal) => api.cracklab.challenge(slug, signal), [slug, isSignedIn]);
   const [detail, setDetail] = useState<ChallengeDetail | null>(null);
   const [answer, setAnswer] = useState(() => readDraft(slug));
@@ -173,6 +241,7 @@ function ChallengePage({ slug }: { slug: string }) {
       setTab('resultat');
       setDetail({ ...detail, mySubmission: submission, submissionCount: detail.submissionCount + 1 });
       challenge.reload();
+      reloadProgress();
     } catch (error) {
       setFailure(error instanceof ApiError ? error.message : 'L’envoi a échoué. Ta réponse est conservée, réessaie.');
       setConfirming(false);
@@ -226,7 +295,16 @@ function ChallengePage({ slug }: { slug: string }) {
             {detail.tags.map((tag) => <Link key={tag} to={`/cracklab?tag=${encodeURIComponent(tag)}`} className="rounded bg-noir-800 px-2 py-0.5 font-mono text-[11px] text-t3 transition-colors hover:text-t1">{tag}</Link>)}
           </div>
           <h1 className="mt-5 max-w-4xl text-balance font-display text-4xl font-bold leading-[1] tracking-tight text-t1 sm:text-5xl lg:text-6xl">{detail.title}</h1>
-          <p className="mt-5 font-mono text-sm text-t4">{detail.totalPoints} points · {detail.expectedFormat ?? (detail.maxWords ? `${detail.maxWords} mots maximum` : 'format libre')} · {detail.submissionCount} réponse{detail.submissionCount > 1 ? 's' : ''}</p>
+          <p className="mt-5 font-mono text-sm text-t4">{detail.totalPoints} points · {detail.expectedFormat ?? (detail.maxWords ? `${detail.maxWords} mots maximum` : 'format libre')}</p>
+          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <dl className="flex gap-6 sm:gap-8">
+              <div><dt className="text-[11px] uppercase tracking-[0.08em] text-t4">Participants</dt><dd className="mt-1 flex items-center gap-1.5 font-mono text-2xl font-bold tabular-nums text-t1"><Users className="h-4 w-4 text-t4" aria-hidden />{detail.submissionCount}</dd></div>
+              <div><dt className="text-[11px] uppercase tracking-[0.08em] text-t4">Moyenne</dt><dd className="mt-1 font-mono text-2xl font-bold tabular-nums text-t1">{detail.averageScore ?? '—'}<span className="text-sm font-normal text-t4">/{detail.totalPoints}</span></dd></div>
+              <div><dt className="text-[11px] uppercase tracking-[0.08em] text-t4">Record</dt><dd className="mt-1 font-mono text-2xl font-bold tabular-nums text-gold-ink">{detail.bestScore ?? '—'}<span className="text-sm font-normal text-t4">/{detail.totalPoints}</span></dd></div>
+            </dl>
+            <ShareButton className="sm:w-auto" title={detail.title} path={challengePath(detail.slug)} label="Défier un ami"
+              text={`Challenge CrackLab : « ${detail.title} ». ${detail.bestScore != null ? `Le record est à ${detail.bestScore}/${detail.totalPoints}.` : 'Personne n’a encore de note.'} Tu relèves le défi ?`} />
+          </div>
         </div>
       </header>
 
@@ -244,7 +322,7 @@ function ChallengePage({ slug }: { slug: string }) {
               </div>
               {tab === 'resultat' && (
                 <div className="space-y-8">
-                  <Result submission={mine} />
+                  <Result submission={mine} challenge={detail} />
                   <section aria-labelledby="my-answer-heading">
                     <h2 id="my-answer-heading" className="label mb-4">Ta réponse · {mine.wordCount} mots</h2>
                     <div className="rounded-lg border border-line bg-noir-900 p-5 sm:p-6"><Prose text={mine.answer} compact /></div>
