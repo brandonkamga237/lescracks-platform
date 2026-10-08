@@ -61,7 +61,7 @@ export default function Landing() {
 
   return (
     <Layout>
-      <SEO title="Apprendre la tech, concrètement" description="Des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme. Une bibliothèque ouverte et une communauté qui apprend en faisant." url="/" />
+      <SEO description="LesCracks : vidéos, ebooks, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant." url="/" />
 
       {/* ── Hero: raised headline panel · photo action panel ────── */}
       <section className="grid lg:grid-cols-[55fr_45fr]">
