@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header';
 import NewsletterBar from '@/components/layout/NewsletterBar';
 import Footer from '@/components/layout/Footer';
 import MobileTabBar from '@/components/layout/MobileTabBar';
+import SignupNudge from '@/components/account/SignupNudge';
 import { ArrowUp } from 'lucide-react';
 
 const WHATSAPP_URL = 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK';
@@ -48,6 +49,7 @@ const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutPro
       <Header />
 
       {/* Opacity only: navigation happens dozens of times a session, movement would get tiring. */}
+      <SignupNudge />
       <main id="main-content" tabIndex={-1} key={location.pathname} className="flex-1 scroll-mt-24 animate-page-in">
         {children}
       </main>

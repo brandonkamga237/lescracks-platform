@@ -8,6 +8,8 @@ import SEO from '@/components/common/SEO';
 import { safeReturnPath } from '@/services/auth';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
+import PhoneField from '@/components/account/PhoneField';
+import { signupContext } from '@/lib/arrival';
 import { useSession } from '@/hooks/useSession';
 import {
   Dialog,
@@ -88,6 +90,9 @@ export default function AuthPage({ mode }: AuthPageProps) {
   const [needsVerification, setNeedsVerification] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
+  // '' when empty, null while what is typed is not a valid number yet.
+  const [phone, setPhone] = useState<string | null>('');
+  const [consent, setConsent] = useState(false);
   const state = location.state as { from?: string; expired?: boolean } | null;
   const returnTo = safeReturnPath(new URLSearchParams(location.search).get('retour') ?? state?.from, isAdmin ? '/admin' : '/profil');
   const registering = mode === 'register';
@@ -114,8 +119,14 @@ export default function AuthPage({ mode }: AuthPageProps) {
     setNeedsVerification(false);
     try {
       if (registering) {
+        if (phone === null) {
+          setFields({ phone: 'Ce numéro ne correspond pas au pays choisi.' });
+          setError('Vérifie ton numéro de téléphone, ou laisse le champ vide pour l’ajouter plus tard.');
+          return;
+        }
         const email = form.email.trim();
-        await createAccount({ ...form, email, firstName: form.firstName.trim(), lastName: form.lastName.trim() });
+        await createAccount({ ...form, email, firstName: form.firstName.trim(), lastName: form.lastName.trim(),
+          phone: phone || undefined, marketingConsent: consent, context: signupContext() });
         setRegisteredEmail(email);
         setSuccessOpen(true);
         setForm({ email: '', password: '', firstName: '', lastName: '' });
@@ -198,6 +209,15 @@ export default function AuthPage({ mode }: AuthPageProps) {
               <div><label htmlFor="auth-lastName" className="text-sm font-medium text-t1">Nom</label><input id="auth-lastName" name="lastName" autoComplete="family-name" required value={form.lastName} onChange={(event) => setForm({ ...form, lastName: event.target.value })} className={inputClass} aria-invalid={Boolean(fields.lastName)} aria-describedby={fields.lastName ? 'lastName-error' : undefined} />{fields.lastName && <p id="lastName-error" className="mt-2 text-sm text-error-ink">{fields.lastName}</p>}</div>
             </div>}
             <div><label htmlFor="auth-email" className="text-sm font-medium text-t1">Adresse email</label><input id="auth-email" name="email" autoComplete="email" required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className={inputClass} aria-invalid={Boolean(fields.email)} aria-describedby={fields.email ? 'email-error' : undefined} />{fields.email && <p id="email-error" className="mt-2 text-sm text-error-ink">{fields.email}</p>}</div>
+            {registering && (
+              <div className="space-y-3">
+                <PhoneField value={phone ?? ''} onChange={setPhone} hint="Pour te prévenir des ateliers et des nouveautés. Il n’est jamais affiché publiquement." />
+                <label className="flex items-start gap-3 text-sm text-t3">
+                  <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#d4af37]" />
+                  <span>Je veux recevoir les nouveautés LesCracks par WhatsApp ou SMS. Je peux arrêter à tout moment.</span>
+                </label>
+              </div>
+            )}
             <div><label htmlFor="auth-password" className="text-sm font-medium text-t1">Mot de passe</label><div className="relative"><input id="auth-password" name="password" autoComplete={registering ? 'new-password' : 'current-password'} required minLength={registering ? 10 : undefined} type={showPassword ? 'text' : 'password'} value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} className={`${inputClass} pr-14`} aria-invalid={Boolean(fields.password)} aria-describedby="password-help" /><button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} aria-pressed={showPassword} className="absolute right-2 top-2.5 flex h-9 w-9 items-center justify-center rounded-full text-t4 transition hover:text-t1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">{showPassword ? <EyeOff aria-hidden="true" className="h-5 w-5" /> : <Eye aria-hidden="true" className="h-5 w-5" />}</button></div><p id="password-help" className={`mt-2 text-xs ${fields.password ? 'text-error-ink' : 'text-t3'}`}>{fields.password ?? (registering ? 'Au moins 10 caractères.' : 'Le mot de passe de ton compte LesCracks.')}</p></div>
             {error && <p role="alert" className="rounded border border-error/20 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
             {notice && <p role="status" className="rounded border border-gold-400/20 p-3 text-sm text-gold-ink">{notice}</p>}

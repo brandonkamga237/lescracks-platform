@@ -47,10 +47,7 @@ public class OidcSyncController {
             throw failed;
         }
         metrics.login("member", request.provider().name().toLowerCase(), true);
-        return ResponseEntity.ok(new UserProfileResponse(user.getId(), user.getEmail(), user.getFirstName(),
-                user.getLastName(), user.getStatus(), user.isEmailVerified(), user.getProvider(), user.getCreatedAt(),
-                user.getUsername(), user.getAvatarUrl(), user.getBio(), user.getLocation(), user.getSocialLinks(),
-                identities.list(user.getEmail())));
+        return ResponseEntity.ok(UserProfileResponse.of(user, identities.list(user.getEmail())));
     }
 
     private static Jwt extractJwt(Authentication authentication) {

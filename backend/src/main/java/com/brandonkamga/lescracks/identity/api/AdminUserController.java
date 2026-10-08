@@ -3,6 +3,7 @@ package com.brandonkamga.lescracks.identity.api;
 import com.brandonkamga.lescracks.identity.api.dto.UserAdminResponse;
 import com.brandonkamga.lescracks.identity.api.dto.UserStatusRequest;
 import com.brandonkamga.lescracks.identity.domain.AdminUserService;
+import com.brandonkamga.lescracks.identity.domain.ProfileCompletion;
 import com.brandonkamga.lescracks.identity.domain.User;
 import com.brandonkamga.lescracks.shared.dto.PageResponse;
 
@@ -52,11 +53,14 @@ public class AdminUserController {
     public ResponseEntity<StreamingResponseBody> export() {
         List<User> list = users.list(null, Pageable.unpaged()).getContent();
         StreamingResponseBody body = out -> {
-            out.write("id;email;firstName;lastName;status;provider;verified;createdAt\n".getBytes(StandardCharsets.UTF_8));
+            out.write("id;email;firstName;lastName;status;provider;verified;createdAt;phone;country;situation;goal;city;marketingConsent;completion\n".getBytes(StandardCharsets.UTF_8));
             for (User user : list) {
                 String row = csvLine(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(),
                         user.getStatus(), user.getProvider(), user.isEmailVerified(),
-                        user.getCreatedAt() == null ? "" : formatter.format(user.getCreatedAt()));
+                        user.getCreatedAt() == null ? "" : formatter.format(user.getCreatedAt()),
+                        nullToEmpty(user.getPhone()), nullToEmpty(user.getCountry()), user.getSituation() == null ? "" : user.getSituation(),
+                        user.getGoal() == null ? "" : user.getGoal(), nullToEmpty(user.getLocation()), user.isMarketingConsent(),
+                        ProfileCompletion.of(user).percent());
                 out.write((row + "\n").getBytes(StandardCharsets.UTF_8));
             }
         };
@@ -67,7 +71,9 @@ public class AdminUserController {
 
     private UserAdminResponse response(User user) {
         return new UserAdminResponse(user.getId(), user.getEmail(), user.getFirstName(),
-                user.getLastName(), user.getStatus(), user.isEmailVerified(), user.getProvider(), user.getCreatedAt());
+                user.getLastName(), user.getStatus(), user.isEmailVerified(), user.getProvider(), user.getCreatedAt(),
+                user.getPhone(), user.getCountry(), user.getSituation(), user.getGoal(), user.getLocation(),
+                user.isMarketingConsent(), ProfileCompletion.of(user).percent());
     }
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -85,5 +91,9 @@ public class AdminUserController {
             }
         }
         return line.toString();
+    }
+
+    private static String nullToEmpty(String value) {
+        return value == null ? "" : value;
     }
 }

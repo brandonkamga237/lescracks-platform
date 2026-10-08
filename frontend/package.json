@@ -24,6 +24,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^10.16.16",
+    "libphonenumber-js": "1.11.17",
     "lucide-react": "^0.344.0",
     "oidc-client-ts": "^3.5.0",
     "path": "^0.12.7",

@@ -28,7 +28,7 @@ export default function Header() {
   const [draft, setDraft] = useState('');
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
-  const { isLoading, isSignedIn, isAdmin, name } = useSession();
+  const { isLoading, isSignedIn, isAdmin, name, user } = useSession();
   const destination = { from: `${pathname}${search}` };
 
   useEffect(() => {
@@ -78,6 +78,7 @@ export default function Header() {
             <Link to={isAdmin ? '/admin' : '/profil'} className="flex items-center gap-2.5 text-sm text-t2 transition-colors hover:text-t1">
               <span className="flex h-8 w-8 items-center justify-center rounded-full border border-gold-400/30 bg-gold-400/10 font-semibold text-gold-ink">{name?.trim().charAt(0).toLocaleUpperCase('fr') || <User className="h-4 w-4" aria-hidden />}</span>
               <span className="max-w-32 truncate">{isAdmin ? 'Administration' : 'Mon espace'}</span>
+              {!isAdmin && user && user.completion < 100 && <span title="Profil à compléter" className="rounded border border-gold-400/40 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-gold-ink">{user.completion} %</span>}
             </Link>
           ) : (
             <><Link to="/connexion" state={destination} className="text-sm font-medium text-t1 transition-colors hover:text-gold-ink">Se connecter</Link><Link to="/inscription" state={destination} className="btn-primary">Créer un compte</Link></>

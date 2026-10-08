@@ -4,6 +4,7 @@ import { Link, Navigate, Outlet, Route, Routes, useLocation } from 'react-router
 import { MotionConfig } from 'framer-motion';
 
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { rememberArrival } from '@/lib/arrival';
 import { useSession } from '@/hooks/useSession';
 import AdminLayout from '@/components/layout/AdminLayout';
 import AuthCallback from '@/pages/AuthCallback';
@@ -36,6 +37,7 @@ const AdminTalks = lazy(() => import('@/pages/admin/AdminTalks'));
 const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
 const ArticleStudio = lazy(() => import('@/pages/admin/ArticleStudio'));
 const AdminCrackLab = lazy(() => import('@/pages/admin/AdminCrackLab'));
+const Welcome = lazy(() => import('@/pages/Welcome'));
 const CrackLabHome = lazy(() => import('@/pages/cracklab/CrackLabHome'));
 const ChallengePage = lazy(() => import('@/pages/cracklab/ChallengePage'));
 const CrackLabRanking = lazy(() => import('@/pages/cracklab/Ranking'));
@@ -100,12 +102,23 @@ function AdminRoute({ bare = false }: AdminRouteProps) {
   return <AdminLayout><Suspense fallback={<Waiting />}><Outlet /></Suspense></AdminLayout>;
 }
 
+// Pages where the welcome questions must not interrupt: signing in, legal reading, the welcome itself.
+const WELCOME_EXEMPT = ['/bienvenue', '/auth/callback', '/connexion', '/inscription', '/reinitialiser', '/verifier-email', '/conditions-utilisation', '/politique-confidentialite', '/admin'];
+
 function AppRoutes() {
   const location = useLocation();
+  const { isSignedIn, isAdmin, user } = useSession();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [location.pathname]);
+
+  useEffect(() => { rememberArrival(`${location.pathname}${location.search}`); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Once after sign-up, whatever the way in: the welcome questions, then back where the member was going.
+  if (isSignedIn && !isAdmin && user?.onboardingRequired && !WELCOME_EXEMPT.some((path) => location.pathname.startsWith(path))) {
+    return <Navigate to={`/bienvenue?retour=${encodeURIComponent(`${location.pathname}${location.search}`)}`} replace />;
+  }
 
   return (
     <Routes>
@@ -140,6 +153,7 @@ function AppRoutes() {
       <Route path="/conditions-utilisation" element={<Terms />} />
       <Route path="/politique-confidentialite" element={<Privacy />} />
       {/* Verifying a code is done by a recruiter who has no account and wants none. */}
+      <Route path="/bienvenue" element={<MemberRoute><Suspense fallback={<Waiting />}><Welcome /></Suspense></MemberRoute>} />
       <Route path="/profil" element={<MemberRoute><Profile /></MemberRoute>} />
 
       <Route path="/admin/articles" element={<AdminRoute bare />}>

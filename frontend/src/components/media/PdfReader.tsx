@@ -11,8 +11,11 @@ pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 interface PdfReaderProps {
   /** Where the PDF bytes are fetched from (same origin, through /api). */
   url: string;
-  downloadUrl: string;
+  /** Absent for visitors: the full file is for members. */
+  downloadUrl?: string;
   title: string;
+  /** Visitor mode: `url` serves a free excerpt; its end invites to create an account to read on. */
+  excerpt?: { onSignUp: () => void; onSignIn: () => void };
   /** Remembers the last page read on this device. */
   storageKey: string;
   onClose: () => void;
@@ -33,7 +36,7 @@ function savePage(key: string, page: number) {
  * (Android's browser shows no PDF inside a page). Pages are drawn as they come into view and
  * released when far away, so a 300-page book does not exhaust a phone's memory.
  */
-export default function PdfReader({ url, downloadUrl, title, storageKey, onClose }: PdfReaderProps) {
+export default function PdfReader({ url, downloadUrl, title, excerpt, storageKey, onClose }: PdfReaderProps) {
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null);
   const [progress, setProgress] = useState(0);
   const [failure, setFailure] = useState(false);
@@ -47,23 +50,36 @@ export default function PdfReader({ url, downloadUrl, title, storageKey, onClose
   const tasks = useRef(new Map<number, RenderTask>());
   const drawn = useRef(new Set<number>());
   const resumed = useRef(false);
+  // The whole book's length, when only an excerpt is loaded.
+  const [fullLength, setFullLength] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    const loading = pdfjs.getDocument({ url, isEvalSupported: false });
-    loading.onProgress = ({ loaded, total }: { loaded: number; total: number }) => { if (total) setProgress(Math.round((loaded / total) * 100)); };
-    loading.promise.then(async (pdf) => {
+    let loading: ReturnType<typeof pdfjs.getDocument> | null = null;
+    const open = async () => {
+      if (excerpt) {
+        // Fetched by hand: the excerpt's response says how long the whole book is.
+        const response = await fetch(url, { credentials: 'include' });
+        if (!response.ok) throw new Error(String(response.status));
+        setFullLength(Number(response.headers.get('X-Total-Pages')) || null);
+        loading = pdfjs.getDocument({ data: new Uint8Array(await response.arrayBuffer()), isEvalSupported: false });
+      } else {
+        loading = pdfjs.getDocument({ url, isEvalSupported: false });
+        loading.onProgress = ({ loaded, total }: { loaded: number; total: number }) => { if (total) setProgress(Math.round((loaded / total) * 100)); };
+      }
+      const pdf = await loading.promise;
       if (cancelled) return;
       const first = await pdf.getPage(1);
       const viewport = first.getViewport({ scale: 1 });
       setRatios(Array.from({ length: pdf.numPages }, () => viewport.height / viewport.width));
       setDoc(pdf);
-    }).catch(() => { if (!cancelled) setFailure(true); });
+    };
+    open().catch(() => { if (!cancelled) setFailure(true); });
     return () => {
       cancelled = true;
-      void loading.destroy();
+      void loading?.destroy();
     };
-  }, [url]);
+  }, [url, excerpt ? 'excerpt' : 'full']); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fit to the reading column: the screen width on a phone, a comfortable page on a desktop.
   useEffect(() => {
@@ -172,6 +188,11 @@ export default function PdfReader({ url, downloadUrl, title, storageKey, onClose
   }, []);
 
   const total = doc?.numPages ?? 0;
+  const shown = fullLength ?? total;
+  const truncated = Boolean(excerpt && fullLength && fullLength > total);
+
+  /** The member lands on the first page they have not read yet. */
+  const continueAfterSignUp = (go: () => void) => { savePage(storageKey, total + 1); go(); };
   const tool = 'flex h-9 w-9 items-center justify-center rounded text-t3 transition-colors duration-150 hover:bg-noir-800 hover:text-t1 disabled:opacity-40';
 
   // Portaled to the body: the page's own containers create stacking contexts the site header would win.
@@ -188,7 +209,7 @@ export default function PdfReader({ url, downloadUrl, title, storageKey, onClose
             <label htmlFor="reader-page" className="sr-only">Aller à la page</label>
             <input id="reader-page" inputMode="numeric" value={jump} onChange={(event) => setJump(event.target.value.replace(/\D/g, ''))} placeholder={String(page)}
               className="h-8 w-12 rounded border border-line bg-transparent text-center text-t1 placeholder:text-t1 focus:border-gold-400 focus:outline-none" />
-            <span>/ {total}</span>
+            <span>/ {shown}</span>
             <button type="button" onClick={() => goTo(Math.min(page + 1, total))} disabled={page >= total} className={`${tool} hidden sm:flex`} aria-label="Page suivante"><ChevronRight className="h-4 w-4" aria-hidden /></button>
           </form>
         )}
@@ -202,7 +223,9 @@ export default function PdfReader({ url, downloadUrl, title, storageKey, onClose
           <button type="button" onClick={() => void (document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()).catch(() => undefined)}
             className={`${tool} hidden sm:flex`} aria-label="Plein écran"><Maximize2 className="h-4 w-4" aria-hidden /></button>
         )}
-        <a href={downloadUrl} className={tool} aria-label="Télécharger"><Download className="h-4 w-4" aria-hidden /></a>
+        {downloadUrl
+          ? <a href={downloadUrl} className={tool} aria-label="Télécharger"><Download className="h-4 w-4" aria-hidden /></a>
+          : excerpt && <button type="button" onClick={() => continueAfterSignUp(excerpt.onSignUp)} className={tool} aria-label="Télécharger (compte gratuit)"><Download className="h-4 w-4" aria-hidden /></button>}
       </header>
 
       <div ref={scroller} className="relative flex-1 overflow-auto overscroll-contain bg-noir-900 pb-[env(safe-area-inset-bottom)]">
@@ -210,7 +233,7 @@ export default function PdfReader({ url, downloadUrl, title, storageKey, onClose
           <div className="mx-auto max-w-md px-6 py-24 text-center">
             <p className="text-t1">Ce document ne peut pas être affiché ici.</p>
             <p className="mt-2 text-sm text-t3">Il est peut-être protégé ou dans un format que le lecteur ne gère pas. Le téléchargement reste disponible.</p>
-            <a href={downloadUrl} className="btn-primary mt-6">Télécharger<Download className="h-4 w-4" aria-hidden /></a>
+            {downloadUrl && <a href={downloadUrl} className="btn-primary mt-6">Télécharger<Download className="h-4 w-4" aria-hidden /></a>}
           </div>
         ) : !doc ? (
           <p role="status" className="flex items-center justify-center gap-3 py-24 text-sm text-t3">
@@ -224,6 +247,17 @@ export default function PdfReader({ url, downloadUrl, title, storageKey, onClose
                   className="block h-full w-full" aria-label={`Page ${index + 1}`} />
               </li>
             ))}
+            {truncated && excerpt && (
+              <li className="w-full max-w-[880px] rounded-lg border border-line bg-noir-950 p-6 text-center sm:p-10">
+                <p className="font-mono text-xs text-gold-ink">fin de l’extrait gratuit · {total} pages sur {fullLength}</p>
+                <p className="mx-auto mt-4 max-w-md text-balance font-display text-2xl font-bold leading-tight text-t1 sm:text-3xl">La suite est réservée aux membres. C’est gratuit.</p>
+                <p className="mx-auto mt-3 max-w-md text-sm text-t3">Crée ton compte en quelques secondes : la lecture reprendra page {total + 1}, et tu pourras télécharger l’ebook.</p>
+                <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
+                  <button type="button" onClick={() => continueAfterSignUp(excerpt.onSignUp)} className="btn-primary">Créer mon compte gratuit</button>
+                  <button type="button" onClick={() => continueAfterSignUp(excerpt.onSignIn)} className="btn-secondary">J’ai déjà un compte</button>
+                </div>
+              </li>
+            )}
           </ol>
         )}
       </div>
