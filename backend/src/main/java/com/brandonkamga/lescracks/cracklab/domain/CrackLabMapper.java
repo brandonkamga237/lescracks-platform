@@ -123,8 +123,12 @@ public class CrackLabMapper {
         return new AuthorResponse(user.getId(), displayName(user.getFirstName(), user.getLastName(), user.getUsername()), avatar(user.getAvatarUrl()));
     }
 
+    public static String displayNameOf(User user) {
+        return displayName(user.getFirstName(), user.getLastName(), user.getUsername());
+    }
+
     /** "Awa N." — enough to recognise someone on a leaderboard, never the email. */
-    static String displayName(String firstName, String lastName, String username) {
+    public static String displayName(String firstName, String lastName, String username) {
         String first = firstName == null ? "" : firstName.trim();
         String last = lastName == null ? "" : lastName.trim();
         if (!first.isEmpty()) {
