@@ -2,6 +2,8 @@ package com.brandonkamga.lescracks.cracklab.api;
 
 import com.brandonkamga.lescracks.cracklab.api.dto.ChallengeDetailResponse;
 import com.brandonkamga.lescracks.cracklab.api.dto.ChallengeSummaryResponse;
+import com.brandonkamga.lescracks.cracklab.api.dto.ProgressResponse;
+import com.brandonkamga.lescracks.cracklab.api.dto.PublicResultResponse;
 import com.brandonkamga.lescracks.cracklab.api.dto.RankingEntryResponse;
 import com.brandonkamga.lescracks.cracklab.api.dto.SubmissionResponse;
 import com.brandonkamga.lescracks.cracklab.api.dto.SubmitRequest;
@@ -11,6 +13,7 @@ import com.brandonkamga.lescracks.cracklab.domain.Challenge;
 import com.brandonkamga.lescracks.cracklab.domain.ChallengeDifficulty;
 import com.brandonkamga.lescracks.cracklab.domain.ChallengeService;
 import com.brandonkamga.lescracks.cracklab.domain.CrackLabMapper;
+import com.brandonkamga.lescracks.cracklab.domain.ProgressService;
 import com.brandonkamga.lescracks.cracklab.domain.Submission;
 import com.brandonkamga.lescracks.cracklab.domain.SubmissionService;
 import com.brandonkamga.lescracks.cracklab.domain.VoteResult;
@@ -31,6 +34,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -43,11 +47,13 @@ public class CrackLabController {
 
     private final ChallengeService challenges;
     private final SubmissionService submissions;
+    private final ProgressService progress;
     private final CrackLabMapper mapper;
 
-    public CrackLabController(ChallengeService challenges, SubmissionService submissions, CrackLabMapper mapper) {
+    public CrackLabController(ChallengeService challenges, SubmissionService submissions, ProgressService progress, CrackLabMapper mapper) {
         this.challenges = challenges;
         this.submissions = submissions;
+        this.progress = progress;
         this.mapper = mapper;
     }
 
@@ -55,8 +61,13 @@ public class CrackLabController {
     public PageResponse<ChallengeSummaryResponse> challenges(@RequestParam(required = false) ChallengeDifficulty difficulty,
                                                              @RequestParam(required = false) String category,
                                                              @RequestParam(required = false) String tag,
-                                                             @PageableDefault(size = 12, sort = "publishedAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return PageResponse.of(challenges.published(difficulty, category, tag, pageable), mapper::summary);
+                                                             @PageableDefault(size = 12, sort = "publishedAt", direction = Sort.Direction.DESC) Pageable pageable,
+                                                             Authentication authentication) {
+        String email = viewer(authentication);
+        Map<Long, Submission> mine = submissions.memberId(email).isPresent()
+                ? submissions.mineAll(email).stream().collect(Collectors.toMap(s -> s.getChallenge().getId(), Function.identity()))
+                : Map.of();
+        return PageResponse.of(challenges.published(difficulty, category, tag, pageable), challenge -> mapper.summary(challenge, mine.get(challenge.getId())));
     }
 
     @GetMapping("/challenges/{slug}")
@@ -93,17 +104,36 @@ public class CrackLabController {
         return new VoteResponse(result.voteScore(), result.myVote());
     }
 
+    /** `period=week` is this week's board (reset every Monday, UTC); anything else is the all-time board. */
     @GetMapping("/ranking")
-    public PageResponse<RankingEntryResponse> ranking(@PageableDefault(size = 20) Pageable pageable, Authentication authentication) {
+    public PageResponse<RankingEntryResponse> ranking(@RequestParam(defaultValue = "all") String period,
+                                                      @PageableDefault(size = 20) Pageable pageable, Authentication authentication) {
         Long viewerId = submissions.memberId(viewer(authentication)).orElse(null);
         // The query fixes its own order; a client-supplied sort would only scramble the ranking.
         Pageable page = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
-        var rows = submissions.ranking(page);
+        var rows = "week".equals(period) ? progress.weekRanking(page) : submissions.ranking(page);
+        Map<Long, Long> xp = progress.allTimeXp();
         int first = (int) page.getOffset();
         List<RankingEntryResponse> entries = IntStream.range(0, rows.getNumberOfElements())
-                .mapToObj(i -> mapper.ranking(first + i + 1, rows.getContent().get(i), viewerId))
+                .mapToObj(i -> mapper.ranking(first + i + 1, rows.getContent().get(i), viewerId, xp.getOrDefault(rows.getContent().get(i).getUserId(), 0L)))
                 .toList();
         return PageResponse.of(new PageImpl<>(entries, page, rows.getTotalElements()), Function.identity());
+    }
+
+    @GetMapping("/me/progress")
+    public ProgressResponse myProgress(Principal principal) {
+        var member = submissions.requireMember(principal.getName());
+        return mapper.progress(progress.of(member), member.getId());
+    }
+
+    @GetMapping("/members/{id}")
+    public ProgressResponse member(@PathVariable Long id, Authentication authentication) {
+        return mapper.progress(progress.publicProfile(id), submissions.memberId(viewer(authentication)).orElse(null));
+    }
+
+    @GetMapping("/results/{id}")
+    public PublicResultResponse result(@PathVariable Long id) {
+        return mapper.publicResult(progress.result(id));
     }
 
     private List<SubmissionResponse> withVotes(List<Submission> list, String email) {

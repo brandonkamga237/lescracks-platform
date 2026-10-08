@@ -217,6 +217,12 @@ public class SubmissionServiceImpl implements SubmissionService {
         return submissions.findById(id).orElseThrow(() -> new NotFoundException("Réponse", "id", id));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public User requireMember(String email) {
+        return member(email);
+    }
+
     /** Admin accounts live in their own table: they manage CrackLab but do not play it. */
     private User member(String email) {
         if (email == null || email.isBlank()) {

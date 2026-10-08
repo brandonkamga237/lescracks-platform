@@ -39,7 +39,9 @@ const AdminCrackLab = lazy(() => import('@/pages/admin/AdminCrackLab'));
 const CrackLabHome = lazy(() => import('@/pages/cracklab/CrackLabHome'));
 const ChallengePage = lazy(() => import('@/pages/cracklab/ChallengePage'));
 const CrackLabRanking = lazy(() => import('@/pages/cracklab/Ranking'));
-const MySubmissions = lazy(() => import('@/pages/cracklab/MySubmissions'));
+const CrackLabMyProfile = lazy(() => import('@/pages/cracklab/MyProfile'));
+const CrackLabMember = lazy(() => import('@/pages/cracklab/MemberProfile'));
+const CrackLabResult = lazy(() => import('@/pages/cracklab/PublicResult'));
 const AdminCrackLabEditor = lazy(() => import('@/pages/admin/AdminCrackLabEditor'));
 const AdminCrackLabQueue = lazy(() => import('@/pages/admin/AdminCrackLabQueue'));
 const AdminCrackLabGrade = lazy(() => import('@/pages/admin/AdminCrackLabGrade'));
@@ -129,7 +131,11 @@ function AppRoutes() {
       <Route path="/cracklab" element={<Suspense fallback={<Waiting />}><CrackLabHome /></Suspense>} />
       <Route path="/cracklab/challenges/:slug" element={<Suspense fallback={<Waiting />}><ChallengePage /></Suspense>} />
       <Route path="/cracklab/classement" element={<Suspense fallback={<Waiting />}><CrackLabRanking /></Suspense>} />
-      <Route path="/cracklab/mes-reponses" element={<MemberRoute><Suspense fallback={<Waiting />}><MySubmissions /></Suspense></MemberRoute>} />
+      <Route path="/cracklab/moi" element={<MemberRoute><Suspense fallback={<Waiting />}><CrackLabMyProfile /></Suspense></MemberRoute>} />
+      <Route path="/cracklab/mes-reponses" element={<Navigate to="/cracklab/moi" replace />} />
+      {/* Public by design: these are the pages a shared link opens. */}
+      <Route path="/cracklab/membres/:id" element={<Suspense fallback={<Waiting />}><CrackLabMember /></Suspense>} />
+      <Route path="/cracklab/resultats/:id" element={<Suspense fallback={<Waiting />}><CrackLabResult /></Suspense>} />
       <Route path="/a-propos" element={<About />} />
       <Route path="/conditions-utilisation" element={<Terms />} />
       <Route path="/politique-confidentialite" element={<Privacy />} />

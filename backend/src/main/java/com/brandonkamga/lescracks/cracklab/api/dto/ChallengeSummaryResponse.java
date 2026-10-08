@@ -16,5 +16,10 @@ public record ChallengeSummaryResponse(
         Integer maxWords,
         int totalPoints,
         long submissionCount,
-        Instant publishedAt) {
+        Instant publishedAt,
+        long gradedCount,
+        Integer averageScore,
+        Integer bestScore,
+        boolean answered,
+        Integer myScore) {
 }

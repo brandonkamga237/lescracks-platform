@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { ArrowLeft, FileText, FlaskConical, Home, Trophy, User } from 'lucide-react';
+import { ArrowLeft, Flame, FlaskConical, Home, Trophy, User, UserRound } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
+import { useCrackLabProgress } from '@/hooks/useCrackLabProgress';
 import { useSession } from '@/hooks/useSession';
 
 interface CrackLabLayoutProps {
@@ -19,7 +20,7 @@ interface Section {
 const SECTIONS: readonly Section[] = [
   { to: '/cracklab', label: 'Challenges', icon: FlaskConical, end: true },
   { to: '/cracklab/classement', label: 'Classement', icon: Trophy },
-  { to: '/cracklab/mes-reponses', label: 'Mes réponses', icon: FileText },
+  { to: '/cracklab/moi', label: 'Mon profil', icon: UserRound },
 ];
 
 /** The wordmark: monospace, so the lab reads as its own place while staying in the LesCracks palette. */
@@ -41,6 +42,7 @@ export default function CrackLabLayout({ children }: CrackLabLayoutProps) {
   const { pathname } = useLocation();
   const { isLoading, isSignedIn, isAdmin, name } = useSession();
   const initial = name?.trim().charAt(0).toLocaleUpperCase('fr');
+  const { progress } = useCrackLabProgress();
 
   return (
     <div className="flex min-h-screen flex-col bg-black pb-[calc(3.5rem+env(safe-area-inset-bottom))] text-t1 lg:pb-0">
@@ -61,12 +63,22 @@ export default function CrackLabLayout({ children }: CrackLabLayoutProps) {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-4">
+          <div className="ml-auto flex items-center gap-3 sm:gap-4">
+            {progress && (
+              // Always in sight: the streak to keep and the XP to grow are what bring a member back.
+              <Link to="/cracklab/moi" aria-label={`Niveau ${progress.level.name}, ${progress.xp} XP, série de ${progress.streak} semaines`}
+                className="flex h-9 items-center gap-2.5 rounded-full border border-line bg-noir-800 pl-2.5 pr-3 font-mono text-xs font-semibold tabular-nums transition-colors hover:border-gold-400/40">
+                <span className={`flex items-center gap-1 ${progress.activeThisWeek ? 'text-gold-ink' : 'text-t4'}`}><Flame className="h-3.5 w-3.5" aria-hidden />{progress.streak}</span>
+                <span aria-hidden className="h-3.5 w-px bg-line" />
+                <span className="text-t1">{progress.xp}<span className="text-t4"> XP</span></span>
+                <span className="hidden rounded bg-gold-400 px-1 py-0.5 text-[10px] text-black sm:inline">N{progress.level.number}</span>
+              </Link>
+            )}
             <Link to="/" className="hidden items-center gap-1.5 text-sm text-t3 transition-colors hover:text-t1 sm:inline-flex">
               <ArrowLeft className="h-4 w-4" aria-hidden />LesCracks
             </Link>
             {isLoading ? null : isSignedIn ? (
-              <Link to={isAdmin ? '/admin/cracklab/challenges' : '/profil'} aria-label={isAdmin ? 'Administration CrackLab' : 'Mon espace'}
+              <Link to={isAdmin ? '/admin/cracklab/challenges' : '/cracklab/moi'} aria-label={isAdmin ? 'Administration CrackLab' : 'Mon profil CrackLab'}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-gold-400/30 bg-gold-400/10 text-sm font-semibold text-gold-ink">
                 {initial || <User className="h-4 w-4" aria-hidden />}
               </Link>

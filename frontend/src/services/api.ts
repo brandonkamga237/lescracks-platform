@@ -1,7 +1,7 @@
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
 import type {
-  AuthProvider, Category, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, RankingEntry, EventFormat, EventSummary, EventType, PageResponse, ResourceKind,
+  AuthProvider, Category, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse, ResourceKind,
   NewsletterStatus, ResourceLikeStatus, ResourceSummary, Tag, TalkVideo, UserIdentity, UserProfile,
   UserProfileUpdate,
 } from '@/services/types';
@@ -84,7 +84,11 @@ export const api = {
     answers: (slug: string, signal?: AbortSignal) => http.get<ChallengeSubmission[]>(`/cracklab/challenges/${encodeURIComponent(slug)}/submissions`, undefined, signal),
     mine: (signal?: AbortSignal) => http.get<ChallengeSubmission[]>('/cracklab/submissions/mine', undefined, signal),
     vote: (submissionId: number, value: -1 | 0 | 1) => http.put<{ voteScore: number; myVote: -1 | 0 | 1 }>(`/cracklab/submissions/${submissionId}/vote`, { value }),
-    ranking: (page = 0, size = 20, signal?: AbortSignal) => http.get<PageResponse<RankingEntry>>('/cracklab/ranking', { page, size }, signal),
+    ranking: (period: RankingPeriod = 'all', page = 0, size = 20, signal?: AbortSignal) =>
+      http.get<PageResponse<RankingEntry>>('/cracklab/ranking', { period, page, size }, signal),
+    progress: (signal?: AbortSignal) => http.get<CrackLabProgress>('/cracklab/me/progress', undefined, signal),
+    member: (id: number, signal?: AbortSignal) => http.get<CrackLabProgress>(`/cracklab/members/${id}`, undefined, signal),
+    result: (id: number, signal?: AbortSignal) => http.get<CrackLabPublicResult>(`/cracklab/results/${id}`, undefined, signal),
   },
 };
 

@@ -256,6 +256,12 @@ export interface ChallengeSummary {
   totalPoints: number;
   submissionCount: number;
   publishedAt?: string;
+  gradedCount: number;
+  averageScore?: number;
+  bestScore?: number;
+  /** Viewer-specific: always false and empty for visitors. */
+  answered?: boolean;
+  myScore?: number;
 }
 
 /** `referenceSolution` and `mySubmission` are set only once the viewer has answered. */
@@ -267,7 +273,62 @@ export interface ChallengeDetail extends ChallengeSummary {
   mySubmission?: ChallengeSubmission;
 }
 
-export interface CrackLabMember { displayName: string; avatarUrl?: string; }
+export interface CrackLabMember { id: number; displayName: string; avatarUrl?: string; }
+
+export interface CrackLabLevel { number: number; name: string; minXp: number; }
+
+export interface CrackLabBadge { code: string; label: string; description: string; unlocked: boolean; }
+
+export interface CrackLabHistoryItem {
+  submissionId: number;
+  challengeSlug: string;
+  challengeTitle: string;
+  category: string;
+  difficulty: ChallengeDifficulty;
+  status: SubmissionStatus;
+  score?: number;
+  totalPoints: number;
+  createdAt: string;
+}
+
+/** A member's standing. `rank` is 0 until a first answer is graded; `nextLevel` is absent at the top. */
+export interface CrackLabProgress {
+  member: CrackLabMember;
+  xp: number;
+  level: CrackLabLevel;
+  nextLevel?: CrackLabLevel;
+  rank: number;
+  rankedMembers: number;
+  betterThanPercent: number;
+  pointsToNextRank: number;
+  weekScore: number;
+  answered: number;
+  graded: number;
+  averagePercent: number;
+  bestPercent: number;
+  streak: number;
+  activeThisWeek: boolean;
+  bestStreak: number;
+  badges: CrackLabBadge[];
+  history: CrackLabHistoryItem[];
+  me: boolean;
+}
+
+/** A shared result: score and standing only, the answer stays private. */
+export interface CrackLabPublicResult {
+  submissionId: number;
+  challenge: ChallengeSummary;
+  author: CrackLabMember;
+  authorLevel: CrackLabLevel;
+  status: SubmissionStatus;
+  score?: number;
+  totalPoints: number;
+  rankOnChallenge: number;
+  betterThanPercent: number;
+  gradedAt?: string;
+}
+
+export type RankingPeriod = 'all' | 'week';
 
 export interface SubmissionEvaluation { criterionId: number; label: string; maxPoints: number; points: number; feedback?: string; }
 
@@ -290,7 +351,7 @@ export interface ChallengeSubmission {
   evaluations: SubmissionEvaluation[];
 }
 
-export interface RankingEntry { rank: number; member: CrackLabMember; totalScore: number; challenges: number; me: boolean; }
+export interface RankingEntry { rank: number; member: CrackLabMember; totalScore: number; challenges: number; me: boolean; level: CrackLabLevel; }
 
 export interface AdminChallenge extends ChallengeDetail {
   referenceSolution: string;
