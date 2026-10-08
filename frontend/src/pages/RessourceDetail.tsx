@@ -30,7 +30,7 @@ function megabytes(bytes: number): string {
 export default function RessourceDetail() {
   const { id = '' } = useParams();
   const location = useLocation();
-  const { isSignedIn, signIn } = useSession();
+  const { isSignedIn, signIn, register } = useSession();
   const hasParam = id.trim().length > 0;
   const resource = useApi((signal) => hasParam ? api.resource(id, signal) : Promise.resolve(null), [id, hasParam]);
   const likes = useApi((signal) => hasParam && resource.data?.id ? api.resourceLikes(resource.data.id, signal) : Promise.resolve(null), [resource.data?.id, hasParam, isSignedIn]);
@@ -46,7 +46,10 @@ export default function RessourceDetail() {
   const fileUrl = loaded?.downloadUrl ? `${ENV.API_BASE_URL.replace(/\/$/, '')}${loaded.downloadUrl.replace(/^\/api(?=\/)/, '')}` : null;
   const readable = Boolean(fileUrl && loaded?.fileFormat?.toLowerCase().includes('pdf'));
   const embeddable = Boolean(loaded?.kind === 'EXTERNAL_VIDEO' && loaded.videoUrl && videoSource(loaded.videoUrl));
-  const resumeAt = loaded && readable ? savedPage(loaded.id) : 1;
+  // Visitors read a free excerpt cut by the server; the whole book and its download are for members.
+  const previewUrl = loaded ? `${ENV.API_BASE_URL.replace(/\/$/, '')}/resources/${loaded.id}/preview` : null;
+  const resumeAt = loaded && readable && isSignedIn ? savedPage(loaded.id) : 1;
+  const readerReturn = loaded ? `${resourcePath(loaded)}?lecture=1` : '/ressources';
 
   function openReader() {
     const next = new URLSearchParams(params);
@@ -123,7 +126,7 @@ export default function RessourceDetail() {
                   {loaded.coverImage && failedImage !== loaded.coverImage ? <img src={loaded.coverImage} alt={`Couverture de ${loaded.title}`} onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" /> : <KindCover kind={loaded.kind} size="spotlight" />}
                   {readable && (
                     <button type="button" onClick={openReader} className="group absolute inset-0 flex items-end bg-gradient-to-t from-black/70 via-black/10 to-transparent p-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold-400 sm:p-7">
-                      <span className="inline-flex items-center gap-2 rounded bg-gold-400 px-4 py-2.5 text-sm font-semibold text-black transition-colors duration-150 group-hover:bg-gold-300"><BookOpen className="h-4 w-4" aria-hidden />{resumeAt > 1 ? `Reprendre page ${resumeAt}` : 'Lire en ligne'}</span>
+                      <span className="inline-flex items-center gap-2 rounded bg-gold-400 px-4 py-2.5 text-sm font-semibold text-black transition-colors duration-150 group-hover:bg-gold-300"><BookOpen className="h-4 w-4" aria-hidden />{!isSignedIn ? 'Lire un extrait gratuit' : resumeAt > 1 ? `Reprendre page ${resumeAt}` : 'Lire en ligne'}</span>
                     </button>
                   )}
                 </div>
@@ -154,7 +157,7 @@ export default function RessourceDetail() {
 
             <aside className="rounded-lg bg-card p-6 sm:p-7 lg:sticky lg:top-24" aria-label="Accéder à la ressource">
               <h2 className="font-display text-2xl font-bold leading-tight text-t1">{loaded.kind === 'EBOOK' ? (readable ? 'Lis l’ebook' : 'Télécharge l’ebook') : loaded.kind === 'ARTICLE' ? 'Lire l’article' : 'Regarde la vidéo'}</h2>
-              <p className="mt-3 text-sm leading-relaxed text-t3">{loaded.kind === 'EBOOK' ? (readable ? 'Lis-le ici, page après page : la lecture reprend où tu t’es arrêté. Ou télécharge-le pour le garder.' : 'Télécharge le support et avance à ton rythme, où que tu sois.') : loaded.kind === 'ARTICLE' ? `Temps de lecture estimé : ${loaded.readingMinutes ?? 1} min.` : embeddable ? 'La vidéo se lit ici, sans quitter LesCracks.' : 'Retrouve la vidéo sur sa plateforme de diffusion.'}</p>
+              <p className="mt-3 text-sm leading-relaxed text-t3">{loaded.kind === 'EBOOK' ? (!isSignedIn ? (readable ? 'Les 10 premières pages sont en accès libre. Avec un compte gratuit : le livre entier et le téléchargement.' : 'Le téléchargement est réservé aux membres. Le compte est gratuit et se crée en quelques secondes.') : readable ? 'Lis-le ici, page après page : la lecture reprend où tu t’es arrêté. Ou télécharge-le pour le garder.' : 'Télécharge le support et avance à ton rythme, où que tu sois.') : loaded.kind === 'ARTICLE' ? `Temps de lecture estimé : ${loaded.readingMinutes ?? 1} min.` : embeddable ? 'La vidéo se lit ici, sans quitter LesCracks.' : 'Retrouve la vidéo sur sa plateforme de diffusion.'}</p>
               <dl className="my-6 space-y-4 border-y border-line py-5 text-sm">
                 <div className="flex justify-between gap-4"><dt className="text-t3">Type</dt><dd className="text-right text-t1">{loaded.kind === 'EBOOK' ? 'Ebook' : loaded.kind === 'ARTICLE' ? 'Article' : 'Vidéo'}</dd></div>
                 {loaded.fileFormat && <div className="flex justify-between gap-4"><dt className="text-t3">Format du fichier</dt><dd className="break-all text-right text-t1">{loaded.fileFormat}</dd></div>}
@@ -164,8 +167,10 @@ export default function RessourceDetail() {
 
 
               {embeddable && <button type="button" onClick={watch} className="btn-primary w-full"><Play className="h-4 w-4 shrink-0" fill="currentColor" aria-hidden />{playing ? 'Lecture en cours' : 'Regarder la vidéo'}</button>}
-              {readable && <button type="button" onClick={openReader} className="btn-primary w-full"><BookOpen className="h-4 w-4 shrink-0" aria-hidden />{resumeAt > 1 ? `Reprendre page ${resumeAt}` : 'Lire en ligne'}</button>}
-              {loaded.kind === 'EBOOK' && fileUrl && <a href={fileUrl} className={`${readable ? 'btn-secondary mt-3' : 'btn-primary'} w-full`}>Télécharger l’ebook<Download className="h-4 w-4 shrink-0" aria-hidden /></a>}
+              {readable && <button type="button" onClick={openReader} className="btn-primary w-full"><BookOpen className="h-4 w-4 shrink-0" aria-hidden />{!isSignedIn ? 'Lire un extrait gratuit' : resumeAt > 1 ? `Reprendre page ${resumeAt}` : 'Lire en ligne'}</button>}
+              {loaded.kind === 'EBOOK' && fileUrl && (isSignedIn
+                ? <a href={fileUrl} className={`${readable ? 'btn-secondary mt-3' : 'btn-primary'} w-full`}>Télécharger l’ebook<Download className="h-4 w-4 shrink-0" aria-hidden /></a>
+                : <button type="button" onClick={() => register(resourcePath(loaded))} className={`${readable ? 'btn-secondary mt-3' : 'btn-primary'} w-full`}>Télécharger · compte gratuit<Download className="h-4 w-4 shrink-0" aria-hidden /></button>)}
               {loaded.kind !== 'ARTICLE' && !(loaded.kind === 'EBOOK' ? loaded.downloadUrl : loaded.videoUrl) && <p className="text-sm text-t3">Le lien d’accès n’est pas disponible pour le moment.</p>}
 
               <ShareButton title={loaded.title} path={resourcePath(loaded)} label="Partager la ressource" className="mt-3" />
@@ -186,7 +191,10 @@ export default function RessourceDetail() {
       </article>
       {reading && loaded && readable && fileUrl && (
         <Suspense fallback={<div role="status" className="fixed inset-0 z-[70] flex items-center justify-center bg-noir-950 text-sm text-t3">Ouverture du lecteur…</div>}>
-          <PdfReader url={`${fileUrl}?inline=true`} downloadUrl={fileUrl} title={loaded.title} storageKey={readerKey(loaded.id)} onClose={closeReader} />
+          {isSignedIn
+            ? <PdfReader url={`${fileUrl}?inline=true`} downloadUrl={fileUrl} title={loaded.title} storageKey={readerKey(loaded.id)} onClose={closeReader} />
+            : <PdfReader url={previewUrl ?? ''} title={loaded.title} storageKey={readerKey(loaded.id)} onClose={closeReader}
+              excerpt={{ onSignUp: () => register(readerReturn), onSignIn: () => signIn(readerReturn) }} />}
         </Suspense>
       )}
     </Layout>
