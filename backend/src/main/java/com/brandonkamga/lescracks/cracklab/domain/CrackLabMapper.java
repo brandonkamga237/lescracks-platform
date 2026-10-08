@@ -91,7 +91,7 @@ public class CrackLabMapper {
                 challenge.getExpectedFormat(), challenge.getMaxWords(), challenge.getReferenceSolution(), criteria(challenge),
                 challenge.totalPoints(), challenge.getStatus(), challenge.getCreatedBy(), challenges.submissionCount(id),
                 challenges.pendingCount(id), challenges.gradingLocked(id), challenge.getPublishedAt(),
-                challenge.getCreatedAt(), challenge.getUpdatedAt());
+                challenge.getCreatedAt(), challenge.getUpdatedAt(), challenge.getScheduledAt());
     }
 
     public SubmissionResponse submission(Submission submission, Long viewerId, int myVote) {

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowUpRight, ClipboardCheck, FlaskConical, Pencil, Plus, Trash2 } from 'lucide-react';
 
-import { AdminAction, AdminConfirm, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
+import { AdminAction, AdminConfirm, AdminRow, AdminSection, AdminState, ScheduledBadge } from '@/components/admin/AdminTable';
 import { useApi } from '@/hooks/useApi';
 import { DIFFICULTY_LABEL, challengePath } from '@/lib/cracklab';
 import { adminApi } from '@/services/adminApi';
@@ -59,7 +59,8 @@ export default function AdminCrackLab() {
                 {challenge.pendingCount > 0 && <> · <Link to={`/admin/cracklab/reponses?challenge=${challenge.id}`} className="text-gold-ink underline-offset-4 hover:underline">{challenge.pendingCount} à noter</Link></>}
               </p>
             </div>
-            <span className={`inline-flex shrink-0 rounded border px-3 py-1 text-xs font-medium ${challenge.status === 'PUBLISHED' ? 'border-gold-400/30 bg-gold-400/10 text-gold-ink' : 'border-line-soft bg-noir-800 text-t3'}`}>{STATUS_LABEL[challenge.status]}</span>
+            {challenge.status === 'DRAFT' && challenge.scheduledAt ? <ScheduledBadge scheduledAt={challenge.scheduledAt} />
+              : <span className={`inline-flex shrink-0 rounded border px-3 py-1 text-xs font-medium ${challenge.status === 'PUBLISHED' ? 'border-gold-400/30 bg-gold-400/10 text-gold-ink' : 'border-line-soft bg-noir-800 text-t3'}`}>{STATUS_LABEL[challenge.status]}</span>}
             <div className="flex gap-2" role="group" aria-label={`Actions pour ${challenge.title}`}>
               <AdminAction icon={Pencil} label="Modifier" onClick={() => navigate(`/admin/cracklab/challenges/${challenge.id}`)} />
               {challenge.status === 'PUBLISHED' && <AdminAction icon={ArrowUpRight} label="Voir" onClick={() => window.open(challengePath(challenge.slug), '_blank', 'noopener')} />}

@@ -19,5 +19,6 @@ public record EventResponse(
         String coverImage,
         EventStatus status,
         Instant createdAt,
-        Instant updatedAt) {
+        Instant updatedAt,
+        Instant scheduledAt) {
 }

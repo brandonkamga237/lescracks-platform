@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.event.domain;
 
 import com.brandonkamga.lescracks.event.api.dto.EventRequest;
+import com.brandonkamga.lescracks.shared.scheduling.ScheduledPublishing;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-public interface EventService {
+public interface EventService extends ScheduledPublishing {
     Page<Event> published(EventType type, Pageable pageable);
     Page<Event> published(EventType type, EventFormat format, Pageable pageable);
     Page<Event> upcoming(Pageable pageable);

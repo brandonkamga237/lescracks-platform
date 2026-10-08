@@ -5,6 +5,7 @@ import com.brandonkamga.lescracks.cracklab.infra.ChallengeRepository;
 import com.brandonkamga.lescracks.cracklab.infra.SubmissionRepository;
 import com.brandonkamga.lescracks.shared.exception.ConflictException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
+import com.brandonkamga.lescracks.shared.scheduling.Schedules;
 import com.brandonkamga.lescracks.shared.util.Slugs;
 
 import org.springframework.data.domain.Page;
@@ -120,12 +121,34 @@ public class ChallengeServiceImpl implements ChallengeService {
         challenge.setTags(request.tags() == null ? new LinkedHashSet<>() : request.tags().stream()
                 .map(String::trim).filter(tag -> !tag.isEmpty())
                 .collect(Collectors.toCollection(LinkedHashSet::new)));
-        ChallengeStatus status = request.status() == null ? ChallengeStatus.DRAFT : request.status();
+        challenge.setScheduledAt(Schedules.check(request.scheduledAt(), challenge.getScheduledAt()));
+        // A scheduled challenge waits as a draft; the scheduler publishes it at the chosen time.
+        ChallengeStatus status = challenge.getScheduledAt() != null || request.status() == null ? ChallengeStatus.DRAFT : request.status();
         if (status == ChallengeStatus.PUBLISHED && challenge.getPublishedAt() == null) {
             challenge.setPublishedAt(Instant.now());
         }
         challenge.setStatus(status);
         challenge.setUpdatedAt(Instant.now());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Long> dueForPublication(Instant now) {
+        return challenges.findScheduledIds(ChallengeStatus.DRAFT, now);
+    }
+
+    @Override
+    public boolean publishScheduled(Long id, Instant now) {
+        Challenge challenge = challenges.findById(id).orElse(null);
+        if (challenge == null || challenge.getStatus() != ChallengeStatus.DRAFT
+                || challenge.getScheduledAt() == null || challenge.getScheduledAt().isAfter(now)) {
+            return false;
+        }
+        challenge.setStatus(ChallengeStatus.PUBLISHED);
+        challenge.setScheduledAt(null);
+        challenge.setPublishedAt(now);
+        challenge.setUpdatedAt(now);
+        return true;
     }
 
     /** Before any grading: criteria are matched by id when kept, the rest are added or dropped. */

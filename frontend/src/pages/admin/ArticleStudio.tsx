@@ -1,17 +1,19 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowLeft, ArrowUpRight, Check, AlertCircle, Columns2, Eye, ListTree, Loader2, Monitor,
+  ArrowLeft, ArrowUpRight, CalendarClock, Check, AlertCircle, Columns2, Eye, ListTree, Loader2, Monitor,
   PenLine, Settings2, Smartphone, AlertTriangle, X,
 } from 'lucide-react';
 
 import { htmlToBlocks } from '@/components/admin/BlockEditor';
+import ScheduleDialog from '@/components/admin/ScheduleDialog';
 import ArticlePreview from '@/components/admin/studio/ArticlePreview';
 import MarkdownEditor from '@/components/admin/studio/MarkdownEditor';
 import SEO from '@/components/common/SEO';
 import { useApi } from '@/hooks/useApi';
 import { checkArticle } from '@/lib/articleChecks';
 import { articleStats, blocksToMarkdown, headingId, markdownToBlocks } from '@/lib/articleMarkdown';
+import { formatScheduleLong, formatScheduleShort } from '@/lib/schedule';
 import { resourcePath } from '@/lib/slugs';
 import { adminApi, type ArticleRequest } from '@/services/adminApi';
 import { api } from '@/services/api';
@@ -106,7 +108,8 @@ export default function ArticleStudio() {
   const [device, setDevice] = useState<'desktop' | 'mobile'>('desktop');
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sideOpen, setSideOpen] = useState(true);
-  const [busy, setBusy] = useState<'save' | 'publish' | 'unpublish' | null>(null);
+  const [busy, setBusy] = useState<'save' | 'publish' | 'unpublish' | 'schedule' | null>(null);
+  const [scheduling, setScheduling] = useState(false);
   const [failure, setFailure] = useState('');
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   const [tagsMatched, setTagsMatched] = useState(false);
@@ -186,12 +189,14 @@ export default function ArticleStudio() {
   const advice = checks.filter((check) => check.level === 'advice');
   const outline = blocks.flatMap((block, index) => (block.type === 'heading' ? [{ index, level: block.level, text: block.text }] : []));
   const status: ResourceStatus = resource?.status ?? 'DRAFT';
+  const scheduledAt = status === 'DRAFT' ? resource?.scheduledAt : undefined;
   const categoryName = categories.data?.find((category) => category.id === draft.categoryId)?.name;
   const coverUrl = coverObjectUrl ?? resource?.coverImage ?? null;
 
   const update = (patch: Partial<Draft>) => setDraft((value) => ({ ...value, ...patch }));
 
-  async function save(target: ResourceStatus) {
+  /** A plain save keeps the current schedule; publishing now, or passing null, cancels it. */
+  async function save(target: ResourceStatus, schedule: string | null = target === 'DRAFT' ? scheduledAt ?? null : null) {
     if (busy || !ready) return;
     setFailure('');
     if (blocking.length) {
@@ -199,7 +204,7 @@ export default function ArticleStudio() {
       if (!hasCover || !draft.categoryId) setSettingsOpen(true);
       return;
     }
-    setBusy(target === status ? 'save' : target === 'PUBLISHED' ? 'publish' : 'unpublish');
+    setBusy(schedule !== (scheduledAt ?? null) ? 'schedule' : target === status ? 'save' : target === 'PUBLISHED' ? 'publish' : 'unpublish');
     const data: ArticleRequest = {
       title: draft.title.trim(),
       description: draft.description.trim(),
@@ -207,6 +212,7 @@ export default function ArticleStudio() {
       categoryId: Number(draft.categoryId),
       tagIds: draft.tagIds,
       status: target,
+      scheduledAt: schedule,
       body: markdownToBlocks(draft.markdown),
     };
     try {
@@ -220,6 +226,7 @@ export default function ArticleStudio() {
       setResource(result);
       setSavedAt(new Date());
       setRestorable(null);
+      setScheduling(false);
       if (!resource) navigate(`/admin/articles/${result.id}`, { replace: true, state: { resource: result } });
     } catch (error) {
       setFailure(error instanceof ApiError ? error.message : 'L’enregistrement a échoué. Ta copie locale est conservée, réessaie.');
@@ -256,7 +263,7 @@ export default function ArticleStudio() {
   const saveLabel = busy ? 'Enregistrement…'
     : dirty ? 'Modifications non enregistrées'
       : savedAt ? `Enregistré à ${timeFormat.format(savedAt)}`
-        : resource ? (status === 'PUBLISHED' ? 'Publié · à jour' : 'Brouillon · à jour') : 'Nouvel article';
+        : resource ? (status === 'PUBLISHED' ? 'Publié · à jour' : scheduledAt ? 'Programmé · à jour' : 'Brouillon · à jour') : 'Nouvel article';
 
   if (loadError) {
     return (
@@ -335,7 +342,13 @@ export default function ArticleStudio() {
           </button>
           {status === 'PUBLISHED'
             ? <button type="button" disabled={!!busy} onClick={() => void save('DRAFT')} className="btn-secondary hidden md:inline-flex">{busy === 'unpublish' ? 'Dépublication…' : 'Dépublier'}</button>
-            : <button type="button" disabled={!!busy} onClick={() => void save('DRAFT')} className="btn-secondary">{busy === 'save' ? 'Enregistrement…' : 'Enregistrer'}</button>}
+            : <>
+              <button type="button" disabled={!!busy} onClick={() => void save('DRAFT')} className="btn-secondary">{busy === 'save' ? 'Enregistrement…' : 'Enregistrer'}</button>
+              <button type="button" disabled={!!busy} onClick={() => setScheduling(true)} title={scheduledAt ? `Publication automatique le ${formatScheduleLong(scheduledAt)}` : 'Choisir une date de publication'}
+                className={`inline-flex h-10 items-center gap-1.5 rounded border px-3 text-sm transition-colors ${scheduledAt ? 'border-dashed border-gold-400/60 text-gold-ink hover:bg-gold-400/10' : 'border-line text-t2 hover:bg-noir-800 hover:text-t1'}`}>
+                <CalendarClock className="h-4 w-4" aria-hidden /><span className="hidden sm:inline">{scheduledAt ? formatScheduleShort(scheduledAt) : 'Programmer'}</span>
+              </button>
+            </>}
           <button type="button" disabled={!!busy} onClick={() => void save('PUBLISHED')} className="btn-primary">
             {busy === 'publish' ? 'Publication…' : status === 'PUBLISHED' ? (busy === 'save' ? 'Mise à jour…' : 'Mettre à jour') : 'Publier'}
           </button>
@@ -453,7 +466,7 @@ export default function ArticleStudio() {
 
               <div className="border-t border-line-soft pt-6 text-sm">
                 <p className="font-medium text-t1">Visibilité</p>
-                <p className="mt-1 text-t3">{status === 'PUBLISHED' ? 'Publié : visible par tout le monde.' : 'Brouillon : visible uniquement dans l’administration.'}</p>
+                <p className="mt-1 text-t3">{status === 'PUBLISHED' ? 'Publié : visible par tout le monde.' : scheduledAt ? `Programmé : en ligne automatiquement le ${formatScheduleLong(scheduledAt)}.` : 'Brouillon : visible uniquement dans l’administration.'}</p>
                 {resource && status === 'PUBLISHED' && (
                   <a href={resourcePath(resource)} target="_blank" rel="noopener noreferrer" className="link mt-3 inline-flex items-center gap-1.5">Voir l’article publié<ArrowUpRight className="h-4 w-4" aria-hidden /></a>
                 )}
@@ -462,6 +475,9 @@ export default function ArticleStudio() {
           </aside>
         )}
       </div>
+
+      <ScheduleDialog open={scheduling} onOpenChange={setScheduling} current={scheduledAt} busy={busy === 'schedule'} subject="cet article"
+        onConfirm={(value) => void save('DRAFT', value)} onUnschedule={() => void save('DRAFT', null)} />
     </div>
   );
 }

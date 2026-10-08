@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminModal } from '@/components/admin/AdminTable';
+import ScheduleField from '@/components/admin/ScheduleField';
 import { useApi } from '@/hooks/useApi';
+import { scheduleIsValid } from '@/lib/schedule';
 import { adminApi, type EbookRequest, type VideoRequest } from '@/services/adminApi';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
@@ -12,6 +14,9 @@ interface ResourceFormProps {
   onCreated: () => void;
   onCancel: () => void;
 }
+
+// 'SCHEDULED' exists only in this form: the API receives a draft with a publication date.
+type Visibility = ResourceStatus | 'SCHEDULED';
 
 const VIDEO_PLATFORMS = ['YouTube', 'Vimeo', 'Dailymotion', 'Twitch', 'Loom', 'TikTok', 'Autre'] as const;
 
@@ -30,8 +35,10 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
     tagIds: [] as number[],
     videoUrl: resource?.videoUrl ?? '',
     platform: resource?.platform ?? 'YouTube',
-    status: resource?.status ?? 'DRAFT' as ResourceStatus,
+    visibility: (resource?.status === 'DRAFT' && resource.scheduledAt ? 'SCHEDULED' : resource?.status ?? 'DRAFT') as Visibility,
+    scheduledAt: resource?.scheduledAt ?? null as string | null,
   });
+  const scheduled = form.visibility === 'SCHEDULED';
   const categories = useApi((signal) => api.categories(signal), []);
   const tags = useApi((signal) => (form.categoryId ? api.tags(Number(form.categoryId), signal) : Promise.resolve([] as Tag[])), [form.categoryId]);
 
@@ -78,6 +85,10 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
       setFailure('Choisis un fichier ebook.');
       return;
     }
+    if (scheduled && !scheduleIsValid(form.scheduledAt)) {
+      setFailure('Choisis une date de publication à venir.');
+      return;
+    }
     setBusy(true);
     const base: EbookRequest = {
       title: form.title.trim(),
@@ -85,7 +96,8 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
       coverImage: resource?.coverImage ?? '',
       categoryId: Number(form.categoryId),
       tagIds: form.tagIds,
-      status: form.status,
+      status: scheduled ? 'DRAFT' : form.visibility as ResourceStatus,
+      scheduledAt: scheduled ? form.scheduledAt : null,
     };
     try {
       if (kind === 'EXTERNAL_VIDEO') {
@@ -138,8 +150,9 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
         <legend className="pr-3 font-display text-lg font-medium">03 · Organisation et visibilité</legend>
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="block text-sm text-t2">Catégorie<select required disabled={categories.loading || !!categories.error} value={form.categoryId} onChange={(event) => setForm({ ...form, categoryId: event.target.value ? Number(event.target.value) : '', tagIds: [] })} className={field}><option value="">{categories.loading ? 'Chargement…' : 'Choisir une catégorie'}</option>{categories.data?.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
-          <label className="block text-sm text-t2">Statut<select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as ResourceStatus })} className={field}><option value="DRAFT">Brouillon</option><option value="PUBLISHED">Publiée</option><option value="ARCHIVED">Archivée</option></select></label>
+          <label className="block text-sm text-t2">Statut<select value={form.visibility} onChange={(event) => setForm({ ...form, visibility: event.target.value as Visibility })} className={field}><option value="DRAFT">Brouillon</option><option value="SCHEDULED">Programmée</option><option value="PUBLISHED">Publiée</option><option value="ARCHIVED">Archivée</option></select></label>
         </div>
+        {scheduled && <ScheduleField value={form.scheduledAt} onChange={(scheduledAt) => setForm({ ...form, scheduledAt })} />}
 
         {form.categoryId && !tags.loading && !tags.error && (
           <div>
@@ -158,11 +171,11 @@ export default function ResourceForm({ resource, onCreated, onCancel }: Resource
         {tags.error && <p role="alert" className="text-sm text-error-ink">{tags.error.message} <button type="button" onClick={tags.reload} className="underline">Réessayer</button></p>}
         {categories.error && <p role="alert" className="text-sm text-error-ink">{categories.error.message} <button type="button" onClick={categories.reload} className="underline">Réessayer</button></p>}
         {!categories.loading && !categories.error && !categories.data?.length && <p className="text-sm text-t3">Crée d’abord une catégorie dans <Link to="/admin/categories" className="text-gold-ink underline">Organisation</Link>.</p>}
-        <p className="text-xs leading-relaxed text-t3">{form.status === 'PUBLISHED' ? 'En enregistrant, cette ressource sera visible sur le site public.' : 'Cette ressource ne sera pas visible sur le site public.'}</p>
+        {!scheduled && <p className="text-xs leading-relaxed text-t3">{form.visibility === 'PUBLISHED' ? 'En enregistrant, cette ressource sera visible sur le site public.' : 'Cette ressource ne sera pas visible sur le site public.'}</p>}
       </fieldset>
 
       {failure && <div role="alert" className="rounded-lg border border-error/30 bg-error/10 p-4 text-sm text-t1"><p>{failure}</p>{fieldErrors.length > 0 && <ul className="mt-2 list-inside list-disc">{fieldErrors.map((error, index) => <li key={index}>{error}</li>)}</ul>}</div>}
-      <div className="flex flex-wrap justify-end gap-3 border-t border-line-soft pt-5"><button type="button" disabled={busy} onClick={onCancel} className="btn-secondary">Annuler</button><button disabled={busy || categories.loading || !!categories.error || !categories.data?.length} className="btn-primary">{busy ? 'Enregistrement…' : form.status === 'PUBLISHED' ? 'Enregistrer et publier' : 'Enregistrer'}</button></div>
+      <div className="flex flex-wrap justify-end gap-3 border-t border-line-soft pt-5"><button type="button" disabled={busy} onClick={onCancel} className="btn-secondary">Annuler</button><button disabled={busy || categories.loading || !!categories.error || !categories.data?.length} className="btn-primary">{busy ? 'Enregistrement…' : form.visibility === 'PUBLISHED' ? 'Enregistrer et publier' : scheduled ? 'Programmer' : 'Enregistrer'}</button></div>
     </form>
   </AdminModal>;
 }

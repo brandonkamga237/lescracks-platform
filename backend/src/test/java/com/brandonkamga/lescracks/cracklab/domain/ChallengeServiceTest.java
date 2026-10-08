@@ -13,6 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,9 +42,13 @@ class ChallengeServiceTest {
     }
 
     private static ChallengeRequest request(List<CriterionRequest> criteria) {
+        return request(criteria, null);
+    }
+
+    private static ChallengeRequest request(List<CriterionRequest> criteria, Instant scheduledAt) {
         return new ChallengeRequest("Concevoir un cache distribué", "Backend", ChallengeDifficulty.INTERMEDIATE,
                 List.of("Redis", " Performance ", ""), "Une API répond en 2 s.", null, "500 mots maximum", 500,
-                "Cache Redis.", criteria, ChallengeStatus.PUBLISHED);
+                "Cache Redis.", criteria, ChallengeStatus.PUBLISHED, scheduledAt);
     }
 
     private static List<CriterionRequest> sameRubricRelabelled() {
@@ -118,5 +124,26 @@ class ChallengeServiceTest {
 
         assertThatThrownBy(() -> service.delete(10L)).isInstanceOf(ConflictException.class);
         verify(challenges, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("a scheduled challenge stays hidden as a draft, then the scheduler publishes and dates it")
+    void scheduledChallengeIsPublishedWhenDue() {
+        Instant tomorrow = Instant.now().plus(1, ChronoUnit.DAYS);
+        when(challenges.existsBySlug(any())).thenReturn(false);
+        when(challenges.save(any(Challenge.class))).thenAnswer(call -> call.getArgument(0));
+
+        Challenge created = service.create(request(List.of(new CriterionRequest(null, "Diagnostic", 100)), tomorrow), "admin");
+
+        assertThat(created.getStatus()).isEqualTo(ChallengeStatus.DRAFT);
+        assertThat(created.getPublishedAt()).isNull();
+
+        created.setId(42L);
+        when(challenges.findById(42L)).thenReturn(Optional.of(created));
+        assertThat(service.publishScheduled(42L, tomorrow.minusSeconds(1))).isFalse();
+        assertThat(service.publishScheduled(42L, tomorrow)).isTrue();
+        assertThat(created.getStatus()).isEqualTo(ChallengeStatus.PUBLISHED);
+        assertThat(created.getPublishedAt()).isEqualTo(tomorrow);
+        assertThat(created.getScheduledAt()).isNull();
     }
 }

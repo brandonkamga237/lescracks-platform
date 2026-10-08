@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+import java.time.Instant;
 import java.util.List;
 
 public record ChallengeRequest(
@@ -23,7 +24,8 @@ public record ChallengeRequest(
         @Positive Integer maxWords,
         @NotBlank String referenceSolution,
         @NotEmpty @Valid List<CriterionRequest> criteria,
-        ChallengeStatus status) {
+        ChallengeStatus status,
+        Instant scheduledAt) {
 
     /** `id` is set for a criterion that already exists, so its grades stay attached to it. */
     public record CriterionRequest(Long id, @NotBlank @Size(max = 200) String label, @NotNull @Positive Integer maxPoints) {
