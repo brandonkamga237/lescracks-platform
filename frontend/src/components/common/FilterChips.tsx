@@ -49,8 +49,9 @@ export default function FilterChips<T extends string>({
     return () => cancelAnimationFrame(frame);
   }, []);
 
+  // Phones scroll the chips sideways on one line; the 1px bottom padding keeps the gold underline inside the scroll box.
   return (
-    <fieldset ref={listRef} className="relative flex flex-wrap items-end gap-x-7 border-b border-line-soft">
+    <fieldset ref={listRef} className="relative -mx-5 flex items-end gap-x-6 overflow-x-auto border-b border-line-soft px-5 pb-px [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:gap-x-7 sm:overflow-visible sm:px-0 sm:pb-0 [&::-webkit-scrollbar]:hidden">
       <legend className="sr-only">{legend}</legend>
       {entries.map(([option, label]) => {
         const active = value === option;
@@ -60,7 +61,7 @@ export default function FilterChips<T extends string>({
             type="button"
             aria-pressed={active}
             onClick={() => onChange(option)}
-            className={`relative inline-flex min-h-11 items-center pb-3 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${
+            className={`relative inline-flex min-h-11 shrink-0 items-center whitespace-nowrap pb-3 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 ${
               active ? 'text-gold-ink' : 'text-t3 hover:text-t1'
             }`}
           >

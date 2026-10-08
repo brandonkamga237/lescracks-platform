@@ -68,8 +68,21 @@ public class TalkServiceImpl implements TalkService {
         video.setDurationMinutes(request.durationMinutes());
         video.setPublishedAt(request.publishedAt());
         video.setStatus(request.status() == null ? TalkStatus.DRAFT : request.status());
+        video.setCoverImage(cover(request.coverImage()));
         video.setUpdatedAt(Instant.now());
         return video;
+    }
+
+    /** Only an image uploaded to the platform: an arbitrary URL would hotlink someone else's server. */
+    private String cover(String coverImage) {
+        if (coverImage == null || coverImage.isBlank()) {
+            return null;
+        }
+        String trimmed = coverImage.trim();
+        if (!trimmed.startsWith("/api/files/")) {
+            throw new BadRequestException("La couverture doit être une image envoyée sur la plateforme.");
+        }
+        return trimmed;
     }
 
     private boolean isYoutubeUrl(String url) {

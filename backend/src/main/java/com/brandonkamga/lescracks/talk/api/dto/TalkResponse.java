@@ -14,5 +14,6 @@ public record TalkResponse(
         Instant publishedAt,
         TalkStatus status,
         Instant createdAt,
-        Instant updatedAt) {
+        Instant updatedAt,
+        String coverImage) {
 }

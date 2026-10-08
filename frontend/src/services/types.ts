@@ -71,6 +71,8 @@ export interface TalkVideo {
   description: string;
   guest?: string;
   youtubeUrl: string;
+  /** Uploaded cover; when absent the YouTube thumbnail is used. */
+  coverImage?: string;
   durationMinutes?: number;
   publishedAt?: string;
   status: TalkStatus;

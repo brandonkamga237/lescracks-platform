@@ -29,9 +29,10 @@ function ResourceCard({ resource, cataloguePath }: ResourceCardProps) {
       <Link
         to={resourcePath(resource)}
         state={{ cataloguePath }}
-        className="group flex h-full flex-col overflow-hidden rounded bg-card transition-transform duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 motion-reduce:hover:translate-y-0"
+        className="group flex h-full overflow-hidden rounded bg-card transition-transform sm:flex-col duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 motion-reduce:hover:translate-y-0"
       >
-        <span className="relative block aspect-[16/9] overflow-hidden bg-noir-700">
+        {/* Phones get a scannable row (thumbnail beside the title); wider screens the poster card. */}
+        <span className="relative block aspect-[4/3] w-28 shrink-0 overflow-hidden bg-noir-700 sm:aspect-[16/9] sm:w-auto">
           {resource.coverImage && failedImage !== resource.coverImage ? (
             <img
               src={resource.coverImage}
@@ -44,15 +45,15 @@ function ResourceCard({ resource, cataloguePath }: ResourceCardProps) {
             <KindCover kind={resource.kind} />
           )}
         </span>
-        <span className="flex flex-1 flex-col gap-2 p-4">
+        <span className="flex min-w-0 flex-1 flex-col gap-1.5 p-3 sm:gap-2 sm:p-4">
           <span className="label flex items-center gap-2">
             <KindIcon className="h-3.5 w-3.5 shrink-0 text-gold-ink" aria-hidden />
             {KIND_LABEL[resource.kind]}
           </span>
-          <span className="line-clamp-2 break-words font-display text-base font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-ink">
+          <span className="line-clamp-3 break-words font-display text-[0.9375rem] font-semibold sm:line-clamp-2 sm:text-base leading-snug text-t1 transition-colors group-hover:text-gold-ink">
             {resource.title}
           </span>
-          {meta && <span className="mt-auto pt-1 text-xs text-t4">{meta}</span>}
+          {meta && <span className="mt-auto truncate pt-1 text-xs text-t4">{meta}</span>}
         </span>
       </Link>
     </li>
