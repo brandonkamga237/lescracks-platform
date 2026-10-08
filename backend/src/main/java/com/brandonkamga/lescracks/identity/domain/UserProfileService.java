@@ -5,8 +5,13 @@ import com.brandonkamga.lescracks.identity.api.dto.UserProfileUpdateRequest;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
+
 public interface UserProfileService {
     User require(String email);
+
+    /** Lookup without failure, for callers that also serve visitors and admin accounts. */
+    Optional<User> find(String email);
     User update(String email, UserProfileUpdateRequest request);
     User updateAvatar(String email, MultipartFile file);
     void changePassword(String email, UserPasswordChangeRequest request);
