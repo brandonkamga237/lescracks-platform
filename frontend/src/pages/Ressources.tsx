@@ -92,12 +92,12 @@ export default function Ressources() {
 
   return (
     <Layout>
-      <SEO title="Bibliothèque" description="Ebooks et vidéos pour apprendre la tech en français. Filtre par format, catégorie et sujet." url="/ressources" />
+      <SEO title="Bibliothèque" description="Ebooks et vidéos pour apprendre la tech et passer à la pratique. Filtre par format, catégorie et sujet." url="/ressources" />
       <Section tone="raised" spacing="tight" backdrop="/images/headers/library.jpg">
         <PageHeader
           eyebrow="Apprendre à ton rythme"
           title="Bibliothèque"
-          description="Vidéos et ebooks pour apprendre la tech, en accès libre."
+          description="Vidéos, ebooks et articles pour apprendre la tech et passer à la pratique."
           meta={!catalogue.loading && !catalogue.error ? `${total} ressource${total > 1 ? 's' : ''}` : undefined}
         />
 

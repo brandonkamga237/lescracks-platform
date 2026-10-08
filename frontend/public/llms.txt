@@ -1,8 +1,8 @@
 # LesCracks
 
-> Une bibliothèque de vidéos et d’ebooks, des événements tech et une communauté francophone pour apprendre à son rythme.
+> Une bibliothèque de vidéos et d’ebooks, des événements tech et une communauté pour apprendre à son rythme.
 
-LesCracks est basée à Yaoundé, au Cameroun. Le contenu de la plateforme est en français. Fondateur : Brandon Kamga.
+LesCracks est basée à Yaoundé, au Cameroun. Fondateur : Brandon Kamga.
 
 ## Pages principales
 
@@ -12,7 +12,7 @@ LesCracks est basée à Yaoundé, au Cameroun. Le contenu de la plateforme est e
 
 ## Accès
 
-Les ressources et les événements publiés sont accessibles sans compte. Les vidéos s’ouvrent sur leur plateforme de diffusion ; les ebooks se téléchargent depuis la plateforme. Les espaces personnels et d’administration nécessitent une connexion.
+Les ressources et les événements publiés se consultent sans compte. Les vidéos se lisent directement sur la plateforme ; chaque ebook propose un aperçu de ses premières pages, et son téléchargement est réservé aux membres. Les espaces personnels et d’administration nécessitent une connexion.
 
 ## En bref
 
