@@ -47,9 +47,9 @@ public class SeoController {
     private final ObjectMapper objectMapper;
 
     private final Map<String, PageMeta> pageMeta = Map.of(
-            "home", new PageMeta("LesCracks · Comprends la tech. Passe à la pratique.",
-                    "Explore des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme. Une bibliothèque ouverte et une communauté qui apprend en faisant.",
-                    "/", "Accueil"),
+            "home", new PageMeta("LesCracks · Apprendre la tech et passer à la pratique",
+                    "LesCracks : vidéos, ebooks, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant.",
+                    "/", "LesCracks : apprendre la tech et passer à la pratique"),
             "a-propos", new PageMeta("À propos · LesCracks",
                     "Ce que fait LesCracks : une bibliothèque tech ouverte, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant.",
                     "/a-propos", "Ce que nous faisons"),
@@ -169,9 +169,20 @@ public class SeoController {
                 new SeoHtml.Link(canonical(request, "/ressources"), "Bibliothèque"),
                 new SeoHtml.Link(canonical(request, "/evenements"), "Événements"),
                 new SeoHtml.Link(canonical(request, "/talk"), "LesCracks Talk"),
+                new SeoHtml.Link(canonical(request, "/cracklab"), "CrackLab"),
                 new SeoHtml.Link(canonical(request, "/a-propos"), "À propos")
         );
         html.navigation("Navigation principale", nav);
+
+        if ("home".equals(page)) {
+            html.section("Bibliothèque", canonical(request, "/ressources"), "Vidéos, ebooks et articles pour apprendre la tech, triés par catégorie et par sujet.");
+            html.section("Événements", canonical(request, "/evenements"), "Ateliers, bootcamps, webinaires et conférences pour pratiquer avec d’autres, en ligne ou sur place.");
+            html.section("LesCracks Talk", canonical(request, "/talk"), "Des conversations vidéo avec celles et ceux qui construisent la tech africaine.");
+            html.section("CrackLab", canonical(request, "/cracklab"), "Des challenges d’ingénierie notés sur 100, un classement chaque semaine et des badges à débloquer.");
+            html.section("À propos", canonical(request, "/a-propos"), "Qui est derrière LesCracks, ce que nous faisons et pourquoi.");
+            addResourceLinks(html, request);
+            addEventLinks(html, request);
+        }
 
         if ("evenements".equals(page)) {
             addEventLinks(html, request);
@@ -182,7 +193,7 @@ public class SeoController {
         }
 
         if ("home".equals(page)) {
-            html.jsonLd(writeJson(websiteJsonLd(request)));
+            html.jsonLd(writeJson(siteIdentityJsonLd(request)));
         }
         html.jsonLd(writeJson(itemListJsonLd(request, nav)));
         html.jsonLd(writeJson(breadcrumbJsonLd(request, List.of(Map.of("name", meta.h1(), "item", canonical)))));
@@ -366,19 +377,34 @@ public class SeoController {
         html.links("Ressources récentes", links);
     }
 
-    private Map<String, Object> websiteJsonLd(HttpServletRequest request) {
-        Map<String, Object> searchAction = new LinkedHashMap<>();
-        searchAction.put("@type", "SearchAction");
-        searchAction.put("target", Map.of("@type", "EntryPoint", "urlTemplate", baseUrl(request) + "/ressources?q={search_term_string}"));
-        searchAction.put("query-input", "required name=search_term_string");
+    /** Who the site is and what it is called: the name and logo Google shows for a brand search. */
+    private Map<String, Object> siteIdentityJsonLd(HttpServletRequest request) {
+        String base = baseUrl(request);
+        Map<String, Object> organization = new LinkedHashMap<>();
+        organization.put("@type", "EducationalOrganization");
+        organization.put("@id", base + "/#organization");
+        organization.put("name", "LesCracks");
+        organization.put("alternateName", List.of("Les Cracks", "lescracks"));
+        organization.put("url", base + "/");
+        organization.put("logo", Map.of("@type", "ImageObject", "url", base + "/icon-512.png", "width", 512, "height", 512));
+        organization.put("image", base + PREVIEW_IMAGE);
+        organization.put("address", Map.of("@type", "PostalAddress", "addressCountry", "CM", "addressLocality", "Yaoundé"));
+        organization.put("founder", Map.of("@type", "Person", "name", "Brandon Kamga"));
+        organization.put("sameAs", List.of("https://www.linkedin.com/company/lescracks", "https://github.com/lescracks", "https://www.youtube.com/@lescracks"));
 
         Map<String, Object> website = new LinkedHashMap<>();
-        website.put("@context", "https://schema.org");
         website.put("@type", "WebSite");
+        website.put("@id", base + "/#website");
         website.put("name", "LesCracks");
-        website.put("url", baseUrl(request));
-        website.put("potentialAction", searchAction);
-        return website;
+        website.put("alternateName", List.of("Les Cracks", "lescracks"));
+        website.put("url", base + "/");
+        website.put("inLanguage", "fr");
+        website.put("publisher", Map.of("@id", base + "/#organization"));
+
+        Map<String, Object> graph = new LinkedHashMap<>();
+        graph.put("@context", "https://schema.org");
+        graph.put("@graph", List.of(organization, website));
+        return graph;
     }
 
     private Map<String, Object> itemListJsonLd(HttpServletRequest request, List<SeoHtml.Link> links) {
