@@ -1,7 +1,10 @@
 import { memo, useState } from 'react';
-import { ArrowUpRight, Play } from 'lucide-react';
+import { Play } from 'lucide-react';
 
-import { youtubeThumbnail, youtubeWatchUrl } from '@/lib/youtube';
+import VideoPlayer from '@/components/media/VideoPlayer';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+
+import { youtubeThumbnail } from '@/lib/youtube';
 import type { TalkVideo } from '@/services/types';
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' });
@@ -10,12 +13,10 @@ interface EpisodeRowProps {
   video: TalkVideo;
 }
 
-/**
- * One episode in the playlist: thumbnail, title and guest.
- * It opens the YouTube video in a new tab — talks live there, not on the site.
- */
+/** One episode in the playlist: thumbnail, title and guest. It plays in a dialog, on the site. */
 function EpisodeRow({ video }: EpisodeRowProps) {
   const [failedThumb, setFailedThumb] = useState(false);
+  const [open, setOpen] = useState(false);
   const thumbnail = video.coverImage || youtubeThumbnail(video.youtubeUrl);
   const meta = [
     video.guest ? `avec ${video.guest}` : null,
@@ -25,11 +26,10 @@ function EpisodeRow({ video }: EpisodeRowProps) {
 
   return (
     <li>
-      <a
-        href={youtubeWatchUrl(video.youtubeUrl)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group grid grid-cols-[6rem_minmax(0,1fr)_auto] items-center gap-x-4 border-t border-line px-2 py-5 transition-colors hover:bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[9rem_minmax(0,1fr)_auto] sm:gap-x-6"
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="group grid w-full text-left grid-cols-[6rem_minmax(0,1fr)_auto] items-center gap-x-4 border-t border-line px-2 py-5 transition-colors hover:bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[9rem_minmax(0,1fr)_auto] sm:gap-x-6"
       >
         <span className="relative aspect-[16/9] overflow-hidden rounded bg-noir-700">
           {thumbnail && !failedThumb ? (
@@ -49,8 +49,15 @@ function EpisodeRow({ video }: EpisodeRowProps) {
           </span>
           {meta && <span className="mt-2 block text-[11px] font-semibold uppercase tracking-[0.1em] text-t4">{meta}</span>}
         </span>
-        <ArrowUpRight className="h-5 w-5 text-t4 opacity-0 transition-opacity group-hover:text-gold-ink group-hover:opacity-100" aria-hidden />
-      </a>
+        <Play className="h-5 w-5 text-t4 opacity-0 transition-opacity group-hover:text-gold-ink group-hover:opacity-100" aria-hidden />
+      </button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="mode-raised w-[calc(100%_-_1rem)] max-w-4xl border-line bg-card p-3 sm:p-5">
+          <DialogTitle className="pr-10 font-display text-lg font-bold leading-tight text-t1 sm:text-xl">{video.title}</DialogTitle>
+          {meta && <DialogDescription className="text-xs text-t4">{meta}</DialogDescription>}
+          {open && <VideoPlayer url={video.youtubeUrl} title={video.title} poster={thumbnail} platform="YouTube" autoStart />}
+        </DialogContent>
+      </Dialog>
     </li>
   );
 }
