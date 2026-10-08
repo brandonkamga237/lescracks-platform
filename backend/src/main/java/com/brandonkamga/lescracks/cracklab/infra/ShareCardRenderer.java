@@ -29,7 +29,7 @@ public class ShareCardRenderer {
     private static final Color WHITE = Color.WHITE;
     private static final Color MUTED = new Color(255, 255, 255, 150);
     private static final Color FAINT = new Color(255, 255, 255, 90);
-    private static final Color GRID = new Color(255, 255, 255, 10);
+    private static final Color LINE = new Color(255, 255, 255, 30);
 
     private final Font sansBold;
     private final Font sansMedium;
@@ -46,20 +46,26 @@ public class ShareCardRenderer {
     public record Row(String rank, String name, String score) {
     }
 
-    /** level: 1 to 3 bars; stats: a short line such as "12 participants · moyenne 64/100". */
-    public byte[] challenge(String title, String difficulty, int level, String category, String stats) {
+    /** seed: the challenge slug, which picks its diagram; level: 1 to 3 bars; stats: "12 participants · moyenne 64/100". */
+    public byte[] challenge(String seed, String title, String difficulty, int level, String category, String stats) {
         return render("CHALLENGE", "Relève le défi sur lescracks.com", g -> {
-            int y = 210;
+            int column = 600;
+            int y = 196;
             drawBars(g, MARGIN, y - 22, level);
-            g.setFont(monoBold.deriveFont(22f));
+            g.setFont(monoBold.deriveFont(20f));
             g.setColor(WHITE);
             g.drawString(difficulty.toUpperCase(), MARGIN + 44, y);
             g.setColor(FAINT);
-            g.drawString("·  " + category.toUpperCase(), MARGIN + 60 + g.getFontMetrics().stringWidth(difficulty.toUpperCase()), y);
-            int bottom = drawWrapped(g, title, sansBold, 72f, 58f, MARGIN, y + 34, WIDTH - 2 * MARGIN, 3, WHITE);
-            g.setFont(monoMedium.deriveFont(26f));
-            g.setColor(GOLD);
-            g.drawString(stats, MARGIN, Math.min(bottom + 64, HEIGHT - 130));
+            g.drawString(category, MARGIN + 64 + g.getFontMetrics().stringWidth(difficulty.toUpperCase()), y);
+            int bottom = drawWrapped(g, title, sansBold, 58f, 42f, MARGIN, y + 30, column - MARGIN, 4, WHITE);
+            g.setFont(monoMedium.deriveFont(22f));
+            g.setColor(MUTED);
+            g.drawString(stats, MARGIN, Math.min(bottom + 58, HEIGHT - 132));
+            int boxX = column + 48;
+            g.setColor(LINE);
+            g.setStroke(new BasicStroke(1.5f));
+            g.drawRoundRect(boxX, 150, WIDTH - MARGIN - boxX, 300, 10, 10);
+            SchematicPainter.paint(g, seed, category, monoMedium, boxX + 16, 166, WIDTH - MARGIN - boxX - 32, 268);
         });
     }
 
@@ -111,8 +117,8 @@ public class ShareCardRenderer {
                 g.setFont(monoBold.deriveFont(40f));
                 int width = g.getFontMetrics().stringWidth(row.score());
                 g.drawString(row.score(), WIDTH - MARGIN - width, y);
-                g.setColor(GRID);
-                g.fillRect(MARGIN, y + 24, WIDTH - 2 * MARGIN, 2);
+                g.setColor(LINE);
+                g.fillRect(MARGIN, y + 24, WIDTH - 2 * MARGIN, 1);
                 y += 82;
             }
         });
@@ -151,47 +157,36 @@ public class ShareCardRenderer {
 
             g.setColor(BACKGROUND);
             g.fillRect(0, 0, WIDTH, HEIGHT);
-            g.setPaint(new RadialGradientPaint(new Point(0, 0), 700f, new float[]{0f, 1f},
-                    new Color[]{new Color(212, 175, 55, 46), new Color(212, 175, 55, 0)}));
-            g.fillRect(0, 0, WIDTH, HEIGHT);
-            g.setColor(GRID);
-            for (int x = 0; x < WIDTH; x += 40) {
-                g.fillRect(x, 0, 1, HEIGHT);
-            }
-            for (int y = 0; y < HEIGHT; y += 40) {
-                g.fillRect(0, y, WIDTH, 1);
-            }
 
-            // Wordmark: Crack in white, Lab and the cursor in gold.
-            g.setFont(monoBold.deriveFont(34f));
+            g.setFont(monoBold.deriveFont(32f));
             g.setColor(WHITE);
             g.drawString("Crack", MARGIN, 96);
             int crack = g.getFontMetrics().stringWidth("Crack");
             g.setColor(GOLD);
-            g.drawString("Lab_", MARGIN + crack, 96);
-            int lab = g.getFontMetrics().stringWidth("Lab_");
+            g.drawString("Lab", MARGIN + crack, 96);
+            int lab = g.getFontMetrics().stringWidth("Lab");
             g.setFont(monoMedium.deriveFont(16f));
             g.setColor(FAINT);
             g.drawString("PAR LESCRACKS", MARGIN + crack + lab + 18, 94);
 
-            g.setFont(monoBold.deriveFont(18f));
+            g.setFont(monoMedium.deriveFont(18f));
             int kindWidth = g.getFontMetrics().stringWidth(kind);
-            g.setColor(GOLD);
-            g.setStroke(new BasicStroke(2f));
-            g.drawRoundRect(WIDTH - MARGIN - kindWidth - 32, 66, kindWidth + 32, 42, 6, 6);
-            g.drawString(kind, WIDTH - MARGIN - kindWidth - 16, 94);
+            g.setColor(FAINT);
+            g.drawString(kind, WIDTH - MARGIN - kindWidth, 94);
+            g.setColor(LINE);
+            g.fillRect(MARGIN, 122, WIDTH - 2 * MARGIN, 1);
 
             painter.paint(g);
 
-            g.setColor(new Color(255, 255, 255, 24));
-            g.fillRect(MARGIN, HEIGHT - 104, WIDTH - 2 * MARGIN, 2);
+            g.setColor(LINE);
+            g.fillRect(MARGIN, HEIGHT - 104, WIDTH - 2 * MARGIN, 1);
             g.setFont(sansBold.deriveFont(28f));
             g.setColor(GOLD);
             g.drawString(callToAction, MARGIN, HEIGHT - 52);
             // Drawn, not typed: the bundled Latin subsets have no arrow glyph.
             int arrowX = MARGIN + g.getFontMetrics().stringWidth(callToAction) + 18;
             int arrowY = HEIGHT - 61;
-            g.setStroke(new BasicStroke(3.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.setStroke(new BasicStroke(3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g.drawLine(arrowX, arrowY, arrowX + 26, arrowY);
             g.drawLine(arrowX + 16, arrowY - 9, arrowX + 26, arrowY);
             g.drawLine(arrowX + 16, arrowY + 9, arrowX + 26, arrowY);
@@ -209,13 +204,15 @@ public class ShareCardRenderer {
         }
     }
 
+    /** A hairline tag, as on the site: no fill, the text carries the accent. */
     private void drawChip(Graphics2D g, String text, int x, int top) {
-        g.setFont(monoBold.deriveFont(20f));
-        int width = g.getFontMetrics().stringWidth(text) + 32;
-        g.setColor(new Color(212, 175, 55, 36));
-        g.fillRoundRect(x, top, width, 44, 8, 8);
+        g.setFont(monoMedium.deriveFont(20f));
+        int width = g.getFontMetrics().stringWidth(text) + 28;
+        g.setColor(LINE);
+        g.setStroke(new BasicStroke(1.5f));
+        g.drawRoundRect(x, top, width, 40, 6, 6);
         g.setColor(GOLD);
-        g.drawString(text, x + 16, top + 29);
+        g.drawString(text, x + 14, top + 27);
     }
 
     /** Word-wraps into at most `maxLines`, shrinking toward `minSize` before cutting with an ellipsis. Returns the last baseline. */

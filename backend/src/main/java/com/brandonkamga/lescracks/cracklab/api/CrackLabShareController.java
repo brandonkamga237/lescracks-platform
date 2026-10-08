@@ -63,7 +63,7 @@ public class CrackLabShareController {
                 ? "Aucune réponse encore : ouvre le bal · " + challenge.totalPoints() + " pts en jeu"
                 : stats.participants() + " participant" + (stats.participants() > 1 ? "s" : "")
                 + (stats.averageScore() == null ? "" : " · moyenne " + stats.averageScore() + "/" + challenge.totalPoints());
-        return png(renderer.challenge(challenge.getTitle(), LEVEL_LABEL.get(challenge.getDifficulty()), BARS.get(challenge.getDifficulty()),
+        return png(renderer.challenge(challenge.getSlug(), challenge.getTitle(), LEVEL_LABEL.get(challenge.getDifficulty()), BARS.get(challenge.getDifficulty()),
                 challenge.getCategory(), line));
     }
 

@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ChevronDown, ChevronUp, Clock3, Crown, Eye, Lock, PenLine, Send, Users } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronDown, ChevronUp, Clock3, Eye, Lock, PenLine, Send } from 'lucide-react';
 
 import Avatar from '@/components/cracklab/Avatar';
-import Badges from '@/components/cracklab/Badges';
-import CountUp from '@/components/cracklab/CountUp';
 import CrackLabLayout from '@/components/cracklab/CrackLabLayout';
 import Difficulty from '@/components/cracklab/Difficulty';
 import LevelChip from '@/components/cracklab/LevelChip';
 import Prose from '@/components/cracklab/Prose';
+import Schematic from '@/components/cracklab/Schematic';
 import XpBar from '@/components/cracklab/XpBar';
 import SEO from '@/components/common/SEO';
 import ShareButton from '@/components/common/ShareButton';
@@ -77,7 +76,7 @@ function Votes({ submission, onVoted }: { submission: ChallengeSubmission; onVot
 function AnswerCard({ submission, onVoted }: { submission: ChallengeSubmission; onVoted: (voteScore: number, myVote: -1 | 0 | 1) => void }) {
   const [open, setOpen] = useState(false);
   return (
-    <li className={`flex gap-3 rounded-lg border p-4 sm:gap-5 sm:p-5 ${submission.mine ? 'border-gold-400/30 bg-gold-400/[0.04]' : 'border-line bg-noir-900'}`}>
+    <li className={`flex gap-3 rounded-lg border p-4 sm:gap-5 sm:p-5 ${submission.mine ? 'border-line bg-noir-900 shadow-[inset_2px_0_0_theme(colors.gold.400)]' : 'border-line bg-noir-900'}`}>
       <Votes submission={submission} onVoted={onVoted} />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
@@ -101,17 +100,23 @@ function NextUp({ current }: { current: string }) {
   const next = list.data?.content.find((challenge) => !challenge.answered && challenge.slug !== current);
   if (!next) return null;
   return (
-    <Link to={challengePath(next.slug)} className="group flex items-center gap-4 rounded-lg border border-line bg-noir-900 p-4 transition-colors hover:border-gold-400/40 sm:p-5">
-      <span className="min-w-0 flex-1">
-        <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-gold-ink">Challenge suivant</span>
-        <span className="mt-1 block truncate font-display text-lg font-bold text-t1 group-hover:text-gold-ink">{next.title}</span>
-        <span className="mt-1 flex flex-wrap items-center gap-x-3 text-xs text-t4"><Difficulty value={next.difficulty} />{next.submissionCount ? plural(next.submissionCount, 'participant') : 'Aucune réponse encore'}</span>
+    <Link to={challengePath(next.slug)} className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-lg border border-line p-3 pr-4 transition-colors duration-150 hover:border-line-strong sm:grid-cols-[6rem_minmax(0,1fr)_auto]">
+      <span className="hidden overflow-hidden rounded border border-line-soft bg-noir-950 sm:block">
+        <Schematic seed={next.slug} category={next.category} labels={false} className="block h-auto w-full" />
       </span>
-      <ArrowRight className="h-5 w-5 shrink-0 text-gold-ink transition-transform group-hover:translate-x-0.5" aria-hidden />
+      <span className="min-w-0">
+        <span className="block font-mono text-[11px] uppercase tracking-[0.08em] text-gold-ink">Challenge suivant</span>
+        <span className="mt-1 block truncate font-medium text-t1">{next.title}</span>
+        <span className="mt-1 flex items-center gap-3 text-xs text-t4"><Difficulty value={next.difficulty} /><span className="font-mono">{next.submissionCount ? plural(next.submissionCount, 'participant') : 'aucune réponse'}</span></span>
+      </span>
+      <ArrowRight className="h-4 w-4 text-t4 transition-colors duration-150 group-hover:text-gold-ink" aria-hidden />
     </Link>
   );
 }
 
+const gradedFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' });
+
+/** The answer's report card: score, standing among the others, then the grid line by line. */
 function Result({ submission, challenge }: { submission: ChallengeSubmission; challenge: ChallengeDetail }) {
   const { progress } = useCrackLabProgress();
   const graded = submission.status === 'GRADED';
@@ -120,74 +125,93 @@ function Result({ submission, challenge }: { submission: ChallengeSubmission; ch
     <ShareButton variant="primary" className="sm:w-auto" title={challenge.title} path={resultPath(submission.id)} label={graded ? 'Partager mon score' : 'Partager mon défi'}
       text={graded ? `J’ai obtenu ${submission.technicalScore}/${submission.totalPoints} sur « ${challenge.title} » sur CrackLab. Tu ferais mieux ?` : `Je viens de relever le challenge « ${challenge.title} » sur CrackLab. À toi :`} />
   );
+  const label = 'font-mono text-[11px] uppercase tracking-[0.08em] text-t4';
 
   if (!graded) {
     return (
       <div className="space-y-4">
-        <div className="rounded-xl border border-gold-400/30 bg-gold-400/[0.06] p-6 sm:p-8 motion-safe:animate-pop">
-          <p className="flex items-center gap-2 font-display text-2xl font-bold text-t1"><Clock3 className="h-6 w-6 text-gold-ink" aria-hidden />Réponse enregistrée</p>
-          <p className="mt-2 text-sm leading-relaxed text-t3">Elle est notée à la main, critère par critère : chaque point obtenu deviendra de l’XP et comptera au classement. En attendant, découvre la solution de référence et les autres réponses.</p>
-          {progress && <XpBar xp={progress.xp} level={progress.level} nextLevel={progress.nextLevel} className="mt-6 max-w-md" />}
-          <div className="mt-6">{share}</div>
-        </div>
+        <section className="rounded-lg border border-line bg-noir-900">
+          <div className="flex items-center justify-between gap-3 border-b border-line-soft px-5 py-3">
+            <span className={label}>Relevé de note</span>
+            <span className="inline-flex items-center gap-1.5 font-mono text-xs text-t3"><Clock3 className="h-3.5 w-3.5" aria-hidden />en notation</span>
+          </div>
+          <div className="p-5">
+            <p className="font-medium text-t1">Réponse enregistrée.</p>
+            <p className="mt-1 max-w-prose text-sm leading-relaxed text-t3">Elle est notée à la main, critère par critère. Chaque point obtenu devient de l’XP et compte au classement. En attendant, la solution de référence et les autres réponses sont ouvertes.</p>
+            {progress && <XpBar xp={progress.xp} level={progress.level} nextLevel={progress.nextLevel} className="mt-5 max-w-md" />}
+            <div className="mt-5">{share}</div>
+          </div>
+        </section>
         <NextUp current={challenge.slug} />
       </div>
     );
   }
+
   const percent = percentOf(submission.technicalScore, submission.totalPoints);
   const rank = standing.data;
   const crowd = challenge.gradedCount;
+  const figures: Array<[string, string, string?]> = [
+    ['Position', rank && crowd > 1 ? ordinal(rank.rankOnChallenge) : '–', crowd > 1 ? `sur ${crowd}` : undefined],
+    ['Devant', rank && crowd > 1 ? `${rank.betterThanPercent} %` : '–', 'des notés'],
+    ['Moyenne', challenge.averageScore != null ? String(challenge.averageScore) : '–', `/${challenge.totalPoints}`],
+    ['XP gagnée', `+${submission.technicalScore}`],
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-xl border border-gold-400/40 bg-noir-900 p-6 shadow-gold sm:p-8">
-        <div aria-hidden className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-gold-400/15 blur-3xl" />
-        <div className="relative">
-          <p className="label">Ton score</p>
-          <p className="mt-3 flex items-baseline gap-2 font-display font-bold leading-none text-t1">
-            <CountUp value={submission.technicalScore ?? 0} className="text-7xl sm:text-8xl" />
-            <span className="text-3xl text-t4">/ {submission.totalPoints}</span>
-            <span className="ml-auto rounded bg-gold-400 px-2 py-1 font-mono text-sm font-bold text-black motion-safe:animate-pop motion-safe:[animation-delay:700ms]">+{submission.technicalScore} XP</span>
-          </p>
-          <div aria-hidden className="mt-5 h-2.5 overflow-hidden rounded-full bg-noir-700">
-            <div className={`h-full origin-left rounded-full bg-gradient-to-r from-gold-500 to-gold-300 motion-safe:animate-grow-x ${fillClass(percent / 100)}`} />
-          </div>
-          <p className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-base">
-            {rank?.rankOnChallenge === 1 ? <span className="inline-flex items-center gap-1.5 font-semibold text-gold-ink"><Crown className="h-5 w-5" aria-hidden />Meilleur score du challenge</span>
-              : rank && crowd > 1 ? <span className="font-semibold text-t1">Mieux que {rank.betterThanPercent} % des participants</span>
-                : <span className="text-t3">{percent} % des points</span>}
-            {rank && crowd > 1 && <span className="font-mono text-sm text-t4">{ordinal(rank.rankOnChallenge)} sur {crowd}{challenge.averageScore != null ? ` · moyenne ${challenge.averageScore}` : ''}</span>}
-          </p>
-          {progress && (
-            <div className="mt-6 border-t border-line-soft pt-5">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <LevelChip level={progress.level} />
-                <Badges badges={progress.badges} compact />
-              </div>
-              <XpBar xp={progress.xp} level={progress.level} nextLevel={progress.nextLevel} />
-            </div>
-          )}
-          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
-            {share}
-            <Link to="/cracklab/classement" className="btn-secondary">Voir le classement</Link>
-          </div>
+    <div className="space-y-4">
+      <section aria-labelledby="report-heading" className="rounded-lg border border-line bg-noir-900">
+        <div className="flex items-center justify-between gap-3 border-b border-line-soft px-5 py-3">
+          <h2 id="report-heading" className={label}>Relevé de note</h2>
+          {submission.gradedAt && <span className="font-mono text-xs text-t4">{gradedFormat.format(new Date(submission.gradedAt))}</span>}
         </div>
-      </div>
+
+        <div className="grid gap-6 p-5 sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-10">
+          <div>
+            <p className="font-display text-6xl font-bold leading-none tracking-tight tabular-nums text-t1">
+              {submission.technicalScore}<span className="text-2xl font-medium text-t4"> / {submission.totalPoints}</span>
+            </p>
+            <p className="mt-3 text-sm text-t3">
+              {rank?.rankOnChallenge === 1 && crowd > 1 ? <span className="text-gold-ink">Meilleure note du challenge.</span> : `${percent} % des points.`}
+            </p>
+          </div>
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-4 self-center sm:grid-cols-4">
+            {figures.map(([name, value, hint]) => (
+              <div key={name}>
+                <dt className={label}>{name}</dt>
+                <dd className="mt-1 font-mono text-lg tabular-nums text-t1">{value}{hint && <span className="ml-1 text-xs text-t4">{hint}</span>}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <ol className="border-t border-line-soft">
+          {submission.evaluations.map((evaluation) => (
+            <li key={evaluation.criterionId} className="border-b border-line-soft px-5 py-3.5 last:border-b-0">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)_4rem]">
+                <span className="text-sm text-t1">{evaluation.label}</span>
+                <span aria-hidden className="col-span-2 row-start-2 h-0.5 bg-line sm:col-span-1 sm:row-start-auto">
+                  <span className={`block h-full bg-gold-400 ${fillClass(evaluation.points / evaluation.maxPoints)}`} />
+                </span>
+                <span className="text-right font-mono text-sm tabular-nums text-t2">{evaluation.points}<span className="text-t4">/{evaluation.maxPoints}</span></span>
+              </div>
+              {evaluation.feedback && <p className="mt-2 max-w-prose whitespace-pre-line text-sm leading-relaxed text-t3">{evaluation.feedback}</p>}
+            </li>
+          ))}
+        </ol>
+
+        {progress && (
+          <div className="flex flex-col gap-4 border-t border-line-soft p-5 sm:flex-row sm:items-center">
+            <LevelChip level={progress.level} className="self-start sm:self-auto" />
+            <XpBar xp={progress.xp} level={progress.level} nextLevel={progress.nextLevel} className="min-w-0 flex-1" />
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2 border-t border-line-soft p-5 sm:flex-row sm:items-center">
+          {share}
+          <Link to="/cracklab/classement" className="btn-secondary">Voir le classement</Link>
+        </div>
+      </section>
       <NextUp current={challenge.slug} />
-      <h2 className="label pt-2">Détail par critère</h2>
-      <ol className="space-y-3">
-        {submission.evaluations.map((evaluation) => (
-          <li key={evaluation.criterionId} className="rounded-lg border border-line bg-noir-900 p-4 sm:p-5">
-            <div className="flex items-baseline justify-between gap-3">
-              <p className="font-semibold text-t1">{evaluation.label}</p>
-              <p className="font-mono text-sm tabular-nums text-t2">{evaluation.points} / {evaluation.maxPoints}</p>
-            </div>
-            <div aria-hidden className="mt-3 h-1.5 overflow-hidden rounded-full bg-noir-700">
-              <div className={`h-full rounded-full bg-gold-400 ${fillClass(evaluation.points / evaluation.maxPoints)}`} />
-            </div>
-            {evaluation.feedback && <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-t3">{evaluation.feedback}</p>}
-          </li>
-        ))}
-      </ol>
     </div>
   );
 }
@@ -286,25 +310,37 @@ function ChallengePage({ slug }: { slug: string }) {
     <CrackLabLayout>
       <SEO title={`${detail.title} · CrackLab`} description={`Challenge ${detail.category} : ${detail.problem.replace(/[#*`>\-[\]()]/g, '').slice(0, 150)}`} url={challengePath(detail.slug)} />
 
-      <header className="border-b border-line-soft bg-noir-900/40">
-        <div className="mx-auto max-w-7xl px-5 pb-10 pt-6 sm:px-8 sm:pb-12">
-          <Link to="/cracklab" className="inline-flex min-h-11 items-center gap-1.5 text-sm text-t3 transition-colors hover:text-t1"><ArrowLeft className="h-4 w-4" aria-hidden />Tous les challenges</Link>
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-            <Difficulty value={detail.difficulty} />
-            <span className="label">{detail.category}</span>
-            {detail.tags.map((tag) => <Link key={tag} to={`/cracklab?tag=${encodeURIComponent(tag)}`} className="rounded bg-noir-800 px-2 py-0.5 font-mono text-[11px] text-t3 transition-colors hover:text-t1">{tag}</Link>)}
-          </div>
-          <h1 className="mt-5 max-w-4xl text-balance font-display text-4xl font-bold leading-[1] tracking-tight text-t1 sm:text-5xl lg:text-6xl">{detail.title}</h1>
-          <p className="mt-5 font-mono text-sm text-t4">{detail.totalPoints} points · {detail.expectedFormat ?? (detail.maxWords ? `${detail.maxWords} mots maximum` : 'format libre')}</p>
-          <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <dl className="flex gap-6 sm:gap-8">
-              <div><dt className="text-[11px] uppercase tracking-[0.08em] text-t4">Participants</dt><dd className="mt-1 flex items-center gap-1.5 font-mono text-2xl font-bold tabular-nums text-t1"><Users className="h-4 w-4 text-t4" aria-hidden />{detail.submissionCount}</dd></div>
-              <div><dt className="text-[11px] uppercase tracking-[0.08em] text-t4">Moyenne</dt><dd className="mt-1 font-mono text-2xl font-bold tabular-nums text-t1">{detail.averageScore ?? '—'}<span className="text-sm font-normal text-t4">/{detail.totalPoints}</span></dd></div>
-              <div><dt className="text-[11px] uppercase tracking-[0.08em] text-t4">Record</dt><dd className="mt-1 font-mono text-2xl font-bold tabular-nums text-gold-ink">{detail.bestScore ?? '—'}<span className="text-sm font-normal text-t4">/{detail.totalPoints}</span></dd></div>
+      <header className="border-b border-line-soft">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 pb-10 pt-6 sm:px-8 sm:pb-12 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-16">
+          <div className="min-w-0">
+            <Link to="/cracklab" className="inline-flex min-h-11 items-center gap-1.5 text-sm text-t3 transition-colors duration-150 hover:text-t1"><ArrowLeft className="h-4 w-4" aria-hidden />Tous les challenges</Link>
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+              <Difficulty value={detail.difficulty} />
+              <span className="font-mono text-xs text-t4">{detail.category}</span>
+              {detail.tags.map((tag) => <Link key={tag} to={`/cracklab?tag=${encodeURIComponent(tag)}`} className="rounded-[3px] border border-line px-1.5 py-0.5 font-mono text-[11px] text-t3 transition-colors duration-150 hover:text-t1">{tag}</Link>)}
+            </div>
+            <h1 className="mt-5 max-w-3xl text-balance font-display text-4xl font-bold leading-[1.02] tracking-tight text-t1 sm:text-5xl">{detail.title}</h1>
+            <dl className="mt-8 flex flex-wrap gap-x-8 gap-y-4 border-t border-line-soft pt-5">
+              {([
+                ['Points', String(detail.totalPoints)],
+                ['Format', detail.expectedFormat ?? (detail.maxWords ? `${detail.maxWords} mots max.` : 'libre')],
+                ['Participants', String(detail.submissionCount)],
+                ['Moyenne', detail.averageScore != null ? `${detail.averageScore}/${detail.totalPoints}` : '–'],
+                ['Record', detail.bestScore != null ? `${detail.bestScore}/${detail.totalPoints}` : '–'],
+              ] as const).map(([name, value]) => (
+                <div key={name}>
+                  <dt className="font-mono text-[11px] uppercase tracking-[0.08em] text-t4">{name}</dt>
+                  <dd className={`mt-1 font-mono text-sm tabular-nums ${name === 'Record' && detail.bestScore != null ? 'text-gold-ink' : 'text-t1'}`}>{value}</dd>
+                </div>
+              ))}
             </dl>
-            <ShareButton className="sm:w-auto" title={detail.title} path={challengePath(detail.slug)} label="Défier un ami"
+            <ShareButton className="mt-6 sm:w-fit" title={detail.title} path={challengePath(detail.slug)} label="Défier quelqu’un"
               text={`Challenge CrackLab : « ${detail.title} ». ${detail.bestScore != null ? `Le record est à ${detail.bestScore}/${detail.totalPoints}.` : 'Personne n’a encore de note.'} Tu relèves le défi ?`} />
           </div>
+          <figure className="self-start rounded-lg border border-line bg-noir-900 p-4">
+            <Schematic seed={detail.slug} category={detail.category} className="block h-auto w-full" />
+            <figcaption className="mt-3 border-t border-line-soft pt-3 font-mono text-[11px] text-t4">en or : le composant au cœur du problème</figcaption>
+          </figure>
         </div>
       </header>
 
@@ -394,7 +430,7 @@ function ChallengePage({ slug }: { slug: string }) {
 
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start" aria-label="Grille de notation">
           {mine && (
-            <div className="rounded-lg border border-line bg-noir-900 p-5">
+            <div className="hidden rounded-lg border border-line bg-noir-900 p-5 lg:block">
               <p className="label">Ta réponse</p>
               <div className="mt-2"><Score submission={mine} /></div>
             </div>
