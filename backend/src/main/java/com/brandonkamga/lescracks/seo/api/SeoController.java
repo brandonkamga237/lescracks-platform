@@ -48,10 +48,10 @@ public class SeoController {
 
     private final Map<String, PageMeta> pageMeta = Map.of(
             "home", new PageMeta("LesCracks · Comprends la tech. Passe à la pratique.",
-                    "Explore des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme. Une bibliothèque ouverte et une communauté qui apprend en faisant.",
+                    "Explore des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme. Une bibliothèque ouverte et une communauté francophone.",
                     "/", "Accueil"),
             "a-propos", new PageMeta("À propos · LesCracks",
-                    "Ce que fait LesCracks : une bibliothèque tech ouverte, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant.",
+                    "Ce que fait LesCracks : une bibliothèque tech ouverte en français, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant.",
                     "/a-propos", "Ce que nous faisons"),
             "conditions-utilisation", new PageMeta("Conditions d’utilisation · LesCracks",
                     "Les conditions d’utilisation de la plateforme LesCracks.",
@@ -63,7 +63,7 @@ public class SeoController {
                     "Bootcamps, ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble.",
                     "/evenements", "Événements"),
             "ressources", new PageMeta("Bibliothèque · LesCracks",
-                    "Ebooks et vidéos pour apprendre la tech et passer à la pratique. Filtre par format, catégorie et sujet.",
+                    "Ebooks et vidéos pour apprendre la tech en français. Filtre par format, catégorie et sujet.",
                     "/ressources", "Bibliothèque"),
             "talk", new PageMeta("LesCracks Talk · La tech africaine en conversations",
                     "Les épisodes du LesCracks Talk : des conversations vidéo avec celles et ceux qui construisent la tech africaine, publiées sur YouTube.",
@@ -83,9 +83,9 @@ public class SeoController {
     @GetMapping(value = "/ressources/{slug}", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> resource(@PathVariable String slug, HttpServletRequest request) {
         return switch (slug) {
-            case "articles" -> ResponseEntity.ok(buildResourceList(request, "ARTICLE", "Articles", "Articles de la bibliothèque LesCracks pour apprendre la tech et passer à la pratique."));
-            case "ebooks" -> ResponseEntity.ok(buildResourceList(request, "EBOOK", "Ebooks", "Ebooks de la bibliothèque LesCracks pour apprendre la tech et passer à la pratique."));
-            case "videos" -> ResponseEntity.ok(buildResourceList(request, "EXTERNAL_VIDEO", "Vidéos", "Vidéos de la bibliothèque LesCracks pour apprendre la tech et passer à la pratique."));
+            case "articles" -> ResponseEntity.ok(buildResourceList(request, "ARTICLE", "Articles", "Articles de la bibliothèque LesCracks pour apprendre la tech en français."));
+            case "ebooks" -> ResponseEntity.ok(buildResourceList(request, "EBOOK", "Ebooks", "Ebooks de la bibliothèque LesCracks pour apprendre la tech en français."));
+            case "videos" -> ResponseEntity.ok(buildResourceList(request, "EXTERNAL_VIDEO", "Vidéos", "Vidéos de la bibliothèque LesCracks pour apprendre la tech en français."));
             default -> ResponseEntity.ok(buildResourceDetail(slug, request));
         };
     }

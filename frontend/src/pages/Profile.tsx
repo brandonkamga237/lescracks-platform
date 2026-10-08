@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { ArrowRight, BookOpen, CalendarDays, KeyRound, Loader2, Lock, LogOut, ShieldCheck, UserRound } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import Layout from '@/components/layout/Layout';
 import { Section } from '@/components/layout/Page';
@@ -16,6 +16,7 @@ import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
 import type { AuthProvider, MemberGoal, MemberSituation } from '@/services/types';
 
+const statusLabels = { ACTIVE: 'Actif', INACTIVE: 'Inactif', BANNED: 'Suspendu' };
 const providerLabels = { LOCAL: 'Email / mot de passe', GOOGLE: 'Google', GITHUB: 'GitHub' };
 
 type IdentityProvider = Exclude<AuthProvider, 'LOCAL'>;
@@ -28,14 +29,6 @@ const identityProviders: { provider: IdentityProvider; label: string }[] = [
 export default function Profile() {
   const { name, email, user, isAdmin, refresh, signOut, socialSignIn } = useSession();
   const navigate = useNavigate();
-  const { hash } = useLocation();
-
-  // /profil#securite and #informations come from the account menu: land on that section.
-  useEffect(() => {
-    if (!hash) return;
-    const frame = requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' }));
-    return () => cancelAnimationFrame(frame);
-  }, [hash]);
   const [form, setForm] = useState({
     firstName: user?.firstName ?? '',
     lastName: user?.lastName ?? '',
@@ -212,10 +205,10 @@ export default function Profile() {
   const joinedLabel = joined && !Number.isNaN(joined.getTime()) ? joined.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
 
   return <Layout>
-    <SEO title="Mon compte" description="Tes informations, ta sécurité et tes connexions LesCracks." url="/profil" />
+    <SEO title="Ton espace" description="Retrouve tes informations et les ressources de la communauté LesCracks." url="/profil" />
     <Section spacing="tight">
       <header className="flex flex-col gap-6 border-b border-line-soft pb-8 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-5"><div aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gold-400/30 bg-gold-400/10 font-display text-2xl text-gold-ink">{user?.avatarUrl ? <img src={`/api/files/${user.avatarUrl}`} alt="" className="h-full w-full object-cover" /> : name ? name.charAt(0).toUpperCase() : <UserRound className="h-7 w-7" />}</div><div><p className="text-sm font-medium tracking-wide text-gold-ink">Mon compte</p><h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-t1 sm:text-4xl">Bonjour{user?.firstName ? `, ${user.firstName}` : name ? `, ${name}` : ''}.</h1><p className="mt-2 text-sm text-t4">Un point de départ pour ta prochaine découverte.</p></div></div>
+        <div className="flex items-center gap-5"><div aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gold-400/30 bg-gold-400/10 font-display text-2xl text-gold-ink">{user?.avatarUrl ? <img src={`/api/files/${user.avatarUrl}`} alt="" className="h-full w-full object-cover" /> : name ? name.charAt(0).toUpperCase() : <UserRound className="h-7 w-7" />}</div><div><p className="text-sm font-medium tracking-wide text-gold-ink">Ton espace personnel</p><h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-t1 sm:text-4xl">Bonjour{user?.firstName ? `, ${user.firstName}` : name ? `, ${name}` : ''}.</h1><p className="mt-2 text-sm text-t4">Un point de départ pour ta prochaine découverte.</p></div></div>
         <button type="button" disabled={Boolean(busy)} onClick={() => void logout()} className="btn-secondary hidden self-start lg:inline-flex"><LogOut aria-hidden="true" className="h-4 w-4" />{busy === 'logout' ? 'Déconnexion…' : 'Me déconnecter'}</button>
       </header>
       {user && user.completion < 100 && !editing && (
@@ -228,9 +221,8 @@ export default function Profile() {
           <p className="mt-4 text-sm text-t3">Il manque : {user.missing.map((field) => FIELD_LABEL[field].toLocaleLowerCase('fr')).join(', ')}. Ça nous aide à te proposer les bonnes ressources et les bons ateliers.</p>
         </section>
       )}
-      <div className="mt-8 grid items-start gap-8 lg:grid-cols-[1.2fr_1fr]">
-        <div className="min-w-0 space-y-6">
-        <section id="informations" className="scroll-mt-24 rounded-lg border border-line-soft bg-card p-5 sm:p-8" aria-labelledby="profile-heading">
+      <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.2fr_1fr]">
+        <section className="rounded-lg border border-line-soft bg-card p-5 sm:p-8" aria-labelledby="profile-heading">
           <div className="flex items-start justify-between gap-4"><div><h2 id="profile-heading" className="font-display text-xl font-bold text-t1">Mes informations</h2><p className="mt-2 text-sm text-t4">Les informations liées à ton compte.</p></div>{user && !editing && <button type="button" disabled={Boolean(busy)} onClick={() => { setEditing(true); setNotice(''); }} className="min-h-11 px-2 text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Modifier</button>}</div>
           {error && <p role="alert" className="mt-5 rounded border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
           {notice && <p role="status" className="mt-5 rounded border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-ink">{notice}</p>}
@@ -288,35 +280,18 @@ export default function Profile() {
               </div>
               <div className="flex flex-wrap gap-3"><button type="submit" className="btn-primary">{busy === 'save' && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}{busy === 'save' ? 'Enregistrement…' : 'Enregistrer'}</button><button type="button" onClick={() => { setEditing(false); setForm({ firstName: user.firstName, lastName: user.lastName, username: user.username ?? '', bio: user.bio ?? '', location: user.location ?? '', socialLinks: user.socialLinks ?? {} }); setPhone(user.phone ?? ''); setDetails({ situation: user.situation, goal: user.goal, interestIds: user.interestIds ?? [], marketingConsent: user.marketingConsent }); setNewSocial({ platform: '', url: '' }); setError(''); setFields({}); }} className="btn-secondary">Annuler</button></div>
             </fieldset>
-          </form> : <dl className="mt-6 divide-y divide-line-soft border-y border-line-soft text-sm">
-            {([
-              ['Nom', name || 'Non renseigné'],
-              ['Email', email || 'Non disponible'],
-              ...(user ? [
-                ['Téléphone', user.phone ? displayPhone(user.phone) : null],
-                ['Ville', user.location ? `${user.location}${user.country ? `, ${countryName(user.country)}` : ''}` : user.country ? countryName(user.country) : null],
-                ['Situation', user.situation ? SITUATION_LABEL[user.situation] : null],
-                ['Objectif', user.goal ? GOAL_LABEL[user.goal] : null],
-                ['Nom d’utilisateur', user.username || null],
-                ['Connexion', providerLabels[user.provider] ?? user.provider],
-                ['Membre depuis', joinedLabel],
-              ] : []),
-            ] as [string, string | null][]).map(([label, value]) => (
-              <div key={label} className="flex items-baseline justify-between gap-4 py-3">
-                <dt className="shrink-0 text-t4">{label}</dt>
-                <dd className={`min-w-0 break-words text-right ${value ? 'text-t1' : 'text-t4'}`}>{value ?? 'À compléter'}</dd>
-              </div>
-            ))}
-            {user && user.interestIds.length > 0 && <div className="py-3"><dt className="text-t4">Centres d’intérêt</dt><dd className="mt-2 flex flex-wrap gap-1.5">{user.interestIds.map((id) => categoryName(id) && <span key={id} className="rounded border border-line px-2 py-0.5 text-xs text-t2">{categoryName(id)}</span>)}</dd></div>}
-            {user?.bio && <div className="py-3"><dt className="text-t4">Bio</dt><dd className="mt-1 whitespace-pre-line text-t1">{user.bio}</dd></div>}
-            {user?.socialLinks && Object.keys(user.socialLinks).length > 0 && <div className="py-3"><dt className="text-t4">Liens</dt><dd className="mt-1 flex flex-wrap gap-x-4 gap-y-1">{Object.entries(user.socialLinks).map(([platform, url]) => <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="capitalize text-gold-ink underline-offset-4 hover:underline">{platform}</a>)}</dd></div>}
+          </form> : <dl className="mt-7 space-y-5">
+            <div><dt className="text-xs tracking-wide text-t4">Nom complet</dt><dd className="mt-1 text-t1">{name || 'Non renseigné'}</dd></div>
+            <div><dt className="text-xs tracking-wide text-t4">Adresse email</dt><dd className="mt-1 break-all text-t1">{email || 'Non disponible pour ce compte'}</dd></div>
+            {user && <div className="flex flex-wrap gap-x-12 gap-y-5"><div><dt className="text-xs tracking-wide text-t4">Nom d'utilisateur</dt><dd className="mt-1 text-t1">{user.username || 'Non renseigné'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Ville</dt><dd className="mt-1 text-t1">{user.location || 'Non renseignée'}{user.country ? `, ${countryName(user.country)}` : ''}</dd></div><div><dt className="text-xs tracking-wide text-t4">Téléphone</dt><dd className="mt-1 text-t1">{user.phone ? displayPhone(user.phone) : 'Non renseigné'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Situation</dt><dd className="mt-1 text-t1">{user.situation ? SITUATION_LABEL[user.situation] : 'Non renseignée'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Objectif</dt><dd className="mt-1 text-t1">{user.goal ? GOAL_LABEL[user.goal] : 'Non renseigné'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Statut du compte</dt><dd className="mt-1 text-t1">{statusLabels[user.status] ?? user.status}</dd></div><div><dt className="text-xs tracking-wide text-t4">Connexion</dt><dd className="mt-1 text-t1">{providerLabels[user.provider] ?? user.provider}</dd></div>{joinedLabel && <div><dt className="text-xs tracking-wide text-t4">Membre depuis le</dt><dd className="mt-1 text-t1"><time dateTime={user.createdAt}>{joinedLabel}</time></dd></div>}</div>}
+            {user && user.interestIds.length > 0 && <div><dt className="text-xs tracking-wide text-t4">Centres d’intérêt</dt><dd className="mt-2 flex flex-wrap gap-1.5">{user.interestIds.map((id) => categoryName(id) && <span key={id} className="rounded border border-line px-2 py-0.5 text-xs text-t2">{categoryName(id)}</span>)}</dd></div>}
+            {user?.bio && <div><dt className="text-xs tracking-wide text-t4">Bio</dt><dd className="mt-1 whitespace-pre-line text-t1">{user.bio}</dd></div>}
+            {user?.socialLinks && Object.keys(user.socialLinks).length > 0 && <div><dt className="text-xs tracking-wide text-t4">Liens sociaux</dt><dd className="mt-1 space-y-1">{Object.entries(user.socialLinks).map(([platform, url]) => <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="block capitalize text-gold-ink underline-offset-4 hover:underline">{platform}</a>)}</dd></div>}
           </dl>}
           <div className="mt-7 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" /><p>{user ? 'Tu peux modifier tes informations ici. Ton adresse email reste liée à ton compte et ne peut pas être modifiée depuis cet espace.' : isAdmin ? 'Tu utilises un compte administrateur. La gestion des contenus est accessible depuis ton tableau de bord.' : 'Tu es connecté avec un fournisseur externe. Aucun profil membre modifiable n’est disponible pour cette connexion. Ton identité et ton mot de passe se gèrent auprès de ton fournisseur.'}</p></div>
           {isAdmin && <Link to="/admin" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-gold-ink">Ouvrir l’administration<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>}
 
-        </section>
-        <section id="securite" className="scroll-mt-24 rounded-lg border border-line-soft bg-card p-5 sm:p-8" aria-label="Sécurité et connexion">
-          <div>
+          <div className="mt-10 border-t border-line-soft pt-6">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded border border-gold-400/25 bg-gold-400/10 text-gold-ink">
@@ -403,7 +378,6 @@ export default function Profile() {
             </div>
           )}
         </section>
-        </div>
         <section aria-labelledby="quick-links-heading">
           <h2 id="quick-links-heading" className="font-display text-xl font-bold text-t1">Et maintenant ?</h2>
           <p className="mt-2 text-sm text-t4">Choisis ce que tu veux explorer aujourd’hui.</p>

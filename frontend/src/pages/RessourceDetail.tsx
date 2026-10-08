@@ -13,20 +13,14 @@ import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
 import { resourcePath } from '@/lib/slugs';
 import { ENV } from '@/config/env';
-import { saveFile } from '@/lib/saveFile';
-import { ApiError } from '@/services/http';
 import { videoSource } from '@/lib/videoEmbed';
 
 // pdf.js is heavy: it loads only when someone opens an ebook.
-const PdfPreview = lazy(() => import('@/components/media/PdfPreview'));
+const PdfReader = lazy(() => import('@/components/media/PdfReader'));
+const readerKey = (id: number) => `lescracks.reader.${id}`;
+function savedPage(id: number) { try { return Number(localStorage.getItem(readerKey(id))) || 1; } catch { return 1; } }
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' });
-
-/** A file type people recognise (PDF, EPUB…) rather than a media type. */
-function fileLabel(contentType: string): string {
-  const known: Record<string, string> = { 'application/pdf': 'PDF', 'application/epub+zip': 'EPUB', 'application/zip': 'ZIP' };
-  return known[contentType.toLowerCase()] ?? (contentType.split('/').pop()?.split('.').pop()?.toUpperCase() || contentType);
-}
 
 function megabytes(bytes: number): string {
   const number = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
@@ -46,53 +40,27 @@ export default function RessourceDetail() {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(loaded?.likeCount ?? 0);
   const [playing, setPlaying] = useState(false);
-  // The preview is part of the URL, so the phone's back button closes it instead of leaving the page.
+  // The reader is part of the URL, so the phone's back button closes it instead of leaving the page.
   const [params, setParams] = useSearchParams();
-  const previewing = params.get('apercu') === '1';
-  const hasFile = Boolean(loaded?.kind === 'EBOOK' && loaded.downloadUrl);
-  const previewable = Boolean(hasFile && loaded?.fileFormat?.toLowerCase().includes('pdf'));
+  const reading = params.get('lecture') === '1';
+  const fileUrl = loaded?.downloadUrl ? `${ENV.API_BASE_URL.replace(/\/$/, '')}${loaded.downloadUrl.replace(/^\/api(?=\/)/, '')}` : null;
+  const readable = Boolean(fileUrl && loaded?.fileFormat?.toLowerCase().includes('pdf'));
   const embeddable = Boolean(loaded?.kind === 'EXTERNAL_VIDEO' && loaded.videoUrl && videoSource(loaded.videoUrl));
-  const previewUrl = loaded ? `${ENV.API_BASE_URL.replace(/\/$/, '')}/resources/${loaded.id}/preview` : '';
-  const [downloading, setDownloading] = useState(false);
-  const [downloadError, setDownloadError] = useState('');
+  // Visitors read a free excerpt cut by the server; the whole book and its download are for members.
+  const previewUrl = loaded ? `${ENV.API_BASE_URL.replace(/\/$/, '')}/resources/${loaded.id}/preview` : null;
+  const resumeAt = loaded && readable && isSignedIn ? savedPage(loaded.id) : 1;
+  const readerReturn = loaded ? `${resourcePath(loaded)}?lecture=1` : '/ressources';
 
-  function openPreview() {
+  function openReader() {
     const next = new URLSearchParams(params);
-    next.set('apercu', '1');
+    next.set('lecture', '1');
     setParams(next, { state: location.state });
   }
 
-  function closePreview() {
-    if (window.history.state?.idx > 0 && previewing) window.history.back();
-    else { const next = new URLSearchParams(params); next.delete('apercu'); setParams(next, { replace: true, state: location.state }); }
+  function closeReader() {
+    if (window.history.state?.idx > 0 && reading) window.history.back();
+    else { const next = new URLSearchParams(params); next.delete('lecture'); setParams(next, { replace: true, state: location.state }); }
   }
-
-  /** Members download straight away; a visitor creates an account and comes back to a download that starts by itself. */
-  async function download() {
-    if (!loaded) return;
-    if (!isSignedIn) { register(`${resourcePath(loaded)}?telecharger=1`); return; }
-    setDownloading(true);
-    setDownloadError('');
-    try {
-      const { blob, filename } = await api.downloadEbook(loaded.id);
-      saveFile(blob, filename ?? `${loaded.title}.pdf`);
-    } catch (error) {
-      setDownloadError(error instanceof ApiError && error.status === 401
-        ? 'Ta session a expiré. Reconnecte-toi pour télécharger l’ebook.'
-        : 'Le téléchargement a échoué. Réessaie dans un instant.');
-    } finally {
-      setDownloading(false);
-    }
-  }
-
-  // Back from sign-up with ?telecharger=1: the download the visitor asked for starts once.
-  useEffect(() => {
-    if (!loaded || !isSignedIn || params.get('telecharger') !== '1') return;
-    const next = new URLSearchParams(params);
-    next.delete('telecharger');
-    setParams(next, { replace: true, state: location.state });
-    void download();
-  }, [loaded?.id, isSignedIn]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function watch() {
     setPlaying(true);
@@ -156,9 +124,9 @@ export default function RessourceDetail() {
               ) : (
                 <div className="relative aspect-[16/9] overflow-hidden bg-noir-800">
                   {loaded.coverImage && failedImage !== loaded.coverImage ? <img src={loaded.coverImage} alt={`Couverture de ${loaded.title}`} onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" /> : <KindCover kind={loaded.kind} size="spotlight" />}
-                  {previewable && (
-                    <button type="button" onClick={openPreview} className="group absolute inset-0 flex items-end bg-gradient-to-t from-black/70 via-black/10 to-transparent p-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold-400 sm:p-7">
-                      <span className="inline-flex items-center gap-2 rounded bg-gold-400 px-4 py-2.5 text-sm font-semibold text-black transition-colors duration-150 group-hover:bg-gold-300"><BookOpen className="h-4 w-4" aria-hidden />Feuilleter l’aperçu</span>
+                  {readable && (
+                    <button type="button" onClick={openReader} className="group absolute inset-0 flex items-end bg-gradient-to-t from-black/70 via-black/10 to-transparent p-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold-400 sm:p-7">
+                      <span className="inline-flex items-center gap-2 rounded bg-gold-400 px-4 py-2.5 text-sm font-semibold text-black transition-colors duration-150 group-hover:bg-gold-300"><BookOpen className="h-4 w-4" aria-hidden />{!isSignedIn ? 'Lire un extrait gratuit' : resumeAt > 1 ? `Reprendre page ${resumeAt}` : 'Lire en ligne'}</span>
                     </button>
                   )}
                 </div>
@@ -188,27 +156,21 @@ export default function RessourceDetail() {
             </div>
 
             <aside className="rounded-lg bg-card p-6 sm:p-7 lg:sticky lg:top-24" aria-label="Accéder à la ressource">
-              <h2 className="font-display text-2xl font-bold leading-tight text-t1">{loaded.kind === 'EBOOK' ? 'Télécharge l’ebook' : loaded.kind === 'ARTICLE' ? 'Lire l’article' : 'Regarde la vidéo'}</h2>
-              <p className="mt-3 text-sm leading-relaxed text-t3">{loaded.kind === 'EBOOK' ? (isSignedIn
-                ? `${previewable ? 'Feuillette les premières pages, puis télécharge-le' : 'Télécharge-le'} pour le lire à ton rythme, même hors connexion.`
-                : `${previewable ? 'Feuillette les premières pages. ' : ''}Le téléchargement se fait avec ton compte LesCracks, créé en quelques secondes.`) : loaded.kind === 'ARTICLE' ? `Temps de lecture estimé : ${loaded.readingMinutes ?? 1} min.` : embeddable ? 'La vidéo se lit ici, sans quitter LesCracks.' : 'Retrouve la vidéo sur sa plateforme de diffusion.'}</p>
+              <h2 className="font-display text-2xl font-bold leading-tight text-t1">{loaded.kind === 'EBOOK' ? (readable ? 'Lis l’ebook' : 'Télécharge l’ebook') : loaded.kind === 'ARTICLE' ? 'Lire l’article' : 'Regarde la vidéo'}</h2>
+              <p className="mt-3 text-sm leading-relaxed text-t3">{loaded.kind === 'EBOOK' ? (!isSignedIn ? (readable ? 'Les 10 premières pages sont en accès libre. Avec un compte gratuit : le livre entier et le téléchargement.' : 'Le téléchargement est réservé aux membres. Le compte est gratuit et se crée en quelques secondes.') : readable ? 'Lis-le ici, page après page : la lecture reprend où tu t’es arrêté. Ou télécharge-le pour le garder.' : 'Télécharge le support et avance à ton rythme, où que tu sois.') : loaded.kind === 'ARTICLE' ? `Temps de lecture estimé : ${loaded.readingMinutes ?? 1} min.` : embeddable ? 'La vidéo se lit ici, sans quitter LesCracks.' : 'Retrouve la vidéo sur sa plateforme de diffusion.'}</p>
               <dl className="my-6 space-y-4 border-y border-line py-5 text-sm">
                 <div className="flex justify-between gap-4"><dt className="text-t3">Type</dt><dd className="text-right text-t1">{loaded.kind === 'EBOOK' ? 'Ebook' : loaded.kind === 'ARTICLE' ? 'Article' : 'Vidéo'}</dd></div>
-                {loaded.fileFormat && <div className="flex justify-between gap-4"><dt className="text-t3">Format du fichier</dt><dd className="break-all text-right text-t1">{fileLabel(loaded.fileFormat)}</dd></div>}
+                {loaded.fileFormat && <div className="flex justify-between gap-4"><dt className="text-t3">Format du fichier</dt><dd className="break-all text-right text-t1">{loaded.fileFormat}</dd></div>}
                 {loaded.fileSize != null && loaded.fileSize >= 0 && <div className="flex justify-between gap-4"><dt className="text-t3">Taille</dt><dd className="text-t1">{megabytes(loaded.fileSize)}</dd></div>}
                 {loaded.platform && <div className="flex justify-between gap-4"><dt className="text-t3">Plateforme</dt><dd className="break-words text-right text-t1">{loaded.platform}</dd></div>}
               </dl>
 
 
               {embeddable && <button type="button" onClick={watch} className="btn-primary w-full"><Play className="h-4 w-4 shrink-0" fill="currentColor" aria-hidden />{playing ? 'Lecture en cours' : 'Regarder la vidéo'}</button>}
-              {hasFile && (
-                <button type="button" onClick={() => void download()} disabled={downloading} className="btn-primary w-full">
-                  <Download className="h-4 w-4 shrink-0" aria-hidden />{downloading ? 'Téléchargement…' : isSignedIn ? 'Télécharger l’ebook' : 'Créer mon compte et télécharger'}
-                </button>
-              )}
-              {hasFile && !isSignedIn && <button type="button" onClick={() => signIn(`${resourcePath(loaded)}?telecharger=1`)} className="mt-2 w-full py-2 text-sm text-t3 underline-offset-4 hover:text-t1 hover:underline">J’ai déjà un compte</button>}
-              {downloadError && <p role="alert" className="mt-3 text-sm text-error-ink">{downloadError}</p>}
-              {previewable && <button type="button" onClick={openPreview} className="btn-secondary mt-3 w-full"><BookOpen className="h-4 w-4 shrink-0" aria-hidden />Feuilleter l’aperçu</button>}
+              {readable && <button type="button" onClick={openReader} className="btn-primary w-full"><BookOpen className="h-4 w-4 shrink-0" aria-hidden />{!isSignedIn ? 'Lire un extrait gratuit' : resumeAt > 1 ? `Reprendre page ${resumeAt}` : 'Lire en ligne'}</button>}
+              {loaded.kind === 'EBOOK' && fileUrl && (isSignedIn
+                ? <a href={fileUrl} className={`${readable ? 'btn-secondary mt-3' : 'btn-primary'} w-full`}>Télécharger l’ebook<Download className="h-4 w-4 shrink-0" aria-hidden /></a>
+                : <button type="button" onClick={() => register(resourcePath(loaded))} className={`${readable ? 'btn-secondary mt-3' : 'btn-primary'} w-full`}>Télécharger · compte gratuit<Download className="h-4 w-4 shrink-0" aria-hidden /></button>)}
               {loaded.kind !== 'ARTICLE' && !(loaded.kind === 'EBOOK' ? loaded.downloadUrl : loaded.videoUrl) && <p className="text-sm text-t3">Le lien d’accès n’est pas disponible pour le moment.</p>}
 
               <ShareButton title={loaded.title} path={resourcePath(loaded)} label="Partager la ressource" className="mt-3" />
@@ -227,11 +189,12 @@ export default function RessourceDetail() {
           <div className="mt-16 border-t border-line pt-8"><Link to={cataloguePath} className="link inline-flex min-h-11 items-center gap-3 text-sm">Continuer à explorer la bibliothèque<ArrowUpRight className="h-4 w-4" aria-hidden /></Link></div>
         </div>}
       </article>
-      {previewing && loaded && previewable && (
-        <Suspense fallback={<div role="status" className="fixed inset-0 z-[70] flex items-center justify-center bg-noir-950 text-sm text-t3">Préparation de l’aperçu…</div>}>
-          <PdfPreview url={previewUrl} title={loaded.title} onClose={closePreview}
-            action={{ label: isSignedIn ? 'Télécharger l’ebook' : 'Créer mon compte et télécharger', busy: downloading, onClick: () => void download() }}
-            secondary={isSignedIn ? undefined : { label: 'J’ai déjà un compte', onClick: () => signIn(`${resourcePath(loaded)}?telecharger=1`) }} />
+      {reading && loaded && readable && fileUrl && (
+        <Suspense fallback={<div role="status" className="fixed inset-0 z-[70] flex items-center justify-center bg-noir-950 text-sm text-t3">Ouverture du lecteur…</div>}>
+          {isSignedIn
+            ? <PdfReader url={`${fileUrl}?inline=true`} downloadUrl={fileUrl} title={loaded.title} storageKey={readerKey(loaded.id)} onClose={closeReader} />
+            : <PdfReader url={previewUrl ?? ''} title={loaded.title} storageKey={readerKey(loaded.id)} onClose={closeReader}
+              excerpt={{ onSignUp: () => register(readerReturn), onSignIn: () => signIn(readerReturn) }} />}
         </Suspense>
       )}
     </Layout>

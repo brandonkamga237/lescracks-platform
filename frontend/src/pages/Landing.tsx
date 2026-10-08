@@ -22,14 +22,14 @@ import { api } from '@/services/api';
  */
 
 const PROMISES = [
-  'Vidéos, ebooks et articles, triés par sujet.',
+  'Vidéos, ebooks et articles en accès libre, sans compte.',
   'Ateliers et conférences, en ligne ou sur place.',
-  'Une communauté qui avance ensemble.',
+  'Une communauté francophone qui avance ensemble.',
 ] as const;
 
 const WHY = [
   'Des contenus choisis, pas une avalanche de liens.',
-  'Pensés pour débuter comme pour progresser.',
+  'En français, pensés pour débuter comme pour progresser.',
   'Des rendez-vous réguliers pour pratiquer en vrai.',
   'Le Talk : la tech africaine racontée par celles et ceux qui la font.',
 ] as const;
@@ -42,7 +42,7 @@ const REVEAL = { initial: { opacity: 0, transform: 'translateY(16px)' }, whileIn
 function Stat({ value, label }: { value: React.ReactNode; label: string }) {
   return (
     <div className="stat-tile">
-      <p className="font-display text-3xl font-bold leading-none tracking-tight text-t1 sm:text-[2.375rem]">{value}</p>
+      <p className="font-display text-4xl font-bold leading-none tracking-tight text-t1 sm:text-[2.375rem]">{value}</p>
       <p className="label mt-3">{label}</p>
     </div>
   );
@@ -61,13 +61,13 @@ export default function Landing() {
 
   return (
     <Layout>
-      <SEO title="Apprendre la tech, concrètement" description="Des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme. Une bibliothèque ouverte et une communauté qui apprend en faisant." url="/" />
+      <SEO title="Apprendre la tech, concrètement" description="Des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme. Une bibliothèque ouverte, une communauté francophone." url="/" />
 
       {/* ── Hero: raised headline panel · photo action panel ────── */}
       <section className="grid lg:grid-cols-[55fr_45fr]">
         <div className="mode-raised flex items-center px-5 py-20 sm:px-8 lg:py-28 lg:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:pr-16">
           <div className="max-w-2xl">
-            <p className="kicker animate-rise motion-reduce:animate-page-in">Apprendre, pratiquer, avancer</p>
+            <p className="kicker animate-rise motion-reduce:animate-page-in">La plateforme tech francophone</p>
             <h1 className="mt-6 animate-rise motion-reduce:animate-page-in font-display text-5xl font-bold leading-[0.92] tracking-tight text-t1 sm:text-6xl xl:text-[5.25rem] xl:leading-[0.9] [animation-delay:50ms]">
               {isSignedIn
                 ? <>Bon retour{firstName ? <>, {firstName}</> : ''}. La suite t’attend.</>
@@ -76,7 +76,7 @@ export default function Landing() {
             <p className="mt-8 max-w-lg animate-rise motion-reduce:animate-page-in text-lg leading-normal text-t3 [animation-delay:100ms]">
               {isSignedIn
                 ? 'Reprends ta lecture ou trouve le prochain rendez-vous.'
-                : 'Vidéos, ebooks et ateliers pour apprendre la tech et passer à la pratique.'}
+                : 'Vidéos, ebooks et ateliers pour apprendre la tech en français, en accès libre.'}
             </p>
             <div className="mt-10 flex animate-rise motion-reduce:animate-page-in flex-wrap items-center gap-x-6 gap-y-4 [animation-delay:150ms]">
               <Link to="/ressources" className="btn-primary">
@@ -96,7 +96,7 @@ export default function Landing() {
                 <>
                   <h2 className="text-2xl font-bold leading-tight text-t1">Ton espace</h2>
                   <p className="mt-2 text-sm text-t3">Tout ce qu’il te faut pour continuer.</p>
-                  <Link to={isAdmin ? '/admin' : '/profil'} className="btn-secondary mt-6 w-full">{isAdmin ? 'Administration' : 'Mon compte'}</Link>
+                  <Link to={isAdmin ? '/admin' : '/profil'} className="btn-secondary mt-6 w-full">{isAdmin ? 'Administration' : 'Mon espace'}</Link>
                   <p className="mt-4 text-center text-sm text-t3">
                     Ou regarde <Link to="/talk" className="link">LesCracks Talk</Link>
                   </p>
@@ -112,7 +112,7 @@ export default function Landing() {
                       </li>
                     ))}
                   </ul>
-                  <Link to="/inscription" className="btn-secondary mt-7 w-full">Créer mon compte</Link>
+                  <Link to="/inscription" className="btn-secondary mt-7 w-full">Créer un compte gratuit</Link>
                   <p className="mt-4 text-center text-sm text-t3">
                     Déjà inscrit ? <Link to="/connexion" className="link">Se connecter</Link>
                   </p>
@@ -125,10 +125,11 @@ export default function Landing() {
 
       {/* ── Figures: charcoal tiles on black ────────────────────── */}
       <Section spacing="tight" aria-label="LesCracks en chiffres">
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           <Stat value={count(recent.data?.totalElements)} label="Ressources" />
           <Stat value={count(categories.data?.length)} label="Sujets" />
           <Stat value={count(upcoming.data?.totalElements)} label="Rendez-vous à venir" />
+          <Stat value="Gratuit" label="Accès à la bibliothèque" />
         </div>
       </Section>
 

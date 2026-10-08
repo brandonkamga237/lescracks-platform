@@ -69,7 +69,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/cracklab/challenges", "/api/cracklab/challenges/*", "/api/cracklab/ranking",
                         "/api/cracklab/members/*", "/api/cracklab/results/*", "/api/cracklab/share/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/resources", "/api/resources/*").permitAll()
-                // Everyone sees an ebook's first pages; downloading it is for members.
+                // The full ebook is for members; visitors read the free excerpt.
                 .requestMatchers(HttpMethod.GET, "/api/resources/*/preview").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/resources/*/download").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/categories", "/api/tags").permitAll()

@@ -83,20 +83,15 @@ interface RequestOptions {
   transport?: AuthTransport;
 }
 
-/** Who is asking: the bearer token for OIDC members, the session cookie otherwise. */
-function credentialsFor(path: string, transport?: AuthTransport) {
+async function request<T>(method: string, path: string, options: RequestOptions = {}): Promise<T> {
   const headers: Record<string, string> = {};
+
   // The token rides in the header, never in a cookie: the API is stateless and CSRF is not
   // a concern for a request the browser will not send on its own.
   const cookieEndpoint = /^\/(?:admin\/)?auth\/(?:login|register|logout|forgot-password|reset-password)$/.test(path);
-  const mode = cookieEndpoint ? 'cookie' : transport ?? getAuthTransport();
+  const mode = cookieEndpoint ? 'cookie' : options.transport ?? getAuthTransport();
   const token = mode === 'oidc' ? currentAccessToken() : null;
   if (token) headers.Authorization = `Bearer ${token}`;
-  return { headers, mode };
-}
-
-async function request<T>(method: string, path: string, options: RequestOptions = {}): Promise<T> {
-  const { headers, mode } = credentialsFor(path, options.transport);
 
   let body: BodyInit | undefined;
   if (options.form) {
@@ -160,32 +155,6 @@ async function request<T>(method: string, path: string, options: RequestOptions 
   }
 }
 
-/** The file name a Content-Disposition header carries, UTF-8 form first. */
-function filenameFrom(disposition: string | null): string | null {
-  if (!disposition) return null;
-  const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
-  if (encoded) {
-    try { return decodeURIComponent(encoded); } catch { /* fall through to the plain name */ }
-  }
-  return disposition.match(/filename="?([^";]+)"?/i)?.[1] ?? null;
-}
-
-/**
- * A file the API protects. A plain link cannot carry an OIDC member's token, so the bytes are
- * fetched like any other call and handed over as a Blob.
- */
-async function download(path: string): Promise<{ blob: Blob; filename: string | null }> {
-  const { headers, mode } = credentialsFor(path);
-  const response = await fetch(`${ENV.API_BASE_URL}${path}`, { headers, credentials: mode === 'cookie' ? 'include' : 'omit' });
-  if (!response.ok) {
-    let body: Partial<ApiErrorBody> = {};
-    try { body = await response.json() as Partial<ApiErrorBody>; } catch { /* not json: the status explains enough */ }
-    if (response.status === 401) window.dispatchEvent(new Event('lescracks:session-expired'));
-    throw new ApiError(response.status, body);
-  }
-  return { blob: await response.blob(), filename: filenameFrom(response.headers.get('Content-Disposition')) };
-}
-
 /** A proxy or gateway can answer html where json was expected; that is still an error. */
 function safeParse(text: string): unknown {
   return JSON.parse(text);
@@ -203,5 +172,4 @@ export const http = {
   patch: <T>(path: string, body?: unknown, query?: Query) =>
     request<T>('PATCH', path, { body, query }),
   delete: <T>(path: string) => request<T>('DELETE', path),
-  download,
 };

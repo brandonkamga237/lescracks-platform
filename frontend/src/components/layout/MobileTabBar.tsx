@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { ArrowRight, BookOpen, CalendarDays, CircleUser, FlaskConical, Info, Lock, LogOut, Podcast, Shield, User } from 'lucide-react';
+import { ArrowRight, BookOpen, CalendarDays, CircleUser, FlaskConical, Info, LogOut, Podcast, Shield, User } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useSession } from '@/hooks/useSession';
-import { fillClass } from '@/lib/cracklab';
 
 interface TabDef {
   to: string;
@@ -90,35 +89,17 @@ export default function MobileTabBar() {
               ) : (
                 <div className="pr-8">
                   <DialogTitle className="font-display text-xl font-bold text-t1">Ton compte</DialogTitle>
-                  <DialogDescription className="mt-1 text-sm text-t3">Ton compte pour télécharger les ebooks, relever les challenges et suivre les ateliers.</DialogDescription>
+                  <DialogDescription className="mt-1 text-sm text-t3">La bibliothèque et l’agenda restent ouverts, avec ou sans compte.</DialogDescription>
                 </div>
               )}
 
               {isLoading ? (
                 <p role="status" className="text-sm text-t3">Vérification de la session…</p>
               ) : isSignedIn ? (
-                <>
-                  {!isAdmin && user && user.completion < 100 && (
-                    <Link to="/profil#informations" className="block rounded-lg border border-line p-3.5">
-                      <span className="flex items-baseline justify-between gap-3 text-sm">
-                        <span className="text-t1">Profil complété à <span className="font-mono tabular-nums text-gold-ink">{user.completion} %</span></span>
-                        <span className="text-xs text-gold-ink">Compléter</span>
-                      </span>
-                      <span aria-hidden className="mt-2.5 block h-1 rounded-full bg-noir-700"><span className={`block h-full rounded-full bg-gold-400 ${fillClass(user.completion / 100)}`} /></span>
-                    </Link>
-                  )}
-                  <nav aria-label="Ton compte">
-                    {(isAdmin
-                      ? [['/admin', 'Administration', Shield]] as const
-                      : [['/profil', 'Mon compte', User], ['/cracklab/moi', 'Mon parcours CrackLab', FlaskConical], ['/profil#securite', 'Sécurité et connexion', Lock]] as const
-                    ).map(([to, label, Icon]) => (
-                      <Link key={to} to={to} className={row}>
-                        <Icon className="h-4 w-4 text-t4" aria-hidden />{label}
-                        <ArrowRight className="ml-auto h-4 w-4 text-t4" aria-hidden />
-                      </Link>
-                    ))}
-                  </nav>
-                </>
+                <Link to={isAdmin ? '/admin' : '/profil'} className="btn-primary w-full">
+                  {isAdmin ? <Shield className="h-4 w-4" aria-hidden /> : <User className="h-4 w-4" aria-hidden />}
+                  {isAdmin ? 'Administration' : 'Mon espace'}
+                </Link>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
                   <Link to="/inscription" state={destination} className="btn-primary">Créer un compte</Link>
@@ -127,6 +108,12 @@ export default function MobileTabBar() {
               )}
 
               <div>
+                {!isAdmin && user && user.completion < 100 && (
+                  <Link to="/profil" className={row}>
+                    <CircleUser className="h-4 w-4 text-gold-ink" aria-hidden />Compléter mon profil
+                    <span className="ml-auto font-mono text-xs tabular-nums text-gold-ink">{user.completion} %</span>
+                  </Link>
+                )}
                 <Link to="/a-propos" className={row}>
                   <Info className="h-4 w-4 text-t4" aria-hidden />À propos
                   <ArrowRight className="ml-auto h-4 w-4 text-t4" aria-hidden />

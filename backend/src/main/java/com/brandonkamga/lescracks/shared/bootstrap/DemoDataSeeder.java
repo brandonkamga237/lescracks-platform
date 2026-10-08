@@ -105,7 +105,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         String title = "Bienvenue sur LesCracks";
         String html = "<p>LesCracks est une école en ligne pensée pour celles et ceux qui apprennent mieux en construisant.</p>"
                 + "<p>Dans cet article de démonstration, tu peux explorer un contenu formaté :</p>"
-                + "<ul><li>Des ressources tech choisies</li><li>Des événements et ateliers</li><li>Une communauté qui apprend en faisant</li></ul>"
+                + "<ul><li>Des ressources tech en français</li><li>Des événements et ateliers</li><li>Une communauté francophone</li></ul>"
                 + "<p>Bonne découverte !</p>";
 
         Resource resource = Resource.builder()
@@ -125,7 +125,7 @@ public class DemoDataSeeder implements CommandLineRunner {
                 .resourceId(resource.getId())
                 .resource(resource)
                 .body(body)
-                .plainText("LesCracks est une école en ligne. Tu peux explorer des ressources tech choisies.")
+                .plainText("LesCracks est une école en ligne. Tu peux explorer des ressources tech en français.")
                 .readingMinutes(1)
                 .build();
         articles.save(article);
