@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowUpRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, Globe2, LayoutDashboard, LogOut, Mail, MoreHorizontal, Podcast, Shield, Tags, Users } from 'lucide-react';
 
@@ -32,13 +32,17 @@ const PHONE_TABS = ['/admin', '/admin/ressources', '/admin/evenements'] as const
 const TAB_ITEM = 'flex min-h-14 w-full flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold-400';
 
 interface AdminLayoutProps { children: React.ReactNode }
-interface WorkspaceNavProps { onNavigate?: () => void }
+interface WorkspaceNavProps {
+  onNavigate?: () => void;
+  /** The desktop sidebar is driven by a mouse: tighter rows let all ten sections fit a laptop screen. */
+  compact?: boolean;
+}
 
-function WorkspaceNav({ onNavigate }: WorkspaceNavProps) {
-  return <nav aria-label="Administration" className="space-y-6">
+function WorkspaceNav({ onNavigate, compact = false }: WorkspaceNavProps) {
+  return <nav aria-label="Administration" className={compact ? 'space-y-3' : 'space-y-6'}>
     {['Espace de travail', 'Contenu', 'Organisation', 'Sécurité'].map((group) => <div key={group}>
-      <p className="label mb-2 px-3">{group}</p>
-      <div className="space-y-0.5">{SECTIONS.filter((section) => section.group === group).map(({ to, label, icon: Icon }) => <NavLink key={to} end={to === '/admin'} to={to} onClick={onNavigate} className={({ isActive }) => `flex min-h-11 items-center gap-3 rounded px-3 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400 ${isActive ? 'bg-noir-800 font-semibold text-gold-ink' : 'text-t3 hover:bg-noir-800 hover:text-t1'}`}><Icon className="h-[18px] w-[18px]" aria-hidden />{label}</NavLink>)}</div>
+      <p className={`label px-3 ${compact ? 'mb-1' : 'mb-2'}`}>{group}</p>
+      <div className="space-y-0.5">{SECTIONS.filter((section) => section.group === group).map(({ to, label, icon: Icon }) => <NavLink key={to} end={to === '/admin'} to={to} onClick={onNavigate} className={({ isActive }) => `flex ${compact ? 'min-h-9' : 'min-h-11'} items-center gap-3 rounded px-3 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400 ${isActive ? 'bg-noir-800 font-semibold text-gold-ink' : 'text-t3 hover:bg-noir-800 hover:text-t1'}`}><Icon className="h-[18px] w-[18px]" aria-hidden />{label}</NavLink>)}</div>
     </div>)}
   </nav>;
 }
@@ -48,6 +52,21 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [moreOpen, setMoreOpen] = useState(false);
+  const sideRef = useRef<HTMLDivElement>(null);
+  const [moreBelow, setMoreBelow] = useState(false);
+  const measureSide = () => {
+    const side = sideRef.current;
+    if (side) setMoreBelow(side.scrollTop + side.clientHeight < side.scrollHeight - 4);
+  };
+
+  useEffect(() => {
+    const side = sideRef.current;
+    if (!side) return;
+    measureSide();
+    const observer = new ResizeObserver(measureSide);
+    observer.observe(side);
+    return () => observer.disconnect();
+  }, []);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
   const current = SECTIONS.find((section) => section.to === location.pathname) ?? SECTIONS[0];
@@ -68,11 +87,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return <div className="min-h-[100dvh] bg-black pb-[calc(3.5rem+env(safe-area-inset-bottom))] text-t1 selection:bg-gold-400/30 lg:pb-0">
     <a href="#admin-content" className="sr-only z-[60] rounded bg-gold-400 px-5 py-3 text-black focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Aller au contenu</a>
-    {/* Scrolls on its own: on a short laptop screen the last sections and « Voir le site public » were cut off. */}
-    <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col overflow-y-auto border-r border-line-soft bg-noir-900 px-5 py-6 lg:flex">
-      <Link to="/admin" aria-label="LesCracks, vue d’ensemble" className="mb-8 shrink-0 px-3"><LesCracksLogo className="h-8 w-auto" /><span className="label mt-3 block">Administration</span></Link>
-      <WorkspaceNav />
-      <Link to="/" className="mt-auto flex min-h-11 shrink-0 items-center justify-between rounded border border-line-soft px-4 text-sm text-t3 transition-colors hover:border-gold-400/40 hover:text-t1">Voir le site public<ArrowUpRight className="h-4 w-4" aria-hidden /></Link>
+    {/* Logo and « Voir le site public » stay put; only the menu scrolls, and a fade says so when Sécurité is below the fold. */}
+    <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-line-soft bg-noir-900 px-5 py-4 lg:flex">
+      <Link to="/admin" aria-label="LesCracks, vue d’ensemble" className="mb-4 shrink-0 px-3"><LesCracksLogo className="h-8 w-auto" /><span className="label mt-2 block">Administration</span></Link>
+      <div ref={sideRef} onScroll={measureSide} className={`-mx-2 min-h-0 flex-1 overflow-y-auto px-2 pb-2 ${moreBelow ? '[mask-image:linear-gradient(to_bottom,black_calc(100%-2.5rem),transparent)]' : ''}`}>
+        <WorkspaceNav compact />
+      </div>
+      <Link to="/" className="mt-3 flex min-h-10 shrink-0 items-center justify-between rounded border border-line-soft px-4 text-sm text-t3 transition-colors hover:border-gold-400/40 hover:text-t1">Voir le site public<ArrowUpRight className="h-4 w-4" aria-hidden /></Link>
     </aside>
     <div className="lg:pl-64">
       <header className="mode-raised sticky top-0 z-30 border-b border-line-soft px-4 sm:px-8">
