@@ -22,5 +22,8 @@ public record ChallengeDetailResponse(
         long submissionCount,
         Instant publishedAt,
         String referenceSolution,
-        SubmissionResponse mySubmission) {
+        SubmissionResponse mySubmission,
+        long gradedCount,
+        Integer averageScore,
+        Integer bestScore) {
 }

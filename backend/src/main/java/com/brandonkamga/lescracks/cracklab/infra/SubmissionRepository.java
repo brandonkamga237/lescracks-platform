@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,6 +63,60 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
             WHERE s.status = com.brandonkamga.lescracks.cracklab.domain.SubmissionStatus.GRADED
             """)
     Page<RankingRow> ranking(Pageable pageable);
+
+    /** The same ranking restricted to grades given since a date: the weekly board resets every Monday. */
+    @Query(value = """
+            SELECT s.user.id AS userId, s.user.firstName AS firstName, s.user.lastName AS lastName,
+                   s.user.username AS username, s.user.avatarUrl AS avatarUrl,
+                   SUM(s.technicalScore) AS totalScore, COUNT(s) AS challenges
+            FROM Submission s
+            WHERE s.status = com.brandonkamga.lescracks.cracklab.domain.SubmissionStatus.GRADED AND s.gradedAt >= :since
+            GROUP BY s.user.id, s.user.firstName, s.user.lastName, s.user.username, s.user.avatarUrl
+            ORDER BY SUM(s.technicalScore) DESC, COUNT(s) ASC, s.user.id ASC
+            """,
+            countQuery = """
+            SELECT COUNT(DISTINCT s.user.id) FROM Submission s
+            WHERE s.status = com.brandonkamga.lescracks.cracklab.domain.SubmissionStatus.GRADED AND s.gradedAt >= :since
+            """)
+    Page<RankingRow> rankingSince(@Param("since") Instant since, Pageable pageable);
+
+    @Query("""
+            SELECT s.user.id AS userId, SUM(s.technicalScore) AS total FROM Submission s
+            WHERE s.status = com.brandonkamga.lescracks.cracklab.domain.SubmissionStatus.GRADED
+            GROUP BY s.user.id
+            """)
+    List<MemberTotal> totalsByMember();
+
+    @Query("""
+            SELECT COALESCE(SUM(s.technicalScore), 0) FROM Submission s
+            WHERE s.user.id = :userId AND s.status = com.brandonkamga.lescracks.cracklab.domain.SubmissionStatus.GRADED
+              AND s.gradedAt >= :since
+            """)
+    long scoreSince(@Param("userId") Long userId, @Param("since") Instant since);
+
+    @Query("SELECT COALESCE(SUM(s.voteScore), 0) FROM Submission s WHERE s.user.id = :userId")
+    long votesReceived(@Param("userId") Long userId);
+
+    @Query("""
+            SELECT COUNT(s) AS graded, AVG(s.technicalScore) AS average, MAX(s.technicalScore) AS best FROM Submission s
+            WHERE s.challenge.id = :challengeId AND s.status = com.brandonkamga.lescracks.cracklab.domain.SubmissionStatus.GRADED
+            """)
+    ChallengeStats challengeStats(@Param("challengeId") Long challengeId);
+
+    long countByChallengeIdAndStatusAndTechnicalScoreLessThan(Long challengeId, SubmissionStatus status, Integer score);
+
+    long countByChallengeIdAndStatusAndTechnicalScoreGreaterThan(Long challengeId, SubmissionStatus status, Integer score);
+
+    interface MemberTotal {
+        Long getUserId();
+        Long getTotal();
+    }
+
+    interface ChallengeStats {
+        Long getGraded();
+        Double getAverage();
+        Integer getBest();
+    }
 
     interface RankingRow {
         Long getUserId();
