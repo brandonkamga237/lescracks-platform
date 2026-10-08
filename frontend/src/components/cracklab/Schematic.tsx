@@ -69,7 +69,7 @@ function Schematic({ seed, category, labels = true, className = '' }: SchematicP
   const columns = (TEMPLATES[normalize(category)] ?? TEMPLATES.backend).map((column) => [...column]);
   // Variation: one middle column gains or loses a node, so two challenges of a category differ.
   const middle = 1 + (h % Math.max(1, columns.length - 2));
-  if ((h >> 3) % 2 === 0 && columns[middle].length < 3) columns[middle].push(columns[middle][0]);
+  if ((h >>> 3) % 2 === 0 && columns[middle].length < 3) columns[middle].push(columns[middle][0]);
   else if (columns[middle].length > 1) columns[middle].pop();
 
   const margin = 34;
@@ -78,7 +78,7 @@ function Schematic({ seed, category, labels = true, className = '' }: SchematicP
     kind, label, x: margin + c * step, y: H / 2 + (r - (column.length - 1) / 2) * (NODE_H + 16),
   })));
   const candidates = placed.slice(1).flat();
-  const hot = candidates[(h >> 5) % candidates.length];
+  const hot = candidates[(h >>> 5) % candidates.length];
 
   const edges: Array<{ d: string; hot: boolean }> = [];
   for (let c = 0; c < placed.length - 1; c++) {
