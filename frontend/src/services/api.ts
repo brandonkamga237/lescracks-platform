@@ -1,7 +1,7 @@
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
 import type {
-  AuthProvider, Category, EventFormat, EventSummary, EventType, PageResponse, ResourceKind,
+  AuthProvider, Category, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, RankingEntry, EventFormat, EventSummary, EventType, PageResponse, ResourceKind,
   NewsletterStatus, ResourceLikeStatus, ResourceSummary, Tag, TalkVideo, UserIdentity, UserProfile,
   UserProfileUpdate,
 } from '@/services/types';
@@ -11,6 +11,14 @@ export interface CatalogueFilters extends Query {
   categoryId?: number;
   search?: string;
   tagId?: number;
+  page?: number;
+  size?: number;
+}
+
+export interface CrackLabFilters extends Query {
+  difficulty?: ChallengeDifficulty;
+  category?: string;
+  tag?: string;
   page?: number;
   size?: number;
 }
@@ -68,6 +76,16 @@ export const api = {
   resourceLikes: (id: number, signal?: AbortSignal) => http.get<ResourceLikeStatus>(`/resources/${id}/likes`, undefined, signal),
   likeResource: (id: number) => http.post<ResourceLikeStatus>(`/resources/${id}/likes`),
   unlikeResource: (id: number) => http.delete<ResourceLikeStatus>(`/resources/${id}/likes`),
+  cracklab: {
+    challenges: (filters: CrackLabFilters = {}, signal?: AbortSignal) =>
+      http.get<PageResponse<ChallengeSummary>>('/cracklab/challenges', filters, signal),
+    challenge: (slug: string, signal?: AbortSignal) => http.get<ChallengeDetail>(`/cracklab/challenges/${encodeURIComponent(slug)}`, undefined, signal),
+    submit: (slug: string, answer: string) => http.post<ChallengeSubmission>(`/cracklab/challenges/${encodeURIComponent(slug)}/submissions`, { answer }),
+    answers: (slug: string, signal?: AbortSignal) => http.get<ChallengeSubmission[]>(`/cracklab/challenges/${encodeURIComponent(slug)}/submissions`, undefined, signal),
+    mine: (signal?: AbortSignal) => http.get<ChallengeSubmission[]>('/cracklab/submissions/mine', undefined, signal),
+    vote: (submissionId: number, value: -1 | 0 | 1) => http.put<{ voteScore: number; myVote: -1 | 0 | 1 }>(`/cracklab/submissions/${submissionId}/vote`, { value }),
+    ranking: (page = 0, size = 20, signal?: AbortSignal) => http.get<PageResponse<RankingEntry>>('/cracklab/ranking', { page, size }, signal),
+  },
 };
 
 export default api;

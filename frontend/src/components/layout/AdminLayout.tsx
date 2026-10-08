@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowUpRight, BookOpen, CalendarDays, ChevronRight, FolderOpen, Globe2, LayoutDashboard, LogOut, Mail, MoreHorizontal, Podcast, Shield, Tags, Users } from 'lucide-react';
+import { ArrowUpRight, BookOpen, CalendarDays, ChevronRight, ClipboardCheck, FlaskConical, FolderOpen, Globe2, LayoutDashboard, LogOut, Mail, MoreHorizontal, Podcast, Shield, Tags, Users } from 'lucide-react';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -21,6 +21,8 @@ const SECTIONS = [
   { to: '/admin/ressources', label: 'Ressources', group: 'Contenu', icon: BookOpen },
   { to: '/admin/evenements', label: 'Événements', group: 'Contenu', icon: CalendarDays },
   { to: '/admin/talks', label: 'Talk', group: 'Contenu', icon: Podcast },
+  { to: '/admin/cracklab/challenges', label: 'Challenges', group: 'CrackLab', icon: FlaskConical },
+  { to: '/admin/cracklab/reponses', label: 'À noter', group: 'CrackLab', icon: ClipboardCheck },
   { to: '/admin/categories', label: 'Catégories', group: 'Organisation', icon: FolderOpen },
   { to: '/admin/tags', label: 'Tags', group: 'Organisation', icon: Tags },
   { to: '/admin/admins', label: 'Administrateurs', group: 'Sécurité', icon: Shield },
@@ -40,7 +42,7 @@ interface WorkspaceNavProps {
 
 function WorkspaceNav({ onNavigate, compact = false }: WorkspaceNavProps) {
   return <nav aria-label="Administration" className={compact ? 'space-y-3' : 'space-y-6'}>
-    {['Espace de travail', 'Contenu', 'Organisation', 'Sécurité'].map((group) => <div key={group}>
+    {['Espace de travail', 'Contenu', 'CrackLab', 'Organisation', 'Sécurité'].map((group) => <div key={group}>
       <p className={`label px-3 ${compact ? 'mb-1' : 'mb-2'}`}>{group}</p>
       <div className="space-y-0.5">{SECTIONS.filter((section) => section.group === group).map(({ to, label, icon: Icon }) => <NavLink key={to} end={to === '/admin'} to={to} onClick={onNavigate} className={({ isActive }) => `flex ${compact ? 'min-h-9' : 'min-h-11'} items-center gap-3 rounded px-3 text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400 ${isActive ? 'bg-noir-800 font-semibold text-gold-ink' : 'text-t3 hover:bg-noir-800 hover:text-t1'}`}><Icon className="h-[18px] w-[18px]" aria-hidden />{label}</NavLink>)}</div>
     </div>)}
@@ -69,7 +71,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }, []);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
-  const current = SECTIONS.find((section) => section.to === location.pathname) ?? SECTIONS[0];
+  // Longest prefix wins, so /admin/cracklab/challenges/12 still reads as « Challenges » in the breadcrumb.
+  const current = [...SECTIONS].sort((a, b) => b.to.length - a.to.length)
+    .find((section) => location.pathname === section.to || (section.to !== '/admin' && location.pathname.startsWith(`${section.to}/`))) ?? SECTIONS[0];
   const moreActive = moreOpen || !PHONE_TABS.some((to) => to === current.to);
   const initial = (name || 'A').slice(0, 1).toUpperCase();
 

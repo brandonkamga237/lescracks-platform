@@ -35,6 +35,10 @@ const AdminTags = lazy(() => import('@/pages/admin/AdminTags'));
 const AdminTalks = lazy(() => import('@/pages/admin/AdminTalks'));
 const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
 const ArticleStudio = lazy(() => import('@/pages/admin/ArticleStudio'));
+const AdminCrackLab = lazy(() => import('@/pages/admin/AdminCrackLab'));
+const AdminCrackLabEditor = lazy(() => import('@/pages/admin/AdminCrackLabEditor'));
+const AdminCrackLabQueue = lazy(() => import('@/pages/admin/AdminCrackLabQueue'));
+const AdminCrackLabGrade = lazy(() => import('@/pages/admin/AdminCrackLabGrade'));
 
 function Waiting() {
   return (
@@ -138,6 +142,12 @@ function AppRoutes() {
         <Route path="admins" element={<AdminAdmins />} />
         <Route path="utilisateurs" element={<AdminUsers />} />
         <Route path="newsletter" element={<AdminNewsletter />} />
+        <Route path="cracklab" element={<Navigate to="/admin/cracklab/challenges" replace />} />
+        <Route path="cracklab/challenges" element={<AdminCrackLab />} />
+        <Route path="cracklab/challenges/nouveau" element={<AdminCrackLabEditor />} />
+        <Route path="cracklab/challenges/:id" element={<AdminCrackLabEditor />} />
+        <Route path="cracklab/reponses" element={<AdminCrackLabQueue />} />
+        <Route path="cracklab/reponses/:id" element={<AdminCrackLabGrade />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
