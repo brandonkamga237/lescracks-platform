@@ -2,6 +2,7 @@ package com.brandonkamga.lescracks.cracklab.domain;
 
 import com.brandonkamga.lescracks.cracklab.api.dto.GradeRequest;
 import com.brandonkamga.lescracks.cracklab.infra.SubmissionRepository;
+import com.brandonkamga.lescracks.identity.domain.User;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,9 @@ public interface SubmissionService {
     Page<SubmissionRepository.RankingRow> ranking(Pageable pageable);
 
     Optional<Long> memberId(String email);
+
+    /** The member behind a session; an admin account or a visitor is refused. */
+    User requireMember(String email);
 
     Page<Submission> forAdmin(SubmissionStatus status, Long challengeId, Pageable pageable);
 

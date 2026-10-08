@@ -19,6 +19,8 @@ RUN --mount=type=cache,target=/root/.m2 \
 # ── Stage 2: dev runtime image ────────────────────────────────────────────────
 FROM eclipse-temurin:21-jdk-alpine AS dev
 WORKDIR /app
+# Same as prod: Java2D needs fontconfig for the CrackLab share images.
+RUN apk add --no-cache fontconfig ttf-dejavu
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=dev"]
@@ -26,8 +28,9 @@ ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=dev"]
 # ── Stage 3: prod runtime image ───────────────────────────────────────────────
 FROM eclipse-temurin:21-jre-alpine AS prod
 WORKDIR /app
-# wget is required for the Docker healthcheck (not present in alpine-jre by default)
-RUN apk add --no-cache wget
+# wget is required for the Docker healthcheck (not present in alpine-jre by default).
+# fontconfig: Java2D needs it to draw the CrackLab share images, even with bundled fonts.
+RUN apk add --no-cache wget fontconfig ttf-dejavu
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]

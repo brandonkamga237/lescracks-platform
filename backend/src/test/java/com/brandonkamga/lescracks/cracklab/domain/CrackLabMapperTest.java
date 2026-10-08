@@ -12,17 +12,20 @@ import static com.brandonkamga.lescracks.cracklab.domain.CrackLabFixtures.challe
 import static com.brandonkamga.lescracks.cracklab.domain.CrackLabFixtures.member;
 import static com.brandonkamga.lescracks.cracklab.domain.CrackLabFixtures.submission;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CrackLabMapperTest {
 
     @Mock private ChallengeService challenges;
+    @Mock private ProgressService progress;
 
     @Test
     @DisplayName("the reference solution stays hidden from a viewer who has not answered")
     void referenceSolutionHiddenBeforeSubmitting() {
-        CrackLabMapper mapper = new CrackLabMapper(challenges);
+        CrackLabMapper mapper = new CrackLabMapper(challenges, progress);
         Challenge challenge = challenge(10, null);
+        when(progress.statsFor(10L)).thenReturn(new ChallengeStats(0, 0, null, null));
 
         ChallengeDetailResponse visitor = mapper.detail(challenge, null);
         ChallengeDetailResponse answered = mapper.detail(challenge, mapper.submission(submission(1, challenge, member(1, "a@b.c")), 1L, 0));
