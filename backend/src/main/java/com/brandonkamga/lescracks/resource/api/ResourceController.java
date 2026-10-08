@@ -26,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 
+import org.springframework.http.ContentDisposition;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
@@ -61,16 +63,20 @@ public class ResourceController {
         return mapper.toResponse(resources.requirePublishedBySlugOrId(slug));
     }
 
+    /** `inline=true` serves the file for the in-site reader; otherwise the browser saves it. */
     @GetMapping("/{id}/download")
-    @Operation(summary = "Télécharger un ebook publié")
-    public ResponseEntity<InputStreamResource> download(@PathVariable Long id) {
+    @Operation(summary = "Télécharger ou lire un ebook publié")
+    public ResponseEntity<InputStreamResource> download(@PathVariable Long id, @RequestParam(defaultValue = "false") boolean inline) {
         Resource resource = resources.requirePublished(id);
         Ebook ebook = ebooks.findByResourceId(id)
                 .orElseThrow(() -> new NotFoundException("Cette ressource n'est pas un ebook."));
         var stored = storage.read(ebook.getDocument().getFile())
                 .orElseThrow(() -> new NotFoundException("Fichier", "id", id));
+        String filename = resource.getTitle() + extension(ebook.getDocument().getFormat());
+        ContentDisposition disposition = (inline ? ContentDisposition.inline() : ContentDisposition.attachment())
+                .filename(filename, StandardCharsets.UTF_8).build();
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getTitle() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
                 .contentType(MediaType.parseMediaType(ebook.getDocument().getFormat()))
                 .contentLength(stored.size())
                 .body(new InputStreamResource(stored.content()));
@@ -142,5 +148,16 @@ public class ResourceController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
         resources.delete(id);
+    }
+
+    /** The saved file keeps a usable extension: an ebook named after its title alone opens with nothing. */
+    private static String extension(String contentType) {
+        return switch (contentType == null ? "" : contentType.toLowerCase()) {
+            case "application/pdf" -> ".pdf";
+            case "application/epub+zip" -> ".epub";
+            case "application/zip" -> ".zip";
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> ".docx";
+            default -> "";
+        };
     }
 }
