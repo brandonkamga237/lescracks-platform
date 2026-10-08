@@ -11,8 +11,8 @@ import java.time.Instant;
 /**
  * One episode of LesCracks Talk: a conversation hosted on YouTube.
  *
- * The platform only references the video — the file lives on YouTube and the
- * thumbnail is derived from the URL, so nothing media-related is stored here.
+ * The platform only references the video — the file lives on YouTube. The thumbnail is
+ * derived from the URL unless the admin uploads a cover, which then wins everywhere.
  */
 @Entity
 @Table(name = "talk_videos")
@@ -38,6 +38,10 @@ public class TalkVideo {
 
     @Column(name = "youtube_url", nullable = false, length = 1000)
     private String youtubeUrl;
+
+    /** Uploaded cover (/api/files/…); null means the YouTube thumbnail is shown. */
+    @Column(name = "cover_image", length = 1000)
+    private String coverImage;
 
     @Column(name = "duration_minutes")
     private Integer durationMinutes;

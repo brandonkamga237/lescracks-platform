@@ -1,6 +1,7 @@
 import { memo, useState } from 'react';
 import { Play } from 'lucide-react';
 
+import ShareButton from '@/components/common/ShareButton';
 import { youtubeThumbnail, youtubeWatchUrl } from '@/lib/youtube';
 import type { TalkVideo } from '@/services/types';
 
@@ -13,7 +14,7 @@ interface TalkSpotlightProps {
 /** The latest episode, announced like the cover of the issue. */
 function TalkSpotlight({ video }: TalkSpotlightProps) {
   const [failedThumb, setFailedThumb] = useState(false);
-  const thumbnail = youtubeThumbnail(video.youtubeUrl);
+  const thumbnail = video.coverImage || youtubeThumbnail(video.youtubeUrl);
   const meta = [
     video.guest ? `avec ${video.guest}` : null,
     video.durationMinutes ? `${video.durationMinutes} min` : null,
@@ -65,15 +66,19 @@ function TalkSpotlight({ video }: TalkSpotlightProps) {
         </h3>
         <p className="mt-6 line-clamp-3 max-w-xl text-base leading-normal text-t3">{video.description}</p>
         {meta && <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.1em] text-t4">{meta}</p>}
-        <a
-          href={youtubeWatchUrl(video.youtubeUrl)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-primary mt-8"
-        >
-          Regarder l’épisode
-          <Play className="h-4 w-4" aria-hidden />
-        </a>
+        <div className="mt-8 flex flex-wrap items-center gap-3">
+          <a
+            href={youtubeWatchUrl(video.youtubeUrl)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary"
+          >
+            Regarder l’épisode
+            <Play className="h-4 w-4" aria-hidden />
+          </a>
+          {/* The episode lives on YouTube, so that is the link shared: its own preview card is the video. */}
+          <ShareButton title={video.title} url={youtubeWatchUrl(video.youtubeUrl)} label="Partager" />
+        </div>
       </div>
     </article>
   );

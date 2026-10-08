@@ -14,5 +14,6 @@ public record TalkRequest(
         @NotBlank @Size(max = 1000) String youtubeUrl,
         Integer durationMinutes,
         Instant publishedAt,
-        TalkStatus status) {
+        TalkStatus status,
+        @Size(max = 1000) String coverImage) {
 }

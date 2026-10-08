@@ -68,10 +68,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return <div className="min-h-[100dvh] bg-black pb-[calc(3.5rem+env(safe-area-inset-bottom))] text-t1 selection:bg-gold-400/30 lg:pb-0">
     <a href="#admin-content" className="sr-only z-[60] rounded bg-gold-400 px-5 py-3 text-black focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Aller au contenu</a>
-    <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-line-soft bg-noir-900 px-5 py-8 lg:flex">
-      <Link to="/admin" aria-label="LesCracks, vue d’ensemble" className="mb-10 px-3"><LesCracksLogo className="h-8 w-auto" /><span className="label mt-3 block">Administration</span></Link>
+    {/* Scrolls on its own: on a short laptop screen the last sections and « Voir le site public » were cut off. */}
+    <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col overflow-y-auto border-r border-line-soft bg-noir-900 px-5 py-6 lg:flex">
+      <Link to="/admin" aria-label="LesCracks, vue d’ensemble" className="mb-8 shrink-0 px-3"><LesCracksLogo className="h-8 w-auto" /><span className="label mt-3 block">Administration</span></Link>
       <WorkspaceNav />
-      <Link to="/" className="mt-auto flex min-h-11 items-center justify-between rounded border border-line-soft px-4 text-sm text-t3 transition-colors hover:border-gold-400/40 hover:text-t1">Voir le site public<ArrowUpRight className="h-4 w-4" aria-hidden /></Link>
+      <Link to="/" className="mt-auto flex min-h-11 shrink-0 items-center justify-between rounded border border-line-soft px-4 text-sm text-t3 transition-colors hover:border-gold-400/40 hover:text-t1">Voir le site public<ArrowUpRight className="h-4 w-4" aria-hidden /></Link>
     </aside>
     <div className="lg:pl-64">
       <header className="mode-raised sticky top-0 z-30 border-b border-line-soft px-4 sm:px-8">
