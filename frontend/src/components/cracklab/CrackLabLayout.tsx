@@ -27,7 +27,7 @@ const SECTIONS: readonly Section[] = [
 export function CrackLabMark({ className = '' }: { className?: string }) {
   return (
     <span className={`font-mono font-bold tracking-tight text-t1 ${className}`}>
-      Crack<span className="text-gold-ink">Lab</span><span aria-hidden className="text-gold-ink motion-safe:animate-pulse">_</span>
+      Crack<span className="text-gold-ink">Lab</span>
     </span>
   );
 }
@@ -48,7 +48,7 @@ export default function CrackLabLayout({ children }: CrackLabLayoutProps) {
     <div className="flex min-h-screen flex-col bg-black pb-[calc(3.5rem+env(safe-area-inset-bottom))] text-t1 lg:pb-0">
       <a href="#cracklab-content" className="sr-only z-[60] rounded bg-gold px-5 py-3 font-medium text-black focus:not-sr-only focus:fixed focus:left-5 focus:top-3">Aller au contenu</a>
 
-      <header className="sticky top-0 z-40 border-b border-line bg-noir-900/95 backdrop-blur supports-[backdrop-filter]:bg-noir-900/80">
+      <header className="sticky top-0 z-40 border-b border-line-soft bg-black">
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-5 sm:px-8 lg:h-16">
           <Link to="/cracklab" aria-label="CrackLab, accueil" className="flex shrink-0 items-baseline gap-2">
             <CrackLabMark className="text-lg" />
@@ -67,11 +67,10 @@ export default function CrackLabLayout({ children }: CrackLabLayoutProps) {
             {progress && (
               // Always in sight: the streak to keep and the XP to grow are what bring a member back.
               <Link to="/cracklab/moi" aria-label={`Niveau ${progress.level.name}, ${progress.xp} XP, série de ${progress.streak} semaines`}
-                className="flex h-9 items-center gap-2.5 rounded-full border border-line bg-noir-800 pl-2.5 pr-3 font-mono text-xs font-semibold tabular-nums transition-colors hover:border-gold-400/40">
+                className="flex h-9 items-center gap-3 rounded border border-line px-3 font-mono text-xs tabular-nums transition-colors duration-150 hover:border-line-strong">
                 <span className={`flex items-center gap-1 ${progress.activeThisWeek ? 'text-gold-ink' : 'text-t4'}`}><Flame className="h-3.5 w-3.5" aria-hidden />{progress.streak}</span>
-                <span aria-hidden className="h-3.5 w-px bg-line" />
-                <span className="text-t1">{progress.xp}<span className="text-t4"> XP</span></span>
-                <span className="hidden rounded bg-gold-400 px-1 py-0.5 text-[10px] text-black sm:inline">N{progress.level.number}</span>
+                <span className="text-t1">{progress.xp}<span className="text-t4"> xp</span></span>
+                <span className="hidden text-t4 sm:inline">N{progress.level.number}</span>
               </Link>
             )}
             <Link to="/" className="hidden items-center gap-1.5 text-sm text-t3 transition-colors hover:text-t1 sm:inline-flex">
@@ -89,7 +88,7 @@ export default function CrackLabLayout({ children }: CrackLabLayoutProps) {
         </div>
       </header>
 
-      <main id="cracklab-content" tabIndex={-1} key={pathname} className="flex-1 animate-page-in outline-none">
+      <main id="cracklab-content" tabIndex={-1} className="flex-1 outline-none">
         {children}
       </main>
 

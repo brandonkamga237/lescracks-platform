@@ -33,7 +33,7 @@ class ShareCardRendererTest {
     @DisplayName("every card is a 1200×630 PNG under 300 KB, even with a very long title")
     void cardsFitPreviewConstraints() throws IOException {
         List<BufferedImage> cards = List.of(
-                check("challenge", renderer.challenge("Une API de paiement qui s’effondre sous la charge du vendredi soir et du Black Friday réunis",
+                check("challenge", renderer.challenge("api-de-paiement", "Une API de paiement qui s’effondre sous la charge du vendredi soir et du Black Friday réunis",
                         "Intermédiaire", 2, "Backend", "12 participants · moyenne 64/100")),
                 check("result", renderer.result("Awa N.", "78", "100", "Une API de paiement qui s’effondre sous la charge",
                         "Mieux que 72 % des participants", "Apprenti")),

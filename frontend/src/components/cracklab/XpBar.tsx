@@ -15,11 +15,11 @@ export default function XpBar({ xp, level, nextLevel, className = '' }: XpBarPro
     <div className={className}>
       <div className="flex items-baseline justify-between gap-3 font-mono text-xs tabular-nums">
         <span className="text-t2">{xp} XP</span>
-        <span className="text-t4">{nextLevel ? `${nextLevel.minXp - xp} XP avant ${nextLevel.name}` : 'Niveau maximum'}</span>
+        <span className="text-t4">{nextLevel ? `${nextLevel.minXp - xp} avant ${nextLevel.name}` : 'Niveau maximum'}</span>
       </div>
       <div role="progressbar" aria-label="Progression vers le niveau suivant" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(Math.min(1, ratio) * 100)}
-        className="mt-2 h-2 overflow-hidden rounded-full bg-noir-700">
-        <div className={`h-full origin-left rounded-full bg-gradient-to-r from-gold-500 to-gold-300 motion-safe:animate-grow-x ${fillClass(ratio)}`} />
+        className="mt-2 h-0.5 bg-line">
+        <div className={`h-full bg-gold-400 ${fillClass(ratio)}`} />
       </div>
     </div>
   );
