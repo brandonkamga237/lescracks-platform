@@ -91,7 +91,7 @@ export default function AdminCrackLabGrade() {
               <h2 id="answer-heading" className="font-display text-lg font-bold text-t1">La réponse de {submission.author.displayName}</h2>
               <p className="text-xs text-t4">{dateFormat.format(new Date(submission.createdAt))} · {submission.wordCount} mots{challenge.maxWords ? ` / ${challenge.maxWords}` : ''}</p>
             </div>
-            <div className="mt-6"><Prose text={submission.answer} /></div>
+            <div className="mt-6"><Prose text={submission.answer} compact /></div>
           </section>
           <details className="group rounded-lg border border-line-soft bg-card p-5 sm:p-7">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 font-display text-lg font-bold text-t1">
