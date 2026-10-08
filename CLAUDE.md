@@ -120,7 +120,7 @@ Before any commit or PR:
 ## Current product scope (September 2026)
 - The current backend controllers and DTOs are the source of truth when older architecture notes above differ from the code.
 - Do not restore removed programmes, applications, participations, attestations, articles, or SEO snapshot controllers as part of frontend work. Do not invent progress, favourites, event registration, or personalised history without backend support.
-- Resources currently use `EBOOK` and `EXTERNAL_VIDEO`; public event detail routes use numeric IDs. Browsing resources needs no account; a PDF ebook gives visitors a free 10-page excerpt (cut by the server), the full book and every download are for members.
+- Resources currently use `EBOOK` and `EXTERNAL_VIDEO`; public event detail routes use numeric IDs. Browsing resources needs no account; a PDF ebook shows everyone a preview of its first pages (cut by the server), and downloading it is for members. Ebooks are not read in full on the site. Marketing copy avoids "gratuit" and any mention of French or francophone.
 - Preserve the black, anthracite, white and gold palette (`#d4af37`). Visitor, member and administrator experiences must use a coherent shared session and actual backend data.
 - Local member/admin authentication uses backend sessions; existing OIDC authentication is a separate transport. Do not send a stale OIDC bearer token alongside local cookie authentication.
 - Validate frontend changes with `pnpm typecheck`, `pnpm lint`, and `pnpm build`. Browser checks using API fixtures verify UI behaviour, not live backend integration.

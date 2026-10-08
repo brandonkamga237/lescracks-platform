@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 
-/** Cuts the free excerpt of a PDF on the server, so a visitor never receives more than its first pages. */
+/** Cuts the first pages of a PDF on the server: the preview never carries the rest of the book. */
 @Component
 public class PdfExcerpts {
 

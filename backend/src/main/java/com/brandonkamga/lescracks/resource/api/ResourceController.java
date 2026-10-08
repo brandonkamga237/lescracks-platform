@@ -42,8 +42,8 @@ public class ResourceController {
     private final StorageService storage;
     private final PdfExcerpts excerpts;
 
-    /** Pages a visitor can read before an account is asked for. */
-    static final int FREE_PAGES = 10;
+    /** Pages shown in an ebook's preview; reading further means downloading it. */
+    static final int PREVIEW_PAGES = 5;
 
     public ResourceController(ResourceService resources, ResourceMapper mapper,
                               EbookRepository ebooks, StorageService storage, PdfExcerpts excerpts) {
@@ -70,40 +70,38 @@ public class ResourceController {
         return mapper.toResponse(resources.requirePublishedBySlugOrId(slug));
     }
 
-    /** Free excerpt of a PDF ebook for visitors: its first pages, with the full length in X-Total-Pages. */
+    /** Preview of a PDF ebook, open to everyone: its first pages, with the full length in X-Total-Pages. */
     @GetMapping("/{id}/preview")
-    @Operation(summary = "Lire l'extrait gratuit d'un ebook PDF")
+    @Operation(summary = "Aperçu des premières pages d'un ebook PDF")
     public ResponseEntity<byte[]> preview(@PathVariable Long id) {
         resources.requirePublished(id);
         Ebook ebook = ebooks.findByResourceId(id)
                 .orElseThrow(() -> new NotFoundException("Cette ressource n'est pas un ebook."));
         if (!ebook.getDocument().getFormat().toLowerCase().contains("pdf")) {
-            throw new BadRequestException("L'extrait n'existe que pour les ebooks au format PDF.");
+            throw new BadRequestException("L'aperçu n'existe que pour les ebooks au format PDF.");
         }
         var stored = storage.read(ebook.getDocument().getFile())
                 .orElseThrow(() -> new NotFoundException("Fichier", "id", id));
-        PdfExcerpts.Excerpt excerpt = excerpts.firstPages(stored.content(), FREE_PAGES);
+        PdfExcerpts.Excerpt excerpt = excerpts.firstPages(stored.content(), PREVIEW_PAGES);
         return ResponseEntity.ok()
                 .header("X-Total-Pages", String.valueOf(excerpt.totalPages()))
-                .header("X-Free-Pages", String.valueOf(excerpt.pages()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.inline().filename("extrait.pdf").build().toString())
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.inline().filename("apercu.pdf").build().toString())
                 .cacheControl(CacheControl.maxAge(Duration.ofMinutes(10)))
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(excerpt.bytes());
     }
 
-    /** Members only (SecurityConfig): `inline=true` serves the file for the in-site reader; otherwise the browser saves it. */
+    /** Members only (SecurityConfig). Fetched by the site's API client, so OIDC members send their token too. */
     @GetMapping("/{id}/download")
-    @Operation(summary = "Télécharger ou lire un ebook publié")
-    public ResponseEntity<InputStreamResource> download(@PathVariable Long id, @RequestParam(defaultValue = "false") boolean inline) {
+    @Operation(summary = "Télécharger un ebook publié")
+    public ResponseEntity<InputStreamResource> download(@PathVariable Long id) {
         Resource resource = resources.requirePublished(id);
         Ebook ebook = ebooks.findByResourceId(id)
                 .orElseThrow(() -> new NotFoundException("Cette ressource n'est pas un ebook."));
         var stored = storage.read(ebook.getDocument().getFile())
                 .orElseThrow(() -> new NotFoundException("Fichier", "id", id));
         String filename = resource.getTitle() + extension(ebook.getDocument().getFormat());
-        ContentDisposition disposition = (inline ? ContentDisposition.inline() : ContentDisposition.attachment())
-                .filename(filename, StandardCharsets.UTF_8).build();
+        ContentDisposition disposition = ContentDisposition.attachment().filename(filename, StandardCharsets.UTF_8).build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
                 .contentType(MediaType.parseMediaType(ebook.getDocument().getFormat()))
