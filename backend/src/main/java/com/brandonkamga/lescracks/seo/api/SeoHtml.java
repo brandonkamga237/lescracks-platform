@@ -130,6 +130,12 @@ public final class SeoHtml {
         return this;
     }
 
+    /** A main section of the site: its link and one sentence, what search engines show under a site's sitelinks. */
+    public SeoHtml section(String title, String href, String text) {
+        body.add("<section><h2><a href=\"" + escape(href) + "\">" + escape(title) + "</a></h2><p>" + escape(text) + "</p></section>");
+        return this;
+    }
+
     public SeoHtml links(String heading, List<Link> items) {
         body.add("<h2>" + escape(heading) + "</h2><ul>");
         items.forEach(l -> body.add("<li><a href=\"" + escape(l.href()) + "\">" + escape(l.label()) + "</a></li>"));
@@ -174,6 +180,12 @@ public final class SeoHtml {
         out.append("<title>").append(escape(title)).append("</title>");
         out.append("<meta name=\"description\" content=\"").append(escape(description)).append("\">");
         out.append("<link rel=\"canonical\" href=\"").append(escape(canonical)).append("\">");
+        // Google's favicon crawler reads the page it is served, so the icons are declared here too.
+        out.append("<link rel=\"icon\" href=\"/favicon.ico\" sizes=\"48x48\">");
+        out.append("<link rel=\"icon\" type=\"image/png\" sizes=\"96x96\" href=\"/favicon-96x96.png\">");
+        out.append("<link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">");
+        out.append("<link rel=\"manifest\" href=\"/site.webmanifest\">");
+        out.append("<meta name=\"theme-color\" content=\"#000000\">");
         out.append("<meta property=\"og:title\" content=\"").append(escape(title)).append("\">");
         out.append("<meta property=\"og:description\" content=\"").append(escape(description)).append("\">");
         out.append("<meta property=\"og:url\" content=\"").append(escape(canonical)).append("\">");
