@@ -6,6 +6,7 @@ import com.brandonkamga.lescracks.resource.domain.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.identity.infra.UserRepository;
 import com.brandonkamga.lescracks.resource.infra.EbookRepository;
+import com.brandonkamga.lescracks.resource.infra.PdfExcerpts;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 
 import org.junit.jupiter.api.DisplayName;
@@ -49,6 +50,7 @@ class SecurityConfigTest {
     @MockitoBean private ResourceMapper mapper;
     @MockitoBean private EbookRepository ebooks;
     @MockitoBean private StorageService storage;
+    @MockitoBean private PdfExcerpts excerpts;
     // The security chain registers the last-seen touch, which needs the users table.
     @MockitoBean private UserRepository users;
 
@@ -92,5 +94,21 @@ class SecurityConfigTest {
     @DisplayName("a write is refused before it reaches the service")
     void deleteRejectsAnonymous() throws Exception {
         mockMvc.perform(delete("/api/resources/admin/1")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("the full ebook is for members: a visitor gets 401 and is sent to sign in")
+    void fullEbookNeedsAnAccount() throws Exception {
+        mockMvc.perform(get("/api/resources/1/download"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
+    }
+
+    @Test
+    @DisplayName("the free excerpt stays open to everyone")
+    void excerptIsOpen() throws Exception {
+        when(resources.requirePublished(1L)).thenThrow(new com.brandonkamga.lescracks.shared.exception.NotFoundException("Resource", "id", 1L));
+
+        mockMvc.perform(get("/api/resources/1/preview")).andExpect(status().isNotFound());
     }
 }

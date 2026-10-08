@@ -10,7 +10,9 @@ import com.brandonkamga.lescracks.resource.domain.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
 import com.brandonkamga.lescracks.resource.infra.EbookRepository;
+import com.brandonkamga.lescracks.resource.infra.PdfExcerpts;
 import com.brandonkamga.lescracks.shared.dto.PageResponse;
+import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 
@@ -26,8 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 
-import org.springframework.http.ContentDisposition;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 
 @RestController
@@ -38,13 +40,18 @@ public class ResourceController {
     private final ResourceMapper mapper;
     private final EbookRepository ebooks;
     private final StorageService storage;
+    private final PdfExcerpts excerpts;
+
+    /** Pages a visitor can read before an account is asked for. */
+    static final int FREE_PAGES = 10;
 
     public ResourceController(ResourceService resources, ResourceMapper mapper,
-                              EbookRepository ebooks, StorageService storage) {
+                              EbookRepository ebooks, StorageService storage, PdfExcerpts excerpts) {
         this.resources = resources;
         this.mapper = mapper;
         this.ebooks = ebooks;
         this.storage = storage;
+        this.excerpts = excerpts;
     }
 
     @GetMapping
@@ -63,7 +70,29 @@ public class ResourceController {
         return mapper.toResponse(resources.requirePublishedBySlugOrId(slug));
     }
 
-    /** `inline=true` serves the file for the in-site reader; otherwise the browser saves it. */
+    /** Free excerpt of a PDF ebook for visitors: its first pages, with the full length in X-Total-Pages. */
+    @GetMapping("/{id}/preview")
+    @Operation(summary = "Lire l'extrait gratuit d'un ebook PDF")
+    public ResponseEntity<byte[]> preview(@PathVariable Long id) {
+        resources.requirePublished(id);
+        Ebook ebook = ebooks.findByResourceId(id)
+                .orElseThrow(() -> new NotFoundException("Cette ressource n'est pas un ebook."));
+        if (!ebook.getDocument().getFormat().toLowerCase().contains("pdf")) {
+            throw new BadRequestException("L'extrait n'existe que pour les ebooks au format PDF.");
+        }
+        var stored = storage.read(ebook.getDocument().getFile())
+                .orElseThrow(() -> new NotFoundException("Fichier", "id", id));
+        PdfExcerpts.Excerpt excerpt = excerpts.firstPages(stored.content(), FREE_PAGES);
+        return ResponseEntity.ok()
+                .header("X-Total-Pages", String.valueOf(excerpt.totalPages()))
+                .header("X-Free-Pages", String.valueOf(excerpt.pages()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.inline().filename("extrait.pdf").build().toString())
+                .cacheControl(CacheControl.maxAge(Duration.ofMinutes(10)))
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(excerpt.bytes());
+    }
+
+    /** Members only (SecurityConfig): `inline=true` serves the file for the in-site reader; otherwise the browser saves it. */
     @GetMapping("/{id}/download")
     @Operation(summary = "Télécharger ou lire un ebook publié")
     public ResponseEntity<InputStreamResource> download(@PathVariable Long id, @RequestParam(defaultValue = "false") boolean inline) {
