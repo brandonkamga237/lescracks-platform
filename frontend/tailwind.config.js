@@ -160,9 +160,6 @@ export default {
     animation: {
       rise: 'rise 300ms var(--ease-out) both',
       'page-in': 'page-in 180ms var(--ease-out) both',
-      // CrackLab rewards: bars fill from the left, a score or badge lands with a small overshoot.
-      'grow-x': 'grow-x 900ms var(--ease-out) both',
-      pop: 'pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both',
     },
     keyframes: {
       rise: {
@@ -172,14 +169,6 @@ export default {
       'page-in': {
         from: { opacity: '0' },
         to: { opacity: '1' },
-      },
-      'grow-x': {
-        from: { transform: 'scaleX(0)' },
-        to: { transform: 'scaleX(1)' },
-      },
-      pop: {
-        from: { opacity: '0', transform: 'scale(0.92)' },
-        to: { opacity: '1', transform: 'scale(1)' },
       },
     },
     // Overrides Tailwind's weak defaults so every existing `ease-out` / `ease-in-out` gets the strong curve.
