@@ -75,7 +75,7 @@ export default function RessourceDetail() {
               {loaded.categoryName && <span className="label">{loaded.categoryName}</span>}
             </div>
             <h1 className="mt-5 break-words font-display text-5xl font-bold leading-[0.94] tracking-tight text-t1 sm:text-6xl lg:text-7xl lg:leading-[0.9]">{loaded.title}</h1>
-            {loaded.createdAt && <p className="label mt-6">Publié le <time dateTime={loaded.createdAt}>{dateFormat.format(new Date(loaded.createdAt))}</time></p>}
+            {(loaded.publishedAt ?? loaded.createdAt) && <p className="label mt-6">Publié le <time dateTime={loaded.publishedAt ?? loaded.createdAt}>{dateFormat.format(new Date(loaded.publishedAt ?? loaded.createdAt))}</time></p>}
           </header>
         </>}
         </div>
