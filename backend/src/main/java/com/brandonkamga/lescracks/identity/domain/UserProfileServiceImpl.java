@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -26,6 +27,12 @@ public class UserProfileServiceImpl implements UserProfileService {
         this.users = users;
         this.passwords = passwords;
         this.storage = storage;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<User> find(String email) {
+        return users.findByEmailIgnoreCase(email);
     }
 
     @Override

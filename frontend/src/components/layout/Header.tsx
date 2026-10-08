@@ -18,6 +18,7 @@ const LINKS: readonly NavLinkDef[] = [
   { to: '/ressources', label: 'Bibliothèque' },
   { to: '/evenements', label: 'Événements' },
   { to: '/talk', label: 'Talk', highlight: true },
+  { to: '/cracklab', label: 'CrackLab' },
   { to: '/a-propos', label: 'À propos' },
 ];
 

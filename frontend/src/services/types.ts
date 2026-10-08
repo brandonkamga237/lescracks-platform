@@ -236,3 +236,69 @@ export interface UserProfileUpdate {
   location?: string;
   socialLinks?: Record<string, string>;
 }
+// ── CrackLab ──────────────────────────────────────────────────────────────
+
+export type ChallengeDifficulty = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+export type ChallengeStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+export type SubmissionStatus = 'SUBMITTED' | 'GRADED';
+
+export interface ChallengeCriterion { id: number; label: string; maxPoints: number; }
+
+export interface ChallengeSummary {
+  id: number;
+  slug: string;
+  title: string;
+  category: string;
+  difficulty: ChallengeDifficulty;
+  tags: string[];
+  expectedFormat?: string;
+  maxWords?: number;
+  totalPoints: number;
+  submissionCount: number;
+  publishedAt?: string;
+}
+
+/** `referenceSolution` and `mySubmission` are set only once the viewer has answered. */
+export interface ChallengeDetail extends ChallengeSummary {
+  problem: string;
+  constraints?: string;
+  criteria: ChallengeCriterion[];
+  referenceSolution?: string;
+  mySubmission?: ChallengeSubmission;
+}
+
+export interface CrackLabMember { displayName: string; avatarUrl?: string; }
+
+export interface SubmissionEvaluation { criterionId: number; label: string; maxPoints: number; points: number; feedback?: string; }
+
+export interface ChallengeSubmission {
+  id: number;
+  challengeId: number;
+  challengeSlug: string;
+  challengeTitle: string;
+  author: CrackLabMember;
+  answer: string;
+  wordCount: number;
+  technicalScore?: number;
+  totalPoints: number;
+  voteScore: number;
+  myVote: -1 | 0 | 1;
+  mine: boolean;
+  status: SubmissionStatus;
+  createdAt: string;
+  gradedAt?: string;
+  evaluations: SubmissionEvaluation[];
+}
+
+export interface RankingEntry { rank: number; member: CrackLabMember; totalScore: number; challenges: number; me: boolean; }
+
+export interface AdminChallenge extends ChallengeDetail {
+  referenceSolution: string;
+  status: ChallengeStatus;
+  createdBy: string;
+  pendingCount: number;
+  /** A graded answer exists: criteria and points are frozen, labels only. */
+  gradingLocked: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

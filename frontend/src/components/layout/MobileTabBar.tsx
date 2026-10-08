@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { ArrowRight, BookOpen, CalendarDays, CircleUser, Home, Info, LogOut, Podcast, Shield, User } from 'lucide-react';
+import { ArrowRight, BookOpen, CalendarDays, CircleUser, FlaskConical, Info, LogOut, Podcast, Shield, User } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -13,10 +13,11 @@ interface TabDef {
 }
 
 const TABS: readonly TabDef[] = [
-  { to: '/', label: 'Accueil', icon: Home },
+  // No home tab: the logo in the header already leads home, and CrackLab earns the slot.
   { to: '/ressources', label: 'Biblio', icon: BookOpen },
   { to: '/evenements', label: 'Agenda', icon: CalendarDays },
   { to: '/talk', label: 'Talk', icon: Podcast },
+  { to: '/cracklab', label: 'CrackLab', icon: FlaskConical },
 ];
 
 const ACCOUNT_PATHS = ['/profil', '/connexion', '/inscription'];
