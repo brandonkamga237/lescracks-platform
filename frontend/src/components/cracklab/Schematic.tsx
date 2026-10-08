@@ -44,7 +44,7 @@ function Shape({ kind, x, y }: { kind: NodeKind; x: number; y: number }) {
     case 'cache':
       return <rect x={left} y={top} width={NODE_W} height={NODE_H} rx={2} strokeDasharray="3 2" />;
     case 'queue':
-      return <g><rect x={left} y={top} width={NODE_W} height={NODE_H} rx={2} />{[1, 2, 3].map((i) => <line key={i} x1={left + i * 7} y1={top + 5} x2={left + i * 7} y2={top + NODE_H - 5} />)}</g>;
+      return <g><rect x={left} y={top} width={NODE_W} height={NODE_H} rx={2} />{[1, 2, 3].map((i) => <line key={i} x1={left + NODE_W - i * 6} y1={top + 5} x2={left + NODE_W - i * 6} y2={top + NODE_H - 5} />)}</g>;
     case 'store':
       return <path d={`M${left} ${top} h${NODE_W - 8} l8 8 v${NODE_H - 8} h${-NODE_W} z M${left + NODE_W - 8} ${top} v8 h8`} />;
     default:
@@ -132,7 +132,7 @@ function Schematic({ seed, category, labels = true, className = '' }: SchematicP
         <g key={`${node.x}-${node.y}`} className={node === hot ? 'fill-gold-400/10 stroke-gold-400' : 'fill-noir-900 stroke-t3'}>
           <Shape kind={node.kind} x={node.x} y={node.y} />
           {labels && (
-            <text x={node.x} y={node.y + (node.kind === 'db' ? 6 : node.kind === 'client' ? 5 : 3)} textAnchor="middle"
+            <text x={node.kind === 'queue' ? node.x - 9 : node.x} y={node.y + (node.kind === 'db' ? 6 : node.kind === 'client' ? 5 : 3)} textAnchor="middle"
               className={`stroke-none font-mono text-[7.5px] ${node === hot ? 'fill-gold-400' : 'fill-t3'}`}>{node.label}</text>
           )}
         </g>
