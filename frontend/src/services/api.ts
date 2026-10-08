@@ -64,6 +64,7 @@ export const api = {
   unlinkIdentity: (provider: AuthProvider) => http.delete<void>(`/me/identities/${provider}`),
   updateProfile: (body: UserProfileUpdate) => http.patch<UserProfile>('/me', body),
   onboard: (answers: OnboardingAnswers) => http.put<UserProfile>('/me/onboarding', answers),
+  downloadEbook: (id: number) => http.download(`/resources/${id}/download`),
   uploadAvatar: (file: File) => {
     const form = new FormData();
     form.append('file', file);

@@ -50,8 +50,8 @@ export default function SignupNudge() {
     <aside aria-labelledby="nudge-title"
       className="fixed inset-x-2 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-50 rounded-lg border border-line-strong bg-noir-900 p-5 shadow-[0_8px_30px_rgba(0,0,0,0.6)] sm:inset-x-auto sm:left-4 sm:w-96 lg:bottom-4">
       <button type="button" onClick={later} aria-label="Fermer" className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded text-t4 transition-colors hover:text-t1"><X className="h-4 w-4" aria-hidden /></button>
-      <p id="nudge-title" className="pr-8 font-medium text-t1">Crée ton compte gratuit</p>
-      <p className="mt-1.5 text-sm leading-relaxed text-t3">Les ebooks en entier et en téléchargement, les challenges CrackLab et les ateliers. Dix secondes avec Google.</p>
+      <p id="nudge-title" className="pr-8 font-medium text-t1">Crée ton compte LesCracks</p>
+      <p className="mt-1.5 text-sm leading-relaxed text-t3">Le téléchargement des ebooks, les challenges CrackLab et les ateliers. Dix secondes avec Google.</p>
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <button type="button" onClick={() => void socialSignIn('google', from)} className="btn-primary flex-1">Continuer avec Google</button>
         <Link to="/inscription" state={{ from }} onClick={() => setOpen(false)} className="btn-secondary flex-1">Avec mon email</Link>

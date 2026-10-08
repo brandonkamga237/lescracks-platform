@@ -97,16 +97,16 @@ class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("the full ebook is for members: a visitor gets 401 and is sent to sign in")
-    void fullEbookNeedsAnAccount() throws Exception {
+    @DisplayName("downloading an ebook is for members: a visitor gets 401 and is sent to sign in")
+    void downloadNeedsAnAccount() throws Exception {
         mockMvc.perform(get("/api/resources/1/download"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
     }
 
     @Test
-    @DisplayName("the free excerpt stays open to everyone")
-    void excerptIsOpen() throws Exception {
+    @DisplayName("the preview of the first pages stays open to everyone")
+    void previewIsOpen() throws Exception {
         when(resources.requirePublished(1L)).thenThrow(new com.brandonkamga.lescracks.shared.exception.NotFoundException("Resource", "id", 1L));
 
         mockMvc.perform(get("/api/resources/1/preview")).andExpect(status().isNotFound());
