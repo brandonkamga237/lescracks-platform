@@ -6,10 +6,15 @@ import Layout from '@/components/layout/Layout';
 import { Section } from '@/components/layout/Page';
 import SEO from '@/components/common/SEO';
 import NewsletterCard from '@/components/common/NewsletterCard';
+import PhoneField from '@/components/account/PhoneField';
+import { useApi } from '@/hooks/useApi';
+import { fillClass } from '@/lib/cracklab';
+import { FIELD_LABEL, GOAL_LABEL, SITUATION_LABEL } from '@/lib/memberProfile';
+import { countryName, displayPhone } from '@/lib/phone';
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
-import type { AuthProvider } from '@/services/types';
+import type { AuthProvider, MemberGoal, MemberSituation } from '@/services/types';
 
 const statusLabels = { ACTIVE: 'Actif', INACTIVE: 'Inactif', BANNED: 'Suspendu' };
 const providerLabels = { LOCAL: 'Email / mot de passe', GOOGLE: 'Google', GITHUB: 'GitHub' };
@@ -32,6 +37,11 @@ export default function Profile() {
     location: user?.location ?? '',
     socialLinks: user?.socialLinks ?? {},
   });
+  // '' when empty, null while what is typed is not a valid number yet.
+  const [phone, setPhone] = useState<string | null>(user?.phone ?? '');
+  const [details, setDetails] = useState({ situation: user?.situation, goal: user?.goal, interestIds: user?.interestIds ?? [], marketingConsent: user?.marketingConsent ?? false });
+  const categories = useApi((signal) => (user ? api.categories(signal) : Promise.resolve([])), [Boolean(user)]);
+  const categoryName = (id: number) => categories.data?.find((category) => category.id === id)?.name;
   const [newSocial, setNewSocial] = useState({ platform: '', url: '' });
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState<'save' | 'logout' | null>(null);
@@ -60,7 +70,9 @@ export default function Profile() {
       location: user?.location ?? '',
       socialLinks: user?.socialLinks ?? {},
     });
-  }, [user?.firstName, user?.lastName, user?.username, user?.bio, user?.location, user?.socialLinks]);
+    setPhone(user?.phone ?? '');
+    setDetails({ situation: user?.situation, goal: user?.goal, interestIds: user?.interestIds ?? [], marketingConsent: user?.marketingConsent ?? false });
+  }, [user]);
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -71,15 +83,27 @@ export default function Profile() {
       setError('Renseigne ton prénom et ton nom pour enregistrer les modifications.');
       return;
     }
+    if (phone === null) {
+      setFields({ phone: 'Ce numéro ne correspond pas au pays choisi.' });
+      setError('Vérifie ton numéro de téléphone, ou vide le champ.');
+      return;
+    }
     setBusy('save');
     try {
       await api.updateProfile({
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
         username: form.username.trim() || undefined,
+        // Sent back as is: the API replaces the photo with whatever it receives, nothing included.
+        avatarUrl: user?.avatarUrl,
         bio: form.bio.trim() || undefined,
         location: form.location.trim() || undefined,
         socialLinks: Object.keys(form.socialLinks).length ? form.socialLinks : undefined,
+        phone,
+        situation: details.situation,
+        goal: details.goal,
+        interestIds: details.interestIds,
+        marketingConsent: details.marketingConsent,
       });
       await refresh();
       setEditing(false);
@@ -187,6 +211,16 @@ export default function Profile() {
         <div className="flex items-center gap-5"><div aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gold-400/30 bg-gold-400/10 font-display text-2xl text-gold-ink">{user?.avatarUrl ? <img src={`/api/files/${user.avatarUrl}`} alt="" className="h-full w-full object-cover" /> : name ? name.charAt(0).toUpperCase() : <UserRound className="h-7 w-7" />}</div><div><p className="text-sm font-medium tracking-wide text-gold-ink">Ton espace personnel</p><h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-t1 sm:text-4xl">Bonjour{user?.firstName ? `, ${user.firstName}` : name ? `, ${name}` : ''}.</h1><p className="mt-2 text-sm text-t4">Un point de départ pour ta prochaine découverte.</p></div></div>
         <button type="button" disabled={Boolean(busy)} onClick={() => void logout()} className="btn-secondary hidden self-start lg:inline-flex"><LogOut aria-hidden="true" className="h-4 w-4" />{busy === 'logout' ? 'Déconnexion…' : 'Me déconnecter'}</button>
       </header>
+      {user && user.completion < 100 && !editing && (
+        <section aria-labelledby="completion-heading" className="mt-8 rounded-lg border border-line bg-card p-5 sm:p-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <h2 id="completion-heading" className="font-sans text-base font-medium tracking-normal text-t1">Profil complété à <span className="font-mono tabular-nums text-gold-ink">{user.completion} %</span></h2>
+            <button type="button" onClick={() => { setEditing(true); setNotice(''); }} className="link text-sm">Compléter mon profil</button>
+          </div>
+          <div aria-hidden className="mt-3 h-1 rounded-full bg-noir-700"><div className={`h-full rounded-full bg-gold-400 ${fillClass(user.completion / 100)}`} /></div>
+          <p className="mt-4 text-sm text-t3">Il manque : {user.missing.map((field) => FIELD_LABEL[field].toLocaleLowerCase('fr')).join(', ')}. Ça nous aide à te proposer les bonnes ressources et les bons ateliers.</p>
+        </section>
+      )}
       <div className="mt-10 grid items-start gap-8 lg:grid-cols-[1.2fr_1fr]">
         <section className="rounded-lg border border-line-soft bg-card p-5 sm:p-8" aria-labelledby="profile-heading">
           <div className="flex items-start justify-between gap-4"><div><h2 id="profile-heading" className="font-display text-xl font-bold text-t1">Mes informations</h2><p className="mt-2 text-sm text-t4">Les informations liées à ton compte.</p></div>{user && !editing && <button type="button" disabled={Boolean(busy)} onClick={() => { setEditing(true); setNotice(''); }} className="min-h-11 px-2 text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Modifier</button>}</div>
@@ -202,7 +236,33 @@ export default function Profile() {
               {(['firstName', 'lastName'] as const).map((key) => <div key={key}><label htmlFor={`profile-${key}`} className="text-sm font-medium text-t2">{key === 'firstName' ? 'Prénom' : 'Nom'}</label><input id={`profile-${key}`} name={key} autoComplete={key === 'firstName' ? 'given-name' : 'family-name'} required value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} className="input mt-2" aria-invalid={Boolean(fields[key])} aria-describedby={fields[key] ? `profile-${key}-error` : undefined} />{fields[key] && <p id={`profile-${key}-error`} className="mt-2 text-sm text-error-ink">{fields[key]}</p>}</div>)}
               <div><label htmlFor="profile-username" className="text-sm font-medium text-t2">Nom d'utilisateur</label><input id="profile-username" name="username" value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value })} className="input mt-2" /></div>
               <div><label htmlFor="profile-bio" className="text-sm font-medium text-t2">Bio</label><textarea id="profile-bio" name="bio" rows={3} value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} className="input mt-2" /></div>
-              <div><label htmlFor="profile-location" className="text-sm font-medium text-t2">Localisation</label><input id="profile-location" name="location" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} className="input mt-2" /></div>
+              <div><label htmlFor="profile-location" className="text-sm font-medium text-t2">Ville</label><input id="profile-location" name="location" autoComplete="address-level2" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} className="input mt-2" /></div>
+              <PhoneField value={phone ?? ''} onChange={setPhone} hint="Jamais affiché publiquement. Le pays de ton compte est déduit de l’indicatif." />
+              <label className="flex items-start gap-3 text-sm text-t3">
+                <input type="checkbox" checked={details.marketingConsent} onChange={(event) => setDetails({ ...details, marketingConsent: event.target.checked })} className="mt-0.5 h-4 w-4 shrink-0 accent-[#d4af37]" />
+                <span>Recevoir les nouveautés par WhatsApp ou SMS.</span>
+              </label>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div><label htmlFor="profile-situation" className="text-sm font-medium text-t2">Situation</label>
+                  <select id="profile-situation" value={details.situation ?? ''} onChange={(event) => setDetails({ ...details, situation: (event.target.value || undefined) as MemberSituation | undefined })} className="input mt-2">
+                    <option value="">Choisir</option>{(Object.entries(SITUATION_LABEL) as [MemberSituation, string][]).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+                  </select></div>
+                <div><label htmlFor="profile-goal" className="text-sm font-medium text-t2">Objectif</label>
+                  <select id="profile-goal" value={details.goal ?? ''} onChange={(event) => setDetails({ ...details, goal: (event.target.value || undefined) as MemberGoal | undefined })} className="input mt-2">
+                    <option value="">Choisir</option>{(Object.entries(GOAL_LABEL) as [MemberGoal, string][]).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+                  </select></div>
+              </div>
+              <div>
+                <span className="text-sm font-medium text-t2">Centres d’intérêt</span>
+                <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Centres d’intérêt">
+                  {categories.data?.map((category) => {
+                    const on = details.interestIds.includes(category.id);
+                    return <button key={category.id} type="button" aria-pressed={on} disabled={!on && details.interestIds.length >= 10}
+                      onClick={() => setDetails({ ...details, interestIds: on ? details.interestIds.filter((id) => id !== category.id) : [...details.interestIds, category.id] })}
+                      className={`min-h-9 rounded border px-3 text-sm transition-colors disabled:opacity-40 ${on ? 'border-gold-400 bg-gold-400/10 text-t1' : 'border-line text-t3 hover:text-t1'}`}>{category.name}</button>;
+                  })}
+                </div>
+              </div>
               <div className="space-y-3">
                 <span className="text-sm font-medium text-t2">Liens sociaux</span>
                 {Object.entries(form.socialLinks).map(([platform, url]) => (
@@ -218,12 +278,13 @@ export default function Profile() {
                   <button type="button" disabled={!newSocial.platform.trim() || !newSocial.url.trim()} onClick={() => { if (!newSocial.platform.trim() || !newSocial.url.trim()) return; setForm({ ...form, socialLinks: { ...form.socialLinks, [newSocial.platform.trim().toLowerCase()]: newSocial.url.trim() } }); setNewSocial({ platform: '', url: '' }); }} className="text-sm text-gold-ink disabled:opacity-50">Ajouter</button>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-3"><button type="submit" className="btn-primary">{busy === 'save' && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}{busy === 'save' ? 'Enregistrement…' : 'Enregistrer'}</button><button type="button" onClick={() => { setEditing(false); setForm({ firstName: user.firstName, lastName: user.lastName, username: user.username ?? '', bio: user.bio ?? '', location: user.location ?? '', socialLinks: user.socialLinks ?? {} }); setNewSocial({ platform: '', url: '' }); setError(''); setFields({}); }} className="btn-secondary">Annuler</button></div>
+              <div className="flex flex-wrap gap-3"><button type="submit" className="btn-primary">{busy === 'save' && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}{busy === 'save' ? 'Enregistrement…' : 'Enregistrer'}</button><button type="button" onClick={() => { setEditing(false); setForm({ firstName: user.firstName, lastName: user.lastName, username: user.username ?? '', bio: user.bio ?? '', location: user.location ?? '', socialLinks: user.socialLinks ?? {} }); setPhone(user.phone ?? ''); setDetails({ situation: user.situation, goal: user.goal, interestIds: user.interestIds ?? [], marketingConsent: user.marketingConsent }); setNewSocial({ platform: '', url: '' }); setError(''); setFields({}); }} className="btn-secondary">Annuler</button></div>
             </fieldset>
           </form> : <dl className="mt-7 space-y-5">
             <div><dt className="text-xs tracking-wide text-t4">Nom complet</dt><dd className="mt-1 text-t1">{name || 'Non renseigné'}</dd></div>
             <div><dt className="text-xs tracking-wide text-t4">Adresse email</dt><dd className="mt-1 break-all text-t1">{email || 'Non disponible pour ce compte'}</dd></div>
-            {user && <div className="flex flex-wrap gap-x-12 gap-y-5"><div><dt className="text-xs tracking-wide text-t4">Nom d'utilisateur</dt><dd className="mt-1 text-t1">{user.username || 'Non renseigné'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Localisation</dt><dd className="mt-1 text-t1">{user.location || 'Non renseigné'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Statut du compte</dt><dd className="mt-1 text-t1">{statusLabels[user.status] ?? user.status}</dd></div><div><dt className="text-xs tracking-wide text-t4">Connexion</dt><dd className="mt-1 text-t1">{providerLabels[user.provider] ?? user.provider}</dd></div>{joinedLabel && <div><dt className="text-xs tracking-wide text-t4">Membre depuis le</dt><dd className="mt-1 text-t1"><time dateTime={user.createdAt}>{joinedLabel}</time></dd></div>}</div>}
+            {user && <div className="flex flex-wrap gap-x-12 gap-y-5"><div><dt className="text-xs tracking-wide text-t4">Nom d'utilisateur</dt><dd className="mt-1 text-t1">{user.username || 'Non renseigné'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Ville</dt><dd className="mt-1 text-t1">{user.location || 'Non renseignée'}{user.country ? `, ${countryName(user.country)}` : ''}</dd></div><div><dt className="text-xs tracking-wide text-t4">Téléphone</dt><dd className="mt-1 text-t1">{user.phone ? displayPhone(user.phone) : 'Non renseigné'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Situation</dt><dd className="mt-1 text-t1">{user.situation ? SITUATION_LABEL[user.situation] : 'Non renseignée'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Objectif</dt><dd className="mt-1 text-t1">{user.goal ? GOAL_LABEL[user.goal] : 'Non renseigné'}</dd></div><div><dt className="text-xs tracking-wide text-t4">Statut du compte</dt><dd className="mt-1 text-t1">{statusLabels[user.status] ?? user.status}</dd></div><div><dt className="text-xs tracking-wide text-t4">Connexion</dt><dd className="mt-1 text-t1">{providerLabels[user.provider] ?? user.provider}</dd></div>{joinedLabel && <div><dt className="text-xs tracking-wide text-t4">Membre depuis le</dt><dd className="mt-1 text-t1"><time dateTime={user.createdAt}>{joinedLabel}</time></dd></div>}</div>}
+            {user && user.interestIds.length > 0 && <div><dt className="text-xs tracking-wide text-t4">Centres d’intérêt</dt><dd className="mt-2 flex flex-wrap gap-1.5">{user.interestIds.map((id) => categoryName(id) && <span key={id} className="rounded border border-line px-2 py-0.5 text-xs text-t2">{categoryName(id)}</span>)}</dd></div>}
             {user?.bio && <div><dt className="text-xs tracking-wide text-t4">Bio</dt><dd className="mt-1 whitespace-pre-line text-t1">{user.bio}</dd></div>}
             {user?.socialLinks && Object.keys(user.socialLinks).length > 0 && <div><dt className="text-xs tracking-wide text-t4">Liens sociaux</dt><dd className="mt-1 space-y-1">{Object.entries(user.socialLinks).map(([platform, url]) => <a key={platform} href={url} target="_blank" rel="noopener noreferrer" className="block capitalize text-gold-ink underline-offset-4 hover:underline">{platform}</a>)}</dd></div>}
           </dl>}

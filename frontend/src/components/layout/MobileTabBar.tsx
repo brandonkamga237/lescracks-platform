@@ -33,7 +33,7 @@ export default function MobileTabBar() {
   const [leaving, setLeaving] = useState(false);
   const [failure, setFailure] = useState('');
   const { pathname, search } = useLocation();
-  const { isLoading, isSignedIn, isAdmin, name, email, signOut } = useSession();
+  const { isLoading, isSignedIn, isAdmin, name, email, signOut, user } = useSession();
   const destination = { from: `${pathname}${search}` };
   const accountActive = open || ACCOUNT_PATHS.includes(pathname);
 
@@ -108,6 +108,12 @@ export default function MobileTabBar() {
               )}
 
               <div>
+                {!isAdmin && user && user.completion < 100 && (
+                  <Link to="/profil" className={row}>
+                    <CircleUser className="h-4 w-4 text-gold-ink" aria-hidden />Compléter mon profil
+                    <span className="ml-auto font-mono text-xs tabular-nums text-gold-ink">{user.completion} %</span>
+                  </Link>
+                )}
                 <Link to="/a-propos" className={row}>
                   <Info className="h-4 w-4 text-t4" aria-hidden />À propos
                   <ArrowRight className="ml-auto h-4 w-4 text-t4" aria-hidden />

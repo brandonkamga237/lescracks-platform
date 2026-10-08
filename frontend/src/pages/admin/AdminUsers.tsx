@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Download, Eye, Search, Trash2 } from 'lucide-react';
 
+import { GOAL_LABEL, SITUATION_LABEL } from '@/lib/memberProfile';
+import { countryName, displayPhone } from '@/lib/phone';
 import { AdminAction, AdminConfirm, AdminModal, AdminPagination, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
 import { Kpi } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
@@ -51,6 +53,30 @@ function UserDetail({ id, onClose }: { id: number; onClose: () => void }) {
           <div>
             <dt className="text-xs text-t4">Inscrit le</dt>
             <dd className="mt-1 text-sm text-t1">{new Date(data.createdAt).toLocaleDateString('fr-FR')}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-t4">Téléphone</dt>
+            <dd className="mt-1 text-sm text-t1">{data.phone ? displayPhone(data.phone) : '—'}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-t4">Pays · ville</dt>
+            <dd className="mt-1 text-sm text-t1">{[countryName(data.country), data.location].filter(Boolean).join(' · ') || '—'}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-t4">Situation</dt>
+            <dd className="mt-1 text-sm text-t1">{data.situation ? SITUATION_LABEL[data.situation] : '—'}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-t4">Objectif</dt>
+            <dd className="mt-1 text-sm text-t1">{data.goal ? GOAL_LABEL[data.goal] : '—'}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-t4">Nouveautés WhatsApp / SMS</dt>
+            <dd className="mt-1 text-sm text-t1">{data.marketingConsent ? 'Accepté' : 'Non'}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-t4">Profil complété</dt>
+            <dd className="mt-1 font-mono text-sm tabular-nums text-t1">{data.completion} %</dd>
           </div>
         </dl>
       )}
@@ -165,14 +191,15 @@ export default function AdminUsers() {
       >
         {/* Desktop table */}
         <div className="hidden overflow-x-auto rounded-lg border border-line-soft bg-card sm:block">
-          <table className="w-full min-w-[680px] text-left text-sm">
+          <table className="w-full min-w-[820px] text-left text-sm">
             <thead className="border-b border-line-soft bg-noir-950/50 text-t4">
               <tr>
                 <th className="px-5 py-3 font-medium">Nom</th>
                 <th className="px-5 py-3 font-medium">Email</th>
                 <th className="px-5 py-3 font-medium">Statut</th>
                 <th className="px-5 py-3 font-medium">Connexion</th>
-                <th className="px-5 py-3 font-medium">Vérifié</th>
+                <th className="px-5 py-3 font-medium">Pays</th>
+                <th className="px-5 py-3 font-medium">Profil</th>
                 <th className="px-5 py-3 font-medium">Inscrit le</th>
                 <th className="px-5 py-3 font-medium text-right">Actions</th>
               </tr>
@@ -195,7 +222,8 @@ export default function AdminUsers() {
                     </select>
                   </td>
                   <td className="px-5 py-3 text-t3">{providerLabels[user.provider]}</td>
-                  <td className="px-5 py-3 text-t3">{user.verified ? 'Oui' : 'Non'}</td>
+                  <td className="px-5 py-3 text-t3">{countryName(user.country) || '—'}</td>
+                  <td className="px-5 py-3 font-mono tabular-nums text-t3">{user.completion} %</td>
                   <td className="px-5 py-3 text-t3">{new Date(user.createdAt).toLocaleDateString('fr-FR')}</td>
                   <td className="px-5 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
@@ -244,6 +272,8 @@ export default function AdminUsers() {
                   </select>
                   <span className="text-xs text-t3">{providerLabels[user.provider]}</span>
                   <span className="text-xs text-t3">{user.verified ? 'Vérifié' : 'Non vérifié'}</span>
+                  {user.country && <span className="text-xs text-t3">{countryName(user.country)}</span>}
+                  <span className="font-mono text-xs tabular-nums text-t3">Profil {user.completion} %</span>
                 </div>
               </div>
               <div className="ml-auto flex items-center gap-2" role="group" aria-label={`Actions pour ${fullName(user)}`}>
