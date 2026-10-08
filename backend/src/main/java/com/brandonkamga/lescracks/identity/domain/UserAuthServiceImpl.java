@@ -46,6 +46,8 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     @Override
     public User register(UserRegisterRequest request) {
+        // Checked before anything is saved: a mistyped number must not leave a half-created account.
+        if (request.phone() != null && !request.phone().isBlank()) PhoneNumbers.parse(request.phone());
         String email = request.email().trim().toLowerCase();
         User existing = users.findByEmailIgnoreCase(email).orElse(null);
         if (existing != null && (existing.getPasswordHash() != null || existing.getProvider() != AuthProvider.LOCAL)) {
@@ -70,6 +72,9 @@ public class UserAuthServiceImpl implements UserAuthService {
                     .provider(AuthProvider.LOCAL)
                     .build());
         }
+        MemberProfiles.phone(user, request.phone());
+        if (request.marketingConsent() != null) user.setMarketingConsent(request.marketingConsent());
+        MemberProfiles.context(user, request.context());
         sendVerificationEmail(user);
         metrics.register(true);
         return user;

@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.identity.api;
 
+import com.brandonkamga.lescracks.identity.api.dto.OnboardingRequest;
 import com.brandonkamga.lescracks.identity.api.dto.UserPasswordChangeRequest;
 import com.brandonkamga.lescracks.identity.api.dto.UserProfileResponse;
 import com.brandonkamga.lescracks.identity.api.dto.UserProfileUpdateRequest;
@@ -38,6 +39,12 @@ public class UserProfileController {
         return response(profiles.update(authentication.getName(), request));
     }
 
+    /** The welcome questions after sign-up: answered, partly answered or put off, it is never shown again. */
+    @PutMapping("/onboarding")
+    public UserProfileResponse onboard(Authentication authentication, @Valid @RequestBody OnboardingRequest request) {
+        return response(profiles.onboard(authentication.getName(), request));
+    }
+
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public UserProfileResponse updateAvatar(Authentication authentication,
                                             @RequestParam("file") MultipartFile file) {
@@ -56,9 +63,6 @@ public class UserProfileController {
     public void delete(Authentication authentication) { profiles.delete(authentication.getName()); }
 
     private UserProfileResponse response(User user) {
-        return new UserProfileResponse(user.getId(), user.getEmail(), user.getFirstName(),
-                user.getLastName(), user.getStatus(), user.isEmailVerified(), user.getProvider(), user.getCreatedAt(),
-                user.getUsername(), user.getAvatarUrl(), user.getBio(), user.getLocation(), user.getSocialLinks(),
-                identities.list(user.getEmail()));
+        return UserProfileResponse.of(user, identities.list(user.getEmail()));
     }
 }

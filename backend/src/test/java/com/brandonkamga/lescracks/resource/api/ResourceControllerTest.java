@@ -6,6 +6,7 @@ import com.brandonkamga.lescracks.resource.domain.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
 import com.brandonkamga.lescracks.resource.infra.EbookRepository;
+import com.brandonkamga.lescracks.resource.infra.PdfExcerpts;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 
@@ -50,6 +51,7 @@ class ResourceControllerTest {
     @MockitoBean private ResourceMapper mapper;
     @MockitoBean private EbookRepository ebooks;
     @MockitoBean private StorageService storage;
+    @MockitoBean private PdfExcerpts excerpts;
 
     private static ResourceResponse response() {
         return new ResourceResponse(1L, "spring-boot", "Spring Boot", "Description",

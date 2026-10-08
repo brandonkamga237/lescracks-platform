@@ -10,7 +10,9 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A registered user of the platform.
@@ -83,4 +85,44 @@ public class User {
 
     @Column(name = "last_seen_at")
     private Instant lastSeenAt;
+
+    /** E.164 (+237…), so the country always follows from it. */
+    @Column(length = 20)
+    private String phone;
+
+    /** ISO 3166 alpha-2, derived from the phone number. */
+    @Column(length = 2)
+    private String country;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private MemberSituation situation;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private MemberGoal goal;
+
+    /** Category ids; ids rather than entities so identity does not reach into the taxonomy domain. */
+    // Lazy: every authenticated request loads the user, and only profile screens read the interests.
+    @ElementCollection
+    @CollectionTable(name = "user_interests", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "category_id")
+    @Builder.Default
+    private Set<Long> interests = new HashSet<>();
+
+    @Column(name = "marketing_consent", nullable = false)
+    @Builder.Default
+    private boolean marketingConsent = false;
+
+    @Column(name = "onboarded_at")
+    private Instant onboardedAt;
+
+    @Column(name = "signup_path", length = 255)
+    private String signupPath;
+
+    @Column(name = "signup_language", length = 20)
+    private String signupLanguage;
+
+    @Column(name = "signup_timezone", length = 64)
+    private String signupTimezone;
 }
