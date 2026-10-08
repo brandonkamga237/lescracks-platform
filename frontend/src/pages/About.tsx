@@ -9,7 +9,7 @@ const ACTIONS = [
   {
     icon: BookOpen,
     title: 'La bibliothèque',
-    body: 'Des vidéos, des ebooks et des articles en accès libre. Tu choisis un sujet, tu avances à ton rythme.',
+    body: 'Des vidéos, des ebooks et des articles choisis. Tu choisis un sujet, tu avances à ton rythme.',
     to: '/ressources',
     link: 'Explorer la bibliothèque',
   },
@@ -51,7 +51,7 @@ export default function About() {
               Apprendre la tech, entouré.
             </h1>
             <p className="mt-8 text-lg leading-normal text-t3">
-              Une plateforme en accès libre : des ressources choisies, des rendez-vous pour pratiquer, une communauté qui avance ensemble.
+              Une plateforme pour apprendre la tech : des ressources choisies, des rendez-vous pour pratiquer, une communauté qui avance ensemble.
             </p>
           </div>
         </div>
