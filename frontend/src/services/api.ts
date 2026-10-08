@@ -3,7 +3,7 @@ import type { Query } from '@/services/http';
 import type {
   AuthProvider, Category, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse, ResourceKind,
   NewsletterStatus, ResourceLikeStatus, ResourceSummary, Tag, TalkVideo, UserIdentity, UserProfile,
-  UserProfileUpdate,
+  UserProfileUpdate, OnboardingAnswers, SignupContext,
 } from '@/services/types';
 
 export interface CatalogueFilters extends Query {
@@ -28,6 +28,9 @@ export interface RegisterRequest {
   password: string;
   firstName: string;
   lastName: string;
+  phone?: string;
+  marketingConsent?: boolean;
+  context?: SignupContext;
 }
 
 export const api = {
@@ -60,6 +63,7 @@ export const api = {
     http.post<UserIdentity>('/me/identities', { provider, token }),
   unlinkIdentity: (provider: AuthProvider) => http.delete<void>(`/me/identities/${provider}`),
   updateProfile: (body: UserProfileUpdate) => http.patch<UserProfile>('/me', body),
+  onboard: (answers: OnboardingAnswers) => http.put<UserProfile>('/me/onboarding', answers),
   uploadAvatar: (file: File) => {
     const form = new FormData();
     form.append('file', file);

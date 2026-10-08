@@ -94,6 +94,13 @@ export interface AdminUser {
   verified: boolean;
   provider: AuthProvider;
   createdAt: string;
+  phone?: string;
+  country?: string;
+  situation?: MemberSituation;
+  goal?: MemberGoal;
+  location?: string;
+  marketingConsent: boolean;
+  completion: number;
 }
 
 export interface AdminSummary {
@@ -231,15 +238,51 @@ export interface UserProfile {
   bio?: string;
   location?: string;
   socialLinks?: Record<string, string>;
+  /** E.164, e.g. +237677123456. */
+  phone?: string;
+  /** ISO 3166 alpha-2, derived from the phone number. */
+  country?: string;
+  situation?: MemberSituation;
+  goal?: MemberGoal;
+  interestIds: number[];
+  marketingConsent: boolean;
+  /** The welcome questions are still to be shown (neither answered nor put off). */
+  onboardingRequired: boolean;
+  /** 0 to 100. */
+  completion: number;
+  missing: ProfileField[];
+}
+
+export type MemberSituation = 'STUDENT' | 'EMPLOYED' | 'CAREER_CHANGE' | 'JOB_SEEKING' | 'FREELANCE';
+export type MemberGoal = 'FIND_JOB' | 'LEVEL_UP' | 'FREELANCE' | 'BUILD_PROJECT';
+export type ProfileField = 'PHONE' | 'SITUATION' | 'INTERESTS' | 'GOAL' | 'CITY' | 'AVATAR' | 'BIO';
+
+export interface SignupContext { path?: string; language?: string; timezone?: string; }
+
+export interface OnboardingAnswers {
+  phone?: string;
+  situation?: MemberSituation;
+  goal?: MemberGoal;
+  interestIds?: number[];
+  location?: string;
+  marketingConsent?: boolean;
+  context?: SignupContext;
 }
 
 export interface UserProfileUpdate {
   firstName: string;
   lastName: string;
   username?: string;
+  avatarUrl?: string;
   bio?: string;
   location?: string;
   socialLinks?: Record<string, string>;
+  /** Omitted: unchanged; empty string: removed. */
+  phone?: string;
+  situation?: MemberSituation;
+  goal?: MemberGoal;
+  interestIds?: number[];
+  marketingConsent?: boolean;
 }
 // ── CrackLab ──────────────────────────────────────────────────────────────
 
