@@ -5,12 +5,10 @@ interface LevelChipProps {
   className?: string;
 }
 
-/** Level number in a gold tab, the name beside it: the same shape on every board and profile. */
 export default function LevelChip({ level, className = '' }: LevelChipProps) {
   return (
-    <span className={`inline-flex items-center overflow-hidden rounded border border-gold-400/30 font-mono text-[11px] font-semibold leading-none ${className}`}>
-      <span className="bg-gold-400 px-1.5 py-1 text-black">N{level.number}</span>
-      <span className="px-1.5 py-1 text-gold-ink">{level.name}</span>
+    <span className={`inline-flex items-center gap-1.5 rounded-[3px] border border-line px-1.5 py-0.5 font-mono text-[11px] leading-none ${className}`}>
+      <span className="text-gold-ink">N{level.number}</span><span className="text-t2">{level.name}</span>
     </span>
   );
 }
