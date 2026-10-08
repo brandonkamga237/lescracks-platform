@@ -12,6 +12,9 @@ interface ShareButtonProps {
   url?: string;
   /** Visible label of the button. */
   label?: string;
+  /** Message sent with the link, in place of the title: "J'ai eu 82/100, à toi". */
+  text?: string;
+  variant?: 'primary' | 'secondary';
   className?: string;
 }
 
@@ -33,13 +36,13 @@ const NETWORKS: Network[] = [
  * On a phone it hands over to the system share sheet, which already knows the reader's apps;
  * elsewhere it opens a small panel. The link preview people see is the backend's snapshot.
  */
-export default function ShareButton({ title, path, url: absolute, label = 'Partager', className = '' }: ShareButtonProps) {
+export default function ShareButton({ title, path, url: absolute, label = 'Partager', text, variant = 'secondary', className = '' }: ShareButtonProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const container = useRef<HTMLDivElement>(null);
   const panelId = useId();
   const url = absolute ?? `${window.location.origin}${path ?? window.location.pathname}`;
-  const shareTitle = `${title} · LesCracks`;
+  const shareTitle = text ?? `${title} · LesCracks`;
 
   useEffect(() => {
     if (!open) return;
@@ -53,7 +56,7 @@ export default function ShareButton({ title, path, url: absolute, label = 'Parta
   async function trigger() {
     const touch = window.matchMedia('(pointer: coarse)').matches;
     if (touch && typeof navigator.share === 'function') {
-      try { await navigator.share({ title: shareTitle, url }); } catch { /* the reader closed the sheet */ }
+      try { await navigator.share(text ? { title, text, url } : { title: shareTitle, url }); } catch { /* the reader closed the sheet */ }
       return;
     }
     setOpen((value) => !value);
@@ -71,7 +74,7 @@ export default function ShareButton({ title, path, url: absolute, label = 'Parta
 
   return (
     <div ref={container} className={`relative ${className}`}>
-      <button type="button" onClick={() => void trigger()} aria-expanded={open} aria-controls={panelId} className="btn-secondary w-full">
+      <button type="button" onClick={() => void trigger()} aria-expanded={open} aria-controls={panelId} className={`${variant === 'primary' ? 'btn-primary' : 'btn-secondary'} w-full`}>
         <Share2 className="h-4 w-4" aria-hidden />{label}
       </button>
 
