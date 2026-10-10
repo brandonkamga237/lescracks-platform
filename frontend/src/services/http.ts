@@ -42,7 +42,8 @@ export class ApiError extends Error {
 export type AuthTransport = 'cookie' | 'oidc';
 
 const transportKey = 'lescracks.auth.transport';
-let transport: AuthTransport = sessionStorage.getItem(transportKey) === 'oidc' ? 'oidc' : 'cookie';
+// Shared across tabs, like the session it describes.
+let transport: AuthTransport = localStorage.getItem(transportKey) === 'oidc' ? 'oidc' : 'cookie';
 
 export function getAuthTransport(): AuthTransport {
   return transport;
@@ -50,7 +51,7 @@ export function getAuthTransport(): AuthTransport {
 
 export function setAuthTransport(value: AuthTransport) {
   transport = value;
-  sessionStorage.setItem(transportKey, value);
+  localStorage.setItem(transportKey, value);
 }
 
 export type Query = Record<string, string | number | boolean | (string | number)[] | undefined | null>;

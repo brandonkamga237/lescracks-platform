@@ -57,6 +57,10 @@ app:
 server:
   compression:
     enabled: true
+  servlet:
+    session:
+      cookie:
+        secure: true
   # Traefik terminates TLS, so Spring must read X-Forwarded-* to build https:// URLs.
   forward-headers-strategy: native
 
