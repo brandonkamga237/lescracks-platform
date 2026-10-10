@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 /**
  * Turns a block document into the HTML fragment that goes inside the fixed newsletter frame.
  *
- * The frame (header, contacts, motto) is {@code MailServiceImpl}'s job and never changes;
+ * The frame (logo, footer) is {@code MailServiceImpl}'s job and never changes;
  * this is only the part an admin personalises. Everything is escaped: an admin writes text,
  * never HTML, so nothing typed into the editor can alter the email markup.
  */
@@ -36,24 +36,24 @@ public class EmailBodyRenderer {
         String type = block.path("type").asText("");
         return switch (type) {
             case "paragraph" -> prose(block, p, personal ->
-                    "<p style=\"margin:0 0 20px 0;font-size:16px;line-height:1.7;color:#d4d4d4;\">" + personal + "</p>");
+                    "<p style=\"margin:0 0 20px 0;font-size:16px;line-height:1.65;color:#262626;\">" + personal + "</p>");
             case "heading" -> {
                 int level = block.path("level").asInt(2) == 3 ? 3 : 2;
                 String style = level == 2
-                        ? "margin:32px 0 16px 0;font-size:22px;font-weight:700;color:#ffffff;"
-                        : "margin:24px 0 12px 0;font-size:18px;font-weight:600;color:#ffffff;";
+                        ? "margin:32px 0 12px 0;font-size:20px;line-height:1.35;font-weight:700;color:#0b0b0b;"
+                        : "margin:24px 0 10px 0;font-size:17px;line-height:1.4;font-weight:700;color:#0b0b0b;";
                 yield prose(block, p, personal ->
                         "<h" + level + " style=\"" + style + "\">" + personal + "</h" + level + ">");
             }
             case "quote" -> prose(block, p, personal ->
-                    "<blockquote style=\"margin:0 0 20px 0;padding:4px 0 4px 20px;border-left:3px solid #d4af37;"
-                            + "font-size:17px;font-style:italic;line-height:1.7;color:#e5e5e5;\">" + personal + "</blockquote>");
+                    "<blockquote style=\"margin:0 0 20px 0;padding:2px 0 2px 18px;border-left:3px solid #d4af37;"
+                            + "font-size:16px;line-height:1.65;color:#3d3d3d;\">" + personal + "</blockquote>");
             case "list" -> {
                 StringBuilder items = new StringBuilder();
                 for (JsonNode item : block.path("items")) {
                     String t = item.path("text").asText("");
                     if (!t.isBlank()) {
-                        items.append("<li style=\"margin:0 0 8px 0;font-size:16px;line-height:1.6;color:#d4d4d4;\">")
+                        items.append("<li style=\"margin:0 0 8px 0;font-size:16px;line-height:1.6;color:#262626;\">")
                                 .append(inline(p.apply(t))).append("</li>");
                     }
                 }
@@ -65,10 +65,10 @@ public class EmailBodyRenderer {
                     yield "";
                 }
                 String img = "<img src=\"" + url + "\" alt=\"" + escape(p.apply(block.path("alt").asText("")))
-                        + "\" style=\"display:block;width:100%;border-radius:12px;margin:0 0 8px 0;\" />";
+                        + "\" style=\"display:block;width:100%;height:auto;border:0;border-radius:4px;margin:0 0 8px 0;\" />";
                 String caption = block.path("caption").asText("");
                 yield caption.isBlank() ? img
-                        : img + "<p style=\"margin:0 0 20px 0;font-size:13px;text-align:center;color:#737373;\">"
+                        : img + "<p style=\"margin:0 0 20px 0;font-size:13px;line-height:1.5;color:#6b6b6b;\">"
                         + escape(p.apply(caption)) + "</p>";
             }
             case "link" -> {
@@ -78,10 +78,10 @@ public class EmailBodyRenderer {
                 }
                 String label = block.path("text").asText("");
                 yield "<p style=\"margin:0 0 20px 0;\"><a href=\"" + url
-                        + "\" style=\"color:#d4af37;font-size:16px;font-weight:600;text-decoration:underline;text-underline-offset:3px;\">"
+                        + "\" style=\"color:#8a6d10;font-size:16px;font-weight:600;text-decoration:underline;\">"
                         + (label.isBlank() ? url : escape(p.apply(label))) + "</a></p>";
             }
-            case "divider" -> "<hr style=\"border:none;border-top:1px solid #2a2a2a;margin:28px 0;\" />";
+            case "divider" -> "<hr style=\"border:none;border-top:1px solid #e6e6e3;margin:28px 0;\" />";
             default -> "";
         };
     }
@@ -101,18 +101,18 @@ public class EmailBodyRenderer {
             String token = matcher.group();
             String html;
             if (token.startsWith("**")) {
-                html = "<strong style=\"color:#ffffff;\">" + token.substring(2, token.length() - 2) + "</strong>";
+                html = "<strong style=\"color:#0b0b0b;\">" + token.substring(2, token.length() - 2) + "</strong>";
             } else if (token.startsWith("*")) {
                 html = "<em>" + token.substring(1, token.length() - 1) + "</em>";
             } else if (token.startsWith("`")) {
-                html = "<code style=\"background:#262626;padding:2px 6px;border-radius:6px;font-size:14px;color:#f5d97e;\">"
+                html = "<code style=\"background:#f1f1ee;padding:2px 5px;border-radius:3px;font-family:Menlo,Consolas,monospace;font-size:14px;color:#262626;\">"
                         + token.substring(1, token.length() - 1) + "</code>";
             } else {
                 int close = token.indexOf(']');
                 String label = token.substring(1, close);
                 String url = safeUrl(unescape(token.substring(close + 2, token.length() - 1)));
                 html = url == null ? label
-                        : "<a href=\"" + url + "\" style=\"color:#d4af37;text-decoration:underline;text-underline-offset:3px;\">" + label + "</a>";
+                        : "<a href=\"" + url + "\" style=\"color:#8a6d10;text-decoration:underline;\">" + label + "</a>";
             }
             matcher.appendReplacement(out, Matcher.quoteReplacement(html));
         }
