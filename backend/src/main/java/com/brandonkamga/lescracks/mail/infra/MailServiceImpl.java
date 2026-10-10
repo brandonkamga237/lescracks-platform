@@ -71,11 +71,17 @@ public class MailServiceImpl implements MailService {
     @Override
     public void sendBroadcast(String recipient, String subject, JsonNode body,
                               String firstName, String lastName) {
+        sendHtml(recipient, subject, broadcastHtml(recipient, subject, body, firstName, lastName));
+    }
+
+    @Override
+    public String broadcastHtml(String recipient, String subject, JsonNode body,
+                                String firstName, String lastName) {
         String html = bodies.render(body, text -> text
                 .replace("{{firstName}}", firstName == null ? "" : firstName)
                 .replace("{{lastName}}", lastName == null ? "" : lastName)
                 .replace("{{email}}", recipient));
-        sendHtml(recipient, subject, wrapper(subject, html, NEWSLETTER_NOTE));
+        return wrapper(subject == null ? "" : subject, html, NEWSLETTER_NOTE);
     }
 
     private SimpleMailMessage message(String recipient) {

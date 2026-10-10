@@ -16,4 +16,7 @@ public interface MailService {
 
     void sendBroadcast(String recipient, String subject, JsonNode body, String firstName,
                        String lastName);
+
+    String broadcastHtml(String recipient, String subject, JsonNode body, String firstName,
+                         String lastName);
 }

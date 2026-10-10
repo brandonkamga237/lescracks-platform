@@ -17,5 +17,6 @@ public interface NewsletterService {
     void notifyEventSubscribers(Event event);
     void notifyResourceSubscribers(Resource resource);
     int broadcast(String subject, JsonNode body);
+    String preview(String subject, JsonNode body);
     List<NewsletterCampaign> campaigns();
 }

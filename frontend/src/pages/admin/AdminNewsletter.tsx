@@ -1,31 +1,14 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Clock, Download, Mail, Send, User } from 'lucide-react';
 
 import { AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
 import BlockEditor, { type BlockEditorHandle } from '@/components/admin/BlockEditor';
-import { ArticleBlocks } from '@/components/resources/ArticleRenderer';
 
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
 import type { AdminSubscriber, ArticleBlock } from '@/services/types';
 
 const statusLabels = { SUBSCRIBED: 'Abonné', UNSUBSCRIBED: 'Désabonné' };
-
-const SAMPLE: Record<string, string> = {
-  '{{firstName}}': 'Marie',
-  '{{lastName}}': 'Kamga',
-  '{{email}}': 'marie@example.com',
-};
-
-/** Replaces personalisation tokens with sample values so the preview reads naturally. */
-function sample(blocks: ArticleBlock[]): ArticleBlock[] {
-  const fill = (text: string) => Object.entries(SAMPLE).reduce((t, [k, v]) => t.split(k).join(v), text);
-  return blocks.map((block) => {
-    if ('text' in block) return { ...block, text: fill(block.text ?? '') };
-    if (block.type === 'list') return { ...block, items: block.items.map((i) => ({ text: fill(i.text) })) };
-    return block;
-  });
-}
 
 function hasBody(blocks: ArticleBlock[]) {
   return blocks.some((block) => {
@@ -44,6 +27,19 @@ export default function AdminNewsletter() {
   const [subject, setSubject] = useState('');
   const [blocks, setBlocks] = useState<ArticleBlock[]>([{ type: 'paragraph', text: '' }]);
   const editorRef = useRef<BlockEditorHandle>(null);
+  const [previewHtml, setPreviewHtml] = useState('');
+  const previewRequest = useRef(0);
+
+  // The server renders the preview, so it is the exact email subscribers get, frame included.
+  useEffect(() => {
+    const id = ++previewRequest.current;
+    const timer = window.setTimeout(() => {
+      adminApi.newsletterPreview(subject.trim(), blocks)
+        .then(({ html }) => { if (id === previewRequest.current) setPreviewHtml(html); })
+        .catch(() => undefined);
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [subject, blocks]);
 
   const stats = useApi((signal) => adminApi.newsletterStats(signal), []);
   const subscriptions = useApi((signal) => adminApi.newsletterSubscriptions(filter, signal), [filter]);
@@ -166,34 +162,10 @@ export default function AdminNewsletter() {
           </div>
 
           <div aria-label="Aperçu de l’email">
-            <p className="mb-3 text-sm font-medium text-t2">Aperçu <span className="font-normal text-t4">— tel que reçu</span></p>
-            <div className="rounded-lg bg-[#0a0a0a] p-4 sm:p-6">
-              <div className="overflow-hidden rounded-lg bg-[#141414]">
-                <div className="h-[3px] bg-gold-400" aria-hidden />
-                <div className="px-6 pb-6 pt-8 text-center sm:px-10">
-                  <p className="font-display text-lg font-bold uppercase tracking-[0.22em] text-gold-ink">LesCracks</p>
-                  <p className="mt-2 text-[11px] uppercase tracking-widest text-t4">Ressources · Événements · Communauté</p>
-                </div>
-                <div className="px-6 pb-10 sm:px-10">
-                  {hasBody(blocks)
-                    ? <ArticleBlocks blocks={sample(blocks)} />
-                    : <p className="py-8 text-center text-sm text-t4">Le corps du message apparaîtra ici.</p>}
-                </div>
-                <div className="border-t border-line-soft bg-[#101010] px-6 py-6 text-center sm:px-10">
-                  <p className="text-xs">
-                    <span className="font-semibold uppercase tracking-wider text-gold-ink">lescracks.com</span>
-                    <span className="mx-2 text-t4">·</span>
-                    <span className="text-t3">Événements</span>
-                    <span className="mx-2 text-t4">·</span>
-                    <span className="text-t3">Ressources</span>
-                  </p>
-                  <p className="mt-3 text-xs italic text-gold-ink">Deviens aussi un crack de la tech.</p>
-                  <p className="mt-3 text-[11px] leading-relaxed text-t4">
-                    Tu reçois cet email parce que tu es inscrit à la lettre LesCracks.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <p className="mb-3 text-sm font-medium text-t2">Aperçu <span className="font-normal text-t4">tel que reçu, avec un abonné fictif</span></p>
+            {previewHtml
+              ? <iframe title="Aperçu de l’email" srcDoc={previewHtml} sandbox="" className="h-[760px] w-full rounded border border-line bg-[#f4f4f2]" />
+              : <p className="rounded border border-line py-16 text-center text-sm text-t4">Préparation de l’aperçu…</p>}
           </div>
         </div>
       </form>
