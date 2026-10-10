@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EmailBodyRendererTest {
 
-    private final EmailBodyRenderer renderer = new EmailBodyRenderer();
+    private final EmailBodyRenderer renderer = new EmailBodyRenderer("https://lescracks.com/");
     private final ObjectMapper mapper = new ObjectMapper();
 
     private JsonNode blocks(String json) throws Exception {
@@ -76,5 +76,17 @@ class EmailBodyRendererTest {
     void rendersNothingForAnEmptyDocument() throws Exception {
         assertThat(renderer.render(blocks("[]"), UnaryOperator.identity())).isEmpty();
         assertThat(renderer.render(blocks("{}"), UnaryOperator.identity())).isEmpty();
+    }
+
+    @Test
+    void makesUploadedImagesAbsolute() throws Exception {
+        String html = renderer.render(blocks("""
+                [{"type": "image", "url": "/api/files/cover.png", "alt": "Couverture"},
+                 {"type": "image", "url": "//evil.example/x.png", "alt": "Ailleurs"}]
+                """), UnaryOperator.identity());
+
+        assertThat(html)
+                .contains("src=\"https://lescracks.com/api/files/cover.png\"")
+                .doesNotContain("evil.example");
     }
 }
