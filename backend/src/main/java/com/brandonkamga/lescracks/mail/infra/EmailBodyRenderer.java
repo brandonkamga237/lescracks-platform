@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.mail.infra;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.function.UnaryOperator;
@@ -19,6 +20,12 @@ public class EmailBodyRenderer {
 
     private static final Pattern INLINE = Pattern.compile(
             "\\*\\*[^*]+\\*\\*|\\*[^*]+\\*|`[^`]+`|\\[[^\\]]+\\]\\([^)\\s]+\\)");
+
+    private final String siteUrl;
+
+    public EmailBodyRenderer(@Value("${app.site.url:http://localhost:5173}") String siteUrl) {
+        this.siteUrl = siteUrl.endsWith("/") ? siteUrl.substring(0, siteUrl.length() - 1) : siteUrl;
+    }
 
     /** Renders the admin's blocks; {@code personalize} rewrites {{variables}} inside prose. */
     public String render(JsonNode body, UnaryOperator<String> personalize) {
@@ -120,9 +127,18 @@ public class EmailBodyRenderer {
         return out.toString();
     }
 
-    /** A link is rendered only when it points at http(s) — anything else would break the frame. */
+    /**
+     * Only http(s) targets are kept, anything else could break the frame. Site paths such as the
+     * editor's uploads (/api/files/...) are made absolute: a mail client has no base URL.
+     */
     private String safeUrl(String url) {
-        return url != null && (url.startsWith("https://") || url.startsWith("http://")) ? url : null;
+        if (url == null) {
+            return null;
+        }
+        if (url.startsWith("/") && !url.startsWith("//")) {
+            return siteUrl + url;
+        }
+        return url.startsWith("https://") || url.startsWith("http://") ? url : null;
     }
 
     private String escape(String value) {
