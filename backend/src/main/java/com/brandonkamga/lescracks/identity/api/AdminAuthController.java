@@ -17,10 +17,14 @@ import org.springframework.security.web.context.SecurityContextRepository;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+
 @RestController
 @RequestMapping("/api/admin/auth")
 public class AdminAuthController {
     private final AdminAuthService auth;
+    private static final Duration ADMIN_IDLE = Duration.ofHours(12);
+
     private final SecurityContextRepository contexts = new HttpSessionSecurityContextRepository();
 
     public AdminAuthController(AdminAuthService auth) {
@@ -36,6 +40,8 @@ public class AdminAuthController {
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
         contexts.saveContext(context, httpRequest, httpResponse);
+        // The back office can publish and delete: it keeps a working day, not a member's month.
+        httpRequest.getSession().setMaxInactiveInterval((int) ADMIN_IDLE.toSeconds());
         return ResponseEntity.ok(new AdminAuthResponse(authentication.getName(), "ADMIN"));
     }
 
