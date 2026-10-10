@@ -19,8 +19,8 @@
   "maxDeltaTimeSeconds": 43200,
   "passwordPolicy": "length(10) and notUsername and notEmail and passwordHistory(3)",
   "accessTokenLifespan": 900,
-  "ssoSessionIdleTimeout": 1800,
-  "ssoSessionMaxLifespan": 36000,
+  "ssoSessionIdleTimeout": 2592000,
+  "ssoSessionMaxLifespan": 7776000,
   "roles": {
     "realm": [
       {
