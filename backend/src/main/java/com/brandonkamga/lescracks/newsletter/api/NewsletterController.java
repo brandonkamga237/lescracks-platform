@@ -4,6 +4,8 @@ import com.brandonkamga.lescracks.identity.domain.User;
 import com.brandonkamga.lescracks.newsletter.api.dto.AdminSubscriberResponse;
 import com.brandonkamga.lescracks.newsletter.api.dto.BroadcastRequest;
 import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterCampaignResponse;
+import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterPreviewRequest;
+import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterPreviewResponse;
 import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterPublicSubscribeRequest;
 import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterResponse;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
@@ -63,6 +65,12 @@ public class NewsletterController {
     public ResponseEntity<Integer> broadcast(@Valid @RequestBody BroadcastRequest request) {
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .body(newsletter.broadcast(request.subject().trim(), request.body()));
+    }
+
+    @PostMapping("/admin/preview")
+    @PreAuthorize("hasRole('ADMIN')")
+    public NewsletterPreviewResponse preview(@Valid @RequestBody NewsletterPreviewRequest request) {
+        return new NewsletterPreviewResponse(newsletter.preview(request.subject(), request.body()));
     }
 
     @GetMapping("/admin/campaigns")

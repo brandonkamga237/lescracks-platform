@@ -71,11 +71,17 @@ public class MailServiceImpl implements MailService {
     @Override
     public void sendBroadcast(String recipient, String subject, JsonNode body,
                               String firstName, String lastName) {
+        sendHtml(recipient, subject, broadcastHtml(recipient, subject, body, firstName, lastName));
+    }
+
+    @Override
+    public String broadcastHtml(String recipient, String subject, JsonNode body,
+                                String firstName, String lastName) {
         String html = bodies.render(body, text -> text
                 .replace("{{firstName}}", firstName == null ? "" : firstName)
                 .replace("{{lastName}}", lastName == null ? "" : lastName)
                 .replace("{{email}}", recipient));
-        sendHtml(recipient, subject, wrapper(html));
+        return wrapper(subject == null ? "" : subject, html, NEWSLETTER_NOTE);
     }
 
     private SimpleMailMessage message(String recipient) {
@@ -111,48 +117,50 @@ public class MailServiceImpl implements MailService {
         return frontendUrl + "/" + coverImage;
     }
 
+    private static final String FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
+    private static final String NEWSLETTER_NOTE = "Tu reçois cet email parce que tu es abonné à la newsletter LesCracks. Une question ? Réponds simplement à ce message.";
+
     /**
-     * The fixed LesCracks frame. Every email — broadcast, notification, verification — is this
-     * envelope with a different body slot. Admins never touch it: identity is not personalisable.
+     * The fixed LesCracks frame around every HTML email: a black band with the logo, a white
+     * reading column, a quiet footer. Admins only write the body; the frame is not editable.
+     * Light on purpose: a white body stays readable in every client, dark mode included.
      */
-    private String wrapper(String body) {
+    private String wrapper(String title, String body, String note) {
         return """
                 <!DOCTYPE html>
                 <html lang="fr">
-                <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-                <body style="margin:0;padding:0;background-color:#0a0a0a;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#e5e5e5;">
-                  <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" border="0" style="background-color:#0a0a0a;padding:48px 16px;">
+                <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta name="color-scheme" content="light">
+                <meta name="supported-color-schemes" content="light">
+                <title>%1$s</title>
+                </head>
+                <body style="margin:0;padding:0;background-color:#f4f4f2;">
+                  <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f4f4f2;">
                     <tr>
-                      <td align="center">
-                        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="background-color:#141414;border-radius:20px;overflow:hidden;max-width:600px;width:100%%;">
+                      <td align="center" style="padding:32px 16px 40px 16px;">
+                        <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;width:100%%;">
                           <tr>
-                            <td style="height:3px;background-color:#d4af37;font-size:0;line-height:0;">&nbsp;</td>
-                          </tr>
-                          <tr>
-                            <td style="padding:36px 48px 28px 48px;text-align:center;">
-                              <p style="margin:0;color:#d4af37;font-size:22px;letter-spacing:0.22em;text-transform:uppercase;font-weight:700;">LesCracks</p>
-                              <p style="margin:10px 0 0 0;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:#737373;">Ressources · Événements · Communauté</p>
+                            <td style="background-color:#0b0b0b;padding:20px 40px;border-radius:4px 4px 0 0;">
+                              <a href="%2$s" style="text-decoration:none;"><img src="%2$s/images/email-logo.png" width="74" height="30" alt="LesCracks" style="display:block;border:0;width:74px;height:30px;font-family:%3$s;font-size:18px;font-weight:700;color:#d4af37;" /></a>
                             </td>
                           </tr>
                           <tr>
-                            <td style="padding:8px 48px 48px 48px;">
-                              %s
+                            <td style="background-color:#ffffff;padding:40px;border:1px solid #e6e6e3;border-top:0;border-radius:0 0 4px 4px;font-family:%3$s;font-size:16px;line-height:1.65;color:#262626;">
+                              %4$s
                             </td>
                           </tr>
                           <tr>
-                            <td style="padding:28px 48px;text-align:center;background-color:#101010;border-top:1px solid #262626;">
-                              <p style="margin:0 0 14px 0;">
-                                <a href="%s" style="color:#d4af37;font-size:12px;font-weight:600;letter-spacing:0.06em;text-decoration:none;text-transform:uppercase;">lescracks.com</a>
-                                <span style="color:#3f3f3f;font-size:12px;">&nbsp;·&nbsp;</span>
-                                <a href="%s/evenements" style="color:#a3a3a3;font-size:12px;text-decoration:none;">Événements</a>
-                                <span style="color:#3f3f3f;font-size:12px;">&nbsp;·&nbsp;</span>
-                                <a href="%s/ressources" style="color:#a3a3a3;font-size:12px;text-decoration:none;">Ressources</a>
+                            <td style="padding:24px 40px 0 40px;font-family:%3$s;font-size:12px;line-height:1.6;color:#6b6b6b;">
+                              <p style="margin:0 0 8px 0;">
+                                <a href="%2$s" style="color:#262626;font-weight:600;text-decoration:none;">LesCracks</a>
+                                <span style="color:#b5b5b5;">&nbsp;&middot;&nbsp;</span>
+                                <a href="%2$s/ressources" style="color:#6b6b6b;text-decoration:none;">Ressources</a>
+                                <span style="color:#b5b5b5;">&nbsp;&middot;&nbsp;</span>
+                                <a href="%2$s/evenements" style="color:#6b6b6b;text-decoration:none;">Événements</a>
                               </p>
-                              <p style="margin:0 0 14px 0;font-size:12px;font-style:italic;color:#d4af37;">Deviens aussi un crack de la tech.</p>
-                              <p style="margin:0;font-size:11px;line-height:1.6;color:#525252;">
-                                Tu reçois cet email parce que tu es inscrit à la lettre LesCracks.<br />
-                                Une question ? Réponds directement à cet email — on lit tout.
-                              </p>
+                              <p style="margin:0;">%5$s</p>
                             </td>
                           </tr>
                         </table>
@@ -161,67 +169,64 @@ public class MailServiceImpl implements MailService {
                   </table>
                 </body>
                 </html>
-                """.formatted(body, frontendUrl, frontendUrl, frontendUrl);
+                """.formatted(escapeHtml(title), frontendUrl, FONT, body, note);
+    }
+
+    private String heading(String text) {
+        return "<h1 style=\"margin:0 0 16px 0;font-size:24px;line-height:1.3;font-weight:700;color:#0b0b0b;\">" + text + "</h1>";
+    }
+
+    private String paragraph(String text) {
+        return "<p style=\"margin:0 0 20px 0;font-size:16px;line-height:1.65;color:#262626;\">" + text + "</p>";
+    }
+
+    private String cover(String url, String alt) {
+        return "<img src=\"" + url + "\" alt=\"" + alt + "\" width=\"518\" style=\"display:block;width:100%;max-width:518px;height:auto;border:0;border-radius:4px;margin:0 0 24px 0;\" />";
+    }
+
+    private String button(String label, String url) {
+        return """
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:8px 0 28px 0;">
+                  <tr>
+                    <td style="background-color:#d4af37;border-radius:4px;">
+                      <a href="%s" style="display:inline-block;padding:13px 24px;font-size:15px;font-weight:600;color:#0b0b0b;text-decoration:none;">%s</a>
+                    </td>
+                  </tr>
+                </table>
+                """.formatted(url, label);
+    }
+
+    private String fallbackLink(String label, String url) {
+        return "<p style=\"margin:0;font-size:13px;line-height:1.6;color:#6b6b6b;word-break:break-all;\">" + label
+                + " <a href=\"" + url + "\" style=\"color:#8a6d10;\">" + url + "</a></p>";
     }
 
     private String resourceHtml(String title, String description, String url, String cover) {
         String escapedTitle = escapeHtml(title);
-        String escapedDescription = escapeHtml(description);
-        return wrapper("""
-                <h1 style="margin:0 0 20px 0;font-size:24px;font-weight:600;color:#ffffff;">%s</h1>
-                <img src="%s" alt="%s" style="display:block;width:100%%;max-width:520px;border-radius:12px;margin-bottom:24px;" />
-                <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#a1a1a1;">%s</p>
-                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 32px 0;">
-                  <tr>
-                    <td style="border-radius:12px;background-color:#d4af37;text-align:center;">
-                      <a href="%s" style="display:inline-block;padding:16px 32px;font-size:16px;font-weight:600;color:#000000;text-decoration:none;border-radius:12px;">Découvrir la ressource</a>
-                    </td>
-                  </tr>
-                </table>
-                <p style="margin:0;font-size:13px;line-height:1.5;color:#525252;word-break:break-all;">Lien direct : %s</p>
-                """.formatted(escapedTitle, cover, escapedTitle, escapedDescription, url, url));
+        return wrapper(title, heading(escapedTitle) + cover(cover, escapedTitle) + paragraph(escapeHtml(description))
+                + button("Découvrir la ressource", url) + fallbackLink("Ou ouvre ce lien :", url), NEWSLETTER_NOTE);
     }
 
     private String eventHtml(String title, String description, String url, String cover, java.time.Instant startDate) {
         String escapedTitle = escapeHtml(title);
-        String escapedDescription = escapeHtml(description);
-        String date = startDate == null ? "" : "<p style=\"margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#a1a1a1;\">"
-                + "<strong style=\"color:#d4af37;\">Date :</strong> "
-                + escapeHtml(DateTimeFormatter.ofPattern("EEEE d MMMM à HH:mm", Locale.FRANCE).format(startDate.atZone(ZoneId.of("Europe/Paris"))))
-                + "</p>";
-        return wrapper("""
-                <h1 style="margin:0 0 20px 0;font-size:24px;font-weight:600;color:#ffffff;">%s</h1>
-                <img src="%s" alt="%s" style="display:block;width:100%%;max-width:520px;border-radius:12px;margin-bottom:24px;" />
-                <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#a1a1a1;">%s</p>
-                %s
-                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 32px 0;">
-                  <tr>
-                    <td style="border-radius:12px;background-color:#d4af37;text-align:center;">
-                      <a href="%s" style="display:inline-block;padding:16px 32px;font-size:16px;font-weight:600;color:#000000;text-decoration:none;border-radius:12px;">Voir l'événement</a>
-                    </td>
-                  </tr>
-                </table>
-                <p style="margin:0;font-size:13px;line-height:1.5;color:#525252;word-break:break-all;">Lien direct : %s</p>
-                """.formatted(escapedTitle, cover, escapedTitle, escapedDescription, date, url, url));
+        String date = startDate == null ? "" : paragraph("<strong style=\"color:#0b0b0b;\">"
+                + escapeHtml(DateTimeFormatter.ofPattern("EEEE d MMMM 'à' HH'h'mm", Locale.FRANCE)
+                        .format(startDate.atZone(ZoneId.of("Europe/Paris"))))
+                + "</strong>");
+        return wrapper(title, heading(escapedTitle) + cover(cover, escapedTitle) + date + paragraph(escapeHtml(description))
+                + button("Voir l'événement", url) + fallbackLink("Ou ouvre ce lien :", url), NEWSLETTER_NOTE);
     }
 
     private String verificationHtml(String firstName, String email, String token) {
         String link = frontendUrl + "/verifier-email?token=" + token;
         String greeting = firstName.isBlank() ? "Bonjour," : "Bonjour " + escapeHtml(firstName) + ",";
-        return wrapper("""
-                <h1 style="margin:0 0 20px 0;font-size:24px;font-weight:600;color:#ffffff;">Confirme ton adresse email</h1>
-                <p style="margin:0 0 24px 0;font-size:16px;line-height:1.6;color:#a1a1a1;">%s</p>
-                <p style="margin:0 0 32px 0;font-size:16px;line-height:1.6;color:#a1a1a1;">Pour activer ton compte et accéder à toutes les ressources LesCracks, clique sur le bouton ci-dessous.</p>
-                <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 32px 0;">
-                  <tr>
-                    <td style="border-radius:12px;background-color:#d4af37;text-align:center;">
-                      <a href="%s" style="display:inline-block;padding:16px 32px;font-size:16px;font-weight:600;color:#000000;text-decoration:none;border-radius:12px;">Confirmer mon email</a>
-                    </td>
-                  </tr>
-                </table>
-                <p style="margin:0 0 16px 0;font-size:14px;line-height:1.5;color:#737373;">Ce lien expire dans 24 heures. Si tu n'as pas créé de compte LesCracks, ignore simplement cet email.</p>
-                <p style="margin:0;font-size:13px;line-height:1.5;color:#525252;word-break:break-all;">Lien de secours : %s</p>
-                """.formatted(greeting, link, link));
+        return wrapper("Confirme ton adresse email", heading("Confirme ton adresse email")
+                + paragraph(greeting)
+                + paragraph("Pour activer ton compte LesCracks, confirme ton adresse en cliquant sur le bouton ci-dessous.")
+                + button("Confirmer mon adresse", link)
+                + paragraph("<span style=\"font-size:14px;color:#6b6b6b;\">Ce lien expire dans 24 heures.</span>")
+                + fallbackLink("Si le bouton ne fonctionne pas, ouvre ce lien :", link),
+                "Tu reçois cet email parce qu'un compte LesCracks a été créé avec cette adresse. Si ce n'est pas toi, ignore simplement ce message.");
     }
 
     private String escapeHtml(String value) {

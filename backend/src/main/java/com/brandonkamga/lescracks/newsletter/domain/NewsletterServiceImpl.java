@@ -125,6 +125,12 @@ public class NewsletterServiceImpl implements NewsletterService {
                 .forEach(subscription -> mail.sendResourceNotification(subscription.getUser().getEmail(), resource));
     }
 
+    /** The exact email a subscriber would get, filled with a sample reader. */
+    @Override
+    public String preview(String subject, JsonNode body) {
+        return mail.broadcastHtml("marie@example.com", subject, body, "Marie", "Kamga");
+    }
+
     @Override
     public int broadcast(String subject, JsonNode body) {
         var active = subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED);
