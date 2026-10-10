@@ -66,7 +66,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
       let mode = getAuthTransport();
       let results = await probe();
       const noCookie = results.every((result) => result.status === 'rejected' && isMissingIdentity(result.reason));
-      if (mode === 'cookie' && noCookie && !sessionStorage.getItem('lescracks.auth.transport') && currentAccessToken()) {
+      if (mode === 'cookie' && noCookie && !localStorage.getItem('lescracks.auth.transport') && currentAccessToken()) {
         mode = 'oidc';
         setAuthTransport(mode);
         results = await probe();

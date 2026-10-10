@@ -18,9 +18,10 @@ export const oidcConfig: AuthProviderProps = {
   response_type: 'code',
   scope: 'openid profile email',
 
-  // Session storage rather than local: closing the tab ends the session, and a token that
-  // outlives the tab it was issued in is a token nobody remembers granting.
-  userStore: new WebStorageStateStore({ store: window.sessionStorage }),
+  // Local storage, so a Google or GitHub sign-in is shared by every tab and survives closing
+  // the browser. Session storage signed members out on each new tab. How long it lasts is the
+  // realm's SSO session, which the silent renewal below keeps alive.
+  userStore: new WebStorageStateStore({ store: window.localStorage }),
 
   // Renewed in a hidden iframe before it expires, so a long read is never interrupted by a
   // redirect the reader did not ask for.
@@ -42,7 +43,7 @@ const storageKey = `oidc.user:${ENV.KEYCLOAK_ISSUER}:${ENV.KEYCLOAK_CLIENT_ID}`;
  * caller knowing a renewal happened.
  */
 export function currentAccessToken(): string | null {
-  const stored = sessionStorage.getItem(storageKey);
+  const stored = localStorage.getItem(storageKey);
   if (!stored) return null;
 
   try {
