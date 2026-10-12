@@ -248,6 +248,20 @@ jobs:
             echo "-> [4/4] Deploying frontend..."
             docker compose -f docker-compose.prod.yml up -d frontend --remove-orphans
 
+            # ── Keycloak session lifetimes ────────────────────────
+            # --import-realm skips a realm that already exists, so the realm file alone never
+            # reaches production. Applied on every deploy; never fails the deploy.
+            echo ""
+            echo "-> Keycloak: Google/GitHub sessions last 30 days..."
+            docker exec lescracks-keycloak sh -c '
+              KCADM=/opt/keycloak/bin/kcadm.sh
+              $KCADM config credentials --config /tmp/kcadm.config --server http://localhost:8080 --realm master \
+                --user "$KC_BOOTSTRAP_ADMIN_USERNAME" --password "$KC_BOOTSTRAP_ADMIN_PASSWORD" &&
+              $KCADM update realms/lescracks --config /tmp/kcadm.config \
+                -s ssoSessionIdleTimeout=2592000 -s ssoSessionMaxLifespan=2592000 &&
+              $KCADM get realms/lescracks --config /tmp/kcadm.config --fields ssoSessionIdleTimeout,ssoSessionMaxLifespan
+            ' || echo "  WARNING: Keycloak sessions not updated (container down or admin credentials changed)"
+
             # ── Cleanup ───────────────────────────────────────────
             echo ""
             echo "-> Pruning unused images..."

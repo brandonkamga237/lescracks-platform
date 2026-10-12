@@ -20,7 +20,7 @@
   "passwordPolicy": "length(10) and notUsername and notEmail and passwordHistory(3)",
   "accessTokenLifespan": 900,
   "ssoSessionIdleTimeout": 2592000,
-  "ssoSessionMaxLifespan": 7776000,
+  "ssoSessionMaxLifespan": 2592000,
   "roles": {
     "realm": [
       {
