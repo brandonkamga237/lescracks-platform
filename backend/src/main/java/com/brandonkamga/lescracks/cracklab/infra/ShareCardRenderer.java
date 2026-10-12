@@ -46,7 +46,7 @@ public class ShareCardRenderer {
     public record Row(String rank, String name, String score) {
     }
 
-    /** seed: the challenge slug, which picks its diagram; level: 1 to 3 bars; stats: "12 participants · moyenne 64/100". */
+    /** seed: the challenge slug, which picks its diagram; level: 1 to 3 bars; stats: "12 participants". */
     public byte[] challenge(String seed, String title, String difficulty, int level, String category, String stats) {
         return render("CHALLENGE", "Relève le défi sur lescracks.com", g -> {
             int column = 600;
@@ -69,7 +69,7 @@ public class ShareCardRenderer {
         });
     }
 
-    public byte[] result(String member, String score, String total, String challengeTitle, String standing, String level) {
+    public byte[] result(String member, String score, String challengeTitle, String standing, String level) {
         return render("RÉSULTAT", "À ton tour sur lescracks.com", g -> {
             g.setFont(sansMedium.deriveFont(30f));
             g.setColor(MUTED);
@@ -80,7 +80,7 @@ public class ShareCardRenderer {
             int scoreWidth = g.getFontMetrics().stringWidth(score);
             g.setFont(sansBold.deriveFont(64f));
             g.setColor(FAINT);
-            g.drawString("/" + total, MARGIN + scoreWidth, 380);
+            g.drawString(" pts", MARGIN + scoreWidth, 380);
             int column = 640;
             g.setFont(monoBold.deriveFont(18f));
             g.setColor(GOLD);

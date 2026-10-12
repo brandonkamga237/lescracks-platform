@@ -1,9 +1,8 @@
 import type { ReactNode } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { ArrowLeft, Flame, FlaskConical, Home, Trophy, User, UserRound } from 'lucide-react';
+import { ArrowLeft, FlaskConical, Home, Trophy, User, UserRound } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-import { useCrackLabProgress } from '@/hooks/useCrackLabProgress';
 import { useSession } from '@/hooks/useSession';
 
 interface CrackLabLayoutProps {
@@ -42,7 +41,6 @@ export default function CrackLabLayout({ children }: CrackLabLayoutProps) {
   const { pathname } = useLocation();
   const { isLoading, isSignedIn, isAdmin, name } = useSession();
   const initial = name?.trim().charAt(0).toLocaleUpperCase('fr');
-  const { progress } = useCrackLabProgress();
 
   return (
     <div className="flex min-h-screen flex-col bg-black pb-[calc(3.5rem+env(safe-area-inset-bottom))] text-t1 lg:pb-0">
@@ -64,15 +62,6 @@ export default function CrackLabLayout({ children }: CrackLabLayoutProps) {
           </nav>
 
           <div className="ml-auto flex items-center gap-3 sm:gap-4">
-            {progress && (
-              // Always in sight: the streak to keep and the XP to grow are what bring a member back.
-              <Link to="/cracklab/moi" aria-label={`Niveau ${progress.level.name}, ${progress.xp} XP, série de ${progress.streak} semaines`}
-                className="flex h-9 items-center gap-3 rounded border border-line px-3 font-mono text-xs tabular-nums transition-colors duration-150 hover:border-line-strong">
-                <span className={`flex items-center gap-1 ${progress.activeThisWeek ? 'text-gold-ink' : 'text-t4'}`}><Flame className="h-3.5 w-3.5" aria-hidden />{progress.streak}</span>
-                <span className="text-t1">{progress.xp}<span className="text-t4"> xp</span></span>
-                <span className="hidden text-t4 sm:inline">N{progress.level.number}</span>
-              </Link>
-            )}
             <Link to="/" className="hidden items-center gap-1.5 text-sm text-t3 transition-colors hover:text-t1 sm:inline-flex">
               <ArrowLeft className="h-4 w-4" aria-hidden />LesCracks
             </Link>
