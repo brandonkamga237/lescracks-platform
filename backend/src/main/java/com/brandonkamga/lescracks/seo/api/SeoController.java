@@ -178,7 +178,7 @@ public class SeoController {
             html.section("Bibliothèque", canonical(request, "/ressources"), "Vidéos, ebooks et articles pour apprendre la tech, triés par catégorie et par sujet.");
             html.section("Événements", canonical(request, "/evenements"), "Ateliers, bootcamps, webinaires et conférences pour pratiquer avec d’autres, en ligne ou sur place.");
             html.section("LesCracks Talk", canonical(request, "/talk"), "Des conversations vidéo avec celles et ceux qui construisent la tech africaine.");
-            html.section("CrackLab", canonical(request, "/cracklab"), "Des challenges d’ingénierie notés sur 100, un classement chaque semaine et des badges à débloquer.");
+            html.section("CrackLab", canonical(request, "/cracklab"), "Des casse-têtes à résoudre en raisonnant, un classement chaque semaine et des badges à débloquer.");
             html.section("À propos", canonical(request, "/a-propos"), "Qui est derrière LesCracks, ce que nous faisons et pourquoi.");
             addResourceLinks(html, request);
             addEventLinks(html, request);

@@ -40,7 +40,7 @@ export default function AdminCrackLab() {
   return (
     <AdminSection
       title="CrackLab"
-      description="Les challenges d’ingénierie : un énoncé, une grille de notation, des réponses à noter."
+      description="Les défis : un énoncé, une grille de notation, des réponses à noter."
       action={<div className="flex flex-wrap items-center gap-3">
         <Link to="/admin/cracklab/reponses" className="btn-secondary"><ClipboardCheck className="h-4 w-4" aria-hidden />À noter{waiting > 0 && ` (${waiting})`}</Link>
         <Link to="/admin/cracklab/challenges/nouveau" className="btn-primary"><Plus className="h-4 w-4" aria-hidden />Nouveau challenge</Link>
