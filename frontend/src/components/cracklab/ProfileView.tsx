@@ -106,7 +106,7 @@ export default function ProfileView({ progress }: ProfileViewProps) {
           </section>
 
           <section aria-labelledby="history-heading">
-            <h2 id="history-heading" className={label}>{progress.me ? 'Tes challenges' : 'Challenges relevés'}</h2>
+            <h2 id="history-heading" className={label}>{progress.me ? 'Tes défis' : 'Défis relevés'}</h2>
             {progress.history.length ? (
               <ul className="mt-4 divide-y divide-line-soft overflow-hidden rounded-lg border border-line">
                 {progress.history.map((item) => (
@@ -121,16 +121,16 @@ export default function ProfileView({ progress }: ProfileViewProps) {
                         <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-t4"><Difficulty value={item.difficulty} /><span className="font-mono">{item.category} · {dateFormat.format(new Date(item.createdAt))}</span></span>
                       </span>
                       {item.status === 'GRADED'
-                        ? <span className="font-mono tabular-nums text-t1">{item.score}<span className="text-t4">/{item.totalPoints}</span></span>
+                        ? <span className="font-mono tabular-nums text-gold-ink">{item.score} pts</span>
                         : <span className="inline-flex items-center gap-1.5 font-mono text-xs text-t3"><Clock3 className="h-3.5 w-3.5" aria-hidden />notation</span>}
                     </Link>
                   </li>
                 ))}
               </ul>
             ) : (
-              <EmptyState icon={<Schematic seed="profil" category="backend" labels={false} className="h-20 w-auto" />} title="Pas encore de challenge relevé."
+              <EmptyState icon={<Schematic seed="profil" category="backend" labels={false} className="h-20 w-auto" />} title="Pas encore de défi relevé."
                 description="Une première réponse, et la note, le niveau et les badges suivent."
-                action={<Link to="/cracklab#challenges" className="btn-primary">Voir les challenges</Link>} />
+                action={<Link to="/cracklab#challenges" className="btn-primary">Voir les défis</Link>} />
             )}
           </section>
         </div>

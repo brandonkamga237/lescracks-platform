@@ -92,7 +92,7 @@ public class CrackLabSeoController {
         ChallengeStats stats = progress.statsFor(challenge.getId());
         String crowd = stats.participants() == 0 ? "Personne n’a encore répondu : ouvre le bal."
                 : stats.participants() + " participant" + (stats.participants() > 1 ? "s" : "")
-                + (stats.averageScore() == null ? "." : ", moyenne " + stats.averageScore() + "/" + challenge.totalPoints() + ".");
+                + ".";
         String description = LEVEL.get(challenge.getDifficulty()) + " · " + challenge.getCategory() + ". " + crowd + " "
                 + (statement.length() > 110 ? statement.substring(0, 110).trim() + "…" : statement);
 
@@ -190,11 +190,9 @@ public class CrackLabSeoController {
         String challengeTitle = submission.getChallenge().getTitle();
         boolean graded = submission.getStatus() == SubmissionStatus.GRADED;
         String title = graded
-                ? name + " a obtenu " + submission.getTechnicalScore() + "/" + submission.getChallenge().totalPoints() + " sur « " + challengeTitle + " »"
-                : name + " a relevé le challenge « " + challengeTitle + " »";
-        String standing = graded && result.rankOnChallenge() == 1 ? "Meilleur score du challenge. "
-                : graded && result.stats().graded() > 1 ? "Mieux que " + result.betterThanPercent() + " % des participants. " : "";
-        String description = standing + "Relève le même défi et compare ton score.";
+                ? name + " a obtenu " + submission.getTechnicalScore() + " pts sur « " + challengeTitle + " »"
+                : name + " a relevé le défi « " + challengeTitle + " »";
+        String description = "Relève le même défi à ton tour.";
         SeoHtml html = new SeoHtml(title + " · CrackLab", description, base + "/cracklab/resultats/" + id)
                 .type("article")
                 .image(base + "/api/cracklab/share/results/" + id + ".png", title, CARD_WIDTH, CARD_HEIGHT);

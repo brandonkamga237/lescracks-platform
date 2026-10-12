@@ -60,9 +60,8 @@ public class CrackLabShareController {
         Challenge challenge = challenges.requirePublished(slug);
         ChallengeStats stats = progress.statsFor(challenge.getId());
         String line = stats.participants() == 0
-                ? "Aucune réponse encore : ouvre le bal · " + challenge.totalPoints() + " pts en jeu"
-                : stats.participants() + " participant" + (stats.participants() > 1 ? "s" : "")
-                + (stats.averageScore() == null ? "" : " · moyenne " + stats.averageScore() + "/" + challenge.totalPoints());
+                ? "Aucune réponse encore : ouvre le bal"
+                : stats.participants() + " participant" + (stats.participants() > 1 ? "s" : "");
         return png(renderer.challenge(challenge.getSlug(), challenge.getTitle(), LEVEL_LABEL.get(challenge.getDifficulty()), BARS.get(challenge.getDifficulty()),
                 challenge.getCategory(), line));
     }
@@ -72,11 +71,10 @@ public class CrackLabShareController {
         PublicResult result = progress.result(id);
         Submission submission = result.submission();
         boolean graded = submission.getStatus() == SubmissionStatus.GRADED;
-        String standing = !graded ? "Réponse en attente de notation"
-                : result.rankOnChallenge() == 1 ? "Meilleur score du challenge"
-                : result.stats().graded() > 1 ? "Mieux que " + result.betterThanPercent() + " % des participants" : "";
+        // A score on its own: no rank or percentage next to it, sharing is not a comparison.
+        String standing = graded ? "" : "Réponse en attente de notation";
         return png(renderer.result(CrackLabMapper.displayNameOf(submission.getUser()), graded ? String.valueOf(submission.getTechnicalScore()) : "—",
-                String.valueOf(submission.getChallenge().totalPoints()), submission.getChallenge().getTitle(), standing, result.authorLevel().name()));
+                submission.getChallenge().getTitle(), standing, result.authorLevel().name()));
     }
 
     @GetMapping("/ranking.png")
