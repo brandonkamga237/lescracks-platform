@@ -18,7 +18,7 @@ interface Section {
 }
 
 const SECTIONS: readonly Section[] = [
-  { to: '/cracklab', label: 'Challenges', icon: FlaskConical, end: true },
+  { to: '/cracklab', label: 'Défis', icon: FlaskConical, end: true },
   { to: '/cracklab/classement', label: 'Classement', icon: Trophy },
   { to: '/cracklab/moi', label: 'Mon profil', icon: UserRound },
 ];
@@ -94,7 +94,7 @@ export default function CrackLabLayout({ children }: CrackLabLayoutProps) {
 
       <footer className="border-t border-line-soft">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-3 px-5 py-8 text-sm text-t4 sm:flex-row sm:items-center sm:px-8">
-          <p><CrackLabMark /> · des challenges d’ingénierie notés critère par critère.</p>
+          <p><CrackLabMark /> · des casse-têtes à résoudre en raisonnant.</p>
           <Link to="/" className="link inline-flex items-center gap-1.5"><ArrowLeft className="h-4 w-4" aria-hidden />Retour à LesCracks</Link>
         </div>
       </footer>

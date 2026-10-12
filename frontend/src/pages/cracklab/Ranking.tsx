@@ -76,7 +76,7 @@ export default function Ranking() {
 
   return (
     <CrackLabLayout>
-      <SEO title={week ? 'Le podium de la semaine · CrackLab' : 'Classement · CrackLab'} description="Le classement CrackLab : la somme des scores techniques obtenus sur les challenges d’ingénierie." url={rankingPath(period)} />
+      <SEO title={week ? 'Le podium de la semaine · CrackLab' : 'Classement · CrackLab'} description="Le classement CrackLab : la somme des scores obtenus sur les défis." url={rankingPath(period)} />
       <div className="mx-auto max-w-4xl px-5 py-10 sm:px-8 sm:py-14">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -113,7 +113,7 @@ export default function Ranking() {
             <div className={ranking.loading ? 'opacity-60' : ''}>
               <div className="overflow-hidden rounded-lg border border-line">
                 <div aria-hidden className="hidden grid-cols-[3rem_minmax(0,1fr)_7rem_6rem_5rem_5rem] gap-x-4 border-b border-line-soft bg-noir-900 px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.08em] text-t4 sm:grid">
-                  <span>#</span><span>Membre</span><span>Niveau</span><span className="text-right">Challenges</span><span className="text-right">Écart</span><span className="text-right">Points</span>
+                  <span>#</span><span>Membre</span><span>Niveau</span><span className="text-right">Défis</span><span className="text-right">Écart</span><span className="text-right">Points</span>
                 </div>
                 <ol className="divide-y divide-line-soft">
                   {list.map((entry, index) => {

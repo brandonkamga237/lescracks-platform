@@ -64,17 +64,17 @@ public class CrackLabSeoController {
     @GetMapping(produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> home(HttpServletRequest request) {
         String canonical = baseUrl(request) + "/cracklab";
-        SeoHtml html = new SeoHtml("CrackLab · Challenges d’ingénierie · LesCracks",
-                "Des problèmes d’ingénierie réels : rédige ta solution, reçois une note critère par critère et compare-la aux autres réponses.",
+        SeoHtml html = new SeoHtml("CrackLab · Casse-têtes et défis de réflexion · LesCracks",
+                "Des casse-têtes concrets à résoudre en raisonnant : propose ta solution, reçois un retour détaillé et compare-la à celles des autres.",
                 canonical)
                 .type("website")
                 .image(baseUrl(request) + PREVIEW_IMAGE, "CrackLab par LesCracks", PREVIEW_WIDTH, PREVIEW_HEIGHT);
-        html.heading("CrackLab : challenges d’ingénierie");
-        html.paragraph("Chaque challenge est un problème technique réel, noté sur une grille publique. Plusieurs solutions sont possibles : c’est le raisonnement qui est évalué.");
+        html.heading("CrackLab : des casse-têtes pour muscler ta réflexion");
+        html.paragraph("Chaque défi est un problème concret, noté sur une grille publique. Plusieurs solutions sont possibles : c’est le raisonnement qui est évalué.");
 
         var published = challenges.published(null, null, null, PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "publishedAt")));
         if (published.isEmpty()) {
-            html.paragraph("Le premier challenge se prépare.");
+            html.paragraph("Le premier défi se prépare.");
         } else {
             List<SeoHtml.Link> links = new ArrayList<>();
             published.forEach(challenge -> links.add(new SeoHtml.Link(baseUrl(request) + "/cracklab/challenges/" + challenge.getSlug(), challenge.getTitle())));
@@ -145,7 +145,7 @@ public class CrackLabSeoController {
                     .append(" ").append(row.getTotalScore()).append(" pts");
         }
         String description = (rows.isEmpty() ? "Le podium est libre." : podium + ".")
-                + " Résous des challenges d’ingénierie notés sur 100 et prends ta place.";
+                + " Résous des casse-têtes et prends ta place.";
         SeoHtml html = new SeoHtml(week ? "Le podium de la semaine · CrackLab" : "Classement CrackLab", description,
                 base + "/cracklab/classement" + (week ? "?periode=semaine" : ""))
                 .type("website")
