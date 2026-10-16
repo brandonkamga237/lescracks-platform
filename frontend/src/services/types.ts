@@ -109,7 +109,8 @@ export interface AdminSummary {
   role: string;
 }
 
-export type NewsletterState = 'SUBSCRIBED' | 'UNSUBSCRIBED';
+/** PENDING: signed up from the public form, address not confirmed yet. */
+export type NewsletterState = 'PENDING' | 'SUBSCRIBED' | 'UNSUBSCRIBED';
 
 export interface AdminSubscriber {
   userId: number;
@@ -124,6 +125,7 @@ export interface AdminSubscriber {
 export interface NewsletterStats {
   subscribed: number;
   unsubscribed: number;
+  pending: number;
 }
 
 export interface UserGrowthPoint {

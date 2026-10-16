@@ -5,6 +5,7 @@ import com.brandonkamga.lescracks.identity.domain.User;
 import com.brandonkamga.lescracks.identity.domain.UserDirectory;
 import com.brandonkamga.lescracks.mail.domain.EventAnnouncement;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
+import com.brandonkamga.lescracks.mail.domain.NewsletterConfirmation;
 import com.brandonkamga.lescracks.mail.domain.NewsletterIssue;
 import com.brandonkamga.lescracks.mail.domain.ResourceAnnouncement;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterCampaignRepository;
@@ -64,7 +65,22 @@ public class NewsletterServiceImpl implements NewsletterService {
         if (user == null) {
             user = users.createContact(normalizedEmail, firstName, lastName);
         }
-        return subscribe(user);
+        User contact = user;
+        NewsletterSubscription subscription = subscriptions.findByUserId(contact.getId())
+                .orElseGet(() -> NewsletterSubscription.builder().user(contact).build());
+        if (subscription.getStatus() == NewsletterStatus.SUBSCRIBED && subscription.getId() != null) return subscription;
+        subscription.setStatus(NewsletterStatus.PENDING);
+        subscription.setUnsubscribedAt(null);
+        subscription = subscriptions.save(subscription);
+        mail.send(new NewsletterConfirmation(contact.getEmail(), subscription.getToken()));
+        return subscription;
+    }
+
+    @Override
+    public void confirm(String token) {
+        NewsletterSubscription subscription = subscriptions.findByToken(token)
+                .orElseThrow(() -> new NotFoundException("Ce lien de confirmation n’est plus valide."));
+        if (subscription.getStatus() == NewsletterStatus.PENDING) subscription.setStatus(NewsletterStatus.SUBSCRIBED);
     }
 
     private NewsletterSubscription subscribe(User user) {
@@ -82,6 +98,15 @@ public class NewsletterServiceImpl implements NewsletterService {
         subscription.setStatus(NewsletterStatus.UNSUBSCRIBED);
         subscription.setUnsubscribedAt(Instant.now());
         return subscription;
+    }
+
+    @Override
+    public void unsubscribeByToken(String token) {
+        NewsletterSubscription subscription = subscriptions.findByToken(token)
+                .orElseThrow(() -> new NotFoundException("Ce lien de désabonnement n’est plus valide."));
+        if (subscription.getStatus() == NewsletterStatus.UNSUBSCRIBED) return;
+        subscription.setStatus(NewsletterStatus.UNSUBSCRIBED);
+        subscription.setUnsubscribedAt(Instant.now());
     }
 
     @Override
@@ -109,7 +134,7 @@ public class NewsletterServiceImpl implements NewsletterService {
         subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED)
                 .forEach(subscription -> mail.send(new EventAnnouncement(subscription.getUser().getEmail(),
                         event.getTitle(), event.getDescription(), "/evenements/" + slugOrId(event.getSlug(), event.getId()),
-                        event.getCoverImage(), event.getStartDate())));
+                        event.getCoverImage(), event.getStartDate(), subscription.getToken())));
     }
 
     @Override
@@ -117,13 +142,18 @@ public class NewsletterServiceImpl implements NewsletterService {
         subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED)
                 .forEach(subscription -> mail.send(new ResourceAnnouncement(subscription.getUser().getEmail(),
                         resource.getTitle(), resource.getDescription(), "/ressources/" + slugOrId(resource.getSlug(), resource.getId()),
-                        resource.getCoverImage())));
+                        resource.getCoverImage(), subscription.getToken())));
     }
 
     /** The exact email a subscriber would get, filled with a sample reader. */
     @Override
     public String preview(String subject, JsonNode body) {
-        return mail.previewHtml(new NewsletterIssue("marie@example.com", subject, body, "Marie", "Kamga"));
+        return mail.previewHtml(new NewsletterIssue("marie@example.com", subject, body, "Marie", "Kamga", null));
+    }
+
+    @Override
+    public void sendTest(String subject, JsonNode body, String email) {
+        mail.send(new NewsletterIssue(email.trim(), "[Test] " + subject, body, "Marie", "Kamga", null));
     }
 
     @Override
@@ -131,7 +161,8 @@ public class NewsletterServiceImpl implements NewsletterService {
         var active = subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED);
         active.forEach(subscription -> {
             User user = subscription.getUser();
-            mail.send(new NewsletterIssue(user.getEmail(), subject, body, user.getFirstName(), user.getLastName()));
+            mail.send(new NewsletterIssue(user.getEmail(), subject, body, user.getFirstName(), user.getLastName(),
+                    subscription.getToken()));
         });
         campaigns.save(NewsletterCampaign.builder()
                 .subject(subject)

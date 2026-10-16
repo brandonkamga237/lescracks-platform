@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.mail.infra;
 
 import com.brandonkamga.lescracks.mail.domain.Email;
+import com.brandonkamga.lescracks.mail.domain.NewsletterConfirmation;
 import com.brandonkamga.lescracks.mail.domain.NewsletterIssue;
 import com.brandonkamga.lescracks.mail.domain.PasswordResetEmail;
 import com.brandonkamga.lescracks.mail.domain.VerificationEmail;
@@ -20,6 +21,7 @@ class EmailTemplatesTest {
     private final EmailTemplates templates = new EmailTemplates(List.of(
             new VerificationEmailTemplate(layout),
             new PasswordResetEmailTemplate(layout),
+            new NewsletterConfirmationTemplate(layout),
             new NewsletterIssueTemplate(layout, new EmailBodyRenderer("https://lescracks.com"))));
 
     @Test
@@ -29,7 +31,7 @@ class EmailTemplatesTest {
                 [{"type": "paragraph", "text": "Bonjour {{firstName}}"}]
                 """);
 
-        RenderedEmail rendered = templates.render(new NewsletterIssue("marie@example.com", "Les <nouveautés>", body, "Marie", "Kamga"));
+        RenderedEmail rendered = templates.render(new NewsletterIssue("marie@example.com", "Les <nouveautés>", body, "Marie", "Kamga", null));
 
         assertThat(rendered.subject()).isEqualTo("Les <nouveautés>");
         assertThat(rendered.html())
@@ -38,6 +40,31 @@ class EmailTemplatesTest {
                 .contains("<title>Les &lt;nouveautés&gt;</title>")
                 .contains("abonné à la newsletter LesCracks")
                 .doesNotContain("{{firstName}}", "text-transform:uppercase");
+    }
+
+    @Test
+    @DisplayName("a newsletter sent to a subscriber links to the unsubscribe page and offers one-click unsubscribe")
+    void unsubscribeLinkAndHeaders() throws Exception {
+        var body = new ObjectMapper().readTree("[{\"type\": \"paragraph\", \"text\": \"Bonjour\"}]");
+
+        RenderedEmail rendered = templates.render(new NewsletterIssue("marie@example.com", "Nouveautés", body, "Marie", "Kamga", "t0k3n"));
+
+        assertThat(rendered.html()).contains("href=\"https://lescracks.com/desabonnement?token=t0k3n\"", "Se désabonner");
+        assertThat(rendered.text()).contains("Se désabonner : https://lescracks.com/desabonnement?token=t0k3n");
+        assertThat(rendered.headers())
+                .containsEntry("List-Unsubscribe", "<https://lescracks.com/api/newsletter/public/unsubscribe?token=t0k3n>")
+                .containsEntry("List-Unsubscribe-Post", "List-Unsubscribe=One-Click");
+    }
+
+    @Test
+    @DisplayName("a preview has no unsubscribe link and no list headers")
+    void previewHasNoUnsubscribe() throws Exception {
+        var body = new ObjectMapper().readTree("[{\"type\": \"paragraph\", \"text\": \"Bonjour\"}]");
+
+        RenderedEmail rendered = templates.render(new NewsletterIssue("marie@example.com", "Nouveautés", body, "Marie", "Kamga", null));
+
+        assertThat(rendered.html()).doesNotContain("desabonnement");
+        assertThat(rendered.headers()).isEmpty();
     }
 
     @Test
@@ -62,6 +89,13 @@ class EmailTemplatesTest {
                 .contains("Ce lien expire dans 24 heures.")
                 .contains("\n--\nTu reçois cet email")
                 .doesNotContain("<", "&nbsp;", "\n\n\n");
+    }
+
+    @Test
+    @DisplayName("the newsletter confirmation links to the confirmation page with its token")
+    void confirmationLink() {
+        assertThat(templates.render(new NewsletterConfirmation("awa@example.com", "c0nf")).html())
+                .contains("href=\"https://lescracks.com/newsletter/confirmer?token=c0nf\"");
     }
 
     @Test

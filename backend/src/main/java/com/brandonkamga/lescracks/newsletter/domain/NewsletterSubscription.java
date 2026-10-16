@@ -8,7 +8,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.HexFormat;
 
 /**
  * A user's subscription to the newsletter.
@@ -43,4 +45,20 @@ public class NewsletterSubscription {
 
     @Column(name = "unsubscribed_at")
     private Instant unsubscribedAt;
+
+    /**
+     * Put in every newsletter email to unsubscribe without signing in. Stored as is: it only
+     * ever stops emails, so leaking it does less harm than losing the one-click link would.
+     */
+    @Column(nullable = false, unique = true, length = 64)
+    @Builder.Default
+    private String token = randomToken();
+
+    private static final SecureRandom RANDOM = new SecureRandom();
+
+    private static String randomToken() {
+        byte[] bytes = new byte[32];
+        RANDOM.nextBytes(bytes);
+        return HexFormat.of().formatHex(bytes);
+    }
 }

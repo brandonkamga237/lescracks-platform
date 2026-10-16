@@ -103,7 +103,7 @@ export default function NewsletterBar({ placement = 'top' }: NewsletterBarProps)
           </form>
         )}
         {!isSignedIn && emailSuccess && (
-          <span className="font-medium text-gold-ink">Merci, tu es bien inscrit.</span>
+          <span role="status" className="font-medium text-gold-ink">Presque fini : confirme ton inscription avec le lien reçu par email.</span>
         )}
         {failure && <span role="alert" className="text-error-ink">{failure}</span>}
         {top && <button type="button" onClick={() => setVisible(false)} aria-label="Masquer ce message" className="ml-1 rounded px-1 text-t4 transition-colors hover:text-t1">×</button>}
