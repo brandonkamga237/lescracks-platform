@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.identity.api.dto;
 
+import com.brandonkamga.lescracks.identity.domain.OnboardingAnswers;
 import com.brandonkamga.lescracks.identity.domain.MemberGoal;
 import com.brandonkamga.lescracks.identity.domain.MemberSituation;
 
@@ -17,4 +18,9 @@ public record OnboardingRequest(
         @Size(max = 100) String location,
         Boolean marketingConsent,
         @Valid SignupContext context) {
+
+    public OnboardingAnswers toAnswers() {
+        return new OnboardingAnswers(phone, situation, goal, interestIds, location, marketingConsent,
+                context == null ? null : context.toArrival());
+    }
 }

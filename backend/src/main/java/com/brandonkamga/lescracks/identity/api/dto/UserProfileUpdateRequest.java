@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.identity.api.dto;
 
+import com.brandonkamga.lescracks.identity.domain.ProfileChanges;
 import com.brandonkamga.lescracks.identity.domain.MemberGoal;
 import com.brandonkamga.lescracks.identity.domain.MemberSituation;
 
@@ -25,4 +26,9 @@ public record UserProfileUpdateRequest(
         @Size(max = 10) Set<Long> interestIds,
         Boolean marketingConsent
 ) {
+
+    public ProfileChanges toChanges() {
+        return new ProfileChanges(firstName, lastName, username, avatarUrl, bio, location, socialLinks, phone,
+                situation, goal, interestIds, marketingConsent);
+    }
 }

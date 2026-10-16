@@ -23,13 +23,14 @@ public class UserIdentityController {
 
     @GetMapping
     public ResponseEntity<List<UserIdentityResponse>> list(Authentication authentication) {
-        return ResponseEntity.ok(identities.list(authentication.getName()));
+        return ResponseEntity.ok(identities.list(authentication.getName()).stream().map(UserIdentityResponse::of).toList());
     }
 
     @PostMapping
     public ResponseEntity<UserIdentityResponse> link(Authentication authentication,
                                                      @Valid @RequestBody LinkIdentityRequest request) {
-        return ResponseEntity.ok(identities.link(authentication.getName(), request));
+        return ResponseEntity.ok(UserIdentityResponse.of(
+                identities.link(authentication.getName(), request.provider(), request.token())));
     }
 
     @DeleteMapping("/{provider}")

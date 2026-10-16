@@ -43,6 +43,10 @@ public class PasswordResetToken {
     @Builder.Default
     private Instant createdAt = Instant.now();
 
+    public boolean isValid() {
+        return usedAt == null && expiresAt.isAfter(Instant.now());
+    }
+
     public void markUsed() {
         usedAt = Instant.now();
     }

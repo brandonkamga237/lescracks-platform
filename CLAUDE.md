@@ -61,9 +61,11 @@ Before any commit or PR:
 ### Backend
 - New code goes into the package of the domain it belongs to, never into a layer-wide package: `<feature>/api` (controller + `api/dto`), `<feature>/domain` (entities, enums, service interface + `XxxServiceImpl`), `<feature>/infra` (repositories, external adapters)
 - Prefer calling another domain through its `domain` service rather than its repositories; `stats`, `seo` and `shared/bootstrap` are the existing exceptions, as read-only aggregation and seeding cut across every domain
-- Controllers return `ResponseEntity<ApiResponse<T>>` built with `ApiResponse.success(...)` / `.error(...)`
+- Controllers return the response record (or `ResponseEntity<XxxResponse>`); requests translate themselves into domain commands (`request.toRegistration()`), responses build themselves from entities (`XxxResponse.of(entity)`)
+- Dependency direction `api → domain ← infra`: `domain` never imports an `api` class; another domain is reached through its service interface (e.g. `UserDirectory`), never its repositories
+- SOLID and the patterns in use (command objects, `EmailTemplate` strategy, after-commit email delivery): see `.claude/skills/backend-endpoint/SKILL.md`
 - Never expose a `<feature>/domain/` entity: always a DTO
-- Errors: throw `ResourceNotFoundException` / `BadRequestException` / `ForbiddenException`; do not set the status in the controller, `GlobalExceptionHandler` does it
+- Errors: throw `NotFoundException` / `BadRequestException` / `ForbiddenException` / `ConflictException`; do not set the status in the controller, `GlobalExceptionHandler` does it
 - DB schema: Flyway only (`ddl-auto: validate` everywhere). A new entity field means a new `V{n}__...sql` migration; never edit a migration that has already been applied
 - Lombok (`@Data`, `@Builder`) on DTOs and entities; logging through `slf4j`
 - Public vs protected endpoints are declared in `SecurityConfig`, plus `@PreAuthorize` on each admin method; roles come from the Keycloak realm: `user`, `admin`
