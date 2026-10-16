@@ -6,6 +6,8 @@ import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 import com.brandonkamga.lescracks.taxonomy.domain.TaxonomyService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,8 @@ import java.util.Set;
 @Service
 @Transactional
 public class UserProfileServiceImpl implements UserProfileService {
+    private static final Logger log = LoggerFactory.getLogger(UserProfileServiceImpl.class);
+
     private final UserRepository users;
     private final PasswordEncoder passwords;
     private final StorageService storage;
@@ -48,12 +52,11 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     public User update(String email, ProfileChanges changes) {
         User user = require(email);
-        user.setFirstName(changes.firstName().trim());
-        user.setLastName(changes.lastName().trim());
-        user.setUsername(changes.username() == null ? null : changes.username().trim().toLowerCase());
-        user.setAvatarUrl(changes.avatarUrl() == null ? null : changes.avatarUrl().trim());
-        user.setBio(changes.bio() == null ? null : changes.bio().trim());
-        user.setLocation(changes.location() == null ? null : changes.location().trim());
+        if (changes.firstName() != null) user.setFirstName(required(changes.firstName(), "Le prénom"));
+        if (changes.lastName() != null) user.setLastName(required(changes.lastName(), "Le nom"));
+        if (changes.username() != null) user.setUsername(optional(changes.username().toLowerCase()));
+        if (changes.bio() != null) user.setBio(optional(changes.bio()));
+        if (changes.location() != null) user.setLocation(optional(changes.location()));
         if (changes.socialLinks() != null) {
             user.setSocialLinks(changes.socialLinks());
         }
@@ -81,6 +84,15 @@ public class UserProfileServiceImpl implements UserProfileService {
         return user;
     }
 
+    private static String required(String value, String label) {
+        if (value.isBlank()) throw new BadRequestException(label + " ne peut pas être vide.");
+        return value.trim();
+    }
+
+    private static String optional(String value) {
+        return value.isBlank() ? null : value.trim();
+    }
+
     /** Null leaves them as they are; each id must be an existing category. */
     private void interests(User user, Set<Long> ids) {
         if (ids == null) return;
@@ -94,17 +106,37 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public User updateAvatar(String email, MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new BadRequestException("Aucun fichier reçu.");
-        }
-        User user = require(email);
+        byte[] content;
         try {
-            String key = storage.store(file.getOriginalFilename(), file.getBytes(), file.getContentType());
-            user.setAvatarUrl(key);
-            user.setUpdatedAt(Instant.now());
-            return user;
+            content = file.getBytes();
         } catch (IOException cause) {
             throw new BadRequestException("Impossible de lire le fichier.");
+        }
+        String contentType = AvatarImages.check(content);
+        User user = require(email);
+        String previous = user.getAvatarUrl();
+        user.setAvatarUrl(storage.store(file.getOriginalFilename(), content, contentType));
+        user.setUpdatedAt(Instant.now());
+        discard(previous);
+        return user;
+    }
+
+    @Override
+    public User removeAvatar(String email) {
+        User user = require(email);
+        discard(user.getAvatarUrl());
+        user.setAvatarUrl(null);
+        user.setUpdatedAt(Instant.now());
+        return user;
+    }
+
+    /** Deletes a photo we stored; an external URL is not ours to delete, and a failed cleanup never fails the change. */
+    private void discard(String avatar) {
+        if (avatar == null || avatar.isBlank() || avatar.startsWith("http") || avatar.startsWith("/")) return;
+        try {
+            storage.delete(avatar);
+        } catch (RuntimeException cause) {
+            log.warn("Previous avatar {} not deleted: {}", avatar, cause.getMessage());
         }
     }
 

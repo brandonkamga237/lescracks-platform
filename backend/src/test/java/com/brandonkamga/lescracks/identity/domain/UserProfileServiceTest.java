@@ -93,4 +93,31 @@ class UserProfileServiceTest {
                 .isInstanceOf(NotFoundException.class);
         assertThat(member.getOnboardedAt()).isNull();
     }
+
+    @Test
+    @DisplayName("a section saves only its own fields: the rest of the profile stays as it was")
+    void partialUpdate() {
+        member.setBio("Dev Java");
+        member.setLocation("Douala");
+
+        service.update("eric@example.com", new ProfileChanges(null, null, null, " Back-end ", null, null, null, null, null, null, null));
+
+        assertThat(member.getFirstName()).isEqualTo("Eric");
+        assertThat(member.getBio()).isEqualTo("Back-end");
+        assertThat(member.getLocation()).isEqualTo("Douala");
+    }
+
+    @Test
+    @DisplayName("an empty optional field is cleared, an empty name is refused")
+    void clearingAndRequiredFields() {
+        member.setLocation("Douala");
+
+        service.update("eric@example.com", new ProfileChanges(null, null, null, null, "", null, null, null, null, null, null));
+        assertThat(member.getLocation()).isNull();
+
+        assertThatThrownBy(() -> service.update("eric@example.com",
+                new ProfileChanges(" ", null, null, null, null, null, null, null, null, null, null)))
+                .isInstanceOf(BadRequestException.class);
+        assertThat(member.getFirstName()).isEqualTo("Eric");
+    }
 }

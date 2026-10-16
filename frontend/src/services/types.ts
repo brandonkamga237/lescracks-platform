@@ -269,15 +269,14 @@ export interface OnboardingAnswers {
   context?: SignupContext;
 }
 
+/** A partial change: an omitted field stays as it is, an empty string clears an optional one. */
 export interface UserProfileUpdate {
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   username?: string;
-  avatarUrl?: string;
   bio?: string;
   location?: string;
   socialLinks?: Record<string, string>;
-  /** Omitted: unchanged; empty string: removed. */
   phone?: string;
   situation?: MemberSituation;
   goal?: MemberGoal;

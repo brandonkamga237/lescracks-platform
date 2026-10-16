@@ -55,6 +55,11 @@ public class UserProfileController {
         return response(profiles.updateAvatar(authentication.getName(), file));
     }
 
+    @DeleteMapping("/avatar")
+    public UserProfileResponse removeAvatar(Authentication authentication) {
+        return response(profiles.removeAvatar(authentication.getName()));
+    }
+
     @PostMapping("/verification-email")
     public ResponseEntity<Void> resendVerification(Authentication authentication) {
         verification.sendAgain(authentication.getName());
