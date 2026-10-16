@@ -21,5 +21,8 @@ public interface NewsletterService {
     void notifyResourceSubscribers(Resource resource);
     int broadcast(String subject, JsonNode body);
     String preview(String subject, JsonNode body);
+
+    /** The campaign as subscribers will get it, sent to one address and marked as a test; nothing is recorded. */
+    void sendTest(String subject, JsonNode body, String email);
     List<NewsletterCampaign> campaigns();
 }

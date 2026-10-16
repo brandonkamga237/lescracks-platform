@@ -136,6 +136,11 @@ public class NewsletterServiceImpl implements NewsletterService {
     }
 
     @Override
+    public void sendTest(String subject, JsonNode body, String email) {
+        mail.send(new NewsletterIssue(email.trim(), "[Test] " + subject, body, "Marie", "Kamga", null));
+    }
+
+    @Override
     public int broadcast(String subject, JsonNode body) {
         var active = subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED);
         active.forEach(subscription -> {
