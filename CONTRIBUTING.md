@@ -81,6 +81,38 @@ editing a Flyway migration that is already applied.
   shared agent settings deny `gh pr merge` and direct pushes to `main` and `develop`, so the
   script above is its only way to merge.
 
+## Releases
+
+Versions follow [SemVer](https://semver.org) and are tagged `vX.Y.Z` on `main`. Nobody picks
+the number by hand: [release-please](https://github.com/googleapis/release-please) derives it
+from the commits merged since the last tag.
+
+| Commits since the last release | Next version |
+| --- | --- |
+| only `fix` / `perf` | patch: `1.4.2` → `1.4.3` |
+| at least one `feat` | minor: `1.4.2` → `1.5.0` |
+| a `!` or a `BREAKING CHANGE:` footer | major: `1.4.2` → `2.0.0` |
+
+How a release goes:
+
+1. `develop` is merged into `main` (merge commit, by the maintainer).
+2. The `Release` workflow opens, or updates, a pull request `chore(main): release X.Y.Z` with
+   the new `CHANGELOG.md` entry. It stays open and grows with each merge into `main`.
+3. When the release should be cut, the maintainer merges that PR (**Create a merge commit**).
+   The workflow then tags `vX.Y.Z` and publishes the GitHub release with the same notes.
+
+The changelog lists `feat`, `fix`, `perf` and `revert`; the other types stay out of it, so
+the commit type decides what users get to read. To force a number, add a `Release-As: x.y.z`
+line to a commit body.
+
+`CHANGELOG.md`, `version.txt` and `.release-please-manifest.json` belong to the release
+workflow: never edit them by hand, on `develop` or anywhere else.
+
+The workflow needs the secret `RELEASE_PLEASE_TOKEN`: a fine-grained personal access token
+limited to this repository, with **Contents**, **Pull requests** and **Issues** set to
+read and write. `GITHUB_TOKEN` cannot be used: what it creates triggers no workflow, so the
+required `Commit messages` check would never run on the release PR.
+
 ## Checks before a PR
 
 ```bash
