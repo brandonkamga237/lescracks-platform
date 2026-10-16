@@ -65,6 +65,12 @@ public class NewsletterController {
      * The link of every newsletter email, and the one-click POST mail clients send for the
      * List-Unsubscribe header (RFC 8058): the token alone identifies the subscription.
      */
+    @PostMapping("/public/confirm")
+    public ResponseEntity<Void> confirm(@RequestParam String token) {
+        newsletter.confirm(token);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/public/unsubscribe")
     public ResponseEntity<Void> unsubscribeByToken(@RequestParam String token) {
         newsletter.unsubscribeByToken(token);
@@ -155,10 +161,12 @@ public class NewsletterController {
     public NewsletterStats stats() {
         return new NewsletterStats(
             subscriptions.countByStatus(NewsletterStatus.SUBSCRIBED),
-            subscriptions.countByStatus(NewsletterStatus.UNSUBSCRIBED));
+            subscriptions.countByStatus(NewsletterStatus.UNSUBSCRIBED),
+            subscriptions.countByStatus(NewsletterStatus.PENDING));
     }
 
-    public record NewsletterStats(long subscribed, long unsubscribed) { }
+    /** {@code pending}: signed up from the public form, address not confirmed yet. */
+    public record NewsletterStats(long subscribed, long unsubscribed, long pending) { }
 
     private AdminSubscriberResponse toAdminResponse(NewsletterSubscription subscription) {
         User user = subscription.getUser();

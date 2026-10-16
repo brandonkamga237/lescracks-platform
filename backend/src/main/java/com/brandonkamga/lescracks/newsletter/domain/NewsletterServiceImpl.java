@@ -5,6 +5,7 @@ import com.brandonkamga.lescracks.identity.domain.User;
 import com.brandonkamga.lescracks.identity.domain.UserDirectory;
 import com.brandonkamga.lescracks.mail.domain.EventAnnouncement;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
+import com.brandonkamga.lescracks.mail.domain.NewsletterConfirmation;
 import com.brandonkamga.lescracks.mail.domain.NewsletterIssue;
 import com.brandonkamga.lescracks.mail.domain.ResourceAnnouncement;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterCampaignRepository;
@@ -64,7 +65,22 @@ public class NewsletterServiceImpl implements NewsletterService {
         if (user == null) {
             user = users.createContact(normalizedEmail, firstName, lastName);
         }
-        return subscribe(user);
+        User contact = user;
+        NewsletterSubscription subscription = subscriptions.findByUserId(contact.getId())
+                .orElseGet(() -> NewsletterSubscription.builder().user(contact).build());
+        if (subscription.getStatus() == NewsletterStatus.SUBSCRIBED && subscription.getId() != null) return subscription;
+        subscription.setStatus(NewsletterStatus.PENDING);
+        subscription.setUnsubscribedAt(null);
+        subscription = subscriptions.save(subscription);
+        mail.send(new NewsletterConfirmation(contact.getEmail(), subscription.getToken()));
+        return subscription;
+    }
+
+    @Override
+    public void confirm(String token) {
+        NewsletterSubscription subscription = subscriptions.findByToken(token)
+                .orElseThrow(() -> new NotFoundException("Ce lien de confirmation n’est plus valide."));
+        if (subscription.getStatus() == NewsletterStatus.PENDING) subscription.setStatus(NewsletterStatus.SUBSCRIBED);
     }
 
     private NewsletterSubscription subscribe(User user) {

@@ -10,7 +10,11 @@ import java.util.List;
 public interface NewsletterService {
     NewsletterSubscription status(String username);
     NewsletterSubscription subscribe(String username);
+    /** From the public form: the address must confirm before anything else is sent to it. */
     NewsletterSubscription subscribePublic(String email, String firstName, String lastName);
+
+    /** The link of the confirmation email. */
+    void confirm(String token);
     NewsletterSubscription unsubscribe(String username);
 
     /** From the link in a newsletter email; using it twice is harmless. */

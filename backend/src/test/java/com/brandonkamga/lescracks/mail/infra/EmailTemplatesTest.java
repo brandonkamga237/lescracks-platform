@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.mail.infra;
 
 import com.brandonkamga.lescracks.mail.domain.Email;
+import com.brandonkamga.lescracks.mail.domain.NewsletterConfirmation;
 import com.brandonkamga.lescracks.mail.domain.NewsletterIssue;
 import com.brandonkamga.lescracks.mail.domain.PasswordResetEmail;
 import com.brandonkamga.lescracks.mail.domain.VerificationEmail;
@@ -20,6 +21,7 @@ class EmailTemplatesTest {
     private final EmailTemplates templates = new EmailTemplates(List.of(
             new VerificationEmailTemplate(layout),
             new PasswordResetEmailTemplate(layout),
+            new NewsletterConfirmationTemplate(layout),
             new NewsletterIssueTemplate(layout, new EmailBodyRenderer("https://lescracks.com"))));
 
     @Test
@@ -87,6 +89,13 @@ class EmailTemplatesTest {
                 .contains("Ce lien expire dans 24 heures.")
                 .contains("\n--\nTu reçois cet email")
                 .doesNotContain("<", "&nbsp;", "\n\n\n");
+    }
+
+    @Test
+    @DisplayName("the newsletter confirmation links to the confirmation page with its token")
+    void confirmationLink() {
+        assertThat(templates.render(new NewsletterConfirmation("awa@example.com", "c0nf")).html())
+                .contains("href=\"https://lescracks.com/newsletter/confirmer?token=c0nf\"");
     }
 
     @Test
