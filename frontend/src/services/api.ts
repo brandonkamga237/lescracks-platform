@@ -30,6 +30,7 @@ export interface RegisterRequest {
   lastName: string;
   phone?: string;
   marketingConsent?: boolean;
+  newsletter?: boolean;
   context?: SignupContext;
 }
 
@@ -78,6 +79,7 @@ export const api = {
   newsletterUnsubscribe: () => http.delete<NewsletterStatus>('/newsletter/unsubscribe'),
   verifyEmail: (token: string) => http.post<void>('/auth/verify-email', undefined, { token }),
   resendVerification: (email: string) => http.post<void>('/auth/resend-verification', { email }),
+  resendMyVerification: () => http.post<void>('/me/verification-email'),
   resourceLikes: (id: number, signal?: AbortSignal) => http.get<ResourceLikeStatus>(`/resources/${id}/likes`, undefined, signal),
   likeResource: (id: number) => http.post<ResourceLikeStatus>(`/resources/${id}/likes`),
   unlikeResource: (id: number) => http.delete<ResourceLikeStatus>(`/resources/${id}/likes`),

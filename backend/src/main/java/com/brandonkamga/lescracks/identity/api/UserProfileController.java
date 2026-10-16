@@ -4,6 +4,7 @@ import com.brandonkamga.lescracks.identity.api.dto.OnboardingRequest;
 import com.brandonkamga.lescracks.identity.api.dto.UserPasswordChangeRequest;
 import com.brandonkamga.lescracks.identity.api.dto.UserProfileResponse;
 import com.brandonkamga.lescracks.identity.api.dto.UserProfileUpdateRequest;
+import com.brandonkamga.lescracks.identity.domain.EmailVerificationService;
 import com.brandonkamga.lescracks.identity.domain.User;
 import com.brandonkamga.lescracks.identity.domain.UserIdentityService;
 import com.brandonkamga.lescracks.identity.domain.UserProfileService;
@@ -22,10 +23,13 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserProfileController {
     private final UserProfileService profiles;
     private final UserIdentityService identities;
+    private final EmailVerificationService verification;
 
-    public UserProfileController(UserProfileService profiles, UserIdentityService identities) {
+    public UserProfileController(UserProfileService profiles, UserIdentityService identities,
+                                 EmailVerificationService verification) {
         this.profiles = profiles;
         this.identities = identities;
+        this.verification = verification;
     }
 
     @GetMapping
@@ -49,6 +53,12 @@ public class UserProfileController {
     public UserProfileResponse updateAvatar(Authentication authentication,
                                             @RequestParam("file") MultipartFile file) {
         return response(profiles.updateAvatar(authentication.getName(), file));
+    }
+
+    @PostMapping("/verification-email")
+    public ResponseEntity<Void> resendVerification(Authentication authentication) {
+        verification.sendAgain(authentication.getName());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/password")

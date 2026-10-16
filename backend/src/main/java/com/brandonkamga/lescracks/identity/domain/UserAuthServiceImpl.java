@@ -30,10 +30,6 @@ public class UserAuthServiceImpl implements UserAuthService {
                     metrics.login("member", "local", false);
                     return new BadRequestException("Email ou mot de passe incorrect.");
                 });
-        if (!user.isEmailVerified()) {
-            metrics.login("member", "local", false);
-            throw new BadRequestException("Ton adresse email n’a pas encore été vérifiée. Consulte ta boîte de réception ou demande un nouveau lien.");
-        }
         metrics.login("member", "local", true);
         return user;
     }

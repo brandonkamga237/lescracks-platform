@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -27,16 +28,17 @@ class UserRegistrationServiceTest {
     @Mock private PasswordEncoder passwords;
     @Mock private EmailVerificationService verification;
     @Mock private AuthMetrics metrics;
+    @Mock private ApplicationEventPublisher events;
 
     private UserRegistrationServiceImpl service;
 
     @BeforeEach
     void setUp() {
-        service = new UserRegistrationServiceImpl(users, passwords, verification, metrics);
+        service = new UserRegistrationServiceImpl(users, passwords, verification, metrics, events);
     }
 
     private static Registration registration(String email) {
-        return new Registration(email, "a-long-password", " Awa ", " Diallo ", null, true,
+        return new Registration(email, "a-long-password", " Awa ", " Diallo ", null, true, true,
                 new Arrival("/ressources", "fr", "Africa/Dakar"));
     }
 
@@ -56,6 +58,7 @@ class UserRegistrationServiceTest {
         assertThat(user.isMarketingConsent()).isTrue();
         assertThat(user.getSignupPath()).isEqualTo("/ressources");
         verify(verification).send(user);
+        verify(events).publishEvent(new MemberRegistered("awa@example.com", true));
         verify(metrics).register(true);
     }
 
@@ -89,7 +92,7 @@ class UserRegistrationServiceTest {
     @Test
     @DisplayName("a mistyped phone number is refused before anything is saved")
     void checksThePhoneFirst() {
-        Registration withBadPhone = new Registration("awa@example.com", "a-long-password", "Awa", "Diallo", "+237 12", null, null);
+        Registration withBadPhone = new Registration("awa@example.com", "a-long-password", "Awa", "Diallo", "+237 12", null, null, null);
 
         assertThatThrownBy(() -> service.register(withBadPhone)).isInstanceOf(BadRequestException.class);
         verify(users, never()).save(any());

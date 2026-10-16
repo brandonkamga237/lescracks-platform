@@ -59,12 +59,11 @@ class UserAuthServiceTest {
     }
 
     @Test
-    @DisplayName("an unverified address is told to check its inbox")
-    void unverified() {
-        member(false);
+    @DisplayName("an unverified address still signs in: confirming it is asked for, not required")
+    void unverifiedSignsIn() {
+        User user = member(false);
         when(passwords.matches("secret-password", "hash")).thenReturn(true);
 
-        assertThatThrownBy(() -> service.authenticate(new Credentials("awa@example.com", "secret-password")))
-                .isInstanceOf(BadRequestException.class).hasMessageContaining("vérifiée");
+        assertThat(service.authenticate(new Credentials("awa@example.com", "secret-password"))).isSameAs(user);
     }
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import { ArrowRight, Eye, EyeOff, Loader2, Mail, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Loader2, ShieldCheck } from 'lucide-react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import Layout from '@/components/layout/Layout';
@@ -8,16 +8,8 @@ import SEO from '@/components/common/SEO';
 import { safeReturnPath } from '@/services/auth';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
-import PhoneField from '@/components/account/PhoneField';
 import { signupContext } from '@/lib/arrival';
 import { useSession } from '@/hooks/useSession';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 
 interface AuthPageProps {
   mode: 'login' | 'register';
@@ -82,17 +74,12 @@ export default function AuthPage({ mode }: AuthPageProps) {
   const location = useLocation();
   const { login, createAccount, socialSignIn, isSignedIn, isLoading, isAdmin, error: sessionError } = useSession();
   const [form, setForm] = useState({ email: '', password: '', firstName: '', lastName: '' });
-  const [busy, setBusy] = useState<'submit' | 'forgot' | 'resend' | 'google' | 'github' | null>(null);
+  const [busy, setBusy] = useState<'submit' | 'forgot' | 'google' | 'github' | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [fields, setFields] = useState<Record<string, string>>({});
-  const [needsVerification, setNeedsVerification] = useState(false);
-  const [successOpen, setSuccessOpen] = useState(false);
-  const [registeredEmail, setRegisteredEmail] = useState('');
-  // '' when empty, null while what is typed is not a valid number yet.
-  const [phone, setPhone] = useState<string | null>('');
-  const [consent, setConsent] = useState(false);
+  const [newsletter, setNewsletter] = useState(false);
   const state = location.state as { from?: string; expired?: boolean } | null;
   const returnTo = safeReturnPath(new URLSearchParams(location.search).get('retour') ?? state?.from, isAdmin ? '/admin' : '/profil');
   const registering = mode === 'register';
@@ -116,45 +103,21 @@ export default function AuthPage({ mode }: AuthPageProps) {
     setError('');
     setNotice('');
     setFields({});
-    setNeedsVerification(false);
     try {
       if (registering) {
-        if (phone === null) {
-          setFields({ phone: 'Ce numéro ne correspond pas au pays choisi.' });
-          setError('Vérifie ton numéro de téléphone, ou laisse le champ vide pour l’ajouter plus tard.');
-          return;
-        }
-        const email = form.email.trim();
-        await createAccount({ ...form, email, firstName: form.firstName.trim(), lastName: form.lastName.trim(),
-          phone: phone || undefined, marketingConsent: consent, context: signupContext() });
-        setRegisteredEmail(email);
-        setSuccessOpen(true);
-        setForm({ email: '', password: '', firstName: '', lastName: '' });
+        // Signed in straight away: the welcome questions come next, and confirming the
+        // address is asked by a banner instead of blocking the way in.
+        await createAccount({ ...form, email: form.email.trim(), firstName: form.firstName.trim(), lastName: form.lastName.trim(),
+          newsletter, context: signupContext() });
       } else {
         await login(form.email.trim(), form.password);
-        navigate(returnTo, { replace: true });
       }
+      navigate(returnTo, { replace: true });
     } catch (cause) {
-      if (cause instanceof ApiError && cause.message.toLowerCase().includes('vérifiée')) {
-        setNeedsVerification(true);
-      }
       report(cause);
     } finally {
       setBusy(null);
     }
-  }
-
-  async function resend() {
-    if (!form.email.trim()) return;
-    setBusy('resend');
-    setError('');
-    setNotice('');
-    try {
-      await api.resendVerification(form.email.trim());
-      setNotice('Un nouveau lien de vérification a été envoyé.');
-    } catch (cause) {
-      report(cause);
-    } finally { setBusy(null); }
   }
 
   async function forgot() {
@@ -209,20 +172,16 @@ export default function AuthPage({ mode }: AuthPageProps) {
               <div><label htmlFor="auth-lastName" className="text-sm font-medium text-t1">Nom</label><input id="auth-lastName" name="lastName" autoComplete="family-name" required value={form.lastName} onChange={(event) => setForm({ ...form, lastName: event.target.value })} className={inputClass} aria-invalid={Boolean(fields.lastName)} aria-describedby={fields.lastName ? 'lastName-error' : undefined} />{fields.lastName && <p id="lastName-error" className="mt-2 text-sm text-error-ink">{fields.lastName}</p>}</div>
             </div>}
             <div><label htmlFor="auth-email" className="text-sm font-medium text-t1">Adresse email</label><input id="auth-email" name="email" autoComplete="email" required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className={inputClass} aria-invalid={Boolean(fields.email)} aria-describedby={fields.email ? 'email-error' : undefined} />{fields.email && <p id="email-error" className="mt-2 text-sm text-error-ink">{fields.email}</p>}</div>
-            {registering && (
-              <div className="space-y-3">
-                <PhoneField value={phone ?? ''} onChange={setPhone} hint="Pour te prévenir des ateliers et des nouveautés. Il n’est jamais affiché publiquement." />
-                <label className="flex items-start gap-3 text-sm text-t3">
-                  <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#d4af37]" />
-                  <span>Je veux recevoir les nouveautés LesCracks par WhatsApp ou SMS. Je peux arrêter à tout moment.</span>
-                </label>
-              </div>
-            )}
             <div><label htmlFor="auth-password" className="text-sm font-medium text-t1">Mot de passe</label><div className="relative"><input id="auth-password" name="password" autoComplete={registering ? 'new-password' : 'current-password'} required minLength={registering ? 10 : undefined} type={showPassword ? 'text' : 'password'} value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} className={`${inputClass} pr-14`} aria-invalid={Boolean(fields.password)} aria-describedby="password-help" /><button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} aria-pressed={showPassword} className="absolute right-2 top-2.5 flex h-9 w-9 items-center justify-center rounded-full text-t4 transition hover:text-t1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">{showPassword ? <EyeOff aria-hidden="true" className="h-5 w-5" /> : <Eye aria-hidden="true" className="h-5 w-5" />}</button></div><p id="password-help" className={`mt-2 text-xs ${fields.password ? 'text-error-ink' : 'text-t3'}`}>{fields.password ?? (registering ? 'Au moins 10 caractères.' : 'Le mot de passe de ton compte LesCracks.')}</p></div>
+            {registering && (
+              <label className="flex items-start gap-3 text-sm text-t3">
+                <input type="checkbox" checked={newsletter} onChange={(event) => setNewsletter(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#d4af37]" />
+                <span>Recevoir la newsletter : les nouvelles ressources et les prochains ateliers, par email. Tu peux te désabonner à tout moment depuis ton compte.</span>
+              </label>
+            )}
             {error && <p role="alert" className="rounded border border-error/20 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
             {notice && <p role="status" className="rounded border border-gold-400/20 p-3 text-sm text-gold-ink">{notice}</p>}
-            {needsVerification && <button type="button" disabled={Boolean(busy)} onClick={() => void resend()} className="-mt-3 text-left text-sm text-gold-ink underline underline-offset-4 hover:text-t1 disabled:opacity-60">{busy === 'resend' ? 'Envoi…' : 'Renvoyer le lien de vérification'}</button>}
-            <button type="submit" className="btn-primary w-full" disabled={Boolean(busy)}>{busy === 'submit' ? <><Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />Connexion en cours…</> : <>{registering ? 'Créer mon compte' : 'Me connecter'}<ArrowRight aria-hidden="true" className="h-4 w-4" /></>}</button>
+            <button type="submit" className="btn-primary w-full" disabled={Boolean(busy)}>{busy === 'submit' ? <><Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />{registering ? 'Création de ton compte…' : 'Connexion en cours…'}</> : <>{registering ? 'Créer mon compte' : 'Me connecter'}<ArrowRight aria-hidden="true" className="h-4 w-4" /></>}</button>
             {!registering && <button type="button" onClick={() => void forgot()} className="min-h-10 w-full text-sm text-t2 underline-offset-4 hover:text-gold-ink hover:underline">{busy === 'forgot' ? 'Envoi du lien…' : 'Mot de passe oublié ?'}</button>}
           </fieldset>
         </form>
@@ -240,26 +199,6 @@ export default function AuthPage({ mode }: AuthPageProps) {
         <p className="mt-7 border-t border-line-soft pt-6 text-center text-sm text-t3">{registering ? 'Déjà un compte ? ' : 'Pas encore de compte ? '}<Link className="font-medium text-gold-ink underline-offset-4 hover:underline" to={`${registering ? '/connexion' : '/inscription'}?retour=${encodeURIComponent(returnTo)}`}>{registering ? 'Connecte-toi' : 'Rejoins-nous'}</Link></p>
       </section>
     </div>
-    <Dialog open={successOpen} onOpenChange={setSuccessOpen}>
-      <DialogContent className="mode-raised border-line sm:max-w-md" aria-describedby="verify-desc">
-        <DialogHeader>
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-gold-400/25 bg-gold-400/10 text-gold-ink">
-            <Mail className="h-5 w-5" aria-hidden="true" />
-          </div>
-          <DialogTitle className="mt-4 text-center font-display text-2xl font-bold">Vérifie ta boîte de réception</DialogTitle>
-          <DialogDescription id="verify-desc" className="text-center text-t3">
-            Un email de confirmation a été envoyé à <span className="font-medium text-white">{registeredEmail}</span>.<br />
-            Clique sur le lien qu'il contient pour activer ton compte.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="mt-4 space-y-3">
-          <p className="text-center text-sm text-t4">Le lien expire dans 24 heures. Pense à vérifier tes indésirables.</p>
-          <Link to="/connexion" onClick={() => setSuccessOpen(false)} className="btn-primary w-full">
-            Aller à la connexion
-          </Link>
-        </div>
-      </DialogContent>
-    </Dialog>
     {busy === 'google' || busy === 'github' ? (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-black/95 text-t1">
         <Loader2 aria-hidden="true" className="h-10 w-10 animate-spin motion-reduce:animate-none text-gold-ink" />

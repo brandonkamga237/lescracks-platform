@@ -5,6 +5,8 @@ import com.brandonkamga.lescracks.identity.infra.UserRepository;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.mail.domain.VerificationEmail;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
+import com.brandonkamga.lescracks.shared.exception.ConflictException;
+import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,7 @@ import java.time.Instant;
 @Transactional
 public class EmailVerificationServiceImpl implements EmailVerificationService {
     private static final Duration VALIDITY = Duration.ofHours(24);
+    private static final Duration COOLDOWN = Duration.ofMinutes(1);
 
     private final UserRepository users;
     private final EmailVerificationTokenRepository tokens;
@@ -51,7 +54,28 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     }
 
     @Override
+    public void sendAgain(String email) {
+        User user = users.findByEmailIgnoreCase(email.trim())
+                .orElseThrow(() -> new NotFoundException("Utilisateur", "email", email));
+        if (user.isEmailVerified()) {
+            throw new ConflictException("Ton adresse email est déjà confirmée.");
+        }
+        if (sentRecently(user)) {
+            throw new ConflictException("Un lien vient de t’être envoyé. Patiente une minute avant d’en demander un autre.");
+        }
+        send(user);
+    }
+
+    @Override
     public void resend(String email) {
-        users.findByEmailIgnoreCase(email.trim()).ifPresent(this::send);
+        users.findByEmailIgnoreCase(email.trim())
+                .filter(user -> !user.isEmailVerified() && !sentRecently(user))
+                .ifPresent(this::send);
+    }
+
+    private boolean sentRecently(User user) {
+        return tokens.findFirstByUserOrderByCreatedAtDesc(user)
+                .map(last -> last.getCreatedAt().isAfter(Instant.now().minus(COOLDOWN)))
+                .orElse(false);
     }
 }
