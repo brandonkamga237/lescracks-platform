@@ -101,6 +101,12 @@ export interface AdminUser {
   location?: string;
   marketingConsent: boolean;
   completion: number;
+  /** False for a newsletter-only contact (no password, no social login). */
+  hasAccount: boolean;
+  onboarded: boolean;
+  lastSeenAt?: string;
+  /** The page the member first arrived on. */
+  signupPath?: string;
 }
 
 export interface AdminSummary {

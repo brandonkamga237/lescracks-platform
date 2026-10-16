@@ -6,7 +6,7 @@ import { countryName, displayPhone } from '@/lib/phone';
 import { AdminAction, AdminConfirm, AdminModal, AdminPagination, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
 import { Kpi } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
-import { adminApi } from '@/services/adminApi';
+import { adminApi, type UserFilters } from '@/services/adminApi';
 import type { AdminUser, AuthProvider } from '@/services/types';
 
 const statusLabels = { ACTIVE: 'Actif', INACTIVE: 'Inactif', BANNED: 'Suspendu' };
@@ -21,15 +21,71 @@ function fullName(user: AdminUser) {
   return [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.email;
 }
 
-function UserDetail({ id, onClose }: { id: number; onClose: () => void }) {
-  const { data, loading, error } = useApi((signal) => adminApi.user(id, signal), [id]);
+function lastSeen(value?: string) {
+  return value ? new Date(value).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : 'Jamais';
+}
+
+interface UserDetailProps {
+  id: number;
+  onClose: () => void;
+  /** Called after a support action, so the list shows the new state. */
+  onChanged: () => void;
+}
+
+function UserDetail({ id, onClose, onChanged }: UserDetailProps) {
+  const { data, loading, error, reload } = useApi((signal) => adminApi.user(id, signal), [id]);
+  const [busy, setBusy] = useState<'resend' | 'verify' | null>(null);
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+
+  async function act(action: 'resend' | 'verify') {
+    setBusy(action);
+    setMessage(null);
+    try {
+      if (action === 'resend') await adminApi.resendUserVerification(id);
+      else await adminApi.verifyUser(id);
+      setMessage({ ok: true, text: action === 'resend' ? 'Nouveau lien envoyé.' : 'Adresse confirmée.' });
+      reload();
+      onChanged();
+    } catch (cause) {
+      setMessage({ ok: false, text: cause instanceof Error ? cause.message : 'L’action a échoué.' });
+    } finally {
+      setBusy(null);
+    }
+  }
 
   return (
     <AdminModal open onClose={onClose} title="Fiche utilisateur" description="Détails du compte" busy={loading}>
       {loading ? <p className="py-8 text-center text-t3">Chargement…</p> : null}
       {error ? <p role="alert" className="rounded-lg border border-error/30 bg-error/10 p-4 text-sm text-t1">{error.message}</p> : null}
+      {data && data.hasAccount && !data.verified && (
+        <div className="mb-5 rounded-lg border border-gold-400/25 bg-gold-400/5 p-4">
+          <p className="text-sm text-t1">Adresse pas encore confirmée.</p>
+          <p className="mt-1 text-xs text-t3">Si la personne dit ne rien recevoir : renvoie le lien, ou confirme l’adresse si elle t’a écrit depuis celle-ci.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" disabled={Boolean(busy)} onClick={() => void act('resend')} className="btn-secondary">{busy === 'resend' ? 'Envoi…' : 'Renvoyer le lien'}</button>
+            <button type="button" disabled={Boolean(busy)} onClick={() => void act('verify')} className="btn-secondary">{busy === 'verify' ? 'Confirmation…' : 'Confirmer l’adresse'}</button>
+          </div>
+        </div>
+      )}
+      {message && <p role={message.ok ? 'status' : 'alert'} className={`mb-4 text-sm ${message.ok ? 'text-success-ink' : 'text-error-ink'}`}>{message.text}</p>}
       {data && (
         <dl className="mt-2 grid gap-5 sm:grid-cols-2">
+          <div>
+            <dt className="text-xs text-t4">Type</dt>
+            <dd className="mt-1 text-sm text-t1">{data.hasAccount ? 'Membre' : 'Contact newsletter (sans compte)'}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-t4">Dernière visite</dt>
+            <dd className="mt-1 text-sm text-t1">{lastSeen(data.lastSeenAt)}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-t4">Questions de bienvenue</dt>
+            <dd className="mt-1 text-sm text-t1">{data.onboarded ? 'Faites' : 'Pas encore'}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-t4">Arrivé par</dt>
+            <dd className="mt-1 break-all text-sm text-t1">{data.signupPath ?? '—'}</dd>
+          </div>
           <div>
             <dt className="text-xs text-t4">Nom</dt>
             <dd className="mt-1 text-sm font-medium text-t1">{fullName(data)}</dd>
@@ -95,7 +151,8 @@ export default function AdminUsers() {
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
   const [deleteError, setDeleteError] = useState('');
 
-  const users = useApi((signal) => adminApi.users(page, debounced, signal), [page, debounced]);
+  const [filters, setFilters] = useState<UserFilters>({});
+  const users = useApi((signal) => adminApi.users(page, debounced, filters, signal), [page, debounced, filters]);
   const overview = useApi((signal) => adminApi.overview(signal), []);
   const list = users.data?.content ?? [];
   const totalPages = users.data?.totalPages ?? 1;
@@ -144,8 +201,8 @@ export default function AdminUsers() {
   }
 
   const headerAction = (
-    <div className="flex w-full max-w-md items-center gap-2">
-      <form onSubmit={submitSearch} className="relative flex-1">
+    <div className="flex w-full max-w-2xl flex-wrap items-center gap-2">
+      <form onSubmit={submitSearch} className="relative min-w-[12rem] flex-1">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-t4" aria-hidden />
         <input
           value={search}
@@ -154,6 +211,18 @@ export default function AdminUsers() {
           className="input w-full pl-9"
         />
       </form>
+      <select aria-label="Type" value={filters.kind ?? ''} className="input w-auto"
+        onChange={(event) => { setPage(0); setFilters({ ...filters, kind: (event.target.value || undefined) as UserFilters['kind'] }); }}>
+        <option value="">Tous</option>
+        <option value="MEMBER">Membres</option>
+        <option value="CONTACT">Contacts newsletter</option>
+      </select>
+      <select aria-label="Email" value={filters.verified === undefined ? '' : String(filters.verified)} className="input w-auto"
+        onChange={(event) => { setPage(0); setFilters({ ...filters, verified: event.target.value === '' ? undefined : event.target.value === 'true' }); }}>
+        <option value="">Email : tous</option>
+        <option value="true">Confirmé</option>
+        <option value="false">Non confirmé</option>
+      </select>
       <button
         type="button"
         onClick={() => void adminApi.exportUsers()}
@@ -172,7 +241,7 @@ export default function AdminUsers() {
       {overview.data && (
         <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <Kpi label="Membres" value={overview.data.users.toLocaleString('fr-FR')}
-            hint={`${overview.data.verifiedUsers.toLocaleString('fr-FR')} emails vérifiés`} />
+            hint={`${overview.data.verifiedUsers.toLocaleString('fr-FR')} emails confirmés · ${overview.data.newsletterContacts.toLocaleString('fr-FR')} contacts newsletter à part`} />
           <Kpi label="Nouveaux · 30 jours" value={overview.data.usersNewLast30d.toLocaleString('fr-FR')}
             hint="inscriptions récentes" />
           <Kpi label="Actifs · 7 jours" value={overview.data.usersActiveLast7d.toLocaleString('fr-FR')}
@@ -180,6 +249,27 @@ export default function AdminUsers() {
           <Kpi label="Actifs · 30 jours" value={overview.data.usersActiveLast30d.toLocaleString('fr-FR')}
             hint="ont utilisé la plateforme ce mois-ci" />
         </div>
+      )}
+
+      {overview.data && overview.data.signupFunnel.signedUp > 0 && (
+        <section aria-labelledby="funnel-title" className="mb-6 rounded-lg border border-line-soft bg-card p-5">
+          <h2 id="funnel-title" className="text-sm font-medium text-t1">Inscriptions des 30 derniers jours</h2>
+          <p className="mt-1 text-xs text-t4">Là où le chiffre chute, c’est là qu’on perd les gens.</p>
+          <ol className="mt-4 grid gap-3 sm:grid-cols-4">
+            {([
+              ['Inscrits', overview.data.signupFunnel.signedUp],
+              ['Email confirmé', overview.data.signupFunnel.verified],
+              ['Bienvenue faite', overview.data.signupFunnel.onboarded],
+              ['Revenus après J+1', overview.data.signupFunnel.returned],
+            ] as [string, number][]).map(([label, value]) => (
+              <li key={label} className="rounded border border-line-soft p-3">
+                <p className="font-display text-2xl font-semibold tabular-nums text-t1">{value.toLocaleString('fr-FR')}</p>
+                <p className="mt-1 text-xs text-t3">{label}
+                  <span className="ml-1 font-mono tabular-nums text-t4">{Math.round((value / overview.data!.signupFunnel.signedUp) * 100)} %</span></p>
+              </li>
+            ))}
+          </ol>
+        </section>
       )}
 
       <AdminState
@@ -198,7 +288,7 @@ export default function AdminUsers() {
                 <th className="px-5 py-3 font-medium">Email</th>
                 <th className="px-5 py-3 font-medium">Statut</th>
                 <th className="px-5 py-3 font-medium">Connexion</th>
-                <th className="px-5 py-3 font-medium">Pays</th>
+                <th className="px-5 py-3 font-medium">Dernière visite</th>
                 <th className="px-5 py-3 font-medium">Profil</th>
                 <th className="px-5 py-3 font-medium">Inscrit le</th>
                 <th className="px-5 py-3 font-medium text-right">Actions</th>
@@ -207,8 +297,10 @@ export default function AdminUsers() {
             <tbody>
               {list.map((user) => (
                 <tr key={user.id} className="border-b border-line-soft last:border-b-0">
-                  <td className="px-5 py-3 text-t1">{fullName(user)}</td>
-                  <td className="px-5 py-3 text-t3">{user.email}</td>
+                  <td className="px-5 py-3 text-t1">{fullName(user)}
+                    {!user.hasAccount && <span className="ml-2 rounded border border-line px-1.5 py-0.5 text-xs text-t4">Contact newsletter</span>}</td>
+                  <td className="px-5 py-3 text-t3">{user.email}
+                    {user.hasAccount && !user.verified && <span className="ml-2 text-xs text-warning-ink">non confirmé</span>}</td>
                   <td className="px-5 py-3">
                     <select
                       value={user.status}
@@ -222,7 +314,7 @@ export default function AdminUsers() {
                     </select>
                   </td>
                   <td className="px-5 py-3 text-t3">{providerLabels[user.provider]}</td>
-                  <td className="px-5 py-3 text-t3">{countryName(user.country) || '—'}</td>
+                  <td className="px-5 py-3 text-t3">{user.hasAccount ? lastSeen(user.lastSeenAt) : '—'}</td>
                   <td className="px-5 py-3 font-mono tabular-nums text-t3">{user.completion} %</td>
                   <td className="px-5 py-3 text-t3">{new Date(user.createdAt).toLocaleDateString('fr-FR')}</td>
                   <td className="px-5 py-3 text-right">
@@ -271,7 +363,9 @@ export default function AdminUsers() {
                     ))}
                   </select>
                   <span className="text-xs text-t3">{providerLabels[user.provider]}</span>
-                  <span className="text-xs text-t3">{user.verified ? 'Vérifié' : 'Non vérifié'}</span>
+                  {user.hasAccount
+                    ? <span className="text-xs text-t3">{user.verified ? 'Email confirmé' : 'Email non confirmé'}</span>
+                    : <span className="text-xs text-t4">Contact newsletter</span>}
                   {user.country && <span className="text-xs text-t3">{countryName(user.country)}</span>}
                   <span className="font-mono text-xs tabular-nums text-t3">Profil {user.completion} %</span>
                 </div>
@@ -293,7 +387,7 @@ export default function AdminUsers() {
         />
       </AdminState>
 
-      {selected && <UserDetail id={selected} onClose={() => setSelected(null)} />}
+      {selected && <UserDetail id={selected} onClose={() => setSelected(null)} onChanged={users.reload} />}
 
       <AdminConfirm
         open={deleteTarget !== null}
