@@ -92,12 +92,12 @@ server:
   servlet:
     session:
       timeout: 30d
-      # A persistent cookie: closing the browser no longer ends the session. The server-side
-      # timeout still applies; this only caps how long the browser keeps it.
+      # A persistent cookie: closing the browser no longer ends the session. Same 30 days as
+      # the server-side timeout and the Keycloak realm, so every sign-in lasts as long.
       cookie:
         http-only: true
         same-site: lax
-        max-age: 90d
+        max-age: 30d
 
 management:
   endpoints:

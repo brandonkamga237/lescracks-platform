@@ -34,9 +34,9 @@ class ShareCardRendererTest {
     void cardsFitPreviewConstraints() throws IOException {
         List<BufferedImage> cards = List.of(
                 check("challenge", renderer.challenge("api-de-paiement", "Une API de paiement qui s’effondre sous la charge du vendredi soir et du Black Friday réunis",
-                        "Intermédiaire", 2, "Backend", "12 participants · moyenne 64/100")),
-                check("result", renderer.result("Awa N.", "78", "100", "Une API de paiement qui s’effondre sous la charge",
-                        "Mieux que 72 % des participants", "Apprenti")),
+                        "Intermédiaire", 2, "Backend", "12 participants")),
+                check("result", renderer.result("Awa N.", "78", "Une API de paiement qui s’effondre sous la charge",
+                        "", "Apprenti")),
                 check("ranking", renderer.ranking("Classement CrackLab", List.of(
                         new ShareCardRenderer.Row("1", "Moussa D.", "245"),
                         new ShareCardRenderer.Row("2", "Awa N.", "178"),
