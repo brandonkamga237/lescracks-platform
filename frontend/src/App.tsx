@@ -24,6 +24,7 @@ import NotFound from '@/pages/NotFound';
 import Profile from '@/pages/Profile';
 import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
+import Formations from '@/pages/Formations';
 import Talk from '@/pages/Talk';
 
 // The back office is never part of a visitor's first load: it ships as its own chunk.
@@ -138,6 +139,7 @@ function AppRoutes() {
               them out. Everything below is open. */}
       <Route path="/blog" element={<Blog />} />
       <Route path="/blog/:slug" element={<BlogPost />} />
+      <Route path="/formations" element={<Formations />} />
       {/* The library became the blog: links already shared keep working. */}
       <Route path="/ressources" element={<Navigate to="/blog" replace />} />
       <Route path="/ressources/:slug" element={<LegacyArticle />} />
