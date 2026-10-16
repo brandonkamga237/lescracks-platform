@@ -14,7 +14,6 @@ public record UserProfileUpdateRequest(
         @NotBlank @Size(max = 120) String firstName,
         @NotBlank @Size(max = 120) String lastName,
         @Size(max = 50) String username,
-        @Size(max = 255) String avatarUrl,
         @Size(max = 2000) String bio,
         @Size(max = 100) String location,
         Map<String, String> socialLinks,
@@ -28,7 +27,7 @@ public record UserProfileUpdateRequest(
 ) {
 
     public ProfileChanges toChanges() {
-        return new ProfileChanges(firstName, lastName, username, avatarUrl, bio, location, socialLinks, phone,
+        return new ProfileChanges(firstName, lastName, username, bio, location, socialLinks, phone,
                 situation, goal, interestIds, marketingConsent);
     }
 }

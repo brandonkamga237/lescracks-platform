@@ -51,7 +51,6 @@ public class UserProfileServiceImpl implements UserProfileService {
         user.setFirstName(changes.firstName().trim());
         user.setLastName(changes.lastName().trim());
         user.setUsername(changes.username() == null ? null : changes.username().trim().toLowerCase());
-        user.setAvatarUrl(changes.avatarUrl() == null ? null : changes.avatarUrl().trim());
         user.setBio(changes.bio() == null ? null : changes.bio().trim());
         user.setLocation(changes.location() == null ? null : changes.location().trim());
         if (changes.socialLinks() != null) {
