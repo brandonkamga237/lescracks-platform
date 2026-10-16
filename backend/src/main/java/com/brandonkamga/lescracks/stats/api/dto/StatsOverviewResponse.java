@@ -2,6 +2,10 @@ package com.brandonkamga.lescracks.stats.api.dto;
 
 import java.util.Map;
 
+/**
+ * {@code users} and its breakdowns count members (people who can sign in); {@code newsletterContacts}
+ * are the addresses known only from the public newsletter form.
+ */
 public record StatsOverviewResponse(
         long users,
         Map<String, Long> usersByStatus,
@@ -10,6 +14,8 @@ public record StatsOverviewResponse(
         long usersNewLast30d,
         long usersActiveLast7d,
         long usersActiveLast30d,
+        long newsletterContacts,
+        SignupFunnel signupFunnel,
         long events,
         Map<String, Long> eventsByStatus,
         Map<String, Long> eventsByType,
