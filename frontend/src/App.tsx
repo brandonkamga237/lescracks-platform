@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { Link, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { Link, Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { MotionConfig } from 'framer-motion';
 
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -22,8 +22,8 @@ import Evenements from '@/pages/Evenements';
 import Landing from '@/pages/Landing';
 import NotFound from '@/pages/NotFound';
 import Profile from '@/pages/Profile';
-import RessourceDetail from '@/pages/RessourceDetail';
-import Ressources from '@/pages/Ressources';
+import Blog from '@/pages/Blog';
+import BlogPost from '@/pages/BlogPost';
 import Talk from '@/pages/Talk';
 
 // The back office is never part of a visitor's first load: it ships as its own chunk.
@@ -66,7 +66,7 @@ function SessionFailure() {
     <p role="alert" className="mt-4 text-t3">{error?.message}</p>
     <p className="mt-3 text-sm text-t4">Un problème de serveur ne signifie pas que tu es déconnecté.</p>
     <button type="button" onClick={() => void reload().catch(() => undefined)} className="mt-6 rounded-full bg-gold-400 px-6 py-3 font-semibold text-black">Réessayer</button>
-    <Link to="/ressources" className="mt-4 text-sm text-t2 underline">Explorer les ressources publiques</Link>
+    <Link to="/blog" className="mt-4 text-sm text-t2 underline">Lire le blog</Link>
   </div>;
 }
 
@@ -99,7 +99,7 @@ function AdminRoute({ bare = false }: AdminRouteProps) {
   if (isLoading) return <Waiting />;
   if (error) return <SessionFailure />;
   if (!isSignedIn) return <Navigate to={`/admin/connexion?retour=${encodeURIComponent(`${location.pathname}${location.search}${location.hash}`)}`} replace />;
-  if (!isAdmin) return <Navigate to="/ressources" replace />;
+  if (!isAdmin) return <Navigate to="/blog" replace />;
   if (bare) return <Suspense fallback={<Waiting />}><Outlet /></Suspense>;
   return <AdminLayout><Suspense fallback={<Waiting />}><Outlet /></Suspense></AdminLayout>;
 }
@@ -136,11 +136,11 @@ function AppRoutes() {
 
       {/* Reading is what brings people in; asking them to sign up first is what keeps
               them out. Everything below is open. */}
-      <Route path="/ressources" element={<Ressources />} />
-      <Route path="/ressources/ebooks" element={<Ressources />} />
-      <Route path="/ressources/videos" element={<Ressources />} />
-      <Route path="/ressources/articles" element={<Ressources />} />
-      <Route path="/ressources/:id" element={<RessourceDetail />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:slug" element={<BlogPost />} />
+      {/* The library became the blog: links already shared keep working. */}
+      <Route path="/ressources" element={<Navigate to="/blog" replace />} />
+      <Route path="/ressources/:slug" element={<LegacyArticle />} />
       <Route path="/evenements" element={<Evenements />} />
       <Route path="/evenements/:id" element={<EvenementDetail />} />
       <Route path="/talk" element={<Talk />} />
@@ -186,6 +186,13 @@ function AppRoutes() {
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
+}
+
+/** /ressources/videos, /ressources/ebooks and /ressources/articles were listings; anything else was an article. */
+function LegacyArticle() {
+  const { slug = '' } = useParams();
+  const listing = ['ebooks', 'videos', 'articles'].includes(slug);
+  return <Navigate to={listing ? '/blog' : `/blog/${slug}`} replace />;
 }
 
 export default function App() {

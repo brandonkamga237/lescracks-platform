@@ -1,7 +1,7 @@
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
 import type {
-  AuthProvider, Category, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse, ResourceKind,
+  ArticleSummary, AuthProvider, Category, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse, ResourceKind,
   NewsletterStatus, ResourceLikeStatus, ResourceSummary, Tag, TalkVideo, UserIdentity, UserProfile,
   UserProfileUpdate, OnboardingAnswers, SignupContext,
 } from '@/services/types';
@@ -42,6 +42,10 @@ export const api = {
   logout: () => http.post<void>('/auth/logout'),
   resources: (filters: CatalogueFilters = {}, signal?: AbortSignal) =>
     http.get<PageResponse<ResourceSummary>>('/resources', filters, signal),
+  articles: (page = 0, size = 12, signal?: AbortSignal) =>
+    http.get<PageResponse<ArticleSummary>>('/resources', { kind: 'ARTICLE', page, size }, signal),
+  article: (slugOrId: string, signal?: AbortSignal) =>
+    http.get<ArticleSummary>(`/resources/${slugOrId}`, undefined, signal),
   resource: (slugOrId: string | number, signal?: AbortSignal) =>
     http.get<ResourceSummary>(`/resources/${slugOrId}`, undefined, signal),
   events: (filters: { type?: EventType; format?: EventFormat; page?: number; size?: number } = {}, signal?: AbortSignal) =>

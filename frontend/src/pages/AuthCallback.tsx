@@ -32,7 +32,7 @@ export default function AuthCallback() {
           <p role="alert" className="mt-4 text-sm leading-relaxed text-t2">{error?.message ?? 'La connexion sécurisée a été interrompue ou a expiré. Tu peux réessayer sans perdre ta destination.'}</p>
           {error && <button type="button" onClick={() => void reload().catch(() => undefined)} className="mt-6 w-full rounded border border-gold-400/40 px-5 py-3 text-gold-ink">Réessayer la vérification</button>}
           <Link to={`/connexion?retour=${encodeURIComponent(from)}`} replace className="mt-4 block rounded bg-gold-400 px-5 py-3 font-semibold text-black">Revenir à la connexion</Link>
-          <Link to="/ressources" className="mt-5 block text-sm text-t3 underline">Explorer les ressources</Link>
+          <Link to="/blog" className="mt-5 block text-sm text-t3 underline">Lire le blog</Link>
         </> : <div role="status">
           <div aria-hidden="true" className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gold-400 border-t-transparent motion-reduce:animate-none" />
           <h1 className="mt-6 font-display text-2xl">On prépare ton espace.</h1>

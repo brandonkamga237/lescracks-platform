@@ -56,7 +56,7 @@ export default function Welcome() {
   const [city, setCity] = useState(user?.location ?? '');
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState('');
-  const returnTo = safeReturnPath(params.get('retour'), '/ressources');
+  const returnTo = safeReturnPath(params.get('retour'), '/blog');
   const last = step === STEPS.length - 1;
 
   async function finish() {
@@ -136,14 +136,14 @@ export default function Welcome() {
           {step === 1 && (
             <>
               <h1 className="font-display text-3xl font-bold leading-tight tracking-tight sm:text-4xl">Où en es-tu ?</h1>
-              <p className="mt-3 text-t3">Pour te proposer des ressources adaptées à ce que tu vis en ce moment.</p>
+              <p className="mt-3 text-t3">Pour te proposer des contenus adaptés à ce que tu vis en ce moment.</p>
               <div className="mt-8"><Choice label="Ta situation" options={SITUATION_LABEL} value={situation} onChange={setSituation} /></div>
             </>
           )}
           {step === 2 && (
             <>
               <h1 className="font-display text-3xl font-bold leading-tight tracking-tight sm:text-4xl">Qu’est-ce qui t’intéresse ?</h1>
-              <p className="mt-3 text-t3">Choisis autant de sujets que tu veux : la bibliothèque et les challenges s’en servent pour te guider.</p>
+              <p className="mt-3 text-t3">Choisis autant de sujets que tu veux : le blog et les challenges s’en servent pour te guider.</p>
               <div className="mt-8 flex flex-wrap gap-2" role="group" aria-label="Centres d’intérêt">
                 {categories.loading && <p role="status" className="text-sm text-t4">Chargement des sujets…</p>}
                 {categories.data?.map((category) => {

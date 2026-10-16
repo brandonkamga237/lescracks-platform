@@ -14,7 +14,7 @@ import { useApi } from '@/hooks/useApi';
 import { checkArticle } from '@/lib/articleChecks';
 import { articleStats, blocksToMarkdown, headingId, markdownToBlocks } from '@/lib/articleMarkdown';
 import { formatScheduleLong, formatScheduleShort } from '@/lib/schedule';
-import { resourcePath } from '@/lib/slugs';
+import { articlePath } from '@/lib/slugs';
 import { adminApi, type ArticleRequest } from '@/services/adminApi';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
@@ -468,7 +468,7 @@ export default function ArticleStudio() {
                 <p className="font-medium text-t1">Visibilité</p>
                 <p className="mt-1 text-t3">{status === 'PUBLISHED' ? 'Publié : visible par tout le monde.' : scheduledAt ? `Programmé : en ligne automatiquement le ${formatScheduleLong(scheduledAt)}.` : 'Brouillon : visible uniquement dans l’administration.'}</p>
                 {resource && status === 'PUBLISHED' && (
-                  <a href={resourcePath(resource)} target="_blank" rel="noopener noreferrer" className="link mt-3 inline-flex items-center gap-1.5">Voir l’article publié<ArrowUpRight className="h-4 w-4" aria-hidden /></a>
+                  <a href={articlePath(resource)} target="_blank" rel="noopener noreferrer" className="link mt-3 inline-flex items-center gap-1.5">Voir l’article publié<ArrowUpRight className="h-4 w-4" aria-hidden /></a>
                 )}
               </div>
             </div>

@@ -52,7 +52,7 @@ export default function VerifyEmail() {
           </div>
         )}
         {!busy && (isSignedIn
-          ? <Link to="/ressources" replace className="btn-primary mt-7 w-full">Continuer vers les ressources<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
+          ? <Link to="/blog" replace className="btn-primary mt-7 w-full">Continuer vers le blog<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>
           : <Link to="/connexion" replace className="btn-primary mt-7 w-full">Me connecter<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>)}
       </section>
     </div>

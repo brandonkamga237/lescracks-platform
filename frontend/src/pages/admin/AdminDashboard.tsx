@@ -7,7 +7,7 @@ import { Delta, Kpi, Panel, PeriodSelect, TrendChart, deltaPct } from '@/compone
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
 import { adminApi } from '@/services/adminApi';
-import { resourcePath, eventPath } from '@/lib/slugs';
+import { articlePath, eventPath } from '@/lib/slugs';
 
 function daysAgo(n: number) {
   const d = new Date();
@@ -160,7 +160,7 @@ export default function AdminDashboard() {
             <ol className="space-y-1">
               {views.data?.resources.slice(0, 6).map((resource) => (
                 <li key={resource.id}>
-                  <Link to={resourcePath(resource)}
+                  <Link to={articlePath(resource)}
                     className="group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-noir-800">
                     <span className="h-10 w-14 shrink-0 overflow-hidden rounded-lg bg-noir-800">
                       {resource.coverImage && <img src={resource.coverImage} alt="" className="h-full w-full object-cover" loading="lazy" />}

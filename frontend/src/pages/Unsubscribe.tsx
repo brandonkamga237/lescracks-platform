@@ -36,10 +36,10 @@ export default function Unsubscribe() {
         <p className="kicker">LesCracks / Newsletter</p>
         <h1 className="mt-4 font-display text-3xl font-bold">{state === 'done' ? 'C’est fait.' : 'Se désabonner'}</h1>
         {state === 'done' ? (
-          <p role="status" className="mt-4 text-sm leading-relaxed text-t3">Tu ne recevras plus la newsletter. Les ressources et les ateliers restent ouverts, à ton rythme.</p>
+          <p role="status" className="mt-4 text-sm leading-relaxed text-t3">Tu ne recevras plus la newsletter. Le blog et les ateliers restent ouverts, à ton rythme.</p>
         ) : (
           <>
-            <p className="mt-4 text-sm leading-relaxed text-t3">Tu ne recevras plus les nouvelles ressources ni les prochains ateliers par email.</p>
+            <p className="mt-4 text-sm leading-relaxed text-t3">Tu ne recevras plus les nouveaux articles ni les prochains ateliers par email.</p>
             {error && <p role="alert" className="mt-5 rounded border border-error/20 p-3 text-sm text-error-ink">{error}</p>}
             {token && (
               <button type="button" onClick={() => void confirm()} disabled={state === 'busy'} className="btn-primary mt-7 w-full">
@@ -49,7 +49,7 @@ export default function Unsubscribe() {
             )}
           </>
         )}
-        <Link to="/ressources" className="mt-6 block text-center text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Voir les ressources</Link>
+        <Link to="/blog" className="mt-6 block text-center text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Lire le blog</Link>
       </section>
     </div>
   </Layout>;

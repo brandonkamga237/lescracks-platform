@@ -5,13 +5,13 @@ import { ArrowRight, ArrowUpRight, Check } from 'lucide-react';
 import SEO from '@/components/common/SEO';
 import { Skeleton } from '@/components/common/Skeleton';
 import { EmptyState, ErrorState } from '@/components/common/States';
+import ArticleCard from '@/components/blog/ArticleCard';
+import ArticleSpotlight from '@/components/blog/ArticleSpotlight';
 import AgendaItem from '@/components/events/AgendaItem';
 import DuotonePhoto from '@/components/illustrations/DuotonePhoto';
 import LineArt from '@/components/illustrations/LineArt';
 import Layout from '@/components/layout/Layout';
 import { Section, SectionHeader } from '@/components/layout/Page';
-import ResourceCard from '@/components/resources/ResourceCard';
-import ResourceSpotlight from '@/components/resources/ResourceSpotlight';
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
@@ -22,7 +22,7 @@ import { api } from '@/services/api';
  */
 
 const PROMISES = [
-  'Vidéos, ebooks et articles, triés par sujet.',
+  'Des articles pour comprendre et progresser.',
   'Ateliers et conférences, en ligne ou sur place.',
   'Une communauté qui avance ensemble.',
 ] as const;
@@ -49,7 +49,7 @@ function Stat({ value, label }: { value: React.ReactNode; label: string }) {
 }
 
 export default function Landing() {
-  const recent = useApi((signal) => api.resources({ size: 4 }, signal), []);
+  const recent = useApi((signal) => api.articles(0, 4, signal), []);
   const upcoming = useApi((signal) => api.upcomingEvents(0, 5, signal), []);
   const categories = useApi((signal) => api.categories(signal), []);
   const { isSignedIn, isAdmin, name } = useSession();
@@ -61,7 +61,7 @@ export default function Landing() {
 
   return (
     <Layout>
-      <SEO description="LesCracks : vidéos, ebooks, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant." url="/" />
+      <SEO description="LesCracks : articles, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant." url="/" />
 
       {/* ── Hero: raised headline panel · photo action panel ────── */}
       <section className="grid lg:grid-cols-[55fr_45fr]">
@@ -76,11 +76,11 @@ export default function Landing() {
             <p className="mt-8 max-w-lg animate-rise motion-reduce:animate-page-in text-lg leading-normal text-t3 [animation-delay:100ms]">
               {isSignedIn
                 ? 'Reprends ta lecture ou trouve le prochain rendez-vous.'
-                : 'Vidéos, ebooks et ateliers pour apprendre la tech et passer à la pratique.'}
+                : 'Articles, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique.'}
             </p>
             <div className="mt-10 flex animate-rise motion-reduce:animate-page-in flex-wrap items-center gap-x-6 gap-y-4 [animation-delay:150ms]">
-              <Link to="/ressources" className="btn-primary">
-                Explorer la bibliothèque <ArrowRight className="h-4 w-4" aria-hidden />
+              <Link to="/blog" className="btn-primary">
+                Lire le blog <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
               <Link to="/evenements" className="link inline-flex items-center gap-1.5 text-sm">Voir l’agenda <ArrowRight className="h-4 w-4" aria-hidden /></Link>
             </div>
@@ -126,7 +126,7 @@ export default function Landing() {
       {/* ── Figures: charcoal tiles on black ────────────────────── */}
       <Section spacing="tight" aria-label="LesCracks en chiffres">
         <div className="grid grid-cols-3 gap-3">
-          <Stat value={count(recent.data?.totalElements)} label="Ressources" />
+          <Stat value={count(recent.data?.totalElements)} label="Articles" />
           <Stat value={count(categories.data?.length)} label="Sujets" />
           <Stat value={count(upcoming.data?.totalElements)} label="Rendez-vous à venir" />
         </div>
@@ -136,10 +136,10 @@ export default function Landing() {
       <motion.div {...REVEAL}>
         <Section tone="raised" aria-labelledby="featured-heading">
           <SectionHeader
-            eyebrow="La bibliothèque"
+            eyebrow="Le blog"
             id="featured-heading"
             title="À la une"
-            action={<Link to="/ressources" className="link inline-flex items-center gap-1.5 text-sm">Toute la bibliothèque <ArrowRight className="h-4 w-4" aria-hidden /></Link>}
+            action={<Link to="/blog" className="link inline-flex items-center gap-1.5 text-sm">Tout le blog <ArrowRight className="h-4 w-4" aria-hidden /></Link>}
           />
 
           {recent.loading ? (
@@ -151,23 +151,21 @@ export default function Landing() {
                 <Skeleton className="h-10 w-3/5" />
                 <Skeleton className="h-4 w-full" />
               </div>
-              <span className="sr-only">Chargement des ressources…</span>
+              <span className="sr-only">Chargement des articles…</span>
             </div>
           ) : recent.error ? (
-            <ErrorState title="La bibliothèque est momentanément indisponible." onRetry={recent.reload} />
+            <ErrorState title="Le blog est momentanément indisponible." onRetry={recent.reload} />
           ) : featured ? (
             <>
-              <ResourceSpotlight resource={featured} cataloguePath="/ressources" />
+              <ArticleSpotlight article={featured} />
               {next.length > 0 && (
                 <ul className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {next.map((resource) => (
-                    <ResourceCard key={resource.id} resource={resource} cataloguePath="/ressources" />
-                  ))}
+                  {next.map((article) => <ArticleCard key={article.id} article={article} />)}
                 </ul>
               )}
             </>
           ) : (
-            <EmptyState title="Les premières ressources arrivent." description="Les vidéos et les ebooks apparaîtront ici dès leur publication." />
+            <EmptyState title="Les premiers articles arrivent." description="Ils apparaîtront ici dès leur publication." />
           )}
         </Section>
       </motion.div>
@@ -224,28 +222,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Par sujet — noir relevé ──────────────────────────────── */}
-      {!!categories.data?.length && (
-        <motion.div {...REVEAL}>
-          <Section tone="raised" aria-labelledby="subjects-heading">
-            <SectionHeader eyebrow="Trouver son sujet" id="subjects-heading" title="Explorer par sujet" />
-            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {categories.data.slice(0, 12).map((category) => (
-                <li key={category.id}>
-                  <Link
-                    to={`/ressources?categoryId=${category.id}`}
-                    className="group flex h-full items-center justify-between gap-4 rounded border border-line px-5 py-4 transition-colors hover:border-t1 hover:bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"
-                  >
-                    <span className="min-w-0 break-words text-base font-semibold text-t1">{category.name}</span>
-                    <ArrowUpRight className="h-5 w-5 shrink-0 text-t4 transition-colors group-hover:text-gold-ink" aria-hidden />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </Section>
-        </motion.div>
-      )}
-
       {/* ── Action — noir ─────────────────────────────────── */}
       <Section spacing="loose">
         <div className="flex flex-col items-start gap-10 lg:flex-row lg:items-end lg:justify-between">
@@ -253,7 +229,7 @@ export default function Landing() {
             Passe à la <span className="text-gold-400">pratique.</span>
           </h2>
           <div className="flex flex-wrap items-center gap-3">
-            <Link to={isSignedIn ? '/ressources' : '/inscription'} className="btn-primary">{isSignedIn ? 'Ouvrir la bibliothèque' : 'Créer un compte'}</Link>
+            <Link to={isSignedIn ? '/cracklab' : '/inscription'} className="btn-primary">{isSignedIn ? 'Relever un challenge' : 'Créer un compte'}</Link>
             <Link to="/evenements" className="btn-secondary">Voir l’agenda</Link>
           </div>
         </div>

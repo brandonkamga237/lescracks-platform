@@ -110,7 +110,7 @@ export default function Talk() {
           </h2>
           <div className="flex flex-wrap gap-3">
             <a href="mailto:contact@lescracks.com" className="btn-primary">Écris-nous</a>
-            <Link to="/ressources" className="btn-secondary">Explorer la bibliothèque</Link>
+            <Link to="/blog" className="btn-secondary">Lire le blog</Link>
           </div>
         </div>
       </Section>

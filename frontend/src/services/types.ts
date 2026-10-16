@@ -43,6 +43,24 @@ export interface ResourceSummary {
 
 export type ResourceDetail = ResourceSummary;
 
+/** A blog article as the public API returns it. */
+export interface ArticleSummary {
+  id: number;
+  slug?: string;
+  title: string;
+  description: string;
+  coverImage: string;
+  categoryId: number;
+  categoryName: string;
+  body?: unknown;
+  readingMinutes?: number;
+  createdAt: string;
+  updatedAt: string;
+  tags: string[];
+  likeCount: number;
+  publishedAt?: string;
+}
+
 export interface ResourceLikeStatus {
   count: number;
   liked: boolean;
