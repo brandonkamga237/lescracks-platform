@@ -2,7 +2,8 @@ package com.brandonkamga.lescracks.identity.domain;
 
 import com.brandonkamga.lescracks.identity.infra.PasswordResetTokenRepository;
 import com.brandonkamga.lescracks.identity.infra.UserRepository;
-import com.brandonkamga.lescracks.mail.domain.MailService;
+import com.brandonkamga.lescracks.mail.domain.Mailer;
+import com.brandonkamga.lescracks.mail.domain.PasswordResetEmail;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,10 +22,10 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private final PasswordResetTokenRepository tokens;
     private final OneTimeTokens oneTimeTokens;
     private final PasswordEncoder passwords;
-    private final MailService mail;
+    private final Mailer mail;
 
     public PasswordResetServiceImpl(UserRepository users, PasswordResetTokenRepository tokens,
-                                    OneTimeTokens oneTimeTokens, PasswordEncoder passwords, MailService mail) {
+                                    OneTimeTokens oneTimeTokens, PasswordEncoder passwords, Mailer mail) {
         this.users = users;
         this.tokens = tokens;
         this.oneTimeTokens = oneTimeTokens;
@@ -43,7 +44,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                             .tokenHash(token.hash())
                             .expiresAt(Instant.now().plus(VALIDITY))
                             .build());
-                    mail.sendPasswordReset(user.getEmail(), token.raw());
+                    mail.send(new PasswordResetEmail(user.getEmail(), token.raw()));
                 });
     }
 

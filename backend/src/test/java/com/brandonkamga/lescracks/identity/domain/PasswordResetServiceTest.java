@@ -2,7 +2,8 @@ package com.brandonkamga.lescracks.identity.domain;
 
 import com.brandonkamga.lescracks.identity.infra.PasswordResetTokenRepository;
 import com.brandonkamga.lescracks.identity.infra.UserRepository;
-import com.brandonkamga.lescracks.mail.domain.MailService;
+import com.brandonkamga.lescracks.mail.domain.Mailer;
+import com.brandonkamga.lescracks.mail.domain.PasswordResetEmail;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +20,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,7 +32,7 @@ class PasswordResetServiceTest {
     @Mock private UserRepository users;
     @Mock private PasswordResetTokenRepository tokens;
     @Mock private PasswordEncoder passwords;
-    @Mock private MailService mail;
+    @Mock private Mailer mail;
 
     private final OneTimeTokens oneTimeTokens = new OneTimeTokens();
     private PasswordResetServiceImpl service;
@@ -49,7 +50,7 @@ class PasswordResetServiceTest {
 
         service.request("eric@example.com");
 
-        verify(mail, never()).sendPasswordReset(anyString(), anyString());
+        verify(mail, never()).send(any());
     }
 
     @Test
@@ -60,7 +61,7 @@ class PasswordResetServiceTest {
 
         service.request(" awa@example.com ");
 
-        verify(mail).sendPasswordReset(eq("awa@example.com"), anyString());
+        verify(mail).send(argThat(email -> email instanceof PasswordResetEmail reset && reset.to().equals("awa@example.com")));
     }
 
     @Test

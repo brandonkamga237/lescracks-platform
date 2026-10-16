@@ -2,7 +2,8 @@ package com.brandonkamga.lescracks.identity.domain;
 
 import com.brandonkamga.lescracks.identity.infra.EmailVerificationTokenRepository;
 import com.brandonkamga.lescracks.identity.infra.UserRepository;
-import com.brandonkamga.lescracks.mail.domain.MailService;
+import com.brandonkamga.lescracks.mail.domain.Mailer;
+import com.brandonkamga.lescracks.mail.domain.VerificationEmail;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 
 import org.springframework.stereotype.Service;
@@ -19,10 +20,10 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private final UserRepository users;
     private final EmailVerificationTokenRepository tokens;
     private final OneTimeTokens oneTimeTokens;
-    private final MailService mail;
+    private final Mailer mail;
 
     public EmailVerificationServiceImpl(UserRepository users, EmailVerificationTokenRepository tokens,
-                                        OneTimeTokens oneTimeTokens, MailService mail) {
+                                        OneTimeTokens oneTimeTokens, Mailer mail) {
         this.users = users;
         this.tokens = tokens;
         this.oneTimeTokens = oneTimeTokens;
@@ -37,7 +38,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
                 .tokenHash(token.hash())
                 .expiresAt(Instant.now().plus(VALIDITY))
                 .build());
-        mail.sendVerificationEmail(user.getEmail(), token.raw(), user.getFirstName());
+        mail.send(new VerificationEmail(user.getEmail(), user.getFirstName(), token.raw()));
     }
 
     @Override

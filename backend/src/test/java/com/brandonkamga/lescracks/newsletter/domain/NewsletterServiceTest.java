@@ -2,7 +2,7 @@ package com.brandonkamga.lescracks.newsletter.domain;
 
 import com.brandonkamga.lescracks.identity.domain.User;
 import com.brandonkamga.lescracks.identity.domain.UserDirectory;
-import com.brandonkamga.lescracks.mail.domain.MailService;
+import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterCampaignRepository;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterSubscriptionRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
@@ -30,7 +30,7 @@ class NewsletterServiceTest {
     @Mock private UserDirectory users;
     @Mock private NewsletterSubscriptionRepository subscriptions;
     @Mock private NewsletterCampaignRepository campaigns;
-    @Mock private MailService mail;
+    @Mock private Mailer mail;
 
     private NewsletterServiceImpl service;
 

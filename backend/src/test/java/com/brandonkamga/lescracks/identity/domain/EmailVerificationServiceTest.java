@@ -2,7 +2,9 @@ package com.brandonkamga.lescracks.identity.domain;
 
 import com.brandonkamga.lescracks.identity.infra.EmailVerificationTokenRepository;
 import com.brandonkamga.lescracks.identity.infra.UserRepository;
-import com.brandonkamga.lescracks.mail.domain.MailService;
+import com.brandonkamga.lescracks.mail.domain.Email;
+import com.brandonkamga.lescracks.mail.domain.Mailer;
+import com.brandonkamga.lescracks.mail.domain.VerificationEmail;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,8 +22,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,7 +31,7 @@ class EmailVerificationServiceTest {
 
     @Mock private UserRepository users;
     @Mock private EmailVerificationTokenRepository tokens;
-    @Mock private MailService mail;
+    @Mock private Mailer mail;
 
     private final OneTimeTokens oneTimeTokens = new OneTimeTokens();
     private EmailVerificationServiceImpl service;
@@ -50,9 +50,12 @@ class EmailVerificationServiceTest {
 
         ArgumentCaptor<EmailVerificationToken> stored = ArgumentCaptor.forClass(EmailVerificationToken.class);
         verify(tokens).save(stored.capture());
-        ArgumentCaptor<String> raw = ArgumentCaptor.forClass(String.class);
-        verify(mail).sendVerificationEmail(eq("awa@example.com"), raw.capture(), eq("Awa"));
-        assertThat(stored.getValue().getTokenHash()).isEqualTo(oneTimeTokens.hash(raw.getValue()));
+        ArgumentCaptor<Email> sent = ArgumentCaptor.forClass(Email.class);
+        verify(mail).send(sent.capture());
+        VerificationEmail email = (VerificationEmail) sent.getValue();
+        assertThat(email.to()).isEqualTo("awa@example.com");
+        assertThat(email.firstName()).isEqualTo("Awa");
+        assertThat(stored.getValue().getTokenHash()).isEqualTo(oneTimeTokens.hash(email.token()));
         assertThat(stored.getValue().getExpiresAt()).isBetween(Instant.now().plus(23, ChronoUnit.HOURS), Instant.now().plus(25, ChronoUnit.HOURS));
     }
 
@@ -87,6 +90,6 @@ class EmailVerificationServiceTest {
 
         service.resend(" nobody@example.com ");
 
-        verify(mail, never()).sendVerificationEmail(anyString(), anyString(), any());
+        verify(mail, never()).send(any());
     }
 }
