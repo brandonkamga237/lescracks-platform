@@ -89,6 +89,7 @@ Before any commit or PR:
 - PR into `develop`: **squash merge**, so the PR title is the commit and follows the commit format. `develop` into `main`: **merge commit**, never squash
 - Full rules: `CONTRIBUTING.md`. Enable the hook once per clone: `git config core.hooksPath .githooks`
 - You may merge a PR into `develop` only with `scripts/git/merge-to-develop.sh <pr>` (it refuses any other base). **Never merge into `main`**: the user does it by hand. `gh pr merge` and direct pushes to `main`/`develop` are denied
+- Releases: release-please (`.github/workflows/release.yml`) turns the commits merged into `main` into a release PR, then a `vX.Y.Z` tag and `CHANGELOG.md`. The commit type picks the bump (`fix` patch, `feat` minor, `!` major). Never edit `CHANGELOG.md`, `version.txt` or `.release-please-manifest.json` by hand
 
 ### Commits
 - Commit **as you go**, not in one lump at the end: a commit as soon as a coherent unit compiles and passes its checks
