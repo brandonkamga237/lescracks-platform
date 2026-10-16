@@ -32,7 +32,7 @@ export default function AdminDashboard() {
   const audience = useApi((signal) => adminApi.audience(days, signal), [days]);
   const views = useApi((signal) => adminApi.contentViews(days, signal), [days]);
   const watch = useApi((signal) => adminApi.watch(signal), []);
-  const recent = useApi((signal) => adminApi.users(0, '', signal), []);
+  const recent = useApi((signal) => adminApi.users(0, '', {}, signal), []);
   // Double range so each metric can compare with the previous period.
   const growth = useApi((signal) => adminApi.userGrowth(daysAgo(days * 2), daysAgo(0), signal), [days]);
   const letter = useApi((signal) => adminApi.newsletterGrowth(daysAgo(days * 2), daysAgo(0), signal), [days]);
@@ -291,7 +291,7 @@ export default function AdminDashboard() {
                   { label: 'Événements à venir', value: stats.eventsUpcoming, to: '/admin/evenements' },
                   { label: 'Membres actifs · 7 j', value: stats.usersActiveLast7d, to: '/admin/utilisateurs' },
                   { label: 'Brouillons', value: stats.resourcesByStatus.DRAFT ?? 0, to: '/admin/ressources' },
-                  { label: 'Emails vérifiés', value: stats.verifiedUsers, to: '/admin/utilisateurs' },
+                  { label: 'Membres vérifiés', value: stats.verifiedUsers, to: '/admin/utilisateurs' },
                 ].map(({ label, value, to }) => (
                   <Link key={label} to={to} className="group">
                     <dd className="font-display text-3xl font-semibold tabular-nums text-t1 group-hover:text-gold-ink">{value.toLocaleString('fr-FR')}</dd>
