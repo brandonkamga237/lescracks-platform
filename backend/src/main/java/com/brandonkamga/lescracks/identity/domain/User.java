@@ -125,4 +125,9 @@ public class User {
 
     @Column(name = "signup_timezone", length = 64)
     private String signupTimezone;
+
+    /** False for a newsletter-only contact: no password and no Google or GitHub login. */
+    public boolean hasLoginMethod() {
+        return passwordHash != null || provider != AuthProvider.LOCAL;
+    }
 }

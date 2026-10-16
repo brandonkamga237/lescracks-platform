@@ -2,7 +2,10 @@ package com.brandonkamga.lescracks;
 
 import com.brandonkamga.lescracks.event.domain.EventService;
 import com.brandonkamga.lescracks.identity.domain.AdminAuthService;
+import com.brandonkamga.lescracks.identity.domain.EmailVerificationService;
+import com.brandonkamga.lescracks.identity.domain.PasswordResetService;
 import com.brandonkamga.lescracks.identity.domain.UserAuthService;
+import com.brandonkamga.lescracks.identity.domain.UserRegistrationService;
 import com.brandonkamga.lescracks.mail.domain.MailService;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
@@ -50,7 +53,9 @@ class LesCracksApplicationIT extends PostgresIT {
     void everyDomainServiceIsWired() {
         Stream.of(ResourceService.class, TaxonomyService.class, EventService.class,
                         NewsletterService.class, StatsService.class, StorageService.class,
-                        MailService.class, UserAuthService.class, AdminAuthService.class)
+                        MailService.class, UserAuthService.class, UserRegistrationService.class,
+                        EmailVerificationService.class, PasswordResetService.class,
+                        AdminAuthService.class)
                 .forEach(service -> assertThat(context.getBeansOfType(service))
                         .as("%s implementations", service.getSimpleName())
                         .hasSize(1));
