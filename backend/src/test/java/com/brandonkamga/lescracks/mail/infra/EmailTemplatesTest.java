@@ -51,6 +51,20 @@ class EmailTemplatesTest {
     }
 
     @Test
+    @DisplayName("the text part says the same thing, with the link spelled out and no markup")
+    void textPart() {
+        String text = templates.render(new VerificationEmail("awa@example.com", "Awa", "abc")).text();
+
+        assertThat(text)
+                .startsWith("Confirme ton adresse email")
+                .contains("Bonjour Awa,")
+                .contains("Confirmer mon adresse : https://lescracks.com/verifier-email?token=abc")
+                .contains("Ce lien expire dans 24 heures.")
+                .contains("\n--\nTu reçois cet email")
+                .doesNotContain("<", "&nbsp;", "\n\n\n");
+    }
+
+    @Test
     @DisplayName("the reset email links to the reset page with its token")
     void resetLink() {
         assertThat(templates.render(new PasswordResetEmail("awa@example.com", "xyz")).html())

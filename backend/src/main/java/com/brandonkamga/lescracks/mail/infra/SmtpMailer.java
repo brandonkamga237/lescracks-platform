@@ -82,11 +82,11 @@ public class SmtpMailer implements Mailer {
     private void deliver(Email email, RenderedEmail rendered) {
         try {
             MimeMessage message = sender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, "UTF-8");
+            MimeMessageHelper helper = new MimeMessageHelper(message, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
             helper.setFrom(from);
             helper.setTo(email.to());
             helper.setSubject(rendered.subject());
-            helper.setText(rendered.html(), true);
+            helper.setText(rendered.text(), rendered.html());
             sender.send(message);
         } catch (MessagingException | RuntimeException failure) {
             log.error("{} not delivered", email.getClass().getSimpleName(), failure);

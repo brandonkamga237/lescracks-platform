@@ -8,14 +8,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -51,6 +55,22 @@ class SmtpMailerTest {
 
         TransactionSynchronizationManager.getSynchronizations().forEach(TransactionSynchronization::afterCommit);
         verify(sender).send(any(MimeMessage.class));
+    }
+
+    @Test
+    @DisplayName("every email carries a plain-text part next to its HTML")
+    void sendsBothParts() throws Exception {
+        ArgumentCaptor<MimeMessage> sent = ArgumentCaptor.forClass(MimeMessage.class);
+
+        mailer.send(new PasswordResetEmail("awa@example.com", "token"));
+
+        verify(sender).send(sent.capture());
+        MimeMessage message = sent.getValue();
+        message.saveChanges();
+        ByteArrayOutputStream raw = new ByteArrayOutputStream();
+        message.writeTo(raw);
+        assertThat(raw.toString(StandardCharsets.UTF_8))
+                .contains("multipart/alternative", "text/plain", "text/html");
     }
 
     @Test

@@ -3,6 +3,9 @@ package com.brandonkamga.lescracks.mail.infra;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /** The building blocks every template shares: the fixed frame and the inline-styled pieces inside it. */
 @Component
 public class EmailLayout {
@@ -15,6 +18,34 @@ public class EmailLayout {
 
     public EmailLayout(@Value("${app.site.url:http://localhost:5173}") String siteUrl) {
         this.siteUrl = siteUrl.endsWith("/") ? siteUrl.substring(0, siteUrl.length() - 1) : siteUrl;
+    }
+
+    private static final Pattern LINK = Pattern.compile("<a\\s[^>]*href=\"([^\"]*)\"[^>]*>(.*?)</a>", Pattern.DOTALL);
+    private static final Pattern BLOCK_END = Pattern.compile("</(p|h[1-6]|li|tr|table|div|blockquote)>|<br\\s*/?>", Pattern.CASE_INSENSITIVE);
+
+    /** The HTML email in its frame, and the same body as plain text. */
+    public RenderedEmail email(String subject, String title, String body, String note) {
+        return new RenderedEmail(subject, frame(title, body, note), text(body) + "\n\n--\n" + text(note) + "\n" + siteUrl);
+    }
+
+    /** Plain text of an HTML fragment: links keep their address, blocks become paragraphs. */
+    String text(String html) {
+        Matcher links = LINK.matcher(html);
+        StringBuilder withUrls = new StringBuilder();
+        while (links.find()) {
+            String url = links.group(1);
+            String label = links.group(2).replaceAll("<[^>]+>", "").trim();
+            String plain = label.isEmpty() || label.equals(url) ? url : label + " : " + url;
+            links.appendReplacement(withUrls, Matcher.quoteReplacement(plain));
+        }
+        links.appendTail(withUrls);
+        String text = BLOCK_END.matcher(withUrls).replaceAll("\n\n")
+                .replaceAll("<li[^>]*>", "- ")
+                .replaceAll("<[^>]+>", "")
+                .replace("&nbsp;", " ").replace("&middot;", "·").replace("&lt;", "<").replace("&gt;", ">")
+                .replace("&quot;", "\"").replace("&#39;", "'").replace("&amp;", "&");
+        return text.lines().map(String::strip).reduce((a, b) -> a + "\n" + b).orElse("")
+                .replaceAll("\n{3,}", "\n\n").strip();
     }
 
     /** An absolute link to a page of the site. */

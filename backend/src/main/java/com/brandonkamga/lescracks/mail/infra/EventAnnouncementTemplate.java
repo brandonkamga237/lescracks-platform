@@ -29,11 +29,10 @@ public class EventAnnouncementTemplate implements EmailTemplate<EventAnnouncemen
         String url = layout.url(email.path());
         String date = email.startsAt() == null ? "" : layout.paragraph("<strong style=\"color:#0b0b0b;\">"
                 + layout.escapeHtml(DATE.format(email.startsAt().atZone(ZoneId.of("Europe/Paris")))) + "</strong>");
-        String html = layout.frame(email.title(), layout.heading(title)
+        String body = layout.heading(title)
                         + layout.cover(layout.absoluteImage(email.coverImage()), title) + date
                         + layout.paragraph(layout.escapeHtml(email.description()))
-                        + layout.button("Voir l'événement", url) + layout.fallbackLink("Ou ouvre ce lien :", url),
-                EmailLayout.NEWSLETTER_NOTE);
-        return new RenderedEmail("Nouvel événement LesCracks : " + email.title(), html);
+                        + layout.button("Voir l'événement", url) + layout.fallbackLink("Ou ouvre ce lien :", url);
+        return layout.email("Nouvel événement LesCracks : " + email.title(), email.title(), body, EmailLayout.NEWSLETTER_NOTE);
     }
 }
