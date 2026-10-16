@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.identity.api.dto;
 
+import com.brandonkamga.lescracks.identity.domain.Registration;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -12,5 +13,12 @@ public record UserRegisterRequest(
         @NotBlank String lastName,
         @Size(max = 30) String phone,
         Boolean marketingConsent,
+        /** Subscribe to the newsletter; unticked by default, as consent must be. */
+        Boolean newsletter,
         @Valid SignupContext context) {
+
+    public Registration toRegistration() {
+        return new Registration(email, password, firstName, lastName, phone, marketingConsent, newsletter,
+                context == null ? null : context.toArrival());
+    }
 }

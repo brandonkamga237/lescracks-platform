@@ -5,10 +5,12 @@ import com.brandonkamga.lescracks.identity.api.dto.UserStatusRequest;
 import com.brandonkamga.lescracks.identity.domain.AdminUserService;
 import com.brandonkamga.lescracks.identity.domain.ProfileCompletion;
 import com.brandonkamga.lescracks.identity.domain.User;
+import com.brandonkamga.lescracks.identity.domain.UserSearch;
 import com.brandonkamga.lescracks.shared.dto.PageResponse;
 
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,10 +33,13 @@ public class AdminUserController {
 
     public AdminUserController(AdminUserService users) { this.users = users; }
 
+    /** Newest first. {@code kind}: MEMBER (can sign in) or CONTACT (newsletter only); {@code verified}: email confirmed or not. */
     @GetMapping
     public PageResponse<UserAdminResponse> list(@RequestParam(required = false) String search,
-                                                @PageableDefault(size = 20) Pageable pageable) {
-        return PageResponse.of(users.list(search, pageable), this::response);
+                                                @RequestParam(required = false) UserSearch.Kind kind,
+                                                @RequestParam(required = false) Boolean verified,
+                                                @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return PageResponse.of(users.list(new UserSearch(search, kind, verified), pageable), this::response);
     }
 
     @GetMapping("/{id}")
@@ -44,6 +49,15 @@ public class AdminUserController {
     public UserAdminResponse status(@PathVariable Long id, @Valid @RequestBody UserStatusRequest request) {
         return response(users.setStatus(id, request.status()));
     }
+
+    @PostMapping("/{id}/verification-email")
+    public ResponseEntity<Void> resendVerification(@PathVariable Long id) {
+        users.resendVerification(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/verify")
+    public UserAdminResponse markVerified(@PathVariable Long id) { return response(users.markVerified(id)); }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -73,7 +87,8 @@ public class AdminUserController {
         return new UserAdminResponse(user.getId(), user.getEmail(), user.getFirstName(),
                 user.getLastName(), user.getStatus(), user.isEmailVerified(), user.getProvider(), user.getCreatedAt(),
                 user.getPhone(), user.getCountry(), user.getSituation(), user.getGoal(), user.getLocation(),
-                user.isMarketingConsent(), ProfileCompletion.of(user).percent());
+                user.isMarketingConsent(), ProfileCompletion.of(user).percent(),
+                user.hasLoginMethod(), user.getOnboardedAt() != null, user.getLastSeenAt(), user.getSignupPath());
     }
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")

@@ -16,6 +16,8 @@ import EvenementDetail from '@/pages/EvenementDetail';
 import Privacy from '@/pages/Privacy';
 import Terms from '@/pages/Terms';
 import VerifyEmail from '@/pages/VerifyEmail';
+import Unsubscribe from '@/pages/Unsubscribe';
+import NewsletterConfirm from '@/pages/NewsletterConfirm';
 import Evenements from '@/pages/Evenements';
 import Landing from '@/pages/Landing';
 import NotFound from '@/pages/NotFound';
@@ -103,7 +105,7 @@ function AdminRoute({ bare = false }: AdminRouteProps) {
 }
 
 // Pages where the welcome questions must not interrupt: signing in, legal reading, the welcome itself.
-const WELCOME_EXEMPT = ['/bienvenue', '/auth/callback', '/connexion', '/inscription', '/reinitialiser', '/verifier-email', '/conditions-utilisation', '/politique-confidentialite', '/admin'];
+const WELCOME_EXEMPT = ['/bienvenue', '/desabonnement', '/newsletter/confirmer', '/auth/callback', '/connexion', '/inscription', '/reinitialiser', '/verifier-email', '/conditions-utilisation', '/politique-confidentialite', '/admin'];
 
 function AppRoutes() {
   const location = useLocation();
@@ -128,6 +130,8 @@ function AppRoutes() {
       <Route path="/inscription" element={<AuthPage mode="register" />} />
       <Route path="/reinitialiser" element={<ResetPasswordPage />} />
       <Route path="/verifier-email" element={<VerifyEmail />} />
+      <Route path="/desabonnement" element={<Unsubscribe />} />
+      <Route path="/newsletter/confirmer" element={<NewsletterConfirm />} />
       <Route path="/admin/connexion" element={<AdminLogin />} />
 
       {/* Reading is what brings people in; asking them to sign up first is what keeps

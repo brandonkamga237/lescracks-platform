@@ -1,8 +1,5 @@
 package com.brandonkamga.lescracks.identity.domain;
 
-import com.brandonkamga.lescracks.identity.api.dto.OnboardingRequest;
-import com.brandonkamga.lescracks.identity.api.dto.UserPasswordChangeRequest;
-import com.brandonkamga.lescracks.identity.api.dto.UserProfileUpdateRequest;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,11 +10,14 @@ public interface UserProfileService {
 
     /** Lookup without failure, for callers that also serve visitors and admin accounts. */
     Optional<User> find(String email);
-    User update(String email, UserProfileUpdateRequest request);
+    User update(String email, ProfileChanges changes);
 
     /** Saves the welcome answers (all optional) and marks the welcome as done, answered or put off. */
-    User onboard(String email, OnboardingRequest request);
+    User onboard(String email, OnboardingAnswers answers);
+    /** Replaces the photo with a JPEG, PNG or WebP of 5 MB at most, and deletes the previous one. */
     User updateAvatar(String email, MultipartFile file);
-    void changePassword(String email, UserPasswordChangeRequest request);
+
+    User removeAvatar(String email);
+    void changePassword(String email, PasswordChange change);
     void delete(String email);
 }

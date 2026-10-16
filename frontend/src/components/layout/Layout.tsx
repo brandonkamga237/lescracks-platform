@@ -7,6 +7,7 @@ import NewsletterBar from '@/components/layout/NewsletterBar';
 import Footer from '@/components/layout/Footer';
 import MobileTabBar from '@/components/layout/MobileTabBar';
 import SignupNudge from '@/components/account/SignupNudge';
+import VerifyEmailBanner from '@/components/account/VerifyEmailBanner';
 import { ArrowUp } from 'lucide-react';
 
 const WHATSAPP_URL = 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK';
@@ -47,6 +48,7 @@ const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutPro
       <a href="#main-content" className="sr-only z-[60] rounded bg-gold px-5 py-3 font-medium text-black focus:not-sr-only focus:fixed focus:left-5 focus:top-3">Aller au contenu</a>
       <NewsletterBar />
       <Header />
+      <VerifyEmailBanner />
 
       {/* Opacity only: navigation happens dozens of times a session, movement would get tiring. */}
       <SignupNudge />

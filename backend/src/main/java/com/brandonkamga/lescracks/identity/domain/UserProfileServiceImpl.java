@@ -1,14 +1,13 @@
 package com.brandonkamga.lescracks.identity.domain;
 
-import com.brandonkamga.lescracks.identity.api.dto.OnboardingRequest;
-import com.brandonkamga.lescracks.identity.api.dto.UserPasswordChangeRequest;
-import com.brandonkamga.lescracks.identity.api.dto.UserProfileUpdateRequest;
 import com.brandonkamga.lescracks.identity.infra.UserRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 import com.brandonkamga.lescracks.taxonomy.domain.TaxonomyService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +22,8 @@ import java.util.Set;
 @Service
 @Transactional
 public class UserProfileServiceImpl implements UserProfileService {
+    private static final Logger log = LoggerFactory.getLogger(UserProfileServiceImpl.class);
+
     private final UserRepository users;
     private final PasswordEncoder passwords;
     private final StorageService storage;
@@ -49,39 +50,47 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public User update(String email, UserProfileUpdateRequest request) {
+    public User update(String email, ProfileChanges changes) {
         User user = require(email);
-        user.setFirstName(request.firstName().trim());
-        user.setLastName(request.lastName().trim());
-        user.setUsername(request.username() == null ? null : request.username().trim().toLowerCase());
-        user.setAvatarUrl(request.avatarUrl() == null ? null : request.avatarUrl().trim());
-        user.setBio(request.bio() == null ? null : request.bio().trim());
-        user.setLocation(request.location() == null ? null : request.location().trim());
-        if (request.socialLinks() != null) {
-            user.setSocialLinks(request.socialLinks());
+        if (changes.firstName() != null) user.setFirstName(required(changes.firstName(), "Le prénom"));
+        if (changes.lastName() != null) user.setLastName(required(changes.lastName(), "Le nom"));
+        if (changes.username() != null) user.setUsername(optional(changes.username().toLowerCase()));
+        if (changes.bio() != null) user.setBio(optional(changes.bio()));
+        if (changes.location() != null) user.setLocation(optional(changes.location()));
+        if (changes.socialLinks() != null) {
+            user.setSocialLinks(changes.socialLinks());
         }
-        MemberProfiles.phone(user, request.phone());
-        if (request.situation() != null) user.setSituation(request.situation());
-        if (request.goal() != null) user.setGoal(request.goal());
-        interests(user, request.interestIds());
-        if (request.marketingConsent() != null) user.setMarketingConsent(request.marketingConsent());
+        MemberProfiles.phone(user, changes.phone());
+        if (changes.situation() != null) user.setSituation(changes.situation());
+        if (changes.goal() != null) user.setGoal(changes.goal());
+        interests(user, changes.interestIds());
+        if (changes.marketingConsent() != null) user.setMarketingConsent(changes.marketingConsent());
         user.setUpdatedAt(Instant.now());
         return user;
     }
 
     @Override
-    public User onboard(String email, OnboardingRequest request) {
+    public User onboard(String email, OnboardingAnswers answers) {
         User user = require(email);
-        MemberProfiles.phone(user, request.phone());
-        if (request.situation() != null) user.setSituation(request.situation());
-        if (request.goal() != null) user.setGoal(request.goal());
-        interests(user, request.interestIds());
-        if (request.location() != null && !request.location().isBlank()) user.setLocation(request.location().trim());
-        if (request.marketingConsent() != null) user.setMarketingConsent(request.marketingConsent());
-        MemberProfiles.context(user, request.context());
+        MemberProfiles.phone(user, answers.phone());
+        if (answers.situation() != null) user.setSituation(answers.situation());
+        if (answers.goal() != null) user.setGoal(answers.goal());
+        interests(user, answers.interestIds());
+        if (answers.location() != null && !answers.location().isBlank()) user.setLocation(answers.location().trim());
+        if (answers.marketingConsent() != null) user.setMarketingConsent(answers.marketingConsent());
+        MemberProfiles.arrival(user, answers.arrival());
         if (user.getOnboardedAt() == null) user.setOnboardedAt(Instant.now());
         user.setUpdatedAt(Instant.now());
         return user;
+    }
+
+    private static String required(String value, String label) {
+        if (value.isBlank()) throw new BadRequestException(label + " ne peut pas être vide.");
+        return value.trim();
+    }
+
+    private static String optional(String value) {
+        return value.isBlank() ? null : value.trim();
     }
 
     /** Null leaves them as they are; each id must be an existing category. */
@@ -97,30 +106,50 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     @Override
     public User updateAvatar(String email, MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new BadRequestException("Aucun fichier reçu.");
-        }
-        User user = require(email);
+        byte[] content;
         try {
-            String key = storage.store(file.getOriginalFilename(), file.getBytes(), file.getContentType());
-            user.setAvatarUrl(key);
-            user.setUpdatedAt(Instant.now());
-            return user;
+            content = file.getBytes();
         } catch (IOException cause) {
             throw new BadRequestException("Impossible de lire le fichier.");
+        }
+        String contentType = AvatarImages.check(content);
+        User user = require(email);
+        String previous = user.getAvatarUrl();
+        user.setAvatarUrl(storage.store(file.getOriginalFilename(), content, contentType));
+        user.setUpdatedAt(Instant.now());
+        discard(previous);
+        return user;
+    }
+
+    @Override
+    public User removeAvatar(String email) {
+        User user = require(email);
+        discard(user.getAvatarUrl());
+        user.setAvatarUrl(null);
+        user.setUpdatedAt(Instant.now());
+        return user;
+    }
+
+    /** Deletes a photo we stored; an external URL is not ours to delete, and a failed cleanup never fails the change. */
+    private void discard(String avatar) {
+        if (avatar == null || avatar.isBlank() || avatar.startsWith("http") || avatar.startsWith("/")) return;
+        try {
+            storage.delete(avatar);
+        } catch (RuntimeException cause) {
+            log.warn("Previous avatar {} not deleted: {}", avatar, cause.getMessage());
         }
     }
 
     @Override
-    public void changePassword(String email, UserPasswordChangeRequest request) {
+    public void changePassword(String email, PasswordChange change) {
         User user = require(email);
-        if (user.getPasswordHash() == null || !passwords.matches(request.currentPassword(), user.getPasswordHash())) {
+        if (user.getPasswordHash() == null || !passwords.matches(change.currentPassword(), user.getPasswordHash())) {
             throw new BadRequestException("Le mot de passe actuel est incorrect.");
         }
-        if (!request.newPassword().equals(request.confirmPassword())) {
+        if (!change.newPassword().equals(change.confirmation())) {
             throw new BadRequestException("Le nouveau mot de passe et sa confirmation ne correspondent pas.");
         }
-        user.setPasswordHash(passwords.encode(request.newPassword()));
+        user.setPasswordHash(passwords.encode(change.newPassword()));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.cracklab.domain;
 
+import com.brandonkamga.lescracks.storage.domain.StoredFiles;
 import com.brandonkamga.lescracks.cracklab.api.dto.AdminChallengeResponse;
 import com.brandonkamga.lescracks.cracklab.api.dto.AuthorResponse;
 import com.brandonkamga.lescracks.cracklab.api.dto.ChallengeDetailResponse;
@@ -141,10 +142,7 @@ public class CrackLabMapper {
     }
 
     private static String avatar(String key) {
-        if (key == null || key.isBlank()) {
-            return null;
-        }
-        return key.startsWith("http") || key.startsWith("/") ? key : "/api/files/" + key;
+        return StoredFiles.publicPath(key);
     }
 
     private static List<CriterionResponse> criteria(Challenge challenge) {

@@ -67,6 +67,12 @@ export interface AdminResourceFilters extends Query {
   categoryId?: number;
   tagId?: number;
 }
+/** MEMBER: can sign in; CONTACT: newsletter only. */
+export interface UserFilters {
+  kind?: 'MEMBER' | 'CONTACT';
+  verified?: boolean;
+}
+
 export interface StatsOverview {
   users: number;
   usersByStatus: Partial<Record<'ACTIVE' | 'INACTIVE' | 'BANNED', number>>;
@@ -75,6 +81,10 @@ export interface StatsOverview {
   usersNewLast30d: number;
   usersActiveLast7d: number;
   usersActiveLast30d: number;
+  /** Addresses known only from the public newsletter form; not counted in `users`. */
+  newsletterContacts: number;
+  /** What became of the last 30 days of sign-ups. */
+  signupFunnel: { signedUp: number; verified: number; onboarded: number; returned: number };
   events: number;
   eventsByStatus: Partial<Record<EventStatus, number>>;
   eventsByType: Partial<Record<EventType, number>>;
@@ -173,8 +183,10 @@ export const adminApi = {
   createTag: (name: string, categoryId: number) => http.post<Tag>('/admin/tags', { name, categoryId }),
   updateTag: (id: number, name: string, categoryId: number) => http.put<Tag>(`/admin/tags/${id}`, { name, categoryId }),
   deleteTag: (id: number) => http.delete<void>(`/admin/tags/${id}`),
-  users: (page = 0, search = '', signal?: AbortSignal) =>
-    http.get<PageResponse<AdminUser>>('/admin/users', { page, size: 12, search, sort: 'createdAt,desc' }, signal),
+  users: (page = 0, search = '', filters: UserFilters = {}, signal?: AbortSignal) =>
+    http.get<PageResponse<AdminUser>>('/admin/users', { page, size: 12, search, ...filters, sort: 'createdAt,desc' }, signal),
+  resendUserVerification: (id: number) => http.post<void>(`/admin/users/${id}/verification-email`),
+  verifyUser: (id: number) => http.post<AdminUser>(`/admin/users/${id}/verify`),
   user: (id: number, signal?: AbortSignal) => http.get<AdminUser>(`/admin/users/${id}`, undefined, signal),
   updateUserStatus: (id: number, status: AdminUser['status']) =>
     http.patch<AdminUser>(`/admin/users/${id}/status`, { status }),
@@ -189,6 +201,8 @@ export const adminApi = {
     http.get<AdminSubscriber[]>('/newsletter/admin/subscriptions', status ? { status } : undefined, signal),
   newsletterBroadcast: (subject: string, body: ArticleBlock[]) =>
     http.post<number>('/newsletter/admin/broadcast', { subject, body }),
+  newsletterTest: (subject: string, body: ArticleBlock[], email: string) =>
+    http.post<void>('/newsletter/admin/test', { subject, body, email }),
   newsletterPreview: (subject: string, body: ArticleBlock[]) =>
     http.post<{ html: string }>('/newsletter/admin/preview', { subject, body }),
   newsletterUnsubscribe: (userId: number) => http.post<AdminSubscriber>(`/newsletter/admin/subscriptions/${userId}/unsubscribe`),

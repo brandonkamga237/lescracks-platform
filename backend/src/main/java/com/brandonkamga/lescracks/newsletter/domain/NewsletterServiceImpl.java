@@ -1,11 +1,13 @@
 package com.brandonkamga.lescracks.newsletter.domain;
 
 import com.brandonkamga.lescracks.event.domain.Event;
-import com.brandonkamga.lescracks.identity.domain.AuthProvider;
 import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.domain.UserStatus;
-import com.brandonkamga.lescracks.identity.infra.UserRepository;
-import com.brandonkamga.lescracks.mail.domain.MailService;
+import com.brandonkamga.lescracks.identity.domain.UserDirectory;
+import com.brandonkamga.lescracks.mail.domain.EventAnnouncement;
+import com.brandonkamga.lescracks.mail.domain.Mailer;
+import com.brandonkamga.lescracks.mail.domain.NewsletterConfirmation;
+import com.brandonkamga.lescracks.mail.domain.NewsletterIssue;
+import com.brandonkamga.lescracks.mail.domain.ResourceAnnouncement;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterCampaignRepository;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterSubscriptionRepository;
 import com.brandonkamga.lescracks.resource.domain.Resource;
@@ -23,13 +25,13 @@ import java.util.List;
 @Service
 @Transactional
 public class NewsletterServiceImpl implements NewsletterService {
-    private final UserRepository users;
+    private final UserDirectory users;
     private final NewsletterSubscriptionRepository subscriptions;
     private final NewsletterCampaignRepository campaigns;
-    private final MailService mail;
+    private final Mailer mail;
 
-    public NewsletterServiceImpl(UserRepository users, NewsletterSubscriptionRepository subscriptions,
-                                 NewsletterCampaignRepository campaigns, MailService mail) {
+    public NewsletterServiceImpl(UserDirectory users, NewsletterSubscriptionRepository subscriptions,
+                                 NewsletterCampaignRepository campaigns, Mailer mail) {
         this.users = users;
         this.subscriptions = subscriptions;
         this.campaigns = campaigns;
@@ -56,22 +58,29 @@ public class NewsletterServiceImpl implements NewsletterService {
     @Override
     public NewsletterSubscription subscribePublic(String email, String firstName, String lastName) {
         String normalizedEmail = email.trim().toLowerCase();
-        User user = users.findByEmailIgnoreCase(normalizedEmail).orElse(null);
-        if (user != null && (user.getPasswordHash() != null || user.getProvider() != AuthProvider.LOCAL)) {
+        User user = users.find(normalizedEmail).orElse(null);
+        if (user != null && user.hasLoginMethod()) {
             throw new BadRequestException("Cette adresse email est déjà associée à un compte. Connecte-toi pour gérer ton abonnement.");
         }
         if (user == null) {
-            user = users.save(User.builder()
-                    .email(normalizedEmail)
-                    .firstName(firstName == null ? "" : firstName.trim())
-                    .lastName(lastName == null ? "" : lastName.trim())
-                    .passwordHash(null)
-                    .status(UserStatus.ACTIVE)
-                    .emailVerified(false)
-                    .provider(AuthProvider.LOCAL)
-                    .build());
+            user = users.createContact(normalizedEmail, firstName, lastName);
         }
-        return subscribe(user);
+        User contact = user;
+        NewsletterSubscription subscription = subscriptions.findByUserId(contact.getId())
+                .orElseGet(() -> NewsletterSubscription.builder().user(contact).build());
+        if (subscription.getStatus() == NewsletterStatus.SUBSCRIBED && subscription.getId() != null) return subscription;
+        subscription.setStatus(NewsletterStatus.PENDING);
+        subscription.setUnsubscribedAt(null);
+        subscription = subscriptions.save(subscription);
+        mail.send(new NewsletterConfirmation(contact.getEmail(), subscription.getToken()));
+        return subscription;
+    }
+
+    @Override
+    public void confirm(String token) {
+        NewsletterSubscription subscription = subscriptions.findByToken(token)
+                .orElseThrow(() -> new NotFoundException("Ce lien de confirmation n’est plus valide."));
+        if (subscription.getStatus() == NewsletterStatus.PENDING) subscription.setStatus(NewsletterStatus.SUBSCRIBED);
     }
 
     private NewsletterSubscription subscribe(User user) {
@@ -92,9 +101,17 @@ public class NewsletterServiceImpl implements NewsletterService {
     }
 
     @Override
+    public void unsubscribeByToken(String token) {
+        NewsletterSubscription subscription = subscriptions.findByToken(token)
+                .orElseThrow(() -> new NotFoundException("Ce lien de désabonnement n’est plus valide."));
+        if (subscription.getStatus() == NewsletterStatus.UNSUBSCRIBED) return;
+        subscription.setStatus(NewsletterStatus.UNSUBSCRIBED);
+        subscription.setUnsubscribedAt(Instant.now());
+    }
+
+    @Override
     public NewsletterSubscription unsubscribeById(Long userId) {
-        User user = users.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Utilisateur", "id", userId));
+        User user = users.require(userId);
         NewsletterSubscription subscription = subscriptions.findByUserId(user.getId())
                 .orElseGet(() -> NewsletterSubscription.builder().user(user).build());
         subscription.setStatus(NewsletterStatus.UNSUBSCRIBED);
@@ -104,8 +121,7 @@ public class NewsletterServiceImpl implements NewsletterService {
 
     @Override
     public NewsletterSubscription subscribeById(Long userId) {
-        User user = users.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Utilisateur", "id", userId));
+        User user = users.require(userId);
         NewsletterSubscription subscription = subscriptions.findByUserId(user.getId())
                 .orElseGet(() -> NewsletterSubscription.builder().user(user).build());
         subscription.setStatus(NewsletterStatus.SUBSCRIBED);
@@ -116,19 +132,28 @@ public class NewsletterServiceImpl implements NewsletterService {
     @Override
     public void notifyEventSubscribers(Event event) {
         subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED)
-                .forEach(subscription -> mail.sendEventNotification(subscription.getUser().getEmail(), event));
+                .forEach(subscription -> mail.send(new EventAnnouncement(subscription.getUser().getEmail(),
+                        event.getTitle(), event.getDescription(), "/evenements/" + slugOrId(event.getSlug(), event.getId()),
+                        event.getCoverImage(), event.getStartDate(), subscription.getToken())));
     }
 
     @Override
     public void notifyResourceSubscribers(Resource resource) {
         subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED)
-                .forEach(subscription -> mail.sendResourceNotification(subscription.getUser().getEmail(), resource));
+                .forEach(subscription -> mail.send(new ResourceAnnouncement(subscription.getUser().getEmail(),
+                        resource.getTitle(), resource.getDescription(), "/ressources/" + slugOrId(resource.getSlug(), resource.getId()),
+                        resource.getCoverImage(), subscription.getToken())));
     }
 
     /** The exact email a subscriber would get, filled with a sample reader. */
     @Override
     public String preview(String subject, JsonNode body) {
-        return mail.broadcastHtml("marie@example.com", subject, body, "Marie", "Kamga");
+        return mail.previewHtml(new NewsletterIssue("marie@example.com", subject, body, "Marie", "Kamga", null));
+    }
+
+    @Override
+    public void sendTest(String subject, JsonNode body, String email) {
+        mail.send(new NewsletterIssue(email.trim(), "[Test] " + subject, body, "Marie", "Kamga", null));
     }
 
     @Override
@@ -136,7 +161,8 @@ public class NewsletterServiceImpl implements NewsletterService {
         var active = subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED);
         active.forEach(subscription -> {
             User user = subscription.getUser();
-            mail.sendBroadcast(user.getEmail(), subject, body, user.getFirstName(), user.getLastName());
+            mail.send(new NewsletterIssue(user.getEmail(), subject, body, user.getFirstName(), user.getLastName(),
+                    subscription.getToken()));
         });
         campaigns.save(NewsletterCampaign.builder()
                 .subject(subject)
@@ -152,8 +178,11 @@ public class NewsletterServiceImpl implements NewsletterService {
         return campaigns.findAllByOrderBySentAtDesc();
     }
 
+    private static String slugOrId(String slug, Long id) {
+        return slug != null ? slug : String.valueOf(id);
+    }
+
     private User user(String username) {
-        return users.findByEmailIgnoreCase(username)
-                .orElseThrow(() -> new NotFoundException("Utilisateur", "email", username));
+        return users.require(username);
     }
 }

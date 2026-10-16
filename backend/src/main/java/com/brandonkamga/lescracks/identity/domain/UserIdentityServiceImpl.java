@@ -1,7 +1,5 @@
 package com.brandonkamga.lescracks.identity.domain;
 
-import com.brandonkamga.lescracks.identity.api.dto.LinkIdentityRequest;
-import com.brandonkamga.lescracks.identity.api.dto.UserIdentityResponse;
 import com.brandonkamga.lescracks.identity.infra.UserIdentityRepository;
 import com.brandonkamga.lescracks.identity.infra.UserRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
@@ -32,19 +30,17 @@ public class UserIdentityServiceImpl implements UserIdentityService {
     }
 
     @Override
-    public List<UserIdentityResponse> list(String email) {
-        User user = requireUser(email);
-        return identities.findByUser(user).stream()
-                .map(identity -> new UserIdentityResponse(identity.getProvider(), identity.getCreatedAt()))
-                .toList();
+    @Transactional(readOnly = true)
+    public List<UserIdentity> list(String email) {
+        return identities.findByUser(requireUser(email));
     }
 
     @Override
-    public UserIdentityResponse link(String email, LinkIdentityRequest request) {
-        if (request.provider() == AuthProvider.LOCAL) {
+    public UserIdentity link(String email, AuthProvider provider, String token) {
+        if (provider == AuthProvider.LOCAL) {
             throw new BadRequestException("Impossible de lier une connexion locale par ce flux.");
         }
-        Jwt jwt = decodeToken(request.token());
+        Jwt jwt = decodeToken(token);
         String tokenEmail = normalize(jwt.getClaimAsString("email"));
         String currentEmail = normalize(email);
         if (!tokenEmail.equals(currentEmail)) {
@@ -57,19 +53,17 @@ public class UserIdentityServiceImpl implements UserIdentityService {
             throw new BadRequestException("Identité externe invalide.");
         }
 
-        identities.findByProviderAndExternalId(request.provider(), externalId).ifPresent(existing -> {
+        identities.findByProviderAndExternalId(provider, externalId).ifPresent(existing -> {
             if (!existing.getUser().getId().equals(user.getId())) {
                 throw new ConflictException("Cette identité externe est déjà liée à un autre compte.");
             }
         });
 
-        UserIdentity identity = identities.findByUserAndProvider(user, request.provider())
-                .orElseGet(() -> UserIdentity.builder().user(user).provider(request.provider()).build());
+        UserIdentity identity = identities.findByUserAndProvider(user, provider)
+                .orElseGet(() -> UserIdentity.builder().user(user).provider(provider).build());
         identity.setExternalId(externalId);
         identity.setUpdatedAt(Instant.now());
-        identities.save(identity);
-
-        return new UserIdentityResponse(identity.getProvider(), identity.getCreatedAt());
+        return identities.save(identity);
     }
 
     @Override

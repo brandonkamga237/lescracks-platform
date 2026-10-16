@@ -101,6 +101,12 @@ export interface AdminUser {
   location?: string;
   marketingConsent: boolean;
   completion: number;
+  /** False for a newsletter-only contact (no password, no social login). */
+  hasAccount: boolean;
+  onboarded: boolean;
+  lastSeenAt?: string;
+  /** The page the member first arrived on. */
+  signupPath?: string;
 }
 
 export interface AdminSummary {
@@ -109,7 +115,8 @@ export interface AdminSummary {
   role: string;
 }
 
-export type NewsletterState = 'SUBSCRIBED' | 'UNSUBSCRIBED';
+/** PENDING: signed up from the public form, address not confirmed yet. */
+export type NewsletterState = 'PENDING' | 'SUBSCRIBED' | 'UNSUBSCRIBED';
 
 export interface AdminSubscriber {
   userId: number;
@@ -124,6 +131,7 @@ export interface AdminSubscriber {
 export interface NewsletterStats {
   subscribed: number;
   unsubscribed: number;
+  pending: number;
 }
 
 export interface UserGrowthPoint {
@@ -269,15 +277,14 @@ export interface OnboardingAnswers {
   context?: SignupContext;
 }
 
+/** A partial change: an omitted field stays as it is, an empty string clears an optional one. */
 export interface UserProfileUpdate {
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   username?: string;
-  avatarUrl?: string;
   bio?: string;
   location?: string;
   socialLinks?: Record<string, string>;
-  /** Omitted: unchanged; empty string: removed. */
   phone?: string;
   situation?: MemberSituation;
   goal?: MemberGoal;

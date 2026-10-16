@@ -188,7 +188,8 @@ export function SessionProvider({ children }: SessionProviderProps) {
     register: (returnTo) => openAuth('/inscription', returnTo),
     signOut,
     login: (email, password) => cookieLogin(() => api.login(email, password)),
-    createAccount: async (body) => { await api.register(body); },
+    // Sign-up opens the session server-side, so the new member is signed in like after a login.
+    createAccount: (body) => cookieLogin(() => api.register(body)),
     loginAdmin: (username, password) => cookieLogin(() => adminApi.login(username, password), () => adminApi.me()),
     socialSignIn,
   }}>{children}</SessionContext.Provider>;

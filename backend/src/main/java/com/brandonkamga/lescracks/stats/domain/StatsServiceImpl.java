@@ -13,6 +13,7 @@ import com.brandonkamga.lescracks.stats.api.dto.AudienceResponse;
 import com.brandonkamga.lescracks.stats.api.dto.ContentViewsResponse;
 import com.brandonkamga.lescracks.stats.api.dto.NamedCount;
 import com.brandonkamga.lescracks.stats.api.dto.SeriesPoint;
+import com.brandonkamga.lescracks.stats.api.dto.SignupFunnel;
 import com.brandonkamga.lescracks.stats.api.dto.StatsOverviewResponse;
 import com.brandonkamga.lescracks.stats.api.dto.TopResourceResponse;
 import com.brandonkamga.lescracks.stats.api.dto.UserGrowthPoint;
@@ -79,8 +80,8 @@ public class StatsServiceImpl implements StatsService {
         Instant days30 = now.minus(30, ChronoUnit.DAYS);
         Instant days7 = now.minus(7, ChronoUnit.DAYS);
 
-        Map<String, Long> usersByStatus = toCounts(users.countGroupedByStatus());
-        Map<String, Long> usersByProvider = toCounts(users.countGroupedByProvider());
+        Map<String, Long> usersByStatus = toCounts(users.countMembersGroupedByStatus());
+        Map<String, Long> usersByProvider = toCounts(users.countMembersGroupedByProvider());
         Map<String, Long> eventsByStatus = toCounts(events.countGroupedByStatus());
         Map<String, Long> eventsByType = toCounts(events.countGroupedByType());
         Map<String, Long> resourcesByStatus = toCounts(resources.countGroupedByStatus());
@@ -105,9 +106,10 @@ public class StatsServiceImpl implements StatsService {
         long talksPublished = talks.countByStatus(TalkStatus.PUBLISHED);
 
         return new StatsOverviewResponse(
-                total(usersByStatus), usersByStatus, usersByProvider, users.countByEmailVerifiedTrue(),
-                users.countByCreatedAtAfter(days30),
+                total(usersByStatus), usersByStatus, usersByProvider, users.countVerifiedMembers(),
+                users.countMembersCreatedAfter(days30),
                 users.countByLastSeenAtAfter(days7), users.countByLastSeenAtAfter(days30),
+                users.countNewsletterContacts(), funnel(users.signupFunnel(days30)),
                 total(eventsByStatus), eventsByStatus, eventsByType,
                 upcoming, ongoing, past,
                 total(resourcesByStatus), resourcesByStatus, resourcesByKind, resourcesByCategory,
@@ -115,6 +117,16 @@ public class StatsServiceImpl implements StatsService {
                 newsletter.countByStatus(NewsletterStatus.UNSUBSCRIBED),
                 newsletter.countByStatusAndSubscribedAtAfter(NewsletterStatus.SUBSCRIBED, days30),
                 talks.count(), talksPublished);
+    }
+
+    private static SignupFunnel funnel(List<Object[]> rows) {
+        if (rows.isEmpty()) return new SignupFunnel(0, 0, 0, 0);
+        Object[] row = rows.get(0);
+        return new SignupFunnel(asLong(row[0]), asLong(row[1]), asLong(row[2]), asLong(row[3]));
+    }
+
+    private static long asLong(Object value) {
+        return value == null ? 0 : ((Number) value).longValue();
     }
 
     @Override

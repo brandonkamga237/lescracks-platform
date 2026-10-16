@@ -1,7 +1,5 @@
 package com.brandonkamga.lescracks.identity.domain;
 
-import com.brandonkamga.lescracks.identity.api.dto.OnboardingRequest;
-import com.brandonkamga.lescracks.identity.api.dto.SignupContext;
 import com.brandonkamga.lescracks.identity.infra.UserRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
@@ -53,8 +51,8 @@ class UserProfileServiceTest {
     void answersFillTheProfile() {
         when(taxonomy.requireCategory(3L)).thenReturn(category(3));
 
-        service.onboard("eric@example.com", new OnboardingRequest("+237 6 77 12 34 56", MemberSituation.CAREER_CHANGE,
-                MemberGoal.FIND_JOB, Set.of(3L), " Douala ", true, new SignupContext("/ressources/docker", "fr-CM", "Africa/Douala")));
+        service.onboard("eric@example.com", new OnboardingAnswers("+237 6 77 12 34 56", MemberSituation.CAREER_CHANGE,
+                MemberGoal.FIND_JOB, Set.of(3L), " Douala ", true, new Arrival("/ressources/docker", "fr-CM", "Africa/Douala")));
 
         assertThat(member.getPhone()).isEqualTo("+237677123456");
         assertThat(member.getCountry()).isEqualTo("CM");
@@ -68,7 +66,7 @@ class UserProfileServiceTest {
     @Test
     @DisplayName("« Plus tard » saves nothing but still closes the welcome")
     void laterClosesTheWelcome() {
-        service.onboard("eric@example.com", new OnboardingRequest(null, null, null, null, null, null, null));
+        service.onboard("eric@example.com", new OnboardingAnswers(null, null, null, null, null, null, null));
 
         assertThat(member.getOnboardedAt()).isNotNull();
         assertThat(member.getPhone()).isNull();
@@ -79,7 +77,7 @@ class UserProfileServiceTest {
     void contextIsKeptFromTheFirstVisit() {
         member.setSignupPath("/cracklab");
 
-        service.onboard("eric@example.com", new OnboardingRequest(null, null, null, null, null, null, new SignupContext("/talk", "fr", "Europe/Paris")));
+        service.onboard("eric@example.com", new OnboardingAnswers(null, null, null, null, null, null, new Arrival("/talk", "fr", "Europe/Paris")));
 
         assertThat(member.getSignupPath()).isEqualTo("/cracklab");
         assertThat(member.getSignupTimezone()).isEqualTo("Europe/Paris");
@@ -88,11 +86,38 @@ class UserProfileServiceTest {
     @Test
     @DisplayName("a wrong number or an unknown category is refused, and nothing is marked as done")
     void refusesBadAnswers() {
-        assertThatThrownBy(() -> service.onboard("eric@example.com", new OnboardingRequest("+237 12", null, null, null, null, null, null)))
+        assertThatThrownBy(() -> service.onboard("eric@example.com", new OnboardingAnswers("+237 12", null, null, null, null, null, null)))
                 .isInstanceOf(BadRequestException.class);
         when(taxonomy.requireCategory(99L)).thenThrow(new NotFoundException("Category", "id", 99L));
-        assertThatThrownBy(() -> service.onboard("eric@example.com", new OnboardingRequest(null, null, null, Set.of(99L), null, null, null)))
+        assertThatThrownBy(() -> service.onboard("eric@example.com", new OnboardingAnswers(null, null, null, Set.of(99L), null, null, null)))
                 .isInstanceOf(NotFoundException.class);
         assertThat(member.getOnboardedAt()).isNull();
+    }
+
+    @Test
+    @DisplayName("a section saves only its own fields: the rest of the profile stays as it was")
+    void partialUpdate() {
+        member.setBio("Dev Java");
+        member.setLocation("Douala");
+
+        service.update("eric@example.com", new ProfileChanges(null, null, null, " Back-end ", null, null, null, null, null, null, null));
+
+        assertThat(member.getFirstName()).isEqualTo("Eric");
+        assertThat(member.getBio()).isEqualTo("Back-end");
+        assertThat(member.getLocation()).isEqualTo("Douala");
+    }
+
+    @Test
+    @DisplayName("an empty optional field is cleared, an empty name is refused")
+    void clearingAndRequiredFields() {
+        member.setLocation("Douala");
+
+        service.update("eric@example.com", new ProfileChanges(null, null, null, null, "", null, null, null, null, null, null));
+        assertThat(member.getLocation()).isNull();
+
+        assertThatThrownBy(() -> service.update("eric@example.com",
+                new ProfileChanges(" ", null, null, null, null, null, null, null, null, null, null)))
+                .isInstanceOf(BadRequestException.class);
+        assertThat(member.getFirstName()).isEqualTo("Eric");
     }
 }

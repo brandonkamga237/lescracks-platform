@@ -30,6 +30,7 @@ export interface RegisterRequest {
   lastName: string;
   phone?: string;
   marketingConsent?: boolean;
+  newsletter?: boolean;
   context?: SignupContext;
 }
 
@@ -70,14 +71,18 @@ export const api = {
     form.append('file', file);
     return http.postForm<UserProfile>('/me/avatar', form);
   },
+  removeAvatar: () => http.delete<UserProfile>('/me/avatar'),
   changePassword: (body: { currentPassword: string; newPassword: string; confirmPassword: string }) =>
     http.post<void>('/me/password', body),
   newsletterStatus: (signal?: AbortSignal) => http.get<NewsletterStatus>('/newsletter', undefined, signal),
   newsletterSubscribe: () => http.post<NewsletterStatus>('/newsletter/subscribe'),
   newsletterPublicSubscribe: (body: { email: string }) => http.post<NewsletterStatus>('/newsletter/public/subscribe', body),
+  newsletterConfirm: (token: string) => http.post<void>('/newsletter/public/confirm', undefined, { token }),
+  newsletterUnsubscribeByToken: (token: string) => http.post<void>('/newsletter/public/unsubscribe', undefined, { token }),
   newsletterUnsubscribe: () => http.delete<NewsletterStatus>('/newsletter/unsubscribe'),
   verifyEmail: (token: string) => http.post<void>('/auth/verify-email', undefined, { token }),
   resendVerification: (email: string) => http.post<void>('/auth/resend-verification', { email }),
+  resendMyVerification: () => http.post<void>('/me/verification-email'),
   resourceLikes: (id: number, signal?: AbortSignal) => http.get<ResourceLikeStatus>(`/resources/${id}/likes`, undefined, signal),
   likeResource: (id: number) => http.post<ResourceLikeStatus>(`/resources/${id}/likes`),
   unlikeResource: (id: number) => http.delete<ResourceLikeStatus>(`/resources/${id}/likes`),

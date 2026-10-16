@@ -6,7 +6,10 @@ import com.brandonkamga.lescracks.identity.api.dto.UserAuthResponse;
 import com.brandonkamga.lescracks.identity.api.dto.UserLoginRequest;
 import com.brandonkamga.lescracks.identity.api.dto.UserRegisterRequest;
 import com.brandonkamga.lescracks.identity.domain.User;
+import com.brandonkamga.lescracks.identity.domain.EmailVerificationService;
+import com.brandonkamga.lescracks.identity.domain.PasswordResetService;
 import com.brandonkamga.lescracks.identity.domain.UserAuthService;
+import com.brandonkamga.lescracks.identity.domain.UserRegistrationService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,16 +30,27 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 public class UserAuthController {
+    private final UserRegistrationService registration;
     private final UserAuthService auth;
+    private final EmailVerificationService verification;
+    private final PasswordResetService passwordReset;
     private final SecurityContextRepository contexts = new HttpSessionSecurityContextRepository();
 
-    public UserAuthController(UserAuthService auth) {
+    public UserAuthController(UserRegistrationService registration, UserAuthService auth,
+                              EmailVerificationService verification, PasswordResetService passwordReset) {
+        this.registration = registration;
         this.auth = auth;
+        this.verification = verification;
+        this.passwordReset = passwordReset;
     }
 
+    /** The new member is signed in at once; confirming the address can wait (see the banner). */
     @PostMapping("/register")
-    public ResponseEntity<UserAuthResponse> register(@Valid @RequestBody UserRegisterRequest request) {
-        User user = auth.register(request);
+    public ResponseEntity<UserAuthResponse> register(@Valid @RequestBody UserRegisterRequest request,
+                                                     HttpServletRequest httpRequest,
+                                                     HttpServletResponse httpResponse) {
+        User user = registration.register(request.toRegistration());
+        startSession(user, httpRequest, httpResponse);
         return ResponseEntity.status(201).body(response(user));
     }
 
@@ -44,31 +58,32 @@ public class UserAuthController {
     public ResponseEntity<UserAuthResponse> login(@Valid @RequestBody UserLoginRequest request,
                                                   HttpServletRequest httpRequest,
                                                   HttpServletResponse httpResponse) {
-        User user = auth.authenticate(request);
-        return login(user, httpRequest, httpResponse);
+        User user = auth.authenticate(request.toCredentials());
+        startSession(user, httpRequest, httpResponse);
+        return ResponseEntity.ok(response(user));
     }
 
     @PostMapping("/verify-email")
     public ResponseEntity<Void> verifyEmail(@RequestParam String token) {
-        auth.verifyEmail(token);
+        verification.verify(token);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/resend-verification")
     public ResponseEntity<Void> resendVerification(@Valid @RequestBody Map<String, String> body) {
-        auth.resendVerificationEmail(body.getOrDefault("email", ""));
+        verification.resend(body.getOrDefault("email", ""));
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/forgot-password")
     public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
-        auth.requestPasswordReset(request);
+        passwordReset.request(request.email());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
-        auth.resetPassword(request);
+        passwordReset.reset(request.token(), request.password());
         return ResponseEntity.noContent().build();
     }
 
@@ -80,15 +95,13 @@ public class UserAuthController {
         return ResponseEntity.noContent().build();
     }
 
-    private ResponseEntity<UserAuthResponse> login(User user,
-                                                   HttpServletRequest request, HttpServletResponse response) {
+    private void startSession(User user, HttpServletRequest request, HttpServletResponse response) {
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 user.getEmail(), null, java.util.List.of(new SimpleGrantedAuthority("ROLE_USER")));
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
         contexts.saveContext(context, request, response);
-        return ResponseEntity.ok(response(user));
     }
 
     private UserAuthResponse response(User user) {

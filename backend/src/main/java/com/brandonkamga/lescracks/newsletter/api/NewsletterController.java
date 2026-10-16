@@ -8,6 +8,7 @@ import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterPreviewRequest;
 import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterPreviewResponse;
 import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterPublicSubscribeRequest;
 import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterResponse;
+import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterTestRequest;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterStatus;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterSubscription;
@@ -60,11 +61,34 @@ public class NewsletterController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * The link of every newsletter email, and the one-click POST mail clients send for the
+     * List-Unsubscribe header (RFC 8058): the token alone identifies the subscription.
+     */
+    @PostMapping("/public/confirm")
+    public ResponseEntity<Void> confirm(@RequestParam String token) {
+        newsletter.confirm(token);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/public/unsubscribe")
+    public ResponseEntity<Void> unsubscribeByToken(@RequestParam String token) {
+        newsletter.unsubscribeByToken(token);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/admin/broadcast")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Integer> broadcast(@Valid @RequestBody BroadcastRequest request) {
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .body(newsletter.broadcast(request.subject().trim(), request.body()));
+    }
+
+    @PostMapping("/admin/test")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> sendTest(@Valid @RequestBody NewsletterTestRequest request) {
+        newsletter.sendTest(request.subject().trim(), request.body(), request.email());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/admin/preview")
@@ -137,10 +161,12 @@ public class NewsletterController {
     public NewsletterStats stats() {
         return new NewsletterStats(
             subscriptions.countByStatus(NewsletterStatus.SUBSCRIBED),
-            subscriptions.countByStatus(NewsletterStatus.UNSUBSCRIBED));
+            subscriptions.countByStatus(NewsletterStatus.UNSUBSCRIBED),
+            subscriptions.countByStatus(NewsletterStatus.PENDING));
     }
 
-    public record NewsletterStats(long subscribed, long unsubscribed) { }
+    /** {@code pending}: signed up from the public form, address not confirmed yet. */
+    public record NewsletterStats(long subscribed, long unsubscribed, long pending) { }
 
     private AdminSubscriberResponse toAdminResponse(NewsletterSubscription subscription) {
         User user = subscription.getUser();
