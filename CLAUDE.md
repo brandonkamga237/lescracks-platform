@@ -81,7 +81,7 @@ Before any commit or PR:
 
 ## Workflow
 ### Branches
-- `main` → production. Every push triggers a deployment (GitHub Actions → Docker Hub → VPS)
+- `main` → production code. Nothing deploys on push: merging the release PR tags `vX.Y.Z` and deploys that version (GitHub Actions → Docker Hub → VPS)
 - `develop` → integration. Default target for new work
 - `feature/xxx`, `fix/xxx`, `docs/xxx`, `chore/xxx` → branch off `develop` with `--no-track` (`git switch -c feature/x --no-track origin/develop`), merge back through a PR
 - `hotfix/xxx` → branches off `main`, production emergencies only
@@ -90,6 +90,7 @@ Before any commit or PR:
 - Full rules: `CONTRIBUTING.md`. Enable the hook once per clone: `git config core.hooksPath .githooks`
 - You may merge a PR into `develop` only with `scripts/git/merge-to-develop.sh <pr>` (it refuses any other base). **Never merge into `main`**: the user does it by hand. `gh pr merge` and direct pushes to `main`/`develop` are denied
 - Releases: release-please (`.github/workflows/release.yml`) turns the commits merged into `main` into a release PR, then a `vX.Y.Z` tag and `CHANGELOG.md`. The commit type picks the bump (`fix` patch, `feat` minor, `!` major). Never edit `CHANGELOG.md`, `version.txt` or `.release-please-manifest.json` by hand
+- CI (`.github/workflows/ci.yml`) runs on every PR: `./mvnw verify`, `pnpm typecheck`/`lint`/`build` and both Docker image builds. `deploy.yml` ships images tagged with the version; a rollback is a manual run of it with an earlier tag. Dependabot opens weekly update PRs against `develop`
 
 ### Commits
 - Commit **as you go**, not in one lump at the end: a commit as soon as a coherent unit compiles and passes its checks
@@ -103,7 +104,7 @@ Before any commit or PR:
 - NEVER: edit a Flyway migration that is already merged (add `V{n+1}` instead)
 - A new environment variable goes into `.env.example` AND `docker-compose.prod.yml`
 - One compose file per environment, at the root: do not recreate one under `backend/` or `frontend/`
-- Never rename `docker-compose.prod.yml` (CI refers to it by name: `paths` filter, `scp`, `up -d`)
+- Never rename `docker-compose.prod.yml` (the deploy workflow refers to it by name: `scp`, `pull`, `up -d`); its backend and frontend images take their tag from `IMAGE_TAG`
 - Frontend dependencies: `pnpm add/remove`, then commit `pnpm-lock.yaml` (never generate a `package-lock.json`)
 
 ## Architecture

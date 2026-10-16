@@ -14,7 +14,7 @@ skipped hook is still caught.
 
 | Branch | Role | Who writes to it |
 | --- | --- | --- |
-| `main` | Production. A push to `main` deploys. | Pull requests from `develop` (or `hotfix/*`) only |
+| `main` | Production code. Deployed when a release is cut (see Releases). | Pull requests from `develop` (or `hotfix/*`) only |
 | `develop` | Integration of finished work | Pull requests from work branches only |
 | `feature/*`, `fix/*`, `docs/*`, `chore/*` | One piece of work | You |
 | `hotfix/*` | Production emergency, cut from `main` | You |
@@ -99,7 +99,19 @@ How a release goes:
 2. The `Release` workflow opens, or updates, a pull request `chore(main): release X.Y.Z` with
    the new `CHANGELOG.md` entry. It stays open and grows with each merge into `main`.
 3. When the release should be cut, the maintainer merges that PR (**Create a merge commit**).
-   The workflow then tags `vX.Y.Z` and publishes the GitHub release with the same notes.
+   The workflow then tags `vX.Y.Z`, publishes the GitHub release with the same notes, builds
+   the images `backend-lescracks:vX.Y.Z` and `frontend-lescracks:vX.Y.Z` and deploys them.
+
+Merging `develop` into `main` alone deploys nothing. A change with no `feat`, `fix`, `perf` or
+`revert` commit (a refactor, a dependency bump) opens no release PR: ship it with the next
+release, or force one with `Release-As`.
+
+### Redeploy or roll back
+
+Actions → **Deploy** → **Run workflow**, with the version to run (`v1.4.0`). Its images are
+reused from Docker Hub as they are, and its own `docker-compose.prod.yml` goes with them, so
+an earlier version rolls the whole stack back. Database migrations do not roll back: a release
+with a Flyway migration can only be undone by a new release.
 
 The changelog lists `feat`, `fix`, `perf` and `revert`; the other types stay out of it, so
 the commit type decides what users get to read. To force a number, add a `Release-As: x.y.z`
@@ -108,12 +120,24 @@ line to a commit body.
 `CHANGELOG.md`, `version.txt` and `.release-please-manifest.json` belong to the release
 workflow: never edit them by hand, on `develop` or anywhere else.
 
+## Dependencies and credentials
+
+- Dependabot opens update PRs against `develop` every Monday: GitHub Actions, Maven, pnpm
+  and the Docker base images (majors of Node and Java excluded). They go through CI and
+  are merged like any other PR.
+- The `Credentials check` workflow tests the Docker Hub token, `RELEASE_PLEASE_TOKEN` (and its
+  expiry date, 30 days ahead) and SSH access to the VPS every Monday. A red run means a secret
+  to renew before the next release.
+
 The workflow needs the secret `RELEASE_PLEASE_TOKEN`: a fine-grained personal access token
 limited to this repository, with **Contents**, **Pull requests** and **Issues** set to
 read and write. `GITHUB_TOKEN` cannot be used: what it creates triggers no workflow, so the
 required `Commit messages` check would never run on the release PR.
 
 ## Checks before a PR
+
+CI runs the same checks on every pull request (`Backend tests`, `Frontend checks`, and a build
+of both Docker images), plus `Commit messages`. Run them locally first:
 
 ```bash
 cd frontend && pnpm typecheck && pnpm lint && pnpm build

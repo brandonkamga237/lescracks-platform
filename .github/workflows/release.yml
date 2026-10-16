@@ -1,6 +1,6 @@
 # Keeps a release pull request open against main, built from the conventional commits merged
-# since the last tag. Merging that PR bumps the version, writes CHANGELOG.md, tags vX.Y.Z and
-# publishes the GitHub release.
+# since the last tag. Merging that PR bumps the version, writes CHANGELOG.md, tags vX.Y.Z,
+# publishes the GitHub release, then deploys that version (deploy.yml).
 #
 # It runs with a personal token, not GITHUB_TOKEN: a PR or tag created by GITHUB_TOKEN triggers
 # no workflow, so the required "Commit messages" check would never run on the release PR, and
@@ -41,3 +41,12 @@ jobs:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+  deploy:
+    name: Deploy
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    uses: ./.github/workflows/deploy.yml
+    with:
+      version: ${{ needs.release-please.outputs.tag_name }}
+    secrets: inherit

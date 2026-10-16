@@ -1,0 +1,59 @@
+# Weekly dependency updates, opened against develop like any other work. Minor and patch
+# bumps are grouped per ecosystem to keep the PR count low; a major gets its own PR.
+# Prefixes keep the PR titles in the commit format checked by the Conventions workflow.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: develop
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: maven
+    directory: /backend
+    target-branch: develop
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: build
+      include: scope
+    open-pull-requests-limit: 5
+    groups:
+      backend-minor-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /frontend
+    target-branch: develop
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: build
+      include: scope
+    open-pull-requests-limit: 5
+    groups:
+      frontend-minor-patch:
+        update-types: [minor, patch]
+
+  # Base images: Node and Java stay on their LTS line until someone decides to move.
+  - package-ecosystem: docker
+    directories: [/backend, /frontend]
+    target-branch: develop
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: build
+      include: scope
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
