@@ -50,6 +50,15 @@ public class AdminUserController {
         return response(users.setStatus(id, request.status()));
     }
 
+    @PostMapping("/{id}/verification-email")
+    public ResponseEntity<Void> resendVerification(@PathVariable Long id) {
+        users.resendVerification(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/verify")
+    public UserAdminResponse markVerified(@PathVariable Long id) { return response(users.markVerified(id)); }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) { users.delete(id); }
