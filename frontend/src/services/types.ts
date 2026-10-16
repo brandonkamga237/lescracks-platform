@@ -43,6 +43,13 @@ export interface ResourceSummary {
 
 export type ResourceDetail = ResourceSummary;
 
+/** An article as the back office sees it: drafts and scheduled ones included. */
+export interface AdminArticle extends ArticleSummary {
+  status: ResourceStatus;
+  /** Set on a draft that goes public automatically at that time. */
+  scheduledAt?: string;
+}
+
 /** A blog article as the public API returns it. */
 export interface ArticleSummary {
   id: number;

@@ -32,7 +32,7 @@ const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
 const AdminAudience = lazy(() => import('@/pages/admin/AdminAudience'));
 const AdminCategories = lazy(() => import('@/pages/admin/AdminCategories'));
 const AdminEvents = lazy(() => import('@/pages/admin/AdminEvents'));
-const AdminResources = lazy(() => import('@/pages/admin/AdminResources'));
+const AdminBlog = lazy(() => import('@/pages/admin/AdminBlog'));
 const AdminNewsletter = lazy(() => import('@/pages/admin/AdminNewsletter'));
 const AdminAdmins = lazy(() => import('@/pages/admin/AdminAdmins'));
 const AdminTags = lazy(() => import('@/pages/admin/AdminTags'));
@@ -169,7 +169,8 @@ function AppRoutes() {
       <Route path="/admin" element={<AdminRoute />}>
         <Route index element={<AdminDashboard />} />
         <Route path="audience" element={<AdminAudience />} />
-        <Route path="ressources" element={<AdminResources />} />
+        <Route path="blog" element={<AdminBlog />} />
+        <Route path="ressources" element={<Navigate to="/admin/blog" replace />} />
         <Route path="evenements" element={<AdminEvents />} />
         <Route path="talks" element={<AdminTalks />} />
         <Route path="categories" element={<AdminCategories />} />

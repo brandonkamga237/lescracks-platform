@@ -2,7 +2,7 @@ import { ENV } from '@/config/env';
 import { prepareImage } from '@/lib/image';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminChallenge, AdminSubscriber, AdminSummary, ChallengeDifficulty, ChallengeStatus, ChallengeSubmission, SubmissionStatus, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
+import type { AdminArticle, AdminChallenge, AdminSubscriber, AdminSummary, ChallengeDifficulty, ChallengeStatus, ChallengeSubmission, SubmissionStatus, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
 
 export interface EbookRequest {
   title: string;
@@ -58,6 +58,12 @@ export interface ChallengeRequest {
   status: ChallengeStatus;
   scheduledAt?: string | null;
 }
+export interface AdminArticleFilters extends Query {
+  page?: number;
+  search?: string;
+  status?: ResourceStatus;
+}
+
 export interface AdminResourceFilters extends Query {
   page?: number;
   size?: number;
@@ -169,6 +175,9 @@ export const adminApi = {
   createArticle: async (data: ArticleRequest, coverImageFile: File) => http.postForm<ResourceSummary>('/resources/admin/articles', articleForm(data, await cover(coverImageFile))),
   updateArticle: async (id: number, data: ArticleRequest, coverImageFile?: File) => http.putForm<ResourceSummary>(`/resources/admin/articles/${id}`, articleForm(data, await cover(coverImageFile))),
   deleteResource: (id: number) => http.delete<void>(`/resources/admin/${id}`),
+  articles: (filters: AdminArticleFilters = {}, signal?: AbortSignal) =>
+    http.get<PageResponse<AdminArticle>>('/resources/admin', { size: 12, sort: 'createdAt,desc', ...filters, kind: 'ARTICLE' }, signal),
+  deleteArticle: (id: number) => http.delete<void>(`/resources/admin/${id}`),
   events: (page = 0, signal?: AbortSignal) => http.get<PageResponse<EventSummary>>('/events/admin', { page, size: 12, sort: 'startDate,desc' }, signal),
   createEvent: async (body: EventRequest, coverImageFile: File) => http.postForm<EventSummary>('/events/admin', eventForm(body, await cover(coverImageFile))),
   updateEvent: async (id: number, body: EventRequest, coverImageFile?: File) => http.putForm<EventSummary>(`/events/admin/${id}`, eventForm(body, await cover(coverImageFile))),

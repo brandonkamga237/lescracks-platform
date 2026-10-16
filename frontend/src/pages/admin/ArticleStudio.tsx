@@ -269,7 +269,7 @@ export default function ArticleStudio() {
     return (
       <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-5 bg-black px-6 text-center text-t1">
         <p className="font-display text-2xl font-bold">{loadError}</p>
-        <Link to="/admin/ressources" className="btn-secondary"><ArrowLeft className="h-4 w-4" aria-hidden />Retour aux ressources</Link>
+        <Link to="/admin/blog" className="btn-secondary"><ArrowLeft className="h-4 w-4" aria-hidden />Retour au blog</Link>
       </div>
     );
   }
@@ -315,7 +315,7 @@ export default function ArticleStudio() {
       <SEO title={draft.title ? `${draft.title} · Studio` : 'Studio d’écriture'} description="Écrire un article LesCracks." url="/admin/articles" />
 
       <header className="mode-raised flex min-h-14 flex-wrap items-center gap-x-3 gap-y-2 border-b border-line-soft px-3 py-2 sm:px-4">
-        <Link to="/admin/ressources" onClick={leave} className="inline-flex h-9 items-center gap-1.5 rounded px-2 text-sm text-t3 transition-colors hover:bg-noir-800 hover:text-t1">
+        <Link to="/admin/blog" onClick={leave} className="inline-flex h-9 items-center gap-1.5 rounded px-2 text-sm text-t3 transition-colors hover:bg-noir-800 hover:text-t1">
           <ArrowLeft className="h-4 w-4" aria-hidden /><span className="hidden sm:inline">Ressources</span>
         </Link>
         <span aria-hidden className="hidden h-5 w-px bg-line sm:block" />

@@ -286,11 +286,11 @@ export default function AdminDashboard() {
             {stats && (
               <dl className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3">
                 {[
-                  { label: 'Ressources publiées', value: stats.resourcesByStatus.PUBLISHED ?? 0, to: '/admin/ressources' },
+                  { label: 'Articles publiés', value: stats.resourcesByStatus.PUBLISHED ?? 0, to: '/admin/blog' },
                   { label: 'Épisodes Talk', value: stats.talksPublished, to: '/admin/talks' },
                   { label: 'Événements à venir', value: stats.eventsUpcoming, to: '/admin/evenements' },
                   { label: 'Membres actifs · 7 j', value: stats.usersActiveLast7d, to: '/admin/utilisateurs' },
-                  { label: 'Brouillons', value: stats.resourcesByStatus.DRAFT ?? 0, to: '/admin/ressources' },
+                  { label: 'Brouillons', value: stats.resourcesByStatus.DRAFT ?? 0, to: '/admin/blog' },
                   { label: 'Membres vérifiés', value: stats.verifiedUsers, to: '/admin/utilisateurs' },
                 ].map(({ label, value, to }) => (
                   <Link key={label} to={to} className="group">
