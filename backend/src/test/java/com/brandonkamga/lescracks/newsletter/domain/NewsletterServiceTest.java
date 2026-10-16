@@ -6,6 +6,7 @@ import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterCampaignRepository;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterSubscriptionRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
+import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,5 +64,28 @@ class NewsletterServiceTest {
         assertThatThrownBy(() -> service.subscribePublic("awa@example.com", null, null))
                 .isInstanceOf(BadRequestException.class);
         verify(users, never()).createContact(anyString(), any(), any());
+    }
+
+    @Test
+    @DisplayName("the link in an email unsubscribes its subscription, and a second click changes nothing")
+    void unsubscribesByToken() {
+        NewsletterSubscription subscription = NewsletterSubscription.builder().status(NewsletterStatus.SUBSCRIBED).build();
+        when(subscriptions.findByToken(subscription.getToken())).thenReturn(Optional.of(subscription));
+
+        service.unsubscribeByToken(subscription.getToken());
+        var first = subscription.getUnsubscribedAt();
+        service.unsubscribeByToken(subscription.getToken());
+
+        assertThat(subscription.getStatus()).isEqualTo(NewsletterStatus.UNSUBSCRIBED);
+        assertThat(subscription.getUnsubscribedAt()).isNotNull().isEqualTo(first);
+        assertThat(subscription.getToken()).hasSize(64);
+    }
+
+    @Test
+    @DisplayName("an unknown link is refused")
+    void unknownToken() {
+        when(subscriptions.findByToken("nope")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.unsubscribeByToken("nope")).isInstanceOf(NotFoundException.class);
     }
 }

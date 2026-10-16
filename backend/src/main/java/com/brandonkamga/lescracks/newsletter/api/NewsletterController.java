@@ -60,6 +60,16 @@ public class NewsletterController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * The link of every newsletter email, and the one-click POST mail clients send for the
+     * List-Unsubscribe header (RFC 8058): the token alone identifies the subscription.
+     */
+    @PostMapping("/public/unsubscribe")
+    public ResponseEntity<Void> unsubscribeByToken(@RequestParam String token) {
+        newsletter.unsubscribeByToken(token);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/admin/broadcast")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Integer> broadcast(@Valid @RequestBody BroadcastRequest request) {

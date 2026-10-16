@@ -30,4 +30,6 @@ public interface NewsletterSubscriptionRepository extends JpaRepository<Newslett
             ORDER BY d
             """, nativeQuery = true)
     List<Object[]> newsletterGrowth(@Param("from") Instant from, @Param("to") Instant to);
+
+    Optional<NewsletterSubscription> findByToken(String token);
 }

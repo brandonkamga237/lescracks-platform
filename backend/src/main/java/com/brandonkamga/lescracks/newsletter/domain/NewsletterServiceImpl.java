@@ -85,6 +85,15 @@ public class NewsletterServiceImpl implements NewsletterService {
     }
 
     @Override
+    public void unsubscribeByToken(String token) {
+        NewsletterSubscription subscription = subscriptions.findByToken(token)
+                .orElseThrow(() -> new NotFoundException("Ce lien de désabonnement n’est plus valide."));
+        if (subscription.getStatus() == NewsletterStatus.UNSUBSCRIBED) return;
+        subscription.setStatus(NewsletterStatus.UNSUBSCRIBED);
+        subscription.setUnsubscribedAt(Instant.now());
+    }
+
+    @Override
     public NewsletterSubscription unsubscribeById(Long userId) {
         User user = users.require(userId);
         NewsletterSubscription subscription = subscriptions.findByUserId(user.getId())

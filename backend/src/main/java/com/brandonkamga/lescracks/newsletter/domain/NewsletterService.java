@@ -12,6 +12,9 @@ public interface NewsletterService {
     NewsletterSubscription subscribe(String username);
     NewsletterSubscription subscribePublic(String email, String firstName, String lastName);
     NewsletterSubscription unsubscribe(String username);
+
+    /** From the link in a newsletter email; using it twice is harmless. */
+    void unsubscribeByToken(String token);
     NewsletterSubscription unsubscribeById(Long userId);
     NewsletterSubscription subscribeById(Long userId);
     void notifyEventSubscribers(Event event);
