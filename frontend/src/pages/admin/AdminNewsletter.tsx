@@ -8,7 +8,7 @@ import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
 import type { AdminSubscriber, ArticleBlock } from '@/services/types';
 
-const statusLabels = { SUBSCRIBED: 'Abonné', UNSUBSCRIBED: 'Désabonné' };
+const statusLabels = { PENDING: 'En attente de confirmation', SUBSCRIBED: 'Abonné', UNSUBSCRIBED: 'Désabonné' };
 
 function hasBody(blocks: ArticleBlock[]) {
   return blocks.some((block) => {
@@ -19,7 +19,7 @@ function hasBody(blocks: ArticleBlock[]) {
 }
 
 export default function AdminNewsletter() {
-  const [filter, setFilter] = useState<'' | 'SUBSCRIBED' | 'UNSUBSCRIBED'>('');
+  const [filter, setFilter] = useState<'' | 'PENDING' | 'SUBSCRIBED' | 'UNSUBSCRIBED'>('');
   const [busyId, setBusyId] = useState<number | null>(null);
   const [busyBroadcast, setBusyBroadcast] = useState(false);
   // Sending to every subscriber cannot be undone: the first click only asks for confirmation.
@@ -139,6 +139,7 @@ export default function AdminNewsletter() {
         <div className="rounded-lg border border-line-soft bg-card p-5">
           <p className="text-xs tracking-wide text-t4">Abonnés</p>
           <p className="mt-2 font-display text-2xl font-semibold text-t1">{stats.data?.subscribed ?? '…'}</p>
+          {Boolean(stats.data?.pending) && <p className="mt-1 text-xs text-t4">+ {stats.data?.pending} en attente de confirmation</p>}
         </div>
         <div className="rounded-lg border border-line-soft bg-card p-5">
           <p className="text-xs tracking-wide text-t4">Désabonnés</p>
@@ -223,6 +224,7 @@ export default function AdminNewsletter() {
             >
               <option value="">Tous</option>
               <option value="SUBSCRIBED">Abonnés</option>
+              <option value="PENDING">En attente de confirmation</option>
               <option value="UNSUBSCRIBED">Désabonnés</option>
             </select>
           </div>
