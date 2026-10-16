@@ -6,6 +6,7 @@ import com.brandonkamga.lescracks.mail.domain.Email;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.mail.domain.VerificationEmail;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
+import com.brandonkamga.lescracks.shared.exception.ConflictException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -81,6 +82,42 @@ class EmailVerificationServiceTest {
 
         assertThatThrownBy(() -> service.verify("raw")).isInstanceOf(BadRequestException.class);
         assertThat(member.isEmailVerified()).isFalse();
+    }
+
+    @Test
+    @DisplayName("a member asking again gets a new link")
+    void sendsAgain() {
+        when(users.findByEmailIgnoreCase("awa@example.com")).thenReturn(Optional.of(member));
+        when(tokens.findFirstByUserOrderByCreatedAtDesc(member)).thenReturn(Optional.of(
+                EmailVerificationToken.builder().createdAt(Instant.now().minus(5, ChronoUnit.MINUTES)).build()));
+
+        service.sendAgain("awa@example.com");
+
+        verify(mail).send(any(VerificationEmail.class));
+    }
+
+    @Test
+    @DisplayName("asking again within a minute is refused with a reason, and sends nothing")
+    void throttlesAMember() {
+        when(users.findByEmailIgnoreCase("awa@example.com")).thenReturn(Optional.of(member));
+        when(tokens.findFirstByUserOrderByCreatedAtDesc(member)).thenReturn(Optional.of(
+                EmailVerificationToken.builder().createdAt(Instant.now().minusSeconds(20)).build()));
+
+        assertThatThrownBy(() -> service.sendAgain("awa@example.com"))
+                .isInstanceOf(ConflictException.class).hasMessageContaining("Patiente une minute");
+        verify(mail, never()).send(any());
+    }
+
+    @Test
+    @DisplayName("an address already confirmed is not sent another link")
+    void alreadyVerified() {
+        member.setEmailVerified(true);
+        when(users.findByEmailIgnoreCase("awa@example.com")).thenReturn(Optional.of(member));
+
+        assertThatThrownBy(() -> service.sendAgain("awa@example.com")).isInstanceOf(ConflictException.class);
+        service.resend("awa@example.com");
+
+        verify(mail, never()).send(any());
     }
 
     @Test

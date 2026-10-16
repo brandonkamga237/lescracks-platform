@@ -7,6 +7,12 @@ public interface EmailVerificationService {
 
     void verify(String token);
 
-    /** Silent when no account matches, so the endpoint cannot be used to probe addresses. */
+    /** For a signed-in member asking again; says why when nothing is sent (already confirmed, just sent). */
+    void sendAgain(String email);
+
+    /**
+     * For the public form: silent when no account matches, when the address is already confirmed
+     * or a link left less than a minute ago, so it can neither probe addresses nor flood a mailbox.
+     */
     void resend(String email);
 }
