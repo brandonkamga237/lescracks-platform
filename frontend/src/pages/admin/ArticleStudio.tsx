@@ -18,7 +18,7 @@ import { articlePath } from '@/lib/slugs';
 import { adminApi, type ArticleRequest } from '@/services/adminApi';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
-import type { ArticleBlock, ResourceStatus, ResourceSummary, Tag } from '@/services/types';
+import type { AdminArticle, ArticleBlock, ResourceStatus, Tag } from '@/services/types';
 
 type Mode = 'write' | 'split' | 'preview';
 
@@ -94,9 +94,9 @@ export default function ArticleStudio() {
   const invalidId = Boolean(id) && articleId === undefined;
   const location = useLocation();
   const navigate = useNavigate();
-  const passed = (location.state as { resource?: ResourceSummary } | null)?.resource;
+  const passed = (location.state as { resource?: AdminArticle } | null)?.resource;
 
-  const [resource, setResource] = useState<ResourceSummary | null>(passed && passed.id === articleId ? passed : null);
+  const [resource, setResource] = useState<AdminArticle | null>(passed && passed.id === articleId ? passed : null);
   const [loadError, setLoadError] = useState(invalidId ? 'Cet article est introuvable.' : '');
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [saved, setSaved] = useState<Draft>(EMPTY);
@@ -122,7 +122,7 @@ export default function ArticleStudio() {
   useEffect(() => {
     if (!articleId || resource) return;
     const controller = new AbortController();
-    adminApi.resources({ kind: 'ARTICLE', size: 200 }, controller.signal)
+    adminApi.articles({ size: 200 }, controller.signal)
       .then((page) => {
         const found = page.content.find((item) => item.id === articleId);
         if (found) setResource(found);
