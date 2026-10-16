@@ -1,6 +1,5 @@
 package com.brandonkamga.lescracks.identity.domain;
 
-import com.brandonkamga.lescracks.identity.api.dto.SignupContext;
 
 /** Rules shared by sign-up, the welcome questions and the profile form. */
 final class MemberProfiles {
@@ -22,11 +21,11 @@ final class MemberProfiles {
     }
 
     /** Recorded once, from the first visit that led to an account; later calls never overwrite it. */
-    static void context(User user, SignupContext context) {
-        if (context == null) return;
-        if (user.getSignupPath() == null) user.setSignupPath(trimmed(context.path()));
-        if (user.getSignupLanguage() == null) user.setSignupLanguage(trimmed(context.language()));
-        if (user.getSignupTimezone() == null) user.setSignupTimezone(trimmed(context.timezone()));
+    static void arrival(User user, Arrival arrival) {
+        if (arrival == null) return;
+        if (user.getSignupPath() == null) user.setSignupPath(trimmed(arrival.path()));
+        if (user.getSignupLanguage() == null) user.setSignupLanguage(trimmed(arrival.language()));
+        if (user.getSignupTimezone() == null) user.setSignupTimezone(trimmed(arrival.timezone()));
     }
 
     private static String trimmed(String value) {

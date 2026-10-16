@@ -74,7 +74,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         }
         MemberProfiles.phone(user, request.phone());
         if (request.marketingConsent() != null) user.setMarketingConsent(request.marketingConsent());
-        MemberProfiles.context(user, request.context());
+        MemberProfiles.arrival(user, request.context() == null ? null : request.context().toArrival());
         sendVerificationEmail(user);
         metrics.register(true);
         return user;

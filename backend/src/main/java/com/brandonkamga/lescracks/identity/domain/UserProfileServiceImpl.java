@@ -1,8 +1,5 @@
 package com.brandonkamga.lescracks.identity.domain;
 
-import com.brandonkamga.lescracks.identity.api.dto.OnboardingRequest;
-import com.brandonkamga.lescracks.identity.api.dto.UserPasswordChangeRequest;
-import com.brandonkamga.lescracks.identity.api.dto.UserProfileUpdateRequest;
 import com.brandonkamga.lescracks.identity.infra.UserRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
@@ -49,36 +46,36 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public User update(String email, UserProfileUpdateRequest request) {
+    public User update(String email, ProfileChanges changes) {
         User user = require(email);
-        user.setFirstName(request.firstName().trim());
-        user.setLastName(request.lastName().trim());
-        user.setUsername(request.username() == null ? null : request.username().trim().toLowerCase());
-        user.setAvatarUrl(request.avatarUrl() == null ? null : request.avatarUrl().trim());
-        user.setBio(request.bio() == null ? null : request.bio().trim());
-        user.setLocation(request.location() == null ? null : request.location().trim());
-        if (request.socialLinks() != null) {
-            user.setSocialLinks(request.socialLinks());
+        user.setFirstName(changes.firstName().trim());
+        user.setLastName(changes.lastName().trim());
+        user.setUsername(changes.username() == null ? null : changes.username().trim().toLowerCase());
+        user.setAvatarUrl(changes.avatarUrl() == null ? null : changes.avatarUrl().trim());
+        user.setBio(changes.bio() == null ? null : changes.bio().trim());
+        user.setLocation(changes.location() == null ? null : changes.location().trim());
+        if (changes.socialLinks() != null) {
+            user.setSocialLinks(changes.socialLinks());
         }
-        MemberProfiles.phone(user, request.phone());
-        if (request.situation() != null) user.setSituation(request.situation());
-        if (request.goal() != null) user.setGoal(request.goal());
-        interests(user, request.interestIds());
-        if (request.marketingConsent() != null) user.setMarketingConsent(request.marketingConsent());
+        MemberProfiles.phone(user, changes.phone());
+        if (changes.situation() != null) user.setSituation(changes.situation());
+        if (changes.goal() != null) user.setGoal(changes.goal());
+        interests(user, changes.interestIds());
+        if (changes.marketingConsent() != null) user.setMarketingConsent(changes.marketingConsent());
         user.setUpdatedAt(Instant.now());
         return user;
     }
 
     @Override
-    public User onboard(String email, OnboardingRequest request) {
+    public User onboard(String email, OnboardingAnswers answers) {
         User user = require(email);
-        MemberProfiles.phone(user, request.phone());
-        if (request.situation() != null) user.setSituation(request.situation());
-        if (request.goal() != null) user.setGoal(request.goal());
-        interests(user, request.interestIds());
-        if (request.location() != null && !request.location().isBlank()) user.setLocation(request.location().trim());
-        if (request.marketingConsent() != null) user.setMarketingConsent(request.marketingConsent());
-        MemberProfiles.context(user, request.context());
+        MemberProfiles.phone(user, answers.phone());
+        if (answers.situation() != null) user.setSituation(answers.situation());
+        if (answers.goal() != null) user.setGoal(answers.goal());
+        interests(user, answers.interestIds());
+        if (answers.location() != null && !answers.location().isBlank()) user.setLocation(answers.location().trim());
+        if (answers.marketingConsent() != null) user.setMarketingConsent(answers.marketingConsent());
+        MemberProfiles.arrival(user, answers.arrival());
         if (user.getOnboardedAt() == null) user.setOnboardedAt(Instant.now());
         user.setUpdatedAt(Instant.now());
         return user;
@@ -112,15 +109,15 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
-    public void changePassword(String email, UserPasswordChangeRequest request) {
+    public void changePassword(String email, PasswordChange change) {
         User user = require(email);
-        if (user.getPasswordHash() == null || !passwords.matches(request.currentPassword(), user.getPasswordHash())) {
+        if (user.getPasswordHash() == null || !passwords.matches(change.currentPassword(), user.getPasswordHash())) {
             throw new BadRequestException("Le mot de passe actuel est incorrect.");
         }
-        if (!request.newPassword().equals(request.confirmPassword())) {
+        if (!change.newPassword().equals(change.confirmation())) {
             throw new BadRequestException("Le nouveau mot de passe et sa confirmation ne correspondent pas.");
         }
-        user.setPasswordHash(passwords.encode(request.newPassword()));
+        user.setPasswordHash(passwords.encode(change.newPassword()));
     }
 
     @Override

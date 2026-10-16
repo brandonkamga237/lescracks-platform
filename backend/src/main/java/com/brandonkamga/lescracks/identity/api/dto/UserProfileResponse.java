@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.identity.api.dto;
 
+import com.brandonkamga.lescracks.identity.domain.UserIdentity;
 import com.brandonkamga.lescracks.identity.domain.AuthProvider;
 import com.brandonkamga.lescracks.identity.domain.MemberGoal;
 import com.brandonkamga.lescracks.identity.domain.MemberSituation;
@@ -24,11 +25,12 @@ public record UserProfileResponse(Long id, String email, String firstName, Strin
                                   Set<Long> interestIds, boolean marketingConsent,
                                   boolean onboardingRequired, int completion, List<String> missing) {
 
-    public static UserProfileResponse of(User user, List<UserIdentityResponse> identities) {
+    public static UserProfileResponse of(User user, List<UserIdentity> identities) {
         ProfileCompletion completion = ProfileCompletion.of(user);
         return new UserProfileResponse(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(),
                 user.getStatus(), user.isEmailVerified(), user.getProvider(), user.getCreatedAt(),
-                user.getUsername(), user.getAvatarUrl(), user.getBio(), user.getLocation(), user.getSocialLinks(), identities,
+                user.getUsername(), user.getAvatarUrl(), user.getBio(), user.getLocation(), user.getSocialLinks(),
+                identities.stream().map(UserIdentityResponse::of).toList(),
                 user.getPhone(), user.getCountry(), user.getSituation(), user.getGoal(),
                 Set.copyOf(user.getInterests()), user.isMarketingConsent(),
                 user.getOnboardedAt() == null, completion.percent(), completion.missing());

@@ -36,13 +36,13 @@ public class UserProfileController {
     @PatchMapping
     public UserProfileResponse update(Authentication authentication,
                                       @Valid @RequestBody UserProfileUpdateRequest request) {
-        return response(profiles.update(authentication.getName(), request));
+        return response(profiles.update(authentication.getName(), request.toChanges()));
     }
 
     /** The welcome questions after sign-up: answered, partly answered or put off, it is never shown again. */
     @PutMapping("/onboarding")
     public UserProfileResponse onboard(Authentication authentication, @Valid @RequestBody OnboardingRequest request) {
-        return response(profiles.onboard(authentication.getName(), request));
+        return response(profiles.onboard(authentication.getName(), request.toAnswers()));
     }
 
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -54,7 +54,7 @@ public class UserProfileController {
     @PostMapping("/password")
     public ResponseEntity<Void> changePassword(Authentication authentication,
                                                @Valid @RequestBody UserPasswordChangeRequest request) {
-        profiles.changePassword(authentication.getName(), request);
+        profiles.changePassword(authentication.getName(), request.toChange());
         return ResponseEntity.noContent().build();
     }
 
