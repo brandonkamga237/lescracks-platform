@@ -26,6 +26,6 @@ public class NewsletterIssueTemplate implements EmailTemplate<NewsletterIssue> {
                 .replace("{{lastName}}", email.lastName() == null ? "" : email.lastName())
                 .replace("{{email}}", email.to()));
         String subject = email.subject() == null ? "" : email.subject();
-        return layout.email(subject, subject, body, EmailLayout.NEWSLETTER_NOTE);
+        return layout.newsletter(subject, subject, body, email.unsubscribeToken());
     }
 }

@@ -87,6 +87,7 @@ public class SmtpMailer implements Mailer {
             helper.setTo(email.to());
             helper.setSubject(rendered.subject());
             helper.setText(rendered.text(), rendered.html());
+            for (var header : rendered.headers().entrySet()) message.setHeader(header.getKey(), header.getValue());
             sender.send(message);
         } catch (MessagingException | RuntimeException failure) {
             log.error("{} not delivered", email.getClass().getSimpleName(), failure);

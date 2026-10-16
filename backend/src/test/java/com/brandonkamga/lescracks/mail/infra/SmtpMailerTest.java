@@ -1,6 +1,9 @@
 package com.brandonkamga.lescracks.mail.infra;
 
+import com.brandonkamga.lescracks.mail.domain.NewsletterIssue;
 import com.brandonkamga.lescracks.mail.domain.PasswordResetEmail;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
@@ -33,7 +36,8 @@ class SmtpMailerTest {
     private final JavaMailSender sender = mock(JavaMailSender.class);
     private final EmailLayout layout = new EmailLayout("https://lescracks.com");
     private final SmtpMailer mailer = new SmtpMailer(sender,
-            new EmailTemplates(List.of(new PasswordResetEmailTemplate(layout))), "LesCracks <contact@lescracks.com>", Runnable::run);
+            new EmailTemplates(List.of(new PasswordResetEmailTemplate(layout),
+                    new NewsletterIssueTemplate(layout, new EmailBodyRenderer("https://lescracks.com")))), "LesCracks <contact@lescracks.com>", Runnable::run);
 
     @BeforeEach
     void setUp() {
@@ -71,6 +75,18 @@ class SmtpMailerTest {
         message.writeTo(raw);
         assertThat(raw.toString(StandardCharsets.UTF_8))
                 .contains("multipart/alternative", "text/plain", "text/html");
+    }
+
+    @Test
+    @DisplayName("a newsletter leaves with its List-Unsubscribe headers")
+    void sendsListHeaders() throws Exception {
+        ArgumentCaptor<MimeMessage> sent = ArgumentCaptor.forClass(MimeMessage.class);
+
+        mailer.send(new NewsletterIssue("awa@example.com", "Nouveautés", new ObjectMapper().readTree("[]"), "Awa", "D", "t0k3n"));
+
+        verify(sender).send(sent.capture());
+        assertThat(sent.getValue().getHeader("List-Unsubscribe-Post", null)).isEqualTo("List-Unsubscribe=One-Click");
+        assertThat(sent.getValue().getHeader("List-Unsubscribe", null)).contains("token=t0k3n");
     }
 
     @Test

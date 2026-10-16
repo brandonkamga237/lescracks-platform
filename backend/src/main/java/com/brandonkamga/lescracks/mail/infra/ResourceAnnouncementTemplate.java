@@ -25,6 +25,6 @@ public class ResourceAnnouncementTemplate implements EmailTemplate<ResourceAnnou
                         + layout.cover(layout.absoluteImage(email.coverImage()), title)
                         + layout.paragraph(layout.escapeHtml(email.description()))
                         + layout.button("Découvrir la ressource", url) + layout.fallbackLink("Ou ouvre ce lien :", url);
-        return layout.email("Nouvelle ressource LesCracks : " + email.title(), email.title(), body, EmailLayout.NEWSLETTER_NOTE);
+        return layout.newsletter("Nouvelle ressource LesCracks : " + email.title(), email.title(), body, email.unsubscribeToken());
     }
 }

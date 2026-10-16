@@ -3,6 +3,7 @@ package com.brandonkamga.lescracks.mail.infra;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,7 +13,7 @@ public class EmailLayout {
     private static final String FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 
     /** Footer of every email sent to newsletter subscribers. */
-    public static final String NEWSLETTER_NOTE = "Tu reçois cet email parce que tu es abonné à la newsletter LesCracks. Une question ? Réponds simplement à ce message.";
+    public static final String NEWSLETTER_NOTE = "Tu reçois cet email parce que tu es abonné à la newsletter LesCracks.";
 
     private final String siteUrl;
 
@@ -26,6 +27,22 @@ public class EmailLayout {
     /** The HTML email in its frame, and the same body as plain text. */
     public RenderedEmail email(String subject, String title, String body, String note) {
         return new RenderedEmail(subject, frame(title, body, note), text(body) + "\n\n--\n" + text(note) + "\n" + siteUrl);
+    }
+
+    /**
+     * A newsletter email: the footer links to the unsubscribe page, and the List-Unsubscribe
+     * headers let the mail client offer its own button, which posts straight to the API
+     * (RFC 8058). Gmail and Yahoo require both from bulk senders. Without a token (a preview,
+     * a test send) the email has neither.
+     */
+    public RenderedEmail newsletter(String subject, String title, String body, String unsubscribeToken) {
+        if (unsubscribeToken == null) return email(subject, title, body, NEWSLETTER_NOTE);
+        String page = url("/desabonnement?token=" + unsubscribeToken);
+        String note = NEWSLETTER_NOTE + " <a href=\"" + page + "\" style=\"color:#6b6b6b;text-decoration:underline;\">Se désabonner</a>";
+        RenderedEmail rendered = email(subject, title, body, note);
+        return new RenderedEmail(rendered.subject(), rendered.html(), rendered.text(), Map.of(
+                "List-Unsubscribe", "<" + url("/api/newsletter/public/unsubscribe?token=" + unsubscribeToken) + ">",
+                "List-Unsubscribe-Post", "List-Unsubscribe=One-Click"));
     }
 
     /** Plain text of an HTML fragment: links keep their address, blocks become paragraphs. */

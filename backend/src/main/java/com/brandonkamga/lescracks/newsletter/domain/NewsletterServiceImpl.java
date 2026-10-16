@@ -118,7 +118,7 @@ public class NewsletterServiceImpl implements NewsletterService {
         subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED)
                 .forEach(subscription -> mail.send(new EventAnnouncement(subscription.getUser().getEmail(),
                         event.getTitle(), event.getDescription(), "/evenements/" + slugOrId(event.getSlug(), event.getId()),
-                        event.getCoverImage(), event.getStartDate())));
+                        event.getCoverImage(), event.getStartDate(), subscription.getToken())));
     }
 
     @Override
@@ -126,13 +126,13 @@ public class NewsletterServiceImpl implements NewsletterService {
         subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED)
                 .forEach(subscription -> mail.send(new ResourceAnnouncement(subscription.getUser().getEmail(),
                         resource.getTitle(), resource.getDescription(), "/ressources/" + slugOrId(resource.getSlug(), resource.getId()),
-                        resource.getCoverImage())));
+                        resource.getCoverImage(), subscription.getToken())));
     }
 
     /** The exact email a subscriber would get, filled with a sample reader. */
     @Override
     public String preview(String subject, JsonNode body) {
-        return mail.previewHtml(new NewsletterIssue("marie@example.com", subject, body, "Marie", "Kamga"));
+        return mail.previewHtml(new NewsletterIssue("marie@example.com", subject, body, "Marie", "Kamga", null));
     }
 
     @Override
@@ -140,7 +140,8 @@ public class NewsletterServiceImpl implements NewsletterService {
         var active = subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED);
         active.forEach(subscription -> {
             User user = subscription.getUser();
-            mail.send(new NewsletterIssue(user.getEmail(), subject, body, user.getFirstName(), user.getLastName()));
+            mail.send(new NewsletterIssue(user.getEmail(), subject, body, user.getFirstName(), user.getLastName(),
+                    subscription.getToken()));
         });
         campaigns.save(NewsletterCampaign.builder()
                 .subject(subject)
