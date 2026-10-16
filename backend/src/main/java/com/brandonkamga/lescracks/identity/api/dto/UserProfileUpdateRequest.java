@@ -4,15 +4,14 @@ import com.brandonkamga.lescracks.identity.domain.ProfileChanges;
 import com.brandonkamga.lescracks.identity.domain.MemberGoal;
 import com.brandonkamga.lescracks.identity.domain.MemberSituation;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.util.Map;
 import java.util.Set;
 
 public record UserProfileUpdateRequest(
-        @NotBlank @Size(max = 120) String firstName,
-        @NotBlank @Size(max = 120) String lastName,
+        @Size(max = 120) String firstName,
+        @Size(max = 120) String lastName,
         @Size(max = 50) String username,
         @Size(max = 2000) String bio,
         @Size(max = 100) String location,

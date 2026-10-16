@@ -4,8 +4,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The profile form. Replaces every plain field; for phone, situation, goal, interests,
- * social links and consent, null leaves the current value as it is.
+ * A partial change of the profile: null leaves a field as it is, so each section of the page
+ * sends only its own fields. An empty text clears an optional field (username, bio, city,
+ * phone); first and last name can change but not be emptied.
  */
 public record ProfileChanges(String firstName, String lastName, String username,
                              String bio, String location, Map<String, String> socialLinks, String phone,

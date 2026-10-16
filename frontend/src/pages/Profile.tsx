@@ -100,9 +100,9 @@ export default function Profile() {
       await api.updateProfile({
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
-        username: form.username.trim() || undefined,
-        bio: form.bio.trim() || undefined,
-        location: form.location.trim() || undefined,
+        username: form.username.trim(),
+        bio: form.bio.trim(),
+        location: form.location.trim(),
         socialLinks: Object.keys(form.socialLinks).length ? form.socialLinks : undefined,
         phone,
         situation: details.situation,

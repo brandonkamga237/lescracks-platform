@@ -52,11 +52,11 @@ public class UserProfileServiceImpl implements UserProfileService {
     @Override
     public User update(String email, ProfileChanges changes) {
         User user = require(email);
-        user.setFirstName(changes.firstName().trim());
-        user.setLastName(changes.lastName().trim());
-        user.setUsername(changes.username() == null ? null : changes.username().trim().toLowerCase());
-        user.setBio(changes.bio() == null ? null : changes.bio().trim());
-        user.setLocation(changes.location() == null ? null : changes.location().trim());
+        if (changes.firstName() != null) user.setFirstName(required(changes.firstName(), "Le prénom"));
+        if (changes.lastName() != null) user.setLastName(required(changes.lastName(), "Le nom"));
+        if (changes.username() != null) user.setUsername(optional(changes.username().toLowerCase()));
+        if (changes.bio() != null) user.setBio(optional(changes.bio()));
+        if (changes.location() != null) user.setLocation(optional(changes.location()));
         if (changes.socialLinks() != null) {
             user.setSocialLinks(changes.socialLinks());
         }
@@ -82,6 +82,15 @@ public class UserProfileServiceImpl implements UserProfileService {
         if (user.getOnboardedAt() == null) user.setOnboardedAt(Instant.now());
         user.setUpdatedAt(Instant.now());
         return user;
+    }
+
+    private static String required(String value, String label) {
+        if (value.isBlank()) throw new BadRequestException(label + " ne peut pas être vide.");
+        return value.trim();
+    }
+
+    private static String optional(String value) {
+        return value.isBlank() ? null : value.trim();
     }
 
     /** Null leaves them as they are; each id must be an existing category. */
