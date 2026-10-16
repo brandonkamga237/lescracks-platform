@@ -83,14 +83,16 @@ Before any commit or PR:
 ### Branches
 - `main` → production. Every push triggers a deployment (GitHub Actions → Docker Hub → VPS)
 - `develop` → integration. Default target for new work
-- `feature/xxx`, `fix/xxx`, `docs/xxx` → branch off `develop`, merge back through a PR
+- `feature/xxx`, `fix/xxx`, `docs/xxx`, `chore/xxx` → branch off `develop` with `--no-track` (`git switch -c feature/x --no-track origin/develop`), merge back through a PR
 - `hotfix/xxx` → branches off `main`, production emergencies only
-- Never write code directly on `main` or `develop`: create the branch before the first edit
+- Never write code directly on `main` or `develop`: create the branch before the first edit. Both are protected (PR + green CI, no force push)
+- PR into `develop`: **squash merge**, so the PR title is the commit and follows the commit format. `develop` into `main`: **merge commit**, never squash
+- Full rules: `CONTRIBUTING.md`. Enable the hook once per clone: `git config core.hooksPath .githooks`
 
 ### Commits
 - Commit **as you go**, not in one lump at the end: a commit as soon as a coherent unit compiles and passes its checks
 - One commit = one logical change. Never mix refactoring, feature work and formatting
-- Format: `type(scope): description` in English (`feat`, `fix`, `refactor`, `docs`, `chore`, `test`)
+- Format: `type(scope): description` in English, header ≤ 100 characters. Types: `feat`, `fix`, `perf`, `refactor`, `docs`, `test`, `build`, `ci`, `chore`, `style`, `revert`. Checked by `scripts/git/check-commit-msg.sh` (hook + CI)
 - **Never mention Claude, AI or any generation tool**: no `Co-Authored-By: Claude` trailer, no "Generated with", no mention in the body. The author is the user, full stop
 - Do not commit until `pnpm typecheck` / `./mvnw test` pass on the part that changed
 

@@ -12,18 +12,24 @@ Check where you are:
 git branch --show-current
 ```
 
-- On `main` or `develop` → **create a branch before changing anything**:
+- On `main` or `develop` → **create a branch before changing anything**, without tracking
+  `develop` (a tracked branch makes a plain `git push` land on `develop`):
   ```
-  git switch develop && git pull
-  git switch -c feature/event-waitlist
+  git fetch origin
+  git switch -c feature/event-waitlist --no-track origin/develop
+  git push -u origin feature/event-waitlist
   ```
+- Once per clone, enable the commit-msg hook: `git config core.hooksPath .githooks`
 - Already on a work branch that matches the task → keep going on it.
 
 Prefixes: `feature/` (new work), `fix/` (bug fix), `docs/` (documentation, README,
-CLAUDE.md), `hotfix/` (production emergency, branches off `main`). Short name, in
-English, kebab-case.
+CLAUDE.md), `chore/` (tooling), `hotfix/` (production emergency, branches off `main`).
+Short name, in English, kebab-case.
 
-PR target: `develop` — except `hotfix/`, which targets `main`.
+PR target: `develop` — except `hotfix/`, which targets `main`. Into `develop` the PR is
+**squash-merged**: its title becomes the commit, so it follows the message format below.
+`develop` into `main` is a **merge commit**, never a squash (a squash commit on `main`
+does not exist on `develop`, and the branches drift apart).
 
 ## Commit progressively
 
@@ -65,8 +71,11 @@ Stage explicitly (`git add <files>`), never a blind `git add -A`: that is how a
 type(scope): imperative description, in English
 ```
 
-`type` ∈ `feat`, `fix`, `refactor`, `docs`, `chore`, `test`.
-`scope` = the area touched (`events`, `seo`, `auth`, `admin`, `ci`, …).
+`type` ∈ `feat`, `fix`, `perf`, `refactor`, `docs`, `test`, `build`, `ci`, `chore`,
+`style`, `revert`. `scope` (optional, lowercase) = the domain or area touched (`identity`,
+`cracklab`, `seo`, `ui`, `ci`, …). Header ≤ 100 characters; `!` marks a breaking change.
+`scripts/git/check-commit-msg.sh` enforces this in the hook and in CI — run it on a
+message file to check before committing. The full list of scopes is in `CONTRIBUTING.md`.
 
 A body is optional and reserved for the **why** and for non-obvious consequences (a
 migration to apply, an environment variable to add, changed behaviour). No exhaustive
@@ -76,7 +85,9 @@ file list: the diff already provides one.
 
 - **No mention of Claude, of AI, or of any generation tool.** No
   `Co-Authored-By: Claude ...` trailer, no "Generated with …", no hint in the body or
-  in the PR description. The author of the commits is the user.
+  in the PR description. The author of the commits is the user. The hook and the
+  `Conventions` CI job reject them; `.claude/settings.json` sets `attribution` to empty so
+  Claude Code never adds them. Only `CLAUDE.md` and `.claude/` may be named.
 - No secrets and no `.env` (see `.gitignore`).
 - No `git push --force`, no `git reset --hard` on shared work, no rewriting of
   history that has already been pushed.
