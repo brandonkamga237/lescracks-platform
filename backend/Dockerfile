@@ -3,7 +3,7 @@
 # ── Stage 1: build ────────────────────────────────────────────────────────────
 # --mount=type=cache keeps /root/.m2 across builds through BuildKit, so a pom.xml
 # change only downloads the new dependencies.
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3.9-eclipse-temurin-26 AS build
 WORKDIR /app
 
 # 1. Copy pom.xml alone => the layer stays cached when only sources change
