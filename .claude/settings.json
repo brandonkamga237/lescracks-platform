@@ -21,7 +21,10 @@
       "Read(./.env)",
       "Read(./**/.env)",
       "Bash(git push --force:*)",
-      "Bash(docker compose -f docker-compose.prod.yml:*)"
+      "Bash(docker compose -f docker-compose.prod.yml:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(git push origin main:*)",
+      "Bash(git push origin develop:*)"
     ]
   },
   "attribution": {
