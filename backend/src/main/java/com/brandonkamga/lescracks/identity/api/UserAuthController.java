@@ -44,9 +44,13 @@ public class UserAuthController {
         this.passwordReset = passwordReset;
     }
 
+    /** The new member is signed in at once; confirming the address can wait (see the banner). */
     @PostMapping("/register")
-    public ResponseEntity<UserAuthResponse> register(@Valid @RequestBody UserRegisterRequest request) {
+    public ResponseEntity<UserAuthResponse> register(@Valid @RequestBody UserRegisterRequest request,
+                                                     HttpServletRequest httpRequest,
+                                                     HttpServletResponse httpResponse) {
         User user = registration.register(request.toRegistration());
+        startSession(user, httpRequest, httpResponse);
         return ResponseEntity.status(201).body(response(user));
     }
 
@@ -55,7 +59,8 @@ public class UserAuthController {
                                                   HttpServletRequest httpRequest,
                                                   HttpServletResponse httpResponse) {
         User user = auth.authenticate(request.toCredentials());
-        return login(user, httpRequest, httpResponse);
+        startSession(user, httpRequest, httpResponse);
+        return ResponseEntity.ok(response(user));
     }
 
     @PostMapping("/verify-email")
@@ -90,15 +95,13 @@ public class UserAuthController {
         return ResponseEntity.noContent().build();
     }
 
-    private ResponseEntity<UserAuthResponse> login(User user,
-                                                   HttpServletRequest request, HttpServletResponse response) {
+    private void startSession(User user, HttpServletRequest request, HttpServletResponse response) {
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 user.getEmail(), null, java.util.List.of(new SimpleGrantedAuthority("ROLE_USER")));
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
         contexts.saveContext(context, request, response);
-        return ResponseEntity.ok(response(user));
     }
 
     private UserAuthResponse response(User user) {
