@@ -22,6 +22,10 @@ export default function AdminNewsletter() {
   const [filter, setFilter] = useState<'' | 'SUBSCRIBED' | 'UNSUBSCRIBED'>('');
   const [busyId, setBusyId] = useState<number | null>(null);
   const [busyBroadcast, setBusyBroadcast] = useState(false);
+  // Sending to every subscriber cannot be undone: the first click only asks for confirmation.
+  const [confirming, setConfirming] = useState(false);
+  const [testEmail, setTestEmail] = useState('');
+  const [busyTest, setBusyTest] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [subject, setSubject] = useState('');
@@ -67,6 +71,24 @@ export default function AdminNewsletter() {
     editorRef.current?.insertText(variable);
   }
 
+  async function sendTest() {
+    setError('');
+    setNotice('');
+    if (!subject.trim() || !hasBody(blocks) || !testEmail.trim()) {
+      setError('Renseigne un objet, un message et l’adresse qui recevra le test.');
+      return;
+    }
+    setBusyTest(true);
+    try {
+      await adminApi.newsletterTest(subject.trim(), blocks, testEmail.trim());
+      setNotice(`Test envoyé à ${testEmail.trim()}. Vérifie aussi le dossier des indésirables.`);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'L’envoi du test a échoué.');
+    } finally {
+      setBusyTest(false);
+    }
+  }
+
   async function broadcast(event: React.FormEvent) {
     event.preventDefault();
     setError('');
@@ -75,6 +97,11 @@ export default function AdminNewsletter() {
       setError('Renseigne un objet et un message.');
       return;
     }
+    if (!confirming) {
+      setConfirming(true);
+      return;
+    }
+    setConfirming(false);
     setBusyBroadcast(true);
     try {
       const count = await adminApi.newsletterBroadcast(subject.trim(), blocks);
@@ -128,18 +155,33 @@ export default function AdminNewsletter() {
           <div>
             <h2 className="font-display text-lg font-semibold text-t1">Envoyer une campagne</h2>
             <p className="mt-2 max-w-lg text-sm leading-relaxed text-t4">
-              Tu écris seulement le corps du message — l’en-tête LesCracks et le pied de page
-              (contacts, devise, liens) sont appliqués automatiquement.
+              Tu écris seulement le corps du message. L’en-tête LesCracks, le pied de page et le lien
+              de désabonnement de chaque abonné sont ajoutés automatiquement.
             </p>
           </div>
-          <button type="submit" disabled={busyBroadcast} className="btn-primary shrink-0">
-            {busyBroadcast ? 'Envoi…' : <><Send className="h-4 w-4" aria-hidden /> Envoyer aux abonnés</>}
-          </button>
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {confirming && <button type="button" onClick={() => setConfirming(false)} className="btn-secondary">Annuler</button>}
+            <button type="submit" disabled={busyBroadcast} className="btn-primary">
+              {busyBroadcast ? 'Envoi…' : confirming
+                ? `Confirmer l’envoi à ${stats.data?.subscribed ?? 'tous les'} abonné${(stats.data?.subscribed ?? 2) > 1 ? 's' : ''}`
+                : <><Send className="h-4 w-4" aria-hidden /> Envoyer aux abonnés</>}
+            </button>
+          </div>
         </div>
 
         <div className="mt-6">
           <label htmlFor="broadcast-subject" className="text-sm font-medium text-t2">Objet de l’email</label>
           <input id="broadcast-subject" value={subject} onChange={(event) => setSubject(event.target.value)} required maxLength={200} className="input mt-2" placeholder="Le sujet que les abonnés verront dans leur boîte" />
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-end gap-3 rounded border border-line-soft p-4">
+          <div className="min-w-0 flex-1">
+            <label htmlFor="broadcast-test" className="text-sm font-medium text-t2">Envoyer un test à</label>
+            <input id="broadcast-test" type="email" value={testEmail} onChange={(event) => setTestEmail(event.target.value)} className="input mt-2" placeholder="ton.adresse@exemple.com" />
+          </div>
+          <button type="button" onClick={() => void sendTest()} disabled={busyTest} className="btn-secondary">
+            {busyTest ? 'Envoi du test…' : 'Envoyer le test'}
+          </button>
         </div>
 
         <div className="mt-6 grid gap-6 xl:grid-cols-2">

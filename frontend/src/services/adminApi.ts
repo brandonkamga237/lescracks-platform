@@ -189,6 +189,8 @@ export const adminApi = {
     http.get<AdminSubscriber[]>('/newsletter/admin/subscriptions', status ? { status } : undefined, signal),
   newsletterBroadcast: (subject: string, body: ArticleBlock[]) =>
     http.post<number>('/newsletter/admin/broadcast', { subject, body }),
+  newsletterTest: (subject: string, body: ArticleBlock[], email: string) =>
+    http.post<void>('/newsletter/admin/test', { subject, body, email }),
   newsletterPreview: (subject: string, body: ArticleBlock[]) =>
     http.post<{ html: string }>('/newsletter/admin/preview', { subject, body }),
   newsletterUnsubscribe: (userId: number) => http.post<AdminSubscriber>(`/newsletter/admin/subscriptions/${userId}/unsubscribe`),
