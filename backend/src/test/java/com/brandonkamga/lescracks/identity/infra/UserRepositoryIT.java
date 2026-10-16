@@ -2,6 +2,7 @@ package com.brandonkamga.lescracks.identity.infra;
 
 import com.brandonkamga.lescracks.identity.domain.AuthProvider;
 import com.brandonkamga.lescracks.identity.domain.User;
+import com.brandonkamga.lescracks.identity.domain.UserSearch;
 import com.brandonkamga.lescracks.support.PostgresIT;
 
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,5 +61,22 @@ class UserRepositoryIT extends PostgresIT {
         assertThat(((Number) after[1]).longValue() - ((Number) before[1]).longValue()).isEqualTo(1);
         assertThat(((Number) after[2]).longValue() - ((Number) before[2]).longValue()).isEqualTo(1);
         assertThat(((Number) after[3]).longValue() - ((Number) before[3]).longValue()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("the back-office filters combine: text, members or contacts, verified or not")
+    void backOfficeFilters() {
+        save("filter-contact@example.com", null, AuthProvider.LOCAL, false);
+        save("filter-member@example.com", "hash", AuthProvider.LOCAL, false);
+        save("filter-verified@example.com", null, AuthProvider.GITHUB, true);
+
+        assertThat(emails(new UserSearch("filter-", UserSearch.Kind.CONTACT, null))).containsExactly("filter-contact@example.com");
+        assertThat(emails(new UserSearch("FILTER-", UserSearch.Kind.MEMBER, false))).containsExactly("filter-member@example.com");
+        assertThat(emails(new UserSearch("filter-", null, true))).containsExactly("filter-verified@example.com");
+        assertThat(emails(new UserSearch("filter-", null, null))).hasSize(3);
+    }
+
+    private List<String> emails(UserSearch search) {
+        return users.findAll(UserSpecifications.matching(search)).stream().map(User::getEmail).toList();
     }
 }

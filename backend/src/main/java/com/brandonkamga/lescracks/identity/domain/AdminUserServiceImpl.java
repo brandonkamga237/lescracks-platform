@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.identity.domain;
 
 import com.brandonkamga.lescracks.identity.infra.UserRepository;
+import com.brandonkamga.lescracks.identity.infra.UserSpecifications;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 
 import org.springframework.data.domain.Page;
@@ -17,10 +18,8 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<User> list(String search, Pageable pageable) {
-        if (search == null || search.isBlank()) return users.findAll(pageable);
-        return users.findByEmailContainingIgnoreCaseOrFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
-                search.trim(), search.trim(), search.trim(), pageable);
+    public Page<User> list(UserSearch search, Pageable pageable) {
+        return users.findAll(UserSpecifications.matching(search), pageable);
     }
 
     @Override
