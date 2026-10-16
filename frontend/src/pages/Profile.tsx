@@ -1,11 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { ArrowRight, BookOpen, CalendarDays, KeyRound, Loader2, Lock, LogOut, ShieldCheck, UserRound } from 'lucide-react';
+import { ArrowRight, BookOpen, CalendarDays, KeyRound, Loader2, Lock, LogOut, ShieldCheck } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import Layout from '@/components/layout/Layout';
 import { Section } from '@/components/layout/Page';
 import SEO from '@/components/common/SEO';
 import NewsletterCard from '@/components/common/NewsletterCard';
+import AvatarPicker from '@/components/account/AvatarPicker';
 import PhoneField from '@/components/account/PhoneField';
 import { useApi } from '@/hooks/useApi';
 import { fillClass } from '@/lib/cracklab';
@@ -66,7 +67,6 @@ export default function Profile() {
   const [unlinkBusy, setUnlinkBusy] = useState<AuthProvider | null>(null);
   const [identityError, setIdentityError] = useState('');
   const [identityNotice, setIdentityNotice] = useState('');
-  const [avatarBusy, setAvatarBusy] = useState(false);
 
   useEffect(() => {
     setForm({
@@ -165,20 +165,6 @@ export default function Profile() {
     }
   }
 
-  async function uploadAvatar(file: File) {
-    setAvatarBusy(true);
-    setError('');
-    try {
-      await api.uploadAvatar(file);
-      await refresh();
-      setNotice('Ton avatar a été mis à jour.');
-    } catch (cause) {
-      setError(cause instanceof ApiError ? cause.message : 'L’upload de l’avatar a échoué.');
-    } finally {
-      setAvatarBusy(false);
-    }
-  }
-
   async function linkProvider(provider: IdentityProvider) {
     setIdentityError('');
     setIdentityNotice('');
@@ -213,7 +199,7 @@ export default function Profile() {
     <SEO title="Mon compte" description="Tes informations, ta sécurité et tes connexions LesCracks." url="/profil" />
     <Section spacing="tight">
       <header className="flex flex-col gap-6 border-b border-line-soft pb-8 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-5"><div aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gold-400/30 bg-gold-400/10 font-display text-2xl text-gold-ink">{user?.avatarUrl ? <img src={user.avatarUrl} alt="" className="h-full w-full object-cover" /> : name ? name.charAt(0).toUpperCase() : <UserRound className="h-7 w-7" />}</div><div><p className="text-sm font-medium tracking-wide text-gold-ink">Mon compte</p><h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-t1 sm:text-4xl">Bonjour{user?.firstName ? `, ${user.firstName}` : name ? `, ${name}` : ''}.</h1><p className="mt-2 text-sm text-t4">Un point de départ pour ta prochaine découverte.</p></div></div>
+        <div className="flex items-center gap-5"><AvatarPicker name={name} avatarUrl={user?.avatarUrl} onChanged={refresh} /><div><p className="text-sm font-medium tracking-wide text-gold-ink">Mon compte</p><h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-t1 sm:text-4xl">Bonjour{user?.firstName ? `, ${user.firstName}` : name ? `, ${name}` : ''}.</h1><p className="mt-2 text-sm text-t4">Un point de départ pour ta prochaine découverte.</p></div></div>
         <button type="button" disabled={Boolean(busy)} onClick={() => void logout()} className="btn-secondary hidden self-start lg:inline-flex"><LogOut aria-hidden="true" className="h-4 w-4" />{busy === 'logout' ? 'Déconnexion…' : 'Me déconnecter'}</button>
       </header>
       {user && user.completion < 100 && !editing && (
@@ -233,12 +219,7 @@ export default function Profile() {
           {error && <p role="alert" className="mt-5 rounded border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
           {notice && <p role="status" className="mt-5 rounded border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-ink">{notice}</p>}
           {editing && user ? <form onSubmit={save} className="mt-7" aria-busy={busy === 'save'}>
-            <fieldset disabled={Boolean(busy) || avatarBusy} className="space-y-5"><legend className="sr-only">Modifier tes informations</legend>
-              <div>
-                <label htmlFor="profile-avatar" className="text-sm font-medium text-t2">Avatar</label>
-                <input id="profile-avatar" type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadAvatar(file); event.target.value = ''; }} className="mt-2 text-sm text-t2 file:mr-4 file:rounded file:border-0 file:bg-gold-400 file:px-4 file:py-2 file:font-medium file:text-black" />
-                {avatarBusy && <p className="mt-2 text-sm text-gold-ink">Envoi en cours…</p>}
-              </div>
+            <fieldset disabled={Boolean(busy)} className="space-y-5"><legend className="sr-only">Modifier tes informations</legend>
               {(['firstName', 'lastName'] as const).map((key) => <div key={key}><label htmlFor={`profile-${key}`} className="text-sm font-medium text-t2">{key === 'firstName' ? 'Prénom' : 'Nom'}</label><input id={`profile-${key}`} name={key} autoComplete={key === 'firstName' ? 'given-name' : 'family-name'} required value={form[key]} onChange={(event) => setForm({ ...form, [key]: event.target.value })} className="input mt-2" aria-invalid={Boolean(fields[key])} aria-describedby={fields[key] ? `profile-${key}-error` : undefined} />{fields[key] && <p id={`profile-${key}-error`} className="mt-2 text-sm text-error-ink">{fields[key]}</p>}</div>)}
               <div><label htmlFor="profile-username" className="text-sm font-medium text-t2">Nom d'utilisateur</label><input id="profile-username" name="username" value={form.username} onChange={(event) => setForm({ ...form, username: event.target.value })} className="input mt-2" /></div>
               <div><label htmlFor="profile-bio" className="text-sm font-medium text-t2">Bio</label><textarea id="profile-bio" name="bio" rows={3} value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} className="input mt-2" /></div>

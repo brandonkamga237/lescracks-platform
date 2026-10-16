@@ -71,6 +71,7 @@ export const api = {
     form.append('file', file);
     return http.postForm<UserProfile>('/me/avatar', form);
   },
+  removeAvatar: () => http.delete<UserProfile>('/me/avatar'),
   changePassword: (body: { currentPassword: string; newPassword: string; confirmPassword: string }) =>
     http.post<void>('/me/password', body),
   newsletterStatus: (signal?: AbortSignal) => http.get<NewsletterStatus>('/newsletter', undefined, signal),
