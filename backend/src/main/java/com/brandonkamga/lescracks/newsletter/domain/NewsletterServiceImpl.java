@@ -1,10 +1,8 @@
 package com.brandonkamga.lescracks.newsletter.domain;
 
 import com.brandonkamga.lescracks.event.domain.Event;
-import com.brandonkamga.lescracks.identity.domain.AuthProvider;
 import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.domain.UserStatus;
-import com.brandonkamga.lescracks.identity.infra.UserRepository;
+import com.brandonkamga.lescracks.identity.domain.UserDirectory;
 import com.brandonkamga.lescracks.mail.domain.MailService;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterCampaignRepository;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterSubscriptionRepository;
@@ -23,12 +21,12 @@ import java.util.List;
 @Service
 @Transactional
 public class NewsletterServiceImpl implements NewsletterService {
-    private final UserRepository users;
+    private final UserDirectory users;
     private final NewsletterSubscriptionRepository subscriptions;
     private final NewsletterCampaignRepository campaigns;
     private final MailService mail;
 
-    public NewsletterServiceImpl(UserRepository users, NewsletterSubscriptionRepository subscriptions,
+    public NewsletterServiceImpl(UserDirectory users, NewsletterSubscriptionRepository subscriptions,
                                  NewsletterCampaignRepository campaigns, MailService mail) {
         this.users = users;
         this.subscriptions = subscriptions;
@@ -56,20 +54,12 @@ public class NewsletterServiceImpl implements NewsletterService {
     @Override
     public NewsletterSubscription subscribePublic(String email, String firstName, String lastName) {
         String normalizedEmail = email.trim().toLowerCase();
-        User user = users.findByEmailIgnoreCase(normalizedEmail).orElse(null);
-        if (user != null && (user.getPasswordHash() != null || user.getProvider() != AuthProvider.LOCAL)) {
+        User user = users.find(normalizedEmail).orElse(null);
+        if (user != null && user.hasLoginMethod()) {
             throw new BadRequestException("Cette adresse email est déjà associée à un compte. Connecte-toi pour gérer ton abonnement.");
         }
         if (user == null) {
-            user = users.save(User.builder()
-                    .email(normalizedEmail)
-                    .firstName(firstName == null ? "" : firstName.trim())
-                    .lastName(lastName == null ? "" : lastName.trim())
-                    .passwordHash(null)
-                    .status(UserStatus.ACTIVE)
-                    .emailVerified(false)
-                    .provider(AuthProvider.LOCAL)
-                    .build());
+            user = users.createContact(normalizedEmail, firstName, lastName);
         }
         return subscribe(user);
     }
@@ -93,8 +83,7 @@ public class NewsletterServiceImpl implements NewsletterService {
 
     @Override
     public NewsletterSubscription unsubscribeById(Long userId) {
-        User user = users.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Utilisateur", "id", userId));
+        User user = users.require(userId);
         NewsletterSubscription subscription = subscriptions.findByUserId(user.getId())
                 .orElseGet(() -> NewsletterSubscription.builder().user(user).build());
         subscription.setStatus(NewsletterStatus.UNSUBSCRIBED);
@@ -104,8 +93,7 @@ public class NewsletterServiceImpl implements NewsletterService {
 
     @Override
     public NewsletterSubscription subscribeById(Long userId) {
-        User user = users.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Utilisateur", "id", userId));
+        User user = users.require(userId);
         NewsletterSubscription subscription = subscriptions.findByUserId(user.getId())
                 .orElseGet(() -> NewsletterSubscription.builder().user(user).build());
         subscription.setStatus(NewsletterStatus.SUBSCRIBED);
@@ -153,7 +141,6 @@ public class NewsletterServiceImpl implements NewsletterService {
     }
 
     private User user(String username) {
-        return users.findByEmailIgnoreCase(username)
-                .orElseThrow(() -> new NotFoundException("Utilisateur", "email", username));
+        return users.require(username);
     }
 }
