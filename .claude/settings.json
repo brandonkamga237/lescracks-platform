@@ -23,5 +23,10 @@
       "Bash(git push --force:*)",
       "Bash(docker compose -f docker-compose.prod.yml:*)"
     ]
+  },
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
   }
 }
