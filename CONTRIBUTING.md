@@ -72,6 +72,15 @@ editing a Flyway migration that is already applied.
   release.
 - Fill in the PR template: what, why, the checks you ran, and anything to do on deploy.
 
+### Who merges
+
+- Into `develop`: anyone, including a coding agent, through `scripts/git/merge-to-develop.sh <pr>`.
+  It refuses any other base branch, a draft, a title outside the commit format, a forbidden
+  mention, or checks that are not green; then it squash-merges and deletes the branch.
+- Into `main`: **only the maintainer**, by hand. A coding agent never merges into `main`: the
+  shared agent settings deny `gh pr merge` and direct pushes to `main` and `develop`, so the
+  script above is its only way to merge.
+
 ## Checks before a PR
 
 ```bash

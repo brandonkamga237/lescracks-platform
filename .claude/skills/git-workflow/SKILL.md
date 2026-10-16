@@ -94,6 +94,13 @@ file list: the diff already provides one.
 - No direct commit on `main` (outside a deliberate `hotfix/`): `main` triggers the
   production deployment.
 
+## Merging
+
+- Into `develop`: `scripts/git/merge-to-develop.sh <pr>` once the checks are green. It refuses
+  any base other than `develop`, then squash-merges and deletes the branch.
+- Into `main`: never. The user merges `develop` into `main` by hand (merge commit). Direct
+  `gh pr merge` and pushes to `main` / `develop` are denied in `.claude/settings.json`.
+
 ## Before the PR
 
 ```

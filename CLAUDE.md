@@ -88,6 +88,7 @@ Before any commit or PR:
 - Never write code directly on `main` or `develop`: create the branch before the first edit. Both are protected (PR + green CI, no force push)
 - PR into `develop`: **squash merge**, so the PR title is the commit and follows the commit format. `develop` into `main`: **merge commit**, never squash
 - Full rules: `CONTRIBUTING.md`. Enable the hook once per clone: `git config core.hooksPath .githooks`
+- You may merge a PR into `develop` only with `scripts/git/merge-to-develop.sh <pr>` (it refuses any other base). **Never merge into `main`**: the user does it by hand. `gh pr merge` and direct pushes to `main`/`develop` are denied
 
 ### Commits
 - Commit **as you go**, not in one lump at the end: a commit as soon as a coherent unit compiles and passes its checks
