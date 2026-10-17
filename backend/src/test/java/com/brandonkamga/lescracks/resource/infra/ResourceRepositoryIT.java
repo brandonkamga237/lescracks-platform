@@ -51,7 +51,7 @@ class ResourceRepositoryIT extends PostgresIT {
     void seed() {
         backend = categories.save(category("Backend"));
         frontend = categories.save(category("Frontend"));
-        java = tags.save(tag(backend, "Java"));
+        java = tags.save(tag("Java"));
     }
 
     private Resource save(Category category, String title, ResourceStatus status) {

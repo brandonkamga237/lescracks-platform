@@ -5,12 +5,14 @@ import com.brandonkamga.lescracks.taxonomy.domain.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
 
     List<Tag> findAllByOrderByNameAsc();
 
-    List<Tag> findByCategoryIdOrderByNameAsc(Long categoryId);
 
-    boolean existsByNameIgnoreCaseAndCategoryId(String name, Long categoryId);
+    boolean existsByNameIgnoreCase(String name);
+
+    Optional<Tag> findByNameIgnoreCase(String name);
 }

@@ -10,7 +10,6 @@ import com.brandonkamga.lescracks.shared.util.Slugs;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 import com.brandonkamga.lescracks.taxonomy.domain.Tag;
 import com.brandonkamga.lescracks.taxonomy.domain.TaxonomyService;
-import com.brandonkamga.lescracks.taxonomy.infra.TagRepository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -32,19 +30,17 @@ import org.springframework.data.domain.Pageable;
 public class ResourceServiceImpl implements ResourceService {
     private final ResourceRepository resources;
     private final ArticleRepository articles;
-    private final TagRepository tags;
     private final StorageService storage;
     private final TaxonomyService taxonomy;
     private final NewsletterService newsletter;
     private final ArticleBody articleBody;
     private final ObjectMapper mapper;
 
-    public ResourceServiceImpl(ResourceRepository resources, ArticleRepository articles, TagRepository tags,
+    public ResourceServiceImpl(ResourceRepository resources, ArticleRepository articles,
                                StorageService storage, TaxonomyService taxonomy,
                                NewsletterService newsletter, ArticleBody articleBody, ObjectMapper mapper) {
         this.resources = resources;
         this.articles = articles;
-        this.tags = tags;
         this.storage = storage;
         this.taxonomy = taxonomy;
         this.newsletter = newsletter;
@@ -219,7 +215,7 @@ public class ResourceServiceImpl implements ResourceService {
 
     private void applyTags(Resource resource, Set<Long> tagIds) {
         if (tagIds == null) return;
-        Set<Tag> selected = new HashSet<>(tags.findAllById(tagIds));
+        Set<Tag> selected = taxonomy.requireAll(tagIds);
         resource.getTags().clear();
         resource.getTags().addAll(selected);
     }
