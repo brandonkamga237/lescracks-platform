@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { AlertTriangle, ArrowUpRight, Bookmark, Check, Copy, Lightbulb } from 'lucide-react';
 
 import { headingId } from '@/lib/articleMarkdown';
-import type { ArticleBlock, CalloutTone, ResourceSummary } from '@/services/types';
+import type { ArticleBlock, ArticleSummary, CalloutTone } from '@/services/types';
 
 type ArticleBody = { html?: string } | unknown[];
 
@@ -147,8 +147,12 @@ export function ArticleBlocks({ blocks }: { blocks: ArticleBlock[] }) {
   );
 }
 
-export default function ArticleRenderer({ resource }: { resource: ResourceSummary }) {
-  const body = resource.body as ArticleBody;
+interface ArticleRendererProps {
+  article: Pick<ArticleSummary, 'body'>;
+}
+
+export default function ArticleRenderer({ article }: ArticleRendererProps) {
+  const body = article.body as ArticleBody;
 
   if (hasHtml(body)) {
     return (

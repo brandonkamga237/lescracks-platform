@@ -140,7 +140,7 @@ export default function Profile() {
             <a href={`#${SECTION_OF[user.missing[0]] ?? 'informations'}`} className="link text-sm">Compléter mon profil</a>
           </div>
           <div aria-hidden className="mt-3 h-1 rounded-full bg-noir-700"><div className={`h-full rounded-full bg-gold-400 ${fillClass(user.completion / 100)}`} /></div>
-          <p className="mt-4 text-sm text-t3">Il manque : {user.missing.map((field) => FIELD_LABEL[field].toLocaleLowerCase('fr')).join(', ')}. Ça nous aide à te proposer les bonnes ressources et les bons ateliers.</p>
+          <p className="mt-4 text-sm text-t3">Il manque : {user.missing.map((field) => FIELD_LABEL[field].toLocaleLowerCase('fr')).join(', ')}. Ça nous aide à te proposer les bons articles et les bons ateliers.</p>
         </section>
       )}
       <div className="mt-8 grid items-start gap-8 lg:grid-cols-[1.2fr_1fr]">
@@ -244,7 +244,7 @@ export default function Profile() {
           <h2 id="quick-links-heading" className="font-display text-xl font-bold text-t1">Et maintenant ?</h2>
           <p className="mt-2 text-sm text-t4">Choisis ce que tu veux explorer aujourd’hui.</p>
           <div className="mt-5 space-y-4">
-            <Link to="/ressources" className="group flex gap-4 rounded-lg border border-line-soft bg-card p-6 transition-colors hover:border-line"><BookOpen aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-semibold text-t1">Explorer les ressources</h3><p className="mt-2 text-sm leading-relaxed text-t4">Des ebooks et des vidéos pour approfondir les sujets qui t’intéressent.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
+            <Link to="/blog" className="group flex gap-4 rounded-lg border border-line-soft bg-card p-6 transition-colors hover:border-line"><BookOpen aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-semibold text-t1">Lire le blog</h3><p className="mt-2 text-sm leading-relaxed text-t4">Des articles pour approfondir les sujets qui t’intéressent.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
             <Link to="/evenements" className="group flex gap-4 rounded-lg border border-line-soft bg-card p-6 transition-colors hover:border-line"><CalendarDays aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-semibold text-t1">Trouver un événement</h3><p className="mt-2 text-sm leading-relaxed text-t4">Découvre les prochains rendez-vous pour apprendre et échanger.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
           </div>
           <div className="mt-6">

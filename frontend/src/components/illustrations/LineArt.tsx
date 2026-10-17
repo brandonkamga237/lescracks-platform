@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-export type LineArtMotif = 'network' | 'code' | 'book' | 'video' | 'calendar' | 'search' | 'path';
+export type LineArtMotif = 'network' | 'code' | 'calendar';
 
 interface LineArtProps {
   motif: LineArtMotif;
@@ -24,22 +24,6 @@ const MOTIFS: Record<LineArtMotif, ReactNode> = {
       <rect x="114" y="100" width="12" height="40" fill="currentColor" stroke="none" />
     </>
   ),
-  book: (
-    <>
-      <path d="M120 70C100 58 70 56 40 62v120c30-6 60-4 80 8M120 70c20-12 50-14 80-8v120c-30-6-60-4-80 8M120 70v120" />
-      <path opacity="0.45" d="M58 90l44 4M58 110l44 3M58 130l44 2M58 150l32 1M138 94l44-4M138 113l44-3M138 132l44-2" />
-      <path d="M168 57v36l8-8 8 8V56" fill="currentColor" />
-    </>
-  ),
-  video: (
-    <>
-      <rect x="30" y="50" width="180" height="120" rx="4" />
-      <path d="M108 88v44l36-22z" fill="currentColor" />
-      <path opacity="0.35" d="M110 196h100" />
-      <path d="M30 196h80" />
-      <circle cx="110" cy="196" r="5" fill="currentColor" />
-    </>
-  ),
   calendar: (
     <>
       <rect x="36" y="44" width="168" height="160" rx="4" />
@@ -50,20 +34,6 @@ const MOTIFS: Record<LineArtMotif, ReactNode> = {
         return <circle key={i} cx={cx} cy={cy} r="2.5" fill="currentColor" stroke="none" opacity={cx === 144 && cy === 128 ? 1 : 0.45} />;
       })}
       <circle cx="144" cy="128" r="11" />
-    </>
-  ),
-  search: (
-    <>
-      <circle cx="104" cy="104" r="50" />
-      <path d="M140 140l56 56" />
-      <path opacity="0.45" d="M80 104h48" strokeDasharray="2 8" />
-    </>
-  ),
-  path: (
-    <>
-      <path d="M30 190c50 0 40-70 90-70s50-60 90-70" strokeDasharray="2 8" />
-      <circle cx="30" cy="190" r="6" fill="currentColor" />
-      <path d="M200 40l20 20M220 40l-20 20" />
     </>
   ),
 };

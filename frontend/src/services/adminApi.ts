@@ -2,9 +2,9 @@ import { ENV } from '@/config/env';
 import { prepareImage } from '@/lib/image';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminChallenge, AdminSubscriber, AdminSummary, ChallengeDifficulty, ChallengeStatus, ChallengeSubmission, SubmissionStatus, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, ResourceSummary, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
+import type { AdminArticle, AdminChallenge, AdminSubscriber, AdminSummary, ChallengeDifficulty, ChallengeStatus, ChallengeSubmission, SubmissionStatus, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
 
-export interface EbookRequest {
+export interface ArticleRequest {
   title: string;
   description: string;
   coverImage: string;
@@ -13,12 +13,6 @@ export interface EbookRequest {
   status?: ResourceStatus;
   /** A date keeps it a draft until then; null or absent cancels any schedule. */
   scheduledAt?: string | null;
-}
-export interface VideoRequest extends EbookRequest {
-  videoUrl: string;
-  platform: string;
-}
-export interface ArticleRequest extends EbookRequest {
   body: unknown;
 }
 export interface EventRequest {
@@ -58,15 +52,13 @@ export interface ChallengeRequest {
   status: ChallengeStatus;
   scheduledAt?: string | null;
 }
-export interface AdminResourceFilters extends Query {
+export interface AdminArticleFilters extends Query {
   page?: number;
   size?: number;
   search?: string;
   status?: ResourceStatus;
-  kind?: ResourceKind;
-  categoryId?: number;
-  tagId?: number;
 }
+
 /** MEMBER: can sign in; CONTACT: newsletter only. */
 export interface UserFilters {
   kind?: 'MEMBER' | 'CONTACT';
@@ -105,28 +97,13 @@ export interface StatsOverview {
 /** Covers are shrunk before upload so shared links point to a light, preview-friendly image. */
 const cover = (file?: File) => (file ? prepareImage(file, { jpeg: true }) : Promise.resolve(undefined));
 
-function dataBlob(data: EbookRequest | VideoRequest) {
+function dataBlob(data: ArticleRequest) {
   return new Blob([JSON.stringify(data)], { type: 'application/json' });
 }
 
 function eventForm(data: EventRequest, coverImageFile?: File) {
   const form = new FormData();
   form.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
-  if (coverImageFile) form.append('coverImageFile', coverImageFile);
-  return form;
-}
-
-function ebookForm(data: EbookRequest, file?: File, coverImageFile?: File) {
-  const form = new FormData();
-  form.append('data', dataBlob(data));
-  if (file) form.append('file', file);
-  if (coverImageFile) form.append('coverImageFile', coverImageFile);
-  return form;
-}
-
-function videoForm(data: VideoRequest, coverImageFile?: File) {
-  const form = new FormData();
-  form.append('data', dataBlob(data));
   if (coverImageFile) form.append('coverImageFile', coverImageFile);
   return form;
 }
@@ -160,15 +137,11 @@ export const adminApi = {
   me: () => http.get<{ username: string; role: string }>('/admin/auth/me'),
   logout: () => http.post<void>('/admin/auth/logout'),
   overview: (signal?: AbortSignal) => http.get<StatsOverview>('/admin/stats/overview', undefined, signal),
-  resources: (filters: AdminResourceFilters = {}, signal?: AbortSignal) =>
-    http.get<PageResponse<ResourceSummary>>('/resources/admin', { size: 12, sort: 'createdAt,desc', ...filters }, signal),
-  createVideo: async (body: VideoRequest, coverImageFile: File) => http.postForm<ResourceSummary>('/resources/admin/videos', videoForm(body, await cover(coverImageFile))),
-  updateVideo: async (id: number, body: VideoRequest, coverImageFile?: File) => http.putForm<ResourceSummary>(`/resources/admin/videos/${id}`, videoForm(body, await cover(coverImageFile))),
-  createEbook: async (data: EbookRequest, file: File, coverImageFile: File) => http.postForm<ResourceSummary>('/resources/admin/ebooks', ebookForm(data, file, await cover(coverImageFile))),
-  updateEbook: async (id: number, data: EbookRequest, file?: File, coverImageFile?: File) => http.putForm<ResourceSummary>(`/resources/admin/ebooks/${id}`, ebookForm(data, file, await cover(coverImageFile))),
-  createArticle: async (data: ArticleRequest, coverImageFile: File) => http.postForm<ResourceSummary>('/resources/admin/articles', articleForm(data, await cover(coverImageFile))),
-  updateArticle: async (id: number, data: ArticleRequest, coverImageFile?: File) => http.putForm<ResourceSummary>(`/resources/admin/articles/${id}`, articleForm(data, await cover(coverImageFile))),
-  deleteResource: (id: number) => http.delete<void>(`/resources/admin/${id}`),
+  createArticle: async (data: ArticleRequest, coverImageFile: File) => http.postForm<AdminArticle>('/resources/admin/articles', articleForm(data, await cover(coverImageFile))),
+  updateArticle: async (id: number, data: ArticleRequest, coverImageFile?: File) => http.putForm<AdminArticle>(`/resources/admin/articles/${id}`, articleForm(data, await cover(coverImageFile))),
+  articles: (filters: AdminArticleFilters = {}, signal?: AbortSignal) =>
+    http.get<PageResponse<AdminArticle>>('/resources/admin', { size: 12, sort: 'createdAt,desc', ...filters, kind: 'ARTICLE' }, signal),
+  deleteArticle: (id: number) => http.delete<void>(`/resources/admin/${id}`),
   events: (page = 0, signal?: AbortSignal) => http.get<PageResponse<EventSummary>>('/events/admin', { page, size: 12, sort: 'startDate,desc' }, signal),
   createEvent: async (body: EventRequest, coverImageFile: File) => http.postForm<EventSummary>('/events/admin', eventForm(body, await cover(coverImageFile))),
   updateEvent: async (id: number, body: EventRequest, coverImageFile?: File) => http.putForm<EventSummary>(`/events/admin/${id}`, eventForm(body, await cover(coverImageFile))),

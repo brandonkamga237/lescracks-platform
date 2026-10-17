@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { ArrowRight, BookOpen, CalendarDays, CircleUser, FlaskConical, Info, Lock, LogOut, Podcast, Shield, User } from 'lucide-react';
+import { ArrowRight, CalendarDays, CircleUser, FlaskConical, GraduationCap, Info, Lock, LogOut, Newspaper, Podcast, Shield, User } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -11,14 +11,16 @@ interface TabDef {
   to: string;
   label: string;
   icon: LucideIcon;
+  /** Gold even when another tab is active, as in the header. */
+  highlight?: boolean;
 }
 
 const TABS: readonly TabDef[] = [
-  // No home tab: the logo in the header already leads home, and CrackLab earns the slot.
-  { to: '/ressources', label: 'Biblio', icon: BookOpen },
+  // No home tab: the logo in the header already leads home. Talk sits in the account sheet.
+  { to: '/blog', label: 'Blog', icon: Newspaper },
+  { to: '/formations', label: 'Formations', icon: GraduationCap },
+  { to: '/cracklab', label: 'CrackLab', icon: FlaskConical, highlight: true },
   { to: '/evenements', label: 'Agenda', icon: CalendarDays },
-  { to: '/talk', label: 'Talk', icon: Podcast },
-  { to: '/cracklab', label: 'CrackLab', icon: FlaskConical },
 ];
 
 const ACCOUNT_PATHS = ['/profil', '/connexion', '/inscription'];
@@ -60,9 +62,9 @@ export default function MobileTabBar() {
   return (
     <nav aria-label="Navigation principale" className="mode-raised fixed inset-x-0 bottom-0 z-40 border-t border-line pb-[env(safe-area-inset-bottom)] lg:hidden">
       <ul className="grid grid-cols-5">
-        {TABS.map(({ to, label, icon: Icon }) => (
+        {TABS.map(({ to, label, icon: Icon, highlight }) => (
           <li key={to}>
-            <NavLink to={to} end={to === '/'} className={({ isActive }) => `${TAB_ITEM} ${isActive ? 'text-gold-ink' : 'text-t3'}`}>
+            <NavLink to={to} className={({ isActive }) => `${TAB_ITEM} ${isActive || highlight ? 'text-gold-ink' : 'text-t3'}`}>
               <Icon className="h-5 w-5" aria-hidden />
               {label}
             </NavLink>
@@ -90,7 +92,7 @@ export default function MobileTabBar() {
               ) : (
                 <div className="pr-8">
                   <DialogTitle className="font-display text-xl font-bold text-t1">Ton compte</DialogTitle>
-                  <DialogDescription className="mt-1 text-sm text-t3">Ton compte pour télécharger les ebooks, relever les challenges et suivre les ateliers.</DialogDescription>
+                  <DialogDescription className="mt-1 text-sm text-t3">Ton compte pour relever les challenges, suivre les ateliers et recevoir les nouveaux articles.</DialogDescription>
                 </div>
               )}
 
@@ -127,6 +129,10 @@ export default function MobileTabBar() {
               )}
 
               <div>
+                <Link to="/talk" className={row}>
+                  <Podcast className="h-4 w-4 text-t4" aria-hidden />LesCracks Talk
+                  <ArrowRight className="ml-auto h-4 w-4 text-t4" aria-hidden />
+                </Link>
                 <Link to="/a-propos" className={row}>
                   <Info className="h-4 w-4 text-t4" aria-hidden />À propos
                   <ArrowRight className="ml-auto h-4 w-4 text-t4" aria-hidden />

@@ -14,11 +14,11 @@ import { useApi } from '@/hooks/useApi';
 import { checkArticle } from '@/lib/articleChecks';
 import { articleStats, blocksToMarkdown, headingId, markdownToBlocks } from '@/lib/articleMarkdown';
 import { formatScheduleLong, formatScheduleShort } from '@/lib/schedule';
-import { resourcePath } from '@/lib/slugs';
+import { articlePath } from '@/lib/slugs';
 import { adminApi, type ArticleRequest } from '@/services/adminApi';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
-import type { ArticleBlock, ResourceStatus, ResourceSummary, Tag } from '@/services/types';
+import type { AdminArticle, ArticleBlock, ResourceStatus, Tag } from '@/services/types';
 
 type Mode = 'write' | 'split' | 'preview';
 
@@ -94,9 +94,9 @@ export default function ArticleStudio() {
   const invalidId = Boolean(id) && articleId === undefined;
   const location = useLocation();
   const navigate = useNavigate();
-  const passed = (location.state as { resource?: ResourceSummary } | null)?.resource;
+  const passed = (location.state as { resource?: AdminArticle } | null)?.resource;
 
-  const [resource, setResource] = useState<ResourceSummary | null>(passed && passed.id === articleId ? passed : null);
+  const [resource, setResource] = useState<AdminArticle | null>(passed && passed.id === articleId ? passed : null);
   const [loadError, setLoadError] = useState(invalidId ? 'Cet article est introuvable.' : '');
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [saved, setSaved] = useState<Draft>(EMPTY);
@@ -122,7 +122,7 @@ export default function ArticleStudio() {
   useEffect(() => {
     if (!articleId || resource) return;
     const controller = new AbortController();
-    adminApi.resources({ kind: 'ARTICLE', size: 200 }, controller.signal)
+    adminApi.articles({ size: 200 }, controller.signal)
       .then((page) => {
         const found = page.content.find((item) => item.id === articleId);
         if (found) setResource(found);
@@ -269,7 +269,7 @@ export default function ArticleStudio() {
     return (
       <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-5 bg-black px-6 text-center text-t1">
         <p className="font-display text-2xl font-bold">{loadError}</p>
-        <Link to="/admin/ressources" className="btn-secondary"><ArrowLeft className="h-4 w-4" aria-hidden />Retour aux ressources</Link>
+        <Link to="/admin/blog" className="btn-secondary"><ArrowLeft className="h-4 w-4" aria-hidden />Retour au blog</Link>
       </div>
     );
   }
@@ -315,7 +315,7 @@ export default function ArticleStudio() {
       <SEO title={draft.title ? `${draft.title} · Studio` : 'Studio d’écriture'} description="Écrire un article LesCracks." url="/admin/articles" />
 
       <header className="mode-raised flex min-h-14 flex-wrap items-center gap-x-3 gap-y-2 border-b border-line-soft px-3 py-2 sm:px-4">
-        <Link to="/admin/ressources" onClick={leave} className="inline-flex h-9 items-center gap-1.5 rounded px-2 text-sm text-t3 transition-colors hover:bg-noir-800 hover:text-t1">
+        <Link to="/admin/blog" onClick={leave} className="inline-flex h-9 items-center gap-1.5 rounded px-2 text-sm text-t3 transition-colors hover:bg-noir-800 hover:text-t1">
           <ArrowLeft className="h-4 w-4" aria-hidden /><span className="hidden sm:inline">Ressources</span>
         </Link>
         <span aria-hidden className="hidden h-5 w-px bg-line sm:block" />
@@ -468,7 +468,7 @@ export default function ArticleStudio() {
                 <p className="font-medium text-t1">Visibilité</p>
                 <p className="mt-1 text-t3">{status === 'PUBLISHED' ? 'Publié : visible par tout le monde.' : scheduledAt ? `Programmé : en ligne automatiquement le ${formatScheduleLong(scheduledAt)}.` : 'Brouillon : visible uniquement dans l’administration.'}</p>
                 {resource && status === 'PUBLISHED' && (
-                  <a href={resourcePath(resource)} target="_blank" rel="noopener noreferrer" className="link mt-3 inline-flex items-center gap-1.5">Voir l’article publié<ArrowUpRight className="h-4 w-4" aria-hidden /></a>
+                  <a href={articlePath(resource)} target="_blank" rel="noopener noreferrer" className="link mt-3 inline-flex items-center gap-1.5">Voir l’article publié<ArrowUpRight className="h-4 w-4" aria-hidden /></a>
                 )}
               </div>
             </div>

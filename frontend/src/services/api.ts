@@ -1,19 +1,11 @@
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
 import type {
-  AuthProvider, Category, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse, ResourceKind,
-  NewsletterStatus, ResourceLikeStatus, ResourceSummary, Tag, TalkVideo, UserIdentity, UserProfile,
+  ArticleSummary, AuthProvider, Category, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse,
+  NewsletterStatus, ResourceLikeStatus, Tag, TalkVideo, UserIdentity, UserProfile,
   UserProfileUpdate, OnboardingAnswers, SignupContext,
 } from '@/services/types';
 
-export interface CatalogueFilters extends Query {
-  kind?: ResourceKind;
-  categoryId?: number;
-  search?: string;
-  tagId?: number;
-  page?: number;
-  size?: number;
-}
 
 export interface CrackLabFilters extends Query {
   difficulty?: ChallengeDifficulty;
@@ -40,10 +32,10 @@ export const api = {
   forgotPassword: (email: string) => http.post<void>('/auth/forgot-password', { email }),
   resetPassword: (token: string, password: string) => http.post<void>('/auth/reset-password', { token, password }),
   logout: () => http.post<void>('/auth/logout'),
-  resources: (filters: CatalogueFilters = {}, signal?: AbortSignal) =>
-    http.get<PageResponse<ResourceSummary>>('/resources', filters, signal),
-  resource: (slugOrId: string | number, signal?: AbortSignal) =>
-    http.get<ResourceSummary>(`/resources/${slugOrId}`, undefined, signal),
+  articles: (page = 0, size = 12, signal?: AbortSignal) =>
+    http.get<PageResponse<ArticleSummary>>('/resources', { kind: 'ARTICLE', page, size }, signal),
+  article: (slugOrId: string, signal?: AbortSignal) =>
+    http.get<ArticleSummary>(`/resources/${slugOrId}`, undefined, signal),
   events: (filters: { type?: EventType; format?: EventFormat; page?: number; size?: number } = {}, signal?: AbortSignal) =>
     http.get<PageResponse<EventSummary>>('/events', filters, signal),
   upcomingEvents: (page = 0, size = 12, signal?: AbortSignal) =>
@@ -65,7 +57,6 @@ export const api = {
   unlinkIdentity: (provider: AuthProvider) => http.delete<void>(`/me/identities/${provider}`),
   updateProfile: (body: UserProfileUpdate) => http.patch<UserProfile>('/me', body),
   onboard: (answers: OnboardingAnswers) => http.put<UserProfile>('/me/onboarding', answers),
-  downloadEbook: (id: number) => http.download(`/resources/${id}/download`),
   uploadAvatar: (file: File) => {
     const form = new FormData();
     form.append('file', file);

@@ -155,8 +155,8 @@ export default function AuthPage({ mode }: AuthPageProps) {
       <section className="order-2 lg:order-1">
         <Link to="/" className="kicker">LesCracks / Ton espace</Link>
         <h1 className="mt-4 max-w-lg font-display text-4xl font-bold leading-[0.94] tracking-tight text-t1 sm:text-5xl lg:text-7xl lg:leading-[0.9]">{registering ? <>Ta prochaine étape<br /><span className="text-gold-ink">commence ici.</span></> : <>Le bon endroit<br />pour <span className="text-gold-ink">aller plus loin.</span></>}</h1>
-        <p className="mt-4 max-w-md text-base leading-relaxed text-t3 sm:text-lg">{registering ? 'Crée ton compte, explore les ressources et trouve ton prochain rendez-vous tech.' : 'Retrouve ton espace personnel. Les ressources et les événements t’attendent, à ton rythme.'}</p>
-        <div className="mt-6 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" /><p>Tu peux aussi découvrir le catalogue sans compte.<br /><Link to="/ressources" className="mt-2 inline-flex items-center gap-2 text-t2 underline underline-offset-4">Explorer les ressources <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link></p></div>
+        <p className="mt-4 max-w-md text-base leading-relaxed text-t3 sm:text-lg">{registering ? 'Crée ton compte, relève des challenges et trouve ton prochain rendez-vous tech.' : 'Retrouve ton espace personnel. Les challenges et les événements t’attendent, à ton rythme.'}</p>
+        <div className="mt-6 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" /><p>Tu peux aussi lire le blog sans compte.<br /><Link to="/blog" className="mt-2 inline-flex items-center gap-2 text-t2 underline underline-offset-4">Lire le blog <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link></p></div>
       </section>
       <section className="order-1 mode-raised rounded-lg p-5 sm:p-9 lg:order-2" aria-labelledby="auth-heading">
         <p className="text-xs tracking-wide text-gold-ink">{registering ? 'Bienvenue dans la communauté' : 'Heureux de te retrouver'}</p>
@@ -176,7 +176,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
             {registering && (
               <label className="flex items-start gap-3 text-sm text-t3">
                 <input type="checkbox" checked={newsletter} onChange={(event) => setNewsletter(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#d4af37]" />
-                <span>Recevoir la newsletter : les nouvelles ressources et les prochains ateliers, par email. Tu peux te désabonner à tout moment depuis ton compte.</span>
+                <span>Recevoir la newsletter : les nouveaux articles et les prochains ateliers, par email. Tu peux te désabonner à tout moment depuis ton compte.</span>
               </label>
             )}
             {error && <p role="alert" className="rounded border border-error/20 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
