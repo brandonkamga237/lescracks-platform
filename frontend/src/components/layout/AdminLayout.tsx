@@ -23,7 +23,7 @@ const SECTIONS = [
   { to: '/admin/talks', label: 'Talk', group: 'Contenu', icon: Podcast },
   { to: '/admin/cracklab/challenges', label: 'Challenges', group: 'CrackLab', icon: FlaskConical },
   { to: '/admin/cracklab/reponses', label: 'À noter', group: 'CrackLab', icon: ClipboardCheck },
-  { to: '/admin/categories', label: 'Catégories', group: 'Organisation', icon: FolderOpen },
+  { to: '/admin/categories', label: 'Thèmes', group: 'Organisation', icon: FolderOpen },
   { to: '/admin/tags', label: 'Tags', group: 'Organisation', icon: Tags },
   { to: '/admin/admins', label: 'Administrateurs', group: 'Sécurité', icon: Shield },
 ] as const;

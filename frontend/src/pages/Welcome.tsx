@@ -143,7 +143,7 @@ export default function Welcome() {
           {step === 2 && (
             <>
               <h1 className="font-display text-3xl font-bold leading-tight tracking-tight sm:text-4xl">Qu’est-ce qui t’intéresse ?</h1>
-              <p className="mt-3 text-t3">Choisis autant de sujets que tu veux : le blog et les challenges s’en servent pour te guider.</p>
+              <p className="mt-3 text-t3">Choisis les thèmes qui t’intéressent : le blog et les challenges s’en servent pour te guider.</p>
               <div className="mt-8 flex flex-wrap gap-2" role="group" aria-label="Centres d’intérêt">
                 {categories.loading && <p role="status" className="text-sm text-t4">Chargement des sujets…</p>}
                 {categories.data?.map((category) => {
