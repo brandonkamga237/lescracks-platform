@@ -14,11 +14,11 @@ import { useApi } from '@/hooks/useApi';
 import { checkArticle } from '@/lib/articleChecks';
 import { articleStats, blocksToMarkdown, headingId, markdownToBlocks } from '@/lib/articleMarkdown';
 import { formatScheduleLong, formatScheduleShort } from '@/lib/schedule';
-import { resourcePath } from '@/lib/slugs';
+import { articlePath } from '@/lib/slugs';
 import { adminApi, type ArticleRequest } from '@/services/adminApi';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
-import type { ArticleBlock, ResourceStatus, ResourceSummary, Tag } from '@/services/types';
+import type { AdminArticle, ArticleBlock, ResourceStatus, Tag } from '@/services/types';
 
 type Mode = 'write' | 'split' | 'preview';
 
@@ -88,15 +88,56 @@ const dayFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeSt
  * exact renderer readers get. A local copy is kept while typing; the server is only written
  * when the author saves.
  */
+interface TagPickerProps {
+  tags: Tag[];
+  selected: number[];
+  query: string;
+  busy: boolean;
+  error: string;
+  onQuery: (query: string) => void;
+  onToggle: (id: number) => void;
+  onCreate: (name: string) => void;
+}
+
+/** Chosen tags first, then those matching what is typed; a new word becomes a tag in one click. */
+function TagPicker({ tags, selected, query, busy, error, onQuery, onToggle, onCreate }: TagPickerProps) {
+  const needle = query.trim().toLocaleLowerCase('fr');
+  const chosen = tags.filter((tag) => selected.includes(tag.id));
+  const matches = needle ? tags.filter((tag) => !selected.includes(tag.id) && tag.name.toLocaleLowerCase('fr').includes(needle)).slice(0, 12) : [];
+  const exists = tags.some((tag) => tag.name.toLocaleLowerCase('fr') === needle);
+  const chip = (tag: Tag, on: boolean) => (
+    <button key={tag.id} type="button" aria-pressed={on} onClick={() => onToggle(tag.id)}
+      className={`min-h-9 rounded border px-3 text-xs transition-colors ${on ? 'border-gold-400 bg-gold-400/10 text-gold-ink' : 'border-line text-t3 hover:text-t1'}`}>
+      {tag.name}
+    </button>
+  );
+  return (
+    <div>
+      <label htmlFor="studio-tag-search" className="text-sm font-medium text-t1">Tags</label>
+      {chosen.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{chosen.map((tag) => chip(tag, true))}</div>}
+      <input id="studio-tag-search" value={query} maxLength={60} onChange={(event) => onQuery(event.target.value)}
+        onKeyDown={(event) => { if (event.key === 'Enter') { event.preventDefault(); if (needle && !exists && !busy) onCreate(query.trim()); } }}
+        placeholder="Chercher ou créer un tag…" className="input mt-2" />
+      {matches.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{matches.map((tag) => chip(tag, false))}</div>}
+      {needle && !exists && (
+        <button type="button" disabled={busy} onClick={() => onCreate(query.trim())} className="mt-2 text-xs font-medium text-gold-ink underline underline-offset-4 disabled:opacity-60">
+          {busy ? 'Création…' : `Créer le tag « ${query.trim()} »`}
+        </button>
+      )}
+      {error && <p role="alert" className="mt-2 text-xs text-error-ink">{error}</p>}
+    </div>
+  );
+}
+
 export default function ArticleStudio() {
   const { id } = useParams();
   const articleId = id && /^\d+$/.test(id) ? Number(id) : undefined;
   const invalidId = Boolean(id) && articleId === undefined;
   const location = useLocation();
   const navigate = useNavigate();
-  const passed = (location.state as { resource?: ResourceSummary } | null)?.resource;
+  const passed = (location.state as { resource?: AdminArticle } | null)?.resource;
 
-  const [resource, setResource] = useState<ResourceSummary | null>(passed && passed.id === articleId ? passed : null);
+  const [resource, setResource] = useState<AdminArticle | null>(passed && passed.id === articleId ? passed : null);
   const [loadError, setLoadError] = useState(invalidId ? 'Cet article est introuvable.' : '');
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [saved, setSaved] = useState<Draft>(EMPTY);
@@ -122,7 +163,7 @@ export default function ArticleStudio() {
   useEffect(() => {
     if (!articleId || resource) return;
     const controller = new AbortController();
-    adminApi.resources({ kind: 'ARTICLE', size: 200 }, controller.signal)
+    adminApi.articles({ size: 200 }, controller.signal)
       .then((page) => {
         const found = page.content.find((item) => item.id === articleId);
         if (found) setResource(found);
@@ -150,17 +191,20 @@ export default function ArticleStudio() {
   }, [ready, key]);
 
   const categories = useApi((signal) => api.categories(signal), []);
-  const tags = useApi((signal) => (draft.categoryId ? api.tags(Number(draft.categoryId), signal) : Promise.resolve([] as Tag[])), [draft.categoryId]);
+  const tags = useApi((signal) => api.tags(signal), []);
+  const [tagQuery, setTagQuery] = useState('');
+  const [tagBusy, setTagBusy] = useState(false);
+  const [tagError, setTagError] = useState('');
 
-  // The API returns tag names; map them to ids once the category's tags are known.
+  // The API returns tag names; map them to ids once the tags are known.
   useEffect(() => {
-    if (tagsMatched || !resource || !tags.data || draft.categoryId !== resource.categoryId) return;
+    if (tagsMatched || !resource || !tags.data) return;
     const names = new Set(resource.tags ?? []);
     const ids = tags.data.filter((tag) => names.has(tag.name)).map((tag) => tag.id);
     setDraft((value) => ({ ...value, tagIds: ids }));
     setSaved((value) => ({ ...value, tagIds: ids }));
     setTagsMatched(true);
-  }, [resource, tags.data, draft.categoryId, tagsMatched]);
+  }, [resource, tags.data, tagsMatched]);
 
   const dirty = ready && (!sameDraft(draft, saved) || coverFile !== null);
 
@@ -269,7 +313,7 @@ export default function ArticleStudio() {
     return (
       <div className="flex min-h-[100dvh] flex-col items-center justify-center gap-5 bg-black px-6 text-center text-t1">
         <p className="font-display text-2xl font-bold">{loadError}</p>
-        <Link to="/admin/ressources" className="btn-secondary"><ArrowLeft className="h-4 w-4" aria-hidden />Retour aux ressources</Link>
+        <Link to="/admin/blog" className="btn-secondary"><ArrowLeft className="h-4 w-4" aria-hidden />Retour au blog</Link>
       </div>
     );
   }
@@ -315,7 +359,7 @@ export default function ArticleStudio() {
       <SEO title={draft.title ? `${draft.title} · Studio` : 'Studio d’écriture'} description="Écrire un article LesCracks." url="/admin/articles" />
 
       <header className="mode-raised flex min-h-14 flex-wrap items-center gap-x-3 gap-y-2 border-b border-line-soft px-3 py-2 sm:px-4">
-        <Link to="/admin/ressources" onClick={leave} className="inline-flex h-9 items-center gap-1.5 rounded px-2 text-sm text-t3 transition-colors hover:bg-noir-800 hover:text-t1">
+        <Link to="/admin/blog" onClick={leave} className="inline-flex h-9 items-center gap-1.5 rounded px-2 text-sm text-t3 transition-colors hover:bg-noir-800 hover:text-t1">
           <ArrowLeft className="h-4 w-4" aria-hidden /><span className="hidden sm:inline">Ressources</span>
         </Link>
         <span aria-hidden className="hidden h-5 w-px bg-line sm:block" />
@@ -436,39 +480,37 @@ export default function ArticleStudio() {
                 <p className="mt-2 text-xs leading-relaxed text-t4">Format paysage 16:9 conseillé, au moins 1600 px de large.</p>
               </div>
 
-              <label className="block text-sm font-medium text-t1">Catégorie
+              <label className="block text-sm font-medium text-t1">Thème
                 <select value={draft.categoryId} disabled={categories.loading || !!categories.error}
-                  onChange={(event) => update({ categoryId: event.target.value ? Number(event.target.value) : '', tagIds: [] })} className="input mt-2">
-                  <option value="">Choisir une catégorie</option>
+                  onChange={(event) => update({ categoryId: event.target.value ? Number(event.target.value) : '' })} className="input mt-2">
+                  <option value="">Choisir un thème</option>
                   {categories.data?.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
                 </select>
               </label>
 
-              {draft.categoryId !== '' && (
-                <div>
-                  <p className="text-sm font-medium text-t1">Sujets</p>
-                  {tags.data?.length ? (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {tags.data.map((tag) => {
-                        const on = draft.tagIds.includes(tag.id);
-                        return (
-                          <button key={tag.id} type="button" aria-pressed={on}
-                            onClick={() => update({ tagIds: on ? draft.tagIds.filter((tagId) => tagId !== tag.id) : [...draft.tagIds, tag.id] })}
-                            className={`min-h-9 rounded border px-3 text-xs transition-colors ${on ? 'border-gold-400 bg-gold-400/10 text-gold-ink' : 'border-line text-t3 hover:text-t1'}`}>
-                            {tag.name}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : <p className="mt-2 text-xs text-t4">{tags.loading ? 'Chargement…' : <>Aucun sujet pour cette catégorie. <Link to="/admin/tags" className="text-gold-ink underline">Créer un sujet</Link>.</>}</p>}
-                </div>
-              )}
+              <TagPicker tags={tags.data ?? []} selected={draft.tagIds} query={tagQuery} busy={tagBusy} error={tagError}
+                onQuery={setTagQuery}
+                onToggle={(id) => update({ tagIds: draft.tagIds.includes(id) ? draft.tagIds.filter((tagId) => tagId !== id) : [...draft.tagIds, id] })}
+                onCreate={async (name) => {
+                  setTagBusy(true);
+                  setTagError('');
+                  try {
+                    const created = await adminApi.createTag(name);
+                    tags.reload();
+                    update({ tagIds: [...draft.tagIds, created.id] });
+                    setTagQuery('');
+                  } catch (cause) {
+                    setTagError(cause instanceof ApiError ? cause.message : 'Le tag n’a pas pu être créé.');
+                  } finally {
+                    setTagBusy(false);
+                  }
+                }} />
 
               <div className="border-t border-line-soft pt-6 text-sm">
                 <p className="font-medium text-t1">Visibilité</p>
                 <p className="mt-1 text-t3">{status === 'PUBLISHED' ? 'Publié : visible par tout le monde.' : scheduledAt ? `Programmé : en ligne automatiquement le ${formatScheduleLong(scheduledAt)}.` : 'Brouillon : visible uniquement dans l’administration.'}</p>
                 {resource && status === 'PUBLISHED' && (
-                  <a href={resourcePath(resource)} target="_blank" rel="noopener noreferrer" className="link mt-3 inline-flex items-center gap-1.5">Voir l’article publié<ArrowUpRight className="h-4 w-4" aria-hidden /></a>
+                  <a href={articlePath(resource)} target="_blank" rel="noopener noreferrer" className="link mt-3 inline-flex items-center gap-1.5">Voir l’article publié<ArrowUpRight className="h-4 w-4" aria-hidden /></a>
                 )}
               </div>
             </div>

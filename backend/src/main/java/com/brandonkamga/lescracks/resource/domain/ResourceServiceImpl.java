@@ -1,13 +1,7 @@
 package com.brandonkamga.lescracks.resource.domain;
 
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
-import com.brandonkamga.lescracks.resource.api.dto.ArticleResourceRequest;
-import com.brandonkamga.lescracks.resource.api.dto.EbookResourceRequest;
-import com.brandonkamga.lescracks.resource.api.dto.VideoResourceRequest;
 import com.brandonkamga.lescracks.resource.infra.ArticleRepository;
-import com.brandonkamga.lescracks.resource.infra.DocumentRepository;
-import com.brandonkamga.lescracks.resource.infra.EbookRepository;
-import com.brandonkamga.lescracks.resource.infra.ExternalVideoReferenceRepository;
 import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
@@ -16,7 +10,6 @@ import com.brandonkamga.lescracks.shared.util.Slugs;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 import com.brandonkamga.lescracks.taxonomy.domain.Tag;
 import com.brandonkamga.lescracks.taxonomy.domain.TaxonomyService;
-import com.brandonkamga.lescracks.taxonomy.infra.TagRepository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,8 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,28 +29,18 @@ import org.springframework.data.domain.Pageable;
 @Transactional
 public class ResourceServiceImpl implements ResourceService {
     private final ResourceRepository resources;
-    private final EbookRepository ebooks;
-    private final ExternalVideoReferenceRepository videos;
     private final ArticleRepository articles;
-    private final DocumentRepository documents;
-    private final TagRepository tags;
     private final StorageService storage;
     private final TaxonomyService taxonomy;
     private final NewsletterService newsletter;
     private final ArticleBody articleBody;
     private final ObjectMapper mapper;
 
-    public ResourceServiceImpl(ResourceRepository resources, EbookRepository ebooks,
-                               ExternalVideoReferenceRepository videos, ArticleRepository articles,
-                               DocumentRepository documents, TagRepository tags,
+    public ResourceServiceImpl(ResourceRepository resources, ArticleRepository articles,
                                StorageService storage, TaxonomyService taxonomy,
                                NewsletterService newsletter, ArticleBody articleBody, ObjectMapper mapper) {
         this.resources = resources;
-        this.ebooks = ebooks;
-        this.videos = videos;
         this.articles = articles;
-        this.documents = documents;
-        this.tags = tags;
         this.storage = storage;
         this.taxonomy = taxonomy;
         this.newsletter = newsletter;
@@ -73,9 +56,8 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Resource> search(ResourceStatus status, String search, String kind, Long categoryId, Long tagId, Pageable pageable) {
-        return resources.search(status, search == null || search.isBlank() ? null : search.trim(),
-                kind == null || kind.isBlank() ? null : kind.trim().toUpperCase(), categoryId, tagId, pageable);
+    public Page<Resource> search(ResourceStatus status, String search, Long categoryId, Long tagId, Pageable pageable) {
+        return resources.search(status, search == null || search.isBlank() ? null : search.trim(), categoryId, tagId, pageable);
     }
 
     @Override
@@ -117,98 +99,33 @@ public class ResourceServiceImpl implements ResourceService {
                 .orElseThrow(() -> new NotFoundException("Resource", "slug", slugOrId));
     }
 
-    private java.util.Optional<Long> parseId(String value) {
+    private Optional<Long> parseId(String value) {
         try {
-            return java.util.Optional.of(Long.parseLong(value));
+            return Optional.of(Long.parseLong(value));
         } catch (NumberFormatException ignored) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
     }
 
     @Override
-    public Resource createVideo(VideoResourceRequest request, MultipartFile coverImageFile) {
-        String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, null);
-        Resource resource = base(request.title(), request.description(), coverImage,
-                request.categoryId(), request.status(), request.scheduledAt(), request.tagIds());
+    public Resource createArticle(ArticleContent content, MultipartFile coverImageFile) {
+        String coverImage = resolveCoverImage(content.coverImage(), coverImageFile, null);
+        Resource resource = base(content.title(), content.description(), coverImage,
+                content.categoryId(), content.status(), content.scheduledAt(), content.tagIds());
         Resource saved = resources.save(resource);
-        videos.save(ExternalVideoReference.builder().resource(saved)
-                .videoUrl(request.videoUrl().trim()).platform(request.platform().trim()).build());
+        persistArticle(saved, content.body());
         if (saved.getStatus() == ResourceStatus.PUBLISHED) newsletter.notifyResourceSubscribers(saved);
         return saved;
     }
 
     @Override
-    public Resource updateVideo(Long id, VideoResourceRequest request, MultipartFile coverImageFile) {
-        Resource resource = require(id);
-        ensureVideo(resource);
-        String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, resource.getCoverImage());
-        apply(resource, request.title(), request.description(), coverImage, request.categoryId(), request.status(), request.scheduledAt(), request.tagIds());
-        ExternalVideoReference video = videos.findByResourceId(id).orElseThrow();
-        video.setVideoUrl(request.videoUrl().trim());
-        video.setPlatform(request.platform().trim());
-        return resource;
-    }
-
-    @Override
-    public Resource createEbook(EbookResourceRequest request, MultipartFile file, MultipartFile coverImageFile) {
-        validateFile(file);
-        String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, null);
-        Resource resource = base(request.title(), request.description(), coverImage,
-                request.categoryId(), request.status(), request.scheduledAt(), request.tagIds());
-        Resource saved = resources.save(resource);
-        try {
-            String key = storage.store(file.getOriginalFilename(), file.getBytes(), file.getContentType());
-            Document document = documents.save(Document.builder().file(key)
-                    .format(file.getContentType() == null ? "application/octet-stream" : file.getContentType())
-                    .fileSize(file.getSize()).build());
-            ebooks.save(Ebook.builder().resource(saved).document(document).build());
-            if (saved.getStatus() == ResourceStatus.PUBLISHED) newsletter.notifyResourceSubscribers(saved);
-            return saved;
-        } catch (IOException exception) {
-            throw new BadRequestException("Le fichier ebook n'a pas pu être lu.");
-        }
-    }
-
-    @Override
-    public Resource updateEbook(Long id, EbookResourceRequest request, MultipartFile file, MultipartFile coverImageFile) {
-        Resource resource = require(id);
-        ensureEbook(resource);
-        String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, resource.getCoverImage());
-        apply(resource, request.title(), request.description(), coverImage, request.categoryId(), request.status(), request.scheduledAt(), request.tagIds());
-        if (file != null && !file.isEmpty()) {
-            Ebook ebook = ebooks.findByResourceId(id).orElseThrow();
-            Document old = ebook.getDocument();
-            try {
-                String key = storage.store(file.getOriginalFilename(), file.getBytes(), file.getContentType());
-                old.setFile(key);
-                old.setFormat(file.getContentType() == null ? "application/octet-stream" : file.getContentType());
-                old.setFileSize(file.getSize());
-            } catch (IOException exception) {
-                throw new BadRequestException("Le fichier ebook n'a pas pu être lu.");
-            }
-        }
-        return resource;
-    }
-
-    @Override
-    public Resource createArticle(ArticleResourceRequest request, MultipartFile coverImageFile) {
-        String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, null);
-        Resource resource = base(request.title(), request.description(), coverImage,
-                request.categoryId(), request.status(), request.scheduledAt(), request.tagIds());
-        Resource saved = resources.save(resource);
-        persistArticle(saved, request.body());
-        if (saved.getStatus() == ResourceStatus.PUBLISHED) newsletter.notifyResourceSubscribers(saved);
-        return saved;
-    }
-
-    @Override
-    public Resource updateArticle(Long id, ArticleResourceRequest request, MultipartFile coverImageFile) {
+    public Resource updateArticle(Long id, ArticleContent content, MultipartFile coverImageFile) {
         Resource resource = require(id);
         ensureArticle(resource);
-        String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, resource.getCoverImage());
-        apply(resource, request.title(), request.description(), coverImage, request.categoryId(), request.status(), request.scheduledAt(), request.tagIds());
+        String coverImage = resolveCoverImage(content.coverImage(), coverImageFile, resource.getCoverImage());
+        apply(resource, content.title(), content.description(), coverImage, content.categoryId(), content.status(), content.scheduledAt(), content.tagIds());
         Article article = articles.findByResourceId(id).orElseThrow();
-        persistArticleBody(article, request.body());
+        persistArticleBody(article, content.body());
         return resource;
     }
 
@@ -217,15 +134,13 @@ public class ResourceServiceImpl implements ResourceService {
     public Page<Resource> all(Pageable pageable) { return resources.findAll(pageable); }
 
     @Override
+    @Transactional(readOnly = true)
+    public Optional<Article> article(Long resourceId) { return articles.findByResourceId(resourceId); }
+
+    @Override
     public void delete(Long id) {
         Resource resource = require(id);
         deleteCoverImage(resource.getCoverImage());
-        ebooks.findByResourceId(id).ifPresent(ebook -> {
-            storage.delete(ebook.getDocument().getFile());
-            ebooks.delete(ebook);
-            documents.delete(ebook.getDocument());
-        });
-        videos.findByResourceId(id).ifPresent(videos::delete);
         articles.findByResourceId(id).ifPresent(articles::delete);
         resources.delete(resource);
     }
@@ -300,7 +215,7 @@ public class ResourceServiceImpl implements ResourceService {
 
     private void applyTags(Resource resource, Set<Long> tagIds) {
         if (tagIds == null) return;
-        Set<Tag> selected = new HashSet<>(tags.findAllById(tagIds));
+        Set<Tag> selected = taxonomy.requireAll(tagIds);
         resource.getTags().clear();
         resource.getTags().addAll(selected);
     }
@@ -328,18 +243,6 @@ public class ResourceServiceImpl implements ResourceService {
         if (file.getSize() > 5 * 1024 * 1024) {
             throw new BadRequestException("L'image de couverture ne doit pas dépasser 5 Mo.");
         }
-    }
-
-    private void ensureVideo(Resource resource) {
-        if (!videos.existsById(resource.getId())) throw new BadRequestException("Cette ressource n'est pas une vidéo externe.");
-    }
-
-    private void ensureEbook(Resource resource) {
-        if (!ebooks.existsById(resource.getId())) throw new BadRequestException("Cette ressource n'est pas un ebook.");
-    }
-
-    private void validateFile(MultipartFile file) {
-        if (file == null || file.isEmpty()) throw new BadRequestException("Le fichier ebook est obligatoire.");
     }
 
     private void persistArticle(Resource resource, com.fasterxml.jackson.databind.JsonNode body) {

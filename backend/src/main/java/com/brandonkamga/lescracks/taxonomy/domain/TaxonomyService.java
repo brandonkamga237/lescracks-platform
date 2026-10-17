@@ -5,10 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * How the catalogue is organised: categories, and the tags that belong to them.
- *
- * The two live together because they are never used apart — a tag without its category is
- * meaningless, and every screen that lists one lists the other.
+ * How articles are organised: a few themes (categories, curated by admins, also used as member
+ * interests) and free tags, unique by name, that authors put on an article.
  */
 public interface TaxonomyService {
 
@@ -18,16 +16,15 @@ public interface TaxonomyService {
 
     Category renameCategory(Long id, String name);
 
-    /** Refuses while resources still point at it, rather than orphaning them. */
+    /** Refuses while articles still use the theme, rather than orphaning them. */
     void deleteCategory(Long id);
 
     List<Tag> tags();
 
-    List<Tag> tagsIn(Long categoryId);
 
-    Tag createTag(String name, Long categoryId);
+    Tag createTag(String name);
 
-    Tag updateTag(Long id, String name, Long categoryId);
+    Tag renameTag(Long id, String name);
 
     void deleteTag(Long id);
 

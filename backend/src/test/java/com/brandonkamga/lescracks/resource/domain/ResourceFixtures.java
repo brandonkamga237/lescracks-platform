@@ -18,8 +18,8 @@ public final class ResourceFixtures {
         return Category.builder().name(name).slug(name.toLowerCase()).build();
     }
 
-    public static Tag tag(Category category, String name) {
-        return Tag.builder().category(category).name(name).build();
+    public static Tag tag(String name) {
+        return Tag.builder().name(name).build();
     }
 
     /** A resource with every non-nullable column filled, ready to be saved or stubbed. */
@@ -34,7 +34,4 @@ public final class ResourceFixtures {
                 .build();
     }
 
-    public static Document document(String key) {
-        return Document.builder().file(key).format("application/pdf").fileSize(1_024L).build();
-    }
 }

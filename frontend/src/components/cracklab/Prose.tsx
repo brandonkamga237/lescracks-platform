@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { ArticleBlocks } from '@/components/resources/ArticleRenderer';
+import { ArticleBlocks } from '@/components/blog/ArticleRenderer';
 import { markdownToBlocks } from '@/lib/articleMarkdown';
 
 interface ProseProps {

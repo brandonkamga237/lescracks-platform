@@ -33,7 +33,7 @@ export default function NewsletterConfirm() {
         <p className="kicker">LesCracks / Newsletter</p>
         <h1 className="mt-4 font-display text-3xl font-bold">{state === 'done' ? 'Bienvenue.' : 'Confirmer ton inscription'}</h1>
         {state === 'done' ? (
-          <p role="status" className="mt-4 text-sm leading-relaxed text-t3">C’est confirmé : les nouvelles ressources et les prochains ateliers arriveront dans ta boîte mail.</p>
+          <p role="status" className="mt-4 text-sm leading-relaxed text-t3">C’est confirmé : les nouveaux articles et les prochains ateliers arriveront dans ta boîte mail.</p>
         ) : (
           <>
             <p className="mt-4 text-sm leading-relaxed text-t3">Un clic pour recevoir la newsletter LesCracks.</p>
@@ -46,7 +46,7 @@ export default function NewsletterConfirm() {
             )}
           </>
         )}
-        <Link to="/ressources" className="mt-6 block text-center text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Voir les ressources</Link>
+        <Link to="/blog" className="mt-6 block text-center text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Lire le blog</Link>
       </section>
     </div>
   </Layout>;

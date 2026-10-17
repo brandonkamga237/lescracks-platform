@@ -31,25 +31,25 @@ export default function AdminCategories() {
     finally { setBusy(null); }
   }
 
-  return <AdminSection title="Catégories" description="Les grands repères du catalogue. Chaque catégorie regroupe ses propres tags." action={<Link to="/admin/tags" className="btn-secondary">Gérer les tags</Link>}>
-    <form onSubmit={(event) => { event.preventDefault(); if (name.trim()) void act('create', () => adminApi.createCategory(name.trim()), () => { setName(''); setNotice('La catégorie a été créée.'); }); }} className="mb-6 flex flex-wrap items-end gap-4 rounded-lg border border-line-soft bg-card p-6">
-      <label className="min-w-48 flex-1 text-sm text-t2">Nouvelle catégorie<input required maxLength={80} value={name} disabled={!!busy} onChange={(event) => setName(event.target.value)} placeholder="Ex. Développement web" className={field} /></label>
+  return <AdminSection title="Thèmes" description="Les grands repères du blog, aussi proposés aux membres comme centres d’intérêt. Garde-en peu : c’est ce qui les rend lisibles." action={<Link to="/admin/tags" className="btn-secondary">Gérer les tags</Link>}>
+    <form onSubmit={(event) => { event.preventDefault(); if (name.trim()) void act('create', () => adminApi.createCategory(name.trim()), () => { setName(''); setNotice('Le thème a été créé.'); }); }} className="mb-6 flex flex-wrap items-end gap-4 rounded-lg border border-line-soft bg-card p-6">
+      <label className="min-w-48 flex-1 text-sm text-t2">Nouveau thème<input required maxLength={80} value={name} disabled={!!busy} onChange={(event) => setName(event.target.value)} placeholder="Ex. Développement web" className={field} /></label>
       <button type="submit" disabled={!!busy || !name.trim()} className="btn-primary"><Plus className="h-4 w-4" aria-hidden />{busy === 'create' ? 'Ajout…' : 'Ajouter'}</button>
     </form>
     {failure && !editing && !pending && <p role="alert" className="mb-5 rounded-lg border border-gold-400/40 p-4 text-sm text-t1">{failure}</p>}
     {notice && <p role="status" className="mb-5 text-sm text-gold-ink">{notice}</p>}
-    <label className="mb-6 block max-w-md text-xs text-t3">Rechercher une catégorie<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} className={field} placeholder="Nom de la catégorie…" /></label>
-    <AdminState loading={categories.loading} error={categories.error} empty={!list.length} emptyMessage={search ? 'Aucune catégorie correspondante.' : 'Aucune catégorie. Ajoute le premier repère du catalogue.'} onRetry={categories.reload}>
-      <p className="mb-4 text-xs text-t4">{list.length} catégorie{list.length !== 1 ? 's' : ''}</p>
+    <label className="mb-6 block max-w-md text-xs text-t3">Rechercher un thème<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} className={field} placeholder="Nom du thème…" /></label>
+    <AdminState loading={categories.loading} error={categories.error} empty={!list.length} emptyMessage={search ? 'Aucun thème correspondant.' : 'Aucun thème. Ajoute le premier repère du blog.'} onRetry={categories.reload}>
+      <p className="mb-4 text-xs text-t4">{list.length} thème{list.length !== 1 ? 's' : ''}</p>
       {list.map((category) => <AdminRow key={category.id}><span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded bg-noir-800 text-gold-ink sm:flex"><FolderOpen className="h-5 w-5" aria-hidden /></span><h2 className="min-w-0 flex-1 break-words text-base font-semibold leading-snug tracking-normal text-t1 sm:text-lg">{category.name}</h2><div className="flex gap-2" role="group" aria-label={`Actions pour ${category.name}`}><AdminAction icon={Pencil} label="Renommer" disabled={!!busy} onClick={() => { setFailure(null); setEditName(category.name); setEditing(category); }} /><AdminAction icon={Trash2} label="Supprimer" danger disabled={!!busy} onClick={() => { setFailure(null); setPending(category); }} /></div></AdminRow>)}
     </AdminState>
-    <AdminModal open={!!editing} onClose={() => { setEditing(null); setFailure(null); }} title="Renommer la catégorie" description="Le nouveau nom sera utilisé dans le catalogue et pour ses tags." busy={!!busy}>
-      <form onSubmit={(event) => { event.preventDefault(); if (editing && editName.trim()) void act(`edit-${editing.id}`, () => adminApi.renameCategory(editing.id, editName.trim()), () => { setEditing(null); setNotice('La catégorie a été renommée.'); }); }} className="space-y-5">
-        <label className="block text-sm text-t2">Nom de la catégorie<input required maxLength={80} disabled={!!busy} value={editName} onChange={(event) => setEditName(event.target.value)} className={field} /></label>
+    <AdminModal open={!!editing} onClose={() => { setEditing(null); setFailure(null); }} title="Renommer le thème" description="Le nouveau nom sera utilisé dans le catalogue et pour ses tags." busy={!!busy}>
+      <form onSubmit={(event) => { event.preventDefault(); if (editing && editName.trim()) void act(`edit-${editing.id}`, () => adminApi.renameCategory(editing.id, editName.trim()), () => { setEditing(null); setNotice('Le thème a été renommé.'); }); }} className="space-y-5">
+        <label className="block text-sm text-t2">Nom du thème<input required maxLength={80} disabled={!!busy} value={editName} onChange={(event) => setEditName(event.target.value)} className={field} /></label>
         {failure && <p role="alert" className="text-sm text-error-ink">{failure}</p>}
         <div className="flex flex-wrap justify-end gap-3"><button type="button" disabled={!!busy} onClick={() => { setEditing(null); setFailure(null); }} className="btn-secondary">Annuler</button><button disabled={!!busy || !editName.trim()} className="btn-primary">{busy ? 'Enregistrement…' : 'Enregistrer'}</button></div>
       </form>
     </AdminModal>
-    <AdminConfirm open={!!pending} title="Supprimer cette catégorie ?" description={pending ? `« ${pending.name} » sera supprimée définitivement. Les catégories contenant des tags ou encore utilisées par des ressources ne peuvent pas être supprimées.` : ''} busy={!!busy} error={failure} onCancel={() => { setPending(null); setFailure(null); }} onConfirm={() => { if (pending) void act(`delete-${pending.id}`, () => adminApi.deleteCategory(pending.id), () => { setPending(null); setNotice('La catégorie a été supprimée.'); }); }} />
+    <AdminConfirm open={!!pending} title="Supprimer ce thème ?" description={pending ? `« ${pending.name} » sera supprimé définitivement. Un thème encore utilisé par des articles ne peut pas être supprimé.` : ''} busy={!!busy} error={failure} onCancel={() => { setPending(null); setFailure(null); }} onConfirm={() => { if (pending) void act(`delete-${pending.id}`, () => adminApi.deleteCategory(pending.id), () => { setPending(null); setNotice('Le thème a été supprimé.'); }); }} />
   </AdminSection>;
 }

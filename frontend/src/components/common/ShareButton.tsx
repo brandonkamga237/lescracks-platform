@@ -6,7 +6,7 @@ import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 
 interface ShareButtonProps {
   title: string;
-  /** Site path (/ressources/…); turned into an absolute link on this origin. */
+  /** Site path (/blog/…); turned into an absolute link on this origin. */
   path?: string;
   /** Absolute link, for content hosted elsewhere (a YouTube episode). Wins over `path`. */
   url?: string;

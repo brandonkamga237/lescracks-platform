@@ -1,19 +1,13 @@
 package com.brandonkamga.lescracks.resource.domain;
 
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
-import com.brandonkamga.lescracks.resource.api.dto.EbookResourceRequest;
-import com.brandonkamga.lescracks.resource.api.dto.VideoResourceRequest;
 import com.brandonkamga.lescracks.resource.infra.ArticleRepository;
-import com.brandonkamga.lescracks.resource.infra.DocumentRepository;
-import com.brandonkamga.lescracks.resource.infra.EbookRepository;
-import com.brandonkamga.lescracks.resource.infra.ExternalVideoReferenceRepository;
 import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 import com.brandonkamga.lescracks.taxonomy.domain.Category;
 import com.brandonkamga.lescracks.taxonomy.domain.TaxonomyService;
-import com.brandonkamga.lescracks.taxonomy.infra.TagRepository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,11 +43,7 @@ import static org.mockito.Mockito.when;
 class ResourceServiceTest {
 
     @Mock private ResourceRepository resources;
-    @Mock private EbookRepository ebooks;
-    @Mock private ExternalVideoReferenceRepository videos;
     @Mock private ArticleRepository articles;
-    @Mock private DocumentRepository documents;
-    @Mock private TagRepository tags;
     @Mock private StorageService storage;
     @Mock private TaxonomyService taxonomy;
     @Mock private NewsletterService newsletter;
@@ -64,48 +54,46 @@ class ResourceServiceTest {
     @BeforeEach
     void setUp() {
         ObjectMapper mapper = new ObjectMapper();
-        service = new ResourceServiceImpl(resources, ebooks, videos, articles, documents, tags,
+        service = new ResourceServiceImpl(resources, articles,
                 storage, taxonomy, newsletter, new ArticleBody(mapper), mapper);
         category = category("Backend");
     }
 
-    private VideoResourceRequest videoRequest(ResourceStatus status) {
-        return videoRequest(status, null);
+    private ArticleContent articleRequest(ResourceStatus status) {
+        return articleRequest(status, null);
     }
 
-    private VideoResourceRequest videoRequest(ResourceStatus status, Instant scheduledAt) {
-        return new VideoResourceRequest("  Titre de la vidéo  ", "  Une description  ",
-                "https://cdn.example/cover.png", 1L, null,
-                "  https://youtu.be/abc  ", "  YouTube  ", status, scheduledAt);
+    private ArticleContent articleRequest(ResourceStatus status, Instant scheduledAt) {
+        return new ArticleContent("  Titre de l’article  ", "  Une description  ",
+                "https://cdn.example/cover.png", 1L, null, status, new ObjectMapper().createArrayNode(), scheduledAt);
     }
 
     @Test
-    @DisplayName("publishing a video notifies the subscribers, and trims what the admin typed")
-    void createVideoPublished() {
+    @DisplayName("publishing an article notifies the subscribers, stores its body, and trims what the admin typed")
+    void createArticlePublished() {
         when(taxonomy.requireCategory(1L)).thenReturn(category);
-        when(resources.existsBySlug("titre-de-la-video")).thenReturn(false);
+        when(resources.existsBySlug("titre-de-l-article")).thenReturn(false);
         when(resources.save(any(Resource.class))).thenAnswer(call -> call.getArgument(0));
 
-        Resource saved = service.createVideo(videoRequest(ResourceStatus.PUBLISHED), null);
+        Resource saved = service.createArticle(articleRequest(ResourceStatus.PUBLISHED), null);
 
-        assertThat(saved.getTitle()).isEqualTo("Titre de la vidéo");
+        assertThat(saved.getTitle()).isEqualTo("Titre de l’article");
         assertThat(saved.getDescription()).isEqualTo("Une description");
-        assertThat(saved.getSlug()).isEqualTo("titre-de-la-video");
+        assertThat(saved.getSlug()).isEqualTo("titre-de-l-article");
         verify(newsletter).notifyResourceSubscribers(saved);
 
-        ArgumentCaptor<ExternalVideoReference> video = ArgumentCaptor.forClass(ExternalVideoReference.class);
-        verify(videos).save(video.capture());
-        assertThat(video.getValue().getVideoUrl()).isEqualTo("https://youtu.be/abc");
-        assertThat(video.getValue().getPlatform()).isEqualTo("YouTube");
+        ArgumentCaptor<Article> article = ArgumentCaptor.forClass(Article.class);
+        verify(articles).save(article.capture());
+        assertThat(article.getValue().getResource()).isSameAs(saved);
     }
 
     @Test
     @DisplayName("a draft stays quiet: nobody is notified about something they cannot read")
-    void createVideoDraftNotifiesNobody() {
+    void createArticleDraftNotifiesNobody() {
         when(taxonomy.requireCategory(1L)).thenReturn(category);
         when(resources.save(any(Resource.class))).thenAnswer(call -> call.getArgument(0));
 
-        Resource saved = service.createVideo(videoRequest(ResourceStatus.DRAFT), null);
+        Resource saved = service.createArticle(articleRequest(ResourceStatus.DRAFT), null);
 
         assertThat(saved.getStatus()).isEqualTo(ResourceStatus.DRAFT);
         verifyNoInteractions(newsletter);
@@ -115,21 +103,21 @@ class ResourceServiceTest {
     @DisplayName("a title already taken gets a numeric suffix, never a duplicate url")
     void slugIsMadeUnique() {
         when(taxonomy.requireCategory(1L)).thenReturn(category);
-        when(resources.existsBySlug("titre-de-la-video")).thenReturn(true);
-        when(resources.existsBySlug("titre-de-la-video-2")).thenReturn(false);
+        when(resources.existsBySlug("titre-de-l-article")).thenReturn(true);
+        when(resources.existsBySlug("titre-de-l-article-2")).thenReturn(false);
         when(resources.save(any(Resource.class))).thenAnswer(call -> call.getArgument(0));
 
-        Resource saved = service.createVideo(videoRequest(ResourceStatus.DRAFT), null);
+        Resource saved = service.createArticle(articleRequest(ResourceStatus.DRAFT), null);
 
-        assertThat(saved.getSlug()).isEqualTo("titre-de-la-video-2");
+        assertThat(saved.getSlug()).isEqualTo("titre-de-l-article-2");
     }
 
     @Test
     void refusesAResourceWithNoCoverImageAtAll() {
-        VideoResourceRequest request = new VideoResourceRequest("Titre", "Description", null, 1L,
-                null, "https://youtu.be/abc", "YouTube", ResourceStatus.DRAFT, null);
+        ArticleContent request = new ArticleContent("Titre", "Description", null, 1L,
+                null, ResourceStatus.DRAFT, new ObjectMapper().createArrayNode(), null);
 
-        assertThatThrownBy(() -> service.createVideo(request, null))
+        assertThatThrownBy(() -> service.createArticle(request, null))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("couverture est obligatoire");
         verify(resources, never()).save(any());
@@ -139,7 +127,7 @@ class ResourceServiceTest {
     void refusesACoverImageThatIsNotAnImage() {
         var pdf = new MockMultipartFile("coverImageFile", "cover.pdf", "application/pdf", "%PDF".getBytes());
 
-        assertThatThrownBy(() -> service.createVideo(videoRequest(ResourceStatus.DRAFT), pdf))
+        assertThatThrownBy(() -> service.createArticle(articleRequest(ResourceStatus.DRAFT), pdf))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("format image");
         verifyNoInteractions(storage);
@@ -150,7 +138,7 @@ class ResourceServiceTest {
         var huge = new MockMultipartFile("coverImageFile", "cover.png", "image/png",
                 new byte[5 * 1024 * 1024 + 1]);
 
-        assertThatThrownBy(() -> service.createVideo(videoRequest(ResourceStatus.DRAFT), huge))
+        assertThatThrownBy(() -> service.createArticle(articleRequest(ResourceStatus.DRAFT), huge))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("5 Mo");
         verifyNoInteractions(storage);
@@ -164,19 +152,9 @@ class ResourceServiceTest {
         when(storage.store(anyString(), any(), anyString())).thenReturn("stored-key.png");
         var png = new MockMultipartFile("coverImageFile", "cover.png", "image/png", new byte[] {1, 2});
 
-        Resource saved = service.createVideo(videoRequest(ResourceStatus.DRAFT), png);
+        Resource saved = service.createArticle(articleRequest(ResourceStatus.DRAFT), png);
 
         assertThat(saved.getCoverImage()).isEqualTo("/api/files/stored-key.png");
-    }
-
-    @Test
-    void refusesAnEbookWithNoFile() {
-        var request = new EbookResourceRequest("Titre", "Description", "https://cdn.example/c.png",
-                1L, null, ResourceStatus.DRAFT, null);
-
-        assertThatThrownBy(() -> service.createEbook(request, new MockMultipartFile("file", new byte[0]), null))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("fichier ebook est obligatoire");
     }
 
     @Test
@@ -214,8 +192,6 @@ class ResourceServiceTest {
         hosted.setId(5L);
         hosted.setCoverImage("/api/files/abc.png");
         when(resources.findById(5L)).thenReturn(Optional.of(hosted));
-        when(ebooks.findByResourceId(5L)).thenReturn(Optional.empty());
-        when(videos.findByResourceId(5L)).thenReturn(Optional.empty());
         when(articles.findByResourceId(5L)).thenReturn(Optional.empty());
 
         service.delete(5L);
@@ -229,8 +205,6 @@ class ResourceServiceTest {
         Resource external = resource(category, "Externe", ResourceStatus.PUBLISHED);
         external.setId(6L);
         when(resources.findById(6L)).thenReturn(Optional.of(external));
-        when(ebooks.findByResourceId(6L)).thenReturn(Optional.empty());
-        when(videos.findByResourceId(6L)).thenReturn(Optional.empty());
         when(articles.findByResourceId(6L)).thenReturn(Optional.empty());
 
         service.delete(6L);
@@ -250,7 +224,7 @@ class ResourceServiceTest {
             when(taxonomy.requireCategory(1L)).thenReturn(category);
             when(resources.save(any(Resource.class))).thenAnswer(call -> call.getArgument(0));
 
-            Resource saved = service.createVideo(videoRequest(ResourceStatus.PUBLISHED, tomorrow), null);
+            Resource saved = service.createArticle(articleRequest(ResourceStatus.PUBLISHED, tomorrow), null);
 
             assertThat(saved.getStatus()).isEqualTo(ResourceStatus.DRAFT);
             assertThat(saved.getScheduledAt()).isEqualTo(tomorrow);
@@ -263,7 +237,7 @@ class ResourceServiceTest {
         void pastDateRefused() {
             when(taxonomy.requireCategory(1L)).thenReturn(category);
 
-            assertThatThrownBy(() -> service.createVideo(videoRequest(ResourceStatus.DRAFT, Instant.now().minus(1, ChronoUnit.HOURS)), null))
+            assertThatThrownBy(() -> service.createArticle(articleRequest(ResourceStatus.DRAFT, Instant.now().minus(1, ChronoUnit.HOURS)), null))
                     .isInstanceOf(BadRequestException.class)
                     .hasMessageContaining("futur");
         }
@@ -310,10 +284,10 @@ class ResourceServiceTest {
             draft.setScheduledAt(justPassed);
             when(resources.findById(draft.getId())).thenReturn(Optional.of(draft));
             when(taxonomy.requireCategory(1L)).thenReturn(category);
-            when(videos.existsById(draft.getId())).thenReturn(true);
-            when(videos.findByResourceId(draft.getId())).thenReturn(Optional.of(ExternalVideoReference.builder().resource(draft).build()));
+            when(articles.existsById(draft.getId())).thenReturn(true);
+            when(articles.findByResourceId(draft.getId())).thenReturn(Optional.of(Article.builder().resource(draft).build()));
 
-            service.updateVideo(draft.getId(), videoRequest(ResourceStatus.DRAFT, justPassed), null);
+            service.updateArticle(draft.getId(), articleRequest(ResourceStatus.DRAFT, justPassed), null);
 
             assertThat(draft.getScheduledAt()).isEqualTo(justPassed);
             assertThat(draft.getStatus()).isEqualTo(ResourceStatus.DRAFT);

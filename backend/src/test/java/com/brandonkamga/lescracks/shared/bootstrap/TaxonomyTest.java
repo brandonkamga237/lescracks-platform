@@ -4,39 +4,27 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-// The seeders run at every startup in production: a catalogue that breaks a column limit or a
+// The seeders run at every startup in production: a theme that breaks a column limit or a
 // unique constraint would stop the application from booting.
 class TaxonomyTest {
 
-    private final Map<String, List<String>> taxonomy = Taxonomy.data();
-
     @Test
-    @DisplayName("category names fit categories.name and are unique ignoring case")
-    void categoryNamesAreValid() {
-        Set<String> seen = new HashSet<>();
-        taxonomy.keySet().forEach(name -> {
-            assertThat(name).isNotBlank().hasSizeLessThanOrEqualTo(80);
-            assertThat(seen.add(name.toLowerCase(Locale.ROOT))).as("duplicate category %s", name).isTrue();
+    @DisplayName("theme names and slugs fit their columns and are unique")
+    void themesAreValid() {
+        Set<String> names = new HashSet<>();
+        Set<String> slugs = new HashSet<>();
+        Taxonomy.THEMES.forEach(theme -> {
+            assertThat(theme.name()).isNotBlank().hasSizeLessThanOrEqualTo(80);
+            assertThat(theme.slug()).matches("[a-z0-9-]+").hasSizeLessThanOrEqualTo(100);
+            assertThat(theme.description()).isNotBlank();
+            assertThat(names.add(theme.name().toLowerCase(Locale.ROOT))).as("duplicate theme %s", theme.name()).isTrue();
+            assertThat(slugs.add(theme.slug())).as("duplicate slug %s", theme.slug()).isTrue();
         });
-    }
-
-    @Test
-    @DisplayName("tag names fit tags.name and are unique ignoring case within a category")
-    void tagNamesAreValid() {
-        taxonomy.forEach((category, tags) -> {
-            assertThat(tags).as("tags of %s", category).isNotEmpty();
-            Set<String> seen = new HashSet<>();
-            tags.forEach(tag -> {
-                assertThat(tag).isNotBlank().hasSizeLessThanOrEqualTo(60);
-                assertThat(seen.add(tag.toLowerCase(Locale.ROOT))).as("duplicate tag %s in %s", tag, category).isTrue();
-            });
-        });
+        assertThat(Taxonomy.THEMES).hasSize(9);
     }
 }

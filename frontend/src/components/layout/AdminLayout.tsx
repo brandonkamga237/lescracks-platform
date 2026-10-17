@@ -18,18 +18,18 @@ const SECTIONS = [
   { to: '/admin/audience', label: 'Audience', group: 'Espace de travail', icon: Globe2 },
   { to: '/admin/utilisateurs', label: 'Utilisateurs', group: 'Espace de travail', icon: Users },
   { to: '/admin/newsletter', label: 'Newsletter', group: 'Espace de travail', icon: Mail },
-  { to: '/admin/ressources', label: 'Ressources', group: 'Contenu', icon: BookOpen },
+  { to: '/admin/blog', label: 'Blog', group: 'Contenu', icon: BookOpen },
   { to: '/admin/evenements', label: 'Événements', group: 'Contenu', icon: CalendarDays },
   { to: '/admin/talks', label: 'Talk', group: 'Contenu', icon: Podcast },
   { to: '/admin/cracklab/challenges', label: 'Challenges', group: 'CrackLab', icon: FlaskConical },
   { to: '/admin/cracklab/reponses', label: 'À noter', group: 'CrackLab', icon: ClipboardCheck },
-  { to: '/admin/categories', label: 'Catégories', group: 'Organisation', icon: FolderOpen },
+  { to: '/admin/categories', label: 'Thèmes', group: 'Organisation', icon: FolderOpen },
   { to: '/admin/tags', label: 'Tags', group: 'Organisation', icon: Tags },
   { to: '/admin/admins', label: 'Administrateurs', group: 'Sécurité', icon: Shield },
 ] as const;
 
 /** The daily work on a phone: everything else waits behind « Plus ». */
-const PHONE_TABS = ['/admin', '/admin/ressources', '/admin/evenements'] as const;
+const PHONE_TABS = ['/admin', '/admin/blog', '/admin/evenements'] as const;
 
 const TAB_ITEM = 'flex min-h-14 w-full flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold-400';
 

@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 
-import { ArticleBlocks } from '@/components/resources/ArticleRenderer';
+import { ArticleBlocks } from '@/components/blog/ArticleRenderer';
 import type { ArticleBlock } from '@/services/types';
 
 interface ArticlePreviewProps {

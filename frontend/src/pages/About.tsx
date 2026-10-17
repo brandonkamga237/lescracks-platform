@@ -8,10 +8,10 @@ import { Section } from '@/components/layout/Page';
 const ACTIONS = [
   {
     icon: BookOpen,
-    title: 'La bibliothèque',
-    body: 'Des vidéos, des ebooks et des articles choisis. Tu choisis un sujet, tu avances à ton rythme.',
-    to: '/ressources',
-    link: 'Explorer la bibliothèque',
+    title: 'Le blog',
+    body: 'Des articles pour comprendre une notion, éviter un piège ou apprendre d’un retour d’expérience. Et bientôt, des formations complètes.',
+    to: '/blog',
+    link: 'Lire le blog',
   },
   {
     icon: CalendarDays,
@@ -41,7 +41,7 @@ const ACTIONS = [
 export default function About() {
   return (
     <Layout>
-      <SEO title="À propos" description="LesCracks est une plateforme tech : une bibliothèque ouverte, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant." url="/a-propos" />
+      <SEO title="À propos" description="LesCracks est une plateforme tech : un blog, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant." url="/a-propos" />
 
       <section className="mode-raised grid lg:grid-cols-2">
         <div className="flex items-center px-5 py-20 sm:px-8 lg:py-28 lg:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:pr-16">
@@ -51,7 +51,7 @@ export default function About() {
               Apprendre la tech, entouré.
             </h1>
             <p className="mt-8 text-lg leading-normal text-t3">
-              Une plateforme pour apprendre la tech : des ressources choisies, des rendez-vous pour pratiquer, une communauté qui avance ensemble.
+              Une plateforme pour apprendre la tech : des articles choisis, des rendez-vous pour pratiquer, une communauté qui avance ensemble.
             </p>
           </div>
         </div>

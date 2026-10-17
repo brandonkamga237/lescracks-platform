@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.resource.api.dto;
 
+import com.brandonkamga.lescracks.resource.domain.ArticleContent;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,4 +21,8 @@ public record ArticleResourceRequest(
         @NotNull JsonNode body,
         Instant scheduledAt
 ) {
+
+    public ArticleContent toContent() {
+        return new ArticleContent(title, description, coverImage, categoryId, tagIds, status, body, scheduledAt);
+    }
 }

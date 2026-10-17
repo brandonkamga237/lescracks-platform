@@ -1,7 +1,7 @@
-import type { EventSummary, ResourceSummary } from '@/services/types';
+import type { ArticleSummary, EventSummary } from '@/services/types';
 
-export function resourcePath(resource: Pick<ResourceSummary, 'id' | 'slug'>): string {
-  return `/ressources/${resource.slug || resource.id}`;
+export function articlePath(article: Pick<ArticleSummary, 'id' | 'slug'>): string {
+  return `/blog/${article.slug || article.id}`;
 }
 
 export function eventPath(event: Pick<EventSummary, 'id' | 'slug'>): string {

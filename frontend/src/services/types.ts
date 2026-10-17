@@ -1,4 +1,3 @@
-export type ResourceKind = 'EBOOK' | 'EXTERNAL_VIDEO' | 'ARTICLE';
 export type ResourceStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 export type EventType = 'BOOTCAMP' | 'WORKSHOP' | 'WEBINAR' | 'CONFERENCE';
 export type EventFormat = 'ONLINE' | 'OFFLINE' | 'HYBRID';
@@ -12,36 +11,36 @@ export interface PageResponse<T> {
   totalPages: number;
 }
 
+/** A theme: what the blog filters on and what members pick as interests. */
 export interface Category { id: number; name: string; slug?: string; description?: string; }
-export interface Tag { id: number; name: string; categoryId: number; categoryName: string; }
+/** A word on an article, unique by name. */
+export interface Tag { id: number; name: string; }
 
-export interface ResourceSummary {
+
+/** An article as the back office sees it: drafts and scheduled ones included. */
+export interface AdminArticle extends ArticleSummary {
+  status: ResourceStatus;
+  /** Set on a draft that goes public automatically at that time. */
+  scheduledAt?: string;
+}
+
+/** A blog article as the public API returns it. */
+export interface ArticleSummary {
   id: number;
   slug?: string;
   title: string;
   description: string;
   coverImage: string;
-  status: ResourceStatus;
   categoryId: number;
   categoryName: string;
-  kind: ResourceKind;
-  videoUrl?: string;
-  platform?: string;
-  downloadUrl?: string;
-  fileFormat?: string;
-  fileSize?: number;
   body?: unknown;
   readingMinutes?: number;
   createdAt: string;
   updatedAt: string;
   tags: string[];
   likeCount: number;
-  /** Set on a draft that goes public automatically at that time. */
-  scheduledAt?: string;
   publishedAt?: string;
 }
-
-export type ResourceDetail = ResourceSummary;
 
 export interface ResourceLikeStatus {
   count: number;
