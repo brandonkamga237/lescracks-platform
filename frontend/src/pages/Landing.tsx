@@ -127,7 +127,7 @@ export default function Landing() {
       <Section spacing="tight" aria-label="LesCracks en chiffres">
         <div className="grid grid-cols-3 gap-3">
           <Stat value={count(recent.data?.totalElements)} label="Articles" />
-          <Stat value={count(categories.data?.length)} label="Sujets" />
+          <Stat value={count(categories.data?.length)} label="Thèmes" />
           <Stat value={count(upcoming.data?.totalElements)} label="Rendez-vous à venir" />
         </div>
       </Section>
@@ -221,6 +221,29 @@ export default function Landing() {
           <LineArt motif="network" className="mx-auto hidden w-full max-w-md text-gold-400 lg:block" />
         </div>
       </section>
+
+      {/* ── Par thème — noir relevé ──────────────────────────────── */}
+      {!!categories.data?.length && (
+        <motion.div {...REVEAL}>
+          <Section tone="raised" aria-labelledby="themes-heading">
+            <SectionHeader eyebrow="Trouver son sujet" id="themes-heading" title="Explorer par thème" />
+            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {categories.data.filter((theme) => theme.slug).map((theme) => (
+                <li key={theme.id}>
+                  <Link to={`/blog?theme=${theme.slug}`}
+                    className="group flex h-full flex-col gap-1.5 rounded border border-line px-5 py-4 transition-colors hover:border-t1 hover:bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400">
+                    <span className="flex items-center justify-between gap-4">
+                      <span className="min-w-0 break-words text-base font-semibold text-t1">{theme.name}</span>
+                      <ArrowUpRight className="h-5 w-5 shrink-0 text-t4 transition-colors group-hover:text-gold-ink" aria-hidden />
+                    </span>
+                    {theme.description && <span className="text-sm leading-relaxed text-t3">{theme.description}</span>}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </Section>
+        </motion.div>
+      )}
 
       {/* ── Action — noir ─────────────────────────────────── */}
       <Section spacing="loose">

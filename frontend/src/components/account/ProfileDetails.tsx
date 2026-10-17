@@ -117,7 +117,7 @@ export default function ProfileDetails({ user, onSaved }: ProfileDetailsProps) {
         <div><label htmlFor="profile-location" className="text-sm font-medium text-t2">Ville</label>
           <input id="profile-location" autoComplete="address-level2" value={about.location} onChange={(event) => setAbout({ ...about, location: event.target.value })} className="input mt-2" /></div>
         <div>
-          <span className="text-sm font-medium text-t2">Centres d’intérêt <span className="font-normal text-t4">(10 au plus)</span></span>
+          <span className="text-sm font-medium text-t2">Centres d’intérêt</span>
           <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Centres d’intérêt">
             {categories.data?.map((category) => {
               const on = about.interestIds.includes(category.id);

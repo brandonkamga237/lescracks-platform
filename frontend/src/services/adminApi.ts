@@ -2,7 +2,7 @@ import { ENV } from '@/config/env';
 import { prepareImage } from '@/lib/image';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminArticle, AdminChallenge, AdminSubscriber, AdminSummary, ChallengeDifficulty, ChallengeStatus, ChallengeSubmission, SubmissionStatus, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceKind, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
+import type { AdminArticle, AdminChallenge, AdminSubscriber, AdminSummary, ChallengeDifficulty, ChallengeStatus, ChallengeSubmission, SubmissionStatus, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
 
 export interface ArticleRequest {
   title: string;
@@ -85,7 +85,6 @@ export interface StatsOverview {
   eventsPast: number;
   resources: number;
   resourcesByStatus: Partial<Record<ResourceStatus, number>>;
-  resourcesByKind: Partial<Record<ResourceKind, number>>;
   resourcesByCategory: Record<string, number>;
   newsletterSubscribers: number;
   newsletterUnsubscribed: number;
@@ -153,8 +152,8 @@ export const adminApi = {
   createCategory: (name: string) => http.post<Category>('/admin/categories', { name }),
   renameCategory: (id: number, name: string) => http.put<Category>(`/admin/categories/${id}`, { name }),
   deleteCategory: (id: number) => http.delete<void>(`/admin/categories/${id}`),
-  createTag: (name: string, categoryId: number) => http.post<Tag>('/admin/tags', { name, categoryId }),
-  updateTag: (id: number, name: string, categoryId: number) => http.put<Tag>(`/admin/tags/${id}`, { name, categoryId }),
+  createTag: (name: string) => http.post<Tag>('/admin/tags', { name }),
+  renameTag: (id: number, name: string) => http.put<Tag>(`/admin/tags/${id}`, { name }),
   deleteTag: (id: number) => http.delete<void>(`/admin/tags/${id}`),
   users: (page = 0, search = '', filters: UserFilters = {}, signal?: AbortSignal) =>
     http.get<PageResponse<AdminUser>>('/admin/users', { page, size: 12, search, ...filters, sort: 'createdAt,desc' }, signal),

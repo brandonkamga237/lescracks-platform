@@ -7,7 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "tags", uniqueConstraints = @UniqueConstraint(columnNames = {"category_id", "name"}))
+/** A word on an article, unique by name ignoring case (tags_name_unique in V25). */
+@Table(name = "tags")
 @Data
 @Builder
 @NoArgsConstructor
@@ -18,9 +19,6 @@ public class Tag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
 
     @Column(nullable = false, length = 60)
     private String name;

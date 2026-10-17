@@ -43,10 +43,9 @@ public class TaxonomyController {
     }
 
     @GetMapping("/tags")
-    @Operation(summary = "Les tags, filtrables par catégorie")
-    public List<TagResponse> tags(@RequestParam(required = false) Long categoryId) {
-        var tags = categoryId == null ? taxonomy.tags() : taxonomy.tagsIn(categoryId);
-        return tags.stream().map(mapper::toResponse).toList();
+    @Operation(summary = "Les tags, par ordre alphabétique")
+    public List<TagResponse> tags() {
+        return taxonomy.tags().stream().map(mapper::toResponse).toList();
     }
 
     @PostMapping("/admin/categories")
@@ -74,13 +73,13 @@ public class TaxonomyController {
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public TagResponse createTag(@Valid @RequestBody TagRequest request) {
-        return mapper.toResponse(taxonomy.createTag(request.name(), request.categoryId()));
+        return mapper.toResponse(taxonomy.createTag(request.name()));
     }
 
     @PutMapping("/admin/tags/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public TagResponse updateTag(@PathVariable Long id, @Valid @RequestBody TagRequest request) {
-        return mapper.toResponse(taxonomy.updateTag(id, request.name(), request.categoryId()));
+    public TagResponse renameTag(@PathVariable Long id, @Valid @RequestBody TagRequest request) {
+        return mapper.toResponse(taxonomy.renameTag(id, request.name()));
     }
 
     @DeleteMapping("/admin/tags/{id}")

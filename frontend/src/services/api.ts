@@ -32,8 +32,8 @@ export const api = {
   forgotPassword: (email: string) => http.post<void>('/auth/forgot-password', { email }),
   resetPassword: (token: string, password: string) => http.post<void>('/auth/reset-password', { token, password }),
   logout: () => http.post<void>('/auth/logout'),
-  articles: (page = 0, size = 12, signal?: AbortSignal) =>
-    http.get<PageResponse<ArticleSummary>>('/resources', { kind: 'ARTICLE', page, size }, signal),
+  articles: (page = 0, size = 12, signal?: AbortSignal, categoryId?: number) =>
+    http.get<PageResponse<ArticleSummary>>('/resources', { page, size, categoryId }, signal),
   article: (slugOrId: string, signal?: AbortSignal) =>
     http.get<ArticleSummary>(`/resources/${slugOrId}`, undefined, signal),
   events: (filters: { type?: EventType; format?: EventFormat; page?: number; size?: number } = {}, signal?: AbortSignal) =>
@@ -47,7 +47,7 @@ export const api = {
   talks: (page = 0, size = 12, signal?: AbortSignal) =>
     http.get<PageResponse<TalkVideo>>('/talks', { page, size }, signal),
   categories: (signal?: AbortSignal) => http.get<Category[]>('/categories', undefined, signal),
-  tags: (categoryId?: number, signal?: AbortSignal) => http.get<Tag[]>('/tags', { categoryId }, signal),
+  tags: (signal?: AbortSignal) => http.get<Tag[]>('/tags', undefined, signal),
   me: (signal?: AbortSignal) => http.get<UserProfile>('/me', undefined, signal),
   syncOidc: (provider: 'google' | 'github') =>
     http.post<UserProfile>('/oidc/sync', { provider: provider.toUpperCase() }),

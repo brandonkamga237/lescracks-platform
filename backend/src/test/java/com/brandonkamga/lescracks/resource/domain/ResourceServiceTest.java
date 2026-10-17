@@ -8,7 +8,6 @@ import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 import com.brandonkamga.lescracks.taxonomy.domain.Category;
 import com.brandonkamga.lescracks.taxonomy.domain.TaxonomyService;
-import com.brandonkamga.lescracks.taxonomy.infra.TagRepository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +44,6 @@ class ResourceServiceTest {
 
     @Mock private ResourceRepository resources;
     @Mock private ArticleRepository articles;
-    @Mock private TagRepository tags;
     @Mock private StorageService storage;
     @Mock private TaxonomyService taxonomy;
     @Mock private NewsletterService newsletter;
@@ -56,7 +54,7 @@ class ResourceServiceTest {
     @BeforeEach
     void setUp() {
         ObjectMapper mapper = new ObjectMapper();
-        service = new ResourceServiceImpl(resources, articles, tags,
+        service = new ResourceServiceImpl(resources, articles,
                 storage, taxonomy, newsletter, new ArticleBody(mapper), mapper);
         category = category("Backend");
     }

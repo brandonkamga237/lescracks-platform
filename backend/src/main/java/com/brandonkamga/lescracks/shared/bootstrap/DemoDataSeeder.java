@@ -64,21 +64,8 @@ public class DemoDataSeeder implements CommandLineRunner {
     }
 
     private void seedTaxonomy() {
-        Map<String, List<String>> taxonomy = Taxonomy.data();
-
-        taxonomy.forEach((categoryName, tagNames) -> {
-            Category category = categories.findByNameIgnoreCase(categoryName)
-                    .orElseGet(() -> categories.save(Category.builder()
-                            .name(categoryName)
-                            .slug(Slugs.uniqueFrom(categoryName, categories::existsBySlug))
-                            .build()));
-            tagNames.stream()
-                    .filter(tagName -> !tags.existsByNameIgnoreCaseAndCategoryId(tagName, category.getId()))
-                    .map(tagName -> Tag.builder().name(tagName).category(category).build())
-                    .forEach(tags::save);
-        });
-
-        log.info("Demo taxonomy ensured: {} categories", taxonomy.size());
+        Taxonomy.ensureThemes(categories);
+        if (!tags.existsByNameIgnoreCase("React")) tags.save(Tag.builder().name("React").build());
     }
 
     private void seedSampleResources() {
@@ -86,12 +73,12 @@ public class DemoDataSeeder implements CommandLineRunner {
             return;
         }
 
-        Category frontend = findCategory("Frontend");
+        Category frontend = findCategory("Développement web");
         if (frontend == null) {
             return;
         }
 
-        Tag react = findTag("React", frontend);
+        Tag react = tags.findByNameIgnoreCase("React").orElse(null);
 
         seedArticle(frontend, react);
     }
@@ -150,15 +137,5 @@ public class DemoDataSeeder implements CommandLineRunner {
 
     private Category findCategory(String name) {
         return categories.findByNameIgnoreCase(name).orElse(null);
-    }
-
-    private Tag findTag(String name, Category category) {
-        if (category == null) {
-            return null;
-        }
-        return tags.findByCategoryIdOrderByNameAsc(category.getId()).stream()
-                .filter(tag -> tag.getName().equalsIgnoreCase(name))
-                .findFirst()
-                .orElse(null);
     }
 }

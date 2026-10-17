@@ -6,6 +6,7 @@ import com.brandonkamga.lescracks.shared.util.Slugs;
 import com.brandonkamga.lescracks.taxonomy.infra.CategoryRepository;
 import com.brandonkamga.lescracks.taxonomy.infra.TagRepository;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,12 +64,14 @@ public class TaxonomyServiceImpl implements TaxonomyService {
     @Override
     public void deleteCategory(Long id) {
         Category category = requireCategory(id);
-        // The database would refuse this too; saying why here is what makes it actionable.
-        if (!tags.findByCategoryIdOrderByNameAsc(id).isEmpty()) {
-            throw new BadRequestException(
-                    "Cette catégorie contient encore des tags. Supprimez-les d'abord.");
+        // Articles point at their theme and the database refuses to orphan them. Taxonomy cannot
+        // ask the resource domain (which depends on it), so the refusal is read and explained here.
+        try {
+            categories.delete(category);
+            categories.flush();
+        } catch (DataIntegrityViolationException stillUsed) {
+            throw new BadRequestException("Des articles utilisent encore ce thème. Change-les de thème avant de le supprimer.");
         }
-        categories.delete(category);
     }
 
     @Override
@@ -77,27 +80,24 @@ public class TaxonomyServiceImpl implements TaxonomyService {
         return tags.findAllByOrderByNameAsc();
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<Tag> tagsIn(Long categoryId) {
-        return tags.findByCategoryIdOrderByNameAsc(categoryId);
-    }
 
     @Override
-    public Tag createTag(String name, Long categoryId) {
+    public Tag createTag(String name) {
         String clean = require(name, "Le nom du tag est obligatoire.");
-        Category category = requireCategory(categoryId);
-        if (tags.existsByNameIgnoreCaseAndCategoryId(clean, categoryId)) {
-            throw new BadRequestException("Ce tag existe déjà dans cette catégorie.");
+        if (tags.existsByNameIgnoreCase(clean)) {
+            throw new BadRequestException("Ce tag existe déjà.");
         }
-        return tags.save(Tag.builder().name(clean).category(category).build());
+        return tags.save(Tag.builder().name(clean).build());
     }
 
     @Override
-    public Tag updateTag(Long id, String name, Long categoryId) {
+    public Tag renameTag(Long id, String name) {
         Tag tag = requireTag(id);
-        tag.setName(require(name, "Le nom du tag est obligatoire."));
-        tag.setCategory(requireCategory(categoryId));
+        String clean = require(name, "Le nom du tag est obligatoire.");
+        tags.findByNameIgnoreCase(clean).filter(other -> !other.getId().equals(id)).ifPresent(other -> {
+            throw new BadRequestException("Ce tag existe déjà.");
+        });
+        tag.setName(clean);
         return tag;
     }
 
