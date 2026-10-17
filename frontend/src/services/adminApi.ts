@@ -153,8 +153,8 @@ export const adminApi = {
   createCategory: (name: string) => http.post<Category>('/admin/categories', { name }),
   renameCategory: (id: number, name: string) => http.put<Category>(`/admin/categories/${id}`, { name }),
   deleteCategory: (id: number) => http.delete<void>(`/admin/categories/${id}`),
-  createTag: (name: string, categoryId: number) => http.post<Tag>('/admin/tags', { name, categoryId }),
-  updateTag: (id: number, name: string, categoryId: number) => http.put<Tag>(`/admin/tags/${id}`, { name, categoryId }),
+  createTag: (name: string) => http.post<Tag>('/admin/tags', { name }),
+  renameTag: (id: number, name: string) => http.put<Tag>(`/admin/tags/${id}`, { name }),
   deleteTag: (id: number) => http.delete<void>(`/admin/tags/${id}`),
   users: (page = 0, search = '', filters: UserFilters = {}, signal?: AbortSignal) =>
     http.get<PageResponse<AdminUser>>('/admin/users', { page, size: 12, search, ...filters, sort: 'createdAt,desc' }, signal),

@@ -12,8 +12,10 @@ export interface PageResponse<T> {
   totalPages: number;
 }
 
+/** A theme: what the blog filters on and what members pick as interests. */
 export interface Category { id: number; name: string; slug?: string; description?: string; }
-export interface Tag { id: number; name: string; categoryId: number; categoryName: string; }
+/** A word on an article, unique by name. */
+export interface Tag { id: number; name: string; }
 
 
 /** An article as the back office sees it: drafts and scheduled ones included. */

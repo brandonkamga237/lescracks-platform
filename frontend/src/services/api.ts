@@ -47,7 +47,7 @@ export const api = {
   talks: (page = 0, size = 12, signal?: AbortSignal) =>
     http.get<PageResponse<TalkVideo>>('/talks', { page, size }, signal),
   categories: (signal?: AbortSignal) => http.get<Category[]>('/categories', undefined, signal),
-  tags: (categoryId?: number, signal?: AbortSignal) => http.get<Tag[]>('/tags', { categoryId }, signal),
+  tags: (signal?: AbortSignal) => http.get<Tag[]>('/tags', undefined, signal),
   me: (signal?: AbortSignal) => http.get<UserProfile>('/me', undefined, signal),
   syncOidc: (provider: 'google' | 'github') =>
     http.post<UserProfile>('/oidc/sync', { provider: provider.toUpperCase() }),
