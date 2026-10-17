@@ -2,7 +2,6 @@ package com.brandonkamga.lescracks.resource.api;
 
 import com.brandonkamga.lescracks.resource.api.dto.ArticleResourceRequest;
 import com.brandonkamga.lescracks.resource.api.dto.ResourceResponse;
-import com.brandonkamga.lescracks.resource.domain.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
 import com.brandonkamga.lescracks.shared.dto.PageResponse;
@@ -62,7 +61,7 @@ public class ResourceController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResourceResponse createArticle(@Valid @RequestPart("data") ArticleResourceRequest request,
                                           @RequestPart(value = "coverImageFile", required = false) MultipartFile coverImageFile) {
-        return mapper.toResponse(resources.createArticle(request, coverImageFile));
+        return mapper.toResponse(resources.createArticle(request.toContent(), coverImageFile));
     }
 
     @PutMapping(value = "/admin/articles/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -70,7 +69,7 @@ public class ResourceController {
     public ResourceResponse updateArticle(@PathVariable Long id,
                                           @Valid @RequestPart("data") ArticleResourceRequest request,
                                           @RequestPart(value = "coverImageFile", required = false) MultipartFile coverImageFile) {
-        return mapper.toResponse(resources.updateArticle(id, request, coverImageFile));
+        return mapper.toResponse(resources.updateArticle(id, request.toContent(), coverImageFile));
     }
 
     @DeleteMapping("/admin/{id}")

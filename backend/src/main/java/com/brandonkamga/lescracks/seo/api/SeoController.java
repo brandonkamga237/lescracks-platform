@@ -7,10 +7,9 @@ import com.brandonkamga.lescracks.event.domain.EventStatus;
 import com.brandonkamga.lescracks.resource.api.dto.ResourceResponse;
 import com.brandonkamga.lescracks.resource.domain.Article;
 import com.brandonkamga.lescracks.resource.domain.Resource;
-import com.brandonkamga.lescracks.resource.domain.ResourceMapper;
+import com.brandonkamga.lescracks.resource.api.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
-import com.brandonkamga.lescracks.resource.infra.ArticleRepository;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 import com.brandonkamga.lescracks.talk.domain.TalkService;
 
@@ -44,7 +43,6 @@ public class SeoController {
     private final EventService events;
     private final TalkService talks;
     private final ResourceMapper mapper;
-    private final ArticleRepository articles;
     private final ObjectMapper objectMapper;
 
     private final Map<String, PageMeta> pageMeta = Map.of(
@@ -72,12 +70,11 @@ public class SeoController {
     );
 
     public SeoController(ResourceService resources, EventService events, TalkService talks,
-                         ResourceMapper mapper, ArticleRepository articles, ObjectMapper objectMapper) {
+                         ResourceMapper mapper, ObjectMapper objectMapper) {
         this.resources = resources;
         this.events = events;
         this.talks = talks;
         this.mapper = mapper;
-        this.articles = articles;
         this.objectMapper = objectMapper;
     }
 
@@ -223,7 +220,7 @@ public class SeoController {
         html.fact("Catégorie", response.categoryName());
         html.fact("Temps de lecture", response.readingMinutes() + " min");
 
-        String prose = articles.findByResourceId(response.id())
+        String prose = resources.article(response.id())
                 .map(Article::getPlainText)
                 .orElse(null);
         if (prose != null && !prose.isBlank()) {

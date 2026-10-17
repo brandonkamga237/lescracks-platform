@@ -1,9 +1,8 @@
 package com.brandonkamga.lescracks.seo.api;
 
 import com.brandonkamga.lescracks.event.domain.EventService;
-import com.brandonkamga.lescracks.resource.domain.ResourceMapper;
+import com.brandonkamga.lescracks.resource.api.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
-import com.brandonkamga.lescracks.resource.infra.ArticleRepository;
 import com.brandonkamga.lescracks.talk.domain.TalkService;
 
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +32,6 @@ class SeoControllerTest {
     @MockitoBean private EventService events;
     @MockitoBean private TalkService talks;
     @MockitoBean private ResourceMapper mapper;
-    @MockitoBean private ArticleRepository articles;
 
     @Test
     @DisplayName("the home page a crawler gets carries the brand, the favicon, the main sections and the site's identity")

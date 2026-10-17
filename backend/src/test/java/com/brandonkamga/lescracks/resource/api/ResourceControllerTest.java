@@ -2,7 +2,7 @@ package com.brandonkamga.lescracks.resource.api;
 
 import com.brandonkamga.lescracks.resource.api.dto.ResourceResponse;
 import com.brandonkamga.lescracks.resource.domain.Resource;
-import com.brandonkamga.lescracks.resource.domain.ResourceMapper;
+import com.brandonkamga.lescracks.resource.api.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;

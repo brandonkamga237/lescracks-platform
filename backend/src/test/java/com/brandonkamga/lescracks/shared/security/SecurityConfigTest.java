@@ -2,7 +2,7 @@ package com.brandonkamga.lescracks.shared.security;
 
 import com.brandonkamga.lescracks.resource.api.ResourceController;
 import com.brandonkamga.lescracks.resource.domain.Resource;
-import com.brandonkamga.lescracks.resource.domain.ResourceMapper;
+import com.brandonkamga.lescracks.resource.api.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.identity.infra.UserRepository;
 import com.brandonkamga.lescracks.storage.domain.StorageService;

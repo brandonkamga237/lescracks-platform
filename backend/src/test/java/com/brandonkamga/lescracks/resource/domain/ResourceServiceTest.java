@@ -1,7 +1,6 @@
 package com.brandonkamga.lescracks.resource.domain;
 
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
-import com.brandonkamga.lescracks.resource.api.dto.ArticleResourceRequest;
 import com.brandonkamga.lescracks.resource.infra.ArticleRepository;
 import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
@@ -62,12 +61,12 @@ class ResourceServiceTest {
         category = category("Backend");
     }
 
-    private ArticleResourceRequest articleRequest(ResourceStatus status) {
+    private ArticleContent articleRequest(ResourceStatus status) {
         return articleRequest(status, null);
     }
 
-    private ArticleResourceRequest articleRequest(ResourceStatus status, Instant scheduledAt) {
-        return new ArticleResourceRequest("  Titre de l’article  ", "  Une description  ",
+    private ArticleContent articleRequest(ResourceStatus status, Instant scheduledAt) {
+        return new ArticleContent("  Titre de l’article  ", "  Une description  ",
                 "https://cdn.example/cover.png", 1L, null, status, new ObjectMapper().createArrayNode(), scheduledAt);
     }
 
@@ -117,7 +116,7 @@ class ResourceServiceTest {
 
     @Test
     void refusesAResourceWithNoCoverImageAtAll() {
-        ArticleResourceRequest request = new ArticleResourceRequest("Titre", "Description", null, 1L,
+        ArticleContent request = new ArticleContent("Titre", "Description", null, 1L,
                 null, ResourceStatus.DRAFT, new ObjectMapper().createArrayNode(), null);
 
         assertThatThrownBy(() -> service.createArticle(request, null))

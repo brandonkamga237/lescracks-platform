@@ -1,7 +1,6 @@
 package com.brandonkamga.lescracks.resource.domain;
 
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
-import com.brandonkamga.lescracks.resource.api.dto.ArticleResourceRequest;
 import com.brandonkamga.lescracks.resource.infra.ArticleRepository;
 import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
@@ -23,6 +22,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -103,39 +103,43 @@ public class ResourceServiceImpl implements ResourceService {
                 .orElseThrow(() -> new NotFoundException("Resource", "slug", slugOrId));
     }
 
-    private java.util.Optional<Long> parseId(String value) {
+    private Optional<Long> parseId(String value) {
         try {
-            return java.util.Optional.of(Long.parseLong(value));
+            return Optional.of(Long.parseLong(value));
         } catch (NumberFormatException ignored) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
     }
 
     @Override
-    public Resource createArticle(ArticleResourceRequest request, MultipartFile coverImageFile) {
-        String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, null);
-        Resource resource = base(request.title(), request.description(), coverImage,
-                request.categoryId(), request.status(), request.scheduledAt(), request.tagIds());
+    public Resource createArticle(ArticleContent content, MultipartFile coverImageFile) {
+        String coverImage = resolveCoverImage(content.coverImage(), coverImageFile, null);
+        Resource resource = base(content.title(), content.description(), coverImage,
+                content.categoryId(), content.status(), content.scheduledAt(), content.tagIds());
         Resource saved = resources.save(resource);
-        persistArticle(saved, request.body());
+        persistArticle(saved, content.body());
         if (saved.getStatus() == ResourceStatus.PUBLISHED) newsletter.notifyResourceSubscribers(saved);
         return saved;
     }
 
     @Override
-    public Resource updateArticle(Long id, ArticleResourceRequest request, MultipartFile coverImageFile) {
+    public Resource updateArticle(Long id, ArticleContent content, MultipartFile coverImageFile) {
         Resource resource = require(id);
         ensureArticle(resource);
-        String coverImage = resolveCoverImage(request.coverImage(), coverImageFile, resource.getCoverImage());
-        apply(resource, request.title(), request.description(), coverImage, request.categoryId(), request.status(), request.scheduledAt(), request.tagIds());
+        String coverImage = resolveCoverImage(content.coverImage(), coverImageFile, resource.getCoverImage());
+        apply(resource, content.title(), content.description(), coverImage, content.categoryId(), content.status(), content.scheduledAt(), content.tagIds());
         Article article = articles.findByResourceId(id).orElseThrow();
-        persistArticleBody(article, request.body());
+        persistArticleBody(article, content.body());
         return resource;
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<Resource> all(Pageable pageable) { return resources.findAll(pageable); }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Article> article(Long resourceId) { return articles.findByResourceId(resourceId); }
 
     @Override
     public void delete(Long id) {
