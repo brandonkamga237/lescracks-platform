@@ -1,7 +1,5 @@
 package com.brandonkamga.lescracks.resource.infra;
 
-import com.brandonkamga.lescracks.resource.domain.Document;
-import com.brandonkamga.lescracks.resource.domain.Ebook;
 import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
 import com.brandonkamga.lescracks.support.PostgresIT;
@@ -21,7 +19,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import static com.brandonkamga.lescracks.resource.domain.ResourceFixtures.category;
-import static com.brandonkamga.lescracks.resource.domain.ResourceFixtures.document;
 import static com.brandonkamga.lescracks.resource.domain.ResourceFixtures.resource;
 import static com.brandonkamga.lescracks.resource.domain.ResourceFixtures.tag;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,8 +40,6 @@ class ResourceRepositoryIT extends PostgresIT {
     @Autowired private ResourceRepository resources;
     @Autowired private CategoryRepository categories;
     @Autowired private TagRepository tags;
-    @Autowired private EbookRepository ebooks;
-    @Autowired private DocumentRepository documents;
 
     private static final PageRequest FIRST_PAGE = PageRequest.of(0, 10);
 
@@ -78,7 +73,7 @@ class ResourceRepositoryIT extends PostgresIT {
         save(backend, "Publiee", ResourceStatus.PUBLISHED);
         save(backend, "Brouillon", ResourceStatus.DRAFT);
 
-        var published = resources.search(ResourceStatus.PUBLISHED, null, null, null, null, FIRST_PAGE);
+        var published = resources.search(ResourceStatus.PUBLISHED, null, null, null, FIRST_PAGE);
 
         assertThat(published.getContent()).extracting(Resource::getTitle).containsExactly("Publiee");
     }
@@ -89,7 +84,7 @@ class ResourceRepositoryIT extends PostgresIT {
         save(backend, "Publiee", ResourceStatus.PUBLISHED);
         save(backend, "Brouillon", ResourceStatus.DRAFT);
 
-        assertThat(resources.search(null, null, null, null, null, FIRST_PAGE)).hasSize(2);
+        assertThat(resources.search(null, null, null, null, FIRST_PAGE)).hasSize(2);
     }
 
     @Test
@@ -98,7 +93,7 @@ class ResourceRepositoryIT extends PostgresIT {
         save(backend, "Spring Boot avance", ResourceStatus.PUBLISHED);
         save(backend, "React pour les nuls", ResourceStatus.PUBLISHED);
 
-        var hits = resources.search(null, "SPRING", null, null, null, FIRST_PAGE);
+        var hits = resources.search(null, "SPRING", null, null, FIRST_PAGE);
 
         assertThat(hits.getContent()).extracting(Resource::getTitle).containsExactly("Spring Boot avance");
     }
@@ -108,7 +103,7 @@ class ResourceRepositoryIT extends PostgresIT {
         save(backend, "Cote serveur", ResourceStatus.PUBLISHED);
         save(frontend, "Cote client", ResourceStatus.PUBLISHED);
 
-        var hits = resources.search(null, null, null, frontend.getId(), null, FIRST_PAGE);
+        var hits = resources.search(null, null, frontend.getId(), null, FIRST_PAGE);
 
         assertThat(hits.getContent()).extracting(Resource::getTitle).containsExactly("Cote client");
     }
@@ -120,24 +115,9 @@ class ResourceRepositoryIT extends PostgresIT {
         resources.saveAndFlush(tagged);
         save(backend, "Sans tag", ResourceStatus.PUBLISHED);
 
-        var hits = resources.search(null, null, null, null, java.getId(), FIRST_PAGE);
+        var hits = resources.search(null, null, null, java.getId(), FIRST_PAGE);
 
         assertThat(hits.getContent()).extracting(Resource::getTitle).containsExactly("Avec tag");
-    }
-
-    @Test
-    @DisplayName("the kind filter reads the subtype tables, not a column on the resource")
-    void filtersByKind() {
-        Resource ebookResource = save(backend, "Un ebook", ResourceStatus.PUBLISHED);
-        Document file = documents.saveAndFlush(document("ebook-key.pdf"));
-        ebooks.saveAndFlush(Ebook.builder().resource(ebookResource).document(file).build());
-        save(backend, "Pas un ebook", ResourceStatus.PUBLISHED);
-
-        var found = resources.search(null, null, "EBOOK", null, null, FIRST_PAGE);
-        var videos = resources.search(null, null, "EXTERNAL_VIDEO", null, null, FIRST_PAGE);
-
-        assertThat(found.getContent()).extracting(Resource::getTitle).containsExactly("Un ebook");
-        assertThat(videos).isEmpty();
     }
 
     @Test
@@ -153,17 +133,5 @@ class ResourceRepositoryIT extends PostgresIT {
         var published = resources.findByStatusOrderByCreatedAtDesc(ResourceStatus.PUBLISHED);
 
         assertThat(published).extracting(Resource::getTitle).containsExactly("Recente", "Ancienne");
-    }
-
-    @Test
-    @DisplayName("the counters the dashboard reads are grouped in the database, not in Java")
-    void countsByKind() {
-        Resource ebookResource = save(backend, "Un ebook", ResourceStatus.PUBLISHED);
-        Document file = documents.saveAndFlush(document("ebook-key.pdf"));
-        ebooks.saveAndFlush(Ebook.builder().resource(ebookResource).document(file).build());
-
-        assertThat(resources.countEbooks()).isEqualTo(1);
-        assertThat(resources.countExternalVideos()).isZero();
-        assertThat(resources.countArticles()).isZero();
     }
 }

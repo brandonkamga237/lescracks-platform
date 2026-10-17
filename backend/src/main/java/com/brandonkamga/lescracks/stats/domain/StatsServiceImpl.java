@@ -86,10 +86,6 @@ public class StatsServiceImpl implements StatsService {
         Map<String, Long> eventsByType = toCounts(events.countGroupedByType());
         Map<String, Long> resourcesByStatus = toCounts(resources.countGroupedByStatus());
         Map<String, Long> resourcesByCategory = toCounts(resources.countGroupedByCategory());
-        Map<String, Long> resourcesByKind = new LinkedHashMap<>();
-        resourcesByKind.put("EXTERNAL_VIDEO", resources.countExternalVideos());
-        resourcesByKind.put("EBOOK", resources.countEbooks());
-        resourcesByKind.put("ARTICLE", resources.countArticles());
 
         long upcoming = 0;
         long ongoing = 0;
@@ -112,7 +108,7 @@ public class StatsServiceImpl implements StatsService {
                 users.countNewsletterContacts(), funnel(users.signupFunnel(days30)),
                 total(eventsByStatus), eventsByStatus, eventsByType,
                 upcoming, ongoing, past,
-                total(resourcesByStatus), resourcesByStatus, resourcesByKind, resourcesByCategory,
+                total(resourcesByStatus), resourcesByStatus, resourcesByCategory,
                 newsletter.countByStatus(NewsletterStatus.SUBSCRIBED),
                 newsletter.countByStatus(NewsletterStatus.UNSUBSCRIBED),
                 newsletter.countByStatusAndSubscribedAtAfter(NewsletterStatus.SUBSCRIBED, days30),

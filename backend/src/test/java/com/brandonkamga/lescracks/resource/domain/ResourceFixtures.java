@@ -34,7 +34,4 @@ public final class ResourceFixtures {
                 .build();
     }
 
-    public static Document document(String key) {
-        return Document.builder().file(key).format("application/pdf").fileSize(1_024L).build();
-    }
 }

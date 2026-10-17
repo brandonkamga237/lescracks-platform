@@ -121,13 +121,13 @@ Before any commit or PR:
 - **Application** = either a 360 application or an event registration (`event != null`)
 - **Participation** = someone enrolled on an event or on the 360, `IN_PROGRESS` then `COMPLETED` or `ABANDONED`
 - **Attestation** = proof of a completed participation, checkable by anyone at `/attestations/{code}`
-- **Resource** = content (VIDEO/DOCUMENT/ARTICLE). A video is always `EXTERNAL`, a document is `UPLOADED` to MinIO, an article is `INLINE` and written in the back office
+- **Resource** = a published piece of content (title, cover, category, status, schedule); today every resource is an **Article** (`articles` table: block body written in the back office), shown on the blog
 - **SEO snapshot** = server-rendered HTML served to bots instead of the SPA
 
 ## Current product scope (September 2026)
 - The current backend controllers and DTOs are the source of truth when older architecture notes above differ from the code.
 - Do not restore removed programmes, applications, participations, attestations, articles, or SEO snapshot controllers as part of frontend work. Do not invent progress, favourites, event registration, or personalised history without backend support.
-- Resources currently use `EBOOK` and `EXTERNAL_VIDEO`; public event detail routes use numeric IDs. Browsing resources needs no account; a PDF ebook shows everyone a preview of its first pages (cut by the server), and downloading it is for members. Ebooks are not read in full on the site. Marketing copy avoids "gratuit" and any mention of French or francophone.
+- The site has a **Blog** (`/blog`, articles only; old `/ressources` links redirect) and a **Formations** tab (`/formations`, courses coming soon: no course model or progress yet). Ebooks and videos were removed (V24). Public event detail routes use numeric IDs. Reading needs no account. CrackLab carries the gold highlight in the navigation, not Talk. Marketing copy avoids "gratuit" and any mention of French or francophone.
 - Preserve the black, anthracite, white and gold palette (`#d4af37`). Visitor, member and administrator experiences must use a coherent shared session and actual backend data.
 - Local member/admin authentication uses backend sessions; existing OIDC authentication is a separate transport. Do not send a stale OIDC bearer token alongside local cookie authentication.
 - Validate frontend changes with `pnpm typecheck`, `pnpm lint`, and `pnpm build`. Browser checks using API fixtures verify UI behaviour, not live backend integration.

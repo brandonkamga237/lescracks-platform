@@ -33,14 +33,10 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
                             and (:search is null or lower(r.title) like concat('%', lower(cast(:search as string)), '%'))
                             and (:categoryId is null or r.category.id = :categoryId)
                             and (:tagId is null or exists (select t.id from Resource r2 join r2.tags t where r2.id = r.id and t.id = :tagId))
-                              and (:kind is null
-                                     or (:kind = 'EBOOK' and exists (select e.resourceId from Ebook e where e.resourceId = r.id))
-                                     or (:kind = 'EXTERNAL_VIDEO' and exists (select v.resourceId from ExternalVideoReference v where v.resourceId = r.id))
-                                     or (:kind = 'ARTICLE' and exists (select a.resourceId from Article a where a.resourceId = r.id)))
                         order by coalesce(r.publishedAt, r.createdAt) desc
                         """)
         Page<Resource> search(@Param("status") ResourceStatus status, @Param("search") String search,
-                              @Param("kind") String kind, @Param("categoryId") Long categoryId,
+                              @Param("categoryId") Long categoryId,
                               @Param("tagId") Long tagId,
                               Pageable pageable);
 
@@ -55,15 +51,6 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
 
     @Query("select r.status, count(r) from Resource r group by r.status")
     List<Object[]> countGroupedByStatus();
-
-    @Query("select count(e) from Ebook e")
-    long countEbooks();
-
-    @Query("select count(v) from ExternalVideoReference v")
-    long countExternalVideos();
-
-    @Query("select count(a) from Article a")
-    long countArticles();
 
     @Query("""
             select c.name, count(r)

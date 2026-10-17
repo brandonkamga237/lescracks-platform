@@ -5,11 +5,11 @@ import com.brandonkamga.lescracks.event.domain.EventFormat;
 import com.brandonkamga.lescracks.event.domain.EventService;
 import com.brandonkamga.lescracks.event.domain.EventStatus;
 import com.brandonkamga.lescracks.resource.api.dto.ResourceResponse;
+import com.brandonkamga.lescracks.resource.domain.Article;
 import com.brandonkamga.lescracks.resource.domain.Resource;
-import com.brandonkamga.lescracks.resource.domain.ResourceMapper;
+import com.brandonkamga.lescracks.resource.api.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
-import com.brandonkamga.lescracks.resource.infra.ArticleRepository;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 import com.brandonkamga.lescracks.talk.domain.TalkService;
 
@@ -43,15 +43,14 @@ public class SeoController {
     private final EventService events;
     private final TalkService talks;
     private final ResourceMapper mapper;
-    private final ArticleRepository articles;
     private final ObjectMapper objectMapper;
 
     private final Map<String, PageMeta> pageMeta = Map.of(
             "home", new PageMeta("LesCracks · Apprendre la tech et passer à la pratique",
-                    "LesCracks : vidéos, ebooks, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant.",
+                    "LesCracks : articles, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant.",
                     "/", "LesCracks : apprendre la tech et passer à la pratique"),
             "a-propos", new PageMeta("À propos · LesCracks",
-                    "Ce que fait LesCracks : une bibliothèque tech ouverte, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant.",
+                    "Ce que fait LesCracks : un blog tech, des formations à venir, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant.",
                     "/a-propos", "Ce que nous faisons"),
             "conditions-utilisation", new PageMeta("Conditions d’utilisation · LesCracks",
                     "Les conditions d’utilisation de la plateforme LesCracks.",
@@ -62,32 +61,29 @@ public class SeoController {
             "evenements", new PageMeta("Événements et ateliers tech · LesCracks",
                     "Bootcamps, ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble.",
                     "/evenements", "Événements"),
-            "ressources", new PageMeta("Bibliothèque · LesCracks",
-                    "Ebooks et vidéos pour apprendre la tech et passer à la pratique. Filtre par format, catégorie et sujet.",
-                    "/ressources", "Bibliothèque"),
+            "blog", new PageMeta("Blog · LesCracks",
+                    "Les articles LesCracks : retours d’expérience, notions expliquées et bonnes pratiques pour progresser en tech.",
+                    "/blog", "Blog"),
+            "formations", new PageMeta("Formations · LesCracks",
+                    "Les formations LesCracks arrivent : des parcours complets, étape par étape, pour passer à la pratique en tech.",
+                    "/formations", "Formations"),
             "talk", new PageMeta("LesCracks Talk · La tech africaine en conversations",
                     "Les épisodes du LesCracks Talk : des conversations vidéo avec celles et ceux qui construisent la tech africaine, publiées sur YouTube.",
                     "/talk", "Le Talk")
     );
 
     public SeoController(ResourceService resources, EventService events, TalkService talks,
-                         ResourceMapper mapper, ArticleRepository articles, ObjectMapper objectMapper) {
+                         ResourceMapper mapper, ObjectMapper objectMapper) {
         this.resources = resources;
         this.events = events;
         this.talks = talks;
         this.mapper = mapper;
-        this.articles = articles;
         this.objectMapper = objectMapper;
     }
 
-    @GetMapping(value = "/ressources/{slug}", produces = MediaType.TEXT_HTML_VALUE)
+    @GetMapping(value = "/blog/{slug}", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> resource(@PathVariable String slug, HttpServletRequest request) {
-        return switch (slug) {
-            case "articles" -> ResponseEntity.ok(buildResourceList(request, "ARTICLE", "Articles", "Articles de la bibliothèque LesCracks pour apprendre la tech et passer à la pratique."));
-            case "ebooks" -> ResponseEntity.ok(buildResourceList(request, "EBOOK", "Ebooks", "Ebooks de la bibliothèque LesCracks pour apprendre la tech et passer à la pratique."));
-            case "videos" -> ResponseEntity.ok(buildResourceList(request, "EXTERNAL_VIDEO", "Vidéos", "Vidéos de la bibliothèque LesCracks pour apprendre la tech et passer à la pratique."));
-            default -> ResponseEntity.ok(buildResourceDetail(slug, request));
-        };
+        return ResponseEntity.ok(buildResourceDetail(slug, request));
     }
 
     @GetMapping(value = "/evenements/{slug}", produces = MediaType.TEXT_HTML_VALUE)
@@ -166,7 +162,8 @@ public class SeoController {
 
         List<SeoHtml.Link> nav = List.of(
                 new SeoHtml.Link(canonical(request, "/"), "Accueil"),
-                new SeoHtml.Link(canonical(request, "/ressources"), "Bibliothèque"),
+                new SeoHtml.Link(canonical(request, "/blog"), "Blog"),
+                new SeoHtml.Link(canonical(request, "/formations"), "Formations"),
                 new SeoHtml.Link(canonical(request, "/evenements"), "Événements"),
                 new SeoHtml.Link(canonical(request, "/talk"), "LesCracks Talk"),
                 new SeoHtml.Link(canonical(request, "/cracklab"), "CrackLab"),
@@ -175,7 +172,8 @@ public class SeoController {
         html.navigation("Navigation principale", nav);
 
         if ("home".equals(page)) {
-            html.section("Bibliothèque", canonical(request, "/ressources"), "Vidéos, ebooks et articles pour apprendre la tech, triés par catégorie et par sujet.");
+            html.section("Blog", canonical(request, "/blog"), "Des articles pour comprendre une notion, éviter un piège ou apprendre d’un retour d’expérience.");
+            html.section("Formations", canonical(request, "/formations"), "Des parcours complets, étape par étape, bientôt disponibles.");
             html.section("Événements", canonical(request, "/evenements"), "Ateliers, bootcamps, webinaires et conférences pour pratiquer avec d’autres, en ligne ou sur place.");
             html.section("LesCracks Talk", canonical(request, "/talk"), "Des conversations vidéo avec celles et ceux qui construisent la tech africaine.");
             html.section("CrackLab", canonical(request, "/cracklab"), "Des casse-têtes à résoudre en raisonnant, un classement chaque semaine et des badges à débloquer.");
@@ -186,7 +184,7 @@ public class SeoController {
 
         if ("evenements".equals(page)) {
             addEventLinks(html, request);
-        } else if ("ressources".equals(page)) {
+        } else if ("blog".equals(page)) {
             addResourceLinks(html, request);
         } else if ("talk".equals(page)) {
             addTalkLinks(html);
@@ -204,13 +202,13 @@ public class SeoController {
     private String buildResourceDetail(String slug, HttpServletRequest request) {
         Resource resource = resources.requirePublishedBySlugOrId(slug);
         ResourceResponse response = mapper.toResponse(resource);
-        String canonical = canonical(request, "/ressources/" + (response.slug() != null ? response.slug() : response.id()));
+        String canonical = canonical(request, "/blog/" + (response.slug() != null ? response.slug() : response.id()));
         SeoHtml html = new SeoHtml(response.title() + " · LesCracks", response.description(), canonical)
                 .image(absolute(request, response.coverImage()), response.title(), null, null);
 
         html.breadcrumbs(List.of(
                 new SeoHtml.Link(canonical(request, "/"), "Accueil"),
-                new SeoHtml.Link(canonical(request, "/ressources"), "Bibliothèque"),
+                new SeoHtml.Link(canonical(request, "/blog"), "Blog"),
                 new SeoHtml.Link(canonical, response.title())
         ));
 
@@ -219,120 +217,36 @@ public class SeoController {
 
         List<Map<String, Object>> breadcrumbItems = List.of(
                 Map.of("name", "Accueil", "item", baseUrl(request) + "/"),
-                Map.of("name", "Bibliothèque", "item", baseUrl(request) + "/ressources"),
+                Map.of("name", "Blog", "item", baseUrl(request) + "/blog"),
                 Map.of("name", response.title(), "item", canonical)
         );
 
-        if ("ARTICLE".equals(response.kind())) {
-            html.type("article");
-            html.fact("Type", "Article");
-            html.fact("Catégorie", response.categoryName());
-            html.fact("Temps de lecture", response.readingMinutes() + " min");
+        html.type("article");
+        html.fact("Catégorie", response.categoryName());
+        html.fact("Temps de lecture", response.readingMinutes() + " min");
 
-            String prose = articles.findByResourceId(response.id())
-                    .map(com.brandonkamga.lescracks.resource.domain.Article::getPlainText)
-                    .orElse(null);
-            if (prose != null && !prose.isBlank()) {
-                for (String paragraph : prose.split("\n\n+")) {
-                    html.paragraph(paragraph);
-                }
+        String prose = resources.article(response.id())
+                .map(Article::getPlainText)
+                .orElse(null);
+        if (prose != null && !prose.isBlank()) {
+            for (String paragraph : prose.split("\n\n+")) {
+                html.paragraph(paragraph);
             }
-
-            Map<String, Object> jsonLd = new LinkedHashMap<>();
-            jsonLd.put("@context", "https://schema.org");
-            jsonLd.put("@type", "Article");
-            jsonLd.put("headline", response.title());
-            jsonLd.put("description", response.description());
-            jsonLd.put("image", absolute(request, response.coverImage()));
-            jsonLd.put("url", canonical);
-            jsonLd.put("datePublished", ISO.format(response.createdAt().atOffset(ZoneOffset.UTC)));
-            jsonLd.put("dateModified", ISO.format(response.updatedAt().atOffset(ZoneOffset.UTC)));
-            jsonLd.put("author", Map.of("@type", "Organization", "name", "LesCracks"));
-            html.jsonLd(writeJson(jsonLd));
-        } else if ("EBOOK".equals(response.kind())) {
-            html.type("book");
-            html.fact("Type", "Ebook");
-            html.fact("Format", response.fileFormat());
-
-            Map<String, Object> jsonLd = new LinkedHashMap<>();
-            jsonLd.put("@context", "https://schema.org");
-            jsonLd.put("@type", "LearningResource");
-            jsonLd.put("name", response.title());
-            jsonLd.put("description", response.description());
-            jsonLd.put("image", absolute(request, response.coverImage()));
-            jsonLd.put("url", canonical);
-            jsonLd.put("learningResourceType", "Ebook");
-            html.jsonLd(writeJson(jsonLd));
-        } else if ("EXTERNAL_VIDEO".equals(response.kind())) {
-            html.type("video.other");
-            html.fact("Type", "Vidéo");
-            html.fact("Plateforme", response.platform());
-
-            Map<String, Object> jsonLd = new LinkedHashMap<>();
-            jsonLd.put("@context", "https://schema.org");
-            jsonLd.put("@type", "LearningResource");
-            jsonLd.put("name", response.title());
-            jsonLd.put("description", response.description());
-            jsonLd.put("image", absolute(request, response.coverImage()));
-            jsonLd.put("url", canonical);
-            jsonLd.put("learningResourceType", "Video");
-            html.jsonLd(writeJson(jsonLd));
         }
-
-        html.jsonLd(writeJson(breadcrumbJsonLd(request, breadcrumbItems)));
-        return html.render();
-    }
-
-    private String buildResourceList(HttpServletRequest request, String kind, String heading, String description) {
-        String slug = kindToSlug(kind);
-        String canonical = canonical(request, "/ressources/" + slug);
-
-        SeoHtml html = new SeoHtml(heading + " · LesCracks", description, canonical)
-                .image(absolute(request, PREVIEW_IMAGE), "LesCracks", PREVIEW_WIDTH, PREVIEW_HEIGHT);
-
-        html.heading(heading);
-        html.paragraph(description);
-
-        var published = resources.search(ResourceStatus.PUBLISHED, null, kind, null, null, PageRequest.of(0, 100));
-
-        List<SeoHtml.Link> links = new ArrayList<>();
-        published.forEach(resource -> {
-            ResourceResponse response = mapper.toResponse(resource);
-            String resourceSlug = response.slug() != null ? response.slug() : String.valueOf(response.id());
-            links.add(new SeoHtml.Link(canonical(request, "/ressources/" + resourceSlug), response.title()));
-        });
-        if (links.isEmpty()) {
-            html.paragraph("Aucun contenu publié dans cette section pour le moment.");
-        } else {
-            html.links("Derniers contenus", links);
-        }
-
-        List<Map<String, Object>> items = new ArrayList<>();
-        published.forEach(resource -> {
-            ResourceResponse response = mapper.toResponse(resource);
-            String resourceSlug = response.slug() != null ? response.slug() : String.valueOf(response.id());
-            Map<String, Object> item = new LinkedHashMap<>();
-            item.put("@type", "ListItem");
-            item.put("position", items.size() + 1);
-            item.put("url", canonical(request, "/ressources/" + resourceSlug));
-            item.put("name", response.title());
-            items.add(item);
-        });
 
         Map<String, Object> jsonLd = new LinkedHashMap<>();
         jsonLd.put("@context", "https://schema.org");
-        jsonLd.put("@type", "CollectionPage");
-        jsonLd.put("name", heading + " · LesCracks");
+        jsonLd.put("@type", "Article");
+        jsonLd.put("headline", response.title());
+        jsonLd.put("description", response.description());
+        jsonLd.put("image", absolute(request, response.coverImage()));
         jsonLd.put("url", canonical);
-        jsonLd.put("mainEntity", Map.of("@type", "ItemList", "itemListElement", items));
+        jsonLd.put("datePublished", ISO.format(response.createdAt().atOffset(ZoneOffset.UTC)));
+        jsonLd.put("dateModified", ISO.format(response.updatedAt().atOffset(ZoneOffset.UTC)));
+        jsonLd.put("author", Map.of("@type", "Organization", "name", "LesCracks"));
         html.jsonLd(writeJson(jsonLd));
 
-        html.jsonLd(writeJson(breadcrumbJsonLd(request, List.of(
-                Map.of("name", "Accueil", "item", baseUrl(request) + "/"),
-                Map.of("name", "Bibliothèque", "item", baseUrl(request) + "/ressources"),
-                Map.of("name", heading, "item", canonical)
-        ))));
-
+        html.jsonLd(writeJson(breadcrumbJsonLd(request, breadcrumbItems)));
         return html.render();
     }
 
@@ -362,9 +276,9 @@ public class SeoController {
     }
 
     private void addResourceLinks(SeoHtml html, HttpServletRequest request) {
-        var published = resources.search(ResourceStatus.PUBLISHED, null, null, null, null, PageRequest.of(0, 50));
+        var published = resources.search(ResourceStatus.PUBLISHED, null, null, null, PageRequest.of(0, 50));
         if (published.isEmpty()) {
-            html.paragraph("Aucune ressource publiée pour le moment.");
+            html.paragraph("Aucun article publié pour le moment.");
             return;
         }
 
@@ -372,9 +286,9 @@ public class SeoController {
         published.forEach(resource -> {
             ResourceResponse response = mapper.toResponse(resource);
             String slug = response.slug() != null ? response.slug() : String.valueOf(response.id());
-            links.add(new SeoHtml.Link(canonical(request, "/ressources/" + slug), response.title()));
+            links.add(new SeoHtml.Link(canonical(request, "/blog/" + slug), response.title()));
         });
-        html.links("Ressources récentes", links);
+        html.links("Articles récents", links);
     }
 
     /** Who the site is and what it is called: the name and logo Google shows for a brand search. */
@@ -468,15 +382,6 @@ public class SeoController {
         return status == EventStatus.CANCELLED
                 ? "https://schema.org/EventCancelled"
                 : "https://schema.org/EventScheduled";
-    }
-
-    private String kindToSlug(String kind) {
-        return switch (kind) {
-            case "EBOOK" -> "ebooks";
-            case "EXTERNAL_VIDEO" -> "videos";
-            case "ARTICLE" -> "articles";
-            default -> kind.toLowerCase();
-        };
     }
 
     private String formatEventType(com.brandonkamga.lescracks.event.domain.EventType type) {

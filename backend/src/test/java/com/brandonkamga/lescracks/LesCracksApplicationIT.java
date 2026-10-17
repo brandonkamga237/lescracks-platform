@@ -86,7 +86,7 @@ class LesCracksApplicationIT extends PostgresIT {
                 .map(type -> type.getJavaType().getSimpleName())
                 .collect(Collectors.toSet());
 
-        assertThat(entities).contains("Resource", "Ebook", "Article", "ExternalVideoReference",
+        assertThat(entities).contains("Resource", "Article",
                 "Category", "Tag", "Event", "NewsletterSubscription", "User", "Admin");
     }
 }
