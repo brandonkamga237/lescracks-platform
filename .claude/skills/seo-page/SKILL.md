@@ -34,7 +34,7 @@ done. Missing one leaves the page invisible to engines, with no visible error.
   (the key combines the bot flag and the path; `location /` does the `rewrite` to
   `/_seo/pages/$seo_page`).
 - **New slug-based detail type**: add it to the named group of the existing regex
-  `location` (`evenements|ressources|apprenants`).
+  `location` (`evenements|blog`).
 - The `location ^~ /_seo/` block is internal and proxies to the backend: leave it alone.
 
 ## 3. Sitemap — `seo/api/SitemapController.java`
