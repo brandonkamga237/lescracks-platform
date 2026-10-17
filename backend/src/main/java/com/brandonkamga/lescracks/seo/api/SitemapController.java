@@ -39,7 +39,8 @@ public class SitemapController {
         xml.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
 
         addUrl(xml, base, "/", "1.0", "daily");
-        addUrl(xml, base, "/ressources", "0.8", "daily");
+        addUrl(xml, base, "/blog", "0.8", "daily");
+        addUrl(xml, base, "/formations", "0.6", "monthly");
         addUrl(xml, base, "/evenements", "0.6", "daily");
         addUrl(xml, base, "/talk", "0.6", "weekly");
         addUrl(xml, base, "/cracklab", "0.7", "weekly");
@@ -53,7 +54,7 @@ public class SitemapController {
             String lastmod = W3C.format(resource.getUpdatedAt().atOffset(ZoneOffset.UTC));
             String slug = resource.getSlug() != null ? resource.getSlug() : String.valueOf(resource.getId());
             xml.append("  <url>\n");
-            xml.append("    <loc>").append(escape(base + "/ressources/" + slug)).append("</loc>\n");
+            xml.append("    <loc>").append(escape(base + "/blog/" + slug)).append("</loc>\n");
             xml.append("    <lastmod>").append(escape(lastmod)).append("</lastmod>\n");
             xml.append("    <priority>0.7</priority>\n");
             xml.append("    <changefreq>weekly</changefreq>\n");

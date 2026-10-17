@@ -47,10 +47,10 @@ public class SeoController {
 
     private final Map<String, PageMeta> pageMeta = Map.of(
             "home", new PageMeta("LesCracks · Apprendre la tech et passer à la pratique",
-                    "LesCracks : vidéos, ebooks, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant.",
+                    "LesCracks : articles, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant.",
                     "/", "LesCracks : apprendre la tech et passer à la pratique"),
             "a-propos", new PageMeta("À propos · LesCracks",
-                    "Ce que fait LesCracks : une bibliothèque tech ouverte, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant.",
+                    "Ce que fait LesCracks : un blog tech, des formations à venir, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant.",
                     "/a-propos", "Ce que nous faisons"),
             "conditions-utilisation", new PageMeta("Conditions d’utilisation · LesCracks",
                     "Les conditions d’utilisation de la plateforme LesCracks.",
@@ -61,9 +61,12 @@ public class SeoController {
             "evenements", new PageMeta("Événements et ateliers tech · LesCracks",
                     "Bootcamps, ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble.",
                     "/evenements", "Événements"),
-            "ressources", new PageMeta("Bibliothèque · LesCracks",
-                    "Ebooks et vidéos pour apprendre la tech et passer à la pratique. Filtre par format, catégorie et sujet.",
-                    "/ressources", "Bibliothèque"),
+            "blog", new PageMeta("Blog · LesCracks",
+                    "Les articles LesCracks : retours d’expérience, notions expliquées et bonnes pratiques pour progresser en tech.",
+                    "/blog", "Blog"),
+            "formations", new PageMeta("Formations · LesCracks",
+                    "Les formations LesCracks arrivent : des parcours complets, étape par étape, pour passer à la pratique en tech.",
+                    "/formations", "Formations"),
             "talk", new PageMeta("LesCracks Talk · La tech africaine en conversations",
                     "Les épisodes du LesCracks Talk : des conversations vidéo avec celles et ceux qui construisent la tech africaine, publiées sur YouTube.",
                     "/talk", "Le Talk")
@@ -78,7 +81,7 @@ public class SeoController {
         this.objectMapper = objectMapper;
     }
 
-    @GetMapping(value = "/ressources/{slug}", produces = MediaType.TEXT_HTML_VALUE)
+    @GetMapping(value = "/blog/{slug}", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> resource(@PathVariable String slug, HttpServletRequest request) {
         return ResponseEntity.ok(buildResourceDetail(slug, request));
     }
@@ -159,7 +162,8 @@ public class SeoController {
 
         List<SeoHtml.Link> nav = List.of(
                 new SeoHtml.Link(canonical(request, "/"), "Accueil"),
-                new SeoHtml.Link(canonical(request, "/ressources"), "Bibliothèque"),
+                new SeoHtml.Link(canonical(request, "/blog"), "Blog"),
+                new SeoHtml.Link(canonical(request, "/formations"), "Formations"),
                 new SeoHtml.Link(canonical(request, "/evenements"), "Événements"),
                 new SeoHtml.Link(canonical(request, "/talk"), "LesCracks Talk"),
                 new SeoHtml.Link(canonical(request, "/cracklab"), "CrackLab"),
@@ -168,7 +172,8 @@ public class SeoController {
         html.navigation("Navigation principale", nav);
 
         if ("home".equals(page)) {
-            html.section("Bibliothèque", canonical(request, "/ressources"), "Vidéos, ebooks et articles pour apprendre la tech, triés par catégorie et par sujet.");
+            html.section("Blog", canonical(request, "/blog"), "Des articles pour comprendre une notion, éviter un piège ou apprendre d’un retour d’expérience.");
+            html.section("Formations", canonical(request, "/formations"), "Des parcours complets, étape par étape, bientôt disponibles.");
             html.section("Événements", canonical(request, "/evenements"), "Ateliers, bootcamps, webinaires et conférences pour pratiquer avec d’autres, en ligne ou sur place.");
             html.section("LesCracks Talk", canonical(request, "/talk"), "Des conversations vidéo avec celles et ceux qui construisent la tech africaine.");
             html.section("CrackLab", canonical(request, "/cracklab"), "Des casse-têtes à résoudre en raisonnant, un classement chaque semaine et des badges à débloquer.");
@@ -179,7 +184,7 @@ public class SeoController {
 
         if ("evenements".equals(page)) {
             addEventLinks(html, request);
-        } else if ("ressources".equals(page)) {
+        } else if ("blog".equals(page)) {
             addResourceLinks(html, request);
         } else if ("talk".equals(page)) {
             addTalkLinks(html);
@@ -197,13 +202,13 @@ public class SeoController {
     private String buildResourceDetail(String slug, HttpServletRequest request) {
         Resource resource = resources.requirePublishedBySlugOrId(slug);
         ResourceResponse response = mapper.toResponse(resource);
-        String canonical = canonical(request, "/ressources/" + (response.slug() != null ? response.slug() : response.id()));
+        String canonical = canonical(request, "/blog/" + (response.slug() != null ? response.slug() : response.id()));
         SeoHtml html = new SeoHtml(response.title() + " · LesCracks", response.description(), canonical)
                 .image(absolute(request, response.coverImage()), response.title(), null, null);
 
         html.breadcrumbs(List.of(
                 new SeoHtml.Link(canonical(request, "/"), "Accueil"),
-                new SeoHtml.Link(canonical(request, "/ressources"), "Bibliothèque"),
+                new SeoHtml.Link(canonical(request, "/blog"), "Blog"),
                 new SeoHtml.Link(canonical, response.title())
         ));
 
@@ -212,7 +217,7 @@ public class SeoController {
 
         List<Map<String, Object>> breadcrumbItems = List.of(
                 Map.of("name", "Accueil", "item", baseUrl(request) + "/"),
-                Map.of("name", "Bibliothèque", "item", baseUrl(request) + "/ressources"),
+                Map.of("name", "Blog", "item", baseUrl(request) + "/blog"),
                 Map.of("name", response.title(), "item", canonical)
         );
 
@@ -273,7 +278,7 @@ public class SeoController {
     private void addResourceLinks(SeoHtml html, HttpServletRequest request) {
         var published = resources.search(ResourceStatus.PUBLISHED, null, null, null, PageRequest.of(0, 50));
         if (published.isEmpty()) {
-            html.paragraph("Aucune ressource publiée pour le moment.");
+            html.paragraph("Aucun article publié pour le moment.");
             return;
         }
 
@@ -281,9 +286,9 @@ public class SeoController {
         published.forEach(resource -> {
             ResourceResponse response = mapper.toResponse(resource);
             String slug = response.slug() != null ? response.slug() : String.valueOf(response.id());
-            links.add(new SeoHtml.Link(canonical(request, "/ressources/" + slug), response.title()));
+            links.add(new SeoHtml.Link(canonical(request, "/blog/" + slug), response.title()));
         });
-        html.links("Ressources récentes", links);
+        html.links("Articles récents", links);
     }
 
     /** Who the site is and what it is called: the name and logo Google shows for a brand search. */
