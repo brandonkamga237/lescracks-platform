@@ -38,7 +38,7 @@ class SeoControllerTest {
     @Test
     @DisplayName("the home page a crawler gets carries the brand, the favicon, the main sections and the site's identity")
     void homeSnapshotIsComplete() throws Exception {
-        when(resources.search(any(), any(), any(), any(), any(), any())).thenReturn(Page.empty());
+        when(resources.search(any(), any(), any(), any(), any())).thenReturn(Page.empty());
         when(events.published(any(), any(), any())).thenReturn(Page.empty());
 
         mockMvc.perform(get("/seo/pages/home"))

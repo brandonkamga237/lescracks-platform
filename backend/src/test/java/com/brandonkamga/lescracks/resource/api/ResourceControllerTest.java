@@ -5,10 +5,7 @@ import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.resource.domain.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
-import com.brandonkamga.lescracks.resource.infra.EbookRepository;
-import com.brandonkamga.lescracks.resource.infra.PdfExcerpts;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
-import com.brandonkamga.lescracks.storage.domain.StorageService;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,14 +46,10 @@ class ResourceControllerTest {
 
     @MockitoBean private ResourceService resources;
     @MockitoBean private ResourceMapper mapper;
-    @MockitoBean private EbookRepository ebooks;
-    @MockitoBean private StorageService storage;
-    @MockitoBean private PdfExcerpts excerpts;
 
     private static ResourceResponse response() {
         return new ResourceResponse(1L, "spring-boot", "Spring Boot", "Description",
                 "https://cdn.example/cover.png", ResourceStatus.PUBLISHED, 2L, "Backend",
-                "EXTERNAL_VIDEO", "https://youtu.be/abc", "YouTube", null, null, null,
                 Set.of("Java"), 3L, Instant.parse("2026-01-01T00:00:00Z"),
                 Instant.parse("2026-01-01T00:00:00Z"), null, null, null, null);
     }
@@ -65,7 +58,7 @@ class ResourceControllerTest {
     @DisplayName("the listing exposes a pager, not Spring's internal Page")
     void listsPublishedResources() throws Exception {
         var page = new PageImpl<>(List.of(new Resource()), PageRequest.of(0, 12), 1);
-        when(resources.search(eq(ResourceStatus.PUBLISHED), any(), any(), any(), any(), any()))
+        when(resources.search(eq(ResourceStatus.PUBLISHED), any(), any(), any(), any()))
                 .thenReturn(page);
         when(mapper.toResponse(any(Resource.class))).thenReturn(response());
 
@@ -101,13 +94,12 @@ class ResourceControllerTest {
 
     @Test
     @DisplayName("validation refuses an empty title before the service is ever called")
-    void validatesTheVideoPayload() throws Exception {
+    void validatesTheArticlePayload() throws Exception {
         var data = new MockMultipartFile("data", "data.json", MediaType.APPLICATION_JSON_VALUE, """
-                {"title": "  ", "description": "Une description", "categoryId": 1,
-                 "videoUrl": "https://youtu.be/abc", "platform": "YouTube"}
+                {"title": "  ", "description": "Une description", "categoryId": 1, "body": []}
                 """.getBytes());
 
-        mockMvc.perform(multipart("/api/resources/admin/videos").file(data))
+        mockMvc.perform(multipart("/api/resources/admin/articles").file(data))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
                 .andExpect(jsonPath("$.fields.title").exists());

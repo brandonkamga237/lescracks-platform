@@ -40,9 +40,6 @@ public class SitemapController {
 
         addUrl(xml, base, "/", "1.0", "daily");
         addUrl(xml, base, "/ressources", "0.8", "daily");
-        addUrl(xml, base, "/ressources/ebooks", "0.8", "weekly");
-        addUrl(xml, base, "/ressources/videos", "0.8", "weekly");
-        addUrl(xml, base, "/ressources/articles", "0.8", "weekly");
         addUrl(xml, base, "/evenements", "0.6", "daily");
         addUrl(xml, base, "/talk", "0.6", "weekly");
         addUrl(xml, base, "/cracklab", "0.7", "weekly");
@@ -51,7 +48,7 @@ public class SitemapController {
         addUrl(xml, base, "/conditions-utilisation", "0.3", "yearly");
         addUrl(xml, base, "/politique-confidentialite", "0.3", "yearly");
 
-        var published = resources.search(ResourceStatus.PUBLISHED, null, null, null, null, PageRequest.of(0, 10_000));
+        var published = resources.search(ResourceStatus.PUBLISHED, null, null, null, PageRequest.of(0, 10_000));
         published.forEach(resource -> {
             String lastmod = W3C.format(resource.getUpdatedAt().atOffset(ZoneOffset.UTC));
             String slug = resource.getSlug() != null ? resource.getSlug() : String.valueOf(resource.getId());

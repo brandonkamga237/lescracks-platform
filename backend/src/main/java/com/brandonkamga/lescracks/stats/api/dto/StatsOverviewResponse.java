@@ -24,7 +24,6 @@ public record StatsOverviewResponse(
         long eventsPast,
         long resources,
         Map<String, Long> resourcesByStatus,
-        Map<String, Long> resourcesByKind,
         Map<String, Long> resourcesByCategory,
         long newsletterSubscribers,
         long newsletterUnsubscribed,

@@ -5,6 +5,7 @@ import com.brandonkamga.lescracks.event.domain.EventFormat;
 import com.brandonkamga.lescracks.event.domain.EventService;
 import com.brandonkamga.lescracks.event.domain.EventStatus;
 import com.brandonkamga.lescracks.resource.api.dto.ResourceResponse;
+import com.brandonkamga.lescracks.resource.domain.Article;
 import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.resource.domain.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
@@ -82,12 +83,7 @@ public class SeoController {
 
     @GetMapping(value = "/ressources/{slug}", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> resource(@PathVariable String slug, HttpServletRequest request) {
-        return switch (slug) {
-            case "articles" -> ResponseEntity.ok(buildResourceList(request, "ARTICLE", "Articles", "Articles de la bibliothèque LesCracks pour apprendre la tech et passer à la pratique."));
-            case "ebooks" -> ResponseEntity.ok(buildResourceList(request, "EBOOK", "Ebooks", "Ebooks de la bibliothèque LesCracks pour apprendre la tech et passer à la pratique."));
-            case "videos" -> ResponseEntity.ok(buildResourceList(request, "EXTERNAL_VIDEO", "Vidéos", "Vidéos de la bibliothèque LesCracks pour apprendre la tech et passer à la pratique."));
-            default -> ResponseEntity.ok(buildResourceDetail(slug, request));
-        };
+        return ResponseEntity.ok(buildResourceDetail(slug, request));
     }
 
     @GetMapping(value = "/evenements/{slug}", produces = MediaType.TEXT_HTML_VALUE)
@@ -223,116 +219,32 @@ public class SeoController {
                 Map.of("name", response.title(), "item", canonical)
         );
 
-        if ("ARTICLE".equals(response.kind())) {
-            html.type("article");
-            html.fact("Type", "Article");
-            html.fact("Catégorie", response.categoryName());
-            html.fact("Temps de lecture", response.readingMinutes() + " min");
+        html.type("article");
+        html.fact("Catégorie", response.categoryName());
+        html.fact("Temps de lecture", response.readingMinutes() + " min");
 
-            String prose = articles.findByResourceId(response.id())
-                    .map(com.brandonkamga.lescracks.resource.domain.Article::getPlainText)
-                    .orElse(null);
-            if (prose != null && !prose.isBlank()) {
-                for (String paragraph : prose.split("\n\n+")) {
-                    html.paragraph(paragraph);
-                }
+        String prose = articles.findByResourceId(response.id())
+                .map(Article::getPlainText)
+                .orElse(null);
+        if (prose != null && !prose.isBlank()) {
+            for (String paragraph : prose.split("\n\n+")) {
+                html.paragraph(paragraph);
             }
-
-            Map<String, Object> jsonLd = new LinkedHashMap<>();
-            jsonLd.put("@context", "https://schema.org");
-            jsonLd.put("@type", "Article");
-            jsonLd.put("headline", response.title());
-            jsonLd.put("description", response.description());
-            jsonLd.put("image", absolute(request, response.coverImage()));
-            jsonLd.put("url", canonical);
-            jsonLd.put("datePublished", ISO.format(response.createdAt().atOffset(ZoneOffset.UTC)));
-            jsonLd.put("dateModified", ISO.format(response.updatedAt().atOffset(ZoneOffset.UTC)));
-            jsonLd.put("author", Map.of("@type", "Organization", "name", "LesCracks"));
-            html.jsonLd(writeJson(jsonLd));
-        } else if ("EBOOK".equals(response.kind())) {
-            html.type("book");
-            html.fact("Type", "Ebook");
-            html.fact("Format", response.fileFormat());
-
-            Map<String, Object> jsonLd = new LinkedHashMap<>();
-            jsonLd.put("@context", "https://schema.org");
-            jsonLd.put("@type", "LearningResource");
-            jsonLd.put("name", response.title());
-            jsonLd.put("description", response.description());
-            jsonLd.put("image", absolute(request, response.coverImage()));
-            jsonLd.put("url", canonical);
-            jsonLd.put("learningResourceType", "Ebook");
-            html.jsonLd(writeJson(jsonLd));
-        } else if ("EXTERNAL_VIDEO".equals(response.kind())) {
-            html.type("video.other");
-            html.fact("Type", "Vidéo");
-            html.fact("Plateforme", response.platform());
-
-            Map<String, Object> jsonLd = new LinkedHashMap<>();
-            jsonLd.put("@context", "https://schema.org");
-            jsonLd.put("@type", "LearningResource");
-            jsonLd.put("name", response.title());
-            jsonLd.put("description", response.description());
-            jsonLd.put("image", absolute(request, response.coverImage()));
-            jsonLd.put("url", canonical);
-            jsonLd.put("learningResourceType", "Video");
-            html.jsonLd(writeJson(jsonLd));
         }
-
-        html.jsonLd(writeJson(breadcrumbJsonLd(request, breadcrumbItems)));
-        return html.render();
-    }
-
-    private String buildResourceList(HttpServletRequest request, String kind, String heading, String description) {
-        String slug = kindToSlug(kind);
-        String canonical = canonical(request, "/ressources/" + slug);
-
-        SeoHtml html = new SeoHtml(heading + " · LesCracks", description, canonical)
-                .image(absolute(request, PREVIEW_IMAGE), "LesCracks", PREVIEW_WIDTH, PREVIEW_HEIGHT);
-
-        html.heading(heading);
-        html.paragraph(description);
-
-        var published = resources.search(ResourceStatus.PUBLISHED, null, kind, null, null, PageRequest.of(0, 100));
-
-        List<SeoHtml.Link> links = new ArrayList<>();
-        published.forEach(resource -> {
-            ResourceResponse response = mapper.toResponse(resource);
-            String resourceSlug = response.slug() != null ? response.slug() : String.valueOf(response.id());
-            links.add(new SeoHtml.Link(canonical(request, "/ressources/" + resourceSlug), response.title()));
-        });
-        if (links.isEmpty()) {
-            html.paragraph("Aucun contenu publié dans cette section pour le moment.");
-        } else {
-            html.links("Derniers contenus", links);
-        }
-
-        List<Map<String, Object>> items = new ArrayList<>();
-        published.forEach(resource -> {
-            ResourceResponse response = mapper.toResponse(resource);
-            String resourceSlug = response.slug() != null ? response.slug() : String.valueOf(response.id());
-            Map<String, Object> item = new LinkedHashMap<>();
-            item.put("@type", "ListItem");
-            item.put("position", items.size() + 1);
-            item.put("url", canonical(request, "/ressources/" + resourceSlug));
-            item.put("name", response.title());
-            items.add(item);
-        });
 
         Map<String, Object> jsonLd = new LinkedHashMap<>();
         jsonLd.put("@context", "https://schema.org");
-        jsonLd.put("@type", "CollectionPage");
-        jsonLd.put("name", heading + " · LesCracks");
+        jsonLd.put("@type", "Article");
+        jsonLd.put("headline", response.title());
+        jsonLd.put("description", response.description());
+        jsonLd.put("image", absolute(request, response.coverImage()));
         jsonLd.put("url", canonical);
-        jsonLd.put("mainEntity", Map.of("@type", "ItemList", "itemListElement", items));
+        jsonLd.put("datePublished", ISO.format(response.createdAt().atOffset(ZoneOffset.UTC)));
+        jsonLd.put("dateModified", ISO.format(response.updatedAt().atOffset(ZoneOffset.UTC)));
+        jsonLd.put("author", Map.of("@type", "Organization", "name", "LesCracks"));
         html.jsonLd(writeJson(jsonLd));
 
-        html.jsonLd(writeJson(breadcrumbJsonLd(request, List.of(
-                Map.of("name", "Accueil", "item", baseUrl(request) + "/"),
-                Map.of("name", "Bibliothèque", "item", baseUrl(request) + "/ressources"),
-                Map.of("name", heading, "item", canonical)
-        ))));
-
+        html.jsonLd(writeJson(breadcrumbJsonLd(request, breadcrumbItems)));
         return html.render();
     }
 
@@ -362,7 +274,7 @@ public class SeoController {
     }
 
     private void addResourceLinks(SeoHtml html, HttpServletRequest request) {
-        var published = resources.search(ResourceStatus.PUBLISHED, null, null, null, null, PageRequest.of(0, 50));
+        var published = resources.search(ResourceStatus.PUBLISHED, null, null, null, PageRequest.of(0, 50));
         if (published.isEmpty()) {
             html.paragraph("Aucune ressource publiée pour le moment.");
             return;
@@ -468,15 +380,6 @@ public class SeoController {
         return status == EventStatus.CANCELLED
                 ? "https://schema.org/EventCancelled"
                 : "https://schema.org/EventScheduled";
-    }
-
-    private String kindToSlug(String kind) {
-        return switch (kind) {
-            case "EBOOK" -> "ebooks";
-            case "EXTERNAL_VIDEO" -> "videos";
-            case "ARTICLE" -> "articles";
-            default -> kind.toLowerCase();
-        };
     }
 
     private String formatEventType(com.brandonkamga.lescracks.event.domain.EventType type) {
