@@ -1,4 +1,3 @@
-export type ResourceKind = 'EBOOK' | 'EXTERNAL_VIDEO' | 'ARTICLE';
 export type ResourceStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 export type EventType = 'BOOTCAMP' | 'WORKSHOP' | 'WEBINAR' | 'CONFERENCE';
 export type EventFormat = 'ONLINE' | 'OFFLINE' | 'HYBRID';
