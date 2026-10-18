@@ -39,6 +39,19 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     Page<Event> findByStatusAndTypeOrderByStartDateAsc(EventStatus status, EventType type, Pageable pageable);
     Page<Event> findByStatusAndFormatOrderByStartDateAsc(EventStatus status, EventFormat format, Pageable pageable);
     Page<Event> findByStatusAndTypeAndFormatOrderByStartDateAsc(EventStatus status, EventType type, EventFormat format, Pageable pageable);
-    Page<Event> findByStatusAndStartDateAfterOrderByStartDateAsc(EventStatus status, Instant now, Pageable pageable);
-    Page<Event> findByStatusAndStartDateBeforeOrderByStartDateDesc(EventStatus status, Instant now, Pageable pageable);
+
+    /** Not started yet, or started and not over: a hackathon running for two weeks is still ahead of its participants. */
+    @Query("""
+            select e from Event e
+            where e.status = :status and (e.startDate > :now or e.endDate > :now)
+            order by e.startDate asc
+            """)
+    Page<Event> findUpcoming(@Param("status") EventStatus status, @Param("now") Instant now, Pageable pageable);
+
+    @Query("""
+            select e from Event e
+            where e.status = :status and e.startDate <= :now and (e.endDate is null or e.endDate <= :now)
+            order by e.startDate desc
+            """)
+    Page<Event> findPast(@Param("status") EventStatus status, @Param("now") Instant now, Pageable pageable);
 }
