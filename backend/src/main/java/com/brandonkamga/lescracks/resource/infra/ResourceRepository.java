@@ -2,6 +2,7 @@ package com.brandonkamga.lescracks.resource.infra;
 
 import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
+import com.brandonkamga.lescracks.resource.domain.ThemeArticles;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Page;
@@ -48,6 +49,15 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
             order by count(l.id) desc
             """)
     List<Object[]> topResources(Pageable pageable);
+
+    @Query("""
+            select new com.brandonkamga.lescracks.resource.domain.ThemeArticles(c, count(r))
+            from Resource r join r.category c
+            where r.status = :status
+            group by c
+            order by count(r) desc, c.name
+            """)
+    List<ThemeArticles> countByTheme(@Param("status") ResourceStatus status);
 
     @Query("select r.status, count(r) from Resource r group by r.status")
     List<Object[]> countGroupedByStatus();

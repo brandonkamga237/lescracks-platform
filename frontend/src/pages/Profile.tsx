@@ -128,30 +128,37 @@ export default function Profile() {
   return <Layout>
     <SEO title="Mon compte" description="Tes informations, ta sécurité et tes connexions LesCracks." url="/profil" />
     <Section spacing="tight">
-      <header className="flex flex-col gap-6 border-b border-line-soft pb-8 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-5"><AvatarPicker name={name} avatarUrl={user?.avatarUrl} onChanged={refresh} /><div><p className="text-sm font-medium tracking-wide text-gold-ink">Mon compte</p><h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-t1 sm:text-4xl">Bonjour{user?.firstName ? `, ${user.firstName}` : name ? `, ${name}` : ''}.</h1><p className="mt-2 text-sm text-t4">Un point de départ pour ta prochaine découverte.</p></div></div>
+      <header className="flex items-center justify-between gap-6 border-b border-line-soft pb-6 sm:pb-8">
+        <div className="flex min-w-0 items-center gap-4 sm:gap-5">
+          <AvatarPicker name={name} avatarUrl={user?.avatarUrl} onChanged={refresh} />
+          <div className="min-w-0">
+            <p className="kicker">Mon compte</p>
+            <h1 className="mt-1 break-words text-xl sm:text-3xl">{user ? `${user.firstName} ${user.lastName}`.trim() : name || 'Ton compte'}</h1>
+            {user?.email && <p className="mt-1 truncate text-sm text-t4">{user.email}</p>}
+          </div>
+        </div>
         <button type="button" disabled={Boolean(busy)} onClick={() => void logout()} className="btn-secondary hidden self-start lg:inline-flex"><LogOut aria-hidden="true" className="h-4 w-4" />{busy === 'logout' ? 'Déconnexion…' : 'Me déconnecter'}</button>
       </header>
       {error && <p role="alert" className="mt-5 rounded border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
       {user && user.completion < 100 && user.missing.length > 0 && (
-        <section aria-labelledby="completion-heading" className="mt-8 rounded-lg border border-line bg-card p-5 sm:p-6">
+        <section aria-labelledby="completion-heading" className="mt-6 rounded-lg border border-line bg-card p-4 sm:mt-8 sm:p-6">
           <div className="flex flex-wrap items-baseline justify-between gap-3">
             <h2 id="completion-heading" className="font-sans text-base font-medium tracking-normal text-t1">Profil complété à <span className="font-mono tabular-nums text-gold-ink">{user.completion} %</span></h2>
             <a href={`#${SECTION_OF[user.missing[0]] ?? 'informations'}`} className="link text-sm">Compléter mon profil</a>
           </div>
           <div aria-hidden className="mt-3 h-1 rounded-full bg-noir-700"><div className={`h-full rounded-full bg-gold-400 ${fillClass(user.completion / 100)}`} /></div>
-          <p className="mt-4 text-sm text-t3">Il manque : {user.missing.map((field) => FIELD_LABEL[field].toLocaleLowerCase('fr')).join(', ')}. Ça nous aide à te proposer les bons articles et les bons ateliers.</p>
+          <p className="mt-3 text-sm text-t3">Il manque : {user.missing.map((field) => FIELD_LABEL[field].toLocaleLowerCase('fr')).join(', ')}. Ça nous aide à te proposer les bons articles et les bons ateliers.</p>
         </section>
       )}
-      <div className="mt-8 grid items-start gap-8 lg:grid-cols-[1.2fr_1fr]">
+      <div className="mt-6 grid items-start gap-6 sm:mt-8 lg:grid-cols-[1.2fr_1fr] lg:gap-8">
         <div className="min-w-0 space-y-6">
         {user ? <ProfileDetails user={user} onSaved={refresh} /> : (
-          <section className="rounded-lg border border-line-soft bg-card p-5 sm:p-8">
+          <section className="rounded-lg border border-line-soft bg-card p-4 sm:p-7">
             <div className="flex items-start gap-3 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" /><p>{isAdmin ? 'Tu utilises un compte administrateur. La gestion des contenus est accessible depuis ton tableau de bord.' : 'Tu es connecté avec un fournisseur externe. Aucun profil membre modifiable n’est disponible pour cette connexion. Ton identité et ton mot de passe se gèrent auprès de ton fournisseur.'}</p></div>
             {isAdmin && <Link to="/admin" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-gold-ink">Ouvrir l’administration<ArrowRight aria-hidden="true" className="h-4 w-4" /></Link>}
           </section>
         )}
-        <section id="securite" className="scroll-mt-24 rounded-lg border border-line-soft bg-card p-5 sm:p-8" aria-label="Sécurité et connexion">
+        <section id="securite" className="scroll-mt-24 rounded-lg border border-line-soft bg-card p-4 sm:p-7" aria-label="Sécurité et connexion">
           <div>
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -159,7 +166,7 @@ export default function Profile() {
                   {user?.provider === 'LOCAL' ? <Lock className="h-5 w-5" aria-hidden="true" /> : <KeyRound className="h-5 w-5" aria-hidden="true" />}
                 </div>
                 <div>
-                  <h3 className="font-display text-lg font-bold text-t1">Sécurité</h3>
+                  <h3 className="text-lg text-t1">Sécurité</h3>
                   <p className="text-sm text-t4">
                     {user?.provider === 'LOCAL'
                       ? 'Change ton mot de passe quand tu le souhaites.'
@@ -186,12 +193,12 @@ export default function Profile() {
             )}
           </div>
           {user && (
-            <div className="mt-10 border-t border-line-soft pt-6">
+            <div className="mt-8 border-t border-line-soft pt-6">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded border border-gold-400/25 bg-gold-400/10 text-gold-ink"><KeyRound className="h-5 w-5" aria-hidden="true" /></div>
                   <div>
-                    <h3 className="font-display text-lg font-bold text-t1">Méthodes de connexion</h3>
+                    <h3 className="text-lg text-t1">Méthodes de connexion</h3>
                     <p className="text-sm text-t4">Gère les façons de te connecter à ton compte.</p>
                   </div>
                 </div>
@@ -241,11 +248,10 @@ export default function Profile() {
         </section>
         </div>
         <section aria-labelledby="quick-links-heading">
-          <h2 id="quick-links-heading" className="font-display text-xl font-bold text-t1">Et maintenant ?</h2>
-          <p className="mt-2 text-sm text-t4">Choisis ce que tu veux explorer aujourd’hui.</p>
-          <div className="mt-5 space-y-4">
-            <Link to="/blog" className="group flex gap-4 rounded-lg border border-line-soft bg-card p-6 transition-colors hover:border-line"><BookOpen aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-semibold text-t1">Lire le blog</h3><p className="mt-2 text-sm leading-relaxed text-t4">Des articles pour approfondir les sujets qui t’intéressent.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
-            <Link to="/evenements" className="group flex gap-4 rounded-lg border border-line-soft bg-card p-6 transition-colors hover:border-line"><CalendarDays aria-hidden="true" className="mt-1 h-6 w-6 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-semibold text-t1">Trouver un événement</h3><p className="mt-2 text-sm leading-relaxed text-t4">Découvre les prochains rendez-vous pour apprendre et échanger.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
+          <h2 id="quick-links-heading" className="text-lg text-t1 sm:text-xl">Et maintenant ?</h2>
+          <div className="mt-4 space-y-3">
+            <Link to="/blog" className="group flex gap-4 rounded-lg border border-line-soft bg-card p-4 transition-colors hover:border-line sm:p-5"><BookOpen aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-sans text-base font-semibold tracking-normal text-t1">Lire le blog</h3><p className="mt-1 text-sm leading-relaxed text-t4">Des articles pour approfondir les sujets qui t’intéressent.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
+            <Link to="/evenements" className="group flex gap-4 rounded-lg border border-line-soft bg-card p-4 transition-colors hover:border-line sm:p-5"><CalendarDays aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-sans text-base font-semibold tracking-normal text-t1">Trouver un événement</h3><p className="mt-1 text-sm leading-relaxed text-t4">Découvre les prochains rendez-vous pour apprendre et échanger.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
           </div>
           <div className="mt-6">
             <NewsletterCard />

@@ -49,7 +49,7 @@ export default function Talk() {
         url="/talk"
       />
 
-      <Section tone="raised" spacing="tight" backdrop="/images/headers/talk.webp">
+      <Section tone="raised" spacing="header">
         <PageHeader
           eyebrow="Sur YouTube"
           title="Le Talk"
@@ -106,7 +106,7 @@ export default function Talk() {
 
       <Section tone="raised">
         <div className="flex flex-col items-start gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <h2 className="max-w-2xl font-display text-4xl font-bold leading-[0.94] tracking-tight text-t1 sm:text-5xl lg:text-6xl lg:leading-[0.9]">
+          <h2 className="max-w-2xl font-display text-2xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl">
             Tu construis quelque chose ? Viens en parler.
           </h2>
           <div className="flex flex-wrap gap-3">

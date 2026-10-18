@@ -39,7 +39,7 @@ function AgendaItem({ event, cataloguePath }: AgendaItemProps) {
         <span aria-hidden className="pt-0.5">
           {hasDate ? (
             <>
-              <span className="block font-display text-4xl font-bold leading-[0.9] text-t1 sm:text-5xl">
+              <span className="block font-display text-3xl font-bold leading-[0.9] text-t1 sm:text-4xl">
                 {start.getDate()}
               </span>
               <span className="kicker mt-2 block">

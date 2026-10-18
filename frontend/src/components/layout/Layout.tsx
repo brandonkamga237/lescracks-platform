@@ -46,7 +46,6 @@ const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutPro
   return (
     <div className="flex min-h-screen flex-col bg-background pb-[calc(3.5rem+env(safe-area-inset-bottom))] text-foreground lg:pb-0">
       <a href="#main-content" className="sr-only z-[60] rounded bg-gold px-5 py-3 font-medium text-black focus:not-sr-only focus:fixed focus:left-5 focus:top-3">Aller au contenu</a>
-      <NewsletterBar />
       <Header />
       <VerifyEmailBanner />
 
@@ -56,7 +55,6 @@ const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutPro
         {children}
       </main>
 
-      {/* WhatsApp flottant — canal principal de conversion */}
       {showFooter && (
         <aside aria-label="La communauté LesCracks" className="mx-auto w-full max-w-7xl px-5 py-10 sm:px-8">
           <div className="flex flex-col items-start justify-between gap-4 border-t border-line-soft pt-8 sm:flex-row sm:items-center">
@@ -65,31 +63,30 @@ const Layout = ({ children, showScrollTop = true, showFooter = true }: LayoutPro
           </div>
         </aside>
       )}
-      {showFooter && <NewsletterBar placement="bottom" />}
+      {showFooter && <NewsletterBar />}
       {showFooter && <Footer />}
 
-      {/* Always one tap away from the community: WhatsApp is where the conversation lives. */}
+      {/* Desktop only: on a phone a floating button covers text and crowds the tab bar; the community link closes every page instead. */}
       <a
         href={WHATSAPP_URL}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Rejoindre la communauté LesCracks sur WhatsApp, nouvel onglet"
         title="Rejoindre la communauté WhatsApp"
-        className="group fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-40 flex h-14 items-center rounded-full bg-gold-400 px-4 text-black shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-[background-color,transform] duration-150 ease-out hover:bg-gold-300 active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400 lg:bottom-6 lg:right-6"
+        className="group fixed bottom-6 right-6 z-40 hidden h-12 items-center rounded-full bg-gold-400 px-3 text-black shadow-[0_8px_24px_rgba(0,0,0,0.5)] transition-[background-color,transform] duration-150 ease-out hover:bg-gold-300 active:scale-[0.97] motion-reduce:active:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold-400 lg:flex"
       >
         <WhatsAppSVG className="h-6 w-6 shrink-0" />
-        <span className="hidden max-w-0 overflow-hidden whitespace-nowrap text-sm font-semibold transition-[max-width,padding-left] duration-200 ease-out motion-reduce:transition-none group-hover:max-w-[12rem] group-hover:pl-2 group-focus-visible:max-w-[12rem] group-focus-visible:pl-2 sm:inline">
+        <span className="max-w-0 overflow-hidden whitespace-nowrap text-sm font-semibold transition-[max-width,padding-left] duration-200 ease-out motion-reduce:transition-none group-hover:max-w-[12rem] group-hover:pl-2 group-focus-visible:max-w-[12rem] group-focus-visible:pl-2">
           Rejoindre la communauté
         </span>
       </a>
 
-      {/* Scroll to Top — au-dessus du bouton WhatsApp */}
       {/* Stays mounted so it can leave the way it came; `invisible` takes it out of the tab order. */}
       {showScrollTop && (
         <button
           type="button"
           onClick={scrollToTop}
-          className={`fixed bottom-24 right-7 z-30 hidden h-11 w-11 items-center justify-center rounded-full border border-line-strong bg-card text-t2 transition-[opacity,transform,visibility,color,border-color] duration-200 ease-out hover:border-gold-400 hover:text-gold-ink active:scale-[0.97] motion-reduce:active:scale-100 motion-reduce:translate-y-0 lg:flex ${showScrollToTop ? 'opacity-100' : 'invisible translate-y-2 opacity-0'}`}
+          className={`fixed bottom-20 right-[1.875rem] z-30 hidden h-11 w-11 items-center justify-center rounded-full border border-line-strong bg-card text-t2 transition-[opacity,transform,visibility,color,border-color] duration-200 ease-out hover:border-gold-400 hover:text-gold-ink active:scale-[0.97] motion-reduce:active:scale-100 motion-reduce:translate-y-0 lg:flex ${showScrollToTop ? 'opacity-100' : 'invisible translate-y-2 opacity-0'}`}
           aria-label="Remonter en haut"
         >
           <ArrowUp className="h-4 w-4" aria-hidden />

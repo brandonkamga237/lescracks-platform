@@ -5,7 +5,9 @@ import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.resource.api.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
+import com.brandonkamga.lescracks.resource.domain.ThemeArticles;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
+import com.brandonkamga.lescracks.taxonomy.domain.Category;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -103,5 +105,17 @@ class ResourceControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
                 .andExpect(jsonPath("$.fields.title").exists());
+    }
+
+    @Test
+    @DisplayName("themes carry their article count, and the literal path is not read as an article slug")
+    void listsThemesWithTheirArticleCount() throws Exception {
+        var theme = Category.builder().id(4L).name("Backend & bases de données").slug("backend").description("API, SQL").build();
+        when(resources.publishedThemes()).thenReturn(List.of(new ThemeArticles(theme, 7)));
+
+        mockMvc.perform(get("/api/resources/themes"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].slug").value("backend"))
+                .andExpect(jsonPath("$[0].articleCount").value(7));
     }
 }

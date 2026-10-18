@@ -14,6 +14,7 @@ import { useApi } from '@/hooks/useApi';
 import { useCrackLabProgress } from '@/hooks/useCrackLabProgress';
 import { useSession } from '@/hooks/useSession';
 import { DIFFICULTY_LABEL, challengePath } from '@/lib/cracklab';
+import { worthFiltering } from '@/lib/filters';
 import { api } from '@/services/api';
 import type { ChallengeDifficulty, ChallengeSummary, CrackLabProgress } from '@/services/types';
 
@@ -106,10 +107,12 @@ export default function CrackLabHome() {
       <section id="challenges" aria-labelledby="challenges-heading" className="mx-auto max-w-6xl scroll-mt-20 px-5 py-10 sm:px-8 sm:py-14">
         <div className="max-w-3xl">
           <h2 id="challenges-heading" className="font-display text-2xl font-bold tracking-tight text-t1">Tous les défis</h2>
-          <div className="mt-4 flex flex-col gap-1">
-            {playing && <FilterChips legend="Statut" allLabel="Tous" options={STATUSES} value={status} onChange={(value) => setParam('statut', value ?? null)} />}
-            <FilterChips legend="Niveau" allLabel="Tous niveaux" options={DIFFICULTIES} value={difficulty} onChange={(value) => setParam('niveau', value ?? null)} />
-          </div>
+          {worthFiltering(everything.length, filtered) && (
+            <div className="mt-4 flex flex-col gap-1">
+              {playing && <FilterChips legend="Statut" allLabel="Tous" options={STATUSES} value={status} onChange={(value) => setParam('statut', value ?? null)} />}
+              <FilterChips legend="Niveau" allLabel="Tous niveaux" options={DIFFICULTIES} value={difficulty} onChange={(value) => setParam('niveau', value ?? null)} />
+            </div>
+          )}
           {tag && (
             <button type="button" onClick={() => setParam('tag', null)} className="mt-4 inline-flex items-center gap-1.5 rounded border border-line px-2.5 py-1 font-mono text-xs text-t1">
               {tag}<X className="h-3 w-3" aria-label="Retirer le filtre" />

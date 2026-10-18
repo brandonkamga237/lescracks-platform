@@ -22,9 +22,10 @@ function Rows({ rows }: RowsProps) {
   return (
     <dl className="divide-y divide-line-soft border-y border-line-soft text-sm">
       {rows.map(([label, value]) => (
-        <div key={label} className="flex items-baseline justify-between gap-4 py-3">
-          <dt className="shrink-0 text-t4">{label}</dt>
-          <dd className={`min-w-0 break-words text-right ${value ? 'text-t1' : 'text-t4'}`}>{value ?? 'À compléter'}</dd>
+        // Stacked on phones: a long email beside its label would wrap one character per line.
+        <div key={label} className="flex flex-col gap-0.5 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+          <dt className="text-t4 sm:shrink-0">{label}</dt>
+          <dd className={`min-w-0 [overflow-wrap:anywhere] sm:text-right ${value ? 'text-t1' : 'text-t4'}`}>{value ?? 'À compléter'}</dd>
         </div>
       ))}
     </dl>
@@ -161,8 +162,8 @@ export default function ProfileDetails({ user, onSaved }: ProfileDetailsProps) {
           : <p className="text-sm text-t4">Aucun lien pour l’instant.</p>}>
         {Object.entries(links).map(([platform, url]) => (
           <div key={platform} className="flex items-center gap-2">
-            <span className="w-24 shrink-0 truncate text-sm capitalize text-t2">{platform}</span>
-            <input type="url" aria-label={`Lien ${platform}`} value={url} onChange={(event) => setLinks({ ...links, [platform]: event.target.value })} className="input" />
+            <span className="w-20 shrink-0 truncate text-sm capitalize text-t2 sm:w-24">{platform}</span>
+            <input type="url" aria-label={`Lien ${platform}`} value={url} onChange={(event) => setLinks({ ...links, [platform]: event.target.value })} className="input min-w-0" />
             <button type="button" onClick={() => { const next = { ...links }; delete next[platform]; setLinks(next); }} className="shrink-0 text-sm text-error-ink">Retirer</button>
           </div>
         ))}

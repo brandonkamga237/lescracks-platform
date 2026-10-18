@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Mail, Newspaper, GraduationCap, FlaskConical, Calendar, Podcast } from 'lucide-react';
+import { Mail, Newspaper, GraduationCap, Calendar, Podcast } from 'lucide-react';
 import { GitHubIcon, LinkedInIcon, YouTubeIcon } from '@/components/icons/BrandIcons';
 import type { LucideIcon } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
@@ -10,7 +10,6 @@ type FooterLink = {
   label: string;
   href: string;
   icon: LucideIcon | null;
-  highlight?: boolean;
   isWhatsApp?: boolean;
   external?: boolean;
 };
@@ -21,7 +20,6 @@ const NAV: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: 'Blog', href: '/blog', icon: Newspaper },
       { label: 'Formations', href: '/formations', icon: GraduationCap },
-      { label: 'CrackLab', href: '/cracklab', icon: FlaskConical, highlight: true },
       { label: 'Événements', href: '/evenements', icon: Calendar },
       { label: 'LesCracks Talk', href: '/talk', icon: Podcast },
       { label: 'À propos', href: '/a-propos', icon: null },
@@ -55,7 +53,7 @@ const Footer = () => {
   return (
     <footer className="bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-8">
-        <p className="mb-16 max-w-3xl font-display text-4xl font-bold leading-[0.94] tracking-tight text-t1 sm:text-5xl lg:text-6xl lg:leading-[0.9]">
+        <p className="mb-10 max-w-3xl font-display text-3xl font-bold leading-[0.95] tracking-tight text-t1 sm:text-5xl">
           Deviens aussi un crack <span className="text-gold-400">de la tech.</span>
         </p>
 
@@ -101,11 +99,7 @@ const Footer = () => {
               <ul className="space-y-3">
                 {col.links.map((link) => {
                   const content = (
-                    <span className={`flex items-center gap-2 text-sm transition-colors ${
-                      link.highlight
-                        ? 'font-medium text-gold-400 hover:text-gold-ink'
-                        : 'text-t3 hover:text-t1'
-                    }`}>
+                    <span className="flex items-center gap-2 text-sm text-t3 transition-colors hover:text-t1">
                       {link.isWhatsApp ? (
                         <WhatsAppIcon className="w-3.5 h-3.5 flex-shrink-0" />
                       ) : link.icon ? (

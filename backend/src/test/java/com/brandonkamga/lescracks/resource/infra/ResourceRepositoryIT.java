@@ -2,6 +2,7 @@ package com.brandonkamga.lescracks.resource.infra;
 
 import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
+import com.brandonkamga.lescracks.resource.domain.ThemeArticles;
 import com.brandonkamga.lescracks.support.PostgresIT;
 import com.brandonkamga.lescracks.taxonomy.domain.Category;
 import com.brandonkamga.lescracks.taxonomy.domain.Tag;
@@ -17,11 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import static com.brandonkamga.lescracks.resource.domain.ResourceFixtures.category;
 import static com.brandonkamga.lescracks.resource.domain.ResourceFixtures.resource;
 import static com.brandonkamga.lescracks.resource.domain.ResourceFixtures.tag;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 /**
  * The catalogue query, against real PostgreSQL.
@@ -133,5 +136,22 @@ class ResourceRepositoryIT extends PostgresIT {
         var published = resources.findByStatusOrderByCreatedAtDesc(ResourceStatus.PUBLISHED);
 
         assertThat(published).extracting(Resource::getTitle).containsExactly("Recente", "Ancienne");
+    }
+
+    @Test
+    @DisplayName("themes count published articles only, the fullest first, and an empty theme is absent")
+    void countsPublishedArticlesByTheme() {
+        save(backend, "Un", ResourceStatus.PUBLISHED);
+        save(backend, "Deux", ResourceStatus.PUBLISHED);
+        save(backend, "Brouillon", ResourceStatus.DRAFT);
+        save(frontend, "Trois", ResourceStatus.PUBLISHED);
+        Category empty = categories.save(category("Vide"));
+
+        var themes = resources.countByTheme(ResourceStatus.PUBLISHED).stream()
+                .filter(entry -> List.of(backend.getId(), frontend.getId(), empty.getId()).contains(entry.theme().getId()))
+                .toList();
+
+        assertThat(themes).extracting(entry -> entry.theme().getName(), ThemeArticles::articles)
+                .containsExactly(tuple("Backend", 2L), tuple("Frontend", 1L));
     }
 }

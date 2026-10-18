@@ -56,6 +56,12 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<ThemeArticles> publishedThemes() {
+        return resources.countByTheme(ResourceStatus.PUBLISHED);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Page<Resource> search(ResourceStatus status, String search, Long categoryId, Long tagId, Pageable pageable) {
         return resources.search(status, search == null || search.isBlank() ? null : search.trim(), categoryId, tagId, pageable);
     }
