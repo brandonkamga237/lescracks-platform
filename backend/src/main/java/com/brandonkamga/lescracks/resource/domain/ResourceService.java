@@ -20,6 +20,9 @@ public interface ResourceService extends ScheduledPublishing {
     Resource updateArticle(Long id, ArticleContent content, MultipartFile coverImageFile);
     Page<Resource> all(Pageable pageable);
 
+    /** Themes holding published articles, the fullest first; empty themes are left out. */
+    List<ThemeArticles> publishedThemes();
+
     /** The body of an article, absent for a resource saved before its body. */
     Optional<Article> article(Long resourceId);
     void delete(Long id);
