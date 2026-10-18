@@ -26,3 +26,7 @@ dist-ssr
 .env.local
 .env.production
 .env.*.local
+
+# TypeScript incremental build cache, rewritten by every typecheck
+*.tsbuildinfo
+package-lock.json

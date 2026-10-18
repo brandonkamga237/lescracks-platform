@@ -123,7 +123,7 @@ export default function Welcome() {
           {step === 0 && (
             <>
               <h1 className="text-balance font-display text-3xl font-bold leading-tight tracking-tight sm:text-4xl">{firstName ? `Bienvenue ${firstName}.` : 'Bienvenue.'} Ton numéro ?</h1>
-              <p className="mt-3 text-t3">Pour te prévenir des ateliers, des lives et des nouveaux challenges. Il n’est jamais affiché publiquement.</p>
+              <p className="mt-3 text-t3">Pour te prévenir des ateliers, des lives et des nouveaux articles. Il n’est jamais affiché publiquement.</p>
               <div className="mt-8 space-y-4">
                 <PhoneField value={phone ?? ''} onChange={setPhone} autoFocus hint="Le pays de ton compte est déduit de l’indicatif." />
                 <label className="flex items-start gap-3 text-sm text-t3">
@@ -143,7 +143,7 @@ export default function Welcome() {
           {step === 2 && (
             <>
               <h1 className="font-display text-3xl font-bold leading-tight tracking-tight sm:text-4xl">Qu’est-ce qui t’intéresse ?</h1>
-              <p className="mt-3 text-t3">Choisis les thèmes qui t’intéressent : le blog et les challenges s’en servent pour te guider.</p>
+              <p className="mt-3 text-t3">Choisis les thèmes qui t’intéressent : le blog s’en sert pour te guider.</p>
               <div className="mt-8 flex flex-wrap gap-2" role="group" aria-label="Centres d’intérêt">
                 {categories.loading && <p role="status" className="text-sm text-t4">Chargement des sujets…</p>}
                 {categories.data?.map((category) => {

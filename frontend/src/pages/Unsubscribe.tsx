@@ -31,7 +31,7 @@ export default function Unsubscribe() {
 
   return <Layout>
     <SEO title="Se désabonner" description="Ne plus recevoir la newsletter LesCracks." url="/desabonnement" />
-    <div className="mx-auto max-w-lg px-5 py-16 sm:py-24">
+    <div className="mx-auto max-w-lg px-5 py-8 sm:py-14">
       <section className="mode-raised rounded-lg p-6 sm:p-9">
         <p className="kicker">LesCracks / Newsletter</p>
         <h1 className="mt-4 font-display text-3xl font-bold">{state === 'done' ? 'C’est fait.' : 'Se désabonner'}</h1>

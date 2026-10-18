@@ -42,7 +42,7 @@ export default function Formations() {
   return (
     <Layout>
       <SEO title="Formations" description="Les formations LesCracks arrivent : des parcours complets, étape par étape, pour passer à la pratique en tech." url="/formations" />
-      <Section tone="raised" spacing="tight" backdrop="/images/headers/library.jpg">
+      <Section tone="raised" spacing="header">
         <PageHeader eyebrow="Bientôt disponible" title="Formations" description="Des parcours complets, étape par étape, pour apprendre une technologie et passer à la pratique." />
       </Section>
 
@@ -84,7 +84,7 @@ export default function Formations() {
               </form>
             )}
             {error && <p role="alert" className="mt-4 text-sm text-error-ink">{error}</p>}
-            <p className="mt-6 border-t border-line-soft pt-5 text-sm text-t3">En attendant, <Link to="/blog" className="link">lis le blog</Link> ou <Link to="/cracklab" className="link">relève un challenge</Link>.</p>
+            <p className="mt-6 border-t border-line-soft pt-5 text-sm text-t3">En attendant, <Link to="/blog" className="link">lis le blog</Link> ou <Link to="/talk" className="link">regarde le Talk</Link>.</p>
           </div>
         </div>
       </Section>

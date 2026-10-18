@@ -39,46 +39,42 @@ const WHATSAPP = 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK';
 // Marketing surface, fired once. Full transform strings stay on the GPU; MotionConfig drops the movement under reduced motion and keeps the fade.
 const REVEAL = { initial: { opacity: 0, transform: 'translateY(16px)' }, whileInView: { opacity: 1, transform: 'translateY(0px)' }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.5, ease: [0.23, 1, 0.32, 1] } } as const;
 
-function Stat({ value, label }: { value: React.ReactNode; label: string }) {
-  return (
-    <div className="stat-tile">
-      <p className="font-display text-3xl font-bold leading-none tracking-tight text-t1 sm:text-[2.375rem]">{value}</p>
-      <p className="label mt-3">{label}</p>
-    </div>
-  );
-}
-
 export default function Landing() {
   const recent = useApi((signal) => api.articles(0, 4, signal), []);
   const upcoming = useApi((signal) => api.upcomingEvents(0, 5, signal), []);
-  const categories = useApi((signal) => api.categories(signal), []);
+  const themes = useApi((signal) => api.themes(signal), []);
   const { isSignedIn, isAdmin, name } = useSession();
   const firstName = name?.trim().split(/\s+/)[0];
 
   const featured = recent.data?.content[0];
   const next = recent.data?.content.slice(1) ?? [];
-  const count = (value: number | undefined) => (value == null ? '—' : value.toLocaleString('fr-FR'));
+  // A figure only shows once it is real and above zero: a dash or a 0 tells a visitor nothing.
+  const figures = ([
+    [recent.data?.totalElements, 'article', 'articles'],
+    [themes.data?.length, 'thème', 'thèmes'],
+    [upcoming.data?.totalElements, 'rendez-vous à venir', 'rendez-vous à venir'],
+  ] as const).filter(([value]) => value != null && value > 0) as ReadonlyArray<readonly [number, string, string]>;
 
   return (
     <Layout>
-      <SEO description="LesCracks : articles, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant." url="/" />
+      <SEO description="LesCracks : articles, ateliers et le Talk pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant." url="/" />
 
       {/* ── Hero: raised headline panel · photo action panel ────── */}
       <section className="grid lg:grid-cols-[55fr_45fr]">
-        <div className="mode-raised flex items-center px-5 py-20 sm:px-8 lg:py-28 lg:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:pr-16">
+        <div className="mode-raised flex items-center px-5 py-10 sm:px-8 sm:py-16 lg:py-24 lg:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:pr-16">
           <div className="max-w-2xl">
             <p className="kicker animate-rise motion-reduce:animate-page-in">Apprendre, pratiquer, avancer</p>
-            <h1 className="mt-6 animate-rise motion-reduce:animate-page-in font-display text-5xl font-bold leading-[0.92] tracking-tight text-t1 sm:text-6xl xl:text-[5.25rem] xl:leading-[0.9] [animation-delay:50ms]">
+            <h1 className="mt-3 animate-rise motion-reduce:animate-page-in font-display text-4xl font-bold leading-[0.95] tracking-tight text-t1 sm:mt-5 sm:text-6xl xl:text-7xl [animation-delay:50ms]">
               {isSignedIn
                 ? <>Bon retour{firstName ? <>, {firstName}</> : ''}. La suite t’attend.</>
                 : <>Deviens aussi un crack de la tech.</>}
             </h1>
-            <p className="mt-8 max-w-lg animate-rise motion-reduce:animate-page-in text-lg leading-normal text-t3 [animation-delay:100ms]">
+            <p className="mt-4 max-w-lg animate-rise motion-reduce:animate-page-in text-base leading-normal text-t3 sm:mt-6 sm:text-lg [animation-delay:100ms]">
               {isSignedIn
                 ? 'Reprends ta lecture ou trouve le prochain rendez-vous.'
-                : 'Articles, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique.'}
+                : 'Articles, ateliers et le Talk pour apprendre la tech et passer à la pratique.'}
             </p>
-            <div className="mt-10 flex animate-rise motion-reduce:animate-page-in flex-wrap items-center gap-x-6 gap-y-4 [animation-delay:150ms]">
+            <div className="mt-6 flex animate-rise motion-reduce:animate-page-in flex-wrap items-center gap-x-6 gap-y-4 [animation-delay:150ms]">
               <Link to="/blog" className="btn-primary">
                 Lire le blog <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
@@ -89,9 +85,9 @@ export default function Landing() {
 
         {/* The card straddles the seam on wide screens so the two halves read as one poster. */}
         <div className="relative bg-black pb-12 lg:pb-0">
-          <DuotonePhoto src="/images/community-1.webp" loading="eager" className="h-72 sm:h-96 lg:absolute lg:inset-0 lg:h-auto" />
-          <div className="relative mx-5 -mt-20 sm:mx-8 lg:absolute lg:bottom-12 lg:-left-16 lg:mx-0 lg:mt-0 lg:w-[22rem]">
-            <div className="mode-raised animate-rise motion-reduce:animate-page-in rounded-lg border border-line p-7 [animation-delay:200ms] sm:max-w-sm lg:max-w-none">
+          <DuotonePhoto src="/images/community-1.webp" loading="eager" className="h-48 sm:h-80 lg:absolute lg:inset-0 lg:h-auto" />
+          <div className="relative mx-5 -mt-12 sm:mx-8 lg:absolute lg:bottom-12 lg:-left-16 lg:mx-0 lg:mt-0 lg:w-[22rem]">
+            <div className="mode-raised animate-rise motion-reduce:animate-page-in rounded-lg border border-line p-5 sm:p-7 [animation-delay:200ms] sm:max-w-sm lg:max-w-none">
               {isSignedIn ? (
                 <>
                   <h2 className="text-2xl font-bold leading-tight text-t1">Ton espace</h2>
@@ -123,14 +119,18 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Figures: charcoal tiles on black ────────────────────── */}
-      <Section spacing="tight" aria-label="LesCracks en chiffres">
-        <div className="grid grid-cols-3 gap-3">
-          <Stat value={count(recent.data?.totalElements)} label="Articles" />
-          <Stat value={count(categories.data?.length)} label="Thèmes" />
-          <Stat value={count(upcoming.data?.totalElements)} label="Rendez-vous à venir" />
-        </div>
-      </Section>
+      {figures.length > 0 && (
+        <section aria-label="LesCracks en chiffres" className="border-b border-line-soft bg-black">
+          <ul className="mx-auto flex max-w-7xl flex-wrap items-baseline gap-x-8 gap-y-2 px-5 py-5 sm:px-8 sm:py-6">
+            {figures.map(([value, one, many]) => (
+              <li key={many} className="flex items-baseline gap-2">
+                <span className="font-display text-2xl font-bold tabular-nums leading-none text-t1 sm:text-3xl">{value.toLocaleString('fr-FR')}</span>
+                <span className="label">{value > 1 ? many : one}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* ── À la une — noir relevé ───────────────────────────────── */}
       <motion.div {...REVEAL}>
@@ -200,10 +200,10 @@ export default function Landing() {
 
       {/* ── Pourquoi — full-bleed photo + checklist on black ────── */}
       <section className="relative overflow-hidden bg-black">
-        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[1.2fr_1fr] lg:py-32">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[1.2fr_1fr] lg:py-24">
           <div>
             <p className="kicker">Pourquoi LesCracks</p>
-            <h2 className="mt-5 font-display text-4xl font-bold leading-[0.96] tracking-tight text-t1 sm:text-5xl lg:text-[3.5rem] lg:leading-[0.92]">
+            <h2 className="mt-3 font-display text-2xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl">
               Apprendre seul, c’est long. Ensemble, ça avance.
             </h2>
             <ul className="mt-10 space-y-5">
@@ -223,20 +223,20 @@ export default function Landing() {
       </section>
 
       {/* ── Par thème — noir relevé ──────────────────────────────── */}
-      {!!categories.data?.length && (
+      {!!themes.data?.length && (
         <motion.div {...REVEAL}>
           <Section tone="raised" aria-labelledby="themes-heading">
             <SectionHeader eyebrow="Trouver son sujet" id="themes-heading" title="Explorer par thème" />
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {categories.data.filter((theme) => theme.slug).map((theme) => (
+              {themes.data.map((theme) => (
                 <li key={theme.id}>
                   <Link to={`/blog?theme=${theme.slug}`}
                     className="group flex h-full flex-col gap-1.5 rounded border border-line px-5 py-4 transition-colors hover:border-t1 hover:bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400">
-                    <span className="flex items-center justify-between gap-4">
+                    <span className="flex items-baseline justify-between gap-4">
                       <span className="min-w-0 break-words text-base font-semibold text-t1">{theme.name}</span>
-                      <ArrowUpRight className="h-5 w-5 shrink-0 text-t4 transition-colors group-hover:text-gold-ink" aria-hidden />
+                      <span className="shrink-0 font-mono text-xs tabular-nums text-gold-ink">{theme.articleCount} article{theme.articleCount > 1 ? 's' : ''}</span>
                     </span>
-                    {theme.description && <span className="text-sm leading-relaxed text-t3">{theme.description}</span>}
+                    {theme.description && <span className="line-clamp-2 text-sm leading-relaxed text-t3">{theme.description}</span>}
                   </Link>
                 </li>
               ))}
@@ -248,11 +248,11 @@ export default function Landing() {
       {/* ── Action — noir ─────────────────────────────────── */}
       <Section spacing="loose">
         <div className="flex flex-col items-start gap-10 lg:flex-row lg:items-end lg:justify-between">
-          <h2 className="max-w-3xl font-display text-5xl font-bold leading-[0.92] tracking-tight text-t1 sm:text-6xl lg:text-7xl lg:leading-[0.9]">
+          <h2 className="max-w-3xl font-display text-3xl font-bold leading-[0.95] tracking-tight text-t1 sm:text-5xl lg:text-6xl">
             Passe à la <span className="text-gold-400">pratique.</span>
           </h2>
           <div className="flex flex-wrap items-center gap-3">
-            <Link to={isSignedIn ? '/cracklab' : '/inscription'} className="btn-primary">{isSignedIn ? 'Relever un challenge' : 'Créer un compte'}</Link>
+            <Link to={isSignedIn ? '/blog' : '/inscription'} className="btn-primary">{isSignedIn ? 'Lire le blog' : 'Créer un compte'}</Link>
             <Link to="/evenements" className="btn-secondary">Voir l’agenda</Link>
           </div>
         </div>

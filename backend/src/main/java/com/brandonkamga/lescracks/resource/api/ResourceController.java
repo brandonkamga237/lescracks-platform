@@ -2,6 +2,7 @@ package com.brandonkamga.lescracks.resource.api;
 
 import com.brandonkamga.lescracks.resource.api.dto.ArticleResourceRequest;
 import com.brandonkamga.lescracks.resource.api.dto.ResourceResponse;
+import com.brandonkamga.lescracks.resource.api.dto.ThemeResponse;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
 import com.brandonkamga.lescracks.shared.dto.PageResponse;
@@ -38,6 +39,12 @@ public class ResourceController {
                                                     @RequestParam(required = false) Long tagId,
                                                     @PageableDefault(size = 12) Pageable pageable) {
         return PageResponse.of(resources.search(ResourceStatus.PUBLISHED, search, categoryId, tagId, pageable), mapper::toResponse);
+    }
+
+    @GetMapping("/themes")
+    @Operation(summary = "Les thèmes qui contiennent des articles publiés, avec leur nombre")
+    public List<ThemeResponse> themes() {
+        return resources.publishedThemes().stream().map(ThemeResponse::of).toList();
     }
 
     @GetMapping("/{slug}")

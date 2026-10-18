@@ -7,21 +7,20 @@ import type { ArticleSummary } from '@/services/types';
 
 interface ArticleCardProps {
   article: ArticleSummary;
+  /** Where the theme label leads; without it the theme is plain text. */
+  themePath?: string;
 }
 
 /** A compact blog card: cover, title, one meta line. The grid reads at a glance. */
-function ArticleCard({ article }: ArticleCardProps) {
+function ArticleCard({ article, themePath }: ArticleCardProps) {
   const [failedImage, setFailedImage] = useState<string | null>(null);
-  const meta = [article.categoryName, `${article.readingMinutes ?? 1} min de lecture`].filter(Boolean).join('  ·  ');
 
+  // The title link stretches over the whole card, so the theme can stay a link of its own instead of a link nested in a link.
   return (
-    <li className="h-full">
-      <Link
-        to={articlePath(article)}
-        className="group flex h-full overflow-hidden rounded bg-card transition-transform sm:flex-col duration-200 ease-out hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 motion-reduce:hover:translate-y-0"
-      >
+    <li className="min-w-0">
+      <article className="group relative flex h-full overflow-hidden rounded bg-card transition-transform duration-200 ease-out focus-within:ring-2 focus-within:ring-gold-400 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 sm:flex-col">
         {/* Phones get a scannable row (thumbnail beside the title); wider screens the poster card. */}
-        <span className="relative block aspect-[4/3] w-28 shrink-0 overflow-hidden bg-noir-700 sm:aspect-[16/9] sm:w-auto">
+        <span className="relative block aspect-[4/3] w-24 shrink-0 overflow-hidden bg-noir-700 sm:aspect-[16/9] sm:w-auto">
           {article.coverImage && failedImage !== article.coverImage ? (
             <img
               src={article.coverImage}
@@ -35,12 +34,18 @@ function ArticleCard({ article }: ArticleCardProps) {
           )}
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-1.5 p-3 sm:gap-2 sm:p-4">
-          <span className="line-clamp-3 break-words font-display text-[0.9375rem] font-semibold sm:line-clamp-2 sm:text-base leading-snug text-t1 transition-colors group-hover:text-gold-ink">
-            {article.title}
+          <h3 className="line-clamp-3 break-words font-display text-[0.9375rem] font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-ink sm:line-clamp-2 sm:text-base">
+            <Link to={articlePath(article)} className="after:absolute after:inset-0 focus-visible:outline-none">{article.title}</Link>
+          </h3>
+          <span className="mt-auto flex min-w-0 items-center gap-2 pt-1 text-xs text-t4">
+            {article.categoryName && (themePath
+              ? <Link to={themePath} className="relative z-10 truncate transition-colors hover:text-gold-ink">{article.categoryName}</Link>
+              : <span className="truncate">{article.categoryName}</span>)}
+            {article.categoryName && <span aria-hidden="true">·</span>}
+            <span className="shrink-0">{article.readingMinutes ?? 1} min</span>
           </span>
-          <span className="mt-auto truncate pt-1 text-xs text-t4">{meta}</span>
         </span>
-      </Link>
+      </article>
     </li>
   );
 }

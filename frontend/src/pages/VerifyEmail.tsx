@@ -37,7 +37,7 @@ export default function VerifyEmail() {
 
   return <Layout>
     <SEO title="Vérification d’email" description="Confirme ton adresse email pour recevoir les emails LesCracks." url="/verifier-email" />
-    <div className="mx-auto max-w-lg px-5 py-16 sm:py-24">
+    <div className="mx-auto max-w-lg px-5 py-8 sm:py-14">
       <section className="mode-raised rounded-lg p-6 sm:p-9">
         <p className="kicker">LesCracks / Ton compte</p>
         <h1 className="mt-4 font-display text-3xl font-bold">Confirmation de ton email</h1>

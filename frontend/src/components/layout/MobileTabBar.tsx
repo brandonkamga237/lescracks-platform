@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { ArrowRight, CalendarDays, CircleUser, FlaskConical, GraduationCap, Info, Lock, LogOut, Newspaper, Podcast, Shield, User } from 'lucide-react';
+import { ArrowRight, CalendarDays, CircleUser, GraduationCap, Info, Lock, LogOut, Newspaper, Podcast, Shield, User } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -11,16 +11,14 @@ interface TabDef {
   to: string;
   label: string;
   icon: LucideIcon;
-  /** Gold even when another tab is active, as in the header. */
-  highlight?: boolean;
 }
 
 const TABS: readonly TabDef[] = [
-  // No home tab: the logo in the header already leads home. Talk sits in the account sheet.
+  // No home tab: the logo in the header already leads home.
   { to: '/blog', label: 'Blog', icon: Newspaper },
   { to: '/formations', label: 'Formations', icon: GraduationCap },
-  { to: '/cracklab', label: 'CrackLab', icon: FlaskConical, highlight: true },
   { to: '/evenements', label: 'Agenda', icon: CalendarDays },
+  { to: '/talk', label: 'Talk', icon: Podcast },
 ];
 
 const ACCOUNT_PATHS = ['/profil', '/connexion', '/inscription'];
@@ -62,9 +60,9 @@ export default function MobileTabBar() {
   return (
     <nav aria-label="Navigation principale" className="mode-raised fixed inset-x-0 bottom-0 z-40 border-t border-line pb-[env(safe-area-inset-bottom)] lg:hidden">
       <ul className="grid grid-cols-5">
-        {TABS.map(({ to, label, icon: Icon, highlight }) => (
+        {TABS.map(({ to, label, icon: Icon }) => (
           <li key={to}>
-            <NavLink to={to} className={({ isActive }) => `${TAB_ITEM} ${isActive || highlight ? 'text-gold-ink' : 'text-t3'}`}>
+            <NavLink to={to} className={({ isActive }) => `${TAB_ITEM} ${isActive ? 'text-gold-ink' : 'text-t3'}`}>
               <Icon className="h-5 w-5" aria-hidden />
               {label}
             </NavLink>
@@ -81,8 +79,8 @@ export default function MobileTabBar() {
             <DialogContent position="bottom" className="mode-raised border-line bg-card">
               {isSignedIn ? (
                 <div className="flex items-center gap-3 pr-8">
-                  <span aria-hidden className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gold-400/30 bg-gold-400/10 font-semibold text-gold-ink">
-                    {name?.trim().charAt(0).toLocaleUpperCase('fr') || <User className="h-4 w-4" />}
+                  <span aria-hidden className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gold-400/30 bg-gold-400/10 font-semibold text-gold-ink">
+                    {user?.avatarUrl ? <img src={user.avatarUrl} alt="" className="h-full w-full object-cover" /> : name?.trim().charAt(0).toLocaleUpperCase('fr') || <User className="h-4 w-4" />}
                   </span>
                   <div className="min-w-0">
                     <DialogTitle className="truncate font-display text-lg font-bold text-t1">{name || (isAdmin ? 'Administrateur' : 'Ton compte')}</DialogTitle>
@@ -92,7 +90,7 @@ export default function MobileTabBar() {
               ) : (
                 <div className="pr-8">
                   <DialogTitle className="font-display text-xl font-bold text-t1">Ton compte</DialogTitle>
-                  <DialogDescription className="mt-1 text-sm text-t3">Ton compte pour relever les challenges, suivre les ateliers et recevoir les nouveaux articles.</DialogDescription>
+                  <DialogDescription className="mt-1 text-sm text-t3">Ton compte pour suivre les ateliers et recevoir les nouveaux articles.</DialogDescription>
                 </div>
               )}
 
@@ -112,7 +110,7 @@ export default function MobileTabBar() {
                   <nav aria-label="Ton compte">
                     {(isAdmin
                       ? [['/admin', 'Administration', Shield]] as const
-                      : [['/profil', 'Mon compte', User], ['/cracklab/moi', 'Mon parcours CrackLab', FlaskConical], ['/profil#securite', 'Sécurité et connexion', Lock]] as const
+                      : [['/profil', 'Mon compte', User], ['/profil#securite', 'Sécurité et connexion', Lock]] as const
                     ).map(([to, label, Icon]) => (
                       <Link key={to} to={to} className={row}>
                         <Icon className="h-4 w-4 text-t4" aria-hidden />{label}
@@ -129,10 +127,6 @@ export default function MobileTabBar() {
               )}
 
               <div>
-                <Link to="/talk" className={row}>
-                  <Podcast className="h-4 w-4 text-t4" aria-hidden />LesCracks Talk
-                  <ArrowRight className="ml-auto h-4 w-4 text-t4" aria-hidden />
-                </Link>
                 <Link to="/a-propos" className={row}>
                   <Info className="h-4 w-4 text-t4" aria-hidden />À propos
                   <ArrowRight className="ml-auto h-4 w-4 text-t4" aria-hidden />

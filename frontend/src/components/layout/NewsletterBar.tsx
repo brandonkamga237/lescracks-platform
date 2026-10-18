@@ -3,16 +3,10 @@ import { useEffect, useState } from 'react';
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
 
-interface NewsletterBarProps {
-  /** `top` is the desktop strip above the header; `bottom` is the phone block above the footer. */
-  placement?: 'top' | 'bottom';
-}
-
-export default function NewsletterBar({ placement = 'top' }: NewsletterBarProps) {
-  const top = placement === 'top';
+/** The newsletter offer, once per page, after the content: a strip above the header cost every page its first lines. */
+export default function NewsletterBar() {
   const { isSignedIn, isAdmin, isLoading, user } = useSession();
   const [subscribed, setSubscribed] = useState<boolean | null>(null);
-  const [visible, setVisible] = useState(true);
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState('');
   const [email, setEmail] = useState('');
@@ -31,7 +25,7 @@ export default function NewsletterBar({ placement = 'top' }: NewsletterBarProps)
     return () => controller.abort();
   }, [user, isAdmin]);
 
-  if (!visible || isLoading || isAdmin || (isSignedIn && !user) || subscribed === true) return null;
+  if (isLoading || isAdmin || (isSignedIn && !user) || subscribed === true) return null;
 
   async function subscribe() {
     setBusy(true);
@@ -62,27 +56,22 @@ export default function NewsletterBar({ placement = 'top' }: NewsletterBarProps)
     }
   }
 
-  // On a phone a strip above the header pushes content down, so there it waits at the end of the page.
   return (
-    <div className={top ? 'hidden border-b border-line-soft bg-black px-4 py-2 text-center text-sm text-t2 lg:block' : 'border-t border-line-soft bg-black px-5 py-8 text-sm text-t2 sm:px-8 lg:hidden'}>
-      <div className={top ? 'mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-3 gap-y-1' : 'flex flex-col items-start gap-3'}>
-        <span>
-          Les nouveaux contenus et rendez-vous arrivent par email.
+    <section aria-label="Newsletter" className="border-t border-line-soft bg-black">
+      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-8 text-sm text-t2 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+        <p className="text-sm text-t2">
+          <span className="font-medium text-t1">Les nouveaux articles et rendez-vous arrivent par email.</span>
           {isSignedIn ? ' Ne manque rien.' : ' Inscris-toi pour les recevoir.'}
-        </span>
+        </p>
         {isSignedIn && user && subscribed === false && (
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => void subscribe()}
-            className="font-medium text-gold-ink underline underline-offset-4 transition-colors hover:text-gold-ink disabled:opacity-50"
-          >
+          <button type="button" disabled={busy} onClick={() => void subscribe()} className="btn-primary shrink-0 self-start lg:self-auto">
             {busy ? 'Abonnement…' : 'M’abonner à la newsletter'}
           </button>
         )}
         {isSignedIn && user && subscribed === null && <span className="sr-only">Vérification de ton abonnement…</span>}
         {!isSignedIn && !emailSuccess && (
-          <form onSubmit={subscribePublic} className={top ? 'flex flex-wrap items-center justify-center gap-2' : 'flex w-full gap-2'}>
+          <form onSubmit={subscribePublic} className="flex w-full gap-2 lg:w-auto">
+            {/* 16px text: anything smaller makes iOS zoom the page on focus. */}
             <input
               type="email"
               required
@@ -90,24 +79,19 @@ export default function NewsletterBar({ placement = 'top' }: NewsletterBarProps)
               onChange={(event) => setEmail(event.target.value)}
               placeholder="ton@email.com"
               aria-label="Ton adresse email"
-              className={top ? 'w-48 rounded border border-line bg-noir-900 px-3 py-1.5 text-sm text-t1 placeholder:text-t4 focus:border-gold-400 focus:outline-none' : 'input min-w-0 flex-1 text-base'}
+              className="input min-w-0 flex-1 text-base lg:w-72 lg:flex-none"
               disabled={emailBusy}
             />
-            <button
-              type="submit"
-              disabled={emailBusy}
-              className={top ? 'rounded bg-gold-400 px-3 py-1.5 text-sm font-medium text-noir-950 transition-colors hover:bg-gold-300 disabled:opacity-50' : 'btn-primary shrink-0'}
-            >
+            <button type="submit" disabled={emailBusy} className="btn-primary shrink-0">
               {emailBusy ? '…' : 'M’abonner'}
             </button>
           </form>
         )}
         {!isSignedIn && emailSuccess && (
-          <span role="status" className="font-medium text-gold-ink">Presque fini : confirme ton inscription avec le lien reçu par email.</span>
+          <p role="status" className="text-sm font-medium text-gold-ink">Presque fini : confirme ton inscription avec le lien reçu par email.</p>
         )}
-        {failure && <span role="alert" className="text-error-ink">{failure}</span>}
-        {top && <button type="button" onClick={() => setVisible(false)} aria-label="Masquer ce message" className="ml-1 rounded px-1 text-t4 transition-colors hover:text-t1">×</button>}
+        {failure && <p role="alert" className="text-sm text-error-ink">{failure}</p>}
       </div>
-    </div>
+    </section>
   );
 }

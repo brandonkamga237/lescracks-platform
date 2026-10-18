@@ -10,6 +10,7 @@ import { EmptyState, ErrorState } from '@/components/common/States';
 import Layout from '@/components/layout/Layout';
 import { PageHeader, Section } from '@/components/layout/Page';
 import { useApi } from '@/hooks/useApi';
+import { LIST_PAGE_SIZE, worthFiltering } from '@/lib/filters';
 import { api } from '@/services/api';
 
 function pageNumber(value: string | null): number {
@@ -21,16 +22,17 @@ function pageNumber(value: string | null): number {
 export default function Blog() {
   const [params, setParams] = useSearchParams();
   const page = pageNumber(params.get('page'));
-  const themes = useApi((signal) => api.categories(signal), []);
+  const themes = useApi((signal) => api.themes(signal), []);
   // The theme travels by slug: /blog?theme=data-ia reads better in a shared link than an id.
   const themeSlug = params.get('theme') ?? undefined;
   const theme = themes.data?.find((item) => item.slug === themeSlug);
   const waitingForTheme = Boolean(themeSlug) && !themes.data && !themes.error;
-  const blog = useApi((signal) => waitingForTheme ? new Promise<never>(() => undefined) : api.articles(page - 1, 12, signal, theme?.id),
+  const blog = useApi((signal) => waitingForTheme ? new Promise<never>(() => undefined) : api.articles(page - 1, LIST_PAGE_SIZE, signal, theme?.id),
     [page, theme?.id, waitingForTheme]);
   const articles = blog.data?.content ?? [];
   const total = blog.data?.totalElements ?? 0;
   const spotlight = page === 1 && !theme ? articles[0] : undefined;
+  const themePaths = new Map((themes.data ?? []).map((item) => [item.id, `/blog?theme=${item.slug}`]));
 
   function selectTheme(slug: string | undefined) {
     setParams(slug ? { theme: slug } : {});
@@ -40,17 +42,19 @@ export default function Blog() {
   return (
     <Layout>
       <SEO title="Blog" description="Les articles LesCracks : retours d’expérience, notions expliquées et bonnes pratiques pour progresser en tech." url="/blog" />
-      <Section tone="raised" spacing="tight" backdrop="/images/headers/library.jpg">
+      <Section tone="raised" spacing="header">
         <PageHeader
           eyebrow="À lire"
           title="Blog"
           description="Retours d’expérience, notions expliquées et bonnes pratiques pour progresser en tech."
           meta={!blog.loading && !blog.error ? `${total} article${total > 1 ? 's' : ''}` : undefined}
         />
-        {!!themes.data?.length && (
-          <FilterChips legend="Thème" allLabel="Tous" value={theme?.slug}
-            options={themes.data.filter((item) => item.slug).map((item) => [item.slug as string, item.name])}
-            onChange={selectTheme} />
+        {!!themes.data?.length && worthFiltering(total, Boolean(theme)) && (
+          <div className="mt-6">
+            <FilterChips legend="Thème" allLabel="Tous" value={theme?.slug}
+              options={themes.data.map((item) => [item.slug, item.name])}
+              onChange={selectTheme} />
+          </div>
         )}
       </Section>
 
@@ -78,7 +82,7 @@ export default function Blog() {
               {spotlight && <ArticleSpotlight article={spotlight} kicker="Dernier article" />}
               {rest.length > 0 && (
                 <ul className={`grid gap-4 sm:grid-cols-2 lg:grid-cols-3 ${spotlight ? 'mt-16' : ''}`}>
-                  {rest.map((article) => <ArticleCard key={article.id} article={article} />)}
+                  {rest.map((article) => <ArticleCard key={article.id} article={article} themePath={themePaths.get(article.categoryId)} />)}
                 </ul>
               )}
               <Pagination page={page} totalPages={blog.data?.totalPages ?? 0} onPageChange={(value) => {

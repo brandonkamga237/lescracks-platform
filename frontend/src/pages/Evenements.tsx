@@ -11,6 +11,7 @@ import { EmptyState, ErrorState } from '@/components/common/States';
 import Layout from '@/components/layout/Layout';
 import { PageHeader, Section, Toolbar } from '@/components/layout/Page';
 import { useApi } from '@/hooks/useApi';
+import { LIST_PAGE_SIZE, worthFiltering } from '@/lib/filters';
 import { api } from '@/services/api';
 import type { EventFormat, EventType } from '@/services/types';
 
@@ -35,7 +36,7 @@ export default function Evenements() {
   const rawPage = params.get('page') ?? '';
   const parsedPage = Number(rawPage);
   const page = /^[1-9]\d*$/.test(rawPage) && Number.isSafeInteger(parsedPage) && parsedPage <= 2147483647 ? parsedPage : 1;
-  const events = useApi((signal) => api.events({ type, format, page: page - 1, size: 12 }, signal), [type, format, page]);
+  const events = useApi((signal) => api.events({ type, format, page: page - 1, size: LIST_PAGE_SIZE }, signal), [type, format, page]);
   const list = events.data?.content ?? [];
   const hasFilters = Boolean(type || format);
   const total = events.data?.totalElements ?? 0;
@@ -57,7 +58,7 @@ export default function Evenements() {
   return (
     <Layout>
       <SEO title="Événements et ateliers tech" description="Bootcamps, ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble." url="/evenements" />
-      <Section tone="raised" spacing="tight" backdrop="/images/about.webp">
+      <Section tone="raised" spacing="header">
         <PageHeader
           eyebrow="En ligne et sur place"
           title="Agenda"
@@ -65,15 +66,17 @@ export default function Evenements() {
           meta={!events.loading && !events.error ? `${total} événement${total > 1 ? 's' : ''}` : undefined}
         />
 
-        <Toolbar>
-          <FilterChips legend="Type de rendez-vous" allLabel="Tous les types" options={types} value={type} onChange={(value) => setParam('type', value ?? null)} />
-          <FilterChips legend="Format" allLabel="Tous les formats" options={formats} value={format} onChange={(value) => setParam('format', value ?? null)} />
-          {hasFilters && (
-            <button type="button" onClick={() => setParams({})} className="inline-flex min-h-11 items-center gap-1.5 pb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-t3 transition-colors hover:text-t1">
-              <X className="h-4 w-4" aria-hidden />Effacer
-            </button>
-          )}
-        </Toolbar>
+        {worthFiltering(total, hasFilters) && (
+          <Toolbar>
+            <FilterChips legend="Type de rendez-vous" allLabel="Tous les types" options={types} value={type} onChange={(value) => setParam('type', value ?? null)} />
+            <FilterChips legend="Format" allLabel="Tous les formats" options={formats} value={format} onChange={(value) => setParam('format', value ?? null)} />
+            {hasFilters && (
+              <button type="button" onClick={() => setParams({})} className="inline-flex min-h-11 items-center gap-1.5 pb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-t3 transition-colors hover:text-t1">
+                <X className="h-4 w-4" aria-hidden />Effacer
+              </button>
+            )}
+          </Toolbar>
+        )}
       </Section>
 
       <Section>
@@ -124,7 +127,7 @@ export default function Evenements() {
       {discovery && !!past.data?.content.length && (
         <Section tone="raised" aria-labelledby="past-events-heading">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
-            <h2 id="past-events-heading" className="font-display text-4xl font-bold leading-[0.96] tracking-tight text-t1 sm:text-5xl">Déjà passés</h2>
+            <h2 id="past-events-heading" className="font-display text-2xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl">Déjà passés</h2>
             <span className="label">Les rendez-vous précédents</span>
           </div>
           <ul aria-label="Événements passés" className="border-b border-line opacity-80">

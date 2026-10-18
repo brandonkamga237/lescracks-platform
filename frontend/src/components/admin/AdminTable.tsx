@@ -19,7 +19,9 @@ interface AdminSectionProps {
 export function AdminSection({ title, description, action, children }: AdminSectionProps) {
   return (
     <section>
-      <PageHeader title={title} description={description} actions={action} />
+      <div className="mb-8">
+        <PageHeader title={title} description={description} actions={action} />
+      </div>
       {children}
     </section>
   );
