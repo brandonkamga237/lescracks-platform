@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,10 +46,10 @@ public class MinioStorageService implements StorageService {
     @Override
     public String store(String originalName, byte[] content, String contentType) {
         String key = UUID.randomUUID() + extensionOf(originalName);
-        try (var stream = new ByteArrayInputStream(content)) {
+        try {
             client.putObject(PutObjectArgs.builder()
                     .bucket(bucket).object(key)
-                    .stream(stream, content.length, -1)
+                    .data(content, content.length)
                     .contentType(contentType != null ? contentType : "application/octet-stream")
                     .build());
             return key;

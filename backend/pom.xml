@@ -66,7 +66,14 @@
 		<dependency>
 			<groupId>io.minio</groupId>
 			<artifactId>minio</artifactId>
-			<version>8.5.17</version>
+			<version>9.0.3</version>
+		</dependency>
+		<!-- MinIO 9 uses OkHttp 5, whose "okhttp" artifact only redirects Gradle builds to the real
+		     jar; Maven needs okhttp-jvm named, or the client fails to compile (okhttp3.HttpUrl). -->
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp-jvm</artifactId>
+			<version>5.3.2</version>
 		</dependency>
 
 		<!-- Testcontainers — integration tests run the real migrations on real PostgreSQL.
@@ -85,6 +92,11 @@
 		<dependency>
 			<groupId>org.testcontainers</groupId>
 			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>minio</artifactId>
 			<scope>test</scope>
 		</dependency>
 
