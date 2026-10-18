@@ -66,6 +66,13 @@ public class EventServiceImpl implements EventService {
     public Page<Event> all(Pageable pageable) { return events.findAll(pageable); }
 
     @Override
+    public int recordView(Long id, EventVisitor visitor) {
+        if (require(id).getStatus() != EventStatus.PUBLISHED) throw new NotFoundException("Event", "id", id);
+        if (events.insertView(id, visitor.key()) == 1) events.incrementViews(id);
+        return events.viewCount(id);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Event require(Long id) {
         return events.findById(id).orElseThrow(() -> new NotFoundException("Event", "id", id));
