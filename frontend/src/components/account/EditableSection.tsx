@@ -49,10 +49,10 @@ export default function EditableSection({ id, title, description, view, children
   }
 
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-24 rounded-lg border border-line-soft bg-card p-5 sm:p-7">
+    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-24 rounded-lg border border-line-soft bg-card p-4 sm:p-7">
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 id={`${id}-title`} className="font-display text-lg font-bold text-t1">{title}</h2>
+        <div className="min-w-0">
+          <h2 id={`${id}-title`} className="text-lg text-t1">{title}</h2>
           {description && <p className="mt-1 text-sm text-t4">{description}</p>}
         </div>
         {!editing && (

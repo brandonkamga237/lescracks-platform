@@ -79,8 +79,8 @@ export default function MobileTabBar() {
             <DialogContent position="bottom" className="mode-raised border-line bg-card">
               {isSignedIn ? (
                 <div className="flex items-center gap-3 pr-8">
-                  <span aria-hidden className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-gold-400/30 bg-gold-400/10 font-semibold text-gold-ink">
-                    {name?.trim().charAt(0).toLocaleUpperCase('fr') || <User className="h-4 w-4" />}
+                  <span aria-hidden className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gold-400/30 bg-gold-400/10 font-semibold text-gold-ink">
+                    {user?.avatarUrl ? <img src={user.avatarUrl} alt="" className="h-full w-full object-cover" /> : name?.trim().charAt(0).toLocaleUpperCase('fr') || <User className="h-4 w-4" />}
                   </span>
                   <div className="min-w-0">
                     <DialogTitle className="truncate font-display text-lg font-bold text-t1">{name || (isAdmin ? 'Administrateur' : 'Ton compte')}</DialogTitle>
