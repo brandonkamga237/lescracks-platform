@@ -44,6 +44,8 @@ export const api = {
     http.get<PageResponse<EventSummary>>('/events/past', { page, size }, signal),
   event: (slugOrId: string | number, signal?: AbortSignal) =>
     http.get<EventSummary>(`/events/${slugOrId}`, undefined, signal),
+  recordEventView: (id: number, visitorId: string) =>
+    http.post<{ viewCount: number }>(`/events/${id}/views`, { visitorId }),
   talks: (page = 0, size = 12, signal?: AbortSignal) =>
     http.get<PageResponse<TalkVideo>>('/talks', { page, size }, signal),
   categories: (signal?: AbortSignal) => http.get<Category[]>('/categories', undefined, signal),

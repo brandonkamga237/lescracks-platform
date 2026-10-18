@@ -73,4 +73,31 @@ class EventServiceTest {
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining("début");
     }
+
+    @Test
+    @DisplayName("a visitor counts once: the first view raises the figure, the next ones only read it")
+    void countsEachVisitorOnce() {
+        Event event = Event.builder().id(3L).status(EventStatus.PUBLISHED).build();
+        when(events.findById(3L)).thenReturn(Optional.of(event));
+        var visitor = EventVisitor.anonymous(java.util.UUID.randomUUID());
+
+        when(events.insertView(3L, visitor.key())).thenReturn(1);
+        when(events.viewCount(3L)).thenReturn(1);
+        assertThat(service.recordView(3L, visitor)).isEqualTo(1);
+        verify(events).incrementViews(3L);
+
+        when(events.insertView(3L, visitor.key())).thenReturn(0);
+        service.recordView(3L, visitor);
+        verify(events, org.mockito.Mockito.times(1)).incrementViews(3L);
+    }
+
+    @Test
+    @DisplayName("a draft cannot collect views: it answers as if it did not exist")
+    void draftsAreNotCounted() {
+        when(events.findById(4L)).thenReturn(Optional.of(Event.builder().id(4L).status(EventStatus.DRAFT).build()));
+
+        assertThatThrownBy(() -> service.recordView(4L, EventVisitor.anonymous(java.util.UUID.randomUUID())))
+                .isInstanceOf(com.brandonkamga.lescracks.shared.exception.NotFoundException.class);
+        verify(events, never()).insertView(any(), any());
+    }
 }

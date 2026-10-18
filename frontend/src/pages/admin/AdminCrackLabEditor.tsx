@@ -4,7 +4,7 @@ import { ArrowDown, ArrowLeft, ArrowUp, CalendarClock, Eye, Lock, PenLine, Plus,
 
 import { AdminSection } from '@/components/admin/AdminTable';
 import ScheduleDialog from '@/components/admin/ScheduleDialog';
-import Prose from '@/components/cracklab/Prose';
+import Prose from '@/components/common/Prose';
 import { CATEGORY_SUGGESTIONS, DIFFICULTY_LABEL } from '@/lib/cracklab';
 import { formatScheduleLong } from '@/lib/schedule';
 import { adminApi, type ChallengeRequest } from '@/services/adminApi';

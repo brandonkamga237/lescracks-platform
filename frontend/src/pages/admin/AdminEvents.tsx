@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { Ban, CalendarDays, CheckCircle2, Pencil, Plus, Search, Send, Trash2 } from 'lucide-react';
 import { AdminAction, AdminConfirm, AdminPagination, AdminRow, AdminSection, AdminState, StatusBadge } from '@/components/admin/AdminTable';
 import EventForm from '@/components/admin/EventForm';
+import { TYPE_LABEL } from '@/components/events/AgendaItem';
 import { useApi } from '@/hooks/useApi';
 import { adminApi, type EventRequest } from '@/services/adminApi';
 import { ApiError } from '@/services/http';
 import type { EventStatus, EventSummary } from '@/services/types';
 
-const typeLabels = { BOOTCAMP: 'Bootcamp', WORKSHOP: 'Atelier', WEBINAR: 'Webinaire', CONFERENCE: 'Conférence' };
 const formatLabels = { ONLINE: 'En ligne', OFFLINE: 'Sur place', HYBRID: 'Hybride' };
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -77,7 +77,7 @@ export default function AdminEvents() {
     <AdminState loading={events.loading} error={events.error} empty={!list.length} emptyMessage={search || status ? 'Aucun événement correspondant sur cette page. Essaie une autre page ou efface les filtres.' : 'Aucun événement. Prépare le prochain rendez-vous.'} onRetry={events.reload}>
       {list.map((event) => <AdminRow key={event.id}>
         <span className="hidden h-10 w-10 shrink-0 items-center justify-center rounded bg-noir-800 text-gold-ink sm:flex"><CalendarDays className="h-5 w-5" aria-hidden /></span>
-        <div className="min-w-0 flex-1 basis-48"><h2 className="break-words text-base font-semibold leading-snug tracking-normal text-t1 sm:text-lg">{event.title}</h2><p className="mt-1 text-xs leading-relaxed text-t3">{typeLabels[event.type]} · {formatLabels[event.format]}</p><p className="mt-1 text-xs text-t4"><time dateTime={event.startDate}>{dateFormat.format(new Date(event.startDate))}</time></p></div>
+        <div className="min-w-0 flex-1 basis-48"><h2 className="break-words text-base font-semibold leading-snug tracking-normal text-t1 sm:text-lg">{event.title}</h2><p className="mt-1 text-xs leading-relaxed text-t3">{TYPE_LABEL[event.type]} · {formatLabels[event.format]}</p><p className="mt-1 text-xs text-t4"><time dateTime={event.startDate}>{dateFormat.format(new Date(event.startDate))}</time></p></div>
         <StatusBadge status={event.status} scheduledAt={event.scheduledAt} />
         <div className="flex flex-wrap gap-2" role="group" aria-label={`Actions pour ${event.title}`}>
           <AdminAction icon={Pencil} label="Modifier" disabled={!!busy[event.id]} onClick={() => setEditor(event)} />

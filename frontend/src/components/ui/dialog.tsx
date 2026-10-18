@@ -45,10 +45,11 @@ const DialogContent = React.forwardRef<
 >(({ className, children, position = "center", ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
+    {/* One column that may shrink: an auto track grows to the full width of any truncated line, an email for one. */}
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed z-50 grid w-full gap-4 border bg-background p-6 shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+        "fixed z-50 grid w-full grid-cols-[minmax(0,1fr)] gap-4 border bg-background p-6 shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
         DIALOG_POSITION[position],
         className
       )}

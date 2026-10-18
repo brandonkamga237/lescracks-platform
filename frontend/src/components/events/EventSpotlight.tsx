@@ -2,8 +2,10 @@ import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
+import { markdownToPlainText } from '@/lib/plainText';
 import { eventPath } from '@/lib/slugs';
 import { FORMAT_LABEL, TYPE_ICON, TYPE_LABEL } from '@/components/events/AgendaItem';
+import ViewCount from '@/components/events/ViewCount';
 import type { EventSummary } from '@/services/types';
 
 const monthYearFormat = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' });
@@ -56,6 +58,7 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
             <TypeIcon className="h-3.5 w-3.5 text-gold-ink" aria-hidden />
             {meta}
           </span>
+          <ViewCount count={event.viewCount ?? 0} className="kicker-muted" />
         </p>
         <h3 className="mt-3 max-w-3xl break-words font-display text-2xl font-bold leading-tight tracking-tight text-t1 sm:text-3xl lg:text-4xl">
           <Link
@@ -67,7 +70,7 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
           </Link>
         </h3>
         <p className="mt-6 line-clamp-3 max-w-2xl text-base leading-normal text-t3">
-          {event.description}
+          {markdownToPlainText(event.description)}
         </p>
         <Link
           to={eventPath(event)}

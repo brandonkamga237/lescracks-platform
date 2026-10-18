@@ -1,26 +1,31 @@
 import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Clock, Heart } from 'lucide-react';
 
 import ArticleCover from '@/components/blog/ArticleCover';
 import { articlePath } from '@/lib/slugs';
 import type { ArticleSummary } from '@/services/types';
 
+// Beyond three, tags wrap to a second line on a phone and push the title down; the rest is summed up as "+N".
+const MAX_TAGS = 3;
+
 interface ArticleCardProps {
   article: ArticleSummary;
-  /** Where the theme label leads; without it the theme is plain text. */
-  themePath?: string;
 }
 
-/** A compact blog card: cover, title, one meta line. The grid reads at a glance. */
-function ArticleCard({ article, themePath }: ArticleCardProps) {
+/** One article: cover, tags, title, then likes and reading time. Every card has the same shape. */
+function ArticleCard({ article }: ArticleCardProps) {
   const [failedImage, setFailedImage] = useState<string | null>(null);
+  const tags = article.tags ?? [];
+  const hidden = tags.length - MAX_TAGS;
 
-  // The title link stretches over the whole card, so the theme can stay a link of its own instead of a link nested in a link.
   return (
     <li className="min-w-0">
-      <article className="group relative flex h-full overflow-hidden rounded bg-card transition-transform duration-200 ease-out focus-within:ring-2 focus-within:ring-gold-400 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 sm:flex-col">
-        {/* Phones get a scannable row (thumbnail beside the title); wider screens the poster card. */}
-        <span className="relative block aspect-[4/3] w-24 shrink-0 overflow-hidden bg-noir-700 sm:aspect-[16/9] sm:w-auto">
+      <Link
+        to={articlePath(article)}
+        className="group flex h-full flex-col overflow-hidden rounded-lg border border-line-soft bg-card transition-[border-color,transform] duration-200 ease-out hover:-translate-y-0.5 hover:border-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 motion-reduce:hover:translate-y-0"
+      >
+        <span className="relative block aspect-[16/9] overflow-hidden bg-noir-700">
           {article.coverImage && failedImage !== article.coverImage ? (
             <img
               src={article.coverImage}
@@ -33,19 +38,30 @@ function ArticleCard({ article, themePath }: ArticleCardProps) {
             <ArticleCover />
           )}
         </span>
-        <span className="flex min-w-0 flex-1 flex-col gap-1.5 p-3 sm:gap-2 sm:p-4">
-          <h3 className="line-clamp-3 break-words font-display text-[0.9375rem] font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-ink sm:line-clamp-2 sm:text-base">
-            <Link to={articlePath(article)} className="after:absolute after:inset-0 focus-visible:outline-none">{article.title}</Link>
-          </h3>
-          <span className="mt-auto flex min-w-0 items-center gap-2 pt-1 text-xs text-t4">
-            {article.categoryName && (themePath
-              ? <Link to={themePath} className="relative z-10 truncate transition-colors hover:text-gold-ink">{article.categoryName}</Link>
-              : <span className="truncate">{article.categoryName}</span>)}
-            {article.categoryName && <span aria-hidden="true">·</span>}
-            <span className="shrink-0">{article.readingMinutes ?? 1} min</span>
+        <span className="flex min-w-0 flex-1 flex-col p-4">
+          {tags.length > 0 && (
+            <span className="mb-2.5 flex min-w-0 flex-wrap gap-1.5">
+              {tags.slice(0, MAX_TAGS).map((tag) => (
+                <span key={tag} className="max-w-full truncate rounded border border-line px-1.5 py-0.5 font-mono text-[11px] text-t3">{tag}</span>
+              ))}
+              {hidden > 0 && <span className="rounded px-1 py-0.5 font-mono text-[11px] text-t4" title={tags.slice(MAX_TAGS).join(', ')}>+{hidden}</span>}
+            </span>
+          )}
+          <span className="line-clamp-2 break-words font-display text-base font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-ink">
+            {article.title}
+          </span>
+          <span className="mt-auto flex items-center gap-4 pt-4 text-xs tabular-nums text-t4">
+            <span className="inline-flex items-center gap-1.5">
+              <Heart className="h-3.5 w-3.5" aria-hidden />
+              {article.likeCount ?? 0}<span className="sr-only"> j’aime</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5" aria-hidden />
+              {article.readingMinutes ?? 1} min<span className="sr-only"> de lecture</span>
+            </span>
           </span>
         </span>
-      </article>
+      </Link>
     </li>
   );
 }
