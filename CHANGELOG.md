@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.4.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.3.0...v1.4.0) (2026-10-18)
+
+
+### Features
+
+* **event:** hackathon type, visitor count and Markdown programmes ([#89](https://github.com/brandonkamga237/lescracks-platform/issues/89)) ([3d84407](https://github.com/brandonkamga237/lescracks-platform/commit/3d84407cb300fc0939e292fda1ce6cda88bd11c7))
+* **frontend:** card-only blog, Talk on the home page, animated entry loader ([#85](https://github.com/brandonkamga237/lescracks-platform/issues/85)) ([8adc06d](https://github.com/brandonkamga237/lescracks-platform/commit/8adc06ddf5d5558a928192d8a7c5045e4e32acdd))
+
+
+### Performance
+
+* **resource:** article lists no longer carry each article's body ([#87](https://github.com/brandonkamga237/lescracks-platform/issues/87)) ([06bebc1](https://github.com/brandonkamga237/lescracks-platform/commit/06bebc1f67b67c44ffee0a1fd57e06a4a6c27899))
+
 ## [1.3.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.2.0...v1.3.0) (2026-10-18)
 
 
