@@ -137,21 +137,21 @@
   }
 
   /* ========== TYPOGRAPHY — poster stacking ==========
-     700 weight, 0.90–0.96 line-height at display sizes; body stays at 1.5. */
+     Defaults for headings without their own size: the page title scale of PageHeader. */
   h1, h2, h3, h4, h5, h6 {
     @apply font-display font-bold tracking-tight;
   }
 
   h1 {
-    @apply text-[2.5rem] leading-[0.94] sm:text-5xl lg:text-[4.25rem] lg:leading-[0.9];
+    @apply text-3xl leading-tight sm:text-4xl lg:text-5xl;
   }
 
   h2 {
-    @apply text-3xl leading-[1.05] md:text-[2.375rem] md:leading-[1.02];
+    @apply text-2xl leading-tight sm:text-3xl;
   }
 
   h3 {
-    @apply text-xl leading-tight md:text-[1.75rem] md:leading-[1.2];
+    @apply text-lg leading-snug sm:text-xl;
   }
 
   p {
