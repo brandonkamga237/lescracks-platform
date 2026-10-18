@@ -8,14 +8,11 @@ import { useSession } from '@/hooks/useSession';
 interface NavLinkDef {
   to: string;
   label: string;
-  /** CrackLab is dressed in gold: it is where members practise, the heart of the site. */
-  highlight?: boolean;
 }
 
 const LINKS: readonly NavLinkDef[] = [
   { to: '/blog', label: 'Blog' },
   { to: '/formations', label: 'Formations' },
-  { to: '/cracklab', label: 'CrackLab', highlight: true },
   { to: '/evenements', label: 'Événements' },
   { to: '/talk', label: 'Talk' },
   { to: '/a-propos', label: 'À propos' },
@@ -37,9 +34,7 @@ export default function Header() {
         <nav className="hidden items-center gap-7 lg:flex" aria-label="Navigation principale">
           {LINKS.map((link) => (
             <NavLink key={link.to} to={link.to} className={({ isActive }) => `text-sm transition-colors ${
-              link.highlight
-                ? 'font-semibold text-gold-ink hover:text-t1'
-                : isActive ? 'font-semibold text-t1' : 'font-medium text-t3 hover:text-t1'
+              isActive ? 'font-semibold text-t1' : 'font-medium text-t3 hover:text-t1'
             }`}>
               {link.label}
             </NavLink>

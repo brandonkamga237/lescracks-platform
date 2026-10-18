@@ -61,7 +61,7 @@ export default function Landing() {
 
   return (
     <Layout>
-      <SEO description="LesCracks : articles, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant." url="/" />
+      <SEO description="LesCracks : articles, ateliers et le Talk pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant." url="/" />
 
       {/* ── Hero: raised headline panel · photo action panel ────── */}
       <section className="grid lg:grid-cols-[55fr_45fr]">
@@ -76,7 +76,7 @@ export default function Landing() {
             <p className="mt-4 max-w-lg animate-rise motion-reduce:animate-page-in text-base leading-normal text-t3 sm:mt-6 sm:text-lg [animation-delay:100ms]">
               {isSignedIn
                 ? 'Reprends ta lecture ou trouve le prochain rendez-vous.'
-                : 'Articles, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique.'}
+                : 'Articles, ateliers et le Talk pour apprendre la tech et passer à la pratique.'}
             </p>
             <div className="mt-6 flex animate-rise motion-reduce:animate-page-in flex-wrap items-center gap-x-6 gap-y-4 [animation-delay:150ms]">
               <Link to="/blog" className="btn-primary">
@@ -252,7 +252,7 @@ export default function Landing() {
             Passe à la <span className="text-gold-400">pratique.</span>
           </h2>
           <div className="flex flex-wrap items-center gap-3">
-            <Link to={isSignedIn ? '/cracklab' : '/inscription'} className="btn-primary">{isSignedIn ? 'Relever un challenge' : 'Créer un compte'}</Link>
+            <Link to={isSignedIn ? '/blog' : '/inscription'} className="btn-primary">{isSignedIn ? 'Lire le blog' : 'Créer un compte'}</Link>
             <Link to="/evenements" className="btn-secondary">Voir l’agenda</Link>
           </div>
         </div>

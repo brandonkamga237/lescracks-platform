@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Mail, Newspaper, GraduationCap, FlaskConical, Calendar, Podcast } from 'lucide-react';
+import { Mail, Newspaper, GraduationCap, Calendar, Podcast } from 'lucide-react';
 import { GitHubIcon, LinkedInIcon, YouTubeIcon } from '@/components/icons/BrandIcons';
 import type { LucideIcon } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
@@ -10,7 +10,6 @@ type FooterLink = {
   label: string;
   href: string;
   icon: LucideIcon | null;
-  highlight?: boolean;
   isWhatsApp?: boolean;
   external?: boolean;
 };
@@ -21,7 +20,6 @@ const NAV: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: 'Blog', href: '/blog', icon: Newspaper },
       { label: 'Formations', href: '/formations', icon: GraduationCap },
-      { label: 'CrackLab', href: '/cracklab', icon: FlaskConical, highlight: true },
       { label: 'Événements', href: '/evenements', icon: Calendar },
       { label: 'LesCracks Talk', href: '/talk', icon: Podcast },
       { label: 'À propos', href: '/a-propos', icon: null },
@@ -101,11 +99,7 @@ const Footer = () => {
               <ul className="space-y-3">
                 {col.links.map((link) => {
                   const content = (
-                    <span className={`flex items-center gap-2 text-sm transition-colors ${
-                      link.highlight
-                        ? 'font-medium text-gold-400 hover:text-gold-ink'
-                        : 'text-t3 hover:text-t1'
-                    }`}>
+                    <span className="flex items-center gap-2 text-sm text-t3 transition-colors hover:text-t1">
                       {link.isWhatsApp ? (
                         <WhatsAppIcon className="w-3.5 h-3.5 flex-shrink-0" />
                       ) : link.icon ? (

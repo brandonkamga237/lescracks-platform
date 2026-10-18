@@ -84,7 +84,7 @@ export default function Formations() {
               </form>
             )}
             {error && <p role="alert" className="mt-4 text-sm text-error-ink">{error}</p>}
-            <p className="mt-6 border-t border-line-soft pt-5 text-sm text-t3">En attendant, <Link to="/blog" className="link">lis le blog</Link> ou <Link to="/cracklab" className="link">relève un challenge</Link>.</p>
+            <p className="mt-6 border-t border-line-soft pt-5 text-sm text-t3">En attendant, <Link to="/blog" className="link">lis le blog</Link> ou <Link to="/talk" className="link">regarde le Talk</Link>.</p>
           </div>
         </div>
       </Section>
