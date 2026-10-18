@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.2.0...v1.3.0) (2026-10-18)
+
+
+### Features
+
+* **frontend:** compact layout, Talk in the navigation, real counts, … ([8e453a7](https://github.com/brandonkamga237/lescracks-platform/commit/8e453a74591fbc770219e2c17aa89b4db59375b0))
+* **frontend:** compact layout, Talk in the navigation, real counts, pencil on the profile photo ([#82](https://github.com/brandonkamga237/lescracks-platform/issues/82)) ([cbeeb1f](https://github.com/brandonkamga237/lescracks-platform/commit/cbeeb1f0551a148e01c482d7f121e9f17bb8f932))
+
 ## [1.2.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.1.0...v1.2.0) (2026-10-18)
 
 
