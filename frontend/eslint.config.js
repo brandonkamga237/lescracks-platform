@@ -19,6 +19,13 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      // React Compiler rules (react-hooks 7) that the existing code breaks in ~30 places, none of
+      // them a bug today. Warnings keep them visible while they are fixed one screen at a time;
+      // the other compiler rules stay errors, so new code follows them from the start.
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/purity': 'warn',
+      'react-hooks/refs': 'warn',
+      'react-hooks/use-memo': 'warn',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
