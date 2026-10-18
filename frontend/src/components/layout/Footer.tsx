@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { Linkedin, Github, Youtube, Mail, Newspaper, GraduationCap, FlaskConical, Calendar, Podcast } from 'lucide-react';
+import { Mail, Newspaper, GraduationCap, FlaskConical, Calendar, Podcast } from 'lucide-react';
+import { GitHubIcon, LinkedInIcon, YouTubeIcon } from '@/components/icons/BrandIcons';
 import type { LucideIcon } from 'lucide-react';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 import LesCracksLogo from '@/components/common/LesCracksLogo';
@@ -43,9 +44,9 @@ const NAV: { title: string; links: FooterLink[] }[] = [
 ];
 
 const SOCIALS = [
-  { icon: Linkedin, href: 'https://linkedin.com/company/lescracks', label: 'LinkedIn' },
-  { icon: Github,   href: 'https://github.com/lescracks',           label: 'GitHub' },
-  { icon: Youtube,  href: 'https://youtube.com/@lescracks',         label: 'YouTube' },
+  { icon: LinkedInIcon, href: 'https://linkedin.com/company/lescracks', label: 'LinkedIn' },
+  { icon: GitHubIcon,   href: 'https://github.com/lescracks',           label: 'GitHub' },
+  { icon: YouTubeIcon,  href: 'https://youtube.com/@lescracks',         label: 'YouTube' },
 ];
 
 const Footer = () => {

@@ -25,14 +25,16 @@ fail() {
 
 # No mention of Claude, Anthropic or any generation tool, anywhere in the message.
 # The file name CLAUDE.md and the .claude/ directory are the only allowed occurrences.
-scrubbed="$(printf '%s' "$message" | sed -E 's/CLAUDE\.md//g; s#\.claude/##g')"
-if printf '%s' "$scrubbed" | grep -qiE 'claude|anthropic|generated with|co-authored-by:.*noreply@|🤖'; then
+# Here-strings, not pipes: grep -q and sed q stop reading early, and under pipefail the writer's
+# broken pipe failed a valid long message (Dependabot bodies).
+scrubbed="$(sed -E 's/CLAUDE\.md//g; s#\.claude/##g' <<< "$message")"
+if grep -qiE 'claude|anthropic|generated with|co-authored-by:.*noreply@|🤖' <<< "$scrubbed"; then
   fail "Commit messages must not mention Claude, Anthropic, AI or a generation tool (trailer, signature or text)."
 fi
 
 [[ "$mode" == "mentions" ]] && exit 0
 
-header="$(printf '%s\n' "$message" | sed -n '/[^[:space:]]/{p;q;}')"
+header="$(sed -n '/[^[:space:]]/{p;q;}' <<< "$message")"
 [[ -n "$header" ]] || fail "Empty commit message."
 
 # Lines git writes itself are accepted as they are.
@@ -47,6 +49,8 @@ if ! [[ "$header" =~ $pattern ]]; then
   scope (optional): lowercase, e.g. identity, cracklab, ci"
 fi
 
-if (( ${#header} > 100 )); then
-  fail "Header is ${#header} characters; keep it at 100 or fewer."
+# GitHub appends " (#123)" to a squashed title; the limit is for what the author wrote.
+written="${header% (#[0-9]*)}"
+if (( ${#written} > 100 )); then
+  fail "Header is ${#written} characters; keep it at 100 or fewer."
 fi
