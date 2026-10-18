@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PlainTextTest {
 
     @Test
-    @DisplayName("markers, emphasis and link targets go; words, numbers and code names stay")
+    @DisplayName("headings, markers, emphasis and link targets go; words, numbers and code names stay")
     void keepsOnlyTheWords() {
         String markdown = """
                 ## Le contexte
@@ -20,7 +20,7 @@ class PlainTextTest {
                 """;
 
         assertThat(PlainText.of(markdown))
-                .isEqualTo("Le contexte Une coopérative de trois agences, view_count inclus. Export en 30 s Le formulaire est ici");
+                .isEqualTo("Une coopérative de trois agences, view_count inclus. Export en 30 s Le formulaire est ici");
     }
 
     @Test

@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.shared.util;
 
 /**
- * Markdown reduced to plain words, for meta descriptions and bot snapshots: block markers,
+ * Markdown reduced to plain words, for meta descriptions and bot snapshots: headings, block markers,
  * emphasis and link targets go. Mirrors frontend/src/lib/plainText.ts.
  */
 public final class PlainText {
@@ -13,9 +13,10 @@ public final class PlainText {
         if (markdown == null) return "";
         return markdown
                 .replaceAll("(?s)```.*?```", " ")
+                .replaceAll("(?m)^\\s{0,3}#{1,6}\\s+.*$", " ")
                 .replaceAll("!\\[[^\\]]*]\\([^)]*\\)", " ")
                 .replaceAll("\\[([^\\]]+)]\\([^)]*\\)", "$1")
-                .replaceAll("(?m)^\\s{0,3}(#{1,6}|>|[-*+]|\\d+[.)])\\s+", "")
+                .replaceAll("(?m)^\\s{0,3}(>|[-*+]|\\d+[.)])\\s+", "")
                 .replaceAll("\\*\\*([^*]+)\\*\\*", "$1")
                 .replaceAll("\\*([^*\\s][^*]*)\\*", "$1")
                 .replaceAll("`([^`]+)`", "$1")
