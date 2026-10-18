@@ -6,8 +6,8 @@ import SEO from '@/components/common/SEO';
 import { Skeleton } from '@/components/common/Skeleton';
 import { EmptyState, ErrorState } from '@/components/common/States';
 import ArticleCard from '@/components/blog/ArticleCard';
-import ArticleSpotlight from '@/components/blog/ArticleSpotlight';
 import AgendaItem from '@/components/events/AgendaItem';
+import EpisodeRow from '@/components/talks/EpisodeRow';
 import DuotonePhoto from '@/components/illustrations/DuotonePhoto';
 import LineArt from '@/components/illustrations/LineArt';
 import Layout from '@/components/layout/Layout';
@@ -40,18 +40,16 @@ const WHATSAPP = 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK';
 const REVEAL = { initial: { opacity: 0, transform: 'translateY(16px)' }, whileInView: { opacity: 1, transform: 'translateY(0px)' }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.5, ease: [0.23, 1, 0.32, 1] } } as const;
 
 export default function Landing() {
-  const recent = useApi((signal) => api.articles(0, 4, signal), []);
-  const upcoming = useApi((signal) => api.upcomingEvents(0, 5, signal), []);
-  const themes = useApi((signal) => api.themes(signal), []);
+  const recent = useApi((signal) => api.articles(0, 3, signal), []);
+  const upcoming = useApi((signal) => api.upcomingEvents(0, 3, signal), []);
+  const talks = useApi((signal) => api.talks(0, 3, signal), []);
   const { isSignedIn, isAdmin, name } = useSession();
   const firstName = name?.trim().split(/\s+/)[0];
 
-  const featured = recent.data?.content[0];
-  const next = recent.data?.content.slice(1) ?? [];
   // A figure only shows once it is real and above zero: a dash or a 0 tells a visitor nothing.
   const figures = ([
     [recent.data?.totalElements, 'article', 'articles'],
-    [themes.data?.length, 'thème', 'thèmes'],
+    [talks.data?.totalElements, 'épisode du Talk', 'épisodes du Talk'],
     [upcoming.data?.totalElements, 'rendez-vous à venir', 'rendez-vous à venir'],
   ] as const).filter(([value]) => value != null && value > 0) as ReadonlyArray<readonly [number, string, string]>;
 
@@ -132,71 +130,66 @@ export default function Landing() {
         </section>
       )}
 
-      {/* ── À la une — noir relevé ───────────────────────────────── */}
+      {/* ── Derniers articles — noir relevé ─────────────────────── */}
       <motion.div {...REVEAL}>
-        <Section tone="raised" aria-labelledby="featured-heading">
+        <Section tone="raised" aria-labelledby="articles-heading">
           <SectionHeader
             eyebrow="Le blog"
-            id="featured-heading"
-            title="À la une"
+            id="articles-heading"
+            title="Derniers articles"
             action={<Link to="/blog" className="link inline-flex items-center gap-1.5 text-sm">Tout le blog <ArrowRight className="h-4 w-4" aria-hidden /></Link>}
           />
-
           {recent.loading ? (
-            <div role="status" className="grid gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
-              <Skeleton className="aspect-[16/10]" />
-              <div className="space-y-4 self-center">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-10 w-4/5" />
-                <Skeleton className="h-10 w-3/5" />
-                <Skeleton className="h-4 w-full" />
-              </div>
+            <div role="status" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[0, 1, 2].map((i) => <Skeleton key={i} className="h-72 rounded-lg" />)}
               <span className="sr-only">Chargement des articles…</span>
             </div>
           ) : recent.error ? (
             <ErrorState title="Le blog est momentanément indisponible." onRetry={recent.reload} />
-          ) : featured ? (
-            <>
-              <ArticleSpotlight article={featured} />
-              {next.length > 0 && (
-                <ul className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {next.map((article) => <ArticleCard key={article.id} article={article} />)}
-                </ul>
-              )}
-            </>
+          ) : recent.data?.content.length ? (
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {recent.data.content.map((article) => <ArticleCard key={article.id} article={article} />)}
+            </ul>
           ) : (
             <EmptyState title="Les premiers articles arrivent." description="Ils apparaîtront ici dès leur publication." />
           )}
         </Section>
       </motion.div>
 
-      {/* ── L'agenda — noir ───────────────────────────────── */}
-      <motion.div {...REVEAL}>
-        <Section aria-labelledby="agenda-heading">
-          <SectionHeader
-            eyebrow="En ligne et sur place"
-            id="agenda-heading"
-            title="L’agenda"
-            description="Les prochains rendez-vous pour pratiquer ensemble."
-            action={<Link to="/evenements" className="link inline-flex items-center gap-1.5 text-sm">Tout l’agenda <ArrowRight className="h-4 w-4" aria-hidden /></Link>}
-          />
+      {/* ── Le Talk — noir: the latest episodes, played on the site ── */}
+      {!!talks.data?.content.length && (
+        <motion.div {...REVEAL}>
+          <Section bordered aria-labelledby="talk-heading">
+            <SectionHeader
+              eyebrow="Sur YouTube"
+              id="talk-heading"
+              title="Le Talk"
+              description="Des conversations avec celles et ceux qui construisent la tech africaine."
+              action={<Link to="/talk" className="link inline-flex items-center gap-1.5 text-sm">Tous les épisodes <ArrowRight className="h-4 w-4" aria-hidden /></Link>}
+            />
+            <ul className="border-b border-line">
+              {talks.data.content.map((video) => <EpisodeRow key={video.id} video={video} />)}
+            </ul>
+          </Section>
+        </motion.div>
+      )}
 
-          {upcoming.loading ? (
-            <div role="status" className="space-y-5">
-              {[0, 1, 2].map((i) => <Skeleton key={i} className="h-16" />)}
-              <span className="sr-only">Chargement des événements…</span>
-            </div>
-          ) : upcoming.error ? (
-            <ErrorState title="L’agenda est momentanément indisponible." onRetry={upcoming.reload} />
-          ) : upcoming.data?.content.length ? (
+      {/* ── L'agenda — noir relevé, only when a date is announced ── */}
+      {!!upcoming.data?.content.length && (
+        <motion.div {...REVEAL}>
+          <Section tone="raised" aria-labelledby="agenda-heading">
+            <SectionHeader
+              eyebrow="En ligne et sur place"
+              id="agenda-heading"
+              title="Prochains rendez-vous"
+              action={<Link to="/evenements" className="link inline-flex items-center gap-1.5 text-sm">Tout l’agenda <ArrowRight className="h-4 w-4" aria-hidden /></Link>}
+            />
             <ul className="border-b border-line">
               {upcoming.data.content.map((event) => <AgendaItem key={event.id} event={event} cataloguePath="/evenements" />)}
             </ul>
-          ) : (
-            <EmptyState title="Le prochain rendez-vous se prépare." description="Aucun événement n’est publié pour le moment. Les dates seront annoncées ici." />
-          )}
-        </Section>
-      </motion.div>
+          </Section>
+        </motion.div>
+      )}
 
       {/* ── Pourquoi — full-bleed photo + checklist on black ────── */}
       <section className="relative overflow-hidden bg-black">
@@ -222,31 +215,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Par thème — noir relevé ──────────────────────────────── */}
-      {!!themes.data?.length && (
-        <motion.div {...REVEAL}>
-          <Section tone="raised" aria-labelledby="themes-heading">
-            <SectionHeader eyebrow="Trouver son sujet" id="themes-heading" title="Explorer par thème" />
-            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {themes.data.map((theme) => (
-                <li key={theme.id}>
-                  <Link to={`/blog?theme=${theme.slug}`}
-                    className="group flex h-full flex-col gap-1.5 rounded border border-line px-5 py-4 transition-colors hover:border-t1 hover:bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400">
-                    <span className="flex items-baseline justify-between gap-4">
-                      <span className="min-w-0 break-words text-base font-semibold text-t1">{theme.name}</span>
-                      <span className="shrink-0 font-mono text-xs tabular-nums text-gold-ink">{theme.articleCount} article{theme.articleCount > 1 ? 's' : ''}</span>
-                    </span>
-                    {theme.description && <span className="line-clamp-2 text-sm leading-relaxed text-t3">{theme.description}</span>}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </Section>
-        </motion.div>
-      )}
-
       {/* ── Action — noir ─────────────────────────────────── */}
-      <Section spacing="loose">
+      <Section spacing="loose" bordered>
         <div className="flex flex-col items-start gap-10 lg:flex-row lg:items-end lg:justify-between">
           <h2 className="max-w-3xl font-display text-3xl font-bold leading-[0.95] tracking-tight text-t1 sm:text-5xl lg:text-6xl">
             Passe à la <span className="text-gold-400">pratique.</span>
