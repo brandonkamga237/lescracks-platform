@@ -13,6 +13,8 @@ export interface PageResponse<T> {
 
 /** A theme: what the blog filters on and what members pick as interests. */
 export interface Category { id: number; name: string; slug?: string; description?: string; }
+/** A blog theme that holds published articles, with how many. */
+export interface BlogTheme { id: number; name: string; slug: string; description?: string; articleCount: number; }
 /** A word on an article, unique by name. */
 export interface Tag { id: number; name: string; }
 

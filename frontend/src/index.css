@@ -223,8 +223,4 @@
   }
 
   /* ========== STAT TILE — charcoal lift, never a shadow ========== */
-  .stat-tile {
-    @apply rounded-lg bg-card p-4;
-  }
-
 }

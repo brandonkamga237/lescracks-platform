@@ -39,25 +39,21 @@ const WHATSAPP = 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK';
 // Marketing surface, fired once. Full transform strings stay on the GPU; MotionConfig drops the movement under reduced motion and keeps the fade.
 const REVEAL = { initial: { opacity: 0, transform: 'translateY(16px)' }, whileInView: { opacity: 1, transform: 'translateY(0px)' }, viewport: { once: true, margin: '-80px' }, transition: { duration: 0.5, ease: [0.23, 1, 0.32, 1] } } as const;
 
-function Stat({ value, label }: { value: React.ReactNode; label: string }) {
-  return (
-    <div className="stat-tile">
-      <p className="font-display text-3xl font-bold leading-none tracking-tight text-t1 sm:text-[2.375rem]">{value}</p>
-      <p className="label mt-3">{label}</p>
-    </div>
-  );
-}
-
 export default function Landing() {
   const recent = useApi((signal) => api.articles(0, 4, signal), []);
   const upcoming = useApi((signal) => api.upcomingEvents(0, 5, signal), []);
-  const categories = useApi((signal) => api.categories(signal), []);
+  const themes = useApi((signal) => api.themes(signal), []);
   const { isSignedIn, isAdmin, name } = useSession();
   const firstName = name?.trim().split(/\s+/)[0];
 
   const featured = recent.data?.content[0];
   const next = recent.data?.content.slice(1) ?? [];
-  const count = (value: number | undefined) => (value == null ? '—' : value.toLocaleString('fr-FR'));
+  // A figure only shows once it is real and above zero: a dash or a 0 tells a visitor nothing.
+  const figures = ([
+    [recent.data?.totalElements, 'article', 'articles'],
+    [themes.data?.length, 'thème', 'thèmes'],
+    [upcoming.data?.totalElements, 'rendez-vous à venir', 'rendez-vous à venir'],
+  ] as const).filter(([value]) => value != null && value > 0) as ReadonlyArray<readonly [number, string, string]>;
 
   return (
     <Layout>
@@ -123,14 +119,18 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── Figures: charcoal tiles on black ────────────────────── */}
-      <Section spacing="tight" aria-label="LesCracks en chiffres">
-        <div className="grid grid-cols-3 gap-3">
-          <Stat value={count(recent.data?.totalElements)} label="Articles" />
-          <Stat value={count(categories.data?.length)} label="Thèmes" />
-          <Stat value={count(upcoming.data?.totalElements)} label="Rendez-vous à venir" />
-        </div>
-      </Section>
+      {figures.length > 0 && (
+        <section aria-label="LesCracks en chiffres" className="border-b border-line-soft bg-black">
+          <ul className="mx-auto flex max-w-7xl flex-wrap items-baseline gap-x-8 gap-y-2 px-5 py-5 sm:px-8 sm:py-6">
+            {figures.map(([value, one, many]) => (
+              <li key={many} className="flex items-baseline gap-2">
+                <span className="font-display text-2xl font-bold tabular-nums leading-none text-t1 sm:text-3xl">{value.toLocaleString('fr-FR')}</span>
+                <span className="label">{value > 1 ? many : one}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* ── À la une — noir relevé ───────────────────────────────── */}
       <motion.div {...REVEAL}>
@@ -223,20 +223,20 @@ export default function Landing() {
       </section>
 
       {/* ── Par thème — noir relevé ──────────────────────────────── */}
-      {!!categories.data?.length && (
+      {!!themes.data?.length && (
         <motion.div {...REVEAL}>
           <Section tone="raised" aria-labelledby="themes-heading">
             <SectionHeader eyebrow="Trouver son sujet" id="themes-heading" title="Explorer par thème" />
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {categories.data.filter((theme) => theme.slug).map((theme) => (
+              {themes.data.map((theme) => (
                 <li key={theme.id}>
                   <Link to={`/blog?theme=${theme.slug}`}
                     className="group flex h-full flex-col gap-1.5 rounded border border-line px-5 py-4 transition-colors hover:border-t1 hover:bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400">
-                    <span className="flex items-center justify-between gap-4">
+                    <span className="flex items-baseline justify-between gap-4">
                       <span className="min-w-0 break-words text-base font-semibold text-t1">{theme.name}</span>
-                      <ArrowUpRight className="h-5 w-5 shrink-0 text-t4 transition-colors group-hover:text-gold-ink" aria-hidden />
+                      <span className="shrink-0 font-mono text-xs tabular-nums text-gold-ink">{theme.articleCount} article{theme.articleCount > 1 ? 's' : ''}</span>
                     </span>
-                    {theme.description && <span className="text-sm leading-relaxed text-t3">{theme.description}</span>}
+                    {theme.description && <span className="line-clamp-2 text-sm leading-relaxed text-t3">{theme.description}</span>}
                   </Link>
                 </li>
               ))}

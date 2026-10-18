@@ -1,7 +1,7 @@
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
 import type {
-  ArticleSummary, AuthProvider, Category, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse,
+  ArticleSummary, AuthProvider, BlogTheme, Category, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse,
   NewsletterStatus, ResourceLikeStatus, Tag, TalkVideo, UserIdentity, UserProfile,
   UserProfileUpdate, OnboardingAnswers, SignupContext,
 } from '@/services/types';
@@ -47,6 +47,7 @@ export const api = {
   talks: (page = 0, size = 12, signal?: AbortSignal) =>
     http.get<PageResponse<TalkVideo>>('/talks', { page, size }, signal),
   categories: (signal?: AbortSignal) => http.get<Category[]>('/categories', undefined, signal),
+  themes: (signal?: AbortSignal) => http.get<BlogTheme[]>('/resources/themes', undefined, signal),
   tags: (signal?: AbortSignal) => http.get<Tag[]>('/tags', undefined, signal),
   me: (signal?: AbortSignal) => http.get<UserProfile>('/me', undefined, signal),
   syncOidc: (provider: 'google' | 'github') =>
