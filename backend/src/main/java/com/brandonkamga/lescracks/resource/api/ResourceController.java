@@ -38,7 +38,7 @@ public class ResourceController {
                                                     @RequestParam(required = false) Long categoryId,
                                                     @RequestParam(required = false) Long tagId,
                                                     @PageableDefault(size = 12) Pageable pageable) {
-        return PageResponse.of(resources.search(ResourceStatus.PUBLISHED, search, categoryId, tagId, pageable), mapper::toResponse);
+        return PageResponse.of(resources.search(ResourceStatus.PUBLISHED, search, categoryId, tagId, pageable), mapper::toSummary);
     }
 
     @GetMapping("/themes")

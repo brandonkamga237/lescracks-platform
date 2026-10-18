@@ -21,8 +21,17 @@ public class ResourceMapper {
     }
 
     public ResourceResponse toResponse(Resource resource) {
+        return build(resource, true);
+    }
+
+    /** For lists: what a card shows, without the body, which weighs tens of kilobytes per article. */
+    public ResourceResponse toSummary(Resource resource) {
+        return build(resource, false);
+    }
+
+    private ResourceResponse build(Resource resource, boolean withBody) {
         var article = resources.article(resource.getId()).orElse(null);
-        JsonNode body = article != null ? article.getBody() : null;
+        JsonNode body = withBody && article != null ? article.getBody() : null;
         Integer readingMinutes = article != null ? article.getReadingMinutes() : null;
         return new ResourceResponse(
                 resource.getId(), resource.getSlug(), resource.getTitle(), resource.getDescription(), resource.getCoverImage(),
