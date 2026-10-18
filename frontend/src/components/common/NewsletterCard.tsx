@@ -41,7 +41,7 @@ export default function NewsletterCard() {
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded border border-gold-400/25 bg-gold-400/10 text-gold-ink"><Mail className="h-5 w-5" aria-hidden /></div>
       <div className="flex-1">
         <h3 className="font-display text-lg font-bold text-t1">Newsletter LesCracks</h3>
-        <p className="mt-1 text-sm leading-relaxed text-t4">Soyez informé des nouveaux contenus, événements et ressources directement par email.</p>
+        <p className="mt-1 text-sm leading-relaxed text-t4">Les nouveaux articles et rendez-vous, directement par email.</p>
         <button
           type="button"
           onClick={() => void toggle()}
