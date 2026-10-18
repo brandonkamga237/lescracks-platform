@@ -6,6 +6,7 @@ import com.brandonkamga.lescracks.event.domain.EventStatus;
 import com.brandonkamga.lescracks.event.domain.EventType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,18 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("select e.id from Event e where e.status = :status and e.scheduledAt <= :now order by e.scheduledAt")
     List<Long> findScheduledIds(@Param("status") EventStatus status, @Param("now") Instant now);
 
+
+    /** 1 for a new visitor, 0 when this visitor already counted. Atomic, so two tabs at once still count once. */
+    @Modifying
+    @Query(value = "insert into event_views (event_id, visitor_key) values (:eventId, :visitorKey) on conflict do nothing", nativeQuery = true)
+    int insertView(@Param("eventId") Long eventId, @Param("visitorKey") String visitorKey);
+
+    @Modifying
+    @Query(value = "update events set view_count = view_count + 1 where id = :eventId", nativeQuery = true)
+    void incrementViews(@Param("eventId") Long eventId);
+
+    @Query(value = "select view_count from events where id = :eventId", nativeQuery = true)
+    int viewCount(@Param("eventId") Long eventId);
 
     Optional<Event> findBySlug(String slug);
 
@@ -39,6 +52,19 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     Page<Event> findByStatusAndTypeOrderByStartDateAsc(EventStatus status, EventType type, Pageable pageable);
     Page<Event> findByStatusAndFormatOrderByStartDateAsc(EventStatus status, EventFormat format, Pageable pageable);
     Page<Event> findByStatusAndTypeAndFormatOrderByStartDateAsc(EventStatus status, EventType type, EventFormat format, Pageable pageable);
-    Page<Event> findByStatusAndStartDateAfterOrderByStartDateAsc(EventStatus status, Instant now, Pageable pageable);
-    Page<Event> findByStatusAndStartDateBeforeOrderByStartDateDesc(EventStatus status, Instant now, Pageable pageable);
+
+    /** Not started yet, or started and not over: a hackathon running for two weeks is still ahead of its participants. */
+    @Query("""
+            select e from Event e
+            where e.status = :status and (e.startDate > :now or e.endDate > :now)
+            order by e.startDate asc
+            """)
+    Page<Event> findUpcoming(@Param("status") EventStatus status, @Param("now") Instant now, Pageable pageable);
+
+    @Query("""
+            select e from Event e
+            where e.status = :status and e.startDate <= :now and (e.endDate is null or e.endDate <= :now)
+            order by e.startDate desc
+            """)
+    Page<Event> findPast(@Param("status") EventStatus status, @Param("now") Instant now, Pageable pageable);
 }

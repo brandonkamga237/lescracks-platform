@@ -10,6 +10,7 @@ import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.resource.api.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
+import com.brandonkamga.lescracks.shared.util.PlainText;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 import com.brandonkamga.lescracks.talk.domain.TalkService;
 
@@ -94,7 +95,7 @@ public class SeoController {
         }
 
         String canonical = canonical(request, "/evenements/" + (event.getSlug() != null ? event.getSlug() : event.getId()));
-        SeoHtml html = new SeoHtml(event.getTitle() + " · LesCracks", event.getDescription(), canonical)
+        SeoHtml html = new SeoHtml(event.getTitle() + " · LesCracks", PlainText.excerpt(event.getDescription(), 160), canonical)
                 .type("website")
                 .image(absolute(request, event.getCoverImage()), event.getTitle(), null, null);
 
@@ -115,14 +116,14 @@ public class SeoController {
         if (event.getLocation() != null && !event.getLocation().isBlank()) {
             html.fact("Lieu", event.getLocation());
         }
-        html.paragraph(event.getDescription());
+        html.paragraph(PlainText.of(event.getDescription()));
 
         Map<String, Object> location = buildEventLocation(event);
         Map<String, Object> jsonLd = new LinkedHashMap<>();
         jsonLd.put("@context", "https://schema.org");
         jsonLd.put("@type", "Event");
         jsonLd.put("name", event.getTitle());
-        jsonLd.put("description", event.getDescription());
+        jsonLd.put("description", PlainText.excerpt(event.getDescription(), 500));
         jsonLd.put("url", canonical);
         jsonLd.put("image", absolute(request, event.getCoverImage()));
         jsonLd.put("startDate", ISO.format(event.getStartDate().atOffset(ZoneOffset.UTC)));
@@ -390,6 +391,7 @@ public class SeoController {
             case WORKSHOP -> "Atelier";
             case WEBINAR -> "Webinaire";
             case CONFERENCE -> "Conférence";
+            case HACKATHON -> "Hackathon";
         };
     }
 

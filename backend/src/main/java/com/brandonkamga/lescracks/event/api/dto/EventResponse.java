@@ -20,5 +20,6 @@ public record EventResponse(
         EventStatus status,
         Instant createdAt,
         Instant updatedAt,
-        Instant scheduledAt) {
+        Instant scheduledAt,
+        int viewCount) {
 }

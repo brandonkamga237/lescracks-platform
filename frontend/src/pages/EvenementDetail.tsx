@@ -1,16 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowUpRight, CalendarDays, CalendarPlus, Clock3, Download, MapPin, Radio } from 'lucide-react';
 import { Link, useLocation, useParams } from 'react-router-dom';
+import Prose from '@/components/common/Prose';
 import SEO from '@/components/common/SEO';
 import ShareButton from '@/components/common/ShareButton';
 import LineArt from '@/components/illustrations/LineArt';
+import { TYPE_LABEL } from '@/components/events/AgendaItem';
+import ViewCount from '@/components/events/ViewCount';
 import Layout from '@/components/layout/Layout';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/services/api';
 import { downloadIcs, googleCalendarUrl } from '@/lib/calendar';
+import { markdownToPlainText } from '@/lib/plainText';
 import { eventPath } from '@/lib/slugs';
+import { browserVisitorId } from '@/lib/visitor';
 
-const typeLabels = { BOOTCAMP: 'Bootcamp', WORKSHOP: 'Atelier', WEBINAR: 'Webinaire', CONFERENCE: 'Conférence' } as const;
 const formatLabels = { ONLINE: 'En ligne', OFFLINE: 'Sur place', HYBRID: 'Hybride' } as const;
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short' });
 
@@ -21,6 +25,18 @@ export default function EvenementDetail() {
   const event = useApi((signal) => hasParam ? api.event(id, signal) : Promise.resolve(null), [id, hasParam]);
   const loaded = hasParam && !event.loading && !event.error && event.data ? event.data : null;
   const [failedImage, setFailedImage] = useState<string | undefined>(undefined);
+  const [views, setViews] = useState<{ id: number; count: number } | null>(null);
+  // Once per event and page: the development double effect would otherwise post twice.
+  const counted = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!loaded || loaded.status !== 'PUBLISHED' || counted.current === loaded.id) return;
+    counted.current = loaded.id;
+    api.recordEventView(loaded.id, browserVisitorId())
+      .then(({ viewCount }) => setViews({ id: loaded.id, count: viewCount }))
+      .catch(() => undefined);
+  }, [loaded]);
+  const viewCount = loaded ? (views?.id === loaded.id ? views.count : loaded.viewCount ?? 0) : 0;
   const missing = !hasParam || event.error?.status === 404;
   const previousPath: unknown = location.state?.cataloguePath;
   const cataloguePath = typeof previousPath === 'string' && /^\/evenements(?:\?.*)?$/.test(previousPath) ? previousPath : '/evenements';
@@ -33,7 +49,7 @@ export default function EvenementDetail() {
 
   return (
     <Layout>
-      <SEO title={loaded?.title ?? (missing ? 'Événement introuvable' : 'Événement')} description={loaded?.description ?? 'Découvre les rendez-vous LesCracks pour apprendre et pratiquer la tech ensemble.'} image={loaded?.coverImage || undefined} url={loaded ? eventPath(loaded) : '/evenements'} />
+      <SEO title={loaded?.title ?? (missing ? 'Événement introuvable' : 'Événement')} description={loaded ? markdownToPlainText(loaded.description).slice(0, 300) : 'Découvre les rendez-vous LesCracks pour apprendre et pratiquer la tech ensemble.'} image={loaded?.coverImage || undefined} url={loaded ? eventPath(loaded) : '/evenements'} />
       <article>
         <div className="mode-raised">
         <div className="mx-auto max-w-7xl px-5 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-10">
@@ -46,7 +62,7 @@ export default function EvenementDetail() {
 
         {loaded && <>
           <header className="mt-5 max-w-5xl sm:mt-8">
-            <div className="flex flex-wrap items-center gap-3"><span className="rounded-full bg-gold-400 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-black">{typeLabels[loaded.type]}</span><span className="label">{formatLabels[loaded.format]}</span><span className="label">· {status}</span></div>
+            <div className="flex flex-wrap items-center gap-3"><span className="rounded-full bg-gold-400 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-black">{TYPE_LABEL[loaded.type]}</span><span className="label">{formatLabels[loaded.format]}</span><span className="label">· {status}</span><ViewCount count={viewCount} spelledOut className="label" /></div>
             <h1 className="mt-3 break-words font-display text-3xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl lg:text-5xl">{loaded.title}</h1>
             {hasDate && <p className="mt-3 text-base sm:text-lg font-semibold text-t2"><time dateTime={loaded.startDate}>{dateFormat.format(start)}</time></p>}
           </header>
@@ -56,14 +72,14 @@ export default function EvenementDetail() {
 
         {loaded && <>
           <div className="aspect-[16/9] w-full overflow-hidden bg-noir-800 sm:aspect-[21/9]">
-            {loaded.coverImage && failedImage !== loaded.coverImage ? <img src={loaded.coverImage} alt="" onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" /> : <div aria-hidden className="relative flex h-full w-full items-center justify-end bg-noir-900 pr-[10%]"><span className="absolute bottom-4 left-5 font-display text-6xl font-bold leading-none text-t4 opacity-20 sm:left-8 sm:text-8xl">{typeLabels[loaded.type]}</span><LineArt motif="calendar" className="relative h-3/5 text-gold-400" /></div>}
+            {loaded.coverImage && failedImage !== loaded.coverImage ? <img src={loaded.coverImage} alt="" onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" /> : <div aria-hidden className="relative flex h-full w-full items-center justify-end bg-noir-900 pr-[10%]"><span className="absolute bottom-4 left-5 font-display text-6xl font-bold leading-none text-t4 opacity-20 sm:left-8 sm:text-8xl">{TYPE_LABEL[loaded.type]}</span><LineArt motif="calendar" className="relative h-3/5 text-gold-400" /></div>}
           </div>
           <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-14">
 
           {status === 'Annulé' && <p className="mb-10 rounded bg-card px-6 py-5 text-sm leading-relaxed text-t2" role="status">Cet événement a été annulé. Les informations ci-dessous sont conservées à titre de référence.</p>}
           {status === 'Terminé' && <p className="mb-10 rounded bg-card px-6 py-5 text-sm leading-relaxed text-t3">Cet événement est terminé. Explore l’agenda pour découvrir les prochains rendez-vous.</p>}
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-16">
-            <section aria-labelledby="event-description" className="min-w-0"><h2 id="event-description" className="font-display text-3xl font-bold leading-tight text-t1">Au programme</h2><p className="mt-5 whitespace-pre-line break-words text-base leading-relaxed text-t2 sm:text-lg">{loaded.description}</p></section>
+            <section aria-labelledby="event-description" className="min-w-0"><h2 id="event-description" className="font-display text-3xl font-bold leading-tight text-t1">Au programme</h2><div className="mt-5 min-w-0 break-words"><Prose text={loaded.description} /></div></section>
             {/* On a phone the date and place come first: they are what someone opening a shared link looks for. */}
             <aside className="-order-1 rounded-lg bg-card p-6 sm:p-7 lg:order-none" aria-label="Informations pratiques">
               <h2 className="font-display text-xl font-bold text-t1">Le rendez-vous en détail</h2>

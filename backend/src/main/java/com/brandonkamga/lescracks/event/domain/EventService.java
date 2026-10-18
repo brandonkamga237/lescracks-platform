@@ -20,4 +20,7 @@ public interface EventService extends ScheduledPublishing {
     Event create(EventRequest request, MultipartFile coverImageFile);
     Event update(Long id, EventRequest request, MultipartFile coverImageFile);
     void delete(Long id);
+
+    /** Counts the visitor once per published event and returns the event's count. */
+    int recordView(Long id, EventVisitor visitor);
 }

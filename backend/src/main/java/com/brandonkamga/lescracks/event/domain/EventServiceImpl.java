@@ -52,18 +52,25 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public Page<Event> upcoming(Pageable pageable) {
-        return events.findByStatusAndStartDateAfterOrderByStartDateAsc(EventStatus.PUBLISHED, Instant.now(), pageable);
+        return events.findUpcoming(EventStatus.PUBLISHED, Instant.now(), pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<Event> past(Pageable pageable) {
-        return events.findByStatusAndStartDateBeforeOrderByStartDateDesc(EventStatus.PUBLISHED, Instant.now(), pageable);
+        return events.findPast(EventStatus.PUBLISHED, Instant.now(), pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<Event> all(Pageable pageable) { return events.findAll(pageable); }
+
+    @Override
+    public int recordView(Long id, EventVisitor visitor) {
+        if (require(id).getStatus() != EventStatus.PUBLISHED) throw new NotFoundException("Event", "id", id);
+        if (events.insertView(id, visitor.key()) == 1) events.incrementViews(id);
+        return events.viewCount(id);
+    }
 
     @Override
     @Transactional(readOnly = true)

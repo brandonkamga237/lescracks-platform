@@ -62,6 +62,10 @@ public class Event {
     @Builder.Default
     private EventStatus status = EventStatus.DRAFT;
 
+    /** People who opened the page, each counted once. Written only by the view recorder's SQL, never by a save. */
+    @Column(name = "view_count", nullable = false, insertable = false, updatable = false)
+    private int viewCount;
+
     /** Set on a draft that the scheduler will publish at that time. */
     @Column(name = "scheduled_at")
     private Instant scheduledAt;

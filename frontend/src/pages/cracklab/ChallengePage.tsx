@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight, ChevronDown, ChevronUp, Eye, PenLine, Send } fro
 import Avatar from '@/components/cracklab/Avatar';
 import CrackLabLayout from '@/components/cracklab/CrackLabLayout';
 import Difficulty from '@/components/cracklab/Difficulty';
-import Prose from '@/components/cracklab/Prose';
+import Prose from '@/components/common/Prose';
 import SEO from '@/components/common/SEO';
 import ShareButton from '@/components/common/ShareButton';
 import { ErrorState } from '@/components/common/States';

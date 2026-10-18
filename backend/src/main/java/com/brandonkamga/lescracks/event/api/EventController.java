@@ -2,6 +2,8 @@ package com.brandonkamga.lescracks.event.api;
 
 import com.brandonkamga.lescracks.event.api.dto.EventRequest;
 import com.brandonkamga.lescracks.event.api.dto.EventResponse;
+import com.brandonkamga.lescracks.event.api.dto.EventViewRequest;
+import com.brandonkamga.lescracks.event.api.dto.EventViewsResponse;
 import com.brandonkamga.lescracks.event.domain.Event;
 import com.brandonkamga.lescracks.event.domain.EventFormat;
 import com.brandonkamga.lescracks.event.domain.EventService;
@@ -14,6 +16,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,6 +58,14 @@ public class EventController {
         return response(event);
     }
 
+    /** Open to everyone: anonymous visitors count too, by the random id their browser keeps. */
+    @PostMapping("/{id}/views")
+    public EventViewsResponse recordView(@PathVariable Long id, @RequestBody(required = false) EventViewRequest request,
+                                         Authentication authentication) {
+        var body = request != null ? request : new EventViewRequest(null);
+        return new EventViewsResponse(events.recordView(id, body.toVisitor(authentication != null ? authentication.getName() : null)));
+    }
+
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public PageResponse<EventResponse> all(@PageableDefault(size = 20) Pageable pageable) {
@@ -85,6 +96,6 @@ public class EventController {
     private static EventResponse response(Event event) {
         return new EventResponse(event.getId(), event.getSlug(), event.getTitle(), event.getDescription(), event.getType(),
                 event.getFormat(), event.getStartDate(), event.getEndDate(), event.getLocation(), event.getCoverImage(),
-                event.getStatus(), event.getCreatedAt(), event.getUpdatedAt(), event.getScheduledAt());
+                event.getStatus(), event.getCreatedAt(), event.getUpdatedAt(), event.getScheduledAt(), event.getViewCount());
     }
 }

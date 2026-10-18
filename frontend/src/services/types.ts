@@ -1,5 +1,5 @@
 export type ResourceStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
-export type EventType = 'BOOTCAMP' | 'WORKSHOP' | 'WEBINAR' | 'CONFERENCE';
+export type EventType = 'BOOTCAMP' | 'WORKSHOP' | 'WEBINAR' | 'CONFERENCE' | 'HACKATHON';
 export type EventFormat = 'ONLINE' | 'OFFLINE' | 'HYBRID';
 export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED';
 
@@ -65,6 +65,8 @@ export interface EventSummary {
   updatedAt: string;
   /** Set on a draft that goes public automatically at that time. */
   scheduledAt?: string;
+  /** Different people who opened the event page, members and anonymous visitors alike. */
+  viewCount: number;
 }
 
 export type EventDetail = EventSummary;
