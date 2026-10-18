@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Check, Facebook, Link2, Linkedin, Mail, Send, Share2, Twitter } from 'lucide-react';
+import type { ComponentType } from 'react';
+import { Check, Link2, Mail, Send, Share2 } from 'lucide-react';
+import { FacebookIcon, LinkedInIcon, XIcon } from '@/components/icons/BrandIcons';
 import type { LucideIcon } from 'lucide-react';
 
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
@@ -18,14 +20,14 @@ interface ShareButtonProps {
   className?: string;
 }
 
-type Network = { name: string; icon: LucideIcon | typeof WhatsAppIcon; href: (url: string, title: string) => string };
+type Network = { name: string; icon: LucideIcon | ComponentType<{ className?: string }>; href: (url: string, title: string) => string };
 
 // WhatsApp first: it is where the community lives and where most links get passed on.
 const NETWORKS: Network[] = [
   { name: 'WhatsApp', icon: WhatsAppIcon, href: (url, title) => `https://wa.me/?text=${encodeURIComponent(`${title}\n${url}`)}` },
-  { name: 'LinkedIn', icon: Linkedin, href: (url) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}` },
-  { name: 'X', icon: Twitter, href: (url, title) => `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}` },
-  { name: 'Facebook', icon: Facebook, href: (url) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}` },
+  { name: 'LinkedIn', icon: LinkedInIcon, href: (url) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}` },
+  { name: 'X', icon: XIcon, href: (url, title) => `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}` },
+  { name: 'Facebook', icon: FacebookIcon, href: (url) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}` },
   { name: 'Telegram', icon: Send, href: (url, title) => `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}` },
   { name: 'E-mail', icon: Mail, href: (url, title) => `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${title}\n\n${url}`)}` },
 ];
