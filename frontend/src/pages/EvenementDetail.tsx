@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowUpRight, CalendarDays, CalendarPlus, Clock3, Download, MapPin, Radio } from 'lucide-react';
 import { Link, useLocation, useParams } from 'react-router-dom';
+import Prose from '@/components/common/Prose';
 import SEO from '@/components/common/SEO';
 import ShareButton from '@/components/common/ShareButton';
 import LineArt from '@/components/illustrations/LineArt';
@@ -10,6 +11,7 @@ import Layout from '@/components/layout/Layout';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/services/api';
 import { downloadIcs, googleCalendarUrl } from '@/lib/calendar';
+import { markdownToPlainText } from '@/lib/plainText';
 import { eventPath } from '@/lib/slugs';
 import { browserVisitorId } from '@/lib/visitor';
 
@@ -47,7 +49,7 @@ export default function EvenementDetail() {
 
   return (
     <Layout>
-      <SEO title={loaded?.title ?? (missing ? 'Événement introuvable' : 'Événement')} description={loaded?.description ?? 'Découvre les rendez-vous LesCracks pour apprendre et pratiquer la tech ensemble.'} image={loaded?.coverImage || undefined} url={loaded ? eventPath(loaded) : '/evenements'} />
+      <SEO title={loaded?.title ?? (missing ? 'Événement introuvable' : 'Événement')} description={loaded ? markdownToPlainText(loaded.description).slice(0, 300) : 'Découvre les rendez-vous LesCracks pour apprendre et pratiquer la tech ensemble.'} image={loaded?.coverImage || undefined} url={loaded ? eventPath(loaded) : '/evenements'} />
       <article>
         <div className="mode-raised">
         <div className="mx-auto max-w-7xl px-5 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-10">
@@ -77,7 +79,7 @@ export default function EvenementDetail() {
           {status === 'Annulé' && <p className="mb-10 rounded bg-card px-6 py-5 text-sm leading-relaxed text-t2" role="status">Cet événement a été annulé. Les informations ci-dessous sont conservées à titre de référence.</p>}
           {status === 'Terminé' && <p className="mb-10 rounded bg-card px-6 py-5 text-sm leading-relaxed text-t3">Cet événement est terminé. Explore l’agenda pour découvrir les prochains rendez-vous.</p>}
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-16">
-            <section aria-labelledby="event-description" className="min-w-0"><h2 id="event-description" className="font-display text-3xl font-bold leading-tight text-t1">Au programme</h2><p className="mt-5 whitespace-pre-line break-words text-base leading-relaxed text-t2 sm:text-lg">{loaded.description}</p></section>
+            <section aria-labelledby="event-description" className="min-w-0"><h2 id="event-description" className="font-display text-3xl font-bold leading-tight text-t1">Au programme</h2><div className="mt-5 min-w-0 break-words"><Prose text={loaded.description} /></div></section>
             {/* On a phone the date and place come first: they are what someone opening a shared link looks for. */}
             <aside className="-order-1 rounded-lg bg-card p-6 sm:p-7 lg:order-none" aria-label="Informations pratiques">
               <h2 className="font-display text-xl font-bold text-t1">Le rendez-vous en détail</h2>

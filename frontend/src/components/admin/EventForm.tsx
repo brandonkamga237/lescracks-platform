@@ -78,7 +78,7 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
       <fieldset disabled={busy} className="space-y-5">
         <legend className="mb-4 font-display text-lg font-medium">01 · Le programme</legend>
         <label className="block text-sm text-t2">Titre<input required maxLength={200} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} className={field} /></label>
-        <label className="block text-sm text-t2">Description<textarea required rows={5} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className={area} /></label>
+        <label className="block text-sm text-t2">Description<textarea required rows={10} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className={`${area} font-mono text-sm`} /><span className="mt-1.5 block text-xs text-t4">Markdown, comme les articles : ## titre, - liste, **gras**, [lien](https://…).</span></label>
         <div className="grid gap-5 sm:grid-cols-2">
           <label className="block text-sm text-t2">Type<select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value as EventType })} className={field}>{(Object.entries(TYPE_LABEL) as Array<[EventType, string]>).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
           <label className="block text-sm text-t2">Format<select value={form.format} onChange={(event) => setForm({ ...form, format: event.target.value as EventFormat })} className={field}><option value="ONLINE">En ligne</option><option value="OFFLINE">Sur place</option><option value="HYBRID">Hybride</option></select></label>

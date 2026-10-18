@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 
 import { AdminSection } from '@/components/admin/AdminTable';
-import Prose from '@/components/cracklab/Prose';
+import Prose from '@/components/common/Prose';
 import { adminApi } from '@/services/adminApi';
 import { ApiError } from '@/services/http';
 import type { AdminChallenge, ChallengeSubmission } from '@/services/types';

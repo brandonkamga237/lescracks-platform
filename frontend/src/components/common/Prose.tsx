@@ -4,13 +4,13 @@ import { ArticleBlocks } from '@/components/blog/ArticleRenderer';
 import { markdownToBlocks } from '@/lib/articleMarkdown';
 
 interface ProseProps {
-  /** Markdown, as typed by an admin (statement, solution) or a member (answer). */
+  /** Markdown, as typed by an admin (statement, solution, event programme) or a member (answer). */
   text: string;
   /** Inside a card (an answer, the constraints): headings shrink so they do not outshout the frame. */
   compact?: boolean;
 }
 
-/** Statements, answers and solutions read like articles: same Markdown, same typography, code blocks included. */
+/** Admin-written Markdown (challenges, event programmes) and member answers read like articles: same typography, code blocks included. */
 export default function Prose({ text, compact = false }: ProseProps) {
   const blocks = useMemo(() => markdownToBlocks(text), [text]);
   if (!compact) return <ArticleBlocks blocks={blocks} />;

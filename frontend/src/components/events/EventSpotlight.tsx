@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
+import { markdownToPlainText } from '@/lib/plainText';
 import { eventPath } from '@/lib/slugs';
 import { FORMAT_LABEL, TYPE_ICON, TYPE_LABEL } from '@/components/events/AgendaItem';
 import ViewCount from '@/components/events/ViewCount';
@@ -69,7 +70,7 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
           </Link>
         </h3>
         <p className="mt-6 line-clamp-3 max-w-2xl text-base leading-normal text-t3">
-          {event.description}
+          {markdownToPlainText(event.description)}
         </p>
         <Link
           to={eventPath(event)}
