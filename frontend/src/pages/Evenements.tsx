@@ -58,7 +58,7 @@ export default function Evenements() {
   return (
     <Layout>
       <SEO title="Événements et ateliers tech" description="Bootcamps, ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble." url="/evenements" />
-      <Section tone="raised" spacing="tight" backdrop="/images/about.webp">
+      <Section tone="raised" spacing="header">
         <PageHeader
           eyebrow="En ligne et sur place"
           title="Agenda"
@@ -127,7 +127,7 @@ export default function Evenements() {
       {discovery && !!past.data?.content.length && (
         <Section tone="raised" aria-labelledby="past-events-heading">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
-            <h2 id="past-events-heading" className="font-display text-4xl font-bold leading-[0.96] tracking-tight text-t1 sm:text-5xl">Déjà passés</h2>
+            <h2 id="past-events-heading" className="font-display text-2xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl">Déjà passés</h2>
             <span className="label">Les rendez-vous précédents</span>
           </div>
           <ul aria-label="Événements passés" className="border-b border-line opacity-80">

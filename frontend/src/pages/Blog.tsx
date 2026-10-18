@@ -42,7 +42,7 @@ export default function Blog() {
   return (
     <Layout>
       <SEO title="Blog" description="Les articles LesCracks : retours d’expérience, notions expliquées et bonnes pratiques pour progresser en tech." url="/blog" />
-      <Section tone="raised" spacing="tight" backdrop="/images/headers/library.jpg">
+      <Section tone="raised" spacing="header">
         <PageHeader
           eyebrow="À lire"
           title="Blog"

@@ -67,10 +67,10 @@ export default function BlogPost() {
             )}
 
             {loaded && (
-              <header className="mt-8 max-w-4xl sm:mt-12">
+              <header className="mt-5 max-w-4xl sm:mt-8">
                 {loaded.categoryName && <p className="label">{loaded.categoryName}</p>}
-                <h1 className="mt-5 break-words font-display text-5xl font-bold leading-[0.94] tracking-tight text-t1 sm:text-6xl lg:text-7xl lg:leading-[0.9]">{loaded.title}</h1>
-                <p className="label mt-6">
+                <h1 className="mt-3 break-words font-display text-3xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl lg:text-5xl">{loaded.title}</h1>
+                <p className="label mt-4">
                   {published && <>Publié le <time dateTime={published}>{dateFormat.format(new Date(published))}</time>  ·  </>}
                   {loaded.readingMinutes ?? 1} min de lecture
                 </p>
@@ -80,7 +80,7 @@ export default function BlogPost() {
         </div>
 
         {loaded && (
-          <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
+          <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-14">
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-12">
               <div className="min-w-0">
                 <div className="relative aspect-[16/9] overflow-hidden bg-noir-800">

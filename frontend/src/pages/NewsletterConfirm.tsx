@@ -28,7 +28,7 @@ export default function NewsletterConfirm() {
 
   return <Layout>
     <SEO title="Confirmer l’inscription" description="Confirme ton inscription à la newsletter LesCracks." url="/newsletter/confirmer" />
-    <div className="mx-auto max-w-lg px-5 py-16 sm:py-24">
+    <div className="mx-auto max-w-lg px-5 py-8 sm:py-14">
       <section className="mode-raised rounded-lg p-6 sm:p-9">
         <p className="kicker">LesCracks / Newsletter</p>
         <h1 className="mt-4 font-display text-3xl font-bold">{state === 'done' ? 'Bienvenue.' : 'Confirmer ton inscription'}</h1>

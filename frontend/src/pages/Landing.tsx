@@ -65,20 +65,20 @@ export default function Landing() {
 
       {/* ── Hero: raised headline panel · photo action panel ────── */}
       <section className="grid lg:grid-cols-[55fr_45fr]">
-        <div className="mode-raised flex items-center px-5 py-20 sm:px-8 lg:py-28 lg:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:pr-16">
+        <div className="mode-raised flex items-center px-5 py-10 sm:px-8 sm:py-16 lg:py-24 lg:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:pr-16">
           <div className="max-w-2xl">
             <p className="kicker animate-rise motion-reduce:animate-page-in">Apprendre, pratiquer, avancer</p>
-            <h1 className="mt-6 animate-rise motion-reduce:animate-page-in font-display text-5xl font-bold leading-[0.92] tracking-tight text-t1 sm:text-6xl xl:text-[5.25rem] xl:leading-[0.9] [animation-delay:50ms]">
+            <h1 className="mt-3 animate-rise motion-reduce:animate-page-in font-display text-4xl font-bold leading-[0.95] tracking-tight text-t1 sm:mt-5 sm:text-6xl xl:text-7xl [animation-delay:50ms]">
               {isSignedIn
                 ? <>Bon retour{firstName ? <>, {firstName}</> : ''}. La suite t’attend.</>
                 : <>Deviens aussi un crack de la tech.</>}
             </h1>
-            <p className="mt-8 max-w-lg animate-rise motion-reduce:animate-page-in text-lg leading-normal text-t3 [animation-delay:100ms]">
+            <p className="mt-4 max-w-lg animate-rise motion-reduce:animate-page-in text-base leading-normal text-t3 sm:mt-6 sm:text-lg [animation-delay:100ms]">
               {isSignedIn
                 ? 'Reprends ta lecture ou trouve le prochain rendez-vous.'
                 : 'Articles, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique.'}
             </p>
-            <div className="mt-10 flex animate-rise motion-reduce:animate-page-in flex-wrap items-center gap-x-6 gap-y-4 [animation-delay:150ms]">
+            <div className="mt-6 flex animate-rise motion-reduce:animate-page-in flex-wrap items-center gap-x-6 gap-y-4 [animation-delay:150ms]">
               <Link to="/blog" className="btn-primary">
                 Lire le blog <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
@@ -89,9 +89,9 @@ export default function Landing() {
 
         {/* The card straddles the seam on wide screens so the two halves read as one poster. */}
         <div className="relative bg-black pb-12 lg:pb-0">
-          <DuotonePhoto src="/images/community-1.webp" loading="eager" className="h-72 sm:h-96 lg:absolute lg:inset-0 lg:h-auto" />
-          <div className="relative mx-5 -mt-20 sm:mx-8 lg:absolute lg:bottom-12 lg:-left-16 lg:mx-0 lg:mt-0 lg:w-[22rem]">
-            <div className="mode-raised animate-rise motion-reduce:animate-page-in rounded-lg border border-line p-7 [animation-delay:200ms] sm:max-w-sm lg:max-w-none">
+          <DuotonePhoto src="/images/community-1.webp" loading="eager" className="h-48 sm:h-80 lg:absolute lg:inset-0 lg:h-auto" />
+          <div className="relative mx-5 -mt-12 sm:mx-8 lg:absolute lg:bottom-12 lg:-left-16 lg:mx-0 lg:mt-0 lg:w-[22rem]">
+            <div className="mode-raised animate-rise motion-reduce:animate-page-in rounded-lg border border-line p-5 sm:p-7 [animation-delay:200ms] sm:max-w-sm lg:max-w-none">
               {isSignedIn ? (
                 <>
                   <h2 className="text-2xl font-bold leading-tight text-t1">Ton espace</h2>
@@ -200,10 +200,10 @@ export default function Landing() {
 
       {/* ── Pourquoi — full-bleed photo + checklist on black ────── */}
       <section className="relative overflow-hidden bg-black">
-        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 py-24 sm:px-8 lg:grid-cols-[1.2fr_1fr] lg:py-32">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[1.2fr_1fr] lg:py-24">
           <div>
             <p className="kicker">Pourquoi LesCracks</p>
-            <h2 className="mt-5 font-display text-4xl font-bold leading-[0.96] tracking-tight text-t1 sm:text-5xl lg:text-[3.5rem] lg:leading-[0.92]">
+            <h2 className="mt-3 font-display text-2xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl">
               Apprendre seul, c’est long. Ensemble, ça avance.
             </h2>
             <ul className="mt-10 space-y-5">
@@ -248,7 +248,7 @@ export default function Landing() {
       {/* ── Action — noir ─────────────────────────────────── */}
       <Section spacing="loose">
         <div className="flex flex-col items-start gap-10 lg:flex-row lg:items-end lg:justify-between">
-          <h2 className="max-w-3xl font-display text-5xl font-bold leading-[0.92] tracking-tight text-t1 sm:text-6xl lg:text-7xl lg:leading-[0.9]">
+          <h2 className="max-w-3xl font-display text-3xl font-bold leading-[0.95] tracking-tight text-t1 sm:text-5xl lg:text-6xl">
             Passe à la <span className="text-gold-400">pratique.</span>
           </h2>
           <div className="flex flex-wrap items-center gap-3">

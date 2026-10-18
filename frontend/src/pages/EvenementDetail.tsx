@@ -45,10 +45,10 @@ export default function EvenementDetail() {
         {(missing || event.error) && <div className="my-12 rounded-lg border border-line bg-noir-900 px-6 py-16 text-center" role="alert"><h1 className="font-display text-3xl font-bold text-t1">{missing ? 'Ce rendez-vous est introuvable.' : 'Impossible de charger cet événement.'}</h1><p className="mx-auto mt-4 max-w-lg text-t3">{missing ? 'Il n’est peut-être plus publié. Retrouve les autres rendez-vous dans l’agenda.' : event.error?.message}</p>{!missing && <button type="button" onClick={event.reload} className="btn-primary mt-6">Réessayer</button>}<Link to={cataloguePath} className="mx-auto mt-5 block w-fit py-2 text-sm text-gold-ink underline underline-offset-4">Retour à l’agenda</Link></div>}
 
         {loaded && <>
-          <header className="mt-8 max-w-5xl sm:mt-12">
+          <header className="mt-5 max-w-5xl sm:mt-8">
             <div className="flex flex-wrap items-center gap-3"><span className="rounded-full bg-gold-400 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-black">{typeLabels[loaded.type]}</span><span className="label">{formatLabels[loaded.format]}</span><span className="label">· {status}</span></div>
-            <h1 className="mt-5 break-words font-display text-5xl font-bold leading-[0.94] tracking-tight text-t1 sm:text-6xl lg:text-7xl lg:leading-[0.9]">{loaded.title}</h1>
-            {hasDate && <p className="mt-6 text-lg font-semibold text-t2"><time dateTime={loaded.startDate}>{dateFormat.format(start)}</time></p>}
+            <h1 className="mt-3 break-words font-display text-3xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl lg:text-5xl">{loaded.title}</h1>
+            {hasDate && <p className="mt-3 text-base sm:text-lg font-semibold text-t2"><time dateTime={loaded.startDate}>{dateFormat.format(start)}</time></p>}
           </header>
         </>}
         </div>
@@ -58,7 +58,7 @@ export default function EvenementDetail() {
           <div className="aspect-[16/9] w-full overflow-hidden bg-noir-800 sm:aspect-[21/9]">
             {loaded.coverImage && failedImage !== loaded.coverImage ? <img src={loaded.coverImage} alt="" onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" /> : <div aria-hidden className="relative flex h-full w-full items-center justify-end bg-noir-900 pr-[10%]"><span className="absolute bottom-4 left-5 font-display text-6xl font-bold leading-none text-t4 opacity-20 sm:left-8 sm:text-8xl">{typeLabels[loaded.type]}</span><LineArt motif="calendar" className="relative h-3/5 text-gold-400" /></div>}
           </div>
-          <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
+          <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-14">
 
           {status === 'Annulé' && <p className="mb-10 rounded bg-card px-6 py-5 text-sm leading-relaxed text-t2" role="status">Cet événement a été annulé. Les informations ci-dessous sont conservées à titre de référence.</p>}
           {status === 'Terminé' && <p className="mb-10 rounded bg-card px-6 py-5 text-sm leading-relaxed text-t3">Cet événement est terminé. Explore l’agenda pour découvrir les prochains rendez-vous.</p>}

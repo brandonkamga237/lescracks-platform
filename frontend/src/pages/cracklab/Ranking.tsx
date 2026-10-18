@@ -81,7 +81,7 @@ export default function Ranking() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="font-mono text-xs text-gold-ink">cracklab / classement</p>
-            <h1 className="mt-4 font-display text-4xl font-bold tracking-tight text-t1 sm:text-5xl">{week ? 'Classement de la semaine' : 'Classement général'}</h1>
+            <h1 className="mt-4 font-display text-3xl font-bold tracking-tight text-t1 sm:text-4xl">{week ? 'Classement de la semaine' : 'Classement général'}</h1>
           </div>
           <ShareButton className="w-full sm:w-auto" title={week ? 'Classement de la semaine' : 'Classement CrackLab'} path={rankingPath(period)} label="Partager"
             text={leader ? `${leader.member.displayName} mène ${week ? 'le classement de la semaine' : 'le classement CrackLab'} avec ${leader.totalScore} pts. Qui prend sa place ?` : 'Le classement CrackLab est encore libre. Viens prendre la première place :'} />

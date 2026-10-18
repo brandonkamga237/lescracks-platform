@@ -50,7 +50,7 @@ export function ResetPasswordPage() {
 
   return <Layout>
     <SEO title="Nouveau mot de passe" description="Choisis un nouveau mot de passe pour ton compte LesCracks." url="/reset-password" />
-    <div className="mx-auto max-w-lg px-5 py-16 sm:py-24">
+    <div className="mx-auto max-w-lg px-5 py-8 sm:py-14">
       <section className="mode-raised rounded-lg p-6 sm:p-9">
         <p className="kicker">LesCracks / Sécurité</p>
         <h1 className="mt-4 font-display text-3xl font-bold">Un nouveau départ.</h1>
@@ -154,7 +154,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
     <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl gap-8 px-5 py-8 sm:px-8 sm:py-12 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-20">
       <section className="order-2 lg:order-1">
         <Link to="/" className="kicker">LesCracks / Ton espace</Link>
-        <h1 className="mt-4 max-w-lg font-display text-4xl font-bold leading-[0.94] tracking-tight text-t1 sm:text-5xl lg:text-7xl lg:leading-[0.9]">{registering ? <>Ta prochaine étape<br /><span className="text-gold-ink">commence ici.</span></> : <>Le bon endroit<br />pour <span className="text-gold-ink">aller plus loin.</span></>}</h1>
+        <h1 className="mt-4 max-w-lg font-display text-3xl font-bold leading-[0.95] tracking-tight text-t1 sm:text-5xl lg:text-6xl">{registering ? <>Ta prochaine étape<br /><span className="text-gold-ink">commence ici.</span></> : <>Le bon endroit<br />pour <span className="text-gold-ink">aller plus loin.</span></>}</h1>
         <p className="mt-4 max-w-md text-base leading-relaxed text-t3 sm:text-lg">{registering ? 'Crée ton compte, relève des challenges et trouve ton prochain rendez-vous tech.' : 'Retrouve ton espace personnel. Les challenges et les événements t’attendent, à ton rythme.'}</p>
         <div className="mt-6 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" /><p>Tu peux aussi lire le blog sans compte.<br /><Link to="/blog" className="mt-2 inline-flex items-center gap-2 text-t2 underline underline-offset-4">Lire le blog <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link></p></div>
       </section>

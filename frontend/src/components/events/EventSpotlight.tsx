@@ -34,7 +34,7 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
       <div aria-hidden className="lg:border-r lg:border-line lg:pr-10">
         {hasDate ? (
           <>
-            <span className="block font-display text-7xl font-bold leading-[0.88] tracking-tight text-t1 lg:text-8xl">
+            <span className="block font-display text-5xl font-bold leading-[0.88] tracking-tight text-t1 lg:text-7xl">
               {start.getDate()}
             </span>
             <span className="mt-3 block kicker">
@@ -57,7 +57,7 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
             {meta}
           </span>
         </p>
-        <h3 className="mt-5 max-w-3xl break-words font-display text-4xl font-bold leading-[0.98] tracking-tight text-t1 sm:text-5xl xl:text-[3.25rem] xl:leading-[0.94]">
+        <h3 className="mt-3 max-w-3xl break-words font-display text-2xl font-bold leading-tight tracking-tight text-t1 sm:text-3xl lg:text-4xl">
           <Link
             to={eventPath(event)}
             state={{ cataloguePath }}

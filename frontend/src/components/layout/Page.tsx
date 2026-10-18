@@ -12,10 +12,11 @@ const CONTAINER = 'mx-auto w-full max-w-7xl px-5 sm:px-8';
 
 /** Vertical rhythm scale. Pages pick an intent, never raw padding values. */
 const SPACING = {
-  // Phones get tighter bands: at 390px every blank 20px pushes the first item below the fold.
-  tight: 'py-10 sm:py-16',
-  normal: 'py-14 sm:py-20 lg:py-28',
-  loose: 'py-24 lg:py-32',
+  // A page title band: the first item of the list must stay above the fold on a 375px phone.
+  header: 'py-6 sm:py-10',
+  tight: 'py-8 sm:py-12',
+  normal: 'py-10 sm:py-16 lg:py-20',
+  loose: 'py-16 lg:py-24',
 } as const;
 
 type Spacing = keyof typeof SPACING;
@@ -36,8 +37,6 @@ interface SectionProps extends Omit<ComponentPropsWithoutRef<'section'>, 'childr
   bordered?: boolean;
   /** Pure black or a raised black band. The shade change is the separator: no border needed. */
   tone?: 'dark' | 'raised';
-  /** Faint photo behind the band, greyscale so it never competes with the single gold accent. */
-  backdrop?: string;
   /** Escape hatch for full-bleed content that manages its own container. */
   bleed?: boolean;
 }
@@ -49,7 +48,6 @@ export function Section({
   bordered = false,
   bleed = false,
   tone = 'dark',
-  backdrop,
   className = '',
   ...rest
 }: SectionProps) {
@@ -64,14 +62,8 @@ export function Section({
   }
 
   return (
-    <section className={`${surface} ${backdrop ? 'relative overflow-hidden' : ''} ${className}`} {...rest}>
-      {backdrop && (
-        <>
-          <img src={backdrop} alt="" aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.16] grayscale" />
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 to-[var(--surface-0)]" />
-        </>
-      )}
-      <div className={`${backdrop ? 'relative ' : ''}${CONTAINER} ${SPACING[spacing]}`}>{children}</div>
+    <section className={`${surface} ${className}`} {...rest}>
+      <div className={`${CONTAINER} ${SPACING[spacing]}`}>{children}</div>
     </section>
   );
 }
@@ -88,19 +80,20 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, eyebrow, description, meta, actions }: PageHeaderProps) {
   return (
-    <header className="mb-8 sm:mb-14">
-      {eyebrow && <p className="kicker mb-5">{eyebrow}</p>}
-      <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
+    <header>
+      {(eyebrow || meta) && (
+        <p className="kicker mb-2 sm:mb-3">
+          {eyebrow}
+          {eyebrow && meta && <span aria-hidden="true" className="text-t4"> · </span>}
+          {meta && <span className="text-t3">{meta}</span>}
+        </p>
+      )}
+      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
         <div className="min-w-0">
-          <h1 className="font-display text-[2.75rem] font-bold leading-[0.94] tracking-tight text-t1 sm:text-6xl lg:text-7xl lg:leading-[0.9]">{title}</h1>
-          {description && <p className="mt-4 max-w-2xl text-base leading-normal text-t3 sm:mt-6 sm:text-lg">{description}</p>}
+          <h1 className="break-words font-display text-3xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl lg:text-5xl">{title}</h1>
+          {description && <p className="mt-2 max-w-2xl text-sm leading-relaxed text-t3 sm:mt-3 sm:text-base">{description}</p>}
         </div>
-        {(meta || actions) && (
-          <div className="flex flex-wrap items-center gap-3 pb-1">
-            {meta && <span className="label">{meta}</span>}
-            {actions}
-          </div>
-        )}
+        {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
       </div>
     </header>
   );
@@ -118,11 +111,11 @@ interface SectionHeaderProps {
 
 export function SectionHeader({ title, eyebrow, description, action, id }: SectionHeaderProps) {
   return (
-    <div className="mb-10 sm:mb-12">
-      {eyebrow && <p className="kicker mb-4">{eyebrow}</p>}
+    <div className="mb-6 sm:mb-10">
+      {eyebrow && <p className="kicker mb-3">{eyebrow}</p>}
       <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
         <div className="min-w-0">
-          <h2 id={id} className="font-display text-4xl font-bold leading-[0.96] tracking-tight text-t1 sm:text-5xl">{title}</h2>
+          <h2 id={id} className="break-words font-display text-2xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl">{title}</h2>
           {description && <p className="mt-4 max-w-xl text-base leading-normal text-t3">{description}</p>}
         </div>
         {action}

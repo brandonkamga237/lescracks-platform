@@ -30,7 +30,7 @@ function TalkSpotlight({ video }: TalkSpotlightProps) {
         <p className="flex items-baseline gap-3">
           <span className="kicker">Dernier épisode</span>
         </p>
-        <h3 className="mt-5 break-words font-display text-4xl font-bold leading-[0.98] tracking-tight text-t1 sm:text-5xl xl:text-[3.25rem] xl:leading-[0.94]">{video.title}</h3>
+        <h3 className="mt-3 break-words font-display text-2xl font-bold leading-tight tracking-tight text-t1 sm:text-3xl lg:text-4xl">{video.title}</h3>
         <p className="mt-6 line-clamp-3 max-w-xl text-base leading-normal text-t3">{video.description}</p>
         {meta && <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.1em] text-t4">{meta}</p>}
         <div className="mt-8 flex flex-wrap items-center gap-3">

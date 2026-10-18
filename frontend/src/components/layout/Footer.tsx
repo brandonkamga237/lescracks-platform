@@ -55,7 +55,7 @@ const Footer = () => {
   return (
     <footer className="bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-8">
-        <p className="mb-16 max-w-3xl font-display text-4xl font-bold leading-[0.94] tracking-tight text-t1 sm:text-5xl lg:text-6xl lg:leading-[0.9]">
+        <p className="mb-10 max-w-3xl font-display text-3xl font-bold leading-[0.95] tracking-tight text-t1 sm:text-5xl">
           Deviens aussi un crack <span className="text-gold-400">de la tech.</span>
         </p>
 
