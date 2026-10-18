@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.MinIOContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -20,7 +21,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class MinioStorageServiceIT {
 
-    private static final MinIOContainer MINIO = new MinIOContainer("minio/minio:RELEASE.2023-09-04T19-57-37Z");
+    // MinIO stopped publishing free images (minio/minio and quay.io/minio/minio both refuse
+    // anonymous pulls); pgsty/minio is the community build of the same server, pinned here.
+    private static final MinIOContainer MINIO = new MinIOContainer(
+            DockerImageName.parse("pgsty/minio:RELEASE.2026-06-18T00-00-00Z").asCompatibleSubstituteFor("minio/minio"));
 
     private static MinioStorageService storage;
 
