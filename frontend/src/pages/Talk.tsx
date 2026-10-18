@@ -1,5 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom';
-import { Podcast, Youtube } from 'lucide-react';
+import { Podcast } from 'lucide-react';
+import { YouTubeIcon } from '@/components/icons/BrandIcons';
 
 import EpisodeRow from '@/components/talks/EpisodeRow';
 import TalkSpotlight from '@/components/talks/TalkSpotlight';
@@ -56,7 +57,7 @@ export default function Talk() {
           meta={!talks.loading && !talks.error ? `${total} épisode${total > 1 ? 's' : ''}` : undefined}
           actions={
             <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" className="btn-primary">
-              <Youtube className="h-4 w-4" aria-hidden />
+              <YouTubeIcon className="h-4 w-4" />
               Suivre la chaîne
             </a>
           }
@@ -80,7 +81,7 @@ export default function Talk() {
               description={page > 1 ? 'Reviens à la première page pour retrouver les épisodes.' : 'Les conversations seront publiées sur YouTube et référencées ici.'}
               action={
                 <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" className="btn-secondary">
-                  <Youtube className="h-4 w-4" aria-hidden />
+                  <YouTubeIcon className="h-4 w-4" />
                   Suivre la chaîne
                 </a>
               }
