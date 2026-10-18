@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowUpRight, CalendarDays, CalendarPlus, Clock3, Download, MapPin, Radio } from 'lucide-react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import SEO from '@/components/common/SEO';
 import ShareButton from '@/components/common/ShareButton';
 import LineArt from '@/components/illustrations/LineArt';
 import { TYPE_LABEL } from '@/components/events/AgendaItem';
+import ViewCount from '@/components/events/ViewCount';
 import Layout from '@/components/layout/Layout';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/services/api';
 import { downloadIcs, googleCalendarUrl } from '@/lib/calendar';
 import { eventPath } from '@/lib/slugs';
+import { browserVisitorId } from '@/lib/visitor';
 
 const formatLabels = { ONLINE: 'En ligne', OFFLINE: 'Sur place', HYBRID: 'Hybride' } as const;
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short' });
@@ -21,6 +23,18 @@ export default function EvenementDetail() {
   const event = useApi((signal) => hasParam ? api.event(id, signal) : Promise.resolve(null), [id, hasParam]);
   const loaded = hasParam && !event.loading && !event.error && event.data ? event.data : null;
   const [failedImage, setFailedImage] = useState<string | undefined>(undefined);
+  const [views, setViews] = useState<{ id: number; count: number } | null>(null);
+  // Once per event and page: the development double effect would otherwise post twice.
+  const counted = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!loaded || loaded.status !== 'PUBLISHED' || counted.current === loaded.id) return;
+    counted.current = loaded.id;
+    api.recordEventView(loaded.id, browserVisitorId())
+      .then(({ viewCount }) => setViews({ id: loaded.id, count: viewCount }))
+      .catch(() => undefined);
+  }, [loaded]);
+  const viewCount = loaded ? (views?.id === loaded.id ? views.count : loaded.viewCount ?? 0) : 0;
   const missing = !hasParam || event.error?.status === 404;
   const previousPath: unknown = location.state?.cataloguePath;
   const cataloguePath = typeof previousPath === 'string' && /^\/evenements(?:\?.*)?$/.test(previousPath) ? previousPath : '/evenements';
@@ -46,7 +60,7 @@ export default function EvenementDetail() {
 
         {loaded && <>
           <header className="mt-5 max-w-5xl sm:mt-8">
-            <div className="flex flex-wrap items-center gap-3"><span className="rounded-full bg-gold-400 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-black">{TYPE_LABEL[loaded.type]}</span><span className="label">{formatLabels[loaded.format]}</span><span className="label">· {status}</span></div>
+            <div className="flex flex-wrap items-center gap-3"><span className="rounded-full bg-gold-400 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-black">{TYPE_LABEL[loaded.type]}</span><span className="label">{formatLabels[loaded.format]}</span><span className="label">· {status}</span><ViewCount count={viewCount} spelledOut className="label" /></div>
             <h1 className="mt-3 break-words font-display text-3xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl lg:text-5xl">{loaded.title}</h1>
             {hasDate && <p className="mt-3 text-base sm:text-lg font-semibold text-t2"><time dateTime={loaded.startDate}>{dateFormat.format(start)}</time></p>}
           </header>

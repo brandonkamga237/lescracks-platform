@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Mic, Rocket, Trophy, Video, Wrench } from 'lucide-react';
 
+import ViewCount from '@/components/events/ViewCount';
 import { eventPath } from '@/lib/slugs';
 import type { EventSummary, EventType } from '@/services/types';
 
@@ -55,9 +56,10 @@ function AgendaItem({ event, cataloguePath }: AgendaItemProps) {
           <span className="block break-words font-display text-xl font-bold leading-tight text-t1 transition-colors group-hover:text-gold-ink sm:text-2xl">
             {event.title}
           </span>
-          <span className="label mt-2 flex items-center gap-2">
+          <span className="label mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
             <TypeIcon className="h-3.5 w-3.5 shrink-0 text-gold-ink" aria-hidden />
             {meta}
+            <ViewCount count={event.viewCount ?? 0} className="ml-2" />
           </span>
         </span>
         <ArrowUpRight className="mt-1 h-5 w-5 text-t4 opacity-0 transition-opacity group-hover:text-gold-ink group-hover:opacity-100" aria-hidden />

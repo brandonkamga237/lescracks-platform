@@ -65,6 +65,8 @@ export interface EventSummary {
   updatedAt: string;
   /** Set on a draft that goes public automatically at that time. */
   scheduledAt?: string;
+  /** Different people who opened the event page, members and anonymous visitors alike. */
+  viewCount: number;
 }
 
 export type EventDetail = EventSummary;
