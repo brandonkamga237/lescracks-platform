@@ -4,13 +4,13 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import SEO from '@/components/common/SEO';
 import ShareButton from '@/components/common/ShareButton';
 import LineArt from '@/components/illustrations/LineArt';
+import { TYPE_LABEL } from '@/components/events/AgendaItem';
 import Layout from '@/components/layout/Layout';
 import { useApi } from '@/hooks/useApi';
 import { api } from '@/services/api';
 import { downloadIcs, googleCalendarUrl } from '@/lib/calendar';
 import { eventPath } from '@/lib/slugs';
 
-const typeLabels = { BOOTCAMP: 'Bootcamp', WORKSHOP: 'Atelier', WEBINAR: 'Webinaire', CONFERENCE: 'Conférence' } as const;
 const formatLabels = { ONLINE: 'En ligne', OFFLINE: 'Sur place', HYBRID: 'Hybride' } as const;
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short' });
 
@@ -46,7 +46,7 @@ export default function EvenementDetail() {
 
         {loaded && <>
           <header className="mt-5 max-w-5xl sm:mt-8">
-            <div className="flex flex-wrap items-center gap-3"><span className="rounded-full bg-gold-400 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-black">{typeLabels[loaded.type]}</span><span className="label">{formatLabels[loaded.format]}</span><span className="label">· {status}</span></div>
+            <div className="flex flex-wrap items-center gap-3"><span className="rounded-full bg-gold-400 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-black">{TYPE_LABEL[loaded.type]}</span><span className="label">{formatLabels[loaded.format]}</span><span className="label">· {status}</span></div>
             <h1 className="mt-3 break-words font-display text-3xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl lg:text-5xl">{loaded.title}</h1>
             {hasDate && <p className="mt-3 text-base sm:text-lg font-semibold text-t2"><time dateTime={loaded.startDate}>{dateFormat.format(start)}</time></p>}
           </header>
@@ -56,7 +56,7 @@ export default function EvenementDetail() {
 
         {loaded && <>
           <div className="aspect-[16/9] w-full overflow-hidden bg-noir-800 sm:aspect-[21/9]">
-            {loaded.coverImage && failedImage !== loaded.coverImage ? <img src={loaded.coverImage} alt="" onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" /> : <div aria-hidden className="relative flex h-full w-full items-center justify-end bg-noir-900 pr-[10%]"><span className="absolute bottom-4 left-5 font-display text-6xl font-bold leading-none text-t4 opacity-20 sm:left-8 sm:text-8xl">{typeLabels[loaded.type]}</span><LineArt motif="calendar" className="relative h-3/5 text-gold-400" /></div>}
+            {loaded.coverImage && failedImage !== loaded.coverImage ? <img src={loaded.coverImage} alt="" onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" /> : <div aria-hidden className="relative flex h-full w-full items-center justify-end bg-noir-900 pr-[10%]"><span className="absolute bottom-4 left-5 font-display text-6xl font-bold leading-none text-t4 opacity-20 sm:left-8 sm:text-8xl">{TYPE_LABEL[loaded.type]}</span><LineArt motif="calendar" className="relative h-3/5 text-gold-400" /></div>}
           </div>
           <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-14">
 

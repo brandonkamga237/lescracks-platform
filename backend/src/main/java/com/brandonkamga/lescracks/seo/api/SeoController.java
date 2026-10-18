@@ -390,6 +390,7 @@ public class SeoController {
             case WORKSHOP -> "Atelier";
             case WEBINAR -> "Webinaire";
             case CONFERENCE -> "Conférence";
+            case HACKATHON -> "Hackathon";
         };
     }
 

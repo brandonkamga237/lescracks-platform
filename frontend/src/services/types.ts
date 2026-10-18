@@ -1,5 +1,5 @@
 export type ResourceStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
-export type EventType = 'BOOTCAMP' | 'WORKSHOP' | 'WEBINAR' | 'CONFERENCE';
+export type EventType = 'BOOTCAMP' | 'WORKSHOP' | 'WEBINAR' | 'CONFERENCE' | 'HACKATHON';
 export type EventFormat = 'ONLINE' | 'OFFLINE' | 'HYBRID';
 export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELLED' | 'COMPLETED';
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AdminModal } from '@/components/admin/AdminTable';
 import ScheduleField from '@/components/admin/ScheduleField';
+import { TYPE_LABEL } from '@/components/events/AgendaItem';
 import { scheduleIsValid } from '@/lib/schedule';
 import { adminApi, type EventRequest } from '@/services/adminApi';
 import { ApiError } from '@/services/http';
@@ -79,7 +80,7 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
         <label className="block text-sm text-t2">Titre<input required maxLength={200} value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} className={field} /></label>
         <label className="block text-sm text-t2">Description<textarea required rows={5} value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className={area} /></label>
         <div className="grid gap-5 sm:grid-cols-2">
-          <label className="block text-sm text-t2">Type<select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value as EventType })} className={field}><option value="BOOTCAMP">Bootcamp</option><option value="WORKSHOP">Atelier</option><option value="WEBINAR">Webinaire</option><option value="CONFERENCE">Conférence</option></select></label>
+          <label className="block text-sm text-t2">Type<select value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value as EventType })} className={field}>{(Object.entries(TYPE_LABEL) as Array<[EventType, string]>).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
           <label className="block text-sm text-t2">Format<select value={form.format} onChange={(event) => setForm({ ...form, format: event.target.value as EventFormat })} className={field}><option value="ONLINE">En ligne</option><option value="OFFLINE">Sur place</option><option value="HYBRID">Hybride</option></select></label>
         </div>
       </fieldset>

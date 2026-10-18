@@ -1,13 +1,14 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Mic, Rocket, Video, Wrench } from 'lucide-react';
+import { ArrowUpRight, Mic, Rocket, Trophy, Video, Wrench } from 'lucide-react';
 
 import { eventPath } from '@/lib/slugs';
-import type { EventSummary } from '@/services/types';
+import type { EventSummary, EventType } from '@/services/types';
 
-export const TYPE_LABEL = { BOOTCAMP: 'Bootcamp', WORKSHOP: 'Atelier', WEBINAR: 'Webinaire', CONFERENCE: 'Conférence' } as const;
+// The one list of type names: the agenda filter, the back-office form and every page read it.
+export const TYPE_LABEL: Record<EventType, string> = { BOOTCAMP: 'Bootcamp', WORKSHOP: 'Atelier', WEBINAR: 'Webinaire', CONFERENCE: 'Conférence', HACKATHON: 'Hackathon' };
 export const FORMAT_LABEL = { ONLINE: 'En ligne', OFFLINE: 'Sur place', HYBRID: 'Hybride' } as const;
-export const TYPE_ICON = { BOOTCAMP: Rocket, WORKSHOP: Wrench, WEBINAR: Video, CONFERENCE: Mic } as const;
+export const TYPE_ICON = { BOOTCAMP: Rocket, WORKSHOP: Wrench, WEBINAR: Video, CONFERENCE: Mic, HACKATHON: Trophy } as const;
 
 const monthFormat = new Intl.DateTimeFormat('fr-FR', { month: 'short' });
 const weekdayFormat = new Intl.DateTimeFormat('fr-FR', { weekday: 'short' });

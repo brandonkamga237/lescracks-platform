@@ -1,7 +1,7 @@
 import { CalendarDays, X } from 'lucide-react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 
-import AgendaItem from '@/components/events/AgendaItem';
+import AgendaItem, { TYPE_LABEL } from '@/components/events/AgendaItem';
 import EventSpotlight from '@/components/events/EventSpotlight';
 import FilterChips from '@/components/common/FilterChips';
 import Pagination from '@/components/common/Pagination';
@@ -15,9 +15,7 @@ import { LIST_PAGE_SIZE, worthFiltering } from '@/lib/filters';
 import { api } from '@/services/api';
 import type { EventFormat, EventType } from '@/services/types';
 
-const types: Array<[EventType, string]> = [
-  ['BOOTCAMP', 'Bootcamp'], ['WORKSHOP', 'Atelier'], ['WEBINAR', 'Webinaire'], ['CONFERENCE', 'Conférence'],
-];
+const types = Object.entries(TYPE_LABEL) as Array<[EventType, string]>;
 const formats: Array<[EventFormat, string]> = [['ONLINE', 'En ligne'], ['OFFLINE', 'Sur place'], ['HYBRID', 'Hybride']];
 
 /**
