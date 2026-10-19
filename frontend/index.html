@@ -82,40 +82,45 @@
     }
     </script>
 
-    <!-- Boot loader: drawn before the bundle arrives, dismissed by main.tsx once React has painted. -->
+    <!-- Boot loader: drawn before the bundle arrives, dismissed by main.tsx once React has painted.
+         A layered service graph: a signal leaves the entry node and reaches each layer in turn,
+         breadth first, the way a request crosses a system. -->
     <style>
-      #boot-loader { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; background: #000; transition: opacity .4s ease, visibility .4s; }
+      #boot-loader { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; background: #000; transition: opacity .4s ease, visibility .4s; }
       #boot-loader.is-done { opacity: 0; visibility: hidden; }
-      #boot-loader svg { width: 184px; height: 184px; overflow: visible; }
-      .boot-grid { stroke: rgba(255,255,255,.07); stroke-width: 1; }
-      .boot-axis { stroke: rgba(255,255,255,.28); stroke-width: 1; }
-      .boot-trace { fill: none; stroke: rgba(212,175,55,.5); stroke-width: 1.4; stroke-dasharray: 1; stroke-dashoffset: 1; animation: boot-draw 1.4s cubic-bezier(.23,1,.32,1) forwards; }
-      .boot-comet { fill: none; stroke: #d4af37; stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: .2 .8; animation: boot-run 2.8s linear infinite; }
-      .boot-head { fill: #fff; offset-path: path("M142.0 80.0L141.7 75.7 140.6 71.4 139.0 67.1 136.6 62.9 133.7 58.8 130.2 54.8 126.1 50.9 121.5 47.1 116.4 43.6 111.0 40.1 105.2 36.9 99.2 33.9 92.9 31.1 86.5 28.6 80.0 26.3 73.5 24.3 67.1 22.5 60.8 21.0 54.8 19.8 49.0 18.9 43.6 18.3 38.5 18.0 33.9 18.0 29.8 18.3 26.3 18.9 23.4 19.8 21.0 21.0 19.4 22.5 18.3 24.3 18.0 26.3 18.3 28.6 19.4 31.1 21.0 33.9 23.4 36.9 26.3 40.1 29.8 43.6 33.9 47.1 38.5 50.9 43.6 54.8 49.0 58.8 54.8 62.9 60.8 67.1 67.1 71.4 73.5 75.7 80.0 80.0 86.5 84.3 92.9 88.6 99.2 92.9 105.2 97.1 111.0 101.2 116.4 105.2 121.5 109.1 126.1 112.9 130.2 116.4 133.7 119.9 136.6 123.1 139.0 126.1 140.6 128.9 141.7 131.4 142.0 133.7 141.7 135.7 140.6 137.5 139.0 139.0 136.6 140.2 133.7 141.1 130.2 141.7 126.1 142.0 121.5 142.0 116.4 141.7 111.0 141.1 105.2 140.2 99.2 139.0 92.9 137.5 86.5 135.7 80.0 133.7 73.5 131.4 67.1 128.9 60.8 126.1 54.8 123.1 49.0 119.9 43.6 116.4 38.5 112.9 33.9 109.1 29.8 105.2 26.3 101.2 23.4 97.1 21.0 92.9 19.4 88.6 18.3 84.3 18.0 80.0 18.3 75.7 19.4 71.4 21.0 67.1 23.4 62.9 26.3 58.8 29.8 54.8 33.9 50.9 38.5 47.1 43.6 43.6 49.0 40.1 54.8 36.9 60.8 33.9 67.1 31.1 73.5 28.6 80.0 26.3 86.5 24.3 92.9 22.5 99.2 21.0 105.2 19.8 111.0 18.9 116.4 18.3 121.5 18.0 126.1 18.0 130.2 18.3 133.7 18.9 136.6 19.8 139.0 21.0 140.6 22.5 141.7 24.3 142.0 26.3 141.7 28.6 140.6 31.1 139.0 33.9 136.6 36.9 133.7 40.1 130.2 43.6 126.1 47.1 121.5 50.9 116.4 54.8 111.0 58.8 105.2 62.9 99.2 67.1 92.9 71.4 86.5 75.7 80.0 80.0 73.5 84.3 67.1 88.6 60.8 92.9 54.8 97.1 49.0 101.2 43.6 105.2 38.5 109.1 33.9 112.9 29.8 116.4 26.3 119.9 23.4 123.1 21.0 126.1 19.4 128.9 18.3 131.4 18.0 133.7 18.3 135.7 19.4 137.5 21.0 139.0 23.4 140.2 26.3 141.1 29.8 141.7 33.9 142.0 38.5 142.0 43.6 141.7 49.0 141.1 54.8 140.2 60.8 139.0 67.1 137.5 73.5 135.7 80.0 133.7 86.5 131.4 92.9 128.9 99.2 126.1 105.2 123.1 111.0 119.9 116.4 116.4 121.5 112.9 126.1 109.1 130.2 105.2 133.7 101.2 136.6 97.1 139.0 92.9 140.6 88.6 141.7 84.3Z"); offset-rotate: 0deg; animation: boot-head 2.8s linear infinite; filter: drop-shadow(0 0 5px #d4af37); }
-      .boot-label { margin: 0; font: 500 11px/1 "JetBrains Mono", ui-monospace, monospace; letter-spacing: .08em; color: rgba(255,255,255,.45); }
+      #boot-loader svg { width: min(300px, 76vw); height: auto; overflow: visible; }
+      .boot-edge { stroke: rgba(255,255,255,.16); stroke-width: 1; }
+      .boot-mesh { stroke: rgba(255,255,255,.12); stroke-width: 1; stroke-dasharray: 2 4; }
+      .boot-signal { stroke: #d4af37; stroke-width: 2.2; stroke-linecap: round; stroke-dasharray: .28 1.5; stroke-dashoffset: .28; animation: boot-signal 2.6s cubic-bezier(.45,0,.55,1) infinite; }
+      .boot-node { fill: #141414; stroke: rgba(255,255,255,.4); stroke-width: 1.2; animation: boot-node 2.6s ease-out infinite; }
+      .boot-halo { fill: none; stroke: #d4af37; stroke-width: 1; opacity: 0; transform-box: fill-box; transform-origin: center; animation: boot-halo 2.6s ease-out infinite; }
+      .s0 { animation-delay: 0.00s; }
+      .s1 { animation-delay: 0.50s; }
+      .s2 { animation-delay: 1.00s; }
+      .n0 { animation-delay: 0.00s; }
+      .n1 { animation-delay: 0.42s; }
+      .n2 { animation-delay: 0.92s; }
+      .n3 { animation-delay: 1.42s; }
       .boot-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-      .boot-label b { font-weight: 500; color: #d4af37; }
-      @keyframes boot-draw { to { stroke-dashoffset: 0; } }
-      @keyframes boot-run { to { stroke-dashoffset: -1; } }
-      /* The head starts where the comet's front edge does (20%); a closed path wraps past 100%. */
-      @keyframes boot-head { from { offset-distance: 20%; } to { offset-distance: 120%; } }
+      /* A signal travels its edge in the first 16.2% of the cycle; the dash sits off the line before and after. */
+      @keyframes boot-signal { 0% { stroke-dashoffset: .28; } 16.2%, 100% { stroke-dashoffset: -1; } }
+      @keyframes boot-node { 0%, 30% { fill: #d4af37; stroke: #d4af37; } 70%, 100% { fill: #141414; stroke: rgba(255,255,255,.4); } }
+      @keyframes boot-halo { 0% { opacity: .6; transform: scale(.5); } 35%, 100% { opacity: 0; transform: scale(1.7); } }
       @media (prefers-reduced-motion: reduce) {
-        .boot-trace { animation: none; stroke-dashoffset: 0; stroke: #d4af37; }
-        .boot-comet, .boot-head { display: none; }
+        .boot-signal, .boot-halo { display: none; }
+        .boot-node { animation: none; fill: #d4af37; stroke: #d4af37; }
       }
     </style>
     <noscript><style>#boot-loader { display: none; }</style></noscript>
   </head>
   <body>
     <div id="boot-loader" role="status">
-      <svg viewBox="0 0 160 160" aria-hidden="true">
-        <g class="boot-grid"><line x1="20" y1="8" x2="20" y2="152"/><line x1="8" y1="20" x2="152" y2="20"/><line x1="50" y1="8" x2="50" y2="152"/><line x1="8" y1="50" x2="152" y2="50"/><line x1="110" y1="8" x2="110" y2="152"/><line x1="8" y1="110" x2="152" y2="110"/><line x1="140" y1="8" x2="140" y2="152"/><line x1="8" y1="140" x2="152" y2="140"/></g>
-        <g class="boot-axis"><line x1="4" y1="80" x2="156" y2="80"/><line x1="80" y1="4" x2="80" y2="156"/><line x1="18" y1="77" x2="18" y2="83"/><line x1="77" y1="18" x2="83" y2="18"/><line x1="49" y1="77" x2="49" y2="83"/><line x1="77" y1="49" x2="83" y2="49"/><line x1="111" y1="77" x2="111" y2="83"/><line x1="77" y1="111" x2="83" y2="111"/><line x1="142" y1="77" x2="142" y2="83"/><line x1="77" y1="142" x2="83" y2="142"/></g>
-        <path class="boot-trace" pathLength="1" d="M142.0 80.0L141.7 75.7 140.6 71.4 139.0 67.1 136.6 62.9 133.7 58.8 130.2 54.8 126.1 50.9 121.5 47.1 116.4 43.6 111.0 40.1 105.2 36.9 99.2 33.9 92.9 31.1 86.5 28.6 80.0 26.3 73.5 24.3 67.1 22.5 60.8 21.0 54.8 19.8 49.0 18.9 43.6 18.3 38.5 18.0 33.9 18.0 29.8 18.3 26.3 18.9 23.4 19.8 21.0 21.0 19.4 22.5 18.3 24.3 18.0 26.3 18.3 28.6 19.4 31.1 21.0 33.9 23.4 36.9 26.3 40.1 29.8 43.6 33.9 47.1 38.5 50.9 43.6 54.8 49.0 58.8 54.8 62.9 60.8 67.1 67.1 71.4 73.5 75.7 80.0 80.0 86.5 84.3 92.9 88.6 99.2 92.9 105.2 97.1 111.0 101.2 116.4 105.2 121.5 109.1 126.1 112.9 130.2 116.4 133.7 119.9 136.6 123.1 139.0 126.1 140.6 128.9 141.7 131.4 142.0 133.7 141.7 135.7 140.6 137.5 139.0 139.0 136.6 140.2 133.7 141.1 130.2 141.7 126.1 142.0 121.5 142.0 116.4 141.7 111.0 141.1 105.2 140.2 99.2 139.0 92.9 137.5 86.5 135.7 80.0 133.7 73.5 131.4 67.1 128.9 60.8 126.1 54.8 123.1 49.0 119.9 43.6 116.4 38.5 112.9 33.9 109.1 29.8 105.2 26.3 101.2 23.4 97.1 21.0 92.9 19.4 88.6 18.3 84.3 18.0 80.0 18.3 75.7 19.4 71.4 21.0 67.1 23.4 62.9 26.3 58.8 29.8 54.8 33.9 50.9 38.5 47.1 43.6 43.6 49.0 40.1 54.8 36.9 60.8 33.9 67.1 31.1 73.5 28.6 80.0 26.3 86.5 24.3 92.9 22.5 99.2 21.0 105.2 19.8 111.0 18.9 116.4 18.3 121.5 18.0 126.1 18.0 130.2 18.3 133.7 18.9 136.6 19.8 139.0 21.0 140.6 22.5 141.7 24.3 142.0 26.3 141.7 28.6 140.6 31.1 139.0 33.9 136.6 36.9 133.7 40.1 130.2 43.6 126.1 47.1 121.5 50.9 116.4 54.8 111.0 58.8 105.2 62.9 99.2 67.1 92.9 71.4 86.5 75.7 80.0 80.0 73.5 84.3 67.1 88.6 60.8 92.9 54.8 97.1 49.0 101.2 43.6 105.2 38.5 109.1 33.9 112.9 29.8 116.4 26.3 119.9 23.4 123.1 21.0 126.1 19.4 128.9 18.3 131.4 18.0 133.7 18.3 135.7 19.4 137.5 21.0 139.0 23.4 140.2 26.3 141.1 29.8 141.7 33.9 142.0 38.5 142.0 43.6 141.7 49.0 141.1 54.8 140.2 60.8 139.0 67.1 137.5 73.5 135.7 80.0 133.7 86.5 131.4 92.9 128.9 99.2 126.1 105.2 123.1 111.0 119.9 116.4 116.4 121.5 112.9 126.1 109.1 130.2 105.2 133.7 101.2 136.6 97.1 139.0 92.9 140.6 88.6 141.7 84.3Z"/>
-        <path class="boot-comet" pathLength="1" d="M142.0 80.0L141.7 75.7 140.6 71.4 139.0 67.1 136.6 62.9 133.7 58.8 130.2 54.8 126.1 50.9 121.5 47.1 116.4 43.6 111.0 40.1 105.2 36.9 99.2 33.9 92.9 31.1 86.5 28.6 80.0 26.3 73.5 24.3 67.1 22.5 60.8 21.0 54.8 19.8 49.0 18.9 43.6 18.3 38.5 18.0 33.9 18.0 29.8 18.3 26.3 18.9 23.4 19.8 21.0 21.0 19.4 22.5 18.3 24.3 18.0 26.3 18.3 28.6 19.4 31.1 21.0 33.9 23.4 36.9 26.3 40.1 29.8 43.6 33.9 47.1 38.5 50.9 43.6 54.8 49.0 58.8 54.8 62.9 60.8 67.1 67.1 71.4 73.5 75.7 80.0 80.0 86.5 84.3 92.9 88.6 99.2 92.9 105.2 97.1 111.0 101.2 116.4 105.2 121.5 109.1 126.1 112.9 130.2 116.4 133.7 119.9 136.6 123.1 139.0 126.1 140.6 128.9 141.7 131.4 142.0 133.7 141.7 135.7 140.6 137.5 139.0 139.0 136.6 140.2 133.7 141.1 130.2 141.7 126.1 142.0 121.5 142.0 116.4 141.7 111.0 141.1 105.2 140.2 99.2 139.0 92.9 137.5 86.5 135.7 80.0 133.7 73.5 131.4 67.1 128.9 60.8 126.1 54.8 123.1 49.0 119.9 43.6 116.4 38.5 112.9 33.9 109.1 29.8 105.2 26.3 101.2 23.4 97.1 21.0 92.9 19.4 88.6 18.3 84.3 18.0 80.0 18.3 75.7 19.4 71.4 21.0 67.1 23.4 62.9 26.3 58.8 29.8 54.8 33.9 50.9 38.5 47.1 43.6 43.6 49.0 40.1 54.8 36.9 60.8 33.9 67.1 31.1 73.5 28.6 80.0 26.3 86.5 24.3 92.9 22.5 99.2 21.0 105.2 19.8 111.0 18.9 116.4 18.3 121.5 18.0 126.1 18.0 130.2 18.3 133.7 18.9 136.6 19.8 139.0 21.0 140.6 22.5 141.7 24.3 142.0 26.3 141.7 28.6 140.6 31.1 139.0 33.9 136.6 36.9 133.7 40.1 130.2 43.6 126.1 47.1 121.5 50.9 116.4 54.8 111.0 58.8 105.2 62.9 99.2 67.1 92.9 71.4 86.5 75.7 80.0 80.0 73.5 84.3 67.1 88.6 60.8 92.9 54.8 97.1 49.0 101.2 43.6 105.2 38.5 109.1 33.9 112.9 29.8 116.4 26.3 119.9 23.4 123.1 21.0 126.1 19.4 128.9 18.3 131.4 18.0 133.7 18.3 135.7 19.4 137.5 21.0 139.0 23.4 140.2 26.3 141.1 29.8 141.7 33.9 142.0 38.5 142.0 43.6 141.7 49.0 141.1 54.8 140.2 60.8 139.0 67.1 137.5 73.5 135.7 80.0 133.7 86.5 131.4 92.9 128.9 99.2 126.1 105.2 123.1 111.0 119.9 116.4 116.4 121.5 112.9 126.1 109.1 130.2 105.2 133.7 101.2 136.6 97.1 139.0 92.9 140.6 88.6 141.7 84.3Z"/>
-        <circle class="boot-head" r="3"/>
+      <svg viewBox="0 0 220 150" aria-hidden="true">
+        <g><line class="boot-edge" x1="20" y1="75" x2="74" y2="34"/><line class="boot-edge" x1="20" y1="75" x2="74" y2="116"/><line class="boot-edge" x1="74" y1="34" x2="134" y2="16"/><line class="boot-edge" x1="74" y1="34" x2="134" y2="75"/><line class="boot-edge" x1="74" y1="116" x2="134" y2="75"/><line class="boot-edge" x1="74" y1="116" x2="134" y2="134"/><line class="boot-edge" x1="134" y1="16" x2="200" y2="44"/><line class="boot-edge" x1="134" y1="75" x2="200" y2="44"/><line class="boot-edge" x1="134" y1="75" x2="200" y2="106"/><line class="boot-edge" x1="134" y1="134" x2="200" y2="106"/><line class="boot-mesh" x1="74" y1="34" x2="74" y2="116"/><line class="boot-mesh" x1="200" y1="44" x2="200" y2="106"/></g>
+        <g><line class="boot-signal s0" x1="20" y1="75" x2="74" y2="34" pathLength="1"/><line class="boot-signal s0" x1="20" y1="75" x2="74" y2="116" pathLength="1"/><line class="boot-signal s1" x1="74" y1="34" x2="134" y2="16" pathLength="1"/><line class="boot-signal s1" x1="74" y1="34" x2="134" y2="75" pathLength="1"/><line class="boot-signal s1" x1="74" y1="116" x2="134" y2="75" pathLength="1"/><line class="boot-signal s1" x1="74" y1="116" x2="134" y2="134" pathLength="1"/><line class="boot-signal s2" x1="134" y1="16" x2="200" y2="44" pathLength="1"/><line class="boot-signal s2" x1="134" y1="75" x2="200" y2="44" pathLength="1"/><line class="boot-signal s2" x1="134" y1="75" x2="200" y2="106" pathLength="1"/><line class="boot-signal s2" x1="134" y1="134" x2="200" y2="106" pathLength="1"/></g>
+        <g><circle class="boot-halo n0" cx="20" cy="75" r="9"/><circle class="boot-halo n1" cx="74" cy="34" r="9"/><circle class="boot-halo n1" cx="74" cy="116" r="9"/><circle class="boot-halo n2" cx="134" cy="16" r="9"/><circle class="boot-halo n2" cx="134" cy="75" r="9"/><circle class="boot-halo n2" cx="134" cy="134" r="9"/><circle class="boot-halo n3" cx="200" cy="44" r="9"/><circle class="boot-halo n3" cx="200" cy="106" r="9"/></g>
+        <g><circle class="boot-node n0" cx="20" cy="75" r="4.5"/><circle class="boot-node n1" cx="74" cy="34" r="4.5"/><circle class="boot-node n1" cx="74" cy="116" r="4.5"/><circle class="boot-node n2" cx="134" cy="16" r="4.5"/><circle class="boot-node n2" cx="134" cy="75" r="4.5"/><circle class="boot-node n2" cx="134" cy="134" r="4.5"/><circle class="boot-node n3" cx="200" cy="44" r="4.5"/><circle class="boot-node n3" cx="200" cy="106" r="4.5"/></g>
       </svg>
-      <p class="boot-label">x = <b>cos 3t</b> · y = <b>sin 2t</b></p>
       <span class="boot-sr">Chargement de LesCracks…</span>
     </div>
     <div id="root"></div>
