@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.4.0...v1.5.0) (2026-10-19)
+
+
+### Features
+
+* **frontend:** the entry loader is a graph whose nodes draw LC ([#91](https://github.com/brandonkamga237/lescracks-platform/issues/91)) ([b62f676](https://github.com/brandonkamga237/lescracks-platform/commit/b62f676b54e19198f9f88bbd80c4f57c7c77c74c))
+* **frontend:** the entry loader is a graph whose nodes draw LC ([#91](https://github.com/brandonkamga237/lescracks-platform/issues/91)) ([9c9d8f3](https://github.com/brandonkamga237/lescracks-platform/commit/9c9d8f348ed1889ba0273f07588eea747dbbbe26))
+
 ## [1.4.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.3.0...v1.4.0) (2026-10-18)
 
 
