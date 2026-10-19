@@ -34,7 +34,7 @@ export default function AdminAudience() {
 
         {data?.available && (
           <>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
               <Kpi label="Visiteurs" value={fmt(data.visitors)}
                 delta={deltaPct(data.visitors, data.previousVisitors)}
                 hint="personnes distinctes" />
@@ -50,7 +50,7 @@ export default function AdminAudience() {
 
             <Panel className="mt-6" title="Fréquentation" subtitle="Visites et pages vues, jour par jour.">
               <TrendChart
-                height={300}
+                className="h-44 sm:h-72"
                 data={data.series.map((p) => ({ date: p.date, visits: p.visits, pageviews: p.pageviews }))}
                 series={[
                   { key: 'pageviews', name: 'Pages vues', color: SERIES_MUTED, dashed: true },

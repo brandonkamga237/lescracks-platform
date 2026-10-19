@@ -239,7 +239,7 @@ export default function AdminUsers() {
       {notice && <p role="status" className="mb-5 rounded-lg border border-success/25 bg-success/5 p-3 text-sm text-success-ink">{notice}</p>}
 
       {overview.data && (
-        <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
           <Kpi label="Membres" value={overview.data.users.toLocaleString('fr-FR')}
             hint={`${overview.data.verifiedUsers.toLocaleString('fr-FR')} emails confirmés · ${overview.data.newsletterContacts.toLocaleString('fr-FR')} contacts newsletter à part`} />
           <Kpi label="Nouveaux · 30 jours" value={overview.data.usersNewLast30d.toLocaleString('fr-FR')}

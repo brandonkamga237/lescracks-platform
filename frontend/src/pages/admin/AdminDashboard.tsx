@@ -3,7 +3,7 @@ import { AlertTriangle, ArrowUpRight, Eye, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { AdminSection, AdminState } from '@/components/admin/AdminTable';
-import { Delta, Kpi, Panel, PeriodSelect, TrendChart, deltaPct } from '@/components/admin/viz';
+import { Delta, Kpi, Panel, PeriodSelect, SEGMENT, Segmented, TrendChart, deltaPct } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
 import { adminApi } from '@/services/adminApi';
@@ -81,7 +81,7 @@ export default function AdminDashboard() {
       action={<PeriodSelect value={days} onChange={setDays} />}
     >
       {/* ── Où en sommes-nous ─────────────────────────────────────────────── */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-3">
         <AdminState loading={audience.loading} error={null} empty={false} emptyMessage="">
           <Kpi
             label={`Visiteurs · ${days} jours`}
@@ -123,14 +123,14 @@ export default function AdminDashboard() {
         title="Comment ça évolue"
         subtitle="Lecture sur la période choisie, comparée à la précédente."
         action={
-          <div className="inline-flex rounded border border-line bg-noir-900 p-1" role="group" aria-label="Indicateur">
+          <Segmented label="Indicateur">
             {METRICS.map((m) => (
-              <button key={m.key} type="button" onClick={() => setMetric(m.key)}
-                className={`rounded px-3.5 py-1.5 text-xs font-medium transition-colors ${metric === m.key ? 'bg-gold-400 text-black' : 'text-t3 hover:text-t1'}`}>
+              <button key={m.key} type="button" onClick={() => setMetric(m.key)} aria-pressed={metric === m.key}
+                className={`${SEGMENT} ${metric === m.key ? 'bg-gold-400 text-black' : 'text-t3 hover:text-t1'}`}>
                 {m.label}
               </button>
             ))}
-          </div>
+          </Segmented>
         }
       >
         {metric === 'visitors' && audience.data && !audience.data.available ? (
@@ -141,7 +141,7 @@ export default function AdminDashboard() {
               <span className="text-sm text-t3">Sur la période</span>
               {trendDelta != null && <Delta pct={trendDelta} />}
             </div>
-            <TrendChart data={chartData} series={[{ key: 'value', name: METRICS.find((m) => m.key === metric)?.label ?? '' }]} height={280} />
+            <TrendChart data={chartData} series={[{ key: 'value', name: METRICS.find((m) => m.key === metric)?.label ?? '' }]} className="h-44 sm:h-72" />
           </>
         )}
       </Panel>

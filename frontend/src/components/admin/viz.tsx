@@ -96,14 +96,15 @@ export const Kpi = ({
   spark?: Record<string, number | string>[];
   sparkKey?: string;
 }) => (
-  <div className="rounded-lg border border-line-soft bg-card p-6">
-    <p className="text-sm text-t3">{label}</p>
-    <div className="mt-3 flex items-baseline gap-3">
-      <p className="font-display text-4xl font-semibold tabular-nums">{value}</p>
+  // Two per row on a phone: the figure and its trend, the sparkline only where there is room for it.
+  <div className="rounded-lg border border-line-soft bg-card p-3.5 sm:p-6">
+    <p className="truncate text-xs text-t3 sm:text-sm">{label}</p>
+    <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 sm:mt-3">
+      <p className="font-display text-2xl font-semibold tabular-nums sm:text-4xl">{value}</p>
       {delta != null && <Delta pct={delta} />}
     </div>
-    {hint && <p className="mt-2 text-xs text-t4">{hint}</p>}
-    {spark && <div className="mt-4"><Sparkline data={spark} dataKey={sparkKey} /></div>}
+    {hint && <p className="mt-1.5 line-clamp-2 text-[11px] leading-snug text-t4 sm:mt-2 sm:text-xs">{hint}</p>}
+    {spark && <div className="mt-4 hidden sm:block"><Sparkline data={spark} dataKey={sparkKey} /></div>}
   </div>
 );
 
@@ -148,13 +149,15 @@ export interface TrendSeries {
 }
 
 export const TrendChart = ({
-  data, series, height = 260,
+  data, series, className = 'h-44 sm:h-64',
 }: {
   data: Record<string, number | string>[];
   series: TrendSeries[];
-  height?: number;
+  /** Height classes: the container fills them, so phones get a shorter chart than desktops. */
+  className?: string;
 }) => (
-  <ResponsiveContainer width="100%" height={height}>
+  <div className={className}>
+  <ResponsiveContainer width="100%" height="100%">
     <AreaChart data={data} margin={{ top: 10, right: 8, bottom: 0, left: -18 }}>
       <defs>
         <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
@@ -179,6 +182,7 @@ export const TrendChart = ({
       ))}
     </AreaChart>
   </ResponsiveContainer>
+  </div>
 );
 
 // ── Horizontal bar list (sources, countries, pages) ────────────────────────────
@@ -212,18 +216,28 @@ export const Panel = ({
   title?: string; subtitle?: string; action?: React.ReactNode;
   className?: string; children: React.ReactNode;
 }) => (
-  <section className={`rounded-lg border border-line-soft bg-card p-6 ${className}`}>
+  <section className={`min-w-0 rounded-lg border border-line-soft bg-card p-4 sm:p-6 ${className}`}>
     {(title || action) && (
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          {title && <h2 className="font-display text-lg font-semibold text-t1">{title}</h2>}
-          {subtitle && <p className="mt-1 text-sm text-t3">{subtitle}</p>}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3 sm:mb-5">
+        <div className="min-w-0">
+          {title && <h2 className="font-display text-base font-semibold text-t1 sm:text-lg">{title}</h2>}
+          {subtitle && <p className="mt-1 text-xs text-t3 sm:text-sm">{subtitle}</p>}
         </div>
-        {action}
+        {action && <div className="max-w-full">{action}</div>}
       </div>
     )}
     {children}
   </section>
+);
+
+// ── Segmented control ──────────────────────────────────────────────────────────
+export const SEGMENT = 'shrink-0 whitespace-nowrap rounded px-3 py-1.5 text-xs font-medium transition-colors';
+
+/** A row of choices that scrolls inside its own frame on a phone instead of widening the page. */
+export const Segmented = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className="flex max-w-full overflow-x-auto rounded border border-line bg-noir-900 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="group" aria-label={label}>
+    {children}
+  </div>
 );
 
 // ── Period selector ────────────────────────────────────────────────────────────
@@ -236,14 +250,14 @@ export const PERIODS = [
 ] as const;
 
 export const PeriodSelect = ({ value, onChange }: { value: number; onChange: (days: number) => void }) => (
-  <div className="inline-flex rounded border border-line bg-noir-900 p-1" role="group" aria-label="Période">
+  <Segmented label="Période">
     {PERIODS.map((p) => (
-      <button key={p.days} type="button" onClick={() => onChange(p.days)}
-        className={`rounded px-3.5 py-1.5 text-xs font-medium transition-colors ${
+      <button key={p.days} type="button" onClick={() => onChange(p.days)} aria-pressed={value === p.days}
+        className={`${SEGMENT} ${
           value === p.days ? 'bg-gold-400 text-black' : 'text-t3 hover:text-t1'
         }`}>
         {p.label}
       </button>
     ))}
-  </div>
+  </Segmented>
 );
