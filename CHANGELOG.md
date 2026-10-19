@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/brandonkamga237/lescracks-platform/compare/v1.5.0...v1.5.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* **stats:** talk to Umami over HTTP/1.1 so the admin audience gets its data ([#101](https://github.com/brandonkamga237/lescracks-platform/issues/101)) ([4b0010a](https://github.com/brandonkamga237/lescracks-platform/commit/4b0010ab8b06dd3f22042d5e4c75e43601416a2b))
+
 ## [1.5.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.4.0...v1.5.0) (2026-10-19)
 
 
