@@ -7,10 +7,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
+import java.net.http.HttpClient;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -25,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class UmamiClient {
     private static final Logger log = LoggerFactory.getLogger(UmamiClient.class);
     private static final Duration TOKEN_TTL = Duration.ofHours(12);
+    private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
     private final RestClient http;
     private final String websiteId;
@@ -47,7 +50,19 @@ public class UmamiClient {
         this.password = password;
         this.enabled = !baseUrl.isBlank() && !websiteId.isBlank()
                 && !username.isBlank() && !password.isBlank();
-        this.http = enabled ? RestClient.builder().baseUrl(baseUrl).build() : null;
+        this.http = enabled ? RestClient.builder().baseUrl(baseUrl).requestFactory(http11()).build() : null;
+    }
+
+    /**
+     * The JDK client opens a plain-http connection by asking to upgrade to HTTP/2 (h2c). Umami's
+     * Node server answers that request by closing the socket, so every call failed with
+     * "header parser received no bytes" and the admin audience showed no data. HTTP/1.1 only.
+     */
+    private static JdkClientHttpRequestFactory http11() {
+        var client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(TIMEOUT).build();
+        var factory = new JdkClientHttpRequestFactory(client);
+        factory.setReadTimeout(TIMEOUT);
+        return factory;
     }
 
     public boolean isEnabled() { return enabled; }
