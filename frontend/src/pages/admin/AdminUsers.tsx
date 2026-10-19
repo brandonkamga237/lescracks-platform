@@ -234,7 +234,7 @@ export default function AdminUsers() {
   );
 
   return (
-    <AdminSection title="Utilisateurs" description="Gère les comptes enregistrés et leur statut." action={headerAction}>
+    <AdminSection title="Membres" description="Les comptes inscrits et les contacts newsletter." action={headerAction}>
       {error && <p role="alert" className="mb-5 rounded-lg border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
       {notice && <p role="status" className="mb-5 rounded-lg border border-success/25 bg-success/5 p-3 text-sm text-success-ink">{notice}</p>}
 
