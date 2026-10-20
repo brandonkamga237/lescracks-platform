@@ -163,6 +163,8 @@ export interface AudienceStats {
   sources: { name: string; count: number }[];
   countries: { name: string; count: number }[];
   topPages: { name: string; count: number }[];
+  /** Custom events the site sends: sign-up clicks, newsletter, WhatsApp, articles read to the end. */
+  events: { name: string; count: number }[];
 }
 
 export interface ViewedResource {

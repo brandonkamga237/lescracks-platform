@@ -4,6 +4,7 @@ import { Globe2 } from 'lucide-react';
 import { AdminSection, AdminState } from '@/components/admin/AdminTable';
 import { BarList, Kpi, Panel, PeriodSelect, SERIES_MUTED, TrendChart, deltaPct, fmt, fmtDuration } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
+import { countryName } from '@/lib/phone';
 import { adminApi } from '@/services/adminApi';
 
 const formatSource = (name: string) =>
@@ -59,6 +60,14 @@ export default function AdminAudience() {
               />
             </Panel>
 
+            <Panel className="mt-6" title="Ce qu’ils font" subtitle="Les actions comptées sur le site pendant la période.">
+              {data.events?.length ? (
+                <BarList items={data.events} />
+              ) : (
+                <p className="py-8 text-center text-sm text-t3">Les actions (inscription, newsletter, WhatsApp, articles lus jusqu’au bout) apparaîtront ici dès les premiers clics.</p>
+              )}
+            </Panel>
+
             <div className="mt-6 grid gap-4 lg:grid-cols-3">
               <Panel title="D’où viennent-ils" subtitle="Sites qui envoient des visiteurs">
                 {data.sources.length ? (
@@ -72,7 +81,7 @@ export default function AdminAudience() {
               </Panel>
               <Panel title="D’où ils sont" subtitle="Pays des visiteurs">
                 {data.countries.length ? (
-                  <BarList items={data.countries} />
+                  <BarList items={data.countries} format={countryName} />
                 ) : (
                   <p className="py-8 text-center text-sm text-t3">Pas encore de répartition par pays.</p>
                 )}
