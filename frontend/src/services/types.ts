@@ -96,6 +96,28 @@ export interface MyEvent {
   status: RegistrationStatus;
 }
 
+export type CertificateKind = 'PARTICIPATION' | 'WINNER' | 'PODIUM' | 'AMBASSADOR';
+
+/** An attestation as anyone checking it sees it. */
+export interface Certificate {
+  code: string;
+  kind: CertificateKind;
+  holderName: string;
+  /** Read after the name: « a participé au hackathon « … » ». */
+  title: string;
+  detail?: string;
+  eventId?: number;
+  eventDate?: string;
+  issuedAt?: string;
+  revoked: boolean;
+}
+
+export interface AdminCertificate extends Omit<Certificate, 'revoked' | 'eventId'> {
+  id: number;
+  status: 'DRAFT' | 'ISSUED' | 'REVOKED';
+  email?: string;
+}
+
 export type ProjectStatus = 'SUBMITTED' | 'UNDER_REVIEW' | 'ACCEPTED' | 'REJECTED';
 
 export interface TeamMember {

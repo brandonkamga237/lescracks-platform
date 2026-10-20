@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Download, ExternalLink, Loader2 } from 'lucide-react';
 
 import { AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
+import EventCertificates from '@/components/admin/EventCertificates';
 import { SEGMENT, Segmented } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
@@ -189,24 +190,28 @@ export default function AdminEventParticipants() {
   const { id = '' } = useParams();
   const eventId = Number(id);
   const event = useApi((signal) => api.event(eventId, signal), [eventId]);
-  const [tab, setTab] = useState<'registrations' | 'projects'>('registrations');
+  const [tab, setTab] = useState<'registrations' | 'projects' | 'certificates'>('registrations');
   const title = event.data?.title ?? 'Événement';
 
   return (
-    <AdminSection title={title} description="Inscrits, présence et projets de cet événement."
+    <AdminSection title={title} description="Inscrits, présence, projets et attestations de cet événement."
       action={<Link to="/admin/evenements" className="btn-secondary inline-flex items-center gap-2"><ArrowLeft className="h-4 w-4" aria-hidden />Événements</Link>}>
       <AdminState loading={event.loading} error={event.error} empty={false} emptyMessage="" onRetry={event.reload}>
-        {event.data?.acceptsSubmissions && (
-          <div className="mb-5">
-            <Segmented label="Vue">
-              <button type="button" aria-pressed={tab === 'registrations'} onClick={() => setTab('registrations')}
-                className={`${SEGMENT} ${tab === 'registrations' ? 'bg-gold-400 text-black' : 'text-t3 hover:text-t1'}`}>Inscrits</button>
-              <button type="button" aria-pressed={tab === 'projects'} onClick={() => setTab('projects')}
-                className={`${SEGMENT} ${tab === 'projects' ? 'bg-gold-400 text-black' : 'text-t3 hover:text-t1'}`}>Projets</button>
-            </Segmented>
-          </div>
-        )}
-        {tab === 'projects' && event.data?.acceptsSubmissions ? <Projects eventId={eventId} /> : <Registrations eventId={eventId} title={title} />}
+        <div className="mb-5">
+          <Segmented label="Vue">
+            {([
+              ['registrations', 'Inscrits'],
+              ...(event.data?.acceptsSubmissions ? [['projects', 'Projets']] : []),
+              ['certificates', 'Attestations'],
+            ] as Array<[typeof tab, string]>).map(([value, label]) => (
+              <button key={value} type="button" aria-pressed={tab === value} onClick={() => setTab(value)}
+                className={`${SEGMENT} ${tab === value ? 'bg-gold-400 text-black' : 'text-t3 hover:text-t1'}`}>{label}</button>
+            ))}
+          </Segmented>
+        </div>
+        {tab === 'projects' && event.data?.acceptsSubmissions ? <Projects eventId={eventId} />
+          : tab === 'certificates' ? <EventCertificates eventId={eventId} acceptsSubmissions={Boolean(event.data?.acceptsSubmissions)} />
+            : <Registrations eventId={eventId} title={title} />}
       </AdminState>
     </AdminSection>
   );
