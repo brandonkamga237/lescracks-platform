@@ -21,5 +21,10 @@ public record EventResponse(
         Instant createdAt,
         Instant updatedAt,
         Instant scheduledAt,
-        int viewCount) {
+        int viewCount,
+        int registrationCount,
+        boolean acceptsSubmissions,
+        int maxTeamSize,
+        /** When submissions close: the deadline, or the end of the event. */
+        Instant submissionsCloseAt) {
 }

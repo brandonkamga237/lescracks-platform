@@ -30,7 +30,10 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
   const [fieldErrors, setFieldErrors] = useState<string[]>([]);
   const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(initial?.coverImage ?? null);
-  const [form, setForm] = useState<EventRequest>({ title: initial?.title ?? '', description: initial?.description ?? '', type: initial?.type ?? 'WORKSHOP', format: initial?.format ?? 'ONLINE', startDate: localDate(initial?.startDate), endDate: localDate(initial?.endDate), location: initial?.location ?? '', status: initial?.status ?? 'DRAFT' });
+  const [form, setForm] = useState<EventRequest>({ title: initial?.title ?? '', description: initial?.description ?? '', type: initial?.type ?? 'WORKSHOP', format: initial?.format ?? 'ONLINE', startDate: localDate(initial?.startDate), endDate: localDate(initial?.endDate), location: initial?.location ?? '', status: initial?.status ?? 'DRAFT',
+    acceptsSubmissions: initial?.acceptsSubmissions ?? false, maxTeamSize: initial?.maxTeamSize ?? 1,
+    // Without its own deadline, an event closes submissions at its end: leave the field empty then.
+    submissionDeadline: initial?.submissionsCloseAt && initial.submissionsCloseAt !== initial.endDate ? localDate(initial.submissionsCloseAt) : '' });
   const [visibility, setVisibility] = useState<Visibility>(initial?.status === 'DRAFT' && initial.scheduledAt ? 'SCHEDULED' : initial?.status ?? 'DRAFT');
   const [scheduledAt, setScheduledAt] = useState<string | null>(initial?.scheduledAt ?? null);
   const scheduled = visibility === 'SCHEDULED';
@@ -63,7 +66,9 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
     if (scheduled && !scheduleIsValid(scheduledAt, start.toISOString())) { setFailure('Choisis une date de publication à venir, avant le début de l’événement.'); return; }
     setBusy(true);
     try {
-      const body = { ...form, status: scheduled ? 'DRAFT' as EventStatus : visibility as EventStatus, scheduledAt: scheduled ? scheduledAt : null, title: form.title.trim(), description: form.description.trim(), location: form.location?.trim() || undefined, startDate: initial && form.startDate === localDate(initial.startDate) ? initial.startDate : start.toISOString(), endDate: initial && form.endDate === localDate(initial.endDate) ? initial.endDate : end?.toISOString() };
+      const deadline = form.acceptsSubmissions && form.submissionDeadline ? new Date(form.submissionDeadline) : null;
+      if (deadline && Number.isNaN(deadline.getTime())) { setFailure('Renseigne une date limite valide.'); setBusy(false); return; }
+      const body = { ...form, submissionDeadline: deadline ? deadline.toISOString() : null, maxTeamSize: form.acceptsSubmissions ? form.maxTeamSize : 1, status: scheduled ? 'DRAFT' as EventStatus : visibility as EventStatus, scheduledAt: scheduled ? scheduledAt : null, title: form.title.trim(), description: form.description.trim(), location: form.location?.trim() || undefined, startDate: initial && form.startDate === localDate(initial.startDate) ? initial.startDate : start.toISOString(), endDate: initial && form.endDate === localDate(initial.endDate) ? initial.endDate : end?.toISOString() };
       if (initial) await adminApi.updateEvent(initial.id, body, coverImageFile ?? undefined);
       else await adminApi.createEvent(body, coverImageFile!);
       onCreated();
@@ -104,7 +109,29 @@ export default function EventForm({ event: initial, onCreated, onCancel }: Event
         <label className="block text-sm text-t2">Lieu ou lien de connexion (facultatif)<input maxLength={200} value={form.location ?? ''} onChange={(event) => setForm({ ...form, location: event.target.value })} className={field} /></label>
       </fieldset>
       <fieldset disabled={busy} className="space-y-4 border-t border-line-soft pt-5">
-        <legend className="pr-3 font-display text-lg font-medium">04 · Visibilité</legend>
+        <legend className="pr-3 font-display text-lg font-medium">04 · Participation</legend>
+        <p className="text-xs leading-relaxed text-t3">Les membres s’inscrivent toujours avec « Je participe ». Coche la case si l’événement attend aussi un projet (un hackathon par exemple).</p>
+        <label className="flex items-start gap-3 text-sm text-t2">
+          <input type="checkbox" checked={Boolean(form.acceptsSubmissions)} onChange={(event) => setForm({ ...form, acceptsSubmissions: event.target.checked })} className="mt-0.5 h-4 w-4 shrink-0 accent-[#d4af37]" />
+          <span>Les participants soumettent un projet sur la plateforme</span>
+        </label>
+        {form.acceptsSubmissions && (
+          <div className="grid gap-5 sm:grid-cols-2">
+            <label className="block text-sm text-t2">Taille d’une équipe
+              <select value={form.maxTeamSize ?? 1} onChange={(event) => setForm({ ...form, maxTeamSize: Number(event.target.value) })} className={field}>
+                <option value={1}>Individuel</option>
+                {[2, 3, 4].map((size) => <option key={size} value={size}>Jusqu’à {size} personnes</option>)}
+              </select>
+            </label>
+            <label className="block text-sm text-t2">Date limite (facultatif)
+              <input type="datetime-local" step="1" aria-describedby="event-timezone" value={form.submissionDeadline ?? ''} onChange={(event) => setForm({ ...form, submissionDeadline: event.target.value })} className={field} />
+              <span className="mt-1.5 block text-xs text-t4">Sans date limite, les soumissions ferment à la fin de l’événement.</span>
+            </label>
+          </div>
+        )}
+      </fieldset>
+      <fieldset disabled={busy} className="space-y-4 border-t border-line-soft pt-5">
+        <legend className="pr-3 font-display text-lg font-medium">05 · Visibilité</legend>
         <label className="block text-sm text-t2">Statut<select value={visibility} onChange={(event) => setVisibility(event.target.value as Visibility)} className={field}><option value="DRAFT">Brouillon</option><option value="SCHEDULED">Programmé</option><option value="PUBLISHED">Publié</option><option value="COMPLETED">Terminé</option><option value="CANCELLED">Annulé</option></select></label>
         {scheduled ? <ScheduleField value={scheduledAt} onChange={setScheduledAt} before={startInstant} />
           : <p className="text-xs text-t3">{visibility === 'PUBLISHED' ? 'En enregistrant, cet événement sera visible sur le site public.' : 'Seuls les événements publiés sont visibles sur le site public.'}</p>}

@@ -1,7 +1,7 @@
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
 import type {
-  ArticleSummary, AuthProvider, BlogTheme, Category, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse,
+  ArticleSummary, AuthProvider, BlogTheme, Category, EventRegistration, MyEvent, Project, ProjectDraft, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse,
   NewsletterStatus, ResourceLikeStatus, Tag, TalkVideo, UserIdentity, UserProfile,
   UserProfileUpdate, OnboardingAnswers, SignupContext,
 } from '@/services/types';
@@ -44,6 +44,13 @@ export const api = {
     http.get<PageResponse<EventSummary>>('/events/past', { page, size }, signal),
   event: (slugOrId: string | number, signal?: AbortSignal) =>
     http.get<EventSummary>(`/events/${slugOrId}`, undefined, signal),
+  eventRegistration: (id: number, signal?: AbortSignal) => http.get<EventRegistration>(`/events/${id}/registration`, undefined, signal),
+  registerForEvent: (id: number) => http.post<EventRegistration>(`/events/${id}/registration`),
+  cancelEventRegistration: (id: number) => http.delete<void>(`/events/${id}/registration`),
+  myEvents: (signal?: AbortSignal) => http.get<MyEvent[]>('/events/registrations/mine', undefined, signal),
+  /** Undefined when the member is on no project for this event (204). */
+  myProject: (id: number, signal?: AbortSignal) => http.get<Project | undefined>(`/events/${id}/submission`, undefined, signal),
+  submitProject: (id: number, draft: ProjectDraft) => http.put<Project>(`/events/${id}/submission`, draft),
   recordEventView: (id: number, visitorId: string) =>
     http.post<{ viewCount: number }>(`/events/${id}/views`, { visitorId }),
   talks: (page = 0, size = 12, signal?: AbortSignal) =>
