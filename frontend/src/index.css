@@ -223,6 +223,11 @@
            focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/25;
   }
 
+  /* A text area takes its height from rows, not from the 48px of a one-line field. */
+  textarea.input {
+    @apply h-auto min-h-24 leading-relaxed;
+  }
+
   /* ========== LINKS ========== */
   .link {
     @apply font-medium text-gold-ink underline-offset-4 transition-colors duration-200 hover:underline;
