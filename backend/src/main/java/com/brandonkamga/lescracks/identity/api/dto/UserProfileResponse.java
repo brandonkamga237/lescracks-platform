@@ -24,7 +24,8 @@ public record UserProfileResponse(Long id, String email, String firstName, Strin
                                   Map<String, String> socialLinks, List<UserIdentityResponse> identities,
                                   String phone, String country, MemberSituation situation, MemberGoal goal,
                                   Set<Long> interestIds, boolean marketingConsent,
-                                  boolean onboardingRequired, int completion, List<String> missing) {
+                                  boolean onboardingRequired, int completion, List<String> missing,
+                                  boolean publicBio, boolean publicLocation, boolean publicLinks) {
 
     public static UserProfileResponse of(User user, List<UserIdentity> identities) {
         ProfileCompletion completion = ProfileCompletion.of(user);
@@ -34,6 +35,7 @@ public record UserProfileResponse(Long id, String email, String firstName, Strin
                 identities.stream().map(UserIdentityResponse::of).toList(),
                 user.getPhone(), user.getCountry(), user.getSituation(), user.getGoal(),
                 Set.copyOf(user.getInterests()), user.isMarketingConsent(),
-                user.getOnboardedAt() == null, completion.percent(), completion.missing());
+                user.getOnboardedAt() == null, completion.percent(), completion.missing(),
+                user.isPublicBio(), user.isPublicLocation(), user.isPublicLinks());
     }
 }

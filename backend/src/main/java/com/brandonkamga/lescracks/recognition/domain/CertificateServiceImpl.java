@@ -155,6 +155,12 @@ public class CertificateServiceImpl implements CertificateService {
         return certificates.findByUserIdAndStatusOrderByIssuedAtDesc(people.require(email).getId(), CertificateStatus.ISSUED);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Certificate> issuedTo(Long userId) {
+        return certificates.findByUserIdAndStatusOrderByIssuedAtDesc(userId, CertificateStatus.ISSUED);
+    }
+
     private Certificate require(Long id) {
         return certificates.findById(id).orElseThrow(() -> new NotFoundException("Attestation", "id", id));
     }

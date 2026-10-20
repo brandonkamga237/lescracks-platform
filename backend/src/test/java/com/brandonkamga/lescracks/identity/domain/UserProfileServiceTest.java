@@ -100,7 +100,7 @@ class UserProfileServiceTest {
         member.setBio("Dev Java");
         member.setLocation("Douala");
 
-        service.update("eric@example.com", new ProfileChanges(null, null, null, " Back-end ", null, null, null, null, null, null, null));
+        service.update("eric@example.com", new ProfileChanges(null, null, null, " Back-end ", null, null, null, null, null, null, null, null));
 
         assertThat(member.getFirstName()).isEqualTo("Eric");
         assertThat(member.getBio()).isEqualTo("Back-end");
@@ -108,15 +108,28 @@ class UserProfileServiceTest {
     }
 
     @Test
+    @DisplayName("public profile choices change one by one; an absent choice stays as it was")
+    void visibilityChoices() {
+        member.setPublicLocation(true);
+
+        service.update("eric@example.com", new ProfileChanges(null, null, null, null, null, null, null, null, null, null, null,
+                new ProfileVisibility(true, null, false)));
+
+        assertThat(member.isPublicBio()).isTrue();
+        assertThat(member.isPublicLocation()).isTrue();
+        assertThat(member.isPublicLinks()).isFalse();
+    }
+
+    @Test
     @DisplayName("an empty optional field is cleared, an empty name is refused")
     void clearingAndRequiredFields() {
         member.setLocation("Douala");
 
-        service.update("eric@example.com", new ProfileChanges(null, null, null, null, "", null, null, null, null, null, null));
+        service.update("eric@example.com", new ProfileChanges(null, null, null, null, "", null, null, null, null, null, null, null));
         assertThat(member.getLocation()).isNull();
 
         assertThatThrownBy(() -> service.update("eric@example.com",
-                new ProfileChanges(" ", null, null, null, null, null, null, null, null, null, null)))
+                new ProfileChanges(" ", null, null, null, null, null, null, null, null, null, null, null)))
                 .isInstanceOf(BadRequestException.class);
         assertThat(member.getFirstName()).isEqualTo("Eric");
     }

@@ -27,4 +27,7 @@ public interface CertificateService {
     Certificate verify(String code);
 
     List<Certificate> mine(String email);
+
+    /** Issued attestations of a member, for their public profile. */
+    List<Certificate> issuedTo(Long userId);
 }

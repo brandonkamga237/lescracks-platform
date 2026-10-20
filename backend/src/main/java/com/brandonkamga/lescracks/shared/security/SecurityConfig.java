@@ -67,6 +67,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/events", "/api/events/*").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/events/*/views").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/certificates/verify/*").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/members/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/talks", "/api/talks/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/cracklab/challenges", "/api/cracklab/challenges/*", "/api/cracklab/ranking",
                         "/api/cracklab/members/*", "/api/cracklab/results/*", "/api/cracklab/share/**").permitAll()
