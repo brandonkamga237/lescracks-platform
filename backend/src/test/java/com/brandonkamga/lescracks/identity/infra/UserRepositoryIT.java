@@ -1,9 +1,13 @@
 package com.brandonkamga.lescracks.identity.infra;
 
 import com.brandonkamga.lescracks.identity.domain.AuthProvider;
+import com.brandonkamga.lescracks.identity.domain.MemberGoal;
+import com.brandonkamga.lescracks.identity.domain.MemberSituation;
 import com.brandonkamga.lescracks.identity.domain.User;
 import com.brandonkamga.lescracks.identity.domain.UserSearch;
 import com.brandonkamga.lescracks.support.PostgresIT;
+import com.brandonkamga.lescracks.taxonomy.domain.Category;
+import com.brandonkamga.lescracks.taxonomy.infra.CategoryRepository;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,7 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,6 +28,9 @@ class UserRepositoryIT extends PostgresIT {
 
     @Autowired
     private UserRepository users;
+
+    @Autowired
+    private CategoryRepository categories;
 
     private User save(String email, String passwordHash, AuthProvider provider, boolean verified) {
         return users.saveAndFlush(User.builder().email(email).firstName("A").lastName("B")
@@ -78,5 +87,31 @@ class UserRepositoryIT extends PostgresIT {
 
     private List<String> emails(UserSearch search) {
         return users.findAll(UserSpecifications.matching(search)).stream().map(User::getEmail).toList();
+    }
+
+    private static long countOf(List<Object[]> rows, Object key) {
+        return rows.stream().filter(row -> String.valueOf(row[0]).equals(String.valueOf(key)))
+                .mapToLong(row -> ((Number) row[1]).longValue()).sum();
+    }
+
+    @Test
+    @DisplayName("the member portrait counts members by situation, goal, country and interest, never contacts")
+    void memberPortrait() {
+        Long theme = categories.saveAndFlush(Category.builder().name("Portrait test").slug("portrait-test").build()).getId();
+        long students = countOf(users.countMembersGroupedBySituation(), MemberSituation.STUDENT);
+        long jobs = countOf(users.countMembersGroupedByGoal(), MemberGoal.FIND_JOB);
+        long cameroon = countOf(users.countMembersGroupedByCountry(), "CM");
+
+        for (String email : List.of("member@example.com", "contact3@example.com")) {
+            users.saveAndFlush(User.builder().email(email).firstName("A").lastName("B")
+                    .passwordHash(email.startsWith("member") ? "hash" : null)
+                    .situation(MemberSituation.STUDENT).goal(MemberGoal.FIND_JOB).country("CM")
+                    .interests(new HashSet<>(Set.of(theme))).build());
+        }
+
+        assertThat(countOf(users.countMembersGroupedBySituation(), MemberSituation.STUDENT)).isEqualTo(students + 1);
+        assertThat(countOf(users.countMembersGroupedByGoal(), MemberGoal.FIND_JOB)).isEqualTo(jobs + 1);
+        assertThat(countOf(users.countMembersGroupedByCountry(), "CM")).isEqualTo(cameroon + 1);
+        assertThat(countOf(users.countMembersGroupedByInterest(), theme)).isEqualTo(1);
     }
 }
