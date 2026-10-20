@@ -8,6 +8,7 @@ import { PageHeader, Section } from '@/components/layout/Page';
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
+import { track } from '@/lib/analytics';
 
 const PROMISES = [
   'Des parcours complets, du premier pas jusqu’au projet.',
@@ -33,6 +34,7 @@ export default function Formations() {
       if (isSignedIn) await api.newsletterSubscribe();
       else await api.newsletterPublicSubscribe({ email: email.trim() });
       setState('done');
+      track('Abonnement newsletter', { compte: isSignedIn ? 'membre' : 'visiteur', depuis: 'formations' });
     } catch (cause) {
       setState('idle');
       setError(cause instanceof ApiError ? cause.message : 'Impossible de joindre le serveur. Réessaie dans un instant.');
