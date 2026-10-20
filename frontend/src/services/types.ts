@@ -183,6 +183,16 @@ export interface ViewedEvent {
   views: number;
 }
 
+/** Who the members are; every list counts members, fullest first, keyed by enum name or theme name. */
+export interface MemberPortrait {
+  members: number;
+  situations: { name: string; count: number }[];
+  goals: { name: string; count: number }[];
+  countries: { name: string; count: number }[];
+  interests: { name: string; count: number }[];
+  providers: { name: string; count: number }[];
+}
+
 export interface ContentViews {
   available: boolean;
   days: number;

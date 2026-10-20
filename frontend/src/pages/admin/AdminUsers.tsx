@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Download, Eye, Search, SlidersHorizontal, Trash2 } from 'lucide-react';
 
-import { GOAL_LABEL, SITUATION_LABEL } from '@/lib/memberProfile';
+import { GOAL_LABEL, PROVIDER_LABEL as providerLabels, SITUATION_LABEL } from '@/lib/memberProfile';
 import { countryName, displayPhone } from '@/lib/phone';
+import MemberPortrait from '@/components/admin/MemberPortrait';
 import { AdminAction, AdminConfirm, AdminModal, AdminPagination, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
 import { Kpi } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
 import { adminApi, type UserFilters } from '@/services/adminApi';
-import type { AdminUser, AuthProvider } from '@/services/types';
+import type { AdminUser } from '@/services/types';
 
 const statusLabels = { ACTIVE: 'Actif', INACTIVE: 'Inactif', BANNED: 'Suspendu' };
 const statusStyles = {
@@ -15,7 +16,6 @@ const statusStyles = {
   INACTIVE: 'border-line bg-noir-800 text-t3',
   BANNED: 'border-error/30 bg-error/10 text-error-ink',
 };
-const providerLabels: Record<AuthProvider, string> = { LOCAL: 'Email', GOOGLE: 'Google', GITHUB: 'GitHub' };
 
 function fullName(user: AdminUser) {
   return [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.email;
@@ -285,6 +285,10 @@ export default function AdminUsers() {
           </ol>
         </section>
       )}
+
+      <div className="order-4 mt-6 sm:order-none sm:mb-6 sm:mt-0">
+        <MemberPortrait />
+      </div>
 
       <div className="order-1 sm:order-none">
       <AdminState
