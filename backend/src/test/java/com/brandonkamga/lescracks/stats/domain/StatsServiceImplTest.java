@@ -12,12 +12,19 @@ import com.brandonkamga.lescracks.talk.infra.TalkVideoRepository;
 import com.brandonkamga.lescracks.taxonomy.domain.Category;
 import com.brandonkamga.lescracks.taxonomy.infra.CategoryRepository;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -49,5 +56,33 @@ class StatsServiceImplTest {
         assertThat(portrait.situations()).containsExactly(new NamedCount("EMPLOYED", 7), new NamedCount("STUDENT", 2));
         assertThat(portrait.providers()).containsExactly(new NamedCount("GOOGLE", 5));
         assertThat(portrait.goals()).isEmpty();
+    }
+
+    private static JsonNode json(String text) throws Exception {
+        return new ObjectMapper().readTree(text);
+    }
+
+    private StatsServiceImpl withUmami(UmamiClient umami) {
+        return new StatsServiceImpl(users, mock(EventRepository.class), mock(ResourceRepository.class),
+                mock(NewsletterSubscriptionRepository.class), mock(TalkVideoRepository.class), umami, categories);
+    }
+
+    @Test
+    @DisplayName("the audience carries the site's custom events, and survives when only they fail")
+    void audienceEvents() throws Exception {
+        UmamiClient umami = mock(UmamiClient.class);
+        when(umami.isEnabled()).thenReturn(true);
+        when(umami.stats(any(), any())).thenReturn(json("{\"visitors\":{\"value\":612},\"visits\":{\"value\":903}}"));
+        when(umami.pageviews(any(), any())).thenReturn(json("{\"pageviews\":[],\"sessions\":[]}"));
+        when(umami.metrics(anyString(), any(), any(), anyInt())).thenReturn(json("[]"));
+        when(umami.metrics(eq("event"), any(), any(), anyInt())).thenReturn(json("[{\"x\":\"Créer un compte\",\"y\":14}]"));
+
+        assertThat(withUmami(umami).audience(30).events()).containsExactly(new NamedCount("Créer un compte", 14));
+
+        when(umami.metrics(eq("event"), any(), any(), anyInt())).thenThrow(new IllegalStateException("Umami down"));
+        var audience = withUmami(umami).audience(30);
+        assertThat(audience.available()).isTrue();
+        assertThat(audience.visitors()).isEqualTo(612);
+        assertThat(audience.events()).isEmpty();
     }
 }

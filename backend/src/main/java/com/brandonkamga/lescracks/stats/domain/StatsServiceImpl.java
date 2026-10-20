@@ -176,6 +176,16 @@ public class StatsServiceImpl implements StatsService {
                 .collect(Collectors.toList());
     }
 
+    /** Optional on top of the audience: a failure here leaves the visitor figures standing. */
+    private List<NamedCount> events(Instant from, Instant to) {
+        try {
+            return toNamedCounts(umami.metrics("event", from, to, 12));
+        } catch (Exception exception) {
+            log.warn("Umami events unavailable: {}", exception.getMessage());
+            return List.of();
+        }
+    }
+
     @Override
     public AudienceResponse audience(int days) {
         if (!umami.isEnabled()) return AudienceResponse.unavailable(days);
@@ -198,7 +208,8 @@ public class StatsServiceImpl implements StatsService {
                     visits, prevOf(stats, "visits"),
                     valueOf(stats, "pageviews"), prevOf(stats, "pageviews"),
                     bounceRate, avgVisit,
-                    toSeries(series), toNamedCounts(sources), toNamedCounts(countries), toNamedCounts(pages));
+                    toSeries(series), toNamedCounts(sources), toNamedCounts(countries), toNamedCounts(pages),
+                    events(from, to));
         } catch (Exception exception) {
             log.warn("Umami audience unavailable: {}", exception.getMessage());
             return AudienceResponse.unavailable(days);
