@@ -235,3 +235,29 @@
 
   /* ========== STAT TILE — charcoal lift, never a shadow ========== */
 }
+
+/* Printing an attestation (« Télécharger en PDF ») keeps the document alone, full page, A4 landscape. */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  body:has(.certificate) * {
+    visibility: hidden;
+  }
+
+  body:has(.certificate) .certificate,
+  body:has(.certificate) .certificate * {
+    visibility: visible;
+  }
+
+  body:has(.certificate) .certificate {
+    position: absolute;
+    inset: 0;
+    max-width: none;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+  }
+}

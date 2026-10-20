@@ -33,6 +33,7 @@ const AdminAudience = lazy(() => import('@/pages/admin/AdminAudience'));
 const AdminCategories = lazy(() => import('@/pages/admin/AdminCategories'));
 const AdminEvents = lazy(() => import('@/pages/admin/AdminEvents'));
 const AdminEventParticipants = lazy(() => import('@/pages/admin/AdminEventParticipants'));
+const Attestation = lazy(() => import('@/pages/Attestation'));
 const AdminBlog = lazy(() => import('@/pages/admin/AdminBlog'));
 const AdminNewsletter = lazy(() => import('@/pages/admin/AdminNewsletter'));
 const AdminAdmins = lazy(() => import('@/pages/admin/AdminAdmins'));
@@ -146,6 +147,7 @@ function AppRoutes() {
       <Route path="/ressources/:slug" element={<LegacyArticle />} />
       <Route path="/evenements" element={<Evenements />} />
       <Route path="/evenements/:id" element={<EvenementDetail />} />
+      <Route path="/attestations/:code" element={<Suspense fallback={<Waiting />}><Attestation /></Suspense>} />
       <Route path="/talk" element={<Talk />} />
       {/* CrackLab: its own space and chrome, the same accounts. Reading is open; answering needs a member. */}
       <Route path="/cracklab" element={<Suspense fallback={<Waiting />}><CrackLabHome /></Suspense>} />
