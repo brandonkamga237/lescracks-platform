@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Ban, CalendarDays, CheckCircle2, Pencil, Plus, Search, Send, Trash2 } from 'lucide-react';
+import { Ban, CalendarDays, CheckCircle2, Pencil, Plus, Search, Send, Trash2, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { AdminAction, AdminConfirm, AdminPagination, AdminRow, AdminSection, AdminState, StatusBadge } from '@/components/admin/AdminTable';
 import EventForm from '@/components/admin/EventForm';
 import { TYPE_LABEL } from '@/components/events/AgendaItem';
@@ -12,6 +13,7 @@ const formatLabels = { ONLINE: 'En ligne', OFFLINE: 'Sur place', HYBRID: 'Hybrid
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });
 
 export default function AdminEvents() {
+  const navigate = useNavigate();
   const [editor, setEditor] = useState<EventSummary | 'new' | null>(null);
   const [pending, setPending] = useState<{ event: EventSummary; action: 'delete' | 'cancel' } | null>(null);
   const [busy, setBusy] = useState<Record<number, string>>({});
@@ -80,6 +82,7 @@ export default function AdminEvents() {
         <div className="min-w-0 flex-1 basis-48"><h2 className="break-words text-base font-semibold leading-snug tracking-normal text-t1 sm:text-lg">{event.title}</h2><p className="mt-1 text-xs leading-relaxed text-t3">{TYPE_LABEL[event.type]} · {formatLabels[event.format]}</p><p className="mt-1 text-xs text-t4"><time dateTime={event.startDate}>{dateFormat.format(new Date(event.startDate))}</time></p></div>
         <StatusBadge status={event.status} scheduledAt={event.scheduledAt} />
         <div className="flex flex-wrap gap-2" role="group" aria-label={`Actions pour ${event.title}`}>
+          {event.status !== 'DRAFT' && <AdminAction icon={Users} label={event.acceptsSubmissions ? 'Inscrits et projets' : 'Inscrits'} onClick={() => navigate(`/admin/evenements/${event.id}`)} />}
           <AdminAction icon={Pencil} label="Modifier" disabled={!!busy[event.id]} onClick={() => setEditor(event)} />
           {event.status !== 'PUBLISHED' && <AdminAction icon={Send} label={busy[event.id] === 'publish' ? 'Publication…' : event.scheduledAt ? 'Publier maintenant' : 'Publier'} disabled={!!busy[event.id]} onClick={() => void act(event, 'publish')} />}
           {event.status === 'PUBLISHED' && <AdminAction icon={CheckCircle2} label={busy[event.id] === 'complete' ? 'En cours…' : 'Marquer terminé'} disabled={!!busy[event.id]} onClick={() => void act(event, 'complete')} />}
