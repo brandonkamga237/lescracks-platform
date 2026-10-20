@@ -61,6 +61,19 @@ public class User {
     @Builder.Default
     private Map<String, String> socialLinks = new HashMap<>();
 
+    /** What the public profile shows beyond name, photo and badges; all private until the member opens them. */
+    @Column(name = "public_bio", nullable = false)
+    @Builder.Default
+    private boolean publicBio = false;
+
+    @Column(name = "public_location", nullable = false)
+    @Builder.Default
+    private boolean publicLocation = false;
+
+    @Column(name = "public_links", nullable = false)
+    @Builder.Default
+    private boolean publicLinks = false;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Builder.Default

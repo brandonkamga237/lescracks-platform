@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.identity.api.dto;
 
 import com.brandonkamga.lescracks.identity.domain.ProfileChanges;
+import com.brandonkamga.lescracks.identity.domain.ProfileVisibility;
 import com.brandonkamga.lescracks.identity.domain.MemberGoal;
 import com.brandonkamga.lescracks.identity.domain.MemberSituation;
 
@@ -22,11 +23,15 @@ public record UserProfileUpdateRequest(
         MemberGoal goal,
         /** Null leaves the interests as they are. */
         @Size(max = 10) Set<Long> interestIds,
-        Boolean marketingConsent
+        Boolean marketingConsent,
+        /** Public profile choices; null leaves each as it is. */
+        Boolean publicBio,
+        Boolean publicLocation,
+        Boolean publicLinks
 ) {
 
     public ProfileChanges toChanges() {
         return new ProfileChanges(firstName, lastName, username, bio, location, socialLinks, phone,
-                situation, goal, interestIds, marketingConsent);
+                situation, goal, interestIds, marketingConsent, new ProfileVisibility(publicBio, publicLocation, publicLinks));
     }
 }
