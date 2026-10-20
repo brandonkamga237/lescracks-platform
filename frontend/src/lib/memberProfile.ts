@@ -1,4 +1,6 @@
-import type { MemberGoal, MemberSituation, ProfileField } from '@/services/types';
+import type { AuthProvider, MemberGoal, MemberSituation, ProfileField } from '@/services/types';
+
+export const PROVIDER_LABEL: Record<AuthProvider, string> = { LOCAL: 'Email', GOOGLE: 'Google', GITHUB: 'GitHub' };
 
 export const SITUATION_LABEL: Record<MemberSituation, string> = {
   STUDENT: 'Étudiant·e',

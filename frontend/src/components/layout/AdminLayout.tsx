@@ -16,7 +16,7 @@ import { ApiError } from '@/services/http';
 const SECTIONS = [
   { to: '/admin', label: 'Pilotage', group: 'Espace de travail', icon: LayoutDashboard },
   { to: '/admin/audience', label: 'Audience', group: 'Espace de travail', icon: Globe2 },
-  { to: '/admin/utilisateurs', label: 'Utilisateurs', group: 'Espace de travail', icon: Users },
+  { to: '/admin/utilisateurs', label: 'Membres', group: 'Espace de travail', icon: Users },
   { to: '/admin/newsletter', label: 'Newsletter', group: 'Espace de travail', icon: Mail },
   { to: '/admin/blog', label: 'Blog', group: 'Contenu', icon: BookOpen },
   { to: '/admin/evenements', label: 'Événements', group: 'Contenu', icon: CalendarDays },
@@ -28,8 +28,8 @@ const SECTIONS = [
   { to: '/admin/admins', label: 'Administrateurs', group: 'Sécurité', icon: Shield },
 ] as const;
 
-/** The daily work on a phone: everything else waits behind « Plus ». */
-const PHONE_TABS = ['/admin', '/admin/blog', '/admin/evenements'] as const;
+/** On a phone the admin checks figures and members; writing an article is laptop work, behind « Plus ». */
+const PHONE_TABS = ['/admin', '/admin/audience', '/admin/utilisateurs'] as const;
 
 const TAB_ITEM = 'flex min-h-14 w-full flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold-400';
 

@@ -16,10 +16,12 @@ public record AudienceResponse(
         List<SeriesPoint> series,
         List<NamedCount> sources,
         List<NamedCount> countries,
-        List<NamedCount> topPages) {
+        List<NamedCount> topPages,
+        /** Custom events sent by the site (sign-up clicks, newsletter, WhatsApp, articles read to the end). */
+        List<NamedCount> events) {
 
     public static AudienceResponse unavailable(int days) {
         return new AudienceResponse(false, days, null, null, null, null, null, null,
-                null, null, List.of(), List.of(), List.of(), List.of());
+                null, null, List.of(), List.of(), List.of(), List.of(), List.of());
     }
 }

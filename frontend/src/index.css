@@ -136,6 +136,12 @@
     scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
   }
 
+  /* A grid item may shrink below its content. By default it cannot, so one truncated title or
+     email widens its whole column past a phone screen; :where() keeps any min-w-* class winning. */
+  :where(.grid) > * {
+    min-width: 0;
+  }
+
   /* ========== TYPOGRAPHY — poster stacking ==========
      Defaults for headings without their own size: the page title scale of PageHeader. */
   h1, h2, h3, h4, h5, h6 {

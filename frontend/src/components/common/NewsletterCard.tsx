@@ -3,6 +3,7 @@ import { Check, Mail } from 'lucide-react';
 
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
+import { track } from '@/lib/analytics';
 
 export default function NewsletterCard() {
   const { user } = useSession();
@@ -31,6 +32,7 @@ export default function NewsletterCard() {
         ? await api.newsletterUnsubscribe()
         : await api.newsletterSubscribe();
       setSubscribed(response.status === 'SUBSCRIBED');
+      if (!subscribed) track('Abonnement newsletter', { compte: 'membre' });
     } finally {
       setBusy(false);
     }

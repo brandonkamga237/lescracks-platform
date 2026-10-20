@@ -43,6 +43,20 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     @Query("select u.provider, count(u) from User u where " + MEMBER + " group by u.provider")
     List<Object[]> countMembersGroupedByProvider();
 
+    @Query("select u.situation, count(u) from User u where u.situation is not null and " + MEMBER + " group by u.situation")
+    List<Object[]> countMembersGroupedBySituation();
+
+    @Query("select u.goal, count(u) from User u where u.goal is not null and " + MEMBER + " group by u.goal")
+    List<Object[]> countMembersGroupedByGoal();
+
+    @Query("select u.country, count(u) from User u where u.country is not null and " + MEMBER + " group by u.country")
+    List<Object[]> countMembersGroupedByCountry();
+
+    /** Members per interest, as category ids: identity keeps ids and never reaches into taxonomy. */
+    @Query(value = "SELECT ui.category_id, count(*) FROM user_interests ui JOIN users ON users.id = ui.user_id WHERE "
+            + MEMBER_SQL + " GROUP BY ui.category_id", nativeQuery = true)
+    List<Object[]> countMembersGroupedByInterest();
+
     @Query("select count(u) from User u where u.emailVerified = true and " + MEMBER)
     long countVerifiedMembers();
 
