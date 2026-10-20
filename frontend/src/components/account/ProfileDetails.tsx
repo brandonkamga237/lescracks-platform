@@ -1,5 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 
+import { Link } from 'react-router-dom';
+
 import EditableSection from '@/components/account/EditableSection';
 import PhoneField from '@/components/account/PhoneField';
 import { useApi } from '@/hooks/useApi';
@@ -44,6 +46,7 @@ export default function ProfileDetails({ user, onSaved }: ProfileDetailsProps) {
   // '' when empty, null while what is typed is not a valid number yet.
   const [phone, setPhone] = useState<string | null>('');
   const [consent, setConsent] = useState(false);
+  const [visibility, setVisibility] = useState({ publicBio: false, publicLocation: false, publicLinks: false });
   const [links, setLinks] = useState<Record<string, string>>({});
   const [newLink, setNewLink] = useState({ platform: '', url: '' });
 
@@ -52,6 +55,7 @@ export default function ProfileDetails({ user, onSaved }: ProfileDetailsProps) {
     setAbout({ situation: user.situation, goal: user.goal, location: user.location ?? '', bio: user.bio ?? '', interestIds: user.interestIds });
     setPhone(user.phone ?? '');
     setConsent(user.marketingConsent);
+    setVisibility({ publicBio: user.publicBio, publicLocation: user.publicLocation, publicLinks: user.publicLinks });
     setLinks(user.socialLinks ?? {});
     setNewLink({ platform: '', url: '' });
   }
@@ -147,6 +151,25 @@ export default function ProfileDetails({ user, onSaved }: ProfileDetailsProps) {
           <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#d4af37]" />
           <span>Recevoir les nouveautés par WhatsApp ou SMS.</span>
         </label>
+      </EditableSection>
+
+      <EditableSection id="profil-public" title="Profil public" description="Ce que voient les autres membres en cliquant sur ton nom. Ton nom, ta photo et tes badges y figurent toujours ; ton email et ton téléphone jamais."
+        onCancel={reset}
+        onSave={() => save(visibility)}
+        view={<>
+          <Rows rows={[
+            ['Bio', user.publicBio ? 'Visible' : 'Privée'],
+            ['Ville', user.publicLocation ? 'Visible' : 'Privée'],
+            ['Liens', user.publicLinks ? 'Visibles' : 'Privés'],
+          ]} />
+          <Link to={`/membres/${user.id}`} className="link mt-4 inline-flex text-sm">Voir mon profil public</Link>
+        </>}>
+        {([['publicBio', 'Montrer ma bio'], ['publicLocation', 'Montrer ma ville'], ['publicLinks', 'Montrer mes liens']] as const).map(([key, label]) => (
+          <label key={key} className="flex items-center gap-3 text-sm text-t2">
+            <input type="checkbox" checked={visibility[key]} onChange={(event) => setVisibility({ ...visibility, [key]: event.target.checked })} className="h-4 w-4 shrink-0 accent-[#d4af37]" />
+            {label}
+          </label>
+        ))}
       </EditableSection>
 
       <EditableSection id="liens" title="Liens" description="LinkedIn, GitHub, portfolio…"

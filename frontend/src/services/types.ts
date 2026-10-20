@@ -399,6 +399,10 @@ export interface UserProfile {
   /** 0 to 100. */
   completion: number;
   missing: ProfileField[];
+  /** Public profile choices: shown to anyone only when true. */
+  publicBio: boolean;
+  publicLocation: boolean;
+  publicLinks: boolean;
 }
 
 export type MemberSituation = 'STUDENT' | 'EMPLOYED' | 'CAREER_CHANGE' | 'JOB_SEEKING' | 'FREELANCE';
@@ -430,6 +434,22 @@ export interface UserProfileUpdate {
   goal?: MemberGoal;
   interestIds?: number[];
   marketingConsent?: boolean;
+  publicBio?: boolean;
+  publicLocation?: boolean;
+  publicLinks?: boolean;
+}
+
+/** A member as anyone sees them: never an email or a phone. */
+export interface PublicProfile {
+  id: number;
+  name: string;
+  avatarUrl?: string;
+  memberSince: string;
+  bio?: string;
+  location?: string;
+  links?: Record<string, string>;
+  badges: MemberBadge[];
+  certificates: { code: string; title: string; issuedAt: string }[];
 }
 // ── CrackLab ──────────────────────────────────────────────────────────────
 

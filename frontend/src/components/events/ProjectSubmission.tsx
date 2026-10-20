@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ExternalLink, Loader2, Trophy } from 'lucide-react';
 
+import MemberLink from '@/components/community/MemberLink';
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
 import { track } from '@/lib/analytics';
@@ -112,7 +113,7 @@ export default function ProjectSubmission({ event }: ProjectSubmissionProps) {
             <p className="label">Équipe</p>
             <ul className="mt-2 flex flex-wrap gap-2">
               {project.team.map((person) => (
-                <li key={person.id} className="rounded-full bg-noir-800 px-3 py-1 text-sm text-t2">{person.name}{person.owner && <span className="text-t4"> · auteur</span>}</li>
+                <li key={person.id} className="rounded-full bg-noir-800 px-3 py-1 text-sm text-t2"><MemberLink id={person.id} name={person.name} />{person.owner && <span className="text-t4"> · auteur</span>}</li>
               ))}
             </ul>
           </div>
