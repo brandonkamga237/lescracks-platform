@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.5.1...v1.6.0) (2026-10-20)
+
+
+### Features
+
+* **admin:** mobile back office, sign-up funnel, member portrait and visitor actions ([#104](https://github.com/brandonkamga237/lescracks-platform/issues/104)) ([0b8fedc](https://github.com/brandonkamga237/lescracks-platform/commit/0b8fedcec5bdcea38949d90af65c1587d8d3d71f))
+
 ## [1.5.1](https://github.com/brandonkamga237/lescracks-platform/compare/v1.5.0...v1.5.1) (2026-10-19)
 
 
