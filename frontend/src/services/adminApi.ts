@@ -2,7 +2,7 @@ import { ENV } from '@/config/env';
 import { prepareImage } from '@/lib/image';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminArticle, AdminCertificate, AdminChallenge, AdminProject, AdminRegistration, ProjectStatus, AdminSubscriber, AdminSummary, ChallengeDifficulty, ChallengeStatus, ChallengeSubmission, SubmissionStatus, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, MemberPortrait, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
+import type { AdminArticle, AdminBadge, AdminCertificate, BadgeHolder, AdminChallenge, AdminProject, AdminRegistration, ProjectStatus, AdminSubscriber, AdminSummary, ChallengeDifficulty, ChallengeStatus, ChallengeSubmission, SubmissionStatus, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, MemberPortrait, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
 
 export interface ArticleRequest {
   title: string;
@@ -197,6 +197,13 @@ export const adminApi = {
   eventProjects: (id: number, signal?: AbortSignal) => http.get<AdminProject[]>(`/events/admin/${id}/submissions`, undefined, signal),
   reviewProject: (id: number, review: { status?: ProjectStatus; score?: number | null; rank?: number | null; note?: string }) =>
     http.patch<AdminProject>(`/events/admin/submissions/${id}`, review),
+  badges: (signal?: AbortSignal) => http.get<AdminBadge[]>('/badges/admin', undefined, signal),
+  createBadge: (badge: { name: string; description: string; icon: string }) => http.post<AdminBadge>('/badges/admin', badge),
+  updateBadge: (id: number, badge: { name: string; description: string; icon: string }) => http.put<AdminBadge>(`/badges/admin/${id}`, badge),
+  deleteBadge: (id: number) => http.delete<void>(`/badges/admin/${id}`),
+  badgeHolders: (id: number, signal?: AbortSignal) => http.get<BadgeHolder[]>(`/badges/admin/${id}/holders`, undefined, signal),
+  awardBadge: (id: number, email: string, reason?: string) => http.post<void>(`/badges/admin/${id}/holders`, { email, reason }),
+  revokeBadge: (id: number, userId: number) => http.delete<void>(`/badges/admin/${id}/holders/${userId}`),
   eventCertificates: (eventId: number, signal?: AbortSignal) => http.get<AdminCertificate[]>(`/certificates/admin/events/${eventId}`, undefined, signal),
   prepareCertificates: (eventId: number) => http.post<AdminCertificate[]>(`/certificates/admin/events/${eventId}/drafts`),
   issueCertificates: (ids: number[]) => http.post<void>('/certificates/admin/issue', { ids }),

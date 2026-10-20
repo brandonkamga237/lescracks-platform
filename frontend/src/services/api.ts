@@ -1,7 +1,7 @@
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
 import type {
-  ArticleSummary, AuthProvider, BlogTheme, Category, Certificate, EventRegistration, MyEvent, Project, ProjectDraft, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse,
+  ArticleSummary, AuthProvider, BlogTheme, Category, Certificate, MemberBadge, EventRegistration, MyEvent, Project, ProjectDraft, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse,
   NewsletterStatus, ResourceLikeStatus, Tag, TalkVideo, UserIdentity, UserProfile,
   UserProfileUpdate, OnboardingAnswers, SignupContext,
 } from '@/services/types';
@@ -48,6 +48,7 @@ export const api = {
   registerForEvent: (id: number) => http.post<EventRegistration>(`/events/${id}/registration`),
   cancelEventRegistration: (id: number) => http.delete<void>(`/events/${id}/registration`),
   verifyCertificate: (code: string, signal?: AbortSignal) => http.get<Certificate>(`/certificates/verify/${encodeURIComponent(code)}`, undefined, signal),
+  myBadges: (signal?: AbortSignal) => http.get<MemberBadge[]>('/badges/mine', undefined, signal),
   myCertificates: (signal?: AbortSignal) => http.get<Certificate[]>('/certificates/mine', undefined, signal),
   myEvents: (signal?: AbortSignal) => http.get<MyEvent[]>('/events/registrations/mine', undefined, signal),
   /** Undefined when the member is on no project for this event (204). */
