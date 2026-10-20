@@ -4,6 +4,7 @@ import { Globe2 } from 'lucide-react';
 import { AdminSection, AdminState } from '@/components/admin/AdminTable';
 import { BarList, Kpi, Panel, PeriodSelect, SERIES_MUTED, TrendChart, deltaPct, fmt, fmtDuration } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
+import { countryName } from '@/lib/phone';
 import { adminApi } from '@/services/adminApi';
 
 const formatSource = (name: string) =>
@@ -34,7 +35,7 @@ export default function AdminAudience() {
 
         {data?.available && (
           <>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
               <Kpi label="Visiteurs" value={fmt(data.visitors)}
                 delta={deltaPct(data.visitors, data.previousVisitors)}
                 hint="personnes distinctes" />
@@ -50,13 +51,21 @@ export default function AdminAudience() {
 
             <Panel className="mt-6" title="Fréquentation" subtitle="Visites et pages vues, jour par jour.">
               <TrendChart
-                height={300}
+                className="h-44 sm:h-72"
                 data={data.series.map((p) => ({ date: p.date, visits: p.visits, pageviews: p.pageviews }))}
                 series={[
                   { key: 'pageviews', name: 'Pages vues', color: SERIES_MUTED, dashed: true },
                   { key: 'visits', name: 'Visites' },
                 ]}
               />
+            </Panel>
+
+            <Panel className="mt-6" title="Ce qu’ils font" subtitle="Les actions comptées sur le site pendant la période.">
+              {data.events?.length ? (
+                <BarList items={data.events} />
+              ) : (
+                <p className="py-8 text-center text-sm text-t3">Les actions (inscription, newsletter, WhatsApp, articles lus jusqu’au bout) apparaîtront ici dès les premiers clics.</p>
+              )}
             </Panel>
 
             <div className="mt-6 grid gap-4 lg:grid-cols-3">
@@ -72,7 +81,7 @@ export default function AdminAudience() {
               </Panel>
               <Panel title="D’où ils sont" subtitle="Pays des visiteurs">
                 {data.countries.length ? (
-                  <BarList items={data.countries} />
+                  <BarList items={data.countries} format={countryName} />
                 ) : (
                   <p className="py-8 text-center text-sm text-t3">Pas encore de répartition par pays.</p>
                 )}

@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Download, Eye, Search, Trash2 } from 'lucide-react';
+import { Download, Eye, Search, SlidersHorizontal, Trash2 } from 'lucide-react';
 
-import { GOAL_LABEL, SITUATION_LABEL } from '@/lib/memberProfile';
+import { GOAL_LABEL, PROVIDER_LABEL as providerLabels, SITUATION_LABEL } from '@/lib/memberProfile';
 import { countryName, displayPhone } from '@/lib/phone';
+import MemberPortrait from '@/components/admin/MemberPortrait';
+import SignupFunnel from '@/components/admin/SignupFunnel';
 import { AdminAction, AdminConfirm, AdminModal, AdminPagination, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
 import { Kpi } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
 import { adminApi, type UserFilters } from '@/services/adminApi';
-import type { AdminUser, AuthProvider } from '@/services/types';
+import type { AdminUser } from '@/services/types';
 
 const statusLabels = { ACTIVE: 'Actif', INACTIVE: 'Inactif', BANNED: 'Suspendu' };
 const statusStyles = {
@@ -15,7 +17,6 @@ const statusStyles = {
   INACTIVE: 'border-line bg-noir-800 text-t3',
   BANNED: 'border-error/30 bg-error/10 text-error-ink',
 };
-const providerLabels: Record<AuthProvider, string> = { LOCAL: 'Email', GOOGLE: 'Google', GITHUB: 'GitHub' };
 
 function fullName(user: AdminUser) {
   return [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || user.email;
@@ -145,6 +146,7 @@ export default function AdminUsers() {
   const [search, setSearch] = useState('');
   const [debounced, setDebounced] = useState('');
   const [busy, setBusy] = useState<number | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [selected, setSelected] = useState<number | null>(null);
@@ -200,9 +202,13 @@ export default function AdminUsers() {
     setDeleteTarget({ id: user.id, name: fullName(user) });
   }
 
+  const activeFilters = Number(filters.kind !== undefined) + Number(filters.verified !== undefined);
+  // On a phone the search stays in view and the rest folds behind « Filtres »; from sm up the
+  // wrappers dissolve (display: contents) into the one row the desktop always had.
   const headerAction = (
-    <div className="flex w-full max-w-2xl flex-wrap items-center gap-2">
-      <form onSubmit={submitSearch} className="relative min-w-[12rem] flex-1">
+    <div className="flex w-full max-w-2xl flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+      <div className="flex gap-2 sm:contents">
+      <form onSubmit={submitSearch} className="relative min-w-0 flex-1 sm:min-w-[12rem]">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-t4" aria-hidden />
         <input
           value={search}
@@ -211,13 +217,19 @@ export default function AdminUsers() {
           className="input w-full pl-9"
         />
       </form>
-      <select aria-label="Type" value={filters.kind ?? ''} className="input w-auto"
+      <button type="button" onClick={() => setFiltersOpen(!filtersOpen)} aria-expanded={filtersOpen} aria-controls="member-filters"
+        className="btn-secondary inline-flex shrink-0 items-center gap-2 sm:hidden">
+        <SlidersHorizontal className="h-4 w-4" aria-hidden />Filtres{activeFilters > 0 && <span className="font-mono text-xs text-gold-ink">{activeFilters}</span>}
+      </button>
+      </div>
+      <div id="member-filters" className={`${filtersOpen ? 'grid' : 'hidden'} grid-cols-2 gap-2 sm:contents`}>
+      <select aria-label="Type" value={filters.kind ?? ''} className="input w-full sm:w-auto"
         onChange={(event) => { setPage(0); setFilters({ ...filters, kind: (event.target.value || undefined) as UserFilters['kind'] }); }}>
         <option value="">Tous</option>
         <option value="MEMBER">Membres</option>
         <option value="CONTACT">Contacts newsletter</option>
       </select>
-      <select aria-label="Email" value={filters.verified === undefined ? '' : String(filters.verified)} className="input w-auto"
+      <select aria-label="Email" value={filters.verified === undefined ? '' : String(filters.verified)} className="input w-full sm:w-auto"
         onChange={(event) => { setPage(0); setFilters({ ...filters, verified: event.target.value === '' ? undefined : event.target.value === 'true' }); }}>
         <option value="">Email : tous</option>
         <option value="true">Confirmé</option>
@@ -226,20 +238,23 @@ export default function AdminUsers() {
       <button
         type="button"
         onClick={() => void adminApi.exportUsers()}
-        className="btn-secondary inline-flex shrink-0 items-center gap-2"
+        className="btn-secondary col-span-2 inline-flex shrink-0 items-center justify-center gap-2"
       >
         <Download className="h-4 w-4" aria-hidden /> CSV
       </button>
+      </div>
     </div>
   );
 
   return (
-    <AdminSection title="Utilisateurs" description="Gère les comptes enregistrés et leur statut." action={headerAction}>
+    <AdminSection title="Membres" description="Les comptes inscrits et les contacts newsletter." action={headerAction}>
       {error && <p role="alert" className="mb-5 rounded-lg border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
       {notice && <p role="status" className="mb-5 rounded-lg border border-success/25 bg-success/5 p-3 text-sm text-success-ink">{notice}</p>}
 
+      {/* On a phone the list comes first: the figures follow it instead of pushing it three screens down. */}
+      <div className="flex flex-col">
       {overview.data && (
-        <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="order-2 mt-6 grid grid-cols-2 gap-3 sm:order-none sm:mb-6 sm:mt-0 sm:gap-4 xl:grid-cols-4">
           <Kpi label="Membres" value={overview.data.users.toLocaleString('fr-FR')}
             hint={`${overview.data.verifiedUsers.toLocaleString('fr-FR')} emails confirmés · ${overview.data.newsletterContacts.toLocaleString('fr-FR')} contacts newsletter à part`} />
           <Kpi label="Nouveaux · 30 jours" value={overview.data.usersNewLast30d.toLocaleString('fr-FR')}
@@ -252,26 +267,14 @@ export default function AdminUsers() {
       )}
 
       {overview.data && overview.data.signupFunnel.signedUp > 0 && (
-        <section aria-labelledby="funnel-title" className="mb-6 rounded-lg border border-line-soft bg-card p-5">
-          <h2 id="funnel-title" className="text-sm font-medium text-t1">Inscriptions des 30 derniers jours</h2>
-          <p className="mt-1 text-xs text-t4">Là où le chiffre chute, c’est là qu’on perd les gens.</p>
-          <ol className="mt-4 grid gap-3 sm:grid-cols-4">
-            {([
-              ['Inscrits', overview.data.signupFunnel.signedUp],
-              ['Email confirmé', overview.data.signupFunnel.verified],
-              ['Bienvenue faite', overview.data.signupFunnel.onboarded],
-              ['Revenus après J+1', overview.data.signupFunnel.returned],
-            ] as [string, number][]).map(([label, value]) => (
-              <li key={label} className="rounded border border-line-soft p-3">
-                <p className="font-display text-2xl font-semibold tabular-nums text-t1">{value.toLocaleString('fr-FR')}</p>
-                <p className="mt-1 text-xs text-t3">{label}
-                  <span className="ml-1 font-mono tabular-nums text-t4">{Math.round((value / overview.data!.signupFunnel.signedUp) * 100)} %</span></p>
-              </li>
-            ))}
-          </ol>
-        </section>
+        <SignupFunnel className="order-3 mt-6 sm:order-none sm:mb-6 sm:mt-0" funnel={overview.data.signupFunnel} />
       )}
 
+      <div className="order-4 mt-6 sm:order-none sm:mb-6 sm:mt-0">
+        <MemberPortrait />
+      </div>
+
+      <div className="order-1 sm:order-none">
       <AdminState
         loading={users.loading}
         error={users.error}
@@ -386,6 +389,8 @@ export default function AdminUsers() {
           onChange={setPage}
         />
       </AdminState>
+      </div>
+      </div>
 
       {selected && <UserDetail id={selected} onClose={() => setSelected(null)} onChanged={users.reload} />}
 

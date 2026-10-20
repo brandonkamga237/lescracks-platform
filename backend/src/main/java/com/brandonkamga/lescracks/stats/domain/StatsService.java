@@ -2,6 +2,7 @@ package com.brandonkamga.lescracks.stats.domain;
 
 import com.brandonkamga.lescracks.stats.api.dto.AudienceResponse;
 import com.brandonkamga.lescracks.stats.api.dto.ContentViewsResponse;
+import com.brandonkamga.lescracks.stats.api.dto.MemberPortraitResponse;
 import com.brandonkamga.lescracks.stats.api.dto.StatsOverviewResponse;
 import com.brandonkamga.lescracks.stats.api.dto.TopResourceResponse;
 import com.brandonkamga.lescracks.stats.api.dto.UserGrowthPoint;
@@ -18,4 +19,5 @@ public interface StatsService {
     AudienceResponse audience(int days);
     ContentViewsResponse contentViews(int days);
     WatchResponse watch();
+    MemberPortraitResponse memberPortrait();
 }

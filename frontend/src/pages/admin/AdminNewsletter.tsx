@@ -28,6 +28,7 @@ export default function AdminNewsletter() {
   const [busyTest, setBusyTest] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [showAll, setShowAll] = useState(false);
   const [subject, setSubject] = useState('');
   const [blocks, setBlocks] = useState<ArticleBlock[]>([{ type: 'paragraph', text: '' }]);
   const editorRef = useRef<BlockEditorHandle>(null);
@@ -117,6 +118,8 @@ export default function AdminNewsletter() {
   }
 
   const list = subscriptions.data ?? [];
+  // The whole subscriber list made the page ten phone screens long: ten first, the rest on demand.
+  const shown = showAll ? list : list.slice(0, 10);
 
   return (
     <AdminSection
@@ -135,23 +138,23 @@ export default function AdminNewsletter() {
       {error && <p role="alert" className="mb-5 rounded-lg border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
       {notice && <p role="status" className="mb-5 rounded-lg border border-success/25 bg-success/5 p-3 text-sm text-success-ink">{notice}</p>}
 
-      <div className="mb-8 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-lg border border-line-soft bg-card p-5">
-          <p className="text-xs tracking-wide text-t4">Abonnés</p>
-          <p className="mt-2 font-display text-2xl font-semibold text-t1">{stats.data?.subscribed ?? '…'}</p>
+      <div className="mb-6 grid grid-cols-3 gap-2 sm:mb-8 sm:gap-4">
+        <div className="rounded-lg border border-line-soft bg-card p-3 sm:p-5">
+          <p className="truncate text-xs tracking-wide text-t4">Abonnés</p>
+          <p className="mt-1.5 font-display text-xl font-semibold tabular-nums text-t1 sm:mt-2 sm:text-2xl">{stats.data?.subscribed ?? '…'}</p>
           {Boolean(stats.data?.pending) && <p className="mt-1 text-xs text-t4">+ {stats.data?.pending} en attente de confirmation</p>}
         </div>
-        <div className="rounded-lg border border-line-soft bg-card p-5">
-          <p className="text-xs tracking-wide text-t4">Désabonnés</p>
-          <p className="mt-2 font-display text-2xl font-semibold text-t1">{stats.data?.unsubscribed ?? '…'}</p>
+        <div className="rounded-lg border border-line-soft bg-card p-3 sm:p-5">
+          <p className="truncate text-xs tracking-wide text-t4">Désabonnés</p>
+          <p className="mt-1.5 font-display text-xl font-semibold tabular-nums text-t1 sm:mt-2 sm:text-2xl">{stats.data?.unsubscribed ?? '…'}</p>
         </div>
-        <div className="rounded-lg border border-line-soft bg-card p-5">
-          <p className="text-xs tracking-wide text-t4">Campagnes envoyées</p>
-          <p className="mt-2 font-display text-2xl font-semibold text-t1">{campaigns.data?.length ?? '…'}</p>
+        <div className="rounded-lg border border-line-soft bg-card p-3 sm:p-5">
+          <p className="truncate text-xs tracking-wide text-t4">Campagnes envoyées</p>
+          <p className="mt-1.5 font-display text-xl font-semibold tabular-nums text-t1 sm:mt-2 sm:text-2xl">{campaigns.data?.length ?? '…'}</p>
         </div>
       </div>
 
-      <form onSubmit={broadcast} className="mb-10 rounded-lg border border-line-soft bg-card p-6 sm:p-8">
+      <form onSubmit={broadcast} className="mb-8 rounded-lg border border-line-soft bg-card p-4 sm:mb-10 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="font-display text-lg font-semibold text-t1">Envoyer une campagne</h2>
@@ -236,7 +239,7 @@ export default function AdminNewsletter() {
             emptyMessage="Aucun abonnement."
             onRetry={subscriptions.reload}
           >
-            {list.map((s) => (
+            {shown.map((s) => (
               <AdminRow key={s.userId}>
                 <div className="min-w-0 flex-1">
                   <p className="break-words font-display font-medium text-t1">{s.email}</p>
@@ -257,6 +260,11 @@ export default function AdminNewsletter() {
                 </button>
               </AdminRow>
             ))}
+            {list.length > shown.length && (
+              <button type="button" onClick={() => setShowAll(true)} className="btn-secondary mt-2 w-full">
+                Afficher les {list.length.toLocaleString('fr-FR')} abonnements
+              </button>
+            )}
           </AdminState>
         </div>
 

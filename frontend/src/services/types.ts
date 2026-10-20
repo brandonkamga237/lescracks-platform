@@ -163,6 +163,8 @@ export interface AudienceStats {
   sources: { name: string; count: number }[];
   countries: { name: string; count: number }[];
   topPages: { name: string; count: number }[];
+  /** Custom events the site sends: sign-up clicks, newsletter, WhatsApp, articles read to the end. */
+  events: { name: string; count: number }[];
 }
 
 export interface ViewedResource {
@@ -181,6 +183,16 @@ export interface ViewedEvent {
   startDate: string;
   status: string;
   views: number;
+}
+
+/** Who the members are; every list counts members, fullest first, keyed by enum name or theme name. */
+export interface MemberPortrait {
+  members: number;
+  situations: { name: string; count: number }[];
+  goals: { name: string; count: number }[];
+  countries: { name: string; count: number }[];
+  interests: { name: string; count: number }[];
+  providers: { name: string; count: number }[];
 }
 
 export interface ContentViews {

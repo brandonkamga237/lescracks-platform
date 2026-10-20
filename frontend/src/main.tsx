@@ -7,6 +7,7 @@ import App from '@/App';
 import { SessionProvider } from '@/contexts/AuthContext';
 import { oidcConfig } from '@/services/auth';
 import '@/index.css';
+import { trackLinkClicks } from '@/lib/analytics';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -39,3 +40,4 @@ function dismissBootLoader() {
 }
 
 requestAnimationFrame(dismissBootLoader);
+trackLinkClicks();

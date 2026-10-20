@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
+import { track } from '@/lib/analytics';
 
 /** The newsletter offer, once per page, after the content: a strip above the header cost every page its first lines. */
 export default function NewsletterBar() {
@@ -33,6 +34,7 @@ export default function NewsletterBar() {
     try {
       const response = await api.newsletterSubscribe();
       setSubscribed(response.status === 'SUBSCRIBED');
+      track('Abonnement newsletter', { compte: 'membre' });
     } catch {
       setFailure('L’abonnement a échoué. Réessaie dans un instant.');
     } finally {
@@ -48,6 +50,7 @@ export default function NewsletterBar() {
     try {
       await api.newsletterPublicSubscribe({ email: email.trim() });
       setEmailSuccess(true);
+      track('Abonnement newsletter', { compte: 'visiteur' });
       setEmail('');
     } catch {
       setFailure('L’abonnement a échoué. Réessaie dans un instant.');

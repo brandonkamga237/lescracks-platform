@@ -10,6 +10,7 @@ import { adminApi } from '@/services/adminApi';
 import { currentAccessToken, safeReturnPath } from '@/services/auth';
 import { ApiError, getAuthTransport, setAuthTransport } from '@/services/http';
 import type { UserProfile } from '@/services/types';
+import { track } from '@/lib/analytics';
 
 const anonymous: SessionIdentity = { isSignedIn: false, isAdmin: false, name: null, email: null, user: null };
 
@@ -166,6 +167,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
   };
 
   const socialSignIn = async (provider: 'google' | 'github', returnTo?: string) => {
+    track('Connexion avec un fournisseur', { fournisseur: provider });
     const previousMode = getAuthTransport();
     setAuthTransport('oidc');
     authRef.current.startSilentRenew();
@@ -189,7 +191,11 @@ export function SessionProvider({ children }: SessionProviderProps) {
     signOut,
     login: (email, password) => cookieLogin(() => api.login(email, password)),
     // Sign-up opens the session server-side, so the new member is signed in like after a login.
-    createAccount: (body) => cookieLogin(() => api.register(body)),
+    createAccount: (body) => cookieLogin(async () => {
+      const created = await api.register(body);
+      track('Compte créé', { méthode: 'email' });
+      return created;
+    }),
     loginAdmin: (username, password) => cookieLogin(() => adminApi.login(username, password), () => adminApi.me()),
     socialSignIn,
   }}>{children}</SessionContext.Provider>;

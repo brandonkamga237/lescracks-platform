@@ -11,6 +11,7 @@ import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
 import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
 import com.brandonkamga.lescracks.stats.api.dto.AudienceResponse;
 import com.brandonkamga.lescracks.stats.api.dto.ContentViewsResponse;
+import com.brandonkamga.lescracks.stats.api.dto.MemberPortraitResponse;
 import com.brandonkamga.lescracks.stats.api.dto.NamedCount;
 import com.brandonkamga.lescracks.stats.api.dto.SeriesPoint;
 import com.brandonkamga.lescracks.stats.api.dto.SignupFunnel;
@@ -24,6 +25,8 @@ import com.brandonkamga.lescracks.stats.api.dto.WatchSignal;
 import com.brandonkamga.lescracks.stats.infra.UmamiClient;
 import com.brandonkamga.lescracks.talk.domain.TalkStatus;
 import com.brandonkamga.lescracks.talk.infra.TalkVideoRepository;
+import com.brandonkamga.lescracks.taxonomy.domain.Category;
+import com.brandonkamga.lescracks.taxonomy.infra.CategoryRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import org.slf4j.Logger;
@@ -56,16 +59,44 @@ public class StatsServiceImpl implements StatsService {
     private final NewsletterSubscriptionRepository newsletter;
     private final TalkVideoRepository talks;
     private final UmamiClient umami;
+    private final CategoryRepository categories;
 
     public StatsServiceImpl(UserRepository users, EventRepository events, ResourceRepository resources,
                             NewsletterSubscriptionRepository newsletter, TalkVideoRepository talks,
-                            UmamiClient umami) {
+                            UmamiClient umami, CategoryRepository categories) {
         this.users = users;
         this.events = events;
         this.resources = resources;
         this.newsletter = newsletter;
         this.talks = talks;
         this.umami = umami;
+        this.categories = categories;
+    }
+
+    @Override
+    public MemberPortraitResponse memberPortrait() {
+        Map<Long, String> themes = categories.findAll().stream().collect(Collectors.toMap(Category::getId, Category::getName));
+        // An interest whose theme was deleted since has no name to show: it is left out.
+        List<NamedCount> interests = users.countMembersGroupedByInterest().stream()
+                .filter(row -> themes.containsKey(((Number) row[0]).longValue()))
+                .map(row -> new NamedCount(themes.get(((Number) row[0]).longValue()), ((Number) row[1]).longValue()))
+                .sorted(Comparator.comparingLong(NamedCount::count).reversed())
+                .toList();
+        long members = users.countMembersGroupedByStatus().stream().mapToLong(row -> ((Number) row[1]).longValue()).sum();
+        return new MemberPortraitResponse(members,
+                grouped(users.countMembersGroupedBySituation()),
+                grouped(users.countMembersGroupedByGoal()),
+                grouped(users.countMembersGroupedByCountry()),
+                interests,
+                grouped(users.countMembersGroupedByProvider()));
+    }
+
+    /** (key, count) rows as named counts, fullest first; enum keys travel as their name. */
+    private static List<NamedCount> grouped(List<Object[]> rows) {
+        return rows.stream()
+                .map(row -> new NamedCount(String.valueOf(row[0]), ((Number) row[1]).longValue()))
+                .sorted(Comparator.comparingLong(NamedCount::count).reversed())
+                .toList();
     }
 
     /**
@@ -145,6 +176,16 @@ public class StatsServiceImpl implements StatsService {
                 .collect(Collectors.toList());
     }
 
+    /** Optional on top of the audience: a failure here leaves the visitor figures standing. */
+    private List<NamedCount> events(Instant from, Instant to) {
+        try {
+            return toNamedCounts(umami.metrics("event", from, to, 12));
+        } catch (Exception exception) {
+            log.warn("Umami events unavailable: {}", exception.getMessage());
+            return List.of();
+        }
+    }
+
     @Override
     public AudienceResponse audience(int days) {
         if (!umami.isEnabled()) return AudienceResponse.unavailable(days);
@@ -167,7 +208,8 @@ public class StatsServiceImpl implements StatsService {
                     visits, prevOf(stats, "visits"),
                     valueOf(stats, "pageviews"), prevOf(stats, "pageviews"),
                     bounceRate, avgVisit,
-                    toSeries(series), toNamedCounts(sources), toNamedCounts(countries), toNamedCounts(pages));
+                    toSeries(series), toNamedCounts(sources), toNamedCounts(countries), toNamedCounts(pages),
+                    events(from, to));
         } catch (Exception exception) {
             log.warn("Umami audience unavailable: {}", exception.getMessage());
             return AudienceResponse.unavailable(days);

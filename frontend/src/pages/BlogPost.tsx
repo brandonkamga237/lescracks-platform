@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 
 import ArticleCover from '@/components/blog/ArticleCover';
 import ArticleRenderer from '@/components/blog/ArticleRenderer';
+import ReadMarker from '@/components/common/ReadMarker';
 import SEO from '@/components/common/SEO';
 import ShareButton from '@/components/common/ShareButton';
 import Layout from '@/components/layout/Layout';
@@ -91,6 +92,7 @@ export default function BlogPost() {
                 <p className="mt-10 max-w-[42rem] whitespace-pre-line break-words text-xl font-medium leading-relaxed text-t1 sm:text-[1.375rem]">{loaded.description}</p>
                 <hr className="my-10 max-w-[42rem] border-line-soft" />
                 <ArticleRenderer article={loaded} />
+                <ReadMarker event="Article lu en entier" data={{ article: loaded.slug ?? String(loaded.id) }} />
                 {loaded.tags.length > 0 && (
                   <ul aria-label="Sujets abordés" className="mt-12 flex max-w-[42rem] flex-wrap gap-2">
                     {loaded.tags.map((tag) => <li key={tag} className="rounded-full bg-card px-3 py-1.5 text-sm font-medium text-t2">{tag}</li>)}
