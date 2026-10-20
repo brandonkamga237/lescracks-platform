@@ -67,6 +67,80 @@ export interface EventSummary {
   scheduledAt?: string;
   /** Different people who opened the event page, members and anonymous visitors alike. */
   viewCount: number;
+  /** Members signed up and not cancelled. */
+  registrationCount: number;
+  /** The event collects projects on the platform (a hackathon does). */
+  acceptsSubmissions: boolean;
+  /** How many people one project may name, the submitter included: 1 to 4. */
+  maxTeamSize: number;
+  /** When submissions close: the deadline, or the end of the event. */
+  submissionsCloseAt?: string;
+}
+
+export type RegistrationStatus = 'REGISTERED' | 'CANCELLED' | 'ATTENDED' | 'ABSENT';
+
+/** The signed-in member's place on an event. */
+export interface EventRegistration {
+  registered: boolean;
+  status?: RegistrationStatus;
+  registeredAt?: string;
+}
+
+export interface MyEvent {
+  id: number;
+  slug?: string;
+  title: string;
+  type: EventType;
+  startDate: string;
+  endDate?: string;
+  status: RegistrationStatus;
+}
+
+export type ProjectStatus = 'SUBMITTED' | 'UNDER_REVIEW' | 'ACCEPTED' | 'REJECTED';
+
+export interface TeamMember {
+  id: number;
+  name: string;
+  email: string;
+  owner: boolean;
+}
+
+/** A project as its team sees it; editable is true for the owner until review or the deadline. */
+export interface Project {
+  id: number;
+  title: string;
+  repositoryUrl: string;
+  demoUrl?: string;
+  description: string;
+  status: ProjectStatus;
+  rank?: number;
+  team: TeamMember[];
+  editable: boolean;
+  submittedAt: string;
+  updatedAt: string;
+  closesAt?: string;
+}
+
+export interface ProjectDraft {
+  title: string;
+  repositoryUrl: string;
+  demoUrl?: string;
+  description: string;
+  teammateEmails: string[];
+}
+
+export interface AdminRegistration {
+  id: number;
+  userId: number;
+  name: string;
+  email: string;
+  status: RegistrationStatus;
+  registeredAt: string;
+}
+
+export interface AdminProject extends Omit<Project, 'editable' | 'closesAt'> {
+  score?: number;
+  reviewNote?: string;
 }
 
 export type EventDetail = EventSummary;

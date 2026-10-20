@@ -6,7 +6,11 @@ import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -33,6 +37,13 @@ public class UserDirectoryImpl implements UserDirectory {
     @Transactional(readOnly = true)
     public User require(Long id) {
         return users.findById(id).orElseThrow(() -> new NotFoundException("Utilisateur", "id", id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<Long, User> findAll(Collection<Long> ids) {
+        if (ids.isEmpty()) return Map.of();
+        return users.findAllById(ids).stream().collect(Collectors.toMap(User::getId, Function.identity()));
     }
 
     @Override

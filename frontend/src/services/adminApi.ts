@@ -2,7 +2,7 @@ import { ENV } from '@/config/env';
 import { prepareImage } from '@/lib/image';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminArticle, AdminChallenge, AdminSubscriber, AdminSummary, ChallengeDifficulty, ChallengeStatus, ChallengeSubmission, SubmissionStatus, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, MemberPortrait, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
+import type { AdminArticle, AdminChallenge, AdminProject, AdminRegistration, ProjectStatus, AdminSubscriber, AdminSummary, ChallengeDifficulty, ChallengeStatus, ChallengeSubmission, SubmissionStatus, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, MemberPortrait, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
 
 export interface ArticleRequest {
   title: string;
@@ -25,6 +25,9 @@ export interface EventRequest {
   location?: string;
   status?: EventStatus;
   scheduledAt?: string | null;
+  acceptsSubmissions?: boolean;
+  maxTeamSize?: number;
+  submissionDeadline?: string | null;
 }
 export interface TalkRequest {
   title: string;
@@ -188,6 +191,12 @@ export const adminApi = {
     http.get<{ from: string; to: string; points: UserGrowthPoint[] }>('/admin/stats/newsletter-growth', { from, to }, signal),
   audience: (days = 30, signal?: AbortSignal) =>
     http.get<AudienceStats>('/admin/stats/audience', { days }, signal),
+  eventRegistrations: (id: number, signal?: AbortSignal) => http.get<AdminRegistration[]>(`/events/admin/${id}/registrations`, undefined, signal),
+  markAttendance: (registrationId: number, status: 'ATTENDED' | 'ABSENT') =>
+    http.patch<unknown>(`/events/admin/registrations/${registrationId}`, { status }),
+  eventProjects: (id: number, signal?: AbortSignal) => http.get<AdminProject[]>(`/events/admin/${id}/submissions`, undefined, signal),
+  reviewProject: (id: number, review: { status?: ProjectStatus; score?: number | null; rank?: number | null; note?: string }) =>
+    http.patch<AdminProject>(`/events/admin/submissions/${id}`, review),
   memberPortrait: (signal?: AbortSignal) => http.get<MemberPortrait>('/admin/stats/members', undefined, signal),
   contentViews: (days = 30, signal?: AbortSignal) =>
     http.get<ContentViews>('/admin/stats/content-views', { days }, signal),

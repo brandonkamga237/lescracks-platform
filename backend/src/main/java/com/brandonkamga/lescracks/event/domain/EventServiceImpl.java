@@ -126,6 +126,9 @@ public class EventServiceImpl implements EventService {
         event.setStartDate(request.startDate());
         event.setEndDate(request.endDate());
         event.setLocation(request.location() == null ? null : request.location().trim());
+        event.setAcceptsSubmissions(Boolean.TRUE.equals(request.acceptsSubmissions()));
+        event.setMaxTeamSize(request.maxTeamSize() == null ? 1 : request.maxTeamSize());
+        event.setSubmissionDeadline(request.submissionDeadline());
         event.setScheduledAt(Schedules.check(request.scheduledAt(), event.getScheduledAt()));
         if (event.getScheduledAt() != null && !event.getScheduledAt().isBefore(request.startDate())) {
             throw new BadRequestException("La publication programmée doit précéder le début de l'événement.");

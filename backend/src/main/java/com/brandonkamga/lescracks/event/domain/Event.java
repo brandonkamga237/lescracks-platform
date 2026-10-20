@@ -62,6 +62,24 @@ public class Event {
     @Builder.Default
     private EventStatus status = EventStatus.DRAFT;
 
+    /** Whether the event collects projects on the platform (a hackathon does). */
+    @Column(name = "accepts_submissions", nullable = false)
+    @Builder.Default
+    private boolean acceptsSubmissions = false;
+
+    /** How many people one project may name, the person submitting included: 1 to 4. */
+    @Column(name = "max_team_size", nullable = false)
+    @Builder.Default
+    private int maxTeamSize = 1;
+
+    /** Last moment to submit or change a project; without it, the event's end. */
+    @Column(name = "submission_deadline")
+    private Instant submissionDeadline;
+
+    /** Members signed up and not cancelled. Written only by the registration SQL, never by a save. */
+    @Column(name = "registration_count", nullable = false, insertable = false, updatable = false)
+    private int registrationCount;
+
     /** People who opened the page, each counted once. Written only by the view recorder's SQL, never by a save. */
     @Column(name = "view_count", nullable = false, insertable = false, updatable = false)
     private int viewCount;
@@ -77,4 +95,9 @@ public class Event {
     @Column(name = "updated_at", nullable = false)
     @Builder.Default
     private Instant updatedAt = Instant.now();
+
+    /** Submissions close at the deadline, or at the end of the event when there is none. */
+    public Instant submissionsCloseAt() {
+        return submissionDeadline != null ? submissionDeadline : endDate;
+    }
 }

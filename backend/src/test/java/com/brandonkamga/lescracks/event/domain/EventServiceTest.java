@@ -41,7 +41,7 @@ class EventServiceTest {
 
     private EventRequest request(EventStatus status, Instant scheduledAt) {
         return new EventRequest("Atelier Docker", "Une après-midi pour conteneuriser une API.", EventType.WORKSHOP,
-                EventFormat.ONLINE, start, null, null, status, scheduledAt);
+                EventFormat.ONLINE, start, null, null, status, scheduledAt, null, null, null);
     }
 
     @Test

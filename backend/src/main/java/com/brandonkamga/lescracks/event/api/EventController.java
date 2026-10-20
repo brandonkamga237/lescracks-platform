@@ -96,6 +96,7 @@ public class EventController {
     private static EventResponse response(Event event) {
         return new EventResponse(event.getId(), event.getSlug(), event.getTitle(), event.getDescription(), event.getType(),
                 event.getFormat(), event.getStartDate(), event.getEndDate(), event.getLocation(), event.getCoverImage(),
-                event.getStatus(), event.getCreatedAt(), event.getUpdatedAt(), event.getScheduledAt(), event.getViewCount());
+                event.getStatus(), event.getCreatedAt(), event.getUpdatedAt(), event.getScheduledAt(), event.getViewCount(),
+                event.getRegistrationCount(), event.isAcceptsSubmissions(), event.getMaxTeamSize(), event.submissionsCloseAt());
     }
 }
