@@ -8,6 +8,7 @@ import SEO from '@/components/common/SEO';
 import NewsletterCard from '@/components/common/NewsletterCard';
 import ProfileDetails from '@/components/account/ProfileDetails';
 import AvatarPicker from '@/components/account/AvatarPicker';
+import MyBadges from '@/components/account/MyBadges';
 import MyCertificates from '@/components/account/MyCertificates';
 import { fillClass } from '@/lib/cracklab';
 import { FIELD_LABEL } from '@/lib/memberProfile';
@@ -254,6 +255,7 @@ export default function Profile() {
             <Link to="/blog" className="group flex gap-4 rounded-lg border border-line-soft bg-card p-4 transition-colors hover:border-line sm:p-5"><BookOpen aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-sans text-base font-semibold tracking-normal text-t1">Lire le blog</h3><p className="mt-1 text-sm leading-relaxed text-t4">Des articles pour approfondir les sujets qui t’intéressent.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
             <Link to="/evenements" className="group flex gap-4 rounded-lg border border-line-soft bg-card p-4 transition-colors hover:border-line sm:p-5"><CalendarDays aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" /><div className="flex-1"><h3 className="font-sans text-base font-semibold tracking-normal text-t1">Trouver un événement</h3><p className="mt-1 text-sm leading-relaxed text-t4">Découvre les prochains rendez-vous pour apprendre et échanger.</p></div><ArrowRight aria-hidden="true" className="mt-1 h-5 w-5 shrink-0 text-t4 transition group-hover:text-gold-ink" /></Link>
           </div>
+          {user && <MyBadges />}
           {user && <MyCertificates />}
           <div className="mt-6">
             <NewsletterCard />

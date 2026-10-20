@@ -118,6 +118,35 @@ export interface AdminCertificate extends Omit<Certificate, 'revoked' | 'eventId
   email?: string;
 }
 
+/** A badge on a profile. icon is a key from lib/badgeIcons. */
+export interface MemberBadge {
+  code: string;
+  name: string;
+  description: string;
+  icon: string;
+  awardedAt: string;
+  reason?: string;
+}
+
+export interface AdminBadge {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  icon: string;
+  /** Awarded by rules; neither edited nor deleted. */
+  system: boolean;
+  holders: number;
+}
+
+export interface BadgeHolder {
+  userId: number;
+  name: string;
+  email: string;
+  awardedAt: string;
+  reason?: string;
+}
+
 export type ProjectStatus = 'SUBMITTED' | 'UNDER_REVIEW' | 'ACCEPTED' | 'REJECTED';
 
 export interface TeamMember {

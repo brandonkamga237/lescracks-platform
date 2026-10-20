@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowUpRight, BookOpen, CalendarDays, ChevronRight, ClipboardCheck, FlaskConical, FolderOpen, Globe2, LayoutDashboard, LogOut, Mail, MoreHorizontal, Podcast, Shield, Tags, Users } from 'lucide-react';
+import { ArrowUpRight, Award, BookOpen, CalendarDays, ChevronRight, ClipboardCheck, FlaskConical, FolderOpen, Globe2, LayoutDashboard, LogOut, Mail, MoreHorizontal, Podcast, Shield, Tags, Users } from 'lucide-react';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -25,6 +25,7 @@ const SECTIONS = [
   { to: '/admin/cracklab/reponses', label: 'À noter', group: 'CrackLab', icon: ClipboardCheck },
   { to: '/admin/categories', label: 'Thèmes', group: 'Organisation', icon: FolderOpen },
   { to: '/admin/tags', label: 'Tags', group: 'Organisation', icon: Tags },
+  { to: '/admin/badges', label: 'Badges', group: 'Organisation', icon: Award },
   { to: '/admin/admins', label: 'Administrateurs', group: 'Sécurité', icon: Shield },
 ] as const;
 
