@@ -17,6 +17,7 @@ import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,15 +39,18 @@ public class CertificateServiceImpl implements CertificateService {
     private final EventSubmissionService submissions;
     private final UserDirectory people;
     private final Mailer mailer;
+    private final ApplicationEventPublisher published;
 
     public CertificateServiceImpl(CertificateRepository certificates, EventService events, EventRegistrationService registrations,
-                                  EventSubmissionService submissions, UserDirectory people, Mailer mailer) {
+                                  EventSubmissionService submissions, UserDirectory people, Mailer mailer,
+                                  ApplicationEventPublisher published) {
         this.certificates = certificates;
         this.events = events;
         this.registrations = registrations;
         this.submissions = submissions;
         this.people = people;
         this.mailer = mailer;
+        this.published = published;
     }
 
     private record Draft(User holder, CertificateKind kind, Integer rank, String detail) {
@@ -114,6 +118,7 @@ public class CertificateServiceImpl implements CertificateService {
             certificate.setStatus(CertificateStatus.ISSUED);
             certificate.setIssuedAt(now);
             mailer.send(new CertificateIssuedEmail(holder.getEmail(), holder.getFirstName(), certificate.getTitle(), certificate.getCode()));
+            published.publishEvent(new CertificateIssued(holder.getId(), certificate.getKind(), certificate.getEventId()));
         }
         log.info("{} attestations issued", drafts.size());
         return drafts;

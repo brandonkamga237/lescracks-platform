@@ -28,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Instant;
 import java.util.List;
@@ -52,6 +53,7 @@ class CertificateServiceTest {
     @Mock private EventSubmissionService submissions;
     @Mock private UserDirectory people;
     @Mock private Mailer mailer;
+    @Mock private ApplicationEventPublisher published;
 
     private CertificateServiceImpl service;
     private final User awa = User.builder().id(1L).email("awa@example.com").firstName("Awa").lastName("Diallo").build();
@@ -60,7 +62,7 @@ class CertificateServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new CertificateServiceImpl(certificates, events, registrations, submissions, people, mailer);
+        service = new CertificateServiceImpl(certificates, events, registrations, submissions, people, mailer, published);
         when(certificates.save(any())).thenAnswer(call -> call.getArgument(0));
         when(certificates.findByEventIdOrderByKindAscHolderNameAsc(any())).thenReturn(List.of());
     }
@@ -126,6 +128,7 @@ class CertificateServiceTest {
         assertThat(draft.getHolderName()).isEqualTo("Awa Diallo");
         assertThat(draft.getIssuedAt()).isNotNull();
         verify(mailer, times(1)).send(new CertificateIssuedEmail("awa@example.com", "Awa", "a participé", "ABCDEFGHJK"));
+        verify(published).publishEvent(new CertificateIssued(1L, null, null));
     }
 
     @Test
