@@ -3,6 +3,7 @@ import { AlertTriangle, ArrowUpRight, Eye, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { AdminSection, AdminState } from '@/components/admin/AdminTable';
+import SignupFunnel from '@/components/admin/SignupFunnel';
 import { Delta, Kpi, Panel, PeriodSelect, SEGMENT, Segmented, TrendChart, deltaPct } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
@@ -30,6 +31,9 @@ export default function AdminDashboard() {
 
   const overview = useApi((signal) => adminApi.overview(signal), []);
   const audience = useApi((signal) => adminApi.audience(days, signal), [days]);
+  // The funnel always reads 30 days; reuse the period's audience when it already is 30 days.
+  const audience30 = useApi((signal) => (days === 30 ? Promise.resolve(null) : adminApi.audience(30, signal)), [days]);
+  const funnelAudience = days === 30 ? audience.data : audience30.data;
   const views = useApi((signal) => adminApi.contentViews(days, signal), [days]);
   const watch = useApi((signal) => adminApi.watch(signal), []);
   const recent = useApi((signal) => adminApi.users(0, '', {}, signal), []);
@@ -145,6 +149,11 @@ export default function AdminDashboard() {
           </>
         )}
       </Panel>
+
+      {stats && stats.signupFunnel.signedUp > 0 && (
+        <SignupFunnel className="mt-6" funnel={stats.signupFunnel}
+          visitors={funnelAudience?.available ? funnelAudience.visitors : null} />
+      )}
 
       {/* ── Qu'est-ce qui fonctionne ──────────────────────────────────────── */}
       <div className="mt-6 grid gap-4 lg:grid-cols-2">

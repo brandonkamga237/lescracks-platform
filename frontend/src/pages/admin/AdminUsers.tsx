@@ -4,6 +4,7 @@ import { Download, Eye, Search, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { GOAL_LABEL, PROVIDER_LABEL as providerLabels, SITUATION_LABEL } from '@/lib/memberProfile';
 import { countryName, displayPhone } from '@/lib/phone';
 import MemberPortrait from '@/components/admin/MemberPortrait';
+import SignupFunnel from '@/components/admin/SignupFunnel';
 import { AdminAction, AdminConfirm, AdminModal, AdminPagination, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
 import { Kpi } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
@@ -266,24 +267,7 @@ export default function AdminUsers() {
       )}
 
       {overview.data && overview.data.signupFunnel.signedUp > 0 && (
-        <section aria-labelledby="funnel-title" className="order-3 mt-6 rounded-lg border border-line-soft bg-card p-4 sm:order-none sm:mb-6 sm:mt-0 sm:p-5">
-          <h2 id="funnel-title" className="text-sm font-medium text-t1">Inscriptions des 30 derniers jours</h2>
-          <p className="mt-1 text-xs text-t4">Là où le chiffre chute, c’est là qu’on perd les gens.</p>
-          <ol className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {([
-              ['Inscrits', overview.data.signupFunnel.signedUp],
-              ['Email confirmé', overview.data.signupFunnel.verified],
-              ['Bienvenue faite', overview.data.signupFunnel.onboarded],
-              ['Revenus après J+1', overview.data.signupFunnel.returned],
-            ] as [string, number][]).map(([label, value]) => (
-              <li key={label} className="rounded border border-line-soft p-3">
-                <p className="font-display text-2xl font-semibold tabular-nums text-t1">{value.toLocaleString('fr-FR')}</p>
-                <p className="mt-1 text-xs text-t3">{label}
-                  <span className="ml-1 font-mono tabular-nums text-t4">{Math.round((value / overview.data!.signupFunnel.signedUp) * 100)} %</span></p>
-              </li>
-            ))}
-          </ol>
-        </section>
+        <SignupFunnel className="order-3 mt-6 sm:order-none sm:mb-6 sm:mt-0" funnel={overview.data.signupFunnel} />
       )}
 
       <div className="order-4 mt-6 sm:order-none sm:mb-6 sm:mt-0">
