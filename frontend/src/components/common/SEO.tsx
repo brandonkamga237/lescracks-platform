@@ -7,12 +7,14 @@ interface SEOProps {
   url?: string;
   /** Optional schema.org object injected as a per-page JSON-LD block. */
   jsonLd?: Record<string, unknown>;
+  /** Keeps the page out of search results (an attestation names a person). */
+  noindex?: boolean;
 }
 
 const SITE = 'https://lescracks.com';
 const DEFAULT_IMAGE = `${SITE}/preview.jpg`;
 const DEFAULT_TITLE = 'LesCracks · Apprendre la tech et passer à la pratique';
-const DEFAULT_DESC = 'Des vidéos, des ebooks et des événements pour développer tes compétences tech, à ton rythme.';
+const DEFAULT_DESC = 'Articles, ateliers et le Talk pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant.';
 
 const setMeta = (selector: string, value: string) => {
   const el = document.querySelector(selector);
@@ -25,6 +27,7 @@ const SEO = ({
   image = DEFAULT_IMAGE,
   url,
   jsonLd,
+  noindex = false,
 }: SEOProps) => {
   const fullTitle = title ? `${title} · LesCracks` : DEFAULT_TITLE;
   const canonicalUrl = url ? `${SITE}${url}` : SITE;
@@ -48,6 +51,12 @@ const SEO = ({
       document.title = DEFAULT_TITLE;
     };
   }, [fullTitle, description, image, canonicalUrl]);
+
+  useEffect(() => {
+    if (!noindex) return;
+    setMeta('meta[name="robots"]', 'noindex, follow');
+    return () => setMeta('meta[name="robots"]', 'index, follow');
+  }, [noindex]);
 
   // Per-page structured data (schema.org). Injected as its own tagged block so it
   // never clobbers the static Organization JSON-LD in index.html.

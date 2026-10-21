@@ -33,6 +33,9 @@ const AdminAudience = lazy(() => import('@/pages/admin/AdminAudience'));
 const AdminCategories = lazy(() => import('@/pages/admin/AdminCategories'));
 const AdminEvents = lazy(() => import('@/pages/admin/AdminEvents'));
 const AdminEventParticipants = lazy(() => import('@/pages/admin/AdminEventParticipants'));
+const AdminBadges = lazy(() => import('@/pages/admin/AdminBadges'));
+const Attestation = lazy(() => import('@/pages/Attestation'));
+const MemberProfile = lazy(() => import('@/pages/MemberProfile'));
 const AdminBlog = lazy(() => import('@/pages/admin/AdminBlog'));
 const AdminNewsletter = lazy(() => import('@/pages/admin/AdminNewsletter'));
 const AdminAdmins = lazy(() => import('@/pages/admin/AdminAdmins'));
@@ -146,6 +149,8 @@ function AppRoutes() {
       <Route path="/ressources/:slug" element={<LegacyArticle />} />
       <Route path="/evenements" element={<Evenements />} />
       <Route path="/evenements/:id" element={<EvenementDetail />} />
+      <Route path="/attestations/:code" element={<Suspense fallback={<Waiting />}><Attestation /></Suspense>} />
+      <Route path="/membres/:id" element={<Suspense fallback={<Waiting />}><MemberProfile /></Suspense>} />
       <Route path="/talk" element={<Talk />} />
       {/* CrackLab: its own space and chrome, the same accounts. Reading is open; answering needs a member. */}
       <Route path="/cracklab" element={<Suspense fallback={<Waiting />}><CrackLabHome /></Suspense>} />
@@ -174,6 +179,7 @@ function AppRoutes() {
         <Route path="ressources" element={<Navigate to="/admin/blog" replace />} />
         <Route path="evenements" element={<AdminEvents />} />
         <Route path="evenements/:id" element={<AdminEventParticipants />} />
+        <Route path="badges" element={<AdminBadges />} />
         <Route path="talks" element={<AdminTalks />} />
         <Route path="categories" element={<AdminCategories />} />
         <Route path="tags" element={<AdminTags />} />

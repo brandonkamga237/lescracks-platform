@@ -1,7 +1,5 @@
 package com.brandonkamga.lescracks.taxonomy.infra;
 
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.infra.UserRepository;
 import com.brandonkamga.lescracks.support.PostgresIT;
 
 import org.flywaydb.core.Flyway;
@@ -24,7 +22,6 @@ class ThemesMigrationIT extends PostgresIT {
 
     @Autowired private Flyway flyway;
     @Autowired private JdbcTemplate jdbc;
-    @Autowired private UserRepository users;
 
     @AfterEach
     void restoreTheSchema() {
@@ -73,8 +70,9 @@ class ThemesMigrationIT extends PostgresIT {
         long third = article(custom, "Le dernier");
         jdbc.update("insert into resource_tags (resource_id, tag_id) values (?, ?), (?, ?), (?, ?)",
                 first, apiInFrontend, second, apiInBackend, second, apiInFrontend);
-        User member = users.saveAndFlush(User.builder().email("awa@example.com").firstName("Awa").lastName("D").build());
-        jdbc.update("insert into user_interests (user_id, category_id) values (?, ?), (?, ?)", member.getId(), frontend, member.getId(), web);
+        // Plain SQL, not the User entity: the entity follows the latest schema, this database stops at V24.
+        long member = jdbc.queryForObject("insert into users (email, first_name, last_name, status) values ('awa@example.com', 'Awa', 'D', 'ACTIVE') returning id", Long.class);
+        jdbc.update("insert into user_interests (user_id, category_id) values (?, ?), (?, ?)", member, frontend, member, web);
 
         flyway.migrate();
 
@@ -90,7 +88,7 @@ class ThemesMigrationIT extends PostgresIT {
         assertThat(jdbc.queryForObject("select count(*) from resource_tags where resource_id = ?", Long.class, second)).isEqualTo(1);
         assertThat(jdbc.queryForObject("select count(*) from resource_tags where resource_id = ?", Long.class, first)).isEqualTo(1);
 
-        assertThat(jdbc.queryForList("select category_id from user_interests where user_id = ?", Long.class, member.getId()))
+        assertThat(jdbc.queryForList("select category_id from user_interests where user_id = ?", Long.class, member))
                 .containsExactly(web);
     }
 }

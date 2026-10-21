@@ -11,5 +11,5 @@ import java.util.Set;
 public record ProfileChanges(String firstName, String lastName, String username,
                              String bio, String location, Map<String, String> socialLinks, String phone,
                              MemberSituation situation, MemberGoal goal, Set<Long> interestIds,
-                             Boolean marketingConsent) {
+                             Boolean marketingConsent, ProfileVisibility visibility) {
 }

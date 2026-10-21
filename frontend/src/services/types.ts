@@ -96,6 +96,57 @@ export interface MyEvent {
   status: RegistrationStatus;
 }
 
+export type CertificateKind = 'PARTICIPATION' | 'WINNER' | 'PODIUM' | 'AMBASSADOR';
+
+/** An attestation as anyone checking it sees it. */
+export interface Certificate {
+  code: string;
+  kind: CertificateKind;
+  holderName: string;
+  /** Read after the name: « a participé au hackathon « … » ». */
+  title: string;
+  detail?: string;
+  eventId?: number;
+  eventDate?: string;
+  issuedAt?: string;
+  revoked: boolean;
+}
+
+export interface AdminCertificate extends Omit<Certificate, 'revoked' | 'eventId'> {
+  id: number;
+  status: 'DRAFT' | 'ISSUED' | 'REVOKED';
+  email?: string;
+}
+
+/** A badge on a profile. icon is a key from lib/badgeIcons. */
+export interface MemberBadge {
+  code: string;
+  name: string;
+  description: string;
+  icon: string;
+  awardedAt: string;
+  reason?: string;
+}
+
+export interface AdminBadge {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  icon: string;
+  /** Awarded by rules; neither edited nor deleted. */
+  system: boolean;
+  holders: number;
+}
+
+export interface BadgeHolder {
+  userId: number;
+  name: string;
+  email: string;
+  awardedAt: string;
+  reason?: string;
+}
+
 export type ProjectStatus = 'SUBMITTED' | 'UNDER_REVIEW' | 'ACCEPTED' | 'REJECTED';
 
 export interface TeamMember {
@@ -348,6 +399,10 @@ export interface UserProfile {
   /** 0 to 100. */
   completion: number;
   missing: ProfileField[];
+  /** Public profile choices: shown to anyone only when true. */
+  publicBio: boolean;
+  publicLocation: boolean;
+  publicLinks: boolean;
 }
 
 export type MemberSituation = 'STUDENT' | 'EMPLOYED' | 'CAREER_CHANGE' | 'JOB_SEEKING' | 'FREELANCE';
@@ -379,6 +434,22 @@ export interface UserProfileUpdate {
   goal?: MemberGoal;
   interestIds?: number[];
   marketingConsent?: boolean;
+  publicBio?: boolean;
+  publicLocation?: boolean;
+  publicLinks?: boolean;
+}
+
+/** A member as anyone sees them: never an email or a phone. */
+export interface PublicProfile {
+  id: number;
+  name: string;
+  avatarUrl?: string;
+  memberSince: string;
+  bio?: string;
+  location?: string;
+  links?: Record<string, string>;
+  badges: MemberBadge[];
+  certificates: { code: string; title: string; issuedAt: string }[];
 }
 // ── CrackLab ──────────────────────────────────────────────────────────────
 

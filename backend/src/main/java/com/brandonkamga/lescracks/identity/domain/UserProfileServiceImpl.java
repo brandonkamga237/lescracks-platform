@@ -65,6 +65,12 @@ public class UserProfileServiceImpl implements UserProfileService {
         if (changes.goal() != null) user.setGoal(changes.goal());
         interests(user, changes.interestIds());
         if (changes.marketingConsent() != null) user.setMarketingConsent(changes.marketingConsent());
+        ProfileVisibility visibility = changes.visibility();
+        if (visibility != null) {
+            if (visibility.bio() != null) user.setPublicBio(visibility.bio());
+            if (visibility.location() != null) user.setPublicLocation(visibility.location());
+            if (visibility.links() != null) user.setPublicLinks(visibility.links());
+        }
         user.setUpdatedAt(Instant.now());
         return user;
     }
