@@ -1,7 +1,7 @@
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
 import type {
-  ArticleSummary, AuthProvider, BlogTheme, Category, Certificate, MemberBadge, PublicProfile, EventRegistration, MyEvent, Project, ProjectDraft, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse,
+  ArticleComment, ArticleSummary, AuthProvider, BlogTheme, CommentThread, Category, Certificate, MemberBadge, PublicProfile, EventRegistration, MyEvent, Project, ProjectDraft, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse,
   NewsletterStatus, ResourceLikeStatus, Tag, TalkVideo, UserIdentity, UserProfile,
   UserProfileUpdate, OnboardingAnswers, SignupContext,
 } from '@/services/types';
@@ -91,6 +91,11 @@ export const api = {
   resourceLikes: (id: number, signal?: AbortSignal) => http.get<ResourceLikeStatus>(`/resources/${id}/likes`, undefined, signal),
   likeResource: (id: number) => http.post<ResourceLikeStatus>(`/resources/${id}/likes`),
   unlikeResource: (id: number) => http.delete<ResourceLikeStatus>(`/resources/${id}/likes`),
+  comments: (resourceId: number, signal?: AbortSignal) => http.get<CommentThread[]>(`/resources/${resourceId}/comments`, undefined, signal),
+  postComment: (resourceId: number, body: string, parentId?: number) => http.post<ArticleComment>(`/resources/${resourceId}/comments`, { body, parentId }),
+  editComment: (id: number, body: string) => http.put<ArticleComment>(`/comments/${id}`, { body }),
+  deleteComment: (id: number) => http.delete<void>(`/comments/${id}`),
+  reportComment: (id: number, reason?: string) => http.post<void>(`/comments/${id}/reports`, { reason }),
   cracklab: {
     challenges: (filters: CrackLabFilters = {}, signal?: AbortSignal) =>
       http.get<PageResponse<ChallengeSummary>>('/cracklab/challenges', filters, signal),

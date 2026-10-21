@@ -579,3 +579,34 @@ export interface AdminChallenge extends ChallengeDetail {
   updatedAt: string;
   scheduledAt?: string;
 }
+
+export interface CommentAuthor { id: number; name: string; avatarUrl?: string; }
+
+/** A removed comment kept for its replies has no author and no body. */
+export interface ArticleComment {
+  id: number;
+  parentId?: number;
+  author?: CommentAuthor;
+  body?: string;
+  createdAt: string;
+  editedAt?: string;
+  removed: boolean;
+  mine: boolean;
+}
+
+export interface CommentThread { comment: ArticleComment; replies: ArticleComment[]; }
+
+export type CommentStatus = 'VISIBLE' | 'HIDDEN' | 'DELETED';
+
+export interface AdminComment {
+  id: number;
+  parentId?: number;
+  body: string;
+  status: CommentStatus;
+  reportCount: number;
+  reasons: string[];
+  createdAt: string;
+  editedAt?: string;
+  author?: { id: number; name: string; email: string };
+  article: { id: number; title: string; slug?: string };
+}
