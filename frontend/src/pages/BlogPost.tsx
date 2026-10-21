@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 
 import ArticleCover from '@/components/blog/ArticleCover';
 import ArticleRenderer from '@/components/blog/ArticleRenderer';
+import ArticleComments from '@/components/community/ArticleComments';
 import ReadMarker from '@/components/common/ReadMarker';
 import SEO from '@/components/common/SEO';
 import ShareButton from '@/components/common/ShareButton';
@@ -116,6 +117,7 @@ export default function BlogPost() {
                 <ShareButton title={loaded.title} path={articlePath(loaded)} label="Partager l’article" className="mt-3" />
               </aside>
             </div>
+            <ArticleComments resourceId={loaded.id} returnPath={articlePath(loaded)} articleSlug={loaded.slug ?? String(loaded.id)} />
             <div className="mt-16 border-t border-line pt-8">
               <Link to="/blog" className="link inline-flex min-h-11 items-center gap-3 text-sm">Lire d’autres articles<ArrowUpRight className="h-4 w-4" aria-hidden /></Link>
             </div>
