@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.8.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.7.0...v1.8.0) (2026-10-21)
+
+
+### Features
+
+* **blog:** show bare web addresses as gold links in articles and event programmes ([#115](https://github.com/brandonkamga237/lescracks-platform/issues/115)) ([85ccf20](https://github.com/brandonkamga237/lescracks-platform/commit/85ccf205becdc7546fbb12f4eb9d1200d95f15f7))
+* **community:** comments under articles with replies, reports and moderation ([#114](https://github.com/brandonkamga237/lescracks-platform/issues/114)) ([3c8c0b6](https://github.com/brandonkamga237/lescracks-platform/commit/3c8c0b6456e766ae6740f27f0c5137239a9ab385))
+* **community:** public member profiles with a quick preview and privacy choices ([#112](https://github.com/brandonkamga237/lescracks-platform/issues/112)) ([65d0941](https://github.com/brandonkamga237/lescracks-platform/commit/65d0941053859cadcfeb5b67a053cf30383d1f22))
+* **recognition:** attestations prepared by the admin, issued on demand, verifiable by code ([#110](https://github.com/brandonkamga237/lescracks-platform/issues/110)) ([65d0941](https://github.com/brandonkamga237/lescracks-platform/commit/65d0941053859cadcfeb5b67a053cf30383d1f22))
+* **recognition:** profile badges from attestations and admin awards, founding badge ([#111](https://github.com/brandonkamga237/lescracks-platform/issues/111)) ([65d0941](https://github.com/brandonkamga237/lescracks-platform/commit/65d0941053859cadcfeb5b67a053cf30383d1f22))
+
 ## [1.7.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.6.0...v1.7.0) (2026-10-20)
 
 
