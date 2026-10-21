@@ -14,9 +14,13 @@ function hasHtml(body: unknown): body is { html: string } {
   return typeof body === 'object' && body !== null && !Array.isArray(body) && 'html' in (body as { html?: string }) && typeof (body as { html?: string }).html === 'string';
 }
 
-const INLINE = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\([^)\s]+\))/g;
+// A bare address ends before the punctuation that closes its sentence: « voir https://x.com. » links x.com.
+const BARE_URL = /^https?:\/\/\S+$/;
+const INLINE = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\([^)\s]+\)|https?:\/\/[^\s<]*[^\s<.,;:!?)»"'])/g;
 
-/** Renders **bold**, *italic*, `code` and [label](url) marks inside a block's text. */
+const LINK = 'text-gold-ink underline decoration-gold-400/40 underline-offset-4 transition-colors hover:decoration-gold-400';
+
+/** Renders **bold**, *italic*, `code`, [label](url) marks and bare https:// addresses inside a block's text. */
 function InlineText({ text }: { text: string }) {
   return (
     <>
@@ -33,11 +37,13 @@ function InlineText({ text }: { text: string }) {
         const link = part.match(/^\[([^\]]+)\]\(([^)\s]+)\)$/);
         if (link) {
           return (
-            <a key={i} href={link[2]} target="_blank" rel="noopener noreferrer"
-              className="text-gold-ink underline decoration-gold-400/40 underline-offset-4 transition-colors hover:decoration-gold-400">
+            <a key={i} href={link[2]} target="_blank" rel="noopener noreferrer" className={LINK}>
               {link[1]}
             </a>
           );
+        }
+        if (BARE_URL.test(part)) {
+          return <a key={i} href={part} target="_blank" rel="noopener noreferrer" className={`${LINK} break-all`}>{part.replace(/^https?:\/\//, '')}</a>;
         }
         return part;
       })}
