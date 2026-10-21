@@ -34,6 +34,7 @@ const AdminCategories = lazy(() => import('@/pages/admin/AdminCategories'));
 const AdminEvents = lazy(() => import('@/pages/admin/AdminEvents'));
 const AdminEventParticipants = lazy(() => import('@/pages/admin/AdminEventParticipants'));
 const AdminBadges = lazy(() => import('@/pages/admin/AdminBadges'));
+const AdminComments = lazy(() => import('@/pages/admin/AdminComments'));
 const Attestation = lazy(() => import('@/pages/Attestation'));
 const MemberProfile = lazy(() => import('@/pages/MemberProfile'));
 const AdminBlog = lazy(() => import('@/pages/admin/AdminBlog'));
@@ -180,6 +181,7 @@ function AppRoutes() {
         <Route path="evenements" element={<AdminEvents />} />
         <Route path="evenements/:id" element={<AdminEventParticipants />} />
         <Route path="badges" element={<AdminBadges />} />
+        <Route path="commentaires" element={<AdminComments />} />
         <Route path="talks" element={<AdminTalks />} />
         <Route path="categories" element={<AdminCategories />} />
         <Route path="tags" element={<AdminTags />} />

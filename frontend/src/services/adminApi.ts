@@ -2,7 +2,7 @@ import { ENV } from '@/config/env';
 import { prepareImage } from '@/lib/image';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminArticle, AdminBadge, AdminCertificate, BadgeHolder, AdminChallenge, AdminProject, AdminRegistration, ProjectStatus, AdminSubscriber, AdminSummary, ChallengeDifficulty, ChallengeStatus, ChallengeSubmission, SubmissionStatus, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, MemberPortrait, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
+import type { AdminArticle, AdminBadge, AdminComment, AdminCertificate, BadgeHolder, AdminChallenge, AdminProject, AdminRegistration, ProjectStatus, AdminSubscriber, AdminSummary, ChallengeDifficulty, ChallengeStatus, ChallengeSubmission, SubmissionStatus, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, MemberPortrait, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
 
 export interface ArticleRequest {
   title: string;
@@ -197,6 +197,10 @@ export const adminApi = {
   eventProjects: (id: number, signal?: AbortSignal) => http.get<AdminProject[]>(`/events/admin/${id}/submissions`, undefined, signal),
   reviewProject: (id: number, review: { status?: ProjectStatus; score?: number | null; rank?: number | null; note?: string }) =>
     http.patch<AdminProject>(`/events/admin/submissions/${id}`, review),
+  comments: (reported: boolean, page = 0, signal?: AbortSignal) =>
+    http.get<PageResponse<AdminComment>>('/comments/admin', { reported, page, size: 20 }, signal),
+  moderateComment: (id: number, status: 'VISIBLE' | 'HIDDEN') => http.put<AdminComment>(`/comments/admin/${id}`, { status }),
+  eraseComment: (id: number) => http.delete<void>(`/comments/admin/${id}`),
   badges: (signal?: AbortSignal) => http.get<AdminBadge[]>('/badges/admin', undefined, signal),
   createBadge: (badge: { name: string; description: string; icon: string }) => http.post<AdminBadge>('/badges/admin', badge),
   updateBadge: (id: number, badge: { name: string; description: string; icon: string }) => http.put<AdminBadge>(`/badges/admin/${id}`, badge),

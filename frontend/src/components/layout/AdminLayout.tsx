@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowUpRight, Award, BookOpen, CalendarDays, ChevronRight, ClipboardCheck, FlaskConical, FolderOpen, Globe2, LayoutDashboard, LogOut, Mail, MoreHorizontal, Podcast, Shield, Tags, Users } from 'lucide-react';
+import { ArrowUpRight, Award, BookOpen, CalendarDays, ChevronRight, ClipboardCheck, FlaskConical, FolderOpen, Globe2, LayoutDashboard, LogOut, Mail, MessageSquare, MoreHorizontal, Podcast, Shield, Tags, Users } from 'lucide-react';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -21,6 +21,7 @@ const SECTIONS = [
   { to: '/admin/blog', label: 'Blog', group: 'Contenu', icon: BookOpen },
   { to: '/admin/evenements', label: 'Événements', group: 'Contenu', icon: CalendarDays },
   { to: '/admin/talks', label: 'Talk', group: 'Contenu', icon: Podcast },
+  { to: '/admin/commentaires', label: 'Commentaires', group: 'Contenu', icon: MessageSquare },
   { to: '/admin/cracklab/challenges', label: 'Challenges', group: 'CrackLab', icon: FlaskConical },
   { to: '/admin/cracklab/reponses', label: 'À noter', group: 'CrackLab', icon: ClipboardCheck },
   { to: '/admin/categories', label: 'Thèmes', group: 'Organisation', icon: FolderOpen },
