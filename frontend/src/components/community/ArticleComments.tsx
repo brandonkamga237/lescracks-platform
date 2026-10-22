@@ -181,10 +181,12 @@ interface ArticleCommentsProps {
   /** Where the reader comes back after signing in. */
   returnPath: string;
   articleSlug: string;
+  /** Reports the number of visible comments, for the counters kept elsewhere on the page. */
+  onCountChange?: (count: number) => void;
 }
 
 /** The discussion under an article: anyone reads it, members write, reply one level deep and report. */
-export default function ArticleComments({ resourceId, returnPath, articleSlug }: ArticleCommentsProps) {
+export default function ArticleComments({ resourceId, returnPath, articleSlug, onCountChange }: ArticleCommentsProps) {
   const { hash } = useLocation();
   const { isLoading, isSignedIn, isAdmin, signIn } = useSession();
   const member = isSignedIn && !isAdmin;
@@ -192,6 +194,8 @@ export default function ArticleComments({ resourceId, returnPath, articleSlug }:
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const list = threads.data ?? [];
   const count = list.reduce((total, thread) => total + (thread.comment.removed ? 0 : 1) + thread.replies.length, 0);
+
+  useEffect(() => { onCountChange?.(count); }, [count, onCountChange]);
 
   // Arriving from a reply email (#commentaire-12): the comments load after the page, so scroll once they are there.
   useEffect(() => {
@@ -207,7 +211,7 @@ export default function ArticleComments({ resourceId, returnPath, articleSlug }:
   }
 
   return (
-    <section aria-labelledby="comments-heading" className="mt-16 max-w-[42rem]">
+    <section id="discussion" aria-labelledby="comments-heading" className="mt-16 max-w-[42rem] scroll-mt-24">
       <h2 id="comments-heading" className="flex items-center gap-3 text-2xl text-t1">
         <MessageCircle className="h-6 w-6 text-gold-ink" aria-hidden />Discussion{count > 0 && <span className="text-base font-normal text-t3">({count})</span>}
       </h2>
