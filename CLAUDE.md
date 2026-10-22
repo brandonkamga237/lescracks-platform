@@ -64,8 +64,9 @@ Before any commit or PR:
 - Controllers return the response record (or `ResponseEntity<XxxResponse>`); requests translate themselves into commands (`request.toRegistration()`), responses build themselves from models (`XxxResponse.of(model)`)
 - Never expose a domain model or a JPA entity: always a DTO
 - Errors: throw `NotFoundException` / `BadRequestException` / `ForbiddenException` / `ConflictException`; do not set the status in the controller, `GlobalExceptionHandler` does it
-- DB schema: Flyway only (`ddl-auto: validate` everywhere). A new entity field means a new `V{n}__...sql` migration; never edit a migration that has already been applied
-- Lombok (`@Data`, `@Builder`) on DTOs and entities; logging through `slf4j`
+- DB access: **plain SQL through `JdbcClient`, no ORM**, in modules on the new skeleton; JPA remains only in modules not migrated yet. No N+1: no query in a loop, related data in one query per list, aggregates computed by PostgreSQL, indexes for every filtered or joined column (see the design-patterns skill)
+- DB schema: Flyway only (`ddl-auto: validate` for the remaining JPA entities). A new entity field means a new `V{n}__...sql` migration; never edit a migration that has already been applied
+- Lombok (`@Data`, `@Builder`) on DTOs and models; logging through `slf4j`
 - Public vs protected endpoints are declared in `SecurityConfig`, plus `@PreAuthorize` on each admin method; roles come from the Keycloak realm: `user`, `admin`
 - Text shown to users (emails, API errors) in French; everything else in English
 - Tests mirror the production layout: `src/test/.../<module>/{api,application,domain,infra}/`; application tests use copying in-memory fakes for stores (`InMemoryXxxStore`) and assert on what was stored, never a global `controller`/`service`/`repository` split. Shared fixtures live in `support/`; domain fixtures stay in their feature package. The suffix picks the suite: `*Test` runs without Docker via `./mvnw test` (pure unit tests plus light slices like `@WebMvcTest`), `*IT` runs via `./mvnw verify` against real PostgreSQL through Testcontainers (extend `support/PostgresIT`)
@@ -109,7 +110,7 @@ Before any commit or PR:
 
 ## Architecture
 - Client-rendered SPA → nginx routes bot user-agents to `/seo/*` (HTML + JSON-LD snapshots rendered by the backend). Every new indexable public page needs its snapshot in `SeoController` and its nginx entry
-- Flyway owns the schema (Hibernate only validates) → keeps dev and prod from drifting apart
+- Flyway owns the schema → keeps dev and prod from drifting apart; SQL adapters are checked against it by their ITs
 - Keycloak owns identity (password, Google, GitHub, reset, login throttling); the API is an OAuth2 resource server and holds no credentials. Adding a provider is realm configuration, not code
 - MinIO (S3-compatible) for files and images, no application disk storage in production
 - Frontend and backend ship as separate containers behind Traefik; the frontend only talks to the backend through `/api/*`

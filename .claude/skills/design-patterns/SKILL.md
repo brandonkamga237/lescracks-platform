@@ -1,6 +1,6 @@
 ---
 name: design-patterns
-description: The architecture, SOLID rules and design patterns every LesCracks backend change must follow — module skeleton, ports and adapters, where each pattern applies, what to reuse from shared/kernel, and the checklist to run before committing. Use for every backend feature, fix or refactor, and whenever deciding where a class goes or whether a pattern is worth it.
+description: The architecture, SOLID rules and design patterns every LesCracks backend change must follow — module skeleton, ports and adapters, plain SQL persistence without ORM, no N+1 and performance rules, where each pattern applies, what to reuse from shared/kernel, and the checklist to run before committing. Use for every backend feature, fix or refactor, and whenever deciding where a class goes or whether a pattern is worth it.
 ---
 
 # Architecture and design patterns
@@ -40,7 +40,7 @@ storing newsletter contacts and marketing attribution).
   application/          use cases: XxxService interface + XxxServiceImpl, command records
   domain/model/         aggregates, value objects, enums, domain events — plain Java
   domain/port/          interfaces the module needs from outside: stores, gateways, clocks
-  infra/persistence/    XxxEntity (JPA), XxxJpaRepository, JpaXxxStore (the adapter), mappers
+  infra/persistence/    JdbcXxxStore (the adapter): plain SQL through JdbcClient, its row mappers
   infra/<technology>/   jwt/, smtp/, minio/, metrics/… one adapter per port
   infra/config/         @Configuration assembling application services, with their transactions
 ```
@@ -81,8 +81,8 @@ api ──▶ application ──▶ domain ◀── infra
 | Pattern | Use it for | Example |
 | --- | --- | --- |
 | **Ports & Adapters** | Anything that touches I/O: database, mail, files, tokens, metrics | `UserStore` ← `JpaUserStore`; `PasswordHasher` ← `BCryptPasswordHasher` |
-| **Repository (as a port)** | Loading and saving an aggregate | `UserStore.save(user)` returns the stored copy; always save explicitly, there is no dirty checking in the domain |
-| **Data Mapper** | Entity ⇄ domain model, inside `infra/persistence` only | `UserEntityMapper.toDomain/copy` |
+| **Repository (as a port)** | Loading and saving an aggregate | `UserStore.save(user)` returns the stored copy; always save explicitly, there is no dirty checking |
+| **Data Mapper** | SQL row ⇄ domain model, inside `infra/persistence` only | a `RowMapper` per aggregate in its `JdbcXxxStore` |
 | **Aggregate** | A cluster changed together, one root, one store | `Event` with its registrations rules; reference other aggregates **by id** |
 | **Value Object** | A concept with rules and no identity | `PhoneNumber`, `Slug`, `EmailAddress`, `PageQuery` — immutable records that validate in their constructor |
 | **Command** | A use case with several inputs | `Registration`, `ProfileChanges`; built by `Request.toCommand()` |
@@ -90,7 +90,7 @@ api ──▶ application ──▶ domain ◀── infra
 | **Facade** | What another module may know about yours | `UserDirectory` / `MemberDirectory` |
 | **Domain Event (Observer)** | A side effect owned by another module | `MemberRegistered` → newsletter subscribes; published through a port (`MemberEvents`), delivered by Spring in infra |
 | **Decorator / Proxy** | Cross-cutting behaviour around a service | `TransactionalServices.wrap` adds the transaction without touching the service |
-| **Specification** | Combinable query filters | `UserSpecifications.matching(search)` — in infra, built from a domain search record |
+| **Query Object** | Combinable filters | a search record (`UserSearch`) turned into a `WHERE` with named parameters in the adapter; never concatenate a value into SQL |
 | **Template Method** | Same flow, varying steps | Publication lifecycle: schedule → publish → announce, with the announce step varying |
 | **Factory method** | Construction with rules (defaults, normalisation) | `Account.register(email, hash)`; static `of(...)` on responses |
 | **Builder** | Many optional fields | Lombok `@Builder` on models and fakes; never on a value object with invariants |
@@ -116,7 +116,45 @@ Before writing any of these, use or extend the kernel one:
 If two modules need the same thing and the kernel lacks it, move it to the kernel in its own
 commit first, then use it.
 
-## 6. Database rules
+## 6. Persistence: plain SQL, no ORM
+
+Modules on the skeleton use **no ORM**: no `@Entity`, no Spring Data repository, no Hibernate.
+Their adapters write SQL by hand with Spring's `JdbcClient`. JPA only survives in modules not
+migrated yet, and disappears from each one at its migration step.
+
+- One adapter per port, `infra/persistence/JdbcXxxStore`, SQL in Java text blocks, every
+  column named (never `SELECT *`), values always bound as named parameters.
+- Mapping by hand: one `RowMapper` per model, next to the SQL that feeds it.
+- Insert with `RETURNING id`; insert-or-update with `INSERT … ON CONFLICT … DO UPDATE`.
+- Counters and toggles in one atomic statement (`UPDATE … SET view_count = view_count + 1`,
+  `INSERT … ON CONFLICT DO NOTHING`), never read-modify-write in Java.
+- Many rows: `batchUpdate`, or one `INSERT … SELECT` / `UPDATE … FROM`; never a loop of statements.
+
+## 7. Performance: no N+1, ever
+
+The rule: **the number of queries of a use case does not grow with the number of rows.**
+
+- **No query inside a loop**, in a stream, or in a mapper. Lists that need related data load
+  it in one more query for the whole page: `WHERE parent_id = ANY(:ids)` (or `IN (:ids)`),
+  grouped in memory by id. A page of 50 comments with their authors is 2 queries, not 51.
+- Prefer a `JOIN` when the related data is one row per row (author name, category label).
+- Lists read what they show: a dedicated read model (record) with only those columns, not the
+  full aggregate with its collections.
+- Counts, sums and groupings are done by PostgreSQL (`count(*) FILTER (WHERE …)`,
+  `GROUP BY`), never by loading rows into Java to count them.
+- Pages: `LIMIT`/`OFFSET` plus `count(*) OVER ()` in the same query; keyset pagination
+  (`WHERE (created_at, id) < (:at, :id)`) for feeds and tables that grow without bound.
+- Every foreign key and every column used in a `WHERE`, `JOIN` or `ORDER BY` of a frequent
+  query has an index, created in the same migration as the query that needs it. A new query
+  on a large table is checked with `EXPLAIN ANALYZE` before merging.
+- Transactions stay short: no network call (email, MinIO, HTTP) inside; side effects run
+  after commit.
+- No cache without a measurement that asks for it; when there is one, the port decides what is
+  cached, not the caller.
+- Persistence ITs assert the query count of list use cases when a regression is likely
+  (a list with related data).
+
+## 8. Database rules
 
 - One table belongs to one module. Cross-module links are `xxx_id` columns with a foreign key,
   never a JPA relation to another module's entity.
@@ -128,16 +166,16 @@ commit first, then use it.
 - Schema changes only through a new Flyway migration (`db-migration` skill). Data moves keep
   ids stable so foreign keys survive.
 
-## 7. Tests that prove the design
+## 9. Tests that prove the design
 
 - `application`: unit tests with **fakes** for stores (`InMemoryXxxStore`, copying) and mocks
   for gateways; assert on what was stored, not on the object you passed in.
 - `domain/model`: plain unit tests of the rules, no mocks.
-- `infra/persistence`: `*IT` on PostgreSQL (`PostgresIT`) for mappings and queries.
+- `infra/persistence`: `*IT` on PostgreSQL (`PostgresIT`) for every SQL statement of the adapter: mapping both ways, filters, paging, conflicts.
 - `api`: `@WebMvcTest` slices for status codes, validation and security.
 - `ArchitectureTest`: add the module to its lists once it follows the skeleton.
 
-## 8. Checklist before every commit
+## 10. Checklist before every commit
 
 1. Which module owns this? Is it in the right folder of the skeleton?
 2. Does `domain`/`application` import anything from Spring, JPA, servlet, `infra` or `api`?
@@ -145,4 +183,6 @@ commit first, then use it.
 4. Is anything here already in `shared/kernel` or another module? Reuse it.
 5. Did I add an abstraction with a single case? Remove it.
 6. Did I touch another module's tables, entities or repositories? Go through its interface.
-7. Tests: application with fakes, IT for persistence, `ArchitectureTest` green.
+7. Persistence in plain SQL, no ORM; no query in a loop; lists load related data in one
+   query; aggregates computed by PostgreSQL; every filtered or joined column indexed.
+8. Tests: application with fakes, IT for every SQL statement, `ArchitectureTest` green.
