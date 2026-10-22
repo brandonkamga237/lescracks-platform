@@ -1,4 +1,4 @@
-package com.brandonkamga.lescracks.identity.domain;
+package com.brandonkamga.lescracks.identity.domain.admin;
 
 import java.util.List;
 

@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.identity.domain;
 
+import com.brandonkamga.lescracks.identity.domain.credential.AuthMetrics;
 import com.brandonkamga.lescracks.identity.infra.UserRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 

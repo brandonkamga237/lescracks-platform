@@ -1,26 +1,20 @@
-package com.brandonkamga.lescracks.identity.domain;
+package com.brandonkamga.lescracks.identity.infra.persistence;
+
+import com.brandonkamga.lescracks.identity.domain.admin.AdminStatus;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.Instant;
 
-/**
- * An administrator of the platform.
- *
- * Admins are local accounts with a username and a password hash, distinct from
- * regular users.
- */
-@Entity
+@Entity(name = "Admin")
 @Table(name = "admins")
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class Admin {
+public class AdminEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,14 +28,11 @@ public class Admin {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    @Builder.Default
-    private AdminStatus status = AdminStatus.ACTIVE;
+    private AdminStatus status;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private Instant createdAt = Instant.now();
+    private Instant createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    @Builder.Default
-    private Instant updatedAt = Instant.now();
+    private Instant updatedAt;
 }

@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks;
 
 import com.brandonkamga.lescracks.event.domain.EventService;
-import com.brandonkamga.lescracks.identity.domain.AdminAuthService;
+import com.brandonkamga.lescracks.identity.domain.admin.AdminAuthService;
 import com.brandonkamga.lescracks.identity.domain.EmailVerificationService;
 import com.brandonkamga.lescracks.identity.domain.PasswordResetService;
 import com.brandonkamga.lescracks.identity.domain.UserAuthService;
@@ -87,6 +87,6 @@ class LesCracksApplicationIT extends PostgresIT {
                 .collect(Collectors.toSet());
 
         assertThat(entities).contains("Resource", "Article",
-                "Category", "Tag", "Event", "NewsletterSubscription", "User", "Admin");
+                "Category", "Tag", "Event", "NewsletterSubscription", "User", "AdminEntity");
     }
 }

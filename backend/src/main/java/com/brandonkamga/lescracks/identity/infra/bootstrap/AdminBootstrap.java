@@ -1,13 +1,14 @@
-package com.brandonkamga.lescracks.identity.infra;
+package com.brandonkamga.lescracks.identity.infra.bootstrap;
 
-import com.brandonkamga.lescracks.identity.domain.Admin;
-import com.brandonkamga.lescracks.identity.domain.AdminStatus;
+import com.brandonkamga.lescracks.identity.domain.admin.Admin;
+import com.brandonkamga.lescracks.identity.domain.admin.AdminStatus;
+import com.brandonkamga.lescracks.identity.domain.admin.AdminStore;
+import com.brandonkamga.lescracks.identity.domain.credential.PasswordHasher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,16 +17,15 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AdminBootstrap implements CommandLineRunner {
-
     private static final Logger log = LoggerFactory.getLogger(AdminBootstrap.class);
 
-    private final AdminRepository admins;
-    private final PasswordEncoder passwords;
+    private final AdminStore admins;
+    private final PasswordHasher passwords;
     private final String username;
     private final String password;
 
-    public AdminBootstrap(AdminRepository admins,
-                          PasswordEncoder passwords,
+    public AdminBootstrap(AdminStore admins,
+                          PasswordHasher passwords,
                           @Value("${app.admin.bootstrap-username:admin}") String username,
                           @Value("${app.admin.bootstrap-password:admin}") String password) {
         this.admins = admins;
@@ -36,12 +36,12 @@ public class AdminBootstrap implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (admins.findByUsernameIgnoreCase(username).isPresent()) {
+        if (admins.findByUsername(username).isPresent()) {
             return;
         }
         admins.save(Admin.builder()
                 .username(username)
-                .passwordHash(passwords.encode(password))
+                .passwordHash(passwords.hash(password))
                 .status(AdminStatus.ACTIVE)
                 .build());
         log.info("Bootstrapped admin '{}'", username);

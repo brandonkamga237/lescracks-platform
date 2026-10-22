@@ -1,22 +1,21 @@
-package com.brandonkamga.lescracks.identity.domain;
+package com.brandonkamga.lescracks.identity.infra.metrics;
+
+import com.brandonkamga.lescracks.identity.domain.credential.AuthMetrics;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Component;
 
-/**
- * Business counters for the auth funnel: who logs in, through which provider, and how
- * often it fails. Answers in Prometheus what "users can't sign in" would otherwise
- * require digging through logs.
- */
+/** Read in Prometheus as auth_login_total and auth_register_total. */
 @Component
-public class AuthMetrics {
+public class MicrometerAuthMetrics implements AuthMetrics {
 
     private final MeterRegistry registry;
 
-    public AuthMetrics(MeterRegistry registry) {
+    public MicrometerAuthMetrics(MeterRegistry registry) {
         this.registry = registry;
     }
 
+    @Override
     public void login(String audience, String provider, boolean success) {
         registry.counter("auth_login_total",
                 "audience", audience,
@@ -24,6 +23,7 @@ public class AuthMetrics {
                 "outcome", success ? "success" : "failure").increment();
     }
 
+    @Override
     public void register(boolean success) {
         registry.counter("auth_register_total", "outcome", success ? "success" : "failure").increment();
     }

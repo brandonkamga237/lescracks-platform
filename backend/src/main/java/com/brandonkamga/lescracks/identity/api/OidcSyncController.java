@@ -2,7 +2,7 @@ package com.brandonkamga.lescracks.identity.api;
 
 import com.brandonkamga.lescracks.identity.api.dto.OidcSyncRequest;
 import com.brandonkamga.lescracks.identity.api.dto.UserProfileResponse;
-import com.brandonkamga.lescracks.identity.domain.AuthMetrics;
+import com.brandonkamga.lescracks.identity.domain.credential.AuthMetrics;
 import com.brandonkamga.lescracks.identity.domain.OidcSyncService;
 import com.brandonkamga.lescracks.identity.domain.User;
 import com.brandonkamga.lescracks.identity.domain.UserIdentityService;
