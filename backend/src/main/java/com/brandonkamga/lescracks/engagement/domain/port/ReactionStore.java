@@ -26,6 +26,9 @@ public interface ReactionStore {
     /** One query whatever the number of ids; targets nobody reacted to are absent. */
     Map<Long, Counts> counts(TargetType type, Collection<Long> ids);
 
+    /** The most liked targets of a type, most liked first; in order, at most {@code limit}. */
+    Map<Long, Counts> mostLiked(TargetType type, int limit);
+
     /** Drops the views, likes and counters of a target that no longer exists. */
     void forget(Target target);
 }

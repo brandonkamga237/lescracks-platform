@@ -15,6 +15,9 @@ public interface EngagementCounts {
     /** One query whatever the number of ids; a target nobody reacted to reads as {@link Counts#NONE}. */
     Map<Long, Counts> countsOf(TargetType type, Collection<Long> ids);
 
+    /** The most liked targets of a type, most liked first. */
+    Map<Long, Counts> listMostLiked(TargetType type, int limit);
+
     /** Drops every view, like and comment of a deleted target. */
     void forget(Target target);
 }

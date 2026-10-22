@@ -145,6 +145,17 @@ final class InMemoryEngagement {
         }
 
         @Override
+        public Map<Long, Counts> mostLiked(TargetType type, int limit) {
+            Map<Long, Counts> ranked = new LinkedHashMap<>();
+            likes.stream().filter(l -> l.startsWith("Target[type=" + type + ","))
+                    .map(l -> Long.valueOf(l.substring(l.indexOf("id=") + 3, l.indexOf(']'))))
+                    .distinct().map(id -> Map.entry(id, counts(new Target(type, id))))
+                    .sorted((a, b) -> Integer.compare(b.getValue().likes(), a.getValue().likes())).limit(limit)
+                    .forEach(entry -> ranked.put(entry.getKey(), entry.getValue()));
+            return ranked;
+        }
+
+        @Override
         public void forget(Target target) {
             views.removeIf(v -> v.startsWith(target + "/"));
             likes.removeIf(l -> l.startsWith(target + "/"));

@@ -66,6 +66,11 @@ public class ReactionServiceImpl implements ReactionService, EngagementCounts {
     }
 
     @Override
+    public Map<Long, Counts> listMostLiked(TargetType type, int limit) {
+        return reactions.mostLiked(type, limit);
+    }
+
+    @Override
     public void forget(Target target) {
         reactions.forget(target);
         comments.deleteByTarget(target);

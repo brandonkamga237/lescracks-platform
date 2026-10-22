@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /** Each reaction is one statement: the row and its counter change together, without a read first. */
@@ -82,6 +83,16 @@ class JdbcReactionStore implements ReactionStore {
                 .param("type", type.name()).param("ids", ids)
                 .query(row -> { counts.put(row.getLong("target_id"), new Counts(row.getInt("view_count"), row.getInt("like_count"))); });
         return counts;
+    }
+
+    @Override
+    public Map<Long, Counts> mostLiked(TargetType type, int limit) {
+        Map<Long, Counts> ranked = new LinkedHashMap<>();
+        jdbc.sql("SELECT target_id, view_count, like_count FROM engagement_counters WHERE target_type = :type AND like_count > 0 "
+                        + "ORDER BY like_count DESC, target_id LIMIT :limit")
+                .param("type", type.name()).param("limit", limit)
+                .query(row -> { ranked.put(row.getLong("target_id"), new Counts(row.getInt("view_count"), row.getInt("like_count"))); });
+        return ranked;
     }
 
     @Override

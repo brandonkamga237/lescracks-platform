@@ -61,6 +61,7 @@ class JdbcEngagementIT extends PostgresIT {
         assertThat(reactions.counts(ARTICLE)).isEqualTo(new Counts(2, 1));
         assertThat(reactions.hasLiked(ARTICLE, awa)).isTrue();
         assertThat(reactions.counts(TargetType.ARTICLE, List.of(ARTICLE.id(), 404L))).containsOnlyKeys(ARTICLE.id());
+        assertThat(reactions.mostLiked(TargetType.ARTICLE, 100)).containsEntry(ARTICLE.id(), new Counts(2, 1));
 
         reactions.forget(ARTICLE);
         assertThat(reactions.counts(ARTICLE)).isEqualTo(Counts.NONE);

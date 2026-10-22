@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.stats.domain;
 
 import com.brandonkamga.lescracks.account.application.AccountStatistics;
+import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
 import com.brandonkamga.lescracks.event.infra.EventRepository;
 import com.brandonkamga.lescracks.member.application.MemberStatistics;
 import com.brandonkamga.lescracks.newsletter.application.NewsletterStatistics;
@@ -33,7 +34,7 @@ class StatsServiceImplTest {
     private final AccountStatistics accounts = mock(AccountStatistics.class);
     private final MemberStatistics members = mock(MemberStatistics.class);
     private final CategoryRepository categories = mock(CategoryRepository.class);
-    private final StatsServiceImpl stats = new StatsServiceImpl(accounts, members, mock(EventRepository.class), mock(ResourceRepository.class),
+    private final StatsServiceImpl stats = new StatsServiceImpl(accounts, members, mock(EngagementCounts.class), mock(EventRepository.class), mock(ResourceRepository.class),
             mock(NewsletterStatistics.class), mock(TalkVideoRepository.class), mock(UmamiClient.class), categories);
 
     @Test
@@ -60,7 +61,7 @@ class StatsServiceImplTest {
     }
 
     private StatsServiceImpl withUmami(UmamiClient umami) {
-        return new StatsServiceImpl(accounts, members, mock(EventRepository.class), mock(ResourceRepository.class),
+        return new StatsServiceImpl(accounts, members, mock(EngagementCounts.class), mock(EventRepository.class), mock(ResourceRepository.class),
                 mock(NewsletterStatistics.class), mock(TalkVideoRepository.class), umami, categories);
     }
 

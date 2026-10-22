@@ -1,6 +1,9 @@
 package com.brandonkamga.lescracks.stats.domain;
 
 import com.brandonkamga.lescracks.account.application.AccountStatistics;
+import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
+import com.brandonkamga.lescracks.engagement.domain.model.Counts;
+import com.brandonkamga.lescracks.engagement.domain.model.TargetType;
 import com.brandonkamga.lescracks.event.domain.Event;
 import com.brandonkamga.lescracks.event.domain.EventStatus;
 import com.brandonkamga.lescracks.event.infra.EventRepository;
@@ -55,6 +58,7 @@ public class StatsServiceImpl implements StatsService {
 
     private final AccountStatistics accounts;
     private final MemberStatistics members;
+    private final EngagementCounts engagement;
     private final EventRepository events;
     private final ResourceRepository resources;
     private final NewsletterStatistics newsletter;
@@ -62,11 +66,12 @@ public class StatsServiceImpl implements StatsService {
     private final UmamiClient umami;
     private final CategoryRepository categories;
 
-    public StatsServiceImpl(AccountStatistics accounts, MemberStatistics members, EventRepository events, ResourceRepository resources,
+    public StatsServiceImpl(AccountStatistics accounts, MemberStatistics members, EngagementCounts engagement, EventRepository events, ResourceRepository resources,
                             NewsletterStatistics newsletter, TalkVideoRepository talks,
                             UmamiClient umami, CategoryRepository categories) {
         this.accounts = accounts;
         this.members = members;
+        this.engagement = engagement;
         this.events = events;
         this.resources = resources;
         this.newsletter = newsletter;
@@ -167,13 +172,14 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public List<TopResourceResponse> topResources(int limit) {
-        return resources.topResources(PageRequest.of(0, limit)).stream()
-                .map(row -> new TopResourceResponse(
-                        ((Number) row[0]).longValue(),
-                        (String) row[1],
-                        ((Number) row[2]).longValue()))
-                .collect(Collectors.toList());
+        Map<Long, Counts> ranked = engagement.listMostLiked(TargetType.ARTICLE, limit);
+        Map<Long, String> titles = resources.findAllById(ranked.keySet()).stream()
+                .collect(Collectors.toMap(Resource::getId, Resource::getTitle));
+        return ranked.entrySet().stream().filter(entry -> titles.containsKey(entry.getKey()))
+                .map(entry -> new TopResourceResponse(entry.getKey(), titles.get(entry.getKey()), entry.getValue().likes()))
+                .toList();
     }
+
 
     /** Optional on top of the audience: a failure here leaves the visitor figures standing. */
     private List<NamedCount> events(Instant from, Instant to) {

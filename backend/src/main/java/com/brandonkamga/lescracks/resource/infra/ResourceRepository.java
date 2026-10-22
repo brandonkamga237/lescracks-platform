@@ -41,14 +41,6 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
                               @Param("tagId") Long tagId,
                               Pageable pageable);
 
-    @Query("""
-            select r.id, r.title, count(l.id)
-            from Resource r
-            left join ResourceLike l on l.resource.id = r.id
-            group by r.id, r.title
-            order by count(l.id) desc
-            """)
-    List<Object[]> topResources(Pageable pageable);
 
     @Query("""
             select new com.brandonkamga.lescracks.resource.domain.ThemeArticles(c, count(r))
