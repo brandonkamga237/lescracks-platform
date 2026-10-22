@@ -42,8 +42,22 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ApiError> handleApp(AppException ex, HttpServletRequest request) {
         log.warn("{} on {} {}: {}", ex.code(), request.getMethod(), path(request), ex.getMessage());
-        return ResponseEntity.status(ex.status())
+        return ResponseEntity.status(statusOf(ex.code()))
                 .body(ApiError.of(ex.code(), ex.getMessage(), path(request)));
+    }
+
+    // Exhaustive on purpose: a new code does not compile until it is given a status here.
+    private static HttpStatus statusOf(ErrorCode code) {
+        return switch (code) {
+            case NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case BAD_REQUEST, VALIDATION_FAILED, MALFORMED_REQUEST -> HttpStatus.BAD_REQUEST;
+            case CONFLICT, DATA_CONFLICT -> HttpStatus.CONFLICT;
+            case FORBIDDEN -> HttpStatus.FORBIDDEN;
+            case UNAUTHENTICATED -> HttpStatus.UNAUTHORIZED;
+            case PAYLOAD_TOO_LARGE -> HttpStatus.PAYLOAD_TOO_LARGE;
+            case METHOD_NOT_ALLOWED -> HttpStatus.METHOD_NOT_ALLOWED;
+            case INTERNAL_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
+        };
     }
 
     /**
