@@ -19,7 +19,7 @@ import java.util.List;
 @Component
 public class TransactionalServices {
 
-    private static final List<String> READS = List.of("find*", "require*", "list*", "search*", "count*");
+    private static final List<String> READS = List.of("find*", "require*", "list*", "search*", "count*", "view*");
 
     private final TransactionInterceptor interceptor;
 
