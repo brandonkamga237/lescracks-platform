@@ -25,7 +25,11 @@ public interface BadgeService {
     /** Awards once: a member who already holds the badge keeps their first award. */
     MemberBadge award(String code, Long userId, String reason);
 
+    /** By hand: the member gets an email, unless they already held it. */
     MemberBadge awardByEmail(Long badgeId, String email, String reason);
+
+    /** Many members in one go; each new holder gets an email. */
+    BulkAward awardMany(Long badgeId, BadgeGrant grant);
 
     void revoke(Long badgeId, Long userId);
 

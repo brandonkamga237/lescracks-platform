@@ -19,6 +19,9 @@ public interface AccountStore {
     /** One query, whatever the number of ids; unknown ids are simply absent. */
     List<Account> findAllById(Collection<Long> ids);
 
+    /** Ignores case; one query whatever the number of addresses. */
+    List<Account> findAllByEmail(Collection<String> emails);
+
     /** Newest first. */
     Paged<Account> search(AccountSearch search, PageQuery page);
 

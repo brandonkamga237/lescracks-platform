@@ -30,8 +30,9 @@ public class RecognitionServices {
     }
 
     @Bean
-    BadgeService badgeService(BadgeStore badges, AwardStore awards, MemberDirectory people) {
-        return transactional.wrap(BadgeService.class, new BadgeServiceImpl(badges, awards, people));
+    BadgeService badgeService(BadgeStore badges, AwardStore awards, MemberDirectory people, RegistrationService registrations,
+                              Mailer mailer) {
+        return transactional.wrap(BadgeService.class, new BadgeServiceImpl(badges, awards, people, registrations, mailer));
     }
 
     @Bean

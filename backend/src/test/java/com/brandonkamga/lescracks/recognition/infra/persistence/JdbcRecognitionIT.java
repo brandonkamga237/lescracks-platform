@@ -84,6 +84,10 @@ class JdbcRecognitionIT extends PostgresIT {
         assertThat(badges.countHolders()).containsEntry(custom.getId(), 2L);
         awards.delete(custom.getId(), kofi);
         assertThat(awards.findByBadge(custom.getId())).hasSize(1);
+
+        assertThat(awards.addAll(custom, List.of(awa, kofi), "en masse")).containsExactly(kofi);
+        assertThat(awards.find(custom.getId(), kofi)).get().extracting(MemberBadge::getReason).isEqualTo("en masse");
+        assertThat(awards.addAll(custom, List.of(), null)).isEmpty();
     }
 
     @Test

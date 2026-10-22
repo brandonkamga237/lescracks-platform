@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -70,6 +71,15 @@ class JdbcAccountStore implements AccountStore {
     public List<Account> findAllById(Collection<Long> ids) {
         if (ids.isEmpty()) return List.of();
         return jdbc.sql("SELECT " + COLUMNS + " FROM accounts WHERE id IN (:ids)").param("ids", ids).query(ROW).list();
+    }
+
+    @Override
+    public List<Account> findAllByEmail(Collection<String> emails) {
+        if (emails.isEmpty()) return List.of();
+        // Served by accounts_email_lower_idx.
+        return jdbc.sql("SELECT " + COLUMNS + " FROM accounts WHERE lower(email) IN (:emails)")
+                .param("emails", emails.stream().map(email -> email.trim().toLowerCase(Locale.ROOT)).distinct().toList())
+                .query(ROW).list();
     }
 
     @Override
