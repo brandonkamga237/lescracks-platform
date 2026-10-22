@@ -482,5 +482,6 @@ export interface AdminComment {
   createdAt: string;
   editedAt?: string;
   author?: { id: number; name: string; email: string };
-  article: { id: number; title: string; slug?: string };
+  /** What the comment is under; absent once that content was deleted. */
+  target?: { type: 'ARTICLE' | 'EVENT' | 'TALK'; id: number; title: string; path: string };
 }
