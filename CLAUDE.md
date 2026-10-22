@@ -3,15 +3,13 @@ French-language tech training platform: resources, events, participations, Accom
 Monorepo: `frontend/` React + Vite (SPA), `backend/` Spring Boot + PostgreSQL + MinIO.
 
 ## Structure
-- `backend/src/main/java/com/brandonkamga/lescracks/` → **package by business domain**, one package per domain: `identity`, `resource`, `taxonomy`, `event`, `newsletter`, `stats`, `storage`, `mail`, `seo`. Each one holds its own entities, services, repositories and payloads, split into three layers:
-  - `<feature>/api/` → controllers (REST under `/api/*`; `seo/api` serves `/seo`, outside `/api`), and `<feature>/api/dto/` → exposed payloads (never entities)
-  - `<feature>/domain/` → JPA entities, enums, business logic (service interface + Impl), mappers
-  - `<feature>/infra/` → Spring Data JPA repositories and external adapters (MinIO, mail, Spring Security glue)
-  - `identity/` covers admins, members, identities and tokens: local sessions plus OIDC synchronisation
+- `backend/src/main/java/com/brandonkamga/lescracks/` → **one package per business capability**. Target map (migration in progress, module by module): `account` (sign-in, credentials, admins), `member` (profile, welcome answers), `newsletter`, `content` (articles + Talk), `event`, `engagement` (views, likes, comments on any target), `recognition`, `taxonomy`, `notification` (emails), `analytics`, `storage`, `seo`. Not yet moved: `identity` (→ `account` + `member`), `resource` + `talk` (→ `content`), `community` (→ `engagement`), `mail` (→ `notification`), `stats` (→ `analytics`)
+  - Every module uses the same skeleton: `api/` + `api/dto/` (HTTP), `application/` (use cases, commands), `domain/model/` + `domain/port/` (plain Java), `infra/persistence/`, `infra/<technology>/`, `infra/config/` (assembly + transactions). Rules, patterns and reuse: **`.claude/skills/design-patterns/SKILL.md`, mandatory for every backend change**
   - `shared/` → cross-cutting code only, never business rules:
     - `shared/security/` → SecurityConfig (route rules) + KeycloakRoleConverter. Identity is Keycloak's; the API only verifies tokens
     - `shared/config/` → OpenApiConfig, JacksonConfig, AppBeans; `shared/bootstrap/` → startup seeders and backfills
-    - `shared/exception/` → business exceptions + `GlobalExceptionHandler`; `shared/dto/` → ApiError, PageResponse; `shared/util/` → Slugs
+    - `shared/exception/` → business exceptions (carry an `ErrorCode`, no HTTP type) + `GlobalExceptionHandler`; `shared/dto/` → ApiError, PageResponse; `shared/paging/` → PageQuery, Paged; `shared/util/` → Slugs
+    - `shared/config/TransactionalServices` → wraps plain-Java application services in their transaction
 - `backend/src/main/resources/`
   - `application.yaml` + `application-{dev,prod,test}.yml`
   - `db/migration/` → Flyway migrations `V{n}__description.sql`
@@ -24,7 +22,7 @@ Monorepo: `frontend/` React + Vite (SPA), `backend/` Spring Boot + PostgreSQL + 
 - `docker-compose.yml` → local dev stack (postgres, minio + backend under profile `app`)
 - `docker-compose.prod.yml` → prod stack (postgres, minio, backend, frontend, Traefik), deployed by CI
 - `.env.example` → shape of the production variables (no secrets)
-- `.claude/skills/` → project skills: `git-workflow`, `dev-setup`, `backend-endpoint`, `db-migration`, `frontend-page`, `seo-page`
+- `.claude/skills/` → project skills: `design-patterns`, `git-workflow`, `dev-setup`, `backend-endpoint`, `db-migration`, `frontend-page`, `seo-page`
 
 ## Commands (exact)
 Backend (from `backend/`):
@@ -59,18 +57,18 @@ Before any commit or PR:
 - Worth writing: a non-obvious workaround, an external constraint, a counter-intuitive decision, a known trap
 
 ### Backend
-- New code goes into the package of the domain it belongs to, never into a layer-wide package: `<feature>/api` (controller + `api/dto`), `<feature>/domain` (entities, enums, service interface + `XxxServiceImpl`), `<feature>/infra` (repositories, external adapters)
-- Prefer calling another domain through its `domain` service rather than its repositories; `stats`, `seo` and `shared/bootstrap` are the existing exceptions, as read-only aggregation and seeding cut across every domain
-- Controllers return the response record (or `ResponseEntity<XxxResponse>`); requests translate themselves into domain commands (`request.toRegistration()`), responses build themselves from entities (`XxxResponse.of(entity)`)
-- Dependency direction `api → domain ← infra`: `domain` never imports an `api` class; another domain is reached through its service interface (e.g. `UserDirectory`), never its repositories
-- SOLID and the patterns in use (command objects, `EmailTemplate` strategy, after-commit email delivery): see `.claude/skills/backend-endpoint/SKILL.md`
-- Never expose a `<feature>/domain/` entity: always a DTO
+- **Architecture, SOLID and design patterns are non-negotiable**: follow `.claude/skills/design-patterns/SKILL.md` for every feature, fix and refactor, and run its checklist before committing. `ArchitectureTest` enforces the dependency rule in CI
+- Dependency direction `api → application → domain ← infra`: `domain` and `application` are plain Java (no Spring, JPA, servlet, Hibernate, Micrometer); I/O goes through ports in `domain/port` implemented by adapters in `infra`; services are assembled in `infra/config`
+- Another module is reached through its `application` interfaces (e.g. `UserDirectory`) or a domain event, never its ports, entities or repositories; `stats`/`analytics`, `seo` and `shared/bootstrap` read across modules until each exposes a query port
+- Reuse before writing: paging, errors, slugs, publication lifecycle, CSV export, visitor keys live once in `shared`; a second copy in a module is a review blocker
+- Controllers return the response record (or `ResponseEntity<XxxResponse>`); requests translate themselves into commands (`request.toRegistration()`), responses build themselves from models (`XxxResponse.of(model)`)
+- Never expose a domain model or a JPA entity: always a DTO
 - Errors: throw `NotFoundException` / `BadRequestException` / `ForbiddenException` / `ConflictException`; do not set the status in the controller, `GlobalExceptionHandler` does it
 - DB schema: Flyway only (`ddl-auto: validate` everywhere). A new entity field means a new `V{n}__...sql` migration; never edit a migration that has already been applied
 - Lombok (`@Data`, `@Builder`) on DTOs and entities; logging through `slf4j`
 - Public vs protected endpoints are declared in `SecurityConfig`, plus `@PreAuthorize` on each admin method; roles come from the Keycloak realm: `user`, `admin`
 - Text shown to users (emails, API errors) in French; everything else in English
-- Tests mirror the production layout: `src/test/.../<feature>/{api,domain,infra}/`, never a global `controller`/`service`/`repository` split. Shared fixtures live in `support/`; domain fixtures stay in their feature package. The suffix picks the suite: `*Test` runs without Docker via `./mvnw test` (pure unit tests plus light slices like `@WebMvcTest`), `*IT` runs via `./mvnw verify` against real PostgreSQL through Testcontainers (extend `support/PostgresIT`)
+- Tests mirror the production layout: `src/test/.../<module>/{api,application,domain,infra}/`; application tests use copying in-memory fakes for stores (`InMemoryXxxStore`) and assert on what was stored, never a global `controller`/`service`/`repository` split. Shared fixtures live in `support/`; domain fixtures stay in their feature package. The suffix picks the suite: `*Test` runs without Docker via `./mvnw test` (pure unit tests plus light slices like `@WebMvcTest`), `*IT` runs via `./mvnw verify` against real PostgreSQL through Testcontainers (extend `support/PostgresIT`)
 
 ### Frontend
 - Import through the `@/...` alias (never deep relative paths)
