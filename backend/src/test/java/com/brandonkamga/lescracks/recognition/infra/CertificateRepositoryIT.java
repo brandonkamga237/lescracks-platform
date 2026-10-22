@@ -1,10 +1,10 @@
 package com.brandonkamga.lescracks.recognition.infra;
 
-import com.brandonkamga.lescracks.event.domain.Event;
-import com.brandonkamga.lescracks.event.domain.EventFormat;
-import com.brandonkamga.lescracks.event.domain.EventStatus;
-import com.brandonkamga.lescracks.event.domain.EventType;
-import com.brandonkamga.lescracks.event.infra.EventRepository;
+import com.brandonkamga.lescracks.event.domain.model.Event;
+import com.brandonkamga.lescracks.event.domain.model.EventFormat;
+import com.brandonkamga.lescracks.event.domain.model.EventStatus;
+import com.brandonkamga.lescracks.event.domain.model.EventType;
+import com.brandonkamga.lescracks.event.domain.port.EventStore;
 import com.brandonkamga.lescracks.account.domain.model.Account;
 import com.brandonkamga.lescracks.account.domain.port.AccountStore;
 import com.brandonkamga.lescracks.recognition.domain.Certificate;
@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class CertificateRepositoryIT extends PostgresIT {
 
     @Autowired private CertificateRepository certificates;
-    @Autowired private EventRepository events;
+    @Autowired private EventStore events;
     @Autowired private AccountStore users;
 
     private Account awa;
@@ -39,7 +39,7 @@ class CertificateRepositoryIT extends PostgresIT {
     @BeforeEach
     void seed() {
         awa = users.save(Account.builder().email("awa.cert@example.com").firstName("Awa").lastName("D").passwordHash("h").build());
-        hackathon = events.saveAndFlush(Event.builder().title("Hackathon cert").slug("hackathon-cert").description("D")
+        hackathon = events.save(Event.builder().title("Hackathon cert").slug("hackathon-cert").description("D")
                 .type(EventType.HACKATHON).format(EventFormat.ONLINE).status(EventStatus.PUBLISHED).startDate(Instant.now()).build());
     }
 

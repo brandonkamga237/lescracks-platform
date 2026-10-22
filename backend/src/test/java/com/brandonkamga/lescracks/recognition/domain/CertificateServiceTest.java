@@ -1,16 +1,16 @@
 package com.brandonkamga.lescracks.recognition.domain;
 
-import com.brandonkamga.lescracks.event.domain.Event;
-import com.brandonkamga.lescracks.event.domain.EventRegistration;
-import com.brandonkamga.lescracks.event.domain.EventRegistrationService;
-import com.brandonkamga.lescracks.event.domain.EventService;
-import com.brandonkamga.lescracks.event.domain.EventSubmission;
-import com.brandonkamga.lescracks.event.domain.EventSubmissionService;
-import com.brandonkamga.lescracks.event.domain.EventType;
-import com.brandonkamga.lescracks.event.domain.RegistrationStatus;
-import com.brandonkamga.lescracks.event.domain.RegistrationView;
-import com.brandonkamga.lescracks.event.domain.SubmissionStatus;
-import com.brandonkamga.lescracks.event.domain.SubmissionView;
+import com.brandonkamga.lescracks.event.application.EventDirectory;
+import com.brandonkamga.lescracks.event.application.RegistrationService;
+import com.brandonkamga.lescracks.event.application.RegistrationView;
+import com.brandonkamga.lescracks.event.application.SubmissionService;
+import com.brandonkamga.lescracks.event.application.SubmissionView;
+import com.brandonkamga.lescracks.event.domain.model.Event;
+import com.brandonkamga.lescracks.event.domain.model.EventType;
+import com.brandonkamga.lescracks.event.domain.model.Registration;
+import com.brandonkamga.lescracks.event.domain.model.RegistrationStatus;
+import com.brandonkamga.lescracks.event.domain.model.Submission;
+import com.brandonkamga.lescracks.event.domain.model.SubmissionStatus;
 import com.brandonkamga.lescracks.member.application.Member;
 import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.mail.domain.CertificateIssuedEmail;
@@ -48,9 +48,9 @@ import static org.mockito.Mockito.when;
 class CertificateServiceTest {
 
     @Mock private CertificateRepository certificates;
-    @Mock private EventService events;
-    @Mock private EventRegistrationService registrations;
-    @Mock private EventSubmissionService submissions;
+    @Mock private EventDirectory events;
+    @Mock private RegistrationService registrations;
+    @Mock private SubmissionService submissions;
     @Mock private MemberDirectory people;
     @Mock private Mailer mailer;
     @Mock private ApplicationEventPublisher published;
@@ -74,7 +74,7 @@ class CertificateServiceTest {
     }
 
     private static SubmissionView project(SubmissionStatus status, Integer rank, Member... team) {
-        return new SubmissionView(EventSubmission.builder().title("Mondje").status(status).rank(rank).build(), List.of(team), null);
+        return new SubmissionView(Submission.builder().title("Mondje").status(status).rank(rank).build(), List.of(team), null);
     }
 
     private List<Certificate> saved(int count) {
@@ -87,7 +87,7 @@ class CertificateServiceTest {
     @DisplayName("a hackathon recognises every member of a kept project, and its winner twice")
     void preparesHackathonDrafts() {
         event(EventType.HACKATHON, true);
-        when(submissions.forEvent(9L)).thenReturn(List.of(
+        when(submissions.listForEvent(9L)).thenReturn(List.of(
                 project(SubmissionStatus.ACCEPTED, 1, awa, kofi), project(SubmissionStatus.REJECTED, null, lina)));
 
         service.prepare(9L);
@@ -103,9 +103,9 @@ class CertificateServiceTest {
     @DisplayName("an event without projects recognises the people marked present, and preparing twice adds nothing")
     void preparesAttendanceDrafts() {
         event(EventType.WORKSHOP, false);
-        when(registrations.forEvent(9L)).thenReturn(List.of(
-                new RegistrationView(EventRegistration.builder().status(RegistrationStatus.ATTENDED).build(), awa),
-                new RegistrationView(EventRegistration.builder().status(RegistrationStatus.ABSENT).build(), kofi)));
+        when(registrations.listForEvent(9L)).thenReturn(List.of(
+                new RegistrationView(Registration.builder().status(RegistrationStatus.ATTENDED).build(), awa),
+                new RegistrationView(Registration.builder().status(RegistrationStatus.ABSENT).build(), kofi)));
         when(certificates.existsByUserIdAndEventIdAndKind(1L, 9L, CertificateKind.PARTICIPATION)).thenReturn(false, true);
 
         service.prepare(9L);

@@ -1,10 +1,10 @@
 package com.brandonkamga.lescracks.shared.bootstrap;
 
-import com.brandonkamga.lescracks.event.domain.Event;
-import com.brandonkamga.lescracks.event.domain.EventFormat;
-import com.brandonkamga.lescracks.event.domain.EventStatus;
-import com.brandonkamga.lescracks.event.domain.EventType;
-import com.brandonkamga.lescracks.event.infra.EventRepository;
+import com.brandonkamga.lescracks.event.application.EventAdminService;
+import com.brandonkamga.lescracks.event.application.EventDraft;
+import com.brandonkamga.lescracks.event.domain.model.EventFormat;
+import com.brandonkamga.lescracks.event.domain.model.EventStatus;
+import com.brandonkamga.lescracks.event.domain.model.EventType;
 import com.brandonkamga.lescracks.content.application.ArticleAdminService;
 import com.brandonkamga.lescracks.content.application.ArticleDraft;
 import com.brandonkamga.lescracks.content.domain.model.ArticleSearch;
@@ -35,10 +35,10 @@ public class DemoDataSeeder implements CommandLineRunner {
 
     private final TaxonomyService taxonomy;
     private final ArticleAdminService articles;
-    private final EventRepository events;
+    private final EventAdminService events;
     private final ObjectMapper mapper;
 
-    public DemoDataSeeder(TaxonomyService taxonomy, ArticleAdminService articles, EventRepository events, ObjectMapper mapper) {
+    public DemoDataSeeder(TaxonomyService taxonomy, ArticleAdminService articles, EventAdminService events, ObjectMapper mapper) {
         this.taxonomy = taxonomy;
         this.articles = articles;
         this.events = events;
@@ -78,23 +78,16 @@ public class DemoDataSeeder implements CommandLineRunner {
     }
 
     private void seedSampleEvent() {
-        if (events.count() > 0) {
+        if (events.list(new PageQuery(0, 1)).total() > 0) {
             return;
         }
 
         Instant start = Instant.now().plus(7, ChronoUnit.DAYS);
-        Event event = Event.builder()
-                .title("Atelier React en ligne")
-                .description("Un atelier de démonstration pour découvrir la plateforme LesCracks et poser tes questions sur React.")
-                .type(EventType.WORKSHOP)
-                .format(EventFormat.ONLINE)
-                .startDate(start)
-                .endDate(start.plus(2, ChronoUnit.HOURS))
-                .location("En ligne")
-                .coverImage(COVER_IMAGE)
-                .status(EventStatus.PUBLISHED)
-                .build();
-        events.save(event);
-        log.info("Seeded demo event '{}'", event.getTitle());
+        String title = "Atelier React en ligne";
+        events.create(new EventDraft(title,
+                "Un atelier de démonstration pour découvrir la plateforme LesCracks et poser tes questions sur React.",
+                EventType.WORKSHOP, EventFormat.ONLINE, start, start.plus(2, ChronoUnit.HOURS), "En ligne",
+                EventStatus.PUBLISHED, null, false, 1, null), null);
+        log.info("Seeded demo event '{}'", title);
     }
 }

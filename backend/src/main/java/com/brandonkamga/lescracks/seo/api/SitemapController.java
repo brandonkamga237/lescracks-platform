@@ -1,10 +1,9 @@
 package com.brandonkamga.lescracks.seo.api;
 
-import com.brandonkamga.lescracks.event.domain.EventService;
+import com.brandonkamga.lescracks.event.application.EventCatalog;
 import com.brandonkamga.lescracks.content.application.ArticleCatalog;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,10 +18,10 @@ import java.time.format.DateTimeFormatter;
 public class SitemapController {
 
     private final ArticleCatalog articles;
-    private final EventService events;
+    private final EventCatalog events;
     private static final DateTimeFormatter W3C = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
-    public SitemapController(ArticleCatalog articles, EventService events) {
+    public SitemapController(ArticleCatalog articles, EventCatalog events) {
         this.articles = articles;
         this.events = events;
     }
@@ -53,12 +52,10 @@ public class SitemapController {
             xml.append("  </url>\n");
         });
 
-        var upcoming = events.published(null, null, PageRequest.of(0, 10_000));
-        upcoming.forEach(event -> {
+        events.listPublished().forEach(event -> {
             String lastmod = W3C.format(event.getUpdatedAt().atOffset(ZoneOffset.UTC));
-            String slug = event.getSlug() != null ? event.getSlug() : String.valueOf(event.getId());
             xml.append("  <url>\n");
-            xml.append("    <loc>").append(escape(base + "/evenements/" + slug)).append("</loc>\n");
+            xml.append("    <loc>").append(escape(base + event.path())).append("</loc>\n");
             xml.append("    <lastmod>").append(escape(lastmod)).append("</lastmod>\n");
             xml.append("    <priority>0.7</priority>\n");
             xml.append("    <changefreq>weekly</changefreq>\n");

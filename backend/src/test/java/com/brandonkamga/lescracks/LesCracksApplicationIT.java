@@ -3,7 +3,11 @@ package com.brandonkamga.lescracks;
 import com.brandonkamga.lescracks.content.application.ArticleAdminService;
 import com.brandonkamga.lescracks.content.application.ArticleCatalog;
 import com.brandonkamga.lescracks.content.application.TalkService;
-import com.brandonkamga.lescracks.event.domain.EventService;
+import com.brandonkamga.lescracks.event.application.EventAdminService;
+import com.brandonkamga.lescracks.event.application.EventCatalog;
+import com.brandonkamga.lescracks.event.application.EventDirectory;
+import com.brandonkamga.lescracks.event.application.RegistrationService;
+import com.brandonkamga.lescracks.event.application.SubmissionService;
 import com.brandonkamga.lescracks.account.application.AccountDirectory;
 import com.brandonkamga.lescracks.account.application.AdminAuthService;
 import com.brandonkamga.lescracks.account.application.EmailVerificationService;
@@ -56,7 +60,8 @@ class LesCracksApplicationIT extends PostgresIT {
     @Test
     @DisplayName("every domain contributes exactly one implementation of its service")
     void everyDomainServiceIsWired() {
-        Stream.of(ArticleCatalog.class, ArticleAdminService.class, TalkService.class, TaxonomyService.class, EventService.class,
+        Stream.of(ArticleCatalog.class, ArticleAdminService.class, TalkService.class, TaxonomyService.class, EventCatalog.class, EventDirectory.class, EventAdminService.class,
+                        RegistrationService.class, SubmissionService.class,
                         NewsletterService.class, StatsService.class, StorageService.class,
                         Mailer.class, SignInService.class, SignUpService.class,
                         EmailVerificationService.class, PasswordResetService.class, AccountDirectory.class,
@@ -68,7 +73,7 @@ class LesCracksApplicationIT extends PostgresIT {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "/api/resources", "/api/resources/{slug}", "/api/talks", "/api/events", "/api/categories", "/api/tags",
+            "/api/resources", "/api/resources/{slug}", "/api/talks", "/api/events", "/api/events/{id}/registration", "/api/categories", "/api/tags",
             "/api/newsletter/subscribe", "/api/files/{key}", "/api/me", "/api/auth/login",
             "/api/admin/stats/overview", "/api/admin/users", "/seo/pages/{page}",
             "/api/sitemap.xml"
@@ -90,6 +95,6 @@ class LesCracksApplicationIT extends PostgresIT {
                 .map(type -> type.getJavaType().getSimpleName())
                 .collect(Collectors.toSet());
 
-        assertThat(entities).contains("Event", "Badge");
+        assertThat(entities).contains("Certificate", "Badge");
     }
 }

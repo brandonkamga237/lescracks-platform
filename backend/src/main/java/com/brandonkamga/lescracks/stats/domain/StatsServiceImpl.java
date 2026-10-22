@@ -5,9 +5,7 @@ import com.brandonkamga.lescracks.content.application.ContentStatistics;
 import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
 import com.brandonkamga.lescracks.engagement.domain.model.Counts;
 import com.brandonkamga.lescracks.engagement.domain.model.TargetType;
-import com.brandonkamga.lescracks.event.domain.Event;
-import com.brandonkamga.lescracks.event.domain.EventStatus;
-import com.brandonkamga.lescracks.event.infra.EventRepository;
+import com.brandonkamga.lescracks.event.application.EventStatistics;
 import com.brandonkamga.lescracks.member.application.MemberStatistics;
 import com.brandonkamga.lescracks.newsletter.application.NewsletterStatistics;
 import com.brandonkamga.lescracks.newsletter.domain.model.SubscriptionStatus;
@@ -55,13 +53,13 @@ public class StatsServiceImpl implements StatsService {
     private final AccountStatistics accounts;
     private final MemberStatistics members;
     private final EngagementCounts engagement;
-    private final EventRepository events;
+    private final EventStatistics events;
     private final ContentStatistics content;
     private final NewsletterStatistics newsletter;
     private final UmamiClient umami;
     private final TaxonomyService taxonomy;
 
-    public StatsServiceImpl(AccountStatistics accounts, MemberStatistics members, EngagementCounts engagement, EventRepository events,
+    public StatsServiceImpl(AccountStatistics accounts, MemberStatistics members, EngagementCounts engagement, EventStatistics events,
                             ContentStatistics content, NewsletterStatistics newsletter, UmamiClient umami, TaxonomyService taxonomy) {
         this.accounts = accounts;
         this.members = members;
@@ -112,22 +110,13 @@ public class StatsServiceImpl implements StatsService {
 
         Map<String, Long> usersByStatus = accounts.membersByStatus();
         Map<String, Long> usersByProvider = accounts.membersByProvider();
-        Map<String, Long> eventsByStatus = toCounts(events.countGroupedByStatus());
-        Map<String, Long> eventsByType = toCounts(events.countGroupedByType());
+        Map<String, Long> eventsByStatus = events.eventsByStatus();
+        Map<String, Long> eventsByType = events.eventsByType();
         Map<String, Long> resourcesByStatus = content.articlesByStatus();
         Map<String, Long> resourcesByCategory = articlesByTheme();
 
-        long upcoming = 0;
-        long ongoing = 0;
-        long past = 0;
         Instant todayStart = LocalDate.now(ZoneOffset.UTC).atStartOfDay().toInstant(ZoneOffset.UTC);
-        for (Event event : events.findByStatus(EventStatus.PUBLISHED)) {
-            Instant start = event.getStartDate();
-            Instant end = event.getEndDate() != null ? event.getEndDate() : todayStart;
-            if (start.isAfter(now)) upcoming++;
-            else if (end.isAfter(now) || !end.isBefore(todayStart)) ongoing++;
-            else past++;
-        }
+        EventStatistics.Timing timing = events.publishedTiming(now, todayStart);
 
 
         return new StatsOverviewResponse(
@@ -136,7 +125,7 @@ public class StatsServiceImpl implements StatsService {
                 accounts.seenSince(days7), accounts.seenSince(days30),
                 newsletter.countWithoutAccount(), funnel(accounts.signupsSince(days30)),
                 total(eventsByStatus), eventsByStatus, eventsByType,
-                upcoming, ongoing, past,
+                timing.upcoming(), timing.ongoing(), timing.past(),
                 total(resourcesByStatus), resourcesByStatus, resourcesByCategory,
                 newsletter.countByStatus(SubscriptionStatus.SUBSCRIBED),
                 newsletter.countByStatus(SubscriptionStatus.UNSUBSCRIBED),
@@ -242,9 +231,9 @@ public class StatsServiceImpl implements StatsService {
                     .limit(12)
                     .toList();
 
-            List<ViewedEvent> viewedEvents = events.findBySlugIn(eventViews.keySet()).stream()
-                    .map(e -> new ViewedEvent(e.getId(), e.getSlug(), e.getTitle(), e.getStartDate(),
-                            e.getStatus().name(), eventViews.getOrDefault(e.getSlug(), 0L)))
+            List<ViewedEvent> viewedEvents = events.eventsByPathKey(eventViews.keySet()).stream()
+                    .map(e -> new ViewedEvent(e.id(), e.slug(), e.title(), e.startDate(), e.status(),
+                            eventViews.getOrDefault(e.slug(), 0L) + eventViews.getOrDefault(String.valueOf(e.id()), 0L)))
                     .sorted(Comparator.comparingLong(ViewedEvent::views).reversed())
                     .limit(12)
                     .toList();
@@ -303,14 +292,13 @@ public class StatsServiceImpl implements StatsService {
 
         final Map<String, Long> eventViews = urlViews;
         Instant soon = now.plus(14, ChronoUnit.DAYS);
-        events.findByStatus(EventStatus.PUBLISHED).stream()
-                .filter(e -> e.getStartDate() != null && e.getStartDate().isAfter(now) && e.getStartDate().isBefore(soon))
-                .limit(3)
+        events.publishedStartingBetween(now, soon, 3)
                 .forEach(event -> {
-                    long views = eventViews.getOrDefault("/evenements/" + event.getSlug(), 0L);
+                    long views = eventViews.getOrDefault("/evenements/" + event.slug(), 0L)
+                            + eventViews.getOrDefault("/evenements/" + event.id(), 0L);
                     if (views < 25) {
-                        signals.add(new WatchSignal("event-low-visibility-" + event.getId(), "warning",
-                                "« " + event.getTitle() + " » arrive bientôt",
+                        signals.add(new WatchSignal("event-low-visibility-" + event.id(), "warning",
+                                "« " + event.title() + " » arrive bientôt",
                                 "L’événement a lieu dans moins de 14 jours mais sa page n’a été vue que "
                                         + views + " fois en 30 jours.",
                                 "Voir l’événement", "/admin/evenements"));
@@ -419,17 +407,6 @@ public class StatsServiceImpl implements StatsService {
         return counts;
     }
 
-
-    /** Grouped-count rows arrive as [key, count]; enum keys are exposed by name. */
-    private Map<String, Long> toCounts(List<Object[]> rows) {
-        Map<String, Long> counts = new LinkedHashMap<>();
-        for (Object[] row : rows) {
-            if (row[0] == null) continue;
-            String key = row[0] instanceof Enum<?> value ? value.name() : row[0].toString();
-            counts.put(key, ((Number) row[1]).longValue());
-        }
-        return counts;
-    }
 
     private long total(Map<String, Long> counts) {
         return counts.values().stream().mapToLong(Long::longValue).sum();

@@ -1,7 +1,8 @@
 package com.brandonkamga.lescracks.shared.security;
 
 import com.brandonkamga.lescracks.event.api.EventController;
-import com.brandonkamga.lescracks.event.domain.EventService;
+import com.brandonkamga.lescracks.event.application.EventAdminService;
+import com.brandonkamga.lescracks.event.application.EventCatalog;
 import com.brandonkamga.lescracks.engagement.api.ReactionController;
 import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
 import com.brandonkamga.lescracks.engagement.application.ReactionService;
@@ -56,7 +57,8 @@ class SecurityConfigTest {
 
     @MockitoBean private ArticleCatalog catalog;
     @MockitoBean private ArticleAdminService articles;
-    @MockitoBean private EventService events;
+    @MockitoBean private EventCatalog events;
+    @MockitoBean private EventAdminService eventAdmin;
     @MockitoBean private ReactionService reactions;
     @MockitoBean private EngagementCounts engagement;
     @MockitoBean private StorageService storage;

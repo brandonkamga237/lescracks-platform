@@ -1,12 +1,12 @@
 package com.brandonkamga.lescracks.recognition.domain;
 
-import com.brandonkamga.lescracks.event.domain.Event;
-import com.brandonkamga.lescracks.event.domain.EventRegistrationService;
-import com.brandonkamga.lescracks.event.domain.EventService;
-import com.brandonkamga.lescracks.event.domain.EventSubmissionService;
-import com.brandonkamga.lescracks.event.domain.RegistrationStatus;
-import com.brandonkamga.lescracks.event.domain.SubmissionStatus;
-import com.brandonkamga.lescracks.event.domain.SubmissionView;
+import com.brandonkamga.lescracks.event.application.EventDirectory;
+import com.brandonkamga.lescracks.event.application.RegistrationService;
+import com.brandonkamga.lescracks.event.application.SubmissionService;
+import com.brandonkamga.lescracks.event.application.SubmissionView;
+import com.brandonkamga.lescracks.event.domain.model.Event;
+import com.brandonkamga.lescracks.event.domain.model.RegistrationStatus;
+import com.brandonkamga.lescracks.event.domain.model.SubmissionStatus;
 import com.brandonkamga.lescracks.member.application.Member;
 import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.mail.domain.CertificateIssuedEmail;
@@ -34,15 +34,15 @@ public class CertificateServiceImpl implements CertificateService {
     private static final Logger log = LoggerFactory.getLogger(CertificateServiceImpl.class);
 
     private final CertificateRepository certificates;
-    private final EventService events;
-    private final EventRegistrationService registrations;
-    private final EventSubmissionService submissions;
+    private final EventDirectory events;
+    private final RegistrationService registrations;
+    private final SubmissionService submissions;
     private final MemberDirectory people;
     private final Mailer mailer;
     private final ApplicationEventPublisher published;
 
-    public CertificateServiceImpl(CertificateRepository certificates, EventService events, EventRegistrationService registrations,
-                                  EventSubmissionService submissions, MemberDirectory people, Mailer mailer,
+    public CertificateServiceImpl(CertificateRepository certificates, EventDirectory events, RegistrationService registrations,
+                                  SubmissionService submissions, MemberDirectory people, Mailer mailer,
                                   ApplicationEventPublisher published) {
         this.certificates = certificates;
         this.events = events;
@@ -61,7 +61,7 @@ public class CertificateServiceImpl implements CertificateService {
         Event event = events.require(eventId);
         List<Draft> drafts = new ArrayList<>();
         if (event.isAcceptsSubmissions()) {
-            for (SubmissionView view : submissions.forEvent(eventId)) {
+            for (SubmissionView view : submissions.listForEvent(eventId)) {
                 if (view.submission().getStatus() == SubmissionStatus.REJECTED) continue;
                 Integer rank = view.submission().getRank();
                 String project = "Projet « " + view.submission().getTitle() + " »";
@@ -72,7 +72,7 @@ public class CertificateServiceImpl implements CertificateService {
                 }
             }
         } else {
-            registrations.forEvent(eventId).stream()
+            registrations.listForEvent(eventId).stream()
                     .filter(view -> view.registration().getStatus() == RegistrationStatus.ATTENDED)
                     .forEach(view -> drafts.add(new Draft(view.member(), CertificateKind.PARTICIPATION, null, null)));
         }

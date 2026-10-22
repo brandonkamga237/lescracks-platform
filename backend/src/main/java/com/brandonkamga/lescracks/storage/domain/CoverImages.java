@@ -13,6 +13,13 @@ public final class CoverImages {
 
     /** An uploaded file wins over a URL, which wins over the current cover; with none of them, it is refused. */
     public static String resolve(StorageService storage, Upload upload, String url, String current) {
+        String cover = resolveOptional(storage, upload, url, current);
+        if (cover == null) throw new BadRequestException("L'image de couverture est obligatoire.");
+        return cover;
+    }
+
+    /** Same precedence, for content whose cover may stay empty (an event). */
+    public static String resolveOptional(StorageService storage, Upload upload, String url, String current) {
         if (upload != null && !upload.isEmpty()) {
             if (upload.contentType() == null || !upload.contentType().startsWith("image/")) {
                 throw new BadRequestException("L'image de couverture doit être au format image (jpg, png, webp, …).");
@@ -24,7 +31,7 @@ public final class CoverImages {
         }
         if (url != null && !url.isBlank()) return url.trim();
         if (current != null && !current.isBlank()) return current;
-        throw new BadRequestException("L'image de couverture est obligatoire.");
+        return null;
     }
 
     /** Deletes a cover stored on the platform; an outside URL is not ours to delete. */

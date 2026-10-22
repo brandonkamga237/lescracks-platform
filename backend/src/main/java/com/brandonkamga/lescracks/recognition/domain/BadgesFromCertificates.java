@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.recognition.domain;
 
-import com.brandonkamga.lescracks.event.domain.EventService;
-import com.brandonkamga.lescracks.event.domain.EventType;
+import com.brandonkamga.lescracks.event.application.EventDirectory;
+import com.brandonkamga.lescracks.event.domain.model.EventType;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class BadgesFromCertificates {
     private final BadgeService badges;
-    private final EventService events;
+    private final EventDirectory events;
 
-    public BadgesFromCertificates(BadgeService badges, EventService events) {
+    public BadgesFromCertificates(BadgeService badges, EventDirectory events) {
         this.badges = badges;
         this.events = events;
     }

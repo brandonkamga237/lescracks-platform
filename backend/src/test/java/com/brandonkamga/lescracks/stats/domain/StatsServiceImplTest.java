@@ -3,7 +3,7 @@ package com.brandonkamga.lescracks.stats.domain;
 import com.brandonkamga.lescracks.account.application.AccountStatistics;
 import com.brandonkamga.lescracks.content.application.ContentStatistics;
 import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
-import com.brandonkamga.lescracks.event.infra.EventRepository;
+import com.brandonkamga.lescracks.event.application.EventStatistics;
 import com.brandonkamga.lescracks.member.application.MemberStatistics;
 import com.brandonkamga.lescracks.newsletter.application.NewsletterStatistics;
 import com.brandonkamga.lescracks.stats.api.dto.NamedCount;
@@ -59,7 +59,7 @@ class StatsServiceImplTest {
     }
 
     private StatsServiceImpl withUmami(UmamiClient umami) {
-        return new StatsServiceImpl(accounts, members, mock(EngagementCounts.class), mock(EventRepository.class),
+        return new StatsServiceImpl(accounts, members, mock(EngagementCounts.class), mock(EventStatistics.class),
                 mock(ContentStatistics.class), mock(NewsletterStatistics.class), umami, taxonomy);
     }
 

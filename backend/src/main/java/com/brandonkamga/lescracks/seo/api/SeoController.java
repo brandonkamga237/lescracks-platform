@@ -1,9 +1,9 @@
 package com.brandonkamga.lescracks.seo.api;
 
-import com.brandonkamga.lescracks.event.domain.Event;
-import com.brandonkamga.lescracks.event.domain.EventFormat;
-import com.brandonkamga.lescracks.event.domain.EventService;
-import com.brandonkamga.lescracks.event.domain.EventStatus;
+import com.brandonkamga.lescracks.event.application.EventCatalog;
+import com.brandonkamga.lescracks.event.domain.model.Event;
+import com.brandonkamga.lescracks.event.domain.model.EventFormat;
+import com.brandonkamga.lescracks.event.domain.model.EventStatus;
 import com.brandonkamga.lescracks.content.application.ArticleCatalog;
 import com.brandonkamga.lescracks.content.application.ArticleView;
 import com.brandonkamga.lescracks.content.application.TalkService;
@@ -14,7 +14,6 @@ import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +39,7 @@ public class SeoController {
     private static final int PREVIEW_HEIGHT = 614;
 
     private final ArticleCatalog articles;
-    private final EventService events;
+    private final EventCatalog events;
     private final TalkService talks;
     private final ObjectMapper objectMapper;
 
@@ -71,7 +70,7 @@ public class SeoController {
                     "/talk", "Le Talk")
     );
 
-    public SeoController(ArticleCatalog articles, EventService events, TalkService talks, ObjectMapper objectMapper) {
+    public SeoController(ArticleCatalog articles, EventCatalog events, TalkService talks, ObjectMapper objectMapper) {
         this.articles = articles;
         this.events = events;
         this.talks = talks;
@@ -85,12 +84,8 @@ public class SeoController {
 
     @GetMapping(value = "/evenements/{slug}", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> event(@PathVariable String slug, HttpServletRequest request) {
-        Event event = events.requireBySlugOrId(slug);
-        if (event.getStatus() != EventStatus.PUBLISHED) {
-            throw new NotFoundException("Event", "slug", slug);
-        }
-
-        String canonical = canonical(request, "/evenements/" + (event.getSlug() != null ? event.getSlug() : event.getId()));
+        Event event = events.requirePublished(slug).event();
+        String canonical = canonical(request, event.path());
         SeoHtml html = new SeoHtml(event.getTitle() + " · LesCracks", PlainText.excerpt(event.getDescription(), 160), canonical)
                 .type("website")
                 .image(absolute(request, event.getCoverImage()), event.getTitle(), null, null);
@@ -245,15 +240,14 @@ public class SeoController {
     }
 
     private void addEventLinks(SeoHtml html, HttpServletRequest request) {
-        var published = events.published(null, null, PageRequest.of(0, 50));
+        var published = events.search(null, null, new PageQuery(0, 50)).items();
         if (published.isEmpty()) {
             html.paragraph("Aucun événement publié pour le moment.");
             return;
         }
 
         List<SeoHtml.Link> links = new ArrayList<>();
-        published.forEach(event -> links.add(new SeoHtml.Link(
-                canonical(request, "/evenements/" + (event.getSlug() != null ? event.getSlug() : event.getId())), event.getTitle())));
+        published.forEach(view -> links.add(new SeoHtml.Link(canonical(request, view.event().path()), view.event().getTitle())));
         html.links("Prochains événements", links);
     }
 
@@ -374,7 +368,7 @@ public class SeoController {
                 : "https://schema.org/EventScheduled";
     }
 
-    private String formatEventType(com.brandonkamga.lescracks.event.domain.EventType type) {
+    private String formatEventType(com.brandonkamga.lescracks.event.domain.model.EventType type) {
         return switch (type) {
             case BOOTCAMP -> "Bootcamp";
             case WORKSHOP -> "Atelier";

@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.recognition.domain;
 
-import com.brandonkamga.lescracks.event.domain.Event;
-import com.brandonkamga.lescracks.event.domain.EventType;
+import com.brandonkamga.lescracks.event.domain.model.Event;
+import com.brandonkamga.lescracks.event.domain.model.EventType;
 
 /**
  * The sentence an attestation reads after the holder's name, by event type and kind:

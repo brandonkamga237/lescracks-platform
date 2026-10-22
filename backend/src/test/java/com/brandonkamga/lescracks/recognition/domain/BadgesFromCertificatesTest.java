@@ -1,8 +1,8 @@
 package com.brandonkamga.lescracks.recognition.domain;
 
-import com.brandonkamga.lescracks.event.domain.Event;
-import com.brandonkamga.lescracks.event.domain.EventService;
-import com.brandonkamga.lescracks.event.domain.EventType;
+import com.brandonkamga.lescracks.event.application.EventDirectory;
+import com.brandonkamga.lescracks.event.domain.model.Event;
+import com.brandonkamga.lescracks.event.domain.model.EventType;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 class BadgesFromCertificatesTest {
 
     private final BadgeService badges = mock(BadgeService.class);
-    private final EventService events = mock(EventService.class);
+    private final EventDirectory events = mock(EventDirectory.class);
     private final BadgesFromCertificates rule = new BadgesFromCertificates(badges, events);
 
     @Test
