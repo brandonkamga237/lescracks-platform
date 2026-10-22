@@ -3,7 +3,7 @@ French-language tech training platform: resources, events, participations, Accom
 Monorepo: `frontend/` React + Vite (SPA), `backend/` Spring Boot + PostgreSQL + MinIO.
 
 ## Structure
-- `backend/src/main/java/com/brandonkamga/lescracks/` → **one package per business capability**. Target map (migration in progress, module by module): `account` (sign-in, credentials, admins), `member` (profile, welcome answers), `newsletter` (its own subscribers, with or without an account) and `engagement` (views, likes, comments on any target; content modules plug in as `ContentTargets`) — migrated, `content` (articles + Talk), `event`, `recognition`, `taxonomy`, `notification` (emails), `analytics`, `storage`, `seo`. Not yet moved: `resource` + `talk` (→ `content`), `community` (now only public profiles), `mail` (→ `notification`), `stats` (→ `analytics`)
+- `backend/src/main/java/com/brandonkamga/lescracks/` → **one package per business capability**. Target map (migration in progress, module by module): `account` (sign-in, credentials, admins), `member` (profile, welcome answers), `newsletter` (its own subscribers, with or without an account) and `engagement` (views, likes, comments on any target; content modules plug in as `ContentTargets`), `taxonomy` (themes and tags) and `content` (blog articles + Talk episodes; routes keep their `/api/resources` and `/api/talks` paths) — migrated, `event`, `recognition`, `notification` (emails), `analytics`, `storage`, `seo`. Not yet moved: `community` (now only public profiles), `mail` (→ `notification`), `stats` (→ `analytics`)
   - Every module uses the same skeleton: `api/` + `api/dto/` (HTTP), `application/` (use cases, commands), `domain/model/` + `domain/port/` (plain Java), `infra/persistence/`, `infra/<technology>/`, `infra/config/` (assembly + transactions). Rules, patterns and reuse: **`.claude/skills/design-patterns/SKILL.md`, mandatory for every backend change**
   - `shared/` → cross-cutting code only, never business rules:
     - `shared/security/` → SecurityConfig (route rules) + KeycloakRoleConverter. Local accounts and their sessions live in `account`; Keycloak only issues the Google/GitHub tokens the API verifies
@@ -120,7 +120,7 @@ Before any commit or PR:
 - **Application** = either a 360 application or an event registration (`event != null`)
 - **Participation** = someone enrolled on an event or on the 360, `IN_PROGRESS` then `COMPLETED` or `ABANDONED`
 - **Attestation** = proof of a completed participation, checkable by anyone at `/attestations/{code}`
-- **Resource** = a published piece of content (title, cover, category, status, schedule); today every resource is an **Article** (`articles` table: block body written in the back office), shown on the blog
+- **Article** = a blog post (title, cover, theme, tags, status, schedule, block body written in the back office), in the `articles` table owned by `content`. The API and the frontend still call it a "resource" (`/api/resources`, `ResourceResponse` shape)
 - **SEO snapshot** = server-rendered HTML served to bots instead of the SPA
 
 ## Current product scope (September 2026)
