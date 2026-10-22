@@ -1,9 +1,9 @@
 package com.brandonkamga.lescracks.identity.api.dto;
 
-import com.brandonkamga.lescracks.identity.domain.AuthProvider;
-import com.brandonkamga.lescracks.identity.domain.MemberGoal;
-import com.brandonkamga.lescracks.identity.domain.MemberSituation;
-import com.brandonkamga.lescracks.identity.domain.UserStatus;
+import com.brandonkamga.lescracks.identity.domain.member.AuthProvider;
+import com.brandonkamga.lescracks.identity.domain.member.MemberGoal;
+import com.brandonkamga.lescracks.identity.domain.member.MemberSituation;
+import com.brandonkamga.lescracks.identity.domain.member.UserStatus;
 
 import java.time.Instant;
 

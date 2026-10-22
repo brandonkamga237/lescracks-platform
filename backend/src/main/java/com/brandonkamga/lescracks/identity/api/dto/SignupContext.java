@@ -1,6 +1,6 @@
 package com.brandonkamga.lescracks.identity.api.dto;
 
-import com.brandonkamga.lescracks.identity.domain.Arrival;
+import com.brandonkamga.lescracks.identity.domain.member.Arrival;
 import jakarta.validation.constraints.Size;
 
 /** Where and how someone arrived, sent by the browser once; never asked. */

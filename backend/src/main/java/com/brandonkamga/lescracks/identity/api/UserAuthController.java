@@ -5,11 +5,11 @@ import com.brandonkamga.lescracks.identity.api.dto.ResetPasswordRequest;
 import com.brandonkamga.lescracks.identity.api.dto.UserAuthResponse;
 import com.brandonkamga.lescracks.identity.api.dto.UserLoginRequest;
 import com.brandonkamga.lescracks.identity.api.dto.UserRegisterRequest;
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.domain.EmailVerificationService;
-import com.brandonkamga.lescracks.identity.domain.PasswordResetService;
-import com.brandonkamga.lescracks.identity.domain.UserAuthService;
-import com.brandonkamga.lescracks.identity.domain.UserRegistrationService;
+import com.brandonkamga.lescracks.identity.domain.member.User;
+import com.brandonkamga.lescracks.identity.domain.signup.EmailVerificationService;
+import com.brandonkamga.lescracks.identity.domain.credential.PasswordResetService;
+import com.brandonkamga.lescracks.identity.domain.credential.UserAuthService;
+import com.brandonkamga.lescracks.identity.domain.signup.UserRegistrationService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

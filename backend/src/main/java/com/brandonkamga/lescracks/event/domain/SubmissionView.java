@@ -1,6 +1,6 @@
 package com.brandonkamga.lescracks.event.domain;
 
-import com.brandonkamga.lescracks.identity.domain.User;
+import com.brandonkamga.lescracks.identity.domain.member.User;
 
 import java.time.Instant;
 import java.util.List;

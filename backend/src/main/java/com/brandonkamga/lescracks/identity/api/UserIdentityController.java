@@ -2,8 +2,8 @@ package com.brandonkamga.lescracks.identity.api;
 
 import com.brandonkamga.lescracks.identity.api.dto.LinkIdentityRequest;
 import com.brandonkamga.lescracks.identity.api.dto.UserIdentityResponse;
-import com.brandonkamga.lescracks.identity.domain.AuthProvider;
-import com.brandonkamga.lescracks.identity.domain.UserIdentityService;
+import com.brandonkamga.lescracks.identity.domain.member.AuthProvider;
+import com.brandonkamga.lescracks.identity.domain.external.UserIdentityService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

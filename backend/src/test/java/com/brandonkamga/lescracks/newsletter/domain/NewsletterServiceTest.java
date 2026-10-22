@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.newsletter.domain;
 
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.domain.UserDirectory;
+import com.brandonkamga.lescracks.identity.domain.member.User;
+import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.mail.domain.NewsletterConfirmation;
 import com.brandonkamga.lescracks.mail.domain.NewsletterIssue;

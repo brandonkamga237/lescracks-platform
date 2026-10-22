@@ -7,8 +7,8 @@ import com.brandonkamga.lescracks.event.domain.EventStatus;
 import com.brandonkamga.lescracks.event.domain.EventSubmission;
 import com.brandonkamga.lescracks.event.domain.EventType;
 import com.brandonkamga.lescracks.event.domain.TeamMember;
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.infra.UserRepository;
+import com.brandonkamga.lescracks.identity.domain.member.User;
+import com.brandonkamga.lescracks.identity.domain.member.UserStore;
 import com.brandonkamga.lescracks.support.PostgresIT;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +31,7 @@ class EventParticipationIT extends PostgresIT {
     @Autowired private EventRepository events;
     @Autowired private EventRegistrationRepository registrations;
     @Autowired private EventSubmissionRepository submissions;
-    @Autowired private UserRepository users;
+    @Autowired private UserStore users;
 
     private Event hackathon;
     private User awa;
@@ -43,8 +43,8 @@ class EventParticipationIT extends PostgresIT {
                 .type(EventType.HACKATHON).format(EventFormat.ONLINE).status(EventStatus.PUBLISHED)
                 .startDate(Instant.now()).endDate(Instant.now().plus(10, ChronoUnit.DAYS))
                 .acceptsSubmissions(true).maxTeamSize(4).build());
-        awa = users.saveAndFlush(User.builder().email("awa.it@example.com").firstName("Awa").lastName("D").passwordHash("h").build());
-        kofi = users.saveAndFlush(User.builder().email("kofi.it@example.com").firstName("Kofi").lastName("A").passwordHash("h").build());
+        awa = users.save(User.builder().email("awa.it@example.com").firstName("Awa").lastName("D").passwordHash("h").build());
+        kofi = users.save(User.builder().email("kofi.it@example.com").firstName("Kofi").lastName("A").passwordHash("h").build());
     }
 
     private EventSubmission project(User owner, User... team) {

@@ -1,5 +1,7 @@
 package com.brandonkamga.lescracks.shared.dto;
 
+import com.brandonkamga.lescracks.shared.paging.Paged;
+
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -17,6 +19,15 @@ public record PageResponse<T>(
         int size,
         long totalElements,
         int totalPages) {
+
+    public static <E, T> PageResponse<T> of(Paged<E> page, Function<E, T> mapper) {
+        return new PageResponse<>(
+                page.items().stream().map(mapper).toList(),
+                page.page(),
+                page.size(),
+                page.total(),
+                page.totalPages());
+    }
 
     public static <E, T> PageResponse<T> of(Page<E> page, Function<E, T> mapper) {
         return new PageResponse<>(

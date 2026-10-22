@@ -7,7 +7,8 @@ import com.brandonkamga.lescracks.resource.api.ResourceController;
 import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.resource.api.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
-import com.brandonkamga.lescracks.identity.infra.UserRepository;
+import com.brandonkamga.lescracks.identity.infra.persistence.UserJpaRepository;
+import com.brandonkamga.lescracks.identity.infra.security.LastSeenFilterConfig;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 
 import org.junit.jupiter.api.DisplayName;
@@ -46,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * No database, so this runs in the fast suite despite booting a Spring slice.
  */
 @WebMvcTest({ResourceController.class, EventController.class})
-@Import({SecurityConfig.class, KeycloakRoleConverter.class, SecurityErrorWriter.class})
+@Import({SecurityConfig.class, KeycloakRoleConverter.class, SecurityErrorWriter.class, LastSeenFilterConfig.class})
 class SecurityConfigTest {
 
     @Autowired private MockMvc mockMvc;
@@ -56,7 +57,7 @@ class SecurityConfigTest {
     @MockitoBean private EventService events;
     @MockitoBean private StorageService storage;
     // The security chain registers the last-seen touch, which needs the users table.
-    @MockitoBean private UserRepository users;
+    @MockitoBean private UserJpaRepository users;
 
     @Test
     @DisplayName("reading the catalogue needs no account: that is what brings people in")

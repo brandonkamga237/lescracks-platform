@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.community.api.dto;
 
 import com.brandonkamga.lescracks.community.domain.CommentView;
-import com.brandonkamga.lescracks.identity.domain.User;
+import com.brandonkamga.lescracks.identity.domain.member.User;
 import com.brandonkamga.lescracks.storage.domain.StoredFiles;
 
 import java.time.Instant;

@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.identity.api.dto;
 
-import com.brandonkamga.lescracks.identity.domain.UserIdentity;
-import com.brandonkamga.lescracks.identity.domain.AuthProvider;
+import com.brandonkamga.lescracks.identity.domain.external.UserIdentity;
+import com.brandonkamga.lescracks.identity.domain.member.AuthProvider;
 
 import java.time.Instant;
 

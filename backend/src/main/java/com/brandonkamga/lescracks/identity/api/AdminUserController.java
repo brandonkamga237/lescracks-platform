@@ -2,16 +2,14 @@ package com.brandonkamga.lescracks.identity.api;
 
 import com.brandonkamga.lescracks.identity.api.dto.UserAdminResponse;
 import com.brandonkamga.lescracks.identity.api.dto.UserStatusRequest;
-import com.brandonkamga.lescracks.identity.domain.AdminUserService;
-import com.brandonkamga.lescracks.identity.domain.ProfileCompletion;
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.domain.UserSearch;
+import com.brandonkamga.lescracks.identity.domain.admin.AdminUserService;
+import com.brandonkamga.lescracks.identity.domain.member.ProfileCompletion;
+import com.brandonkamga.lescracks.identity.domain.member.User;
+import com.brandonkamga.lescracks.identity.domain.member.UserSearch;
 import com.brandonkamga.lescracks.shared.dto.PageResponse;
+import com.brandonkamga.lescracks.shared.paging.PageQuery;
 
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +27,8 @@ import java.util.List;
 @RequestMapping("/api/admin/users")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminUserController {
+    private static final int MAX_PAGE_SIZE = 100;
+
     private final AdminUserService users;
 
     public AdminUserController(AdminUserService users) { this.users = users; }
@@ -38,8 +38,10 @@ public class AdminUserController {
     public PageResponse<UserAdminResponse> list(@RequestParam(required = false) String search,
                                                 @RequestParam(required = false) UserSearch.Kind kind,
                                                 @RequestParam(required = false) Boolean verified,
-                                                @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return PageResponse.of(users.list(new UserSearch(search, kind, verified), pageable), this::response);
+                                                @RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "20") int size) {
+        PageQuery query = new PageQuery(Math.max(0, page), Math.clamp(size, 1, MAX_PAGE_SIZE));
+        return PageResponse.of(users.list(new UserSearch(search, kind, verified), query), this::response);
     }
 
     @GetMapping("/{id}")
@@ -65,7 +67,7 @@ public class AdminUserController {
 
     @GetMapping(value = "/export", produces = "text/csv")
     public ResponseEntity<StreamingResponseBody> export() {
-        List<User> list = users.list(null, Pageable.unpaged()).getContent();
+        List<User> list = users.listAll(UserSearch.ANYONE);
         StreamingResponseBody body = out -> {
             out.write("id;email;firstName;lastName;status;provider;verified;createdAt;phone;country;situation;goal;city;marketingConsent;completion\n".getBytes(StandardCharsets.UTF_8));
             for (User user : list) {

@@ -3,8 +3,8 @@ package com.brandonkamga.lescracks.community.infra;
 import com.brandonkamga.lescracks.community.domain.Comment;
 import com.brandonkamga.lescracks.community.domain.CommentReport;
 import com.brandonkamga.lescracks.community.domain.CommentStatus;
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.infra.UserRepository;
+import com.brandonkamga.lescracks.identity.domain.member.User;
+import com.brandonkamga.lescracks.identity.domain.member.UserStore;
 import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
 import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
@@ -29,13 +29,13 @@ class CommentRepositoryIT extends PostgresIT {
     @Autowired private CommentReportRepository reports;
     @Autowired private ResourceRepository resources;
     @Autowired private CategoryRepository categories;
-    @Autowired private UserRepository users;
+    @Autowired private UserStore users;
 
     @Test
     @DisplayName("the queue lists reported comments by number of reports, never deleted ones, and keeps who reported what")
     void moderationQueue() {
         Resource article = resources.save(resource(categories.save(category("Comments")), "Commentaires", ResourceStatus.PUBLISHED));
-        User awa = users.saveAndFlush(User.builder().email("awa.comments@example.com").firstName("Awa").lastName("D").passwordHash("h").build());
+        User awa = users.save(User.builder().email("awa.comments@example.com").firstName("Awa").lastName("D").passwordHash("h").build());
         Comment once = comments.save(Comment.builder().resourceId(article.getId()).authorId(awa.getId()).body("un").reportCount(1).build());
         Comment twice = comments.save(Comment.builder().resourceId(article.getId()).authorId(awa.getId()).body("deux").reportCount(2).build());
         comments.save(Comment.builder().resourceId(article.getId()).authorId(awa.getId()).body("supprimé").reportCount(5).status(CommentStatus.DELETED).build());

@@ -3,7 +3,7 @@ package com.brandonkamga.lescracks.stats.domain;
 import com.brandonkamga.lescracks.event.domain.Event;
 import com.brandonkamga.lescracks.event.domain.EventStatus;
 import com.brandonkamga.lescracks.event.infra.EventRepository;
-import com.brandonkamga.lescracks.identity.infra.UserRepository;
+import com.brandonkamga.lescracks.identity.infra.persistence.UserJpaRepository;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterStatus;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterSubscriptionRepository;
 import com.brandonkamga.lescracks.resource.domain.Resource;
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 public class StatsServiceImpl implements StatsService {
     private static final Logger log = LoggerFactory.getLogger(StatsServiceImpl.class);
 
-    private final UserRepository users;
+    private final UserJpaRepository users;
     private final EventRepository events;
     private final ResourceRepository resources;
     private final NewsletterSubscriptionRepository newsletter;
@@ -61,7 +61,7 @@ public class StatsServiceImpl implements StatsService {
     private final UmamiClient umami;
     private final CategoryRepository categories;
 
-    public StatsServiceImpl(UserRepository users, EventRepository events, ResourceRepository resources,
+    public StatsServiceImpl(UserJpaRepository users, EventRepository events, ResourceRepository resources,
                             NewsletterSubscriptionRepository newsletter, TalkVideoRepository talks,
                             UmamiClient umami, CategoryRepository categories) {
         this.users = users;

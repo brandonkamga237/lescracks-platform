@@ -3,9 +3,9 @@ package com.brandonkamga.lescracks.identity.api;
 import com.brandonkamga.lescracks.identity.api.dto.OidcSyncRequest;
 import com.brandonkamga.lescracks.identity.api.dto.UserProfileResponse;
 import com.brandonkamga.lescracks.identity.domain.credential.AuthMetrics;
-import com.brandonkamga.lescracks.identity.domain.OidcSyncService;
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.domain.UserIdentityService;
+import com.brandonkamga.lescracks.identity.domain.external.OidcSyncService;
+import com.brandonkamga.lescracks.identity.domain.member.User;
+import com.brandonkamga.lescracks.identity.domain.external.UserIdentityService;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 
 import jakarta.validation.Valid;
@@ -41,7 +41,7 @@ public class OidcSyncController {
         }
         User user;
         try {
-            user = oidc.sync(jwt, request.provider());
+            user = oidc.sync(jwt.getTokenValue(), request.provider());
         } catch (RuntimeException failed) {
             metrics.login("member", request.provider().name().toLowerCase(), false);
             throw failed;

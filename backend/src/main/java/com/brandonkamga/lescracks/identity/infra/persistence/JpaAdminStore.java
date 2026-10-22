@@ -29,7 +29,8 @@ class JpaAdminStore implements AdminStore {
 
     @Override
     public Admin save(Admin admin) {
-        AdminEntity entity = admin.getId() == null ? new AdminEntity() : admins.findById(admin.getId()).orElseGet(AdminEntity::new);
+        AdminEntity entity = admin.getId() == null ? new AdminEntity()
+                : admins.findById(admin.getId()).orElseThrow(() -> new IllegalStateException("No admin " + admin.getId() + " to update"));
         entity.setUsername(admin.getUsername());
         entity.setPasswordHash(admin.getPasswordHash());
         entity.setStatus(admin.getStatus());

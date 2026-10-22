@@ -1,6 +1,6 @@
 package com.brandonkamga.lescracks.identity.api.dto;
 
-import com.brandonkamga.lescracks.identity.domain.PasswordChange;
+import com.brandonkamga.lescracks.identity.domain.credential.PasswordChange;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 

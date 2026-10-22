@@ -1,6 +1,6 @@
 package com.brandonkamga.lescracks.event.api.dto;
 
-import com.brandonkamga.lescracks.identity.domain.User;
+import com.brandonkamga.lescracks.identity.domain.member.User;
 
 /** Someone named on a project. The email is shown to the team, who need it to edit the project. */
 public record TeamMemberResponse(Long id, String name, String email, boolean owner) {

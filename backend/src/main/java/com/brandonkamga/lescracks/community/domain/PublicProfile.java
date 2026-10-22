@@ -1,6 +1,6 @@
 package com.brandonkamga.lescracks.community.domain;
 
-import com.brandonkamga.lescracks.identity.domain.User;
+import com.brandonkamga.lescracks.identity.domain.member.User;
 import com.brandonkamga.lescracks.recognition.domain.Certificate;
 import com.brandonkamga.lescracks.recognition.domain.MemberBadge;
 

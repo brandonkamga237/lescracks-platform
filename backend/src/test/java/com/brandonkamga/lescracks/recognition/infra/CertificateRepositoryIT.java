@@ -5,8 +5,8 @@ import com.brandonkamga.lescracks.event.domain.EventFormat;
 import com.brandonkamga.lescracks.event.domain.EventStatus;
 import com.brandonkamga.lescracks.event.domain.EventType;
 import com.brandonkamga.lescracks.event.infra.EventRepository;
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.infra.UserRepository;
+import com.brandonkamga.lescracks.identity.domain.member.User;
+import com.brandonkamga.lescracks.identity.domain.member.UserStore;
 import com.brandonkamga.lescracks.recognition.domain.Certificate;
 import com.brandonkamga.lescracks.recognition.domain.CertificateCodes;
 import com.brandonkamga.lescracks.recognition.domain.CertificateKind;
@@ -31,14 +31,14 @@ class CertificateRepositoryIT extends PostgresIT {
 
     @Autowired private CertificateRepository certificates;
     @Autowired private EventRepository events;
-    @Autowired private UserRepository users;
+    @Autowired private UserStore users;
 
     private User awa;
     private Event hackathon;
 
     @BeforeEach
     void seed() {
-        awa = users.saveAndFlush(User.builder().email("awa.cert@example.com").firstName("Awa").lastName("D").passwordHash("h").build());
+        awa = users.save(User.builder().email("awa.cert@example.com").firstName("Awa").lastName("D").passwordHash("h").build());
         hackathon = events.saveAndFlush(Event.builder().title("Hackathon cert").slug("hackathon-cert").description("D")
                 .type(EventType.HACKATHON).format(EventFormat.ONLINE).status(EventStatus.PUBLISHED).startDate(Instant.now()).build());
     }

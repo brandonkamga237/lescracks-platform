@@ -2,8 +2,8 @@ package com.brandonkamga.lescracks.community.domain;
 
 import com.brandonkamga.lescracks.community.infra.CommentReportRepository;
 import com.brandonkamga.lescracks.community.infra.CommentRepository;
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.domain.UserDirectory;
+import com.brandonkamga.lescracks.identity.domain.member.User;
+import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
 import com.brandonkamga.lescracks.mail.domain.CommentReplyEmail;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.resource.domain.Resource;

@@ -1,9 +1,9 @@
 package com.brandonkamga.lescracks.identity.api.dto;
 
-import com.brandonkamga.lescracks.identity.domain.ProfileChanges;
-import com.brandonkamga.lescracks.identity.domain.ProfileVisibility;
-import com.brandonkamga.lescracks.identity.domain.MemberGoal;
-import com.brandonkamga.lescracks.identity.domain.MemberSituation;
+import com.brandonkamga.lescracks.identity.domain.member.ProfileChanges;
+import com.brandonkamga.lescracks.identity.domain.member.ProfileVisibility;
+import com.brandonkamga.lescracks.identity.domain.member.MemberGoal;
+import com.brandonkamga.lescracks.identity.domain.member.MemberSituation;
 
 import jakarta.validation.constraints.Size;
 

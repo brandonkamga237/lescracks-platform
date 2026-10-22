@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.recognition.domain;
 
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.domain.UserDirectory;
+import com.brandonkamga.lescracks.identity.domain.member.User;
+import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
 import com.brandonkamga.lescracks.recognition.infra.BadgeRepository;
 import com.brandonkamga.lescracks.recognition.infra.MemberBadgeRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;

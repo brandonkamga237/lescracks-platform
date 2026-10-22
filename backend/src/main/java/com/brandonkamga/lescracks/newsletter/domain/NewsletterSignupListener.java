@@ -1,6 +1,6 @@
 package com.brandonkamga.lescracks.newsletter.domain;
 
-import com.brandonkamga.lescracks.identity.domain.MemberRegistered;
+import com.brandonkamga.lescracks.identity.domain.signup.MemberRegistered;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;

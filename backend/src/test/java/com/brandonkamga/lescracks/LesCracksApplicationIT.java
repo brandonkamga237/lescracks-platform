@@ -2,11 +2,11 @@ package com.brandonkamga.lescracks;
 
 import com.brandonkamga.lescracks.event.domain.EventService;
 import com.brandonkamga.lescracks.identity.domain.admin.AdminAuthService;
-import com.brandonkamga.lescracks.identity.domain.EmailVerificationService;
-import com.brandonkamga.lescracks.identity.domain.PasswordResetService;
-import com.brandonkamga.lescracks.identity.domain.UserAuthService;
-import com.brandonkamga.lescracks.identity.domain.UserDirectory;
-import com.brandonkamga.lescracks.identity.domain.UserRegistrationService;
+import com.brandonkamga.lescracks.identity.domain.signup.EmailVerificationService;
+import com.brandonkamga.lescracks.identity.domain.credential.PasswordResetService;
+import com.brandonkamga.lescracks.identity.domain.credential.UserAuthService;
+import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
+import com.brandonkamga.lescracks.identity.domain.signup.UserRegistrationService;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;

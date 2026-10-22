@@ -1,9 +1,9 @@
 package com.brandonkamga.lescracks.community.domain;
 
-import com.brandonkamga.lescracks.identity.domain.AuthProvider;
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.domain.UserDirectory;
-import com.brandonkamga.lescracks.identity.domain.UserStatus;
+import com.brandonkamga.lescracks.identity.domain.member.AuthProvider;
+import com.brandonkamga.lescracks.identity.domain.member.User;
+import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
+import com.brandonkamga.lescracks.identity.domain.member.UserStatus;
 import com.brandonkamga.lescracks.recognition.domain.BadgeService;
 import com.brandonkamga.lescracks.recognition.domain.CertificateService;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;

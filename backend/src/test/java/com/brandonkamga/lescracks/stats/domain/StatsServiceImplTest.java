@@ -1,9 +1,9 @@
 package com.brandonkamga.lescracks.stats.domain;
 
 import com.brandonkamga.lescracks.event.infra.EventRepository;
-import com.brandonkamga.lescracks.identity.domain.AuthProvider;
-import com.brandonkamga.lescracks.identity.domain.MemberSituation;
-import com.brandonkamga.lescracks.identity.infra.UserRepository;
+import com.brandonkamga.lescracks.identity.domain.member.AuthProvider;
+import com.brandonkamga.lescracks.identity.domain.member.MemberSituation;
+import com.brandonkamga.lescracks.identity.infra.persistence.UserJpaRepository;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterSubscriptionRepository;
 import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
 import com.brandonkamga.lescracks.stats.api.dto.NamedCount;
@@ -30,7 +30,7 @@ import static org.mockito.Mockito.when;
 
 class StatsServiceImplTest {
 
-    private final UserRepository users = mock(UserRepository.class);
+    private final UserJpaRepository users = mock(UserJpaRepository.class);
     private final CategoryRepository categories = mock(CategoryRepository.class);
     private final StatsServiceImpl stats = new StatsServiceImpl(users, mock(EventRepository.class), mock(ResourceRepository.class),
             mock(NewsletterSubscriptionRepository.class), mock(TalkVideoRepository.class), mock(UmamiClient.class), categories);
