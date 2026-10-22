@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.8.0...v1.9.0) (2026-10-22)
+
+
+### Features
+
+* **frontend:** keep the main actions in reach on event and article pages ([#118](https://github.com/brandonkamga237/lescracks-platform/issues/118)) ([5511ba7](https://github.com/brandonkamga237/lescracks-platform/commit/5511ba7bd5231f29676279d192d726ae992f4e15))
+
 ## [1.8.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.7.0...v1.8.0) (2026-10-21)
 
 
