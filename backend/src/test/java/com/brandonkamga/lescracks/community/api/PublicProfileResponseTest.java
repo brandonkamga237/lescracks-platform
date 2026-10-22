@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.community.api;
 
 import com.brandonkamga.lescracks.community.api.dto.PublicProfileResponse;
-import com.brandonkamga.lescracks.community.domain.PublicProfile;
+import com.brandonkamga.lescracks.community.application.PublicProfile;
 import com.brandonkamga.lescracks.member.application.Member;
 
 import org.junit.jupiter.api.DisplayName;

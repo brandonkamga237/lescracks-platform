@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.community.api;
 
 import com.brandonkamga.lescracks.community.api.dto.PublicProfileResponse;
-import com.brandonkamga.lescracks.community.domain.PublicProfileService;
+import com.brandonkamga.lescracks.community.application.PublicProfileService;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +20,6 @@ public class PublicProfileController {
     /** Public: what a click on a member's name shows. */
     @GetMapping("/{id}")
     public PublicProfileResponse profile(@PathVariable Long id) {
-        return PublicProfileResponse.of(profiles.of(id));
+        return PublicProfileResponse.of(profiles.require(id));
     }
 }
