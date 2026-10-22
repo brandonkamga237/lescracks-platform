@@ -58,7 +58,7 @@ function UserDetail({ id, onClose, onChanged }: UserDetailProps) {
     <AdminModal open onClose={onClose} title="Fiche utilisateur" description="Détails du compte" busy={loading}>
       {loading ? <p className="py-8 text-center text-t3">Chargement…</p> : null}
       {error ? <p role="alert" className="rounded-lg border border-error/30 bg-error/10 p-4 text-sm text-t1">{error.message}</p> : null}
-      {data && data.hasAccount && !data.verified && (
+      {data && !data.verified && (
         <div className="mb-5 rounded-lg border border-gold-400/25 bg-gold-400/5 p-4">
           <p className="text-sm text-t1">Adresse pas encore confirmée.</p>
           <p className="mt-1 text-xs text-t3">Si la personne dit ne rien recevoir : renvoie le lien, ou confirme l’adresse si elle t’a écrit depuis celle-ci.</p>
@@ -71,10 +71,6 @@ function UserDetail({ id, onClose, onChanged }: UserDetailProps) {
       {message && <p role={message.ok ? 'status' : 'alert'} className={`mb-4 text-sm ${message.ok ? 'text-success-ink' : 'text-error-ink'}`}>{message.text}</p>}
       {data && (
         <dl className="mt-2 grid gap-5 sm:grid-cols-2">
-          <div>
-            <dt className="text-xs text-t4">Type</dt>
-            <dd className="mt-1 text-sm text-t1">{data.hasAccount ? 'Membre' : 'Contact newsletter (sans compte)'}</dd>
-          </div>
           <div>
             <dt className="text-xs text-t4">Dernière visite</dt>
             <dd className="mt-1 text-sm text-t1">{lastSeen(data.lastSeenAt)}</dd>
@@ -202,7 +198,7 @@ export default function AdminUsers() {
     setDeleteTarget({ id: user.id, name: fullName(user) });
   }
 
-  const activeFilters = Number(filters.kind !== undefined) + Number(filters.verified !== undefined);
+  const activeFilters = Number(filters.verified !== undefined);
   // On a phone the search stays in view and the rest folds behind « Filtres »; from sm up the
   // wrappers dissolve (display: contents) into the one row the desktop always had.
   const headerAction = (
@@ -222,13 +218,7 @@ export default function AdminUsers() {
         <SlidersHorizontal className="h-4 w-4" aria-hidden />Filtres{activeFilters > 0 && <span className="font-mono text-xs text-gold-ink">{activeFilters}</span>}
       </button>
       </div>
-      <div id="member-filters" className={`${filtersOpen ? 'grid' : 'hidden'} grid-cols-2 gap-2 sm:contents`}>
-      <select aria-label="Type" value={filters.kind ?? ''} className="input w-full sm:w-auto"
-        onChange={(event) => { setPage(0); setFilters({ ...filters, kind: (event.target.value || undefined) as UserFilters['kind'] }); }}>
-        <option value="">Tous</option>
-        <option value="MEMBER">Membres</option>
-        <option value="CONTACT">Contacts newsletter</option>
-      </select>
+      <div id="member-filters" className={`${filtersOpen ? 'grid' : 'hidden'} gap-2 sm:contents`}>
       <select aria-label="Email" value={filters.verified === undefined ? '' : String(filters.verified)} className="input w-full sm:w-auto"
         onChange={(event) => { setPage(0); setFilters({ ...filters, verified: event.target.value === '' ? undefined : event.target.value === 'true' }); }}>
         <option value="">Email : tous</option>
@@ -256,7 +246,7 @@ export default function AdminUsers() {
       {overview.data && (
         <div className="order-2 mt-6 grid grid-cols-2 gap-3 sm:order-none sm:mb-6 sm:mt-0 sm:gap-4 xl:grid-cols-4">
           <Kpi label="Membres" value={overview.data.users.toLocaleString('fr-FR')}
-            hint={`${overview.data.verifiedUsers.toLocaleString('fr-FR')} emails confirmés · ${overview.data.newsletterContacts.toLocaleString('fr-FR')} contacts newsletter à part`} />
+            hint={`${overview.data.verifiedUsers.toLocaleString('fr-FR')} emails confirmés · ${overview.data.newsletterContacts.toLocaleString('fr-FR')} abonnés newsletter sans compte`} />
           <Kpi label="Nouveaux · 30 jours" value={overview.data.usersNewLast30d.toLocaleString('fr-FR')}
             hint="inscriptions récentes" />
           <Kpi label="Actifs · 7 jours" value={overview.data.usersActiveLast7d.toLocaleString('fr-FR')}
@@ -300,10 +290,9 @@ export default function AdminUsers() {
             <tbody>
               {list.map((user) => (
                 <tr key={user.id} className="border-b border-line-soft last:border-b-0">
-                  <td className="px-5 py-3 text-t1">{fullName(user)}
-                    {!user.hasAccount && <span className="ml-2 rounded border border-line px-1.5 py-0.5 text-xs text-t4">Contact newsletter</span>}</td>
+                  <td className="px-5 py-3 text-t1">{fullName(user)}</td>
                   <td className="px-5 py-3 text-t3">{user.email}
-                    {user.hasAccount && !user.verified && <span className="ml-2 text-xs text-warning-ink">non confirmé</span>}</td>
+                    {!user.verified && <span className="ml-2 text-xs text-warning-ink">non confirmé</span>}</td>
                   <td className="px-5 py-3">
                     <select
                       value={user.status}
@@ -317,7 +306,7 @@ export default function AdminUsers() {
                     </select>
                   </td>
                   <td className="px-5 py-3 text-t3">{providerLabels[user.provider]}</td>
-                  <td className="px-5 py-3 text-t3">{user.hasAccount ? lastSeen(user.lastSeenAt) : '—'}</td>
+                  <td className="px-5 py-3 text-t3">{lastSeen(user.lastSeenAt)}</td>
                   <td className="px-5 py-3 font-mono tabular-nums text-t3">{user.completion} %</td>
                   <td className="px-5 py-3 text-t3">{new Date(user.createdAt).toLocaleDateString('fr-FR')}</td>
                   <td className="px-5 py-3 text-right">
@@ -366,9 +355,7 @@ export default function AdminUsers() {
                     ))}
                   </select>
                   <span className="text-xs text-t3">{providerLabels[user.provider]}</span>
-                  {user.hasAccount
-                    ? <span className="text-xs text-t3">{user.verified ? 'Email confirmé' : 'Email non confirmé'}</span>
-                    : <span className="text-xs text-t4">Contact newsletter</span>}
+                  <span className="text-xs text-t3">{user.verified ? 'Email confirmé' : 'Email non confirmé'}</span>
                   {user.country && <span className="text-xs text-t3">{countryName(user.country)}</span>}
                   <span className="font-mono text-xs tabular-nums text-t3">Profil {user.completion} %</span>
                 </div>
