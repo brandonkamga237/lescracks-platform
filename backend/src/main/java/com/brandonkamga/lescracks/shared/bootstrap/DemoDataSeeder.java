@@ -53,7 +53,7 @@ public class DemoDataSeeder implements CommandLineRunner {
     }
 
     private void seedSampleArticle() {
-        if (articles.list(new ArticleSearch(null, null, null, null), new PageQuery(0, 1)).total() > 0) {
+        if (articles.list(ArticleSearch.backOffice(null, null, null, null), new PageQuery(0, 1)).total() > 0) {
             return;
         }
         Category frontend = taxonomy.listCategories().stream()

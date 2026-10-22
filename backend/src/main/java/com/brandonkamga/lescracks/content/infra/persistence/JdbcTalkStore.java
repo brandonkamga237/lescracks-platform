@@ -49,7 +49,7 @@ class JdbcTalkStore implements TalkStore {
         String where = status == null ? "" : " WHERE status = '" + status.name() + "'";
         List<Long> totals = new ArrayList<>();
         List<Talk> found = jdbc.sql("SELECT " + COLUMNS + ", count(*) OVER () AS total FROM talk_videos" + where
-                        + " ORDER BY published_at DESC NULLS LAST, id DESC LIMIT :limit OFFSET :offset")
+                        + (status == null ? " ORDER BY created_at DESC" : " ORDER BY published_at DESC NULLS LAST") + ", id DESC LIMIT :limit OFFSET :offset")
                 .param("limit", page.size()).param("offset", (long) page.page() * page.size())
                 .query((row, number) -> {
                     if (number == 0) totals.add(row.getLong("total"));

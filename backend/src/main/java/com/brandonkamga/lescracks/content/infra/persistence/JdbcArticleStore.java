@@ -108,7 +108,8 @@ class JdbcArticleStore implements ArticleStore {
         List<Long> totals = new ArrayList<>();
         RowMapper<Article> mapper = rows(withBody);
         List<Article> found = jdbc.sql("SELECT " + (withBody ? FULL : CARD) + ", count(*) OVER () AS total FROM articles" + where
-                        + " ORDER BY coalesce(published_at, created_at) DESC, id DESC LIMIT :limit OFFSET :offset")
+                        + " ORDER BY " + (search.order() == ArticleSearch.Order.CREATION ? "created_at" : "coalesce(published_at, created_at)")
+                        + " DESC, id DESC LIMIT :limit OFFSET :offset")
                 .params(params)
                 .query((row, number) -> {
                     if (number == 0) totals.add(row.getLong("total"));

@@ -67,7 +67,7 @@ public class ArticleController {
                                              @RequestParam(required = false) Long tagId,
                                              @RequestParam(defaultValue = "0") int page,
                                              @RequestParam(defaultValue = "20") int size) {
-        return PageResponse.of(admin.list(new ArticleSearch(status, search, categoryId, tagId), pageOf(page, size)),
+        return PageResponse.of(admin.list(ArticleSearch.backOffice(status, search, categoryId, tagId), pageOf(page, size)),
                 ArticleResponse::of);
     }
 

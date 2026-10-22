@@ -86,8 +86,8 @@ final class InMemoryContent {
                     .filter(article -> search.tagId() == null || article.getTagIds().contains(search.tagId()))
                     .filter(article -> search.text() == null
                             || (article.getTitle() + " " + article.getDescription()).toLowerCase().contains(search.text().toLowerCase()))
-                    .sorted(Comparator.comparing((Article article) -> article.getPublishedAt() != null ? article.getPublishedAt() : article.getCreatedAt())
-                            .reversed())
+                    .sorted(Comparator.comparing((Article article) -> search.order() == ArticleSearch.Order.CREATION || article.getPublishedAt() == null
+                            ? article.getCreatedAt() : article.getPublishedAt()).reversed())
                     .map(article -> withBody ? copy(article) : card(article))
                     .toList();
             return page(found, page);

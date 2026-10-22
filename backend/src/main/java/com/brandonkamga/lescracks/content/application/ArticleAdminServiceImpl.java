@@ -50,7 +50,7 @@ public class ArticleAdminServiceImpl implements ArticleAdminService {
     @Override
     public Paged<ArticleView> list(ArticleSearch search, PageQuery page) {
         String text = search.text() == null || search.text().isBlank() ? null : search.text().trim();
-        Paged<Article> found = articles.search(new ArticleSearch(search.status(), text, search.categoryId(), search.tagId()), page, true);
+        Paged<Article> found = articles.search(new ArticleSearch(search.status(), text, search.categoryId(), search.tagId(), search.order()), page, true);
         return new Paged<>(views.of(found.items()), found.page(), found.size(), found.total());
     }
 

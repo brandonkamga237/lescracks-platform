@@ -91,16 +91,23 @@ class JdbcContentIT extends PostgresIT {
         Article recent = article("it-recent", backend, ArticleStatus.PUBLISHED, Instant.parse("2026-06-01T00:00:00Z"), Set.of());
         article("it-draft", mobile, ArticleStatus.DRAFT, null, Set.of(java.getId()));
 
-        var published = articles.search(new ArticleSearch(ArticleStatus.PUBLISHED, null, backend.getId(), null), new PageQuery(0, 1), false);
+        var published = articles.search(ArticleSearch.published(null, backend.getId(), null), new PageQuery(0, 1), false);
         assertThat(published.items()).extracting(Article::getId).containsExactly(recent.getId());
         assertThat(published.total()).isEqualTo(2);
         assertThat(published.items().get(0).getBody()).isNull();
 
-        assertThat(articles.search(new ArticleSearch(null, "TITRE IT-D", null, null), new PageQuery(0, 10), false).items())
+        assertThat(articles.search(ArticleSearch.backOffice(null, "TITRE IT-D", null, null), new PageQuery(0, 10), false).items())
                 .extracting(Article::getSlug).containsExactly("it-draft");
-        assertThat(articles.search(new ArticleSearch(ArticleStatus.PUBLISHED, null, null, java.getId()), new PageQuery(0, 10), true).items())
+        assertThat(articles.search(ArticleSearch.backOffice(ArticleStatus.PUBLISHED, null, null, java.getId()), new PageQuery(0, 10), true).items())
                 .extracting(Article::getId).containsExactly(old.getId());
-        assertThat(articles.search(new ArticleSearch(null, null, mobile.getId(), null), new PageQuery(3, 10), false).total()).isEqualTo(1);
+        assertThat(articles.search(ArticleSearch.backOffice(null, null, mobile.getId(), null), new PageQuery(3, 10), false).total()).isEqualTo(1);
+
+        // Written last but dated earlier: readers see it after the others, the back office first.
+        Article backdated = article("it-backdated", backend, ArticleStatus.PUBLISHED, Instant.parse("2025-01-01T00:00:00Z"), Set.of());
+        assertThat(articles.search(ArticleSearch.published(null, backend.getId(), null), new PageQuery(0, 10), false).items())
+                .extracting(Article::getId).containsExactly(recent.getId(), old.getId(), backdated.getId());
+        assertThat(articles.search(ArticleSearch.backOffice(ArticleStatus.PUBLISHED, null, backend.getId(), null), new PageQuery(0, 10), false).items())
+                .extracting(Article::getId).containsExactly(backdated.getId(), recent.getId(), old.getId());
     }
 
     @Test

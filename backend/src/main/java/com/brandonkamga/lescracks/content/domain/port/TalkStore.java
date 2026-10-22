@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface TalkStore {
 
-    /** Everything, or one status when it is set; newest published first. */
+    /** Everything newest created first (the back office), or one status newest published first. */
     Paged<Talk> findAll(TalkStatus status, PageQuery page);
 
     Optional<Talk> findById(Long id);
