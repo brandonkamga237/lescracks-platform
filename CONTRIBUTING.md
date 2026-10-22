@@ -39,7 +39,7 @@ type(scope): description
 - **type**: `feat` (user-facing addition), `fix` (bug fix), `perf`, `refactor` (no behaviour
   change), `docs`, `test`, `build` (dependencies, Dockerfiles), `ci` (workflows), `chore`
   (tooling, housekeeping), `style` (formatting only), `revert`.
-- **scope** (optional, lowercase): the domain or area touched. Backend domains: `identity`,
+- **scope** (optional, lowercase): the domain or area touched. Backend domains: `account`, `member`,
   `resource`, `taxonomy`, `event`, `newsletter`, `stats`, `storage`, `mail`, `seo`,
   `community`, `recognition`, `talk`. Cross-cutting: `ui`, `admin`, `auth`, `ci`, `docker`, `deps`, `keycloak`,
   `tooling`.

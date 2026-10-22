@@ -57,7 +57,9 @@ api ──▶ application ──▶ domain ◀── infra
 - `domain` imports nothing from `application`, `api` or `infra`.
 - `infra` implements ports; it never holds a business rule.
 - Another module is reached through its `application` interfaces (or a published event),
-  never its `domain/port`, `infra` or entities. `analytics` reads through query ports each
+  never its `domain/port`, `infra` or entities. The types those interfaces expose — read
+  models, commands, events, enums such as `AccountStatus` — are its published language and
+  may be used; nothing else of its domain. `analytics` reads through query ports each
   module exposes for it.
 - Spring annotations live in `api` and `infra` only. Application services are built in
   `infra/config` and wrapped by `TransactionalServices` (reads by name prefix

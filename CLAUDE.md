@@ -3,10 +3,10 @@ French-language tech training platform: resources, events, participations, Accom
 Monorepo: `frontend/` React + Vite (SPA), `backend/` Spring Boot + PostgreSQL + MinIO.
 
 ## Structure
-- `backend/src/main/java/com/brandonkamga/lescracks/` → **one package per business capability**. Target map (migration in progress, module by module): `account` (sign-in, credentials, admins), `member` (profile, welcome answers), `newsletter`, `content` (articles + Talk), `event`, `engagement` (views, likes, comments on any target), `recognition`, `taxonomy`, `notification` (emails), `analytics`, `storage`, `seo`. Not yet moved: `identity` (→ `account` + `member`), `resource` + `talk` (→ `content`), `community` (→ `engagement`), `mail` (→ `notification`), `stats` (→ `analytics`)
+- `backend/src/main/java/com/brandonkamga/lescracks/` → **one package per business capability**. Target map (migration in progress, module by module): `account` (sign-in, credentials, admins) and `member` (profile, welcome answers) — both migrated, `newsletter`, `content` (articles + Talk), `event`, `engagement` (views, likes, comments on any target), `recognition`, `taxonomy`, `notification` (emails), `analytics`, `storage`, `seo`. Not yet moved: `resource` + `talk` (→ `content`), `community` (→ `engagement`), `mail` (→ `notification`), `stats` (→ `analytics`)
   - Every module uses the same skeleton: `api/` + `api/dto/` (HTTP), `application/` (use cases, commands), `domain/model/` + `domain/port/` (plain Java), `infra/persistence/`, `infra/<technology>/`, `infra/config/` (assembly + transactions). Rules, patterns and reuse: **`.claude/skills/design-patterns/SKILL.md`, mandatory for every backend change**
   - `shared/` → cross-cutting code only, never business rules:
-    - `shared/security/` → SecurityConfig (route rules) + KeycloakRoleConverter. Identity is Keycloak's; the API only verifies tokens
+    - `shared/security/` → SecurityConfig (route rules) + KeycloakRoleConverter. Local accounts and their sessions live in `account`; Keycloak only issues the Google/GitHub tokens the API verifies
     - `shared/config/` → OpenApiConfig, JacksonConfig, AppBeans; `shared/bootstrap/` → startup seeders and backfills
     - `shared/exception/` → business exceptions (carry an `ErrorCode`, no HTTP type) + `GlobalExceptionHandler`; `shared/dto/` → ApiError, PageResponse; `shared/paging/` → PageQuery, Paged; `shared/util/` → Slugs
     - `shared/config/TransactionalServices` → wraps plain-Java application services in their transaction
@@ -111,7 +111,7 @@ Before any commit or PR:
 ## Architecture
 - Client-rendered SPA → nginx routes bot user-agents to `/seo/*` (HTML + JSON-LD snapshots rendered by the backend). Every new indexable public page needs its snapshot in `SeoController` and its nginx entry
 - Flyway owns the schema → keeps dev and prod from drifting apart; SQL adapters are checked against it by their ITs
-- Keycloak owns identity (password, Google, GitHub, reset, login throttling); the API is an OAuth2 resource server and holds no credentials. Adding a provider is realm configuration, not code
+- Members and admins sign in locally (`account`: BCrypt hashes, JDBC sessions); Google and GitHub go through Keycloak, whose tokens the API verifies as an OAuth2 resource server and syncs into a local account
 - MinIO (S3-compatible) for files and images, no application disk storage in production
 - Frontend and backend ship as separate containers behind Traefik; the frontend only talks to the backend through `/api/*`
 
