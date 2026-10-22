@@ -23,6 +23,7 @@ import java.util.Set;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -51,7 +52,8 @@ class SeoControllerTest {
                 .andExpect(content().string(allOf(
                         containsString("<title>LesCracks · Apprendre la tech et passer à la pratique</title>"),
                         containsString("href=\"/favicon-96x96.png\""),
-                        containsString(">CrackLab</a></h2>"),
+                        containsString(">LesCracks Talk</a></h2>"),
+                        not(containsString("CrackLab")),
                         containsString(">Blog</a></h2>"),
                         containsString(">Formations</a></h2>"),
                         containsString("\"@type\":\"WebSite\""),

@@ -48,7 +48,7 @@ public class SeoController {
 
     private final Map<String, PageMeta> pageMeta = Map.of(
             "home", new PageMeta("LesCracks · Apprendre la tech et passer à la pratique",
-                    "LesCracks : articles, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant.",
+                    "LesCracks : articles, ateliers et rendez-vous pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant.",
                     "/", "LesCracks : apprendre la tech et passer à la pratique"),
             "a-propos", new PageMeta("À propos · LesCracks",
                     "Ce que fait LesCracks : un blog tech, des formations à venir, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant.",
@@ -167,7 +167,6 @@ public class SeoController {
                 new SeoHtml.Link(canonical(request, "/formations"), "Formations"),
                 new SeoHtml.Link(canonical(request, "/evenements"), "Événements"),
                 new SeoHtml.Link(canonical(request, "/talk"), "LesCracks Talk"),
-                new SeoHtml.Link(canonical(request, "/cracklab"), "CrackLab"),
                 new SeoHtml.Link(canonical(request, "/a-propos"), "À propos")
         );
         html.navigation("Navigation principale", nav);
@@ -177,7 +176,6 @@ public class SeoController {
             html.section("Formations", canonical(request, "/formations"), "Des parcours complets, étape par étape, bientôt disponibles.");
             html.section("Événements", canonical(request, "/evenements"), "Ateliers, bootcamps, webinaires et conférences pour pratiquer avec d’autres, en ligne ou sur place.");
             html.section("LesCracks Talk", canonical(request, "/talk"), "Des conversations vidéo avec celles et ceux qui construisent la tech africaine.");
-            html.section("CrackLab", canonical(request, "/cracklab"), "Des casse-têtes à résoudre en raisonnant, un classement chaque semaine et des badges à débloquer.");
             html.section("À propos", canonical(request, "/a-propos"), "Qui est derrière LesCracks, ce que nous faisons et pourquoi.");
             addResourceLinks(html, request);
             addEventLinks(html, request);
