@@ -18,6 +18,7 @@ public record ResourceResponse(
         String categoryName,
         Set<String> tags,
         Long likeCount,
+        Integer viewCount,
         Instant createdAt,
         Instant updatedAt,
         JsonNode body,

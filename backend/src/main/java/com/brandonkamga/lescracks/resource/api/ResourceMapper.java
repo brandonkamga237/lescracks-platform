@@ -38,6 +38,7 @@ public class ResourceMapper {
                 resource.getStatus(), resource.getCategory().getId(), resource.getCategory().getName(),
                 resource.getTags().stream().map(tag -> tag.getName()).collect(Collectors.toSet()),
                 likes.countLikes(resource.getId()),
+                resource.getViewCount(),
                 resource.getCreatedAt(), resource.getUpdatedAt(),
                 body, readingMinutes, resource.getScheduledAt(), resource.getPublishedAt());
     }

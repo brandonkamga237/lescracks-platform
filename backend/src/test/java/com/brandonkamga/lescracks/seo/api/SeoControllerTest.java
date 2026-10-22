@@ -66,7 +66,7 @@ class SeoControllerTest {
                 .coverImage("/api/files/c.png").status(ResourceStatus.PUBLISHED).build();
         when(resources.requirePublishedBySlugOrId("singleton-java")).thenReturn(article);
         when(mapper.toResponse(article)).thenReturn(new ResourceResponse(4L, "singleton-java", "Le Singleton", "Un pattern",
-                "/api/files/c.png", ResourceStatus.PUBLISHED, 2L, "Backend", Set.of("Java"), 0L,
+                "/api/files/c.png", ResourceStatus.PUBLISHED, 2L, "Backend", Set.of("Java"), 0L, 0,
                 Instant.parse("2026-10-01T00:00:00Z"), Instant.parse("2026-10-01T00:00:00Z"), null, 4, null, null));
 
         mockMvc.perform(get("/seo/blog/singleton-java"))

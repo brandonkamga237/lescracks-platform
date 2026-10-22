@@ -1,6 +1,6 @@
 import { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, Heart } from 'lucide-react';
+import { Clock, Eye, Heart } from 'lucide-react';
 
 import ArticleCover from '@/components/blog/ArticleCover';
 import { articlePath } from '@/lib/slugs';
@@ -13,11 +13,12 @@ interface ArticleCardProps {
   article: ArticleSummary;
 }
 
-/** One article: cover, tags, title, then likes and reading time. Every card has the same shape. */
+/** One article: cover, tags, title, then readers, likes and reading time. Every card has the same shape. */
 function ArticleCard({ article }: ArticleCardProps) {
   const [failedImage, setFailedImage] = useState<string | null>(null);
   const tags = article.tags ?? [];
   const hidden = tags.length - MAX_TAGS;
+  const views = article.viewCount ?? 0;
 
   return (
     <li className="min-w-0">
@@ -50,7 +51,13 @@ function ArticleCard({ article }: ArticleCardProps) {
           <span className="line-clamp-2 break-words font-display text-base font-semibold leading-snug text-t1 transition-colors group-hover:text-gold-ink">
             {article.title}
           </span>
-          <span className="mt-auto flex items-center gap-4 pt-4 text-xs tabular-nums text-t4">
+          <span className="mt-auto flex items-center gap-4 pt-4 text-xs tabular-nums text-t3">
+            {views > 0 && (
+              <span className="inline-flex items-center gap-1.5">
+                <Eye className="h-3.5 w-3.5" aria-hidden />
+                {views.toLocaleString('fr-FR')}<span className="sr-only"> lectures</span>
+              </span>
+            )}
             <span className="inline-flex items-center gap-1.5">
               <Heart className="h-3.5 w-3.5" aria-hidden />
               {article.likeCount ?? 0}<span className="sr-only"> j’aime</span>
