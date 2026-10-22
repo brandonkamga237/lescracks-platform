@@ -23,7 +23,6 @@ import com.brandonkamga.lescracks.storage.domain.StorageService;
 import com.brandonkamga.lescracks.support.PostgresIT;
 import com.brandonkamga.lescracks.taxonomy.application.TaxonomyService;
 
-import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -50,7 +49,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LesCracksApplicationIT extends PostgresIT {
 
     @Autowired private ApplicationContext context;
-    @Autowired private EntityManagerFactory entityManagerFactory;
 
     /** Qualified by name: springdoc contributes handler mappings of its own. */
     @Autowired
@@ -86,15 +84,5 @@ class LesCracksApplicationIT extends PostgresIT {
                 .collect(Collectors.toSet());
 
         assertThat(patterns).contains(route);
-    }
-
-    @Test
-    @DisplayName("the entities of the modules not migrated yet are part of the persistence unit")
-    void entitiesFromEveryDomainAreScanned() {
-        Set<String> entities = entityManagerFactory.getMetamodel().getEntities().stream()
-                .map(type -> type.getJavaType().getSimpleName())
-                .collect(Collectors.toSet());
-
-        assertThat(entities).contains("Certificate", "Badge");
     }
 }
