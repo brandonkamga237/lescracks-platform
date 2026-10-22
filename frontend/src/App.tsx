@@ -44,17 +44,7 @@ const AdminTags = lazy(() => import('@/pages/admin/AdminTags'));
 const AdminTalks = lazy(() => import('@/pages/admin/AdminTalks'));
 const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
 const ArticleStudio = lazy(() => import('@/pages/admin/ArticleStudio'));
-const AdminCrackLab = lazy(() => import('@/pages/admin/AdminCrackLab'));
 const Welcome = lazy(() => import('@/pages/Welcome'));
-const CrackLabHome = lazy(() => import('@/pages/cracklab/CrackLabHome'));
-const ChallengePage = lazy(() => import('@/pages/cracklab/ChallengePage'));
-const CrackLabRanking = lazy(() => import('@/pages/cracklab/Ranking'));
-const CrackLabMyProfile = lazy(() => import('@/pages/cracklab/MyProfile'));
-const CrackLabMember = lazy(() => import('@/pages/cracklab/MemberProfile'));
-const CrackLabResult = lazy(() => import('@/pages/cracklab/PublicResult'));
-const AdminCrackLabEditor = lazy(() => import('@/pages/admin/AdminCrackLabEditor'));
-const AdminCrackLabQueue = lazy(() => import('@/pages/admin/AdminCrackLabQueue'));
-const AdminCrackLabGrade = lazy(() => import('@/pages/admin/AdminCrackLabGrade'));
 
 function Waiting() {
   return (
@@ -153,15 +143,7 @@ function AppRoutes() {
       <Route path="/attestations/:code" element={<Suspense fallback={<Waiting />}><Attestation /></Suspense>} />
       <Route path="/membres/:id" element={<Suspense fallback={<Waiting />}><MemberProfile /></Suspense>} />
       <Route path="/talk" element={<Talk />} />
-      {/* CrackLab: its own space and chrome, the same accounts. Reading is open; answering needs a member. */}
-      <Route path="/cracklab" element={<Suspense fallback={<Waiting />}><CrackLabHome /></Suspense>} />
-      <Route path="/cracklab/challenges/:slug" element={<Suspense fallback={<Waiting />}><ChallengePage /></Suspense>} />
-      <Route path="/cracklab/classement" element={<Suspense fallback={<Waiting />}><CrackLabRanking /></Suspense>} />
-      <Route path="/cracklab/moi" element={<MemberRoute><Suspense fallback={<Waiting />}><CrackLabMyProfile /></Suspense></MemberRoute>} />
-      <Route path="/cracklab/mes-reponses" element={<Navigate to="/cracklab/moi" replace />} />
-      {/* Public by design: these are the pages a shared link opens. */}
-      <Route path="/cracklab/membres/:id" element={<Suspense fallback={<Waiting />}><CrackLabMember /></Suspense>} />
-      <Route path="/cracklab/resultats/:id" element={<Suspense fallback={<Waiting />}><CrackLabResult /></Suspense>} />
+      <Route path="/cracklab/*" element={<Navigate to="/" replace />} />
       <Route path="/a-propos" element={<About />} />
       <Route path="/conditions-utilisation" element={<Terms />} />
       <Route path="/politique-confidentialite" element={<Privacy />} />
@@ -188,12 +170,6 @@ function AppRoutes() {
         <Route path="admins" element={<AdminAdmins />} />
         <Route path="utilisateurs" element={<AdminUsers />} />
         <Route path="newsletter" element={<AdminNewsletter />} />
-        <Route path="cracklab" element={<Navigate to="/admin/cracklab/challenges" replace />} />
-        <Route path="cracklab/challenges" element={<AdminCrackLab />} />
-        <Route path="cracklab/challenges/nouveau" element={<AdminCrackLabEditor />} />
-        <Route path="cracklab/challenges/:id" element={<AdminCrackLabEditor />} />
-        <Route path="cracklab/reponses" element={<AdminCrackLabQueue />} />
-        <Route path="cracklab/reponses/:id" element={<AdminCrackLabGrade />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

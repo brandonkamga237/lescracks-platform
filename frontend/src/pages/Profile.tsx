@@ -10,7 +10,7 @@ import ProfileDetails from '@/components/account/ProfileDetails';
 import AvatarPicker from '@/components/account/AvatarPicker';
 import MyBadges from '@/components/account/MyBadges';
 import MyCertificates from '@/components/account/MyCertificates';
-import { fillClass } from '@/lib/cracklab';
+import { fillClass } from '@/lib/progress';
 import { FIELD_LABEL } from '@/lib/memberProfile';
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
