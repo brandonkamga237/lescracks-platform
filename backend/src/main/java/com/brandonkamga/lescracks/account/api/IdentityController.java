@@ -1,35 +1,33 @@
-package com.brandonkamga.lescracks.identity.api;
+package com.brandonkamga.lescracks.account.api;
 
-import com.brandonkamga.lescracks.identity.api.dto.LinkIdentityRequest;
-import com.brandonkamga.lescracks.identity.api.dto.UserIdentityResponse;
-import com.brandonkamga.lescracks.identity.domain.member.AuthProvider;
-import com.brandonkamga.lescracks.identity.domain.external.UserIdentityService;
+import com.brandonkamga.lescracks.account.api.dto.IdentityResponse;
+import com.brandonkamga.lescracks.account.api.dto.LinkIdentityRequest;
+import com.brandonkamga.lescracks.account.application.ExternalIdentityService;
+import com.brandonkamga.lescracks.account.domain.model.AuthProvider;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/me/identities")
-public class UserIdentityController {
+public class IdentityController {
+    private final ExternalIdentityService identities;
 
-    private final UserIdentityService identities;
-
-    public UserIdentityController(UserIdentityService identities) { this.identities = identities; }
+    public IdentityController(ExternalIdentityService identities) { this.identities = identities; }
 
     @GetMapping
-    public ResponseEntity<List<UserIdentityResponse>> list(Authentication authentication) {
-        return ResponseEntity.ok(identities.list(authentication.getName()).stream().map(UserIdentityResponse::of).toList());
+    public ResponseEntity<List<IdentityResponse>> list(Authentication authentication) {
+        return ResponseEntity.ok(identities.list(authentication.getName()).stream().map(IdentityResponse::of).toList());
     }
 
     @PostMapping
-    public ResponseEntity<UserIdentityResponse> link(Authentication authentication,
-                                                     @Valid @RequestBody LinkIdentityRequest request) {
-        return ResponseEntity.ok(UserIdentityResponse.of(
+    public ResponseEntity<IdentityResponse> link(Authentication authentication,
+                                                 @Valid @RequestBody LinkIdentityRequest request) {
+        return ResponseEntity.ok(IdentityResponse.of(
                 identities.link(authentication.getName(), request.provider(), request.token())));
     }
 

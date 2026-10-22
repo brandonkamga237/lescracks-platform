@@ -1,4 +1,4 @@
-package com.brandonkamga.lescracks.identity.domain.admin;
+package com.brandonkamga.lescracks.account.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import java.time.Instant;
 
 /** An administrator: a local account with a username, distinct from members. */
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Admin {

@@ -11,8 +11,8 @@ import com.brandonkamga.lescracks.event.domain.RegistrationStatus;
 import com.brandonkamga.lescracks.event.domain.RegistrationView;
 import com.brandonkamga.lescracks.event.domain.SubmissionStatus;
 import com.brandonkamga.lescracks.event.domain.SubmissionView;
-import com.brandonkamga.lescracks.identity.domain.member.User;
-import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
+import com.brandonkamga.lescracks.member.application.Member;
+import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.mail.domain.CertificateIssuedEmail;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.recognition.infra.CertificateRepository;
@@ -51,14 +51,14 @@ class CertificateServiceTest {
     @Mock private EventService events;
     @Mock private EventRegistrationService registrations;
     @Mock private EventSubmissionService submissions;
-    @Mock private UserDirectory people;
+    @Mock private MemberDirectory people;
     @Mock private Mailer mailer;
     @Mock private ApplicationEventPublisher published;
 
     private CertificateServiceImpl service;
-    private final User awa = User.builder().id(1L).email("awa@example.com").firstName("Awa").lastName("Diallo").build();
-    private final User kofi = User.builder().id(2L).email("kofi@example.com").firstName("Kofi").lastName("Mensah").build();
-    private final User lina = User.builder().id(3L).email("lina@example.com").firstName("Lina").lastName("Moussa").build();
+    private final Member awa = Member.builder().id(1L).email("awa@example.com").firstName("Awa").lastName("Diallo").build();
+    private final Member kofi = Member.builder().id(2L).email("kofi@example.com").firstName("Kofi").lastName("Mensah").build();
+    private final Member lina = Member.builder().id(3L).email("lina@example.com").firstName("Lina").lastName("Moussa").build();
 
     @BeforeEach
     void setUp() {
@@ -73,7 +73,7 @@ class CertificateServiceTest {
         return event;
     }
 
-    private static SubmissionView project(SubmissionStatus status, Integer rank, User... team) {
+    private static SubmissionView project(SubmissionStatus status, Integer rank, Member... team) {
         return new SubmissionView(EventSubmission.builder().title("Mondje").status(status).rank(rank).build(), List.of(team), null);
     }
 

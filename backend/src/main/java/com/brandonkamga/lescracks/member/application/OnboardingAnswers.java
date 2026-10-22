@@ -1,4 +1,8 @@
-package com.brandonkamga.lescracks.identity.domain.member;
+package com.brandonkamga.lescracks.member.application;
+
+import com.brandonkamga.lescracks.account.application.Arrival;
+import com.brandonkamga.lescracks.member.domain.model.MemberGoal;
+import com.brandonkamga.lescracks.member.domain.model.MemberSituation;
 
 import java.util.Set;
 

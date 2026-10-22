@@ -1,4 +1,4 @@
-package com.brandonkamga.lescracks.identity.api.dto;
+package com.brandonkamga.lescracks.account.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

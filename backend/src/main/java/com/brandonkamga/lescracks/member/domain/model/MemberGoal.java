@@ -1,4 +1,4 @@
-package com.brandonkamga.lescracks.identity.domain.member;
+package com.brandonkamga.lescracks.member.domain.model;
 
 public enum MemberGoal {
     FIND_JOB,

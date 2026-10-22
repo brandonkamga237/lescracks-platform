@@ -1,7 +1,7 @@
-package com.brandonkamga.lescracks.identity.infra.security;
+package com.brandonkamga.lescracks.account.infra.security;
 
-import com.brandonkamga.lescracks.identity.domain.external.IdentityClaims;
-import com.brandonkamga.lescracks.identity.domain.external.IdentityTokenVerifier;
+import com.brandonkamga.lescracks.account.domain.model.IdentityClaims;
+import com.brandonkamga.lescracks.account.domain.port.IdentityTokenVerifier;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 
 import org.springframework.security.oauth2.jwt.Jwt;

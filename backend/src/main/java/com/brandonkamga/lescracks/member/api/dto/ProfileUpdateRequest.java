@@ -1,16 +1,16 @@
-package com.brandonkamga.lescracks.identity.api.dto;
+package com.brandonkamga.lescracks.member.api.dto;
 
-import com.brandonkamga.lescracks.identity.domain.member.ProfileChanges;
-import com.brandonkamga.lescracks.identity.domain.member.ProfileVisibility;
-import com.brandonkamga.lescracks.identity.domain.member.MemberGoal;
-import com.brandonkamga.lescracks.identity.domain.member.MemberSituation;
+import com.brandonkamga.lescracks.member.application.ProfileChanges;
+import com.brandonkamga.lescracks.member.application.ProfileVisibility;
+import com.brandonkamga.lescracks.member.domain.model.MemberGoal;
+import com.brandonkamga.lescracks.member.domain.model.MemberSituation;
 
 import jakarta.validation.constraints.Size;
 
 import java.util.Map;
 import java.util.Set;
 
-public record UserProfileUpdateRequest(
+public record ProfileUpdateRequest(
         @Size(max = 120) String firstName,
         @Size(max = 120) String lastName,
         @Size(max = 50) String username,

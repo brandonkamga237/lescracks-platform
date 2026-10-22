@@ -1,4 +1,4 @@
-package com.brandonkamga.lescracks.identity.domain.member;
+package com.brandonkamga.lescracks.member.domain.model;
 
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.google.i18n.phonenumbers.NumberParseException;

@@ -1,63 +1,51 @@
-package com.brandonkamga.lescracks.identity.api;
+package com.brandonkamga.lescracks.member.api;
 
-import com.brandonkamga.lescracks.identity.api.dto.OnboardingRequest;
-import com.brandonkamga.lescracks.identity.api.dto.UserPasswordChangeRequest;
-import com.brandonkamga.lescracks.identity.api.dto.UserProfileResponse;
-import com.brandonkamga.lescracks.identity.api.dto.UserProfileUpdateRequest;
-import com.brandonkamga.lescracks.identity.domain.credential.PasswordService;
-import com.brandonkamga.lescracks.identity.domain.external.UserIdentityService;
-import com.brandonkamga.lescracks.identity.domain.member.User;
-import com.brandonkamga.lescracks.identity.domain.member.UserProfileService;
-import com.brandonkamga.lescracks.identity.domain.signup.EmailVerificationService;
+import com.brandonkamga.lescracks.account.application.ExternalIdentityService;
+import com.brandonkamga.lescracks.member.api.dto.OnboardingRequest;
+import com.brandonkamga.lescracks.member.api.dto.ProfileResponse;
+import com.brandonkamga.lescracks.member.api.dto.ProfileUpdateRequest;
+import com.brandonkamga.lescracks.member.application.MemberView;
+import com.brandonkamga.lescracks.member.application.ProfileService;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+/** The signed-in member's profile. Password, confirmation and closing the account are account's, under /api/me too. */
 @RestController
 @RequestMapping("/api/me")
-public class UserProfileController {
-    private final UserProfileService profiles;
-    private final UserIdentityService identities;
-    private final EmailVerificationService verification;
-    private final PasswordService passwords;
+public class ProfileController {
+    private final ProfileService profiles;
+    private final ExternalIdentityService identities;
 
-    public UserProfileController(UserProfileService profiles, UserIdentityService identities,
-                                 EmailVerificationService verification, PasswordService passwords) {
+    public ProfileController(ProfileService profiles, ExternalIdentityService identities) {
         this.profiles = profiles;
         this.identities = identities;
-        this.verification = verification;
-        this.passwords = passwords;
     }
 
     @GetMapping
-    public UserProfileResponse get(Authentication authentication) {
-        return response(profiles.require(authentication.getName()));
+    public ProfileResponse get(Authentication authentication) {
+        return response(profiles.view(authentication.getName()));
     }
 
     @PatchMapping
-    public UserProfileResponse update(Authentication authentication,
-                                      @Valid @RequestBody UserProfileUpdateRequest request) {
+    public ProfileResponse update(Authentication authentication, @Valid @RequestBody ProfileUpdateRequest request) {
         return response(profiles.update(authentication.getName(), request.toChanges()));
     }
 
     /** The welcome questions after sign-up: answered, partly answered or put off, it is never shown again. */
     @PutMapping("/onboarding")
-    public UserProfileResponse onboard(Authentication authentication, @Valid @RequestBody OnboardingRequest request) {
+    public ProfileResponse onboard(Authentication authentication, @Valid @RequestBody OnboardingRequest request) {
         return response(profiles.onboard(authentication.getName(), request.toAnswers()));
     }
 
     @PostMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public UserProfileResponse updateAvatar(Authentication authentication,
-                                            @RequestParam("file") MultipartFile file) {
+    public ProfileResponse updateAvatar(Authentication authentication, @RequestParam("file") MultipartFile file) {
         byte[] content;
         try {
             content = file.getBytes();
@@ -68,28 +56,11 @@ public class UserProfileController {
     }
 
     @DeleteMapping("/avatar")
-    public UserProfileResponse removeAvatar(Authentication authentication) {
+    public ProfileResponse removeAvatar(Authentication authentication) {
         return response(profiles.removeAvatar(authentication.getName()));
     }
 
-    @PostMapping("/verification-email")
-    public ResponseEntity<Void> resendVerification(Authentication authentication) {
-        verification.sendAgain(authentication.getName());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/password")
-    public ResponseEntity<Void> changePassword(Authentication authentication,
-                                               @Valid @RequestBody UserPasswordChangeRequest request) {
-        passwords.change(authentication.getName(), request.toChange());
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(Authentication authentication) { profiles.delete(authentication.getName()); }
-
-    private UserProfileResponse response(User user) {
-        return UserProfileResponse.of(user, identities.list(user.getEmail()));
+    private ProfileResponse response(MemberView view) {
+        return ProfileResponse.of(view, identities.list(view.account().getEmail()));
     }
 }

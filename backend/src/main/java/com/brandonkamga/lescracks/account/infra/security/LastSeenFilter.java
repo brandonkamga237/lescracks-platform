@@ -1,6 +1,6 @@
-package com.brandonkamga.lescracks.identity.infra.security;
+package com.brandonkamga.lescracks.account.infra.security;
 
-import com.brandonkamga.lescracks.identity.infra.persistence.UserJpaRepository;
+import com.brandonkamga.lescracks.account.infra.persistence.JdbcLastSeen;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,8 +16,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
 
 /**
  * Stamps users.last_seen_at on authenticated member requests. The update is
@@ -25,13 +23,12 @@ import java.time.Instant;
  * never blocks or fails the request it rode along with.
  */
 public class LastSeenFilter extends OncePerRequestFilter {
-    private static final Duration STALE_AFTER = Duration.ofHours(1);
     private static final Logger log = LoggerFactory.getLogger(LastSeenFilter.class);
 
-    private final UserJpaRepository users;
+    private final JdbcLastSeen lastSeen;
 
-    public LastSeenFilter(UserJpaRepository users) {
-        this.users = users;
+    public LastSeenFilter(JdbcLastSeen lastSeen) {
+        this.lastSeen = lastSeen;
     }
 
     @Override
@@ -43,8 +40,7 @@ public class LastSeenFilter extends OncePerRequestFilter {
             String email = emailOf(authentication);
             if (email != null) {
                 try {
-                    Instant now = Instant.now();
-                    users.touchLastSeen(email, now, now.minus(STALE_AFTER));
+                    lastSeen.touch(email);
                 } catch (Exception exception) {
                     log.debug("last_seen touch skipped: {}", exception.getMessage());
                 }

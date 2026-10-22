@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.community.api.dto;
 
 import com.brandonkamga.lescracks.community.domain.CommentView;
-import com.brandonkamga.lescracks.identity.domain.member.User;
+import com.brandonkamga.lescracks.member.application.Member;
 import com.brandonkamga.lescracks.storage.domain.StoredFiles;
 
 import java.time.Instant;
@@ -18,7 +18,7 @@ public record CommentResponse(Long id, Long parentId, Author author, String body
 
     public static CommentResponse of(CommentView view, String viewerEmail) {
         var comment = view.comment();
-        User author = view.author();
+        Member author = view.author();
         if (author == null) {
             return new CommentResponse(comment.getId(), comment.getParentId(), null, null, comment.getCreatedAt(), null, true, false);
         }

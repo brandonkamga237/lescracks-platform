@@ -7,8 +7,8 @@ import com.brandonkamga.lescracks.resource.api.ResourceController;
 import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.resource.api.ResourceMapper;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
-import com.brandonkamga.lescracks.identity.infra.persistence.UserJpaRepository;
-import com.brandonkamga.lescracks.identity.infra.security.LastSeenFilterConfig;
+import com.brandonkamga.lescracks.account.infra.persistence.JdbcLastSeen;
+import com.brandonkamga.lescracks.account.infra.security.LastSeenFilterConfig;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 
 import org.junit.jupiter.api.DisplayName;
@@ -56,8 +56,8 @@ class SecurityConfigTest {
     @MockitoBean private ResourceMapper mapper;
     @MockitoBean private EventService events;
     @MockitoBean private StorageService storage;
-    // The security chain registers the last-seen touch, which needs the users table.
-    @MockitoBean private UserJpaRepository users;
+    // The security chain registers the last-seen touch, which needs the database.
+    @MockitoBean private JdbcLastSeen lastSeen;
 
     @Test
     @DisplayName("reading the catalogue needs no account: that is what brings people in")

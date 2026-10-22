@@ -1,4 +1,6 @@
-package com.brandonkamga.lescracks.identity.domain.external;
+package com.brandonkamga.lescracks.account.domain.port;
+
+import com.brandonkamga.lescracks.account.domain.model.IdentityClaims;
 
 public interface IdentityTokenVerifier {
 

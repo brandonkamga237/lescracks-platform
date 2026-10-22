@@ -1,4 +1,4 @@
-package com.brandonkamga.lescracks.identity.domain.credential;
+package com.brandonkamga.lescracks.account.domain.model;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

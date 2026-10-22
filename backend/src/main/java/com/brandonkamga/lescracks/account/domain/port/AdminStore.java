@@ -1,4 +1,6 @@
-package com.brandonkamga.lescracks.identity.domain.admin;
+package com.brandonkamga.lescracks.account.domain.port;
+
+import com.brandonkamga.lescracks.account.domain.model.Admin;
 
 import java.util.List;
 import java.util.Optional;

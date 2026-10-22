@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.newsletter.domain;
 
-import com.brandonkamga.lescracks.identity.domain.member.User;
-import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
+import com.brandonkamga.lescracks.account.application.AccountSummary;
+import com.brandonkamga.lescracks.account.application.AccountDirectory;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.mail.domain.NewsletterConfirmation;
 import com.brandonkamga.lescracks.mail.domain.NewsletterIssue;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class NewsletterServiceTest {
 
-    @Mock private UserDirectory users;
+    @Mock private AccountDirectory users;
     @Mock private NewsletterSubscriptionRepository subscriptions;
     @Mock private NewsletterCampaignRepository campaigns;
     @Mock private Mailer mail;
@@ -47,7 +47,7 @@ class NewsletterServiceTest {
     @Test
     @DisplayName("an unknown address is recorded as a contact, waits for confirmation and gets the confirmation email")
     void subscribesAContact() {
-        User contact = User.builder().id(4L).email("awa@example.com").build();
+        AccountSummary contact = AccountSummary.builder().id(4L).email("awa@example.com").build();
         when(users.find("awa@example.com")).thenReturn(Optional.empty());
         when(users.createContact("awa@example.com", "Awa", null)).thenReturn(contact);
         when(subscriptions.findByUserId(4L)).thenReturn(Optional.empty());
@@ -79,7 +79,7 @@ class NewsletterServiceTest {
     @DisplayName("an address that has an account must sign in to manage its subscription")
     void refusesAnAccount() {
         when(users.find("awa@example.com"))
-                .thenReturn(Optional.of(User.builder().email("awa@example.com").passwordHash("hash").build()));
+                .thenReturn(Optional.of(AccountSummary.builder().email("awa@example.com").loginMethod(true).build()));
 
         assertThatThrownBy(() -> service.subscribePublic("awa@example.com", null, null))
                 .isInstanceOf(BadRequestException.class);

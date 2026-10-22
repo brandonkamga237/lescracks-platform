@@ -1,8 +1,8 @@
 package com.brandonkamga.lescracks.event.domain;
 
 import com.brandonkamga.lescracks.event.infra.EventSubmissionRepository;
-import com.brandonkamga.lescracks.identity.domain.member.User;
-import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
+import com.brandonkamga.lescracks.member.application.Member;
+import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.ConflictException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
@@ -31,10 +31,10 @@ public class EventSubmissionServiceImpl implements EventSubmissionService {
     private final EventSubmissionRepository submissions;
     private final EventService events;
     private final EventRegistrationService registrations;
-    private final UserDirectory people;
+    private final MemberDirectory people;
 
     public EventSubmissionServiceImpl(EventSubmissionRepository submissions, EventService events,
-                                      EventRegistrationService registrations, UserDirectory people) {
+                                      EventRegistrationService registrations, MemberDirectory people) {
         this.submissions = submissions;
         this.events = events;
         this.registrations = registrations;
@@ -50,8 +50,8 @@ public class EventSubmissionServiceImpl implements EventSubmissionService {
         Instant closesAt = event.submissionsCloseAt();
         if (closesAt != null && closesAt.isBefore(Instant.now())) throw new BadRequestException("Les soumissions sont closes.");
 
-        User owner = people.require(email);
-        List<User> teammates = teammates(draft.teammateEmails(), owner);
+        Member owner = people.require(email);
+        List<Member> teammates = teammates(draft.teammateEmails(), owner);
         if (1 + teammates.size() > event.getMaxTeamSize()) {
             throw new BadRequestException(event.getMaxTeamSize() == 1
                     ? "Les projets de cet événement sont individuels."
@@ -66,7 +66,7 @@ public class EventSubmissionServiceImpl implements EventSubmissionService {
             throw new BadRequestException("Ce projet est en revue : il ne peut plus être modifié.");
         }
         Long current = submission != null ? submission.getId() : null;
-        for (User teammate : teammates) {
+        for (Member teammate : teammates) {
             submissions.findByEventAndMember(eventId, teammate.getId())
                     .filter(other -> !Objects.equals(other.getId(), current))
                     .ifPresent(other -> { throw new ConflictException(fullName(teammate) + " fait déjà partie d’un autre projet pour cet événement."); });
@@ -92,14 +92,14 @@ public class EventSubmissionServiceImpl implements EventSubmissionService {
         return view(saved);
     }
 
-    private List<User> teammates(List<String> emails, User owner) {
+    private List<Member> teammates(List<String> emails, Member owner) {
         if (emails == null) return List.of();
         Set<String> distinct = emails.stream().filter(Objects::nonNull).map(value -> value.trim().toLowerCase(Locale.ROOT))
                 .filter(value -> !value.isEmpty() && !value.equalsIgnoreCase(owner.getEmail()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
-        List<User> found = new ArrayList<>();
+        List<Member> found = new ArrayList<>();
         for (String address : distinct) {
-            found.add(people.find(address).filter(User::hasLoginMethod).orElseThrow(() ->
+            found.add(people.find(address).filter(Member::hasLoginMethod).orElseThrow(() ->
                     new BadRequestException(address + " n’a pas encore de compte LesCracks : invite cette personne à s’inscrire, puis ajoute-la.")));
         }
         return found;
@@ -133,15 +133,15 @@ public class EventSubmissionServiceImpl implements EventSubmissionService {
     }
 
     private SubmissionView view(EventSubmission submission) {
-        Map<Long, User> found = people.findAll(submission.getMembers().stream().map(TeamMember::userId).toList());
-        List<User> team = new ArrayList<>();
+        Map<Long, Member> found = people.findAll(submission.getMembers().stream().map(TeamMember::userId).toList());
+        List<Member> team = new ArrayList<>();
         if (found.containsKey(submission.getOwnerId())) team.add(found.get(submission.getOwnerId()));
         found.values().stream().filter(user -> !user.getId().equals(submission.getOwnerId()))
                 .sorted((a, b) -> fullName(a).compareToIgnoreCase(fullName(b))).forEach(team::add);
         return new SubmissionView(submission, team, submission.getEvent().submissionsCloseAt());
     }
 
-    private static String fullName(User user) {
+    private static String fullName(Member user) {
         String name = ((user.getFirstName() == null ? "" : user.getFirstName()) + " " + (user.getLastName() == null ? "" : user.getLastName())).trim();
         return name.isEmpty() ? user.getEmail() : name;
     }

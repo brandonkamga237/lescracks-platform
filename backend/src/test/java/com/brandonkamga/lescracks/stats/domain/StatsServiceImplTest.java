@@ -1,9 +1,8 @@
 package com.brandonkamga.lescracks.stats.domain;
 
+import com.brandonkamga.lescracks.account.application.AccountStatistics;
 import com.brandonkamga.lescracks.event.infra.EventRepository;
-import com.brandonkamga.lescracks.identity.domain.member.AuthProvider;
-import com.brandonkamga.lescracks.identity.domain.member.MemberSituation;
-import com.brandonkamga.lescracks.identity.infra.persistence.UserJpaRepository;
+import com.brandonkamga.lescracks.member.application.MemberStatistics;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterSubscriptionRepository;
 import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
 import com.brandonkamga.lescracks.stats.api.dto.NamedCount;
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,24 +30,21 @@ import static org.mockito.Mockito.when;
 
 class StatsServiceImplTest {
 
-    private final UserJpaRepository users = mock(UserJpaRepository.class);
+    private final AccountStatistics accounts = mock(AccountStatistics.class);
+    private final MemberStatistics members = mock(MemberStatistics.class);
     private final CategoryRepository categories = mock(CategoryRepository.class);
-    private final StatsServiceImpl stats = new StatsServiceImpl(users, mock(EventRepository.class), mock(ResourceRepository.class),
+    private final StatsServiceImpl stats = new StatsServiceImpl(accounts, members, mock(EventRepository.class), mock(ResourceRepository.class),
             mock(NewsletterSubscriptionRepository.class), mock(TalkVideoRepository.class), mock(UmamiClient.class), categories);
-
-    private static List<Object[]> rows(Object[]... rows) {
-        return List.of(rows);
-    }
 
     @Test
     @DisplayName("the portrait names each interest, puts the fullest first and leaves out deleted themes")
     void memberPortrait() {
         when(categories.findAll()).thenReturn(List.of(
                 Category.builder().id(1L).name("Backend").build(), Category.builder().id(2L).name("Data & IA").build()));
-        when(users.countMembersGroupedByInterest()).thenReturn(rows(new Object[]{1L, 4L}, new Object[]{2L, 9L}, new Object[]{99L, 3L}));
-        when(users.countMembersGroupedBySituation()).thenReturn(rows(new Object[]{MemberSituation.STUDENT, 2L}, new Object[]{MemberSituation.EMPLOYED, 7L}));
-        when(users.countMembersGroupedByStatus()).thenReturn(rows(new Object[]{"ACTIVE", 12L}, new Object[]{"BANNED", 1L}));
-        when(users.countMembersGroupedByProvider()).thenReturn(rows(new Object[]{AuthProvider.GOOGLE, 5L}));
+        when(members.byInterest()).thenReturn(Map.of(1L, 4L, 2L, 9L, 99L, 3L));
+        when(members.bySituation()).thenReturn(Map.of("STUDENT", 2L, "EMPLOYED", 7L));
+        when(accounts.membersByStatus()).thenReturn(Map.of("ACTIVE", 12L, "BANNED", 1L));
+        when(accounts.membersByProvider()).thenReturn(Map.of("GOOGLE", 5L));
 
         var portrait = stats.memberPortrait();
 
@@ -63,7 +60,7 @@ class StatsServiceImplTest {
     }
 
     private StatsServiceImpl withUmami(UmamiClient umami) {
-        return new StatsServiceImpl(users, mock(EventRepository.class), mock(ResourceRepository.class),
+        return new StatsServiceImpl(accounts, members, mock(EventRepository.class), mock(ResourceRepository.class),
                 mock(NewsletterSubscriptionRepository.class), mock(TalkVideoRepository.class), umami, categories);
     }
 

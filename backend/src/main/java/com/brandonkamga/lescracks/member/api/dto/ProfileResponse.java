@@ -1,12 +1,15 @@
-package com.brandonkamga.lescracks.identity.api.dto;
+package com.brandonkamga.lescracks.member.api.dto;
 
-import com.brandonkamga.lescracks.identity.domain.external.UserIdentity;
-import com.brandonkamga.lescracks.identity.domain.member.AuthProvider;
-import com.brandonkamga.lescracks.identity.domain.member.MemberGoal;
-import com.brandonkamga.lescracks.identity.domain.member.MemberSituation;
-import com.brandonkamga.lescracks.identity.domain.member.ProfileCompletion;
-import com.brandonkamga.lescracks.identity.domain.member.User;
-import com.brandonkamga.lescracks.identity.domain.member.UserStatus;
+import com.brandonkamga.lescracks.account.api.dto.IdentityResponse;
+import com.brandonkamga.lescracks.account.application.AccountSummary;
+import com.brandonkamga.lescracks.account.domain.model.AccountStatus;
+import com.brandonkamga.lescracks.account.domain.model.AuthProvider;
+import com.brandonkamga.lescracks.account.domain.model.ExternalIdentity;
+import com.brandonkamga.lescracks.member.application.MemberView;
+import com.brandonkamga.lescracks.member.domain.model.MemberGoal;
+import com.brandonkamga.lescracks.member.domain.model.MemberProfile;
+import com.brandonkamga.lescracks.member.domain.model.MemberSituation;
+import com.brandonkamga.lescracks.member.domain.model.ProfileCompletion;
 import com.brandonkamga.lescracks.storage.domain.StoredFiles;
 
 import java.time.Instant;
@@ -18,24 +21,26 @@ import java.util.Set;
  * `onboardingRequired`: the welcome questions have been neither answered nor put off yet.
  * `missing`: what the completion gauge still waits for (PHONE, SITUATION, INTERESTS, GOAL, CITY, AVATAR, BIO).
  */
-public record UserProfileResponse(Long id, String email, String firstName, String lastName,
-                                  UserStatus status, boolean verified, AuthProvider provider, Instant createdAt,
-                                  String username, String avatarUrl, String bio, String location,
-                                  Map<String, String> socialLinks, List<UserIdentityResponse> identities,
-                                  String phone, String country, MemberSituation situation, MemberGoal goal,
-                                  Set<Long> interestIds, boolean marketingConsent,
-                                  boolean onboardingRequired, int completion, List<String> missing,
-                                  boolean publicBio, boolean publicLocation, boolean publicLinks) {
+public record ProfileResponse(Long id, String email, String firstName, String lastName,
+                              AccountStatus status, boolean verified, AuthProvider provider, Instant createdAt,
+                              String username, String avatarUrl, String bio, String location,
+                              Map<String, String> socialLinks, List<IdentityResponse> identities,
+                              String phone, String country, MemberSituation situation, MemberGoal goal,
+                              Set<Long> interestIds, boolean marketingConsent,
+                              boolean onboardingRequired, int completion, List<String> missing,
+                              boolean publicBio, boolean publicLocation, boolean publicLinks) {
 
-    public static UserProfileResponse of(User user, List<UserIdentity> identities) {
-        ProfileCompletion completion = ProfileCompletion.of(user);
-        return new UserProfileResponse(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(),
-                user.getStatus(), user.isEmailVerified(), user.getProvider(), user.getCreatedAt(),
-                user.getUsername(), StoredFiles.publicPath(user.getAvatarUrl()), user.getBio(), user.getLocation(), user.getSocialLinks(),
-                identities.stream().map(UserIdentityResponse::of).toList(),
-                user.getPhone(), user.getCountry(), user.getSituation(), user.getGoal(),
-                Set.copyOf(user.getInterests()), user.isMarketingConsent(),
-                user.getOnboardedAt() == null, completion.percent(), completion.missing(),
-                user.isPublicBio(), user.isPublicLocation(), user.isPublicLinks());
+    public static ProfileResponse of(MemberView view, List<ExternalIdentity> identities) {
+        AccountSummary account = view.account();
+        MemberProfile profile = view.profile();
+        ProfileCompletion completion = view.completion();
+        return new ProfileResponse(account.getId(), account.getEmail(), account.getFirstName(), account.getLastName(),
+                account.getStatus(), account.isEmailVerified(), account.getProvider(), account.getCreatedAt(),
+                profile.getUsername(), StoredFiles.publicPath(profile.getAvatarUrl()), profile.getBio(), profile.getLocation(),
+                profile.getSocialLinks(), identities.stream().map(IdentityResponse::of).toList(),
+                profile.getPhone(), profile.getCountry(), profile.getSituation(), profile.getGoal(),
+                Set.copyOf(profile.getInterests()), profile.isMarketingConsent(),
+                profile.getOnboardedAt() == null, completion.percent(), completion.missing(),
+                profile.isPublicBio(), profile.isPublicLocation(), profile.isPublicLinks());
     }
 }

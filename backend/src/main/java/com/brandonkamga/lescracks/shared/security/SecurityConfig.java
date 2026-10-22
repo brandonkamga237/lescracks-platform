@@ -1,6 +1,6 @@
 package com.brandonkamga.lescracks.shared.security;
 
-import com.brandonkamga.lescracks.identity.infra.security.LastSeenFilter;
+import com.brandonkamga.lescracks.account.infra.security.LastSeenFilter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

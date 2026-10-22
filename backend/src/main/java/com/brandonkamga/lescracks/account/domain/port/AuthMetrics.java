@@ -1,4 +1,4 @@
-package com.brandonkamga.lescracks.identity.domain.credential;
+package com.brandonkamga.lescracks.account.domain.port;
 
 /**
  * Business counters for the auth funnel: who logs in, through which provider, and how often it

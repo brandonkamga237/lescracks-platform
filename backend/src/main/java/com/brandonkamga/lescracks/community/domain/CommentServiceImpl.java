@@ -2,8 +2,8 @@ package com.brandonkamga.lescracks.community.domain;
 
 import com.brandonkamga.lescracks.community.infra.CommentReportRepository;
 import com.brandonkamga.lescracks.community.infra.CommentRepository;
-import com.brandonkamga.lescracks.identity.domain.member.User;
-import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
+import com.brandonkamga.lescracks.member.application.Member;
+import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.mail.domain.CommentReplyEmail;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.resource.domain.Resource;
@@ -41,11 +41,11 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository comments;
     private final CommentReportRepository reports;
     private final ResourceService resources;
-    private final UserDirectory people;
+    private final MemberDirectory people;
     private final Mailer mailer;
 
     public CommentServiceImpl(CommentRepository comments, CommentReportRepository reports, ResourceService resources,
-                              UserDirectory people, Mailer mailer) {
+                              MemberDirectory people, Mailer mailer) {
         this.comments = comments;
         this.reports = reports;
         this.resources = resources;
@@ -58,7 +58,7 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentThread> threads(Long resourceId) {
         resources.requirePublished(resourceId);
         List<Comment> all = comments.findByResourceIdOrderByCreatedAtAsc(resourceId);
-        Map<Long, User> authors = people.findAll(all.stream().map(Comment::getAuthorId).collect(Collectors.toSet()));
+        Map<Long, Member> authors = people.findAll(all.stream().map(Comment::getAuthorId).collect(Collectors.toSet()));
         Map<Long, List<CommentView>> replies = new HashMap<>();
         for (Comment comment : all) {
             if (comment.isReply() && comment.isVisible()) {
@@ -79,7 +79,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentView post(String email, Long resourceId, CommentDraft draft) {
         Resource resource = resources.requirePublished(resourceId);
-        User author = people.require(email);
+        Member author = people.require(email);
         String body = cleaned(draft.body());
         if (comments.countByAuthorIdAndCreatedAtAfter(author.getId(), Instant.now().minus(BURST_WINDOW)) >= BURST_LIMIT) {
             throw new BadRequestException("Tu as beaucoup commenté en peu de temps : réessaie dans quelques minutes.");
@@ -102,9 +102,9 @@ public class CommentServiceImpl implements CommentService {
         return new CommentView(saved, author);
     }
 
-    private void notifyAnswered(Comment parent, User replier, Resource resource, String body) {
+    private void notifyAnswered(Comment parent, Member replier, Resource resource, String body) {
         if (parent.getAuthorId().equals(replier.getId())) return;
-        User answered = people.findAll(Set.of(parent.getAuthorId())).get(parent.getAuthorId());
+        Member answered = people.findAll(Set.of(parent.getAuthorId())).get(parent.getAuthorId());
         if (answered == null || answered.getEmail() == null) return;
         String path = "/blog/" + (resource.getSlug() == null || resource.getSlug().isBlank() ? resource.getId() : resource.getSlug())
                 + "#commentaire-" + parent.getId();
@@ -114,7 +114,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentView edit(String email, Long commentId, String body) {
-        User author = people.require(email);
+        Member author = people.require(email);
         Comment comment = owned(commentId, author);
         if (!comment.isVisible()) throw new BadRequestException("Ce commentaire ne peut plus être modifié.");
         comment.setBody(cleaned(body));
@@ -130,7 +130,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void report(String email, Long commentId, String reason) {
-        User reporter = people.require(email);
+        Member reporter = people.require(email);
         Comment comment = require(commentId);
         if (comment.getAuthorId().equals(reporter.getId())) throw new BadRequestException("Tu ne peux pas signaler ton propre commentaire.");
         if (reports.existsByCommentIdAndReporterId(commentId, reporter.getId())) throw new ConflictException("Tu as déjà signalé ce commentaire.");
@@ -145,7 +145,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional(readOnly = true)
     public Page<ModeratedComment> moderation(boolean reportedOnly, Pageable pageable) {
         Page<Comment> page = reportedOnly ? comments.findReported(pageable) : comments.findRecent(pageable);
-        Map<Long, User> authors = people.findAll(page.getContent().stream().map(Comment::getAuthorId).collect(Collectors.toSet()));
+        Map<Long, Member> authors = people.findAll(page.getContent().stream().map(Comment::getAuthorId).collect(Collectors.toSet()));
         Map<Long, Resource> articles = new LinkedHashMap<>();
         return page.map(comment -> moderated(comment, authors.get(comment.getAuthorId()),
                 articles.computeIfAbsent(comment.getResourceId(), resources::require)));
@@ -166,7 +166,7 @@ public class CommentServiceImpl implements CommentService {
         comments.delete(require(commentId));
     }
 
-    private ModeratedComment moderated(Comment comment, User author, Resource resource) {
+    private ModeratedComment moderated(Comment comment, Member author, Resource resource) {
         List<String> reasons = comment.getReportCount() == 0 ? List.of()
                 : reports.findByCommentIdOrderByCreatedAtDesc(comment.getId()).stream().map(CommentReport::getReason).filter(r -> r != null).toList();
         return new ModeratedComment(comment, author, resource, reasons);
@@ -176,7 +176,7 @@ public class CommentServiceImpl implements CommentService {
         return comments.findById(id).orElseThrow(() -> new NotFoundException("Comment", "id", id));
     }
 
-    private Comment owned(Long id, User author) {
+    private Comment owned(Long id, Member author) {
         Comment comment = require(id);
         if (!comment.getAuthorId().equals(author.getId())) throw new ForbiddenException("Ce commentaire n’est pas le tien.");
         if (comment.getStatus() == CommentStatus.DELETED) throw new NotFoundException("Comment", "id", id);
@@ -191,7 +191,7 @@ public class CommentServiceImpl implements CommentService {
         return text;
     }
 
-    static String displayName(User member) {
+    static String displayName(Member member) {
         String name = ((member.getFirstName() == null ? "" : member.getFirstName()) + " " + (member.getLastName() == null ? "" : member.getLastName())).trim();
         return name.isEmpty() ? "Membre LesCracks" : name;
     }

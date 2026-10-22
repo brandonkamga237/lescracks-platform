@@ -1,4 +1,4 @@
-package com.brandonkamga.lescracks.identity.infra.security;
+package com.brandonkamga.lescracks.account.infra.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

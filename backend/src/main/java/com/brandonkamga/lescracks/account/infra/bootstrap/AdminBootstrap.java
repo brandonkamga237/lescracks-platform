@@ -1,9 +1,9 @@
-package com.brandonkamga.lescracks.identity.infra.bootstrap;
+package com.brandonkamga.lescracks.account.infra.bootstrap;
 
-import com.brandonkamga.lescracks.identity.domain.admin.Admin;
-import com.brandonkamga.lescracks.identity.domain.admin.AdminStatus;
-import com.brandonkamga.lescracks.identity.domain.admin.AdminStore;
-import com.brandonkamga.lescracks.identity.domain.credential.PasswordHasher;
+import com.brandonkamga.lescracks.account.domain.model.Admin;
+import com.brandonkamga.lescracks.account.domain.model.AdminStatus;
+import com.brandonkamga.lescracks.account.domain.port.AdminStore;
+import com.brandonkamga.lescracks.account.domain.port.PasswordHasher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

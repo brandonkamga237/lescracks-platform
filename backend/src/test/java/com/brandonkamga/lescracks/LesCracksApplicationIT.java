@@ -1,12 +1,14 @@
 package com.brandonkamga.lescracks;
 
 import com.brandonkamga.lescracks.event.domain.EventService;
-import com.brandonkamga.lescracks.identity.domain.admin.AdminAuthService;
-import com.brandonkamga.lescracks.identity.domain.signup.EmailVerificationService;
-import com.brandonkamga.lescracks.identity.domain.credential.PasswordResetService;
-import com.brandonkamga.lescracks.identity.domain.credential.UserAuthService;
-import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
-import com.brandonkamga.lescracks.identity.domain.signup.UserRegistrationService;
+import com.brandonkamga.lescracks.account.application.AccountDirectory;
+import com.brandonkamga.lescracks.account.application.AdminAuthService;
+import com.brandonkamga.lescracks.account.application.EmailVerificationService;
+import com.brandonkamga.lescracks.account.application.PasswordResetService;
+import com.brandonkamga.lescracks.account.application.SignInService;
+import com.brandonkamga.lescracks.account.application.SignUpService;
+import com.brandonkamga.lescracks.member.application.MemberDirectory;
+import com.brandonkamga.lescracks.member.application.ProfileService;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
@@ -54,9 +56,9 @@ class LesCracksApplicationIT extends PostgresIT {
     void everyDomainServiceIsWired() {
         Stream.of(ResourceService.class, TaxonomyService.class, EventService.class,
                         NewsletterService.class, StatsService.class, StorageService.class,
-                        Mailer.class, UserAuthService.class, UserRegistrationService.class,
-                        EmailVerificationService.class, PasswordResetService.class, UserDirectory.class,
-                        AdminAuthService.class)
+                        Mailer.class, SignInService.class, SignUpService.class,
+                        EmailVerificationService.class, PasswordResetService.class, AccountDirectory.class,
+                        AdminAuthService.class, MemberDirectory.class, ProfileService.class)
                 .forEach(service -> assertThat(context.getBeansOfType(service))
                         .as("%s implementations", service.getSimpleName())
                         .hasSize(1));
@@ -87,6 +89,6 @@ class LesCracksApplicationIT extends PostgresIT {
                 .collect(Collectors.toSet());
 
         assertThat(entities).contains("Resource", "Article",
-                "Category", "Tag", "Event", "NewsletterSubscription", "User", "AdminEntity");
+                "Category", "Tag", "Event", "NewsletterSubscription");
     }
 }

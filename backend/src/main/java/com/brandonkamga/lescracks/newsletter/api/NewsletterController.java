@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.newsletter.api;
 
-import com.brandonkamga.lescracks.identity.domain.member.User;
-import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
+import com.brandonkamga.lescracks.account.application.AccountSummary;
+import com.brandonkamga.lescracks.account.application.AccountDirectory;
 import com.brandonkamga.lescracks.newsletter.api.dto.AdminSubscriberResponse;
 import com.brandonkamga.lescracks.newsletter.api.dto.BroadcastRequest;
 import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterCampaignResponse;
@@ -14,6 +14,7 @@ import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterStatus;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterSubscription;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterSubscriptionRepository;
+import com.brandonkamga.lescracks.shared.util.Csv;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
@@ -26,8 +27,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.nio.charset.StandardCharsets;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -36,10 +35,10 @@ import java.util.Map;
 public class NewsletterController {
     private final NewsletterService newsletter;
     private final NewsletterSubscriptionRepository subscriptions;
-    private final UserDirectory people;
+    private final AccountDirectory people;
 
     public NewsletterController(NewsletterService newsletter, NewsletterSubscriptionRepository subscriptions,
-                                UserDirectory people) {
+                                AccountDirectory people) {
         this.newsletter = newsletter;
         this.subscriptions = subscriptions;
         this.people = people;
@@ -140,17 +139,14 @@ public class NewsletterController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<StreamingResponseBody> exportSubscriptions() {
         List<NewsletterSubscription> list = subscriptions.findAll();
-        Map<Long, User> users = people.findAll(list.stream().map(NewsletterSubscription::getUserId).toList());
+        Map<Long, AccountSummary> users = people.findAll(list.stream().map(NewsletterSubscription::getUserId).toList());
         StreamingResponseBody body = out -> {
             out.write("email;firstName;lastName;status;subscribedAt;unsubscribedAt\n".getBytes(StandardCharsets.UTF_8));
             for (NewsletterSubscription s : list) {
-                User user = users.get(s.getUserId());
+                AccountSummary user = users.get(s.getUserId());
                 if (user == null) continue;
-                String row = csvLine(user.getEmail(), user.getFirstName(), user.getLastName(),
-                        s.getStatus().name(),
-                        s.getSubscribedAt() == null ? "" : formatter.format(s.getSubscribedAt()),
-                        s.getUnsubscribedAt() == null ? "" : formatter.format(s.getUnsubscribedAt()));
-                out.write((row + "\n").getBytes(StandardCharsets.UTF_8));
+                out.write(Csv.line(user.getEmail(), user.getFirstName(), user.getLastName(), s.getStatus().name(),
+                        s.getSubscribedAt(), s.getUnsubscribedAt()).getBytes(StandardCharsets.UTF_8));
             }
         };
         return ResponseEntity.ok()
@@ -171,7 +167,7 @@ public class NewsletterController {
     public record NewsletterStats(long subscribed, long unsubscribed, long pending) { }
 
     private List<AdminSubscriberResponse> toAdminResponses(List<NewsletterSubscription> list) {
-        Map<Long, User> users = people.findAll(list.stream().map(NewsletterSubscription::getUserId).toList());
+        Map<Long, AccountSummary> users = people.findAll(list.stream().map(NewsletterSubscription::getUserId).toList());
         return list.stream().filter(subscription -> users.containsKey(subscription.getUserId()))
                 .map(subscription -> toAdminResponse(subscription, users.get(subscription.getUserId()))).toList();
     }
@@ -180,7 +176,7 @@ public class NewsletterController {
         return toAdminResponse(subscription, people.require(subscription.getUserId()));
     }
 
-    private AdminSubscriberResponse toAdminResponse(NewsletterSubscription subscription, User user) {
+    private AdminSubscriberResponse toAdminResponse(NewsletterSubscription subscription, AccountSummary user) {
         return new AdminSubscriberResponse(user.getId(), user.getEmail(), user.getFirstName(),
                 user.getLastName(), subscription.getStatus(), subscription.getSubscribedAt(),
                 subscription.getUnsubscribedAt());
@@ -191,20 +187,4 @@ public class NewsletterController {
                 subscription.getUnsubscribedAt());
     }
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-            .withZone(ZoneId.of("UTC"));
-
-    private String csvLine(Object... values) {
-        StringBuilder line = new StringBuilder();
-        for (int i = 0; i < values.length; i++) {
-            if (i > 0) line.append(';');
-            String value = String.valueOf(values[i]);
-            if (value.contains(";") || value.contains("\"") || value.contains("\n")) {
-                line.append('"').append(value.replace("\"", "\"\"")).append('"');
-            } else {
-                line.append(value);
-            }
-        }
-        return line.toString();
-    }
 }

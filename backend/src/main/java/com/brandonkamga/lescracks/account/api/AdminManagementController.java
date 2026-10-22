@@ -1,9 +1,9 @@
-package com.brandonkamga.lescracks.identity.api;
+package com.brandonkamga.lescracks.account.api;
 
-import com.brandonkamga.lescracks.identity.api.dto.AdminCreateRequest;
-import com.brandonkamga.lescracks.identity.api.dto.AdminResponse;
-import com.brandonkamga.lescracks.identity.domain.admin.Admin;
-import com.brandonkamga.lescracks.identity.domain.admin.AdminManagementService;
+import com.brandonkamga.lescracks.account.api.dto.AdminCreateRequest;
+import com.brandonkamga.lescracks.account.api.dto.AdminResponse;
+import com.brandonkamga.lescracks.account.domain.model.Admin;
+import com.brandonkamga.lescracks.account.application.AdminManagementService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

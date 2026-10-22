@@ -1,13 +1,13 @@
-package com.brandonkamga.lescracks.identity.api.dto;
+package com.brandonkamga.lescracks.account.api.dto;
 
-import com.brandonkamga.lescracks.identity.domain.external.UserIdentity;
-import com.brandonkamga.lescracks.identity.domain.member.AuthProvider;
+import com.brandonkamga.lescracks.account.domain.model.ExternalIdentity;
+import com.brandonkamga.lescracks.account.domain.model.AuthProvider;
 
 import java.time.Instant;
 
-public record UserIdentityResponse(AuthProvider provider, Instant linkedAt) {
+public record IdentityResponse(AuthProvider provider, Instant linkedAt) {
 
-    public static UserIdentityResponse of(UserIdentity identity) {
-        return new UserIdentityResponse(identity.getProvider(), identity.getCreatedAt());
+    public static IdentityResponse of(ExternalIdentity identity) {
+        return new IdentityResponse(identity.getProvider(), identity.getCreatedAt());
     }
 }

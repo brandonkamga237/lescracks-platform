@@ -1,9 +1,9 @@
-package com.brandonkamga.lescracks.identity.api;
+package com.brandonkamga.lescracks.account.api;
 
-import com.brandonkamga.lescracks.identity.api.dto.AdminAuthResponse;
-import com.brandonkamga.lescracks.identity.api.dto.AdminLoginRequest;
-import com.brandonkamga.lescracks.identity.domain.admin.Admin;
-import com.brandonkamga.lescracks.identity.domain.admin.AdminAuthService;
+import com.brandonkamga.lescracks.account.api.dto.AdminAuthResponse;
+import com.brandonkamga.lescracks.account.api.dto.AdminLoginRequest;
+import com.brandonkamga.lescracks.account.domain.model.Admin;
+import com.brandonkamga.lescracks.account.application.AdminAuthService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

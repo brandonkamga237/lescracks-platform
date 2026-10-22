@@ -1,11 +1,11 @@
-package com.brandonkamga.lescracks.identity.api;
+package com.brandonkamga.lescracks.member.api;
 
-import com.brandonkamga.lescracks.identity.api.dto.OidcSyncRequest;
-import com.brandonkamga.lescracks.identity.api.dto.UserProfileResponse;
-import com.brandonkamga.lescracks.identity.domain.credential.AuthMetrics;
-import com.brandonkamga.lescracks.identity.domain.external.OidcSyncService;
-import com.brandonkamga.lescracks.identity.domain.member.User;
-import com.brandonkamga.lescracks.identity.domain.external.UserIdentityService;
+import com.brandonkamga.lescracks.account.application.ExternalIdentityService;
+import com.brandonkamga.lescracks.account.application.OidcSyncService;
+import com.brandonkamga.lescracks.member.api.dto.OidcSyncRequest;
+import com.brandonkamga.lescracks.member.api.dto.ProfileResponse;
+import com.brandonkamga.lescracks.member.application.MemberView;
+import com.brandonkamga.lescracks.member.application.ProfileService;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 
 import jakarta.validation.Valid;
@@ -18,36 +18,29 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/** A Google or GitHub sign-in: the account is synced in account, and the answer is the member's profile. */
 @RestController
 @RequestMapping("/api/oidc")
 public class OidcSyncController {
-
     private final OidcSyncService oidc;
-    private final UserIdentityService identities;
-    private final AuthMetrics metrics;
+    private final ProfileService profiles;
+    private final ExternalIdentityService identities;
 
-    public OidcSyncController(OidcSyncService oidc, UserIdentityService identities, AuthMetrics metrics) {
+    public OidcSyncController(OidcSyncService oidc, ProfileService profiles, ExternalIdentityService identities) {
         this.oidc = oidc;
+        this.profiles = profiles;
         this.identities = identities;
-        this.metrics = metrics;
     }
 
     @PostMapping("/sync")
-    public ResponseEntity<UserProfileResponse> sync(Authentication authentication,
-                                                    @Valid @RequestBody OidcSyncRequest request) {
+    public ResponseEntity<ProfileResponse> sync(Authentication authentication, @Valid @RequestBody OidcSyncRequest request) {
         Jwt jwt = extractJwt(authentication);
         if (jwt == null) {
             throw new BadRequestException("La synchronisation de ton profil a échoué.");
         }
-        User user;
-        try {
-            user = oidc.sync(jwt.getTokenValue(), request.provider());
-        } catch (RuntimeException failed) {
-            metrics.login("member", request.provider().name().toLowerCase(), false);
-            throw failed;
-        }
-        metrics.login("member", request.provider().name().toLowerCase(), true);
-        return ResponseEntity.ok(UserProfileResponse.of(user, identities.list(user.getEmail())));
+        String email = oidc.sync(jwt.getTokenValue(), request.provider()).getEmail();
+        MemberView view = profiles.view(email);
+        return ResponseEntity.ok(ProfileResponse.of(view, identities.list(email)));
     }
 
     private static Jwt extractJwt(Authentication authentication) {

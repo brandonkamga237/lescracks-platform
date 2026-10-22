@@ -1,8 +1,9 @@
-package com.brandonkamga.lescracks.identity.api.dto;
+package com.brandonkamga.lescracks.member.api.dto;
 
-import com.brandonkamga.lescracks.identity.domain.member.OnboardingAnswers;
-import com.brandonkamga.lescracks.identity.domain.member.MemberGoal;
-import com.brandonkamga.lescracks.identity.domain.member.MemberSituation;
+import com.brandonkamga.lescracks.account.api.dto.SignupContext;
+import com.brandonkamga.lescracks.member.application.OnboardingAnswers;
+import com.brandonkamga.lescracks.member.domain.model.MemberGoal;
+import com.brandonkamga.lescracks.member.domain.model.MemberSituation;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;

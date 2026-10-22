@@ -1,66 +1,66 @@
-package com.brandonkamga.lescracks.identity.api;
+package com.brandonkamga.lescracks.account.api;
 
-import com.brandonkamga.lescracks.identity.api.dto.ForgotPasswordRequest;
-import com.brandonkamga.lescracks.identity.api.dto.ResetPasswordRequest;
-import com.brandonkamga.lescracks.identity.api.dto.UserAuthResponse;
-import com.brandonkamga.lescracks.identity.api.dto.UserLoginRequest;
-import com.brandonkamga.lescracks.identity.api.dto.UserRegisterRequest;
-import com.brandonkamga.lescracks.identity.domain.member.User;
-import com.brandonkamga.lescracks.identity.domain.signup.EmailVerificationService;
-import com.brandonkamga.lescracks.identity.domain.credential.PasswordResetService;
-import com.brandonkamga.lescracks.identity.domain.credential.UserAuthService;
-import com.brandonkamga.lescracks.identity.domain.signup.UserRegistrationService;
+import com.brandonkamga.lescracks.account.api.dto.AuthResponse;
+import com.brandonkamga.lescracks.account.api.dto.ForgotPasswordRequest;
+import com.brandonkamga.lescracks.account.api.dto.LoginRequest;
+import com.brandonkamga.lescracks.account.api.dto.RegisterRequest;
+import com.brandonkamga.lescracks.account.api.dto.ResetPasswordRequest;
+import com.brandonkamga.lescracks.account.application.AccountSummary;
+import com.brandonkamga.lescracks.account.application.EmailVerificationService;
+import com.brandonkamga.lescracks.account.application.PasswordResetService;
+import com.brandonkamga.lescracks.account.application.SignInService;
+import com.brandonkamga.lescracks.account.application.SignUpService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
-
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-public class UserAuthController {
-    private final UserRegistrationService registration;
-    private final UserAuthService auth;
+public class AuthController {
+    private final SignUpService signUp;
+    private final SignInService signIn;
     private final EmailVerificationService verification;
     private final PasswordResetService passwordReset;
     private final SecurityContextRepository contexts = new HttpSessionSecurityContextRepository();
 
-    public UserAuthController(UserRegistrationService registration, UserAuthService auth,
-                              EmailVerificationService verification, PasswordResetService passwordReset) {
-        this.registration = registration;
-        this.auth = auth;
+    public AuthController(SignUpService signUp, SignInService signIn,
+                          EmailVerificationService verification, PasswordResetService passwordReset) {
+        this.signUp = signUp;
+        this.signIn = signIn;
         this.verification = verification;
         this.passwordReset = passwordReset;
     }
 
     /** The new member is signed in at once; confirming the address can wait (see the banner). */
     @PostMapping("/register")
-    public ResponseEntity<UserAuthResponse> register(@Valid @RequestBody UserRegisterRequest request,
-                                                     HttpServletRequest httpRequest,
-                                                     HttpServletResponse httpResponse) {
-        User user = registration.register(request.toRegistration());
-        startSession(user, httpRequest, httpResponse);
-        return ResponseEntity.status(201).body(response(user));
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request,
+                                                 HttpServletRequest httpRequest,
+                                                 HttpServletResponse httpResponse) {
+        AccountSummary account = signUp.register(request.toRegistration());
+        startSession(account, httpRequest, httpResponse);
+        return ResponseEntity.status(201).body(AuthResponse.of(account));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserAuthResponse> login(@Valid @RequestBody UserLoginRequest request,
-                                                  HttpServletRequest httpRequest,
-                                                  HttpServletResponse httpResponse) {
-        User user = auth.authenticate(request.toCredentials());
-        startSession(user, httpRequest, httpResponse);
-        return ResponseEntity.ok(response(user));
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request,
+                                              HttpServletRequest httpRequest,
+                                              HttpServletResponse httpResponse) {
+        AccountSummary account = signIn.authenticate(request.toCredentials());
+        startSession(account, httpRequest, httpResponse);
+        return ResponseEntity.ok(AuthResponse.of(account));
     }
 
     @PostMapping("/verify-email")
@@ -95,16 +95,12 @@ public class UserAuthController {
         return ResponseEntity.noContent().build();
     }
 
-    private void startSession(User user, HttpServletRequest request, HttpServletResponse response) {
+    private void startSession(AccountSummary account, HttpServletRequest request, HttpServletResponse response) {
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                user.getEmail(), null, java.util.List.of(new SimpleGrantedAuthority("ROLE_USER")));
+                account.getEmail(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);
         contexts.saveContext(context, request, response);
-    }
-
-    private UserAuthResponse response(User user) {
-        return new UserAuthResponse(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(), user.isEmailVerified(), user.getProvider());
     }
 }

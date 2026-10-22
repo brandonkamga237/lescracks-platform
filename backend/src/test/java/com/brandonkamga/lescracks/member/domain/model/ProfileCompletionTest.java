@@ -1,4 +1,4 @@
-package com.brandonkamga.lescracks.identity.domain.member;
+package com.brandonkamga.lescracks.member.domain.model;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,9 +10,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ProfileCompletionTest {
 
     @Test
-    @DisplayName("a fresh account lists everything to fill, phone first")
+    @DisplayName("an empty profile lists everything to fill, phone first")
     void freshAccount() {
-        ProfileCompletion completion = ProfileCompletion.of(User.builder().email("a@b.c").firstName("A").lastName("B").build());
+        ProfileCompletion completion = ProfileCompletion.of(MemberProfile.empty(1L));
 
         assertThat(completion.percent()).isZero();
         assertThat(completion.missing()).containsExactly("PHONE", "SITUATION", "INTERESTS", "GOAL", "CITY", "AVATAR", "BIO");
@@ -21,7 +21,7 @@ class ProfileCompletionTest {
     @Test
     @DisplayName("each answered question moves the gauge, up to 100 %")
     void filledProfile() {
-        User user = User.builder().email("a@b.c").firstName("A").lastName("B")
+        MemberProfile user = MemberProfile.builder().accountId(1L)
                 .phone("+237677123456").country("CM").situation(MemberSituation.STUDENT).goal(MemberGoal.FIND_JOB)
                 .interests(Set.of(1L)).location("Douala").build();
 

@@ -1,6 +1,6 @@
-package com.brandonkamga.lescracks.identity.infra.metrics;
+package com.brandonkamga.lescracks.account.infra.metrics;
 
-import com.brandonkamga.lescracks.identity.domain.credential.AuthMetrics;
+import com.brandonkamga.lescracks.account.domain.port.AuthMetrics;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Component;

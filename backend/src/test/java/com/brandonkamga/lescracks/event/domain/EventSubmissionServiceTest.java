@@ -1,8 +1,8 @@
 package com.brandonkamga.lescracks.event.domain;
 
 import com.brandonkamga.lescracks.event.infra.EventSubmissionRepository;
-import com.brandonkamga.lescracks.identity.domain.member.User;
-import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
+import com.brandonkamga.lescracks.member.application.Member;
+import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.ConflictException;
 
@@ -35,15 +35,15 @@ class EventSubmissionServiceTest {
     @Mock private EventSubmissionRepository submissions;
     @Mock private EventService events;
     @Mock private EventRegistrationService registrations;
-    @Mock private UserDirectory people;
+    @Mock private MemberDirectory people;
 
     private EventSubmissionServiceImpl service;
     private Event hackathon;
-    private final User owner = member(1L, "awa@example.com");
-    private final User teammate = member(2L, "kofi@example.com");
+    private final Member owner = member(1L, "awa@example.com");
+    private final Member teammate = member(2L, "kofi@example.com");
 
-    private static User member(Long id, String email) {
-        return User.builder().id(id).email(email).firstName("M" + id).lastName("L").passwordHash("hash").build();
+    private static Member member(Long id, String email) {
+        return Member.builder().id(id).email(email).firstName("M" + id).lastName("L").loginMethod(true).build();
     }
 
     private static ProjectDraft draft(List<String> teammates) {
@@ -69,7 +69,7 @@ class EventSubmissionServiceTest {
         SubmissionView view = service.submit(9L, "awa@example.com", draft(List.of("Kofi@Example.com", "awa@example.com")));
 
         assertThat(view.submission().getMembers()).extracting(TeamMember::userId).containsExactlyInAnyOrder(1L, 2L);
-        assertThat(view.team()).extracting(User::getId).containsExactly(1L, 2L);
+        assertThat(view.team()).extracting(Member::getId).containsExactly(1L, 2L);
         verify(registrations).ensureRegistered(hackathon, 1L);
         verify(registrations).ensureRegistered(hackathon, 2L);
     }

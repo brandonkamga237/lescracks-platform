@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.community.domain;
 
-import com.brandonkamga.lescracks.identity.domain.member.User;
+import com.brandonkamga.lescracks.member.application.Member;
 
 /** A comment with its author, who is null once the comment is no longer shown. */
-public record CommentView(Comment comment, User author) {
+public record CommentView(Comment comment, Member author) {
 }

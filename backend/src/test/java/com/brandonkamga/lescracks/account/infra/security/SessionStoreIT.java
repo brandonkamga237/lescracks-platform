@@ -1,4 +1,4 @@
-package com.brandonkamga.lescracks.identity.infra;
+package com.brandonkamga.lescracks.account.infra.security;
 
 import com.brandonkamga.lescracks.support.PostgresIT;
 

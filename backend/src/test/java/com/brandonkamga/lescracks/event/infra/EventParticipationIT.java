@@ -7,8 +7,8 @@ import com.brandonkamga.lescracks.event.domain.EventStatus;
 import com.brandonkamga.lescracks.event.domain.EventSubmission;
 import com.brandonkamga.lescracks.event.domain.EventType;
 import com.brandonkamga.lescracks.event.domain.TeamMember;
-import com.brandonkamga.lescracks.identity.domain.member.User;
-import com.brandonkamga.lescracks.identity.domain.member.UserStore;
+import com.brandonkamga.lescracks.account.domain.model.Account;
+import com.brandonkamga.lescracks.account.domain.port.AccountStore;
 import com.brandonkamga.lescracks.support.PostgresIT;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -31,11 +31,11 @@ class EventParticipationIT extends PostgresIT {
     @Autowired private EventRepository events;
     @Autowired private EventRegistrationRepository registrations;
     @Autowired private EventSubmissionRepository submissions;
-    @Autowired private UserStore users;
+    @Autowired private AccountStore users;
 
     private Event hackathon;
-    private User awa;
-    private User kofi;
+    private Account awa;
+    private Account kofi;
 
     @BeforeEach
     void seed() {
@@ -43,15 +43,15 @@ class EventParticipationIT extends PostgresIT {
                 .type(EventType.HACKATHON).format(EventFormat.ONLINE).status(EventStatus.PUBLISHED)
                 .startDate(Instant.now()).endDate(Instant.now().plus(10, ChronoUnit.DAYS))
                 .acceptsSubmissions(true).maxTeamSize(4).build());
-        awa = users.save(User.builder().email("awa.it@example.com").firstName("Awa").lastName("D").passwordHash("h").build());
-        kofi = users.save(User.builder().email("kofi.it@example.com").firstName("Kofi").lastName("A").passwordHash("h").build());
+        awa = users.save(Account.builder().email("awa.it@example.com").firstName("Awa").lastName("D").passwordHash("h").build());
+        kofi = users.save(Account.builder().email("kofi.it@example.com").firstName("Kofi").lastName("A").passwordHash("h").build());
     }
 
-    private EventSubmission project(User owner, User... team) {
+    private EventSubmission project(Account owner, Account... team) {
         EventSubmission submission = EventSubmission.builder().event(hackathon).ownerId(owner.getId()).title("P")
                 .repositoryUrl("https://github.com/x/y").description("D").build();
         submission.getMembers().add(new TeamMember(owner.getId(), hackathon.getId()));
-        for (User member : team) submission.getMembers().add(new TeamMember(member.getId(), hackathon.getId()));
+        for (Account member : team) submission.getMembers().add(new TeamMember(member.getId(), hackathon.getId()));
         return submissions.saveAndFlush(submission);
     }
 

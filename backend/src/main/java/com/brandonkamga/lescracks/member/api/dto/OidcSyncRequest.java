@@ -1,6 +1,6 @@
-package com.brandonkamga.lescracks.identity.api.dto;
+package com.brandonkamga.lescracks.member.api.dto;
 
-import com.brandonkamga.lescracks.identity.domain.member.AuthProvider;
+import com.brandonkamga.lescracks.account.domain.model.AuthProvider;
 
 import jakarta.validation.constraints.NotNull;
 

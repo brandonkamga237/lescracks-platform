@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.recognition.domain;
 
-import com.brandonkamga.lescracks.identity.domain.member.User;
-import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
+import com.brandonkamga.lescracks.member.application.Member;
+import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.recognition.infra.BadgeRepository;
 import com.brandonkamga.lescracks.recognition.infra.MemberBadgeRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
@@ -30,9 +30,9 @@ public class BadgeServiceImpl implements BadgeService {
 
     private final BadgeRepository badges;
     private final MemberBadgeRepository awards;
-    private final UserDirectory people;
+    private final MemberDirectory people;
 
-    public BadgeServiceImpl(BadgeRepository badges, MemberBadgeRepository awards, UserDirectory people) {
+    public BadgeServiceImpl(BadgeRepository badges, MemberBadgeRepository awards, MemberDirectory people) {
         this.badges = badges;
         this.awards = awards;
         this.people = people;
@@ -86,7 +86,7 @@ public class BadgeServiceImpl implements BadgeService {
 
     @Override
     public MemberBadge awardByEmail(Long badgeId, String email, String reason) {
-        User member = people.find(email).orElseThrow(() -> new BadRequestException("Aucun membre n’a l’adresse " + email + "."));
+        Member member = people.find(email).orElseThrow(() -> new BadRequestException("Aucun membre n’a l’adresse " + email + "."));
         return give(require(badgeId), member.getId(), reason);
     }
 
@@ -119,7 +119,7 @@ public class BadgeServiceImpl implements BadgeService {
     @Transactional(readOnly = true)
     public List<BadgeHolder> holders(Long badgeId) {
         List<MemberBadge> list = awards.findByBadgeIdOrderByAwardedAtDesc(require(badgeId).getId());
-        Map<Long, User> members = people.findAll(list.stream().map(MemberBadge::getUserId).toList());
+        Map<Long, Member> members = people.findAll(list.stream().map(MemberBadge::getUserId).toList());
         return list.stream().filter(award -> members.containsKey(award.getUserId()))
                 .map(award -> new BadgeHolder(award, members.get(award.getUserId()))).toList();
     }

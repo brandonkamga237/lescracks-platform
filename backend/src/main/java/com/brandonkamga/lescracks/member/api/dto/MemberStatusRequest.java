@@ -1,8 +1,8 @@
-package com.brandonkamga.lescracks.identity.api.dto;
+package com.brandonkamga.lescracks.member.api.dto;
 
-import com.brandonkamga.lescracks.identity.domain.member.UserStatus;
+import com.brandonkamga.lescracks.account.domain.model.AccountStatus;
 
 import jakarta.validation.constraints.NotNull;
 
-public record UserStatusRequest(@NotNull UserStatus status) {
+public record MemberStatusRequest(@NotNull AccountStatus status) {
 }

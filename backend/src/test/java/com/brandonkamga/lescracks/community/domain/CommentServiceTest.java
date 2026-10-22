@@ -2,8 +2,8 @@ package com.brandonkamga.lescracks.community.domain;
 
 import com.brandonkamga.lescracks.community.infra.CommentReportRepository;
 import com.brandonkamga.lescracks.community.infra.CommentRepository;
-import com.brandonkamga.lescracks.identity.domain.member.User;
-import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
+import com.brandonkamga.lescracks.member.application.Member;
+import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.mail.domain.CommentReplyEmail;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.resource.domain.Resource;
@@ -44,13 +44,13 @@ class CommentServiceTest {
     @Mock private CommentRepository comments;
     @Mock private CommentReportRepository reports;
     @Mock private ResourceService resources;
-    @Mock private UserDirectory people;
+    @Mock private MemberDirectory people;
     @Mock private Mailer mailer;
 
     private CommentServiceImpl service;
     private final Resource article = Resource.builder().id(7L).title("Docker sans peur").slug("docker-sans-peur").status(ResourceStatus.PUBLISHED).build();
-    private final User awa = User.builder().id(1L).email("awa@example.com").firstName("Awa").lastName("Diallo").build();
-    private final User eric = User.builder().id(2L).email("eric@example.com").firstName("Eric").lastName("Tchana").build();
+    private final Member awa = Member.builder().id(1L).email("awa@example.com").firstName("Awa").lastName("Diallo").build();
+    private final Member eric = Member.builder().id(2L).email("eric@example.com").firstName("Eric").lastName("Tchana").build();
 
     @BeforeEach
     void setUp() {
@@ -68,7 +68,7 @@ class CommentServiceTest {
         });
     }
 
-    private Comment comment(long id, User author, Long parentId) {
+    private Comment comment(long id, Member author, Long parentId) {
         Comment comment = Comment.builder().id(id).resourceId(7L).authorId(author.getId()).parentId(parentId).body("Merci !").build();
         when(comments.findById(id)).thenReturn(Optional.of(comment));
         return comment;

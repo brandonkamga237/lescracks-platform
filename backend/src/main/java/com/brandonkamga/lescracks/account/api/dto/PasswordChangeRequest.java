@@ -1,10 +1,10 @@
-package com.brandonkamga.lescracks.identity.api.dto;
+package com.brandonkamga.lescracks.account.api.dto;
 
-import com.brandonkamga.lescracks.identity.domain.credential.PasswordChange;
+import com.brandonkamga.lescracks.account.application.PasswordChange;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record UserPasswordChangeRequest(
+public record PasswordChangeRequest(
         @NotBlank String currentPassword,
         @NotBlank @Size(min = 10, message = "Le nouveau mot de passe doit contenir au moins 10 caractères.") String newPassword,
         @NotBlank String confirmPassword

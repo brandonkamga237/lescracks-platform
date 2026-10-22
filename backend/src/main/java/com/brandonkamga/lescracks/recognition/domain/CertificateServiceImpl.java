@@ -7,8 +7,8 @@ import com.brandonkamga.lescracks.event.domain.EventSubmissionService;
 import com.brandonkamga.lescracks.event.domain.RegistrationStatus;
 import com.brandonkamga.lescracks.event.domain.SubmissionStatus;
 import com.brandonkamga.lescracks.event.domain.SubmissionView;
-import com.brandonkamga.lescracks.identity.domain.member.User;
-import com.brandonkamga.lescracks.identity.domain.member.UserDirectory;
+import com.brandonkamga.lescracks.member.application.Member;
+import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.mail.domain.CertificateIssuedEmail;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.recognition.infra.CertificateRepository;
@@ -37,12 +37,12 @@ public class CertificateServiceImpl implements CertificateService {
     private final EventService events;
     private final EventRegistrationService registrations;
     private final EventSubmissionService submissions;
-    private final UserDirectory people;
+    private final MemberDirectory people;
     private final Mailer mailer;
     private final ApplicationEventPublisher published;
 
     public CertificateServiceImpl(CertificateRepository certificates, EventService events, EventRegistrationService registrations,
-                                  EventSubmissionService submissions, UserDirectory people, Mailer mailer,
+                                  EventSubmissionService submissions, MemberDirectory people, Mailer mailer,
                                   ApplicationEventPublisher published) {
         this.certificates = certificates;
         this.events = events;
@@ -53,7 +53,7 @@ public class CertificateServiceImpl implements CertificateService {
         this.published = published;
     }
 
-    private record Draft(User holder, CertificateKind kind, Integer rank, String detail) {
+    private record Draft(Member holder, CertificateKind kind, Integer rank, String detail) {
     }
 
     @Override
@@ -65,7 +65,7 @@ public class CertificateServiceImpl implements CertificateService {
                 if (view.submission().getStatus() == SubmissionStatus.REJECTED) continue;
                 Integer rank = view.submission().getRank();
                 String project = "Projet « " + view.submission().getTitle() + " »";
-                for (User member : view.team()) {
+                for (Member member : view.team()) {
                     drafts.add(new Draft(member, CertificateKind.PARTICIPATION, null, project));
                     if (rank != null && rank == 1) drafts.add(new Draft(member, CertificateKind.WINNER, rank, project));
                     else if (rank != null && rank <= 3) drafts.add(new Draft(member, CertificateKind.PODIUM, rank, project));
@@ -99,7 +99,7 @@ public class CertificateServiceImpl implements CertificateService {
     @Transactional(readOnly = true)
     public List<CertificateView> forEvent(Long eventId) {
         List<Certificate> list = certificates.findByEventIdOrderByKindAscHolderNameAsc(eventId);
-        Map<Long, User> holders = people.findAll(list.stream().map(Certificate::getUserId).toList());
+        Map<Long, Member> holders = people.findAll(list.stream().map(Certificate::getUserId).toList());
         return list.stream().map(certificate -> new CertificateView(certificate,
                 holders.containsKey(certificate.getUserId()) ? holders.get(certificate.getUserId()).getEmail() : null)).toList();
     }
@@ -108,10 +108,10 @@ public class CertificateServiceImpl implements CertificateService {
     public List<Certificate> issue(Collection<Long> ids) {
         List<Certificate> drafts = certificates.findAllById(ids).stream()
                 .filter(certificate -> certificate.getStatus() == CertificateStatus.DRAFT).toList();
-        Map<Long, User> holders = people.findAll(drafts.stream().map(Certificate::getUserId).toList());
+        Map<Long, Member> holders = people.findAll(drafts.stream().map(Certificate::getUserId).toList());
         Instant now = Instant.now();
         for (Certificate certificate : drafts) {
-            User holder = holders.get(certificate.getUserId());
+            Member holder = holders.get(certificate.getUserId());
             if (holder == null) continue;
             // The name as it stands at issue time is the one the document keeps.
             certificate.setHolderName(fullName(holder));
@@ -165,7 +165,7 @@ public class CertificateServiceImpl implements CertificateService {
         return certificates.findById(id).orElseThrow(() -> new NotFoundException("Attestation", "id", id));
     }
 
-    private static String fullName(User user) {
+    private static String fullName(Member user) {
         String name = ((user.getFirstName() == null ? "" : user.getFirstName()) + " " + (user.getLastName() == null ? "" : user.getLastName())).trim();
         return name.isEmpty() ? user.getEmail() : name;
     }

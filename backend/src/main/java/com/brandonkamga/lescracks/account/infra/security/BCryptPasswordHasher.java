@@ -1,6 +1,6 @@
-package com.brandonkamga.lescracks.identity.infra.security;
+package com.brandonkamga.lescracks.account.infra.security;
 
-import com.brandonkamga.lescracks.identity.domain.credential.PasswordHasher;
+import com.brandonkamga.lescracks.account.domain.port.PasswordHasher;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;

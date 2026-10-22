@@ -1,4 +1,4 @@
-package com.brandonkamga.lescracks.identity.domain.member;
+package com.brandonkamga.lescracks.member.domain.model;
 
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 
@@ -7,14 +7,14 @@ import com.brandonkamga.lescracks.shared.exception.BadRequestException;
  * the file is served back from our own domain, so an HTML or SVG file posing as a photo would
  * run as a page of the site.
  */
-final class AvatarImages {
+public final class AvatarImages {
     static final int MAX_BYTES = 5 * 1024 * 1024;
 
     private AvatarImages() {
     }
 
     /** The content type to store the photo with; refuses anything that is not a JPEG, PNG or WebP. */
-    static String check(byte[] content) {
+    public static String check(byte[] content) {
         if (content.length == 0) throw new BadRequestException("Aucun fichier reçu.");
         if (content.length > MAX_BYTES) throw new BadRequestException("La photo dépasse 5 Mo. Choisis une image plus légère.");
         if (startsWith(content, 0xFF, 0xD8, 0xFF)) return "image/jpeg";
