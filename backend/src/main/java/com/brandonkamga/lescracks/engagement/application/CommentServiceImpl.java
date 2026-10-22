@@ -177,4 +177,9 @@ public class CommentServiceImpl implements CommentService {
         String name = ((member.getFirstName() == null ? "" : member.getFirstName()) + " " + (member.getLastName() == null ? "" : member.getLastName())).trim();
         return name.isEmpty() ? "Membre LesCracks" : name;
     }
+
+    @Override
+    public long countWrittenBy(Long authorId) {
+        return comments.countByAuthorSince(authorId, Instant.EPOCH);
+    }
 }

@@ -83,6 +83,14 @@ class JdbcSubmissionStore implements SubmissionStore {
     }
 
     @Override
+    public List<Submission> findByUser(Long userId) {
+        return withMembers(jdbc.sql("SELECT " + COLUMNS + """
+                         FROM event_submissions s JOIN event_submission_members m ON m.submission_id = s.id
+                        WHERE m.user_id = :user ORDER BY s.submitted_at DESC""")
+                .param("user", userId).query(ROW).list());
+    }
+
+    @Override
     public Submission save(Submission submission) {
         Long id = submission.getId();
         var statement = id == null

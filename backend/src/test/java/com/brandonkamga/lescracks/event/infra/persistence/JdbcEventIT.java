@@ -128,6 +128,8 @@ class JdbcEventIT extends PostgresIT {
             assertThat(found.getMemberIds()).containsExactly(awa, kofi);
         });
         assertThat(submissions.findTaken(hackathon.getId(), List.of(kofi), null)).containsExactly(kofi);
+        assertThat(submissions.findByUser(kofi)).singleElement().extracting(Submission::getMemberIds)
+                .isEqualTo(new LinkedHashSet<>(List.of(awa, kofi)));
         assertThat(submissions.findTaken(hackathon.getId(), List.of(kofi), project.getId())).isEmpty();
 
         project.setMemberIds(new LinkedHashSet<>(List.of(awa)));
