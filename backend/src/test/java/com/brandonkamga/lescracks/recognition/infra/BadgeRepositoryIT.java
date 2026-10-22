@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.recognition.infra;
 
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.infra.UserRepository;
+import com.brandonkamga.lescracks.account.domain.model.Account;
+import com.brandonkamga.lescracks.account.domain.port.AccountStore;
 import com.brandonkamga.lescracks.recognition.domain.Badge;
 import com.brandonkamga.lescracks.recognition.domain.MemberBadge;
 import com.brandonkamga.lescracks.support.PostgresIT;
@@ -21,7 +21,7 @@ class BadgeRepositoryIT extends PostgresIT {
 
     @Autowired private BadgeRepository badges;
     @Autowired private MemberBadgeRepository awards;
-    @Autowired private UserRepository users;
+    @Autowired private AccountStore users;
 
     @Test
     @DisplayName("the migration seeds the system badges the rules award")
@@ -34,7 +34,7 @@ class BadgeRepositoryIT extends PostgresIT {
     @Test
     @DisplayName("a member holds a badge once, and the catalogue counts its holders")
     void oneAwardPerMember() {
-        User awa = users.saveAndFlush(User.builder().email("awa.badge@example.com").firstName("Awa").lastName("D").passwordHash("h").build());
+        Account awa = users.save(Account.builder().email("awa.badge@example.com").firstName("Awa").lastName("D").passwordHash("h").build());
         Badge winner = badges.findByCode(Badge.HACKATHON_WINNER).orElseThrow();
         awards.saveAndFlush(MemberBadge.builder().badge(winner).userId(awa.getId()).build());
 

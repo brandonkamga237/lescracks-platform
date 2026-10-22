@@ -1,6 +1,6 @@
 package com.brandonkamga.lescracks.newsletter.domain;
 
-import com.brandonkamga.lescracks.identity.domain.MemberRegistered;
+import com.brandonkamga.lescracks.account.domain.model.AccountRegistered;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,8 +18,8 @@ class NewsletterSignupListenerTest {
     @Test
     @DisplayName("a member who ticked the box is subscribed, the others are not")
     void subscribesOnlyOnRequest() {
-        listener.subscribeIfAsked(new MemberRegistered("awa@example.com", true));
-        listener.subscribeIfAsked(new MemberRegistered("eric@example.com", false));
+        listener.subscribeIfAsked(new AccountRegistered(1L, "awa@example.com", null, null, true));
+        listener.subscribeIfAsked(new AccountRegistered(2L, "eric@example.com", null, null, false));
 
         verify(newsletter).subscribe("awa@example.com");
         verify(newsletter, never()).subscribe("eric@example.com");

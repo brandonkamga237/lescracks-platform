@@ -1,11 +1,9 @@
 package com.brandonkamga.lescracks.shared.exception;
 
-import org.springframework.http.HttpStatus;
-
 public class NotFoundException extends AppException {
 
     public NotFoundException(String message) {
-        super(message, ErrorCode.NOT_FOUND, HttpStatus.NOT_FOUND);
+        super(message, ErrorCode.NOT_FOUND);
     }
 
     /** "Event introuvable (slug = spring-boot)." — enough to debug, nothing internal leaked. */

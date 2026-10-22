@@ -1,8 +1,8 @@
 package com.brandonkamga.lescracks.event.domain;
 
 import com.brandonkamga.lescracks.event.infra.EventRegistrationRepository;
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.domain.UserDirectory;
+import com.brandonkamga.lescracks.member.application.Member;
+import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 
@@ -24,9 +24,9 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
 
     private final EventRegistrationRepository registrations;
     private final EventService events;
-    private final UserDirectory people;
+    private final MemberDirectory people;
 
-    public EventRegistrationServiceImpl(EventRegistrationRepository registrations, EventService events, UserDirectory people) {
+    public EventRegistrationServiceImpl(EventRegistrationRepository registrations, EventService events, MemberDirectory people) {
         this.registrations = registrations;
         this.events = events;
         this.people = people;
@@ -37,7 +37,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         Event event = requirePublished(eventId);
         Instant end = event.getEndDate() != null ? event.getEndDate() : event.getStartDate();
         if (end.isBefore(Instant.now())) throw new BadRequestException("Cet événement est terminé : les inscriptions sont closes.");
-        User member = people.require(email);
+        Member member = people.require(email);
         return signUp(event, member.getId());
     }
 
@@ -60,7 +60,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
 
     @Override
     public void cancel(Long eventId, String email) {
-        User member = people.require(email);
+        Member member = people.require(email);
         registrations.findByEventIdAndUserId(eventId, member.getId())
                 .filter(registration -> registration.getStatus() == RegistrationStatus.REGISTERED)
                 .ifPresent(registration -> {
@@ -80,7 +80,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
     @Override
     @Transactional(readOnly = true)
     public List<EventRegistration> mine(String email) {
-        User member = people.require(email);
+        Member member = people.require(email);
         return registrations.findForMember(member.getId(), EnumSet.of(RegistrationStatus.REGISTERED, RegistrationStatus.ATTENDED, RegistrationStatus.ABSENT));
     }
 
@@ -89,7 +89,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
     public List<RegistrationView> forEvent(Long eventId) {
         events.require(eventId);
         List<EventRegistration> list = registrations.findByEventIdOrderByCreatedAtAsc(eventId);
-        Map<Long, User> members = people.findAll(list.stream().map(EventRegistration::getUserId).toList());
+        Map<Long, Member> members = people.findAll(list.stream().map(EventRegistration::getUserId).toList());
         return list.stream().filter(registration -> members.containsKey(registration.getUserId()))
                 .map(registration -> new RegistrationView(registration, members.get(registration.getUserId()))).toList();
     }

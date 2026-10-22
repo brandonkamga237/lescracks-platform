@@ -1,6 +1,6 @@
 ---
 name: db-migration
-description: Change the LesCracks database schema through a Flyway migration. Use whenever a field or JPA entity is added, changed or removed, or when facing a Hibernate "Schema-validation" or Flyway "checksum mismatch" error.
+description: Change the LesCracks database schema through a Flyway migration. Use whenever a table, column or index is added, changed or removed (SQL adapter or remaining JPA entity), or when facing a Hibernate "Schema-validation" or Flyway "checksum mismatch" error.
 ---
 
 # Schema migration (Flyway)
@@ -20,9 +20,14 @@ production. That is not a bug, it is the safety net.
 2. Create `V{n+1}__short_description.sql` (two underscores after the number,
    snake_case).
 3. Write the DDL. The SQL dialect is PostgreSQL.
-4. Change the JPA entity to match — the two must line up exactly (column name,
-   nullability, type).
-5. Restart the backend: if it starts, Hibernate validation passed.
+4. Index what the queries need: every new foreign key, and every column a frequent query
+   filters, joins or sorts on, in the same migration (`CREATE INDEX … ON table (col)`).
+   Use `TIMESTAMPTZ` for instants and the shapes listed in the design-patterns skill.
+5. Update the code that reads the table:
+   - a module on the new skeleton: its `JdbcXxxStore` SQL and row mapper, and the `*IT`
+     covering every statement (that IT is what proves SQL and schema line up);
+   - a module still on JPA: the entity, which must match exactly (column name, nullability,
+     type); if the backend starts, Hibernate validation passed.
 
 Example:
 ```sql

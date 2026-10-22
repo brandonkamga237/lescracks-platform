@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.recognition.domain;
 
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.domain.UserDirectory;
+import com.brandonkamga.lescracks.member.application.Member;
+import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.recognition.infra.BadgeRepository;
 import com.brandonkamga.lescracks.recognition.infra.MemberBadgeRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
@@ -30,7 +30,7 @@ class BadgeServiceTest {
 
     @Mock private BadgeRepository badges;
     @Mock private MemberBadgeRepository awards;
-    @Mock private UserDirectory people;
+    @Mock private MemberDirectory people;
 
     private BadgeServiceImpl service;
     private final Badge system = Badge.builder().id(1L).code(Badge.HACKATHON_WINNER).name("Lauréat").description("d").system(true).build();
@@ -79,7 +79,7 @@ class BadgeServiceTest {
         when(people.find("ghost@example.com")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> service.awardByEmail(1L, "ghost@example.com", null)).isInstanceOf(BadRequestException.class);
 
-        when(people.find("awa@example.com")).thenReturn(Optional.of(User.builder().id(7L).email("awa@example.com").build()));
+        when(people.find("awa@example.com")).thenReturn(Optional.of(Member.builder().id(7L).email("awa@example.com").build()));
         when(awards.findByBadgeIdAndUserId(1L, 7L)).thenReturn(Optional.empty());
         assertThat(service.awardByEmail(1L, "awa@example.com", "  ").getReason()).isNull();
     }

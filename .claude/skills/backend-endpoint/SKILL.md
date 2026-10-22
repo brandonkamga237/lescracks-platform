@@ -1,32 +1,42 @@
 ---
 name: backend-endpoint
-description: Add or change a REST endpoint or a domain service in the LesCracks backend, following the controller → domain command → service interface/impl → entity chain, the dependency direction, SOLID and the patterns already in use. Use whenever the Spring Boot API or its business code changes (new route, newly exposed field, new email, changed permissions).
+description: Add or change a REST endpoint or a use case in the LesCracks backend, step by step — request/response, command, application service, port and adapter, assembly, controller, security. Follows the design-patterns skill. Use whenever the Spring Boot API or its business code changes (new route, newly exposed field, new email, changed permissions).
 ---
 
 # Adding an endpoint
 
+Read `.claude/skills/design-patterns/SKILL.md` first: it defines the modules, the skeleton,
+the dependency rule and the patterns. This file is the step-by-step for one endpoint.
+
 ## The full chain
 
-Code is organised by business domain: everything below lives under `<feature>/`
-(`identity`, `resource`, `taxonomy`, `event`, `newsletter`, `stats`, `storage`, `mail`,
-`seo`, `talk`, `community`, `recognition`), with `api/` for HTTP, `domain/` for entities and business
-logic, `infra/` for repositories and external adapters.
+Everything lives under `<module>/` (`account`, `member`, `newsletter`, `content`, `event`,
+`engagement`, `recognition`, `taxonomy`, `notification`, `analytics`, `storage`, `seo`).
+Modules not yet moved to the skeleton keep `api/`, `domain/`, `infra/`; new code in them still
+follows the steps below as closely as their layout allows.
 
-1. **Request / response** — `<feature>/api/dto/XxxRequest.java`, `XxxResponse.java`
+1. **Request / response** — `<module>/api/dto/XxxRequest.java`, `XxxResponse.java`.
    Java records. Validation (`@NotBlank`, `@Size`, `@Email`…) on requests only. Never
-   expose an entity.
-   - A request translates itself into a domain command: `public Registration toRegistration()`.
-   - A response builds itself from entities: `public static UserProfileResponse of(User user, …)`.
+   expose a domain model or an entity.
+   - A request translates itself into a command: `public Registration toRegistration()`.
+   - A response builds itself from the model: `public static UserProfileResponse of(User user, …)`.
 
-2. **Domain command** — `<feature>/domain/Xxx.java`, a record with only what the business
-   rule needs (`Registration`, `ProfileChanges`, `Credentials`). No validation annotation,
-   no JSON concern: it is the input of the service, whatever the transport.
+2. **Command** — `<module>/application/Xxx.java`, a record with only what the use case
+   needs. No validation annotation, no JSON concern.
 
-3. **Service** — interface `<feature>/domain/XxxService.java` + `XxxServiceImpl.java`.
-   Takes commands or plain values, returns entities or values. All business rules live
-   here, never in the controller.
+3. **Use case** — interface `<module>/application/XxxService.java` + `XxxServiceImpl.java`,
+   plain Java. It loads aggregates through ports (`domain/port`), applies the rules held by
+   the model (`domain/model`), and **saves explicitly** through the port.
 
-4. **Controller** — `<feature>/api/XxxController.java`: parse, call one service method,
+4. **Port and adapter** — when the use case needs I/O that no port offers yet, add the
+   interface in `domain/port` and its implementation in `infra/<technology>/` or
+   `infra/persistence/` (entity + `XxxJpaRepository` + `JpaXxxStore` + mapper).
+
+5. **Assembly** — `<module>/infra/config/XxxServices.java` builds the service with
+   `transactional.wrap(XxxService.class, new XxxServiceImpl(...))`. Name read methods
+   `find/require/list/search/count…` so they run read-only.
+
+6. **Controller** — `<module>/api/XxxController.java`: parse, call one service method,
    shape the response. Nothing else.
    ```java
    @PostMapping("/register")
@@ -34,60 +44,14 @@ logic, `infra/` for repositories and external adapters.
        return ResponseEntity.status(201).body(response(registration.register(request.toRegistration())));
    }
    ```
-   Errors: throw `NotFoundException`, `BadRequestException`, `ForbiddenException` or
-   `ConflictException` (`shared/exception`); `GlobalExceptionHandler` sets the status and
-   the French message. Never build an error status by hand.
+   Errors: throw `NotFoundException`, `BadRequestException`, `ForbiddenException`,
+   `ConflictException` or `UnauthenticatedException` (`shared/exception`); they carry an
+   `ErrorCode` and `GlobalExceptionHandler` maps it to the status. Never build a status by hand.
 
-5. **SecurityConfig** — `shared/security/SecurityConfig.java`. `/api/**` is authenticated
+7. **SecurityConfig** — `shared/security/SecurityConfig.java`. `/api/**` is authenticated
    by default: a public route is declared `permitAll()` above that line, method by method.
    `/api/admin/**` and `/api/*/admin/**` need `hasRole("ADMIN")`; add `@PreAuthorize` on
    admin controllers too.
-
-## Dependency direction (non-negotiable)
-
-```
-api  ──▶  domain  ◀──  infra
-```
-
-- `domain` never imports from any `api` package: no request, no response, no controller.
-  If a service signature needs a DTO, create a domain command instead.
-- `infra` never imports from `api`.
-- A controller never touches a repository: it goes through its domain service.
-- A domain reaches another domain through that domain's **service interface**, never its
-  repositories or entities' persistence. Example: `newsletter` uses `identity`'s
-  `UserDirectory` (`find`, `require`, `createContact`), not `UserRepository`.
-  Exceptions, read-only by design: `stats`, `seo`, `shared/bootstrap`.
-
-## SOLID, applied here
-
-- **Single responsibility** — one service per use case family, not per entity. Identity
-  has `UserRegistrationService`, `UserAuthService`, `EmailVerificationService`,
-  `PasswordResetService`, `UserProfileService`: a change to password reset never
-  touches sign-up. When a service passes ~150 lines or its constructor takes more than
-  five collaborators, it is doing two jobs: split it.
-- **Open/closed** — a new variant is a new class, not a new `if`/`switch` branch or a new
-  method on a shared interface. Adding an email = a record implementing `mail.domain.Email`
-  plus an `EmailTemplate` bean; `Mailer` and the other templates do not change.
-- **Liskov** — an implementation honours its interface's contract (`resend` stays silent
-  on unknown addresses in every implementation; a test double does too).
-- **Interface segregation** — callers depend on the narrow interface they use
-  (`UserDirectory` for other domains, not the whole profile service).
-- **Dependency inversion** — services depend on interfaces (`Mailer`, `StorageService`,
-  `PasswordEncoder`), wired by constructor injection, never `new` on a collaborator and
-  never field `@Autowired`. This is what lets every service be unit tested with mocks.
-
-## Patterns already in use — reuse them before inventing another
-
-| Pattern | Where | Use it when |
-| --- | --- | --- |
-| Command object | `Registration`, `ProfileChanges`, `OnboardingAnswers` (identity/domain) | A service needs several inputs from a request |
-| Strategy + registry | `EmailTemplate<T>` picked by type in `EmailTemplates` (mail/infra) | Several variants of one behaviour, chosen at runtime |
-| Facade across domains | `UserDirectory` (identity/domain) | Another domain needs people without knowing identity's storage |
-| Deferred side effect | `SmtpMailer` sends after commit (`TransactionSynchronization`) | A side effect (email, webhook) must not run for a rolled-back change, nor fail it |
-| Value helper | `OneTimeTokens`, `PhoneNumbers`, `ProfileCompletion` | A rule used by several services, with no state of its own |
-
-Do not add a pattern for one case: an interface with a single implementation that will
-never vary, a factory for one class, a generic base service. Two real variants first.
 
 ## Conventions
 
@@ -101,9 +65,10 @@ never vary, a factory for one class, a generic base service. Two real variants f
 
 ## Tests that come with the change
 
-Mirror the production package (`src/test/.../<feature>/{api,domain,infra}/`).
-- Every new service method: a `*Test` with Mockito on its collaborators, one test per
-  rule (`@DisplayName` states the rule in a sentence).
+Mirror the production package (`src/test/.../<module>/{api,application,domain,infra}/`).
+- Every new use case: a `*Test` with fakes for stores (`InMemoryXxxStore`, copying) and
+  mocks for gateways, one test per rule (`@DisplayName` states the rule in a sentence).
+  Assert on what was stored.
 - Every new email template: assert the link, the escaping and the text part.
 - Persistence or query changes: a `*IT` extending `support/PostgresIT`.
 

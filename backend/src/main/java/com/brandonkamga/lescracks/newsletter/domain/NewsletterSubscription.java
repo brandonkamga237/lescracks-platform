@@ -1,6 +1,5 @@
 package com.brandonkamga.lescracks.newsletter.domain;
 
-import com.brandonkamga.lescracks.identity.domain.User;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -30,9 +29,9 @@ public class NewsletterSubscription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private User user;
+    /** An id, not the entity: identity owns its storage and is reached through UserDirectory. */
+    @Column(name = "user_id", nullable = false, unique = true, updatable = false)
+    private Long userId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

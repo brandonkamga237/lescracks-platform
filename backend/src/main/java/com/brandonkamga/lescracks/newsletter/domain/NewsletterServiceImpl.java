@@ -1,8 +1,8 @@
 package com.brandonkamga.lescracks.newsletter.domain;
 
 import com.brandonkamga.lescracks.event.domain.Event;
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.domain.UserDirectory;
+import com.brandonkamga.lescracks.account.application.AccountSummary;
+import com.brandonkamga.lescracks.account.application.AccountDirectory;
 import com.brandonkamga.lescracks.mail.domain.EventAnnouncement;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.mail.domain.NewsletterConfirmation;
@@ -21,16 +21,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
 public class NewsletterServiceImpl implements NewsletterService {
-    private final UserDirectory users;
+    private final AccountDirectory users;
     private final NewsletterSubscriptionRepository subscriptions;
     private final NewsletterCampaignRepository campaigns;
     private final Mailer mail;
 
-    public NewsletterServiceImpl(UserDirectory users, NewsletterSubscriptionRepository subscriptions,
+    public NewsletterServiceImpl(AccountDirectory users, NewsletterSubscriptionRepository subscriptions,
                                  NewsletterCampaignRepository campaigns, Mailer mail) {
         this.users = users;
         this.subscriptions = subscriptions;
@@ -41,9 +42,9 @@ public class NewsletterServiceImpl implements NewsletterService {
     @Override
     @Transactional(readOnly = true)
     public NewsletterSubscription status(String username) {
-        User user = user(username);
+        AccountSummary user = user(username);
         return subscriptions.findByUserId(user.getId())
-                .orElseGet(() -> NewsletterSubscription.builder().user(user)
+                .orElseGet(() -> NewsletterSubscription.builder().userId(user.getId())
                     .status(NewsletterStatus.UNSUBSCRIBED)
                     .subscribedAt(null)
                     .build());
@@ -51,23 +52,23 @@ public class NewsletterServiceImpl implements NewsletterService {
 
     @Override
     public NewsletterSubscription subscribe(String username) {
-        User user = user(username);
+        AccountSummary user = user(username);
         return subscribe(user);
     }
 
     @Override
     public NewsletterSubscription subscribePublic(String email, String firstName, String lastName) {
         String normalizedEmail = email.trim().toLowerCase();
-        User user = users.find(normalizedEmail).orElse(null);
+        AccountSummary user = users.find(normalizedEmail).orElse(null);
         if (user != null && user.hasLoginMethod()) {
             throw new BadRequestException("Cette adresse email est déjà associée à un compte. Connecte-toi pour gérer ton abonnement.");
         }
         if (user == null) {
             user = users.createContact(normalizedEmail, firstName, lastName);
         }
-        User contact = user;
+        AccountSummary contact = user;
         NewsletterSubscription subscription = subscriptions.findByUserId(contact.getId())
-                .orElseGet(() -> NewsletterSubscription.builder().user(contact).build());
+                .orElseGet(() -> NewsletterSubscription.builder().userId(contact.getId()).build());
         if (subscription.getStatus() == NewsletterStatus.SUBSCRIBED && subscription.getId() != null) return subscription;
         subscription.setStatus(NewsletterStatus.PENDING);
         subscription.setUnsubscribedAt(null);
@@ -83,9 +84,9 @@ public class NewsletterServiceImpl implements NewsletterService {
         if (subscription.getStatus() == NewsletterStatus.PENDING) subscription.setStatus(NewsletterStatus.SUBSCRIBED);
     }
 
-    private NewsletterSubscription subscribe(User user) {
+    private NewsletterSubscription subscribe(AccountSummary user) {
         NewsletterSubscription subscription = subscriptions.findByUserId(user.getId())
-                .orElseGet(() -> NewsletterSubscription.builder().user(user).build());
+                .orElseGet(() -> NewsletterSubscription.builder().userId(user.getId()).build());
         subscription.setStatus(NewsletterStatus.SUBSCRIBED);
         subscription.setUnsubscribedAt(null);
         return subscriptions.save(subscription);
@@ -111,9 +112,9 @@ public class NewsletterServiceImpl implements NewsletterService {
 
     @Override
     public NewsletterSubscription unsubscribeById(Long userId) {
-        User user = users.require(userId);
+        AccountSummary user = users.require(userId);
         NewsletterSubscription subscription = subscriptions.findByUserId(user.getId())
-                .orElseGet(() -> NewsletterSubscription.builder().user(user).build());
+                .orElseGet(() -> NewsletterSubscription.builder().userId(user.getId()).build());
         subscription.setStatus(NewsletterStatus.UNSUBSCRIBED);
         subscription.setUnsubscribedAt(Instant.now());
         return subscriptions.save(subscription);
@@ -121,9 +122,9 @@ public class NewsletterServiceImpl implements NewsletterService {
 
     @Override
     public NewsletterSubscription subscribeById(Long userId) {
-        User user = users.require(userId);
+        AccountSummary user = users.require(userId);
         NewsletterSubscription subscription = subscriptions.findByUserId(user.getId())
-                .orElseGet(() -> NewsletterSubscription.builder().user(user).build());
+                .orElseGet(() -> NewsletterSubscription.builder().userId(user.getId()).build());
         subscription.setStatus(NewsletterStatus.SUBSCRIBED);
         subscription.setUnsubscribedAt(null);
         return subscriptions.save(subscription);
@@ -131,16 +132,20 @@ public class NewsletterServiceImpl implements NewsletterService {
 
     @Override
     public void notifyEventSubscribers(Event event) {
-        subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED)
-                .forEach(subscription -> mail.send(new EventAnnouncement(subscription.getUser().getEmail(),
+        var active = subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED);
+        Map<Long, AccountSummary> people = people(active);
+        active.stream().filter(subscription -> people.containsKey(subscription.getUserId()))
+                .forEach(subscription -> mail.send(new EventAnnouncement(people.get(subscription.getUserId()).getEmail(),
                         event.getTitle(), event.getDescription(), "/evenements/" + slugOrId(event.getSlug(), event.getId()),
                         event.getCoverImage(), event.getStartDate(), subscription.getToken())));
     }
 
     @Override
     public void notifyResourceSubscribers(Resource resource) {
-        subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED)
-                .forEach(subscription -> mail.send(new ResourceAnnouncement(subscription.getUser().getEmail(),
+        var active = subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED);
+        Map<Long, AccountSummary> people = people(active);
+        active.stream().filter(subscription -> people.containsKey(subscription.getUserId()))
+                .forEach(subscription -> mail.send(new ResourceAnnouncement(people.get(subscription.getUserId()).getEmail(),
                         resource.getTitle(), resource.getDescription(), "/ressources/" + slugOrId(resource.getSlug(), resource.getId()),
                         resource.getCoverImage(), subscription.getToken())));
     }
@@ -159,8 +164,10 @@ public class NewsletterServiceImpl implements NewsletterService {
     @Override
     public int broadcast(String subject, JsonNode body) {
         var active = subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED);
+        Map<Long, AccountSummary> people = people(active);
         active.forEach(subscription -> {
-            User user = subscription.getUser();
+            AccountSummary user = people.get(subscription.getUserId());
+            if (user == null) return;
             mail.send(new NewsletterIssue(user.getEmail(), subject, body, user.getFirstName(), user.getLastName(),
                     subscription.getToken()));
         });
@@ -182,7 +189,11 @@ public class NewsletterServiceImpl implements NewsletterService {
         return slug != null ? slug : String.valueOf(id);
     }
 
-    private User user(String username) {
+    private Map<Long, AccountSummary> people(List<NewsletterSubscription> subscriptions) {
+        return users.findAll(subscriptions.stream().map(NewsletterSubscription::getUserId).toList());
+    }
+
+    private AccountSummary user(String username) {
         return users.require(username);
     }
 }

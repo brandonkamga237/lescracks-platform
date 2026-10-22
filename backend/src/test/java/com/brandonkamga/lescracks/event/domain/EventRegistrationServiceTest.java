@@ -1,8 +1,8 @@
 package com.brandonkamga.lescracks.event.domain;
 
 import com.brandonkamga.lescracks.event.infra.EventRegistrationRepository;
-import com.brandonkamga.lescracks.identity.domain.User;
-import com.brandonkamga.lescracks.identity.domain.UserDirectory;
+import com.brandonkamga.lescracks.member.application.Member;
+import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 
@@ -31,10 +31,10 @@ class EventRegistrationServiceTest {
 
     @Mock private EventRegistrationRepository registrations;
     @Mock private EventService events;
-    @Mock private UserDirectory people;
+    @Mock private MemberDirectory people;
 
     private EventRegistrationServiceImpl service;
-    private final User member = User.builder().id(7L).email("awa@example.com").build();
+    private final Member member = Member.builder().id(7L).email("awa@example.com").build();
 
     @BeforeEach
     void setUp() {

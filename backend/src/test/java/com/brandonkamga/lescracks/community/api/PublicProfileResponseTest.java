@@ -2,7 +2,7 @@ package com.brandonkamga.lescracks.community.api;
 
 import com.brandonkamga.lescracks.community.api.dto.PublicProfileResponse;
 import com.brandonkamga.lescracks.community.domain.PublicProfile;
-import com.brandonkamga.lescracks.identity.domain.User;
+import com.brandonkamga.lescracks.member.application.Member;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,8 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PublicProfileResponseTest {
 
-    private static User member(boolean open) {
-        return User.builder().id(7L).email("awa@example.com").phone("+237677123456").firstName("Awa").lastName("Diallo")
+    private static Member member(boolean open) {
+        return Member.builder().id(7L).email("awa@example.com").firstName("Awa").lastName("Diallo")
                 .bio("Développeuse backend").location("Douala").socialLinks(Map.of("github", "https://github.com/awa"))
                 .publicBio(open).publicLocation(open).publicLinks(open).build();
     }

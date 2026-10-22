@@ -1,9 +1,10 @@
 package com.brandonkamga.lescracks.stats.domain;
 
+import com.brandonkamga.lescracks.account.application.AccountStatistics;
 import com.brandonkamga.lescracks.event.domain.Event;
 import com.brandonkamga.lescracks.event.domain.EventStatus;
 import com.brandonkamga.lescracks.event.infra.EventRepository;
-import com.brandonkamga.lescracks.identity.infra.UserRepository;
+import com.brandonkamga.lescracks.member.application.MemberStatistics;
 import com.brandonkamga.lescracks.newsletter.domain.NewsletterStatus;
 import com.brandonkamga.lescracks.newsletter.infra.NewsletterSubscriptionRepository;
 import com.brandonkamga.lescracks.resource.domain.Resource;
@@ -53,7 +54,8 @@ import java.util.stream.Collectors;
 public class StatsServiceImpl implements StatsService {
     private static final Logger log = LoggerFactory.getLogger(StatsServiceImpl.class);
 
-    private final UserRepository users;
+    private final AccountStatistics accounts;
+    private final MemberStatistics members;
     private final EventRepository events;
     private final ResourceRepository resources;
     private final NewsletterSubscriptionRepository newsletter;
@@ -61,10 +63,11 @@ public class StatsServiceImpl implements StatsService {
     private final UmamiClient umami;
     private final CategoryRepository categories;
 
-    public StatsServiceImpl(UserRepository users, EventRepository events, ResourceRepository resources,
+    public StatsServiceImpl(AccountStatistics accounts, MemberStatistics members, EventRepository events, ResourceRepository resources,
                             NewsletterSubscriptionRepository newsletter, TalkVideoRepository talks,
                             UmamiClient umami, CategoryRepository categories) {
-        this.users = users;
+        this.accounts = accounts;
+        this.members = members;
         this.events = events;
         this.resources = resources;
         this.newsletter = newsletter;
@@ -77,24 +80,23 @@ public class StatsServiceImpl implements StatsService {
     public MemberPortraitResponse memberPortrait() {
         Map<Long, String> themes = categories.findAll().stream().collect(Collectors.toMap(Category::getId, Category::getName));
         // An interest whose theme was deleted since has no name to show: it is left out.
-        List<NamedCount> interests = users.countMembersGroupedByInterest().stream()
-                .filter(row -> themes.containsKey(((Number) row[0]).longValue()))
-                .map(row -> new NamedCount(themes.get(((Number) row[0]).longValue()), ((Number) row[1]).longValue()))
+        List<NamedCount> interests = members.byInterest().entrySet().stream()
+                .filter(entry -> themes.containsKey(entry.getKey()))
+                .map(entry -> new NamedCount(themes.get(entry.getKey()), entry.getValue()))
                 .sorted(Comparator.comparingLong(NamedCount::count).reversed())
                 .toList();
-        long members = users.countMembersGroupedByStatus().stream().mapToLong(row -> ((Number) row[1]).longValue()).sum();
-        return new MemberPortraitResponse(members,
-                grouped(users.countMembersGroupedBySituation()),
-                grouped(users.countMembersGroupedByGoal()),
-                grouped(users.countMembersGroupedByCountry()),
+        return new MemberPortraitResponse(total(accounts.membersByStatus()),
+                grouped(members.bySituation()),
+                grouped(members.byGoal()),
+                grouped(members.byCountry()),
                 interests,
-                grouped(users.countMembersGroupedByProvider()));
+                grouped(accounts.membersByProvider()));
     }
 
     /** (key, count) rows as named counts, fullest first; enum keys travel as their name. */
-    private static List<NamedCount> grouped(List<Object[]> rows) {
-        return rows.stream()
-                .map(row -> new NamedCount(String.valueOf(row[0]), ((Number) row[1]).longValue()))
+    private static List<NamedCount> grouped(Map<String, Long> counts) {
+        return counts.entrySet().stream()
+                .map(entry -> new NamedCount(entry.getKey(), entry.getValue()))
                 .sorted(Comparator.comparingLong(NamedCount::count).reversed())
                 .toList();
     }
@@ -111,8 +113,8 @@ public class StatsServiceImpl implements StatsService {
         Instant days30 = now.minus(30, ChronoUnit.DAYS);
         Instant days7 = now.minus(7, ChronoUnit.DAYS);
 
-        Map<String, Long> usersByStatus = toCounts(users.countMembersGroupedByStatus());
-        Map<String, Long> usersByProvider = toCounts(users.countMembersGroupedByProvider());
+        Map<String, Long> usersByStatus = accounts.membersByStatus();
+        Map<String, Long> usersByProvider = accounts.membersByProvider();
         Map<String, Long> eventsByStatus = toCounts(events.countGroupedByStatus());
         Map<String, Long> eventsByType = toCounts(events.countGroupedByType());
         Map<String, Long> resourcesByStatus = toCounts(resources.countGroupedByStatus());
@@ -133,10 +135,10 @@ public class StatsServiceImpl implements StatsService {
         long talksPublished = talks.countByStatus(TalkStatus.PUBLISHED);
 
         return new StatsOverviewResponse(
-                total(usersByStatus), usersByStatus, usersByProvider, users.countVerifiedMembers(),
-                users.countMembersCreatedAfter(days30),
-                users.countByLastSeenAtAfter(days7), users.countByLastSeenAtAfter(days30),
-                users.countNewsletterContacts(), funnel(users.signupFunnel(days30)),
+                total(usersByStatus), usersByStatus, usersByProvider, accounts.verifiedMembers(),
+                accounts.membersCreatedSince(days30),
+                accounts.seenSince(days7), accounts.seenSince(days30),
+                accounts.newsletterContacts(), funnel(accounts.signupsSince(days30)),
                 total(eventsByStatus), eventsByStatus, eventsByType,
                 upcoming, ongoing, past,
                 total(resourcesByStatus), resourcesByStatus, resourcesByCategory,
@@ -146,19 +148,15 @@ public class StatsServiceImpl implements StatsService {
                 talks.count(), talksPublished);
     }
 
-    private static SignupFunnel funnel(List<Object[]> rows) {
-        if (rows.isEmpty()) return new SignupFunnel(0, 0, 0, 0);
-        Object[] row = rows.get(0);
-        return new SignupFunnel(asLong(row[0]), asLong(row[1]), asLong(row[2]), asLong(row[3]));
-    }
-
-    private static long asLong(Object value) {
-        return value == null ? 0 : ((Number) value).longValue();
+    private SignupFunnel funnel(AccountStatistics.SignupCohort cohort) {
+        return new SignupFunnel(cohort.signedUp(), cohort.verified(), members.countOnboarded(cohort.accountIds()), cohort.returned());
     }
 
     @Override
     public List<UserGrowthPoint> userGrowth(Instant from, Instant to) {
-        return toGrowthPoints(users.userGrowth(from, to));
+        return accounts.memberGrowth(from, to).entrySet().stream()
+                .map(day -> new UserGrowthPoint(day.getKey(), day.getValue()))
+                .toList();
     }
 
     @Override
