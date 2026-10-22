@@ -35,15 +35,14 @@ public class AdminMemberController {
         this.accounts = accounts;
     }
 
-    /** Newest first. {@code kind}: MEMBER (can sign in) or CONTACT (newsletter only); {@code verified}: email confirmed or not. */
+    /** Newest first. {@code verified}: email confirmed or not. */
     @GetMapping
     public PageResponse<MemberAdminResponse> list(@RequestParam(required = false) String search,
-                                                  @RequestParam(required = false) AccountSearch.Kind kind,
                                                   @RequestParam(required = false) Boolean verified,
                                                   @RequestParam(defaultValue = "0") int page,
                                                   @RequestParam(defaultValue = "20") int size) {
         PageQuery query = new PageQuery(Math.max(0, page), Math.clamp(size, 1, MAX_PAGE_SIZE));
-        return PageResponse.of(members.list(new AccountSearch(search, kind, verified), query), MemberAdminResponse::of);
+        return PageResponse.of(members.list(new AccountSearch(search, verified), query), MemberAdminResponse::of);
     }
 
     @GetMapping("/{id}")

@@ -25,8 +25,8 @@ public class PublicProfileServiceImpl implements PublicProfileService {
     @Override
     public PublicProfile of(Long memberId) {
         Member member = people.require(memberId);
-        // Newsletter-only contacts, suspended and banned accounts have no public face.
-        if (!member.isActive() || !member.hasLoginMethod()) {
+        // Suspended and banned accounts have no public face.
+        if (!member.isActive()) {
             throw new NotFoundException("Membre", "id", memberId);
         }
         return new PublicProfile(member, badges.badgesOf(memberId), certificates.issuedTo(memberId));

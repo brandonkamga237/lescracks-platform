@@ -3,7 +3,7 @@ package com.brandonkamga.lescracks.stats.domain;
 import com.brandonkamga.lescracks.account.application.AccountStatistics;
 import com.brandonkamga.lescracks.event.infra.EventRepository;
 import com.brandonkamga.lescracks.member.application.MemberStatistics;
-import com.brandonkamga.lescracks.newsletter.infra.NewsletterSubscriptionRepository;
+import com.brandonkamga.lescracks.newsletter.application.NewsletterStatistics;
 import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
 import com.brandonkamga.lescracks.stats.api.dto.NamedCount;
 import com.brandonkamga.lescracks.stats.infra.UmamiClient;
@@ -34,7 +34,7 @@ class StatsServiceImplTest {
     private final MemberStatistics members = mock(MemberStatistics.class);
     private final CategoryRepository categories = mock(CategoryRepository.class);
     private final StatsServiceImpl stats = new StatsServiceImpl(accounts, members, mock(EventRepository.class), mock(ResourceRepository.class),
-            mock(NewsletterSubscriptionRepository.class), mock(TalkVideoRepository.class), mock(UmamiClient.class), categories);
+            mock(NewsletterStatistics.class), mock(TalkVideoRepository.class), mock(UmamiClient.class), categories);
 
     @Test
     @DisplayName("the portrait names each interest, puts the fullest first and leaves out deleted themes")
@@ -61,7 +61,7 @@ class StatsServiceImplTest {
 
     private StatsServiceImpl withUmami(UmamiClient umami) {
         return new StatsServiceImpl(accounts, members, mock(EventRepository.class), mock(ResourceRepository.class),
-                mock(NewsletterSubscriptionRepository.class), mock(TalkVideoRepository.class), umami, categories);
+                mock(NewsletterStatistics.class), mock(TalkVideoRepository.class), umami, categories);
     }
 
     @Test

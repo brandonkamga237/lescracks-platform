@@ -99,7 +99,7 @@ public class EventSubmissionServiceImpl implements EventSubmissionService {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         List<Member> found = new ArrayList<>();
         for (String address : distinct) {
-            found.add(people.find(address).filter(Member::hasLoginMethod).orElseThrow(() ->
+            found.add(people.find(address).orElseThrow(() ->
                     new BadRequestException(address + " n’a pas encore de compte LesCracks : invite cette personne à s’inscrire, puis ajoute-la.")));
         }
         return found;

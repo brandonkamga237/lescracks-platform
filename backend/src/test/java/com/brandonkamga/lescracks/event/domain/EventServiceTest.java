@@ -2,7 +2,8 @@ package com.brandonkamga.lescracks.event.domain;
 
 import com.brandonkamga.lescracks.event.api.dto.EventRequest;
 import com.brandonkamga.lescracks.event.infra.EventRepository;
-import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
+import com.brandonkamga.lescracks.newsletter.application.Announcements;
+import com.brandonkamga.lescracks.newsletter.application.EventNews;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.when;
 class EventServiceTest {
 
     @Mock private EventRepository events;
-    @Mock private NewsletterService newsletter;
+    @Mock private Announcements announcements;
     @Mock private StorageService storage;
 
     private EventServiceImpl service;
@@ -36,7 +37,7 @@ class EventServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new EventServiceImpl(events, newsletter, storage);
+        service = new EventServiceImpl(events, announcements, storage);
     }
 
     private EventRequest request(EventStatus status, Instant scheduledAt) {
@@ -54,7 +55,7 @@ class EventServiceTest {
 
         assertThat(event.getStatus()).isEqualTo(EventStatus.DRAFT);
         assertThat(event.getScheduledAt()).isEqualTo(tomorrow);
-        verify(newsletter, never()).notifyEventSubscribers(any());
+        verify(announcements, never()).announceEvent(any());
 
         event.setId(7L);
         when(events.findById(7L)).thenReturn(Optional.of(event));
@@ -63,7 +64,8 @@ class EventServiceTest {
         assertThat(event.getScheduledAt()).isNull();
 
         service.announce(7L);
-        verify(newsletter).notifyEventSubscribers(event);
+        verify(announcements).announceEvent(new EventNews(event.getTitle(), event.getDescription(),
+                "/evenements/" + (event.getSlug() != null ? event.getSlug() : 7L), event.getCoverImage(), event.getStartDate()));
     }
 
     @Test

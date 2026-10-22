@@ -29,7 +29,7 @@ class ArchitectureTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"account", "member"})
+    @ValueSource(strings = {"account", "member", "newsletter"})
     @DisplayName("a module's domain and use cases are plain Java: no framework, persistence, web or infrastructure")
     void coreIsPlainJava(String module) {
         noClasses().that().resideInAnyPackage(ROOT + "." + module + ".domain..", ROOT + "." + module + ".application..")
@@ -41,14 +41,14 @@ class ArchitectureTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"account", "member"})
+    @ValueSource(strings = {"account", "member", "newsletter"})
     @DisplayName("the parts of a module's domain depend on each other in one direction only")
     void domainHasNoCycles(String module) {
         slices().matching(ROOT + "." + module + ".domain.(*)..").should().beFreeOfCycles().check(classes);
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"account", "member"})
+    @ValueSource(strings = {"account", "member", "newsletter"})
     @DisplayName("a migrated module persists in plain SQL: no JPA, no Spring Data JPA, no Hibernate anywhere in it")
     void noOrm(String module) {
         noClasses().that().resideInAPackage(ROOT + "." + module + "..")
@@ -59,7 +59,7 @@ class ArchitectureTest {
 
     // shared/security registers account's last-seen filter in the security chain.
     @ParameterizedTest
-    @ValueSource(strings = {"account", "member"})
+    @ValueSource(strings = {"account", "member", "newsletter"})
     @DisplayName("other modules reach a migrated module through its application layer, never its ports or adapters")
     void portsAndAdaptersStayInside(String module) {
         noClasses().that().resideOutsideOfPackages(ROOT + "." + module + "..", ROOT + ".shared.security..")

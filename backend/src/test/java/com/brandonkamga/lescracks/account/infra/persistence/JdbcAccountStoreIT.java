@@ -66,7 +66,7 @@ class JdbcAccountStoreIT extends PostgresIT {
     @DisplayName("a batch lookup is one query and skips unknown ids")
     void batch() {
         Account a = save("batch-a@example.com", "hash", AuthProvider.LOCAL, false);
-        Account b = save("batch-b@example.com", null, AuthProvider.LOCAL, false);
+        Account b = save("batch-b@example.com", null, AuthProvider.GOOGLE, false);
 
         assertThat(accounts.findAllById(List.of(a.getId(), b.getId(), -1L))).extracting(Account::getEmail)
                 .containsExactlyInAnyOrder("batch-a@example.com", "batch-b@example.com");
@@ -74,23 +74,21 @@ class JdbcAccountStoreIT extends PostgresIT {
     }
 
     @Test
-    @DisplayName("the back-office filters combine: text, members or contacts, verified or not")
+    @DisplayName("the back-office filters combine: text in any case, verified or not")
     void filters() {
-        save("filter-contact@example.com", null, AuthProvider.LOCAL, false);
         save("filter-member@example.com", "hash", AuthProvider.LOCAL, false);
         save("filter-verified@example.com", null, AuthProvider.GITHUB, true);
 
-        assertThat(emails(new AccountSearch("filter-", AccountSearch.Kind.CONTACT, null))).containsExactly("filter-contact@example.com");
-        assertThat(emails(new AccountSearch("FILTER-", AccountSearch.Kind.MEMBER, false))).containsExactly("filter-member@example.com");
-        assertThat(emails(new AccountSearch("filter-", null, true))).containsExactly("filter-verified@example.com");
-        assertThat(emails(new AccountSearch("filter-", null, null))).hasSize(3);
+        assertThat(emails(new AccountSearch("FILTER-", false))).containsExactly("filter-member@example.com");
+        assertThat(emails(new AccountSearch("filter-", true))).containsExactly("filter-verified@example.com");
+        assertThat(emails(new AccountSearch("filter-", null))).hasSize(2);
     }
 
     @Test
     @DisplayName("a page carries its total, newest first, even when asked past the end")
     void paging() {
         for (int i = 0; i < 3; i++) save("page-" + i + "@example.com", "hash", AuthProvider.LOCAL, false);
-        AccountSearch search = new AccountSearch("page-", null, null);
+        AccountSearch search = new AccountSearch("page-", null);
 
         Paged<Account> first = accounts.search(search, new PageQuery(0, 2));
         Paged<Account> beyond = accounts.search(search, new PageQuery(5, 2));

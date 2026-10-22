@@ -43,7 +43,7 @@ class EventSubmissionServiceTest {
     private final Member teammate = member(2L, "kofi@example.com");
 
     private static Member member(Long id, String email) {
-        return Member.builder().id(id).email(email).firstName("M" + id).lastName("L").loginMethod(true).build();
+        return Member.builder().id(id).email(email).firstName("M" + id).lastName("L").build();
     }
 
     private static ProjectDraft draft(List<String> teammates) {

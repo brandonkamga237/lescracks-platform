@@ -5,6 +5,6 @@ package com.brandonkamga.lescracks.account.domain.model;
  * them: the member module keeps the phone and consent, the newsletter subscribes on request.
  * A listener that throws undoes the whole sign-up.
  */
-public record AccountRegistered(Long accountId, String email, String phone, Boolean marketingConsent,
-                                boolean wantsNewsletter) {
+public record AccountRegistered(Long accountId, String email, String firstName, String lastName,
+                                String phone, Boolean marketingConsent, boolean wantsNewsletter) {
 }

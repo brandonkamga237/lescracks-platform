@@ -16,9 +16,6 @@ public interface AccountDirectory {
     /** Several accounts in one query, by id; unknown ids are simply absent. */
     Map<Long, AccountSummary> findAll(Collection<Long> ids);
 
-    /** A person known only by email (a newsletter subscriber): no password, no social login. */
-    AccountSummary createContact(String email, String firstName, String lastName);
-
     /** Null leaves a name as it is; a blank name is refused. */
     AccountSummary rename(Long id, String firstName, String lastName);
 

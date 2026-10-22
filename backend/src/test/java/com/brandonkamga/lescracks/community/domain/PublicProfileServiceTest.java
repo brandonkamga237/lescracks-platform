@@ -26,7 +26,7 @@ class PublicProfileServiceTest {
     @Test
     @DisplayName("an active member has a public profile with their badges and attestations")
     void showsActiveMembers() {
-        Member awa = Member.builder().id(7L).email("awa@example.com").loginMethod(true).active(true).build();
+        Member awa = Member.builder().id(7L).email("awa@example.com").active(true).build();
         when(people.require(7L)).thenReturn(awa);
         when(badges.badgesOf(7L)).thenReturn(List.of());
         when(certificates.issuedTo(7L)).thenReturn(List.of());
@@ -35,12 +35,10 @@ class PublicProfileServiceTest {
     }
 
     @Test
-    @DisplayName("a banned account and a newsletter-only contact have no public face")
+    @DisplayName("a suspended or banned account has no public face")
     void hidesOthers() {
-        when(people.require(8L)).thenReturn(Member.builder().id(8L).loginMethod(true).active(false).build());
-        when(people.require(9L)).thenReturn(Member.builder().id(9L).active(true).build());
+        when(people.require(8L)).thenReturn(Member.builder().id(8L).active(false).build());
 
         assertThatThrownBy(() -> service.of(8L)).isInstanceOf(NotFoundException.class);
-        assertThatThrownBy(() -> service.of(9L)).isInstanceOf(NotFoundException.class);
     }
 }

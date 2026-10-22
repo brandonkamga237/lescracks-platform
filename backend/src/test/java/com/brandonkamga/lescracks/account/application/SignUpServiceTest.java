@@ -55,21 +55,9 @@ class SignUpServiceTest {
         assertThat(stored.getPasswordHash()).isEqualTo("hash");
         assertThat(stored.isEmailVerified()).isFalse();
         assertThat(stored.getSignupPath()).isEqualTo("/ressources");
-        verify(events).registered(new AccountRegistered(created.getId(), "awa@example.com", "+237 6 77 12 34 56", true, true));
+        verify(events).registered(new AccountRegistered(created.getId(), "awa@example.com", "Awa", "Diallo", "+237 6 77 12 34 56", true, true));
         verify(verification).send(created);
         verify(metrics).register(true);
-    }
-
-    @Test
-    @DisplayName("a newsletter-only contact with the same address becomes the account")
-    void upgradesANewsletterContact() {
-        Account contact = accounts.save(Account.builder().email("awa@example.com").firstName("").lastName("").build());
-        when(passwords.hash("a-long-password")).thenReturn("hash");
-
-        AccountSummary created = service.register(registration("awa@example.com"));
-
-        assertThat(created.getId()).isEqualTo(contact.getId());
-        assertThat(accounts.stored(contact.getId()).hasLoginMethod()).isTrue();
     }
 
     @Test

@@ -31,9 +31,6 @@ class JdbcAccountStore implements AccountStore {
             id, email, password_hash, first_name, last_name, status, email_verified, provider,
             created_at, updated_at, last_seen_at, signup_path, signup_language, signup_timezone""";
 
-    /** Same rule as {@link Account#hasLoginMethod()}. */
-    static final String CAN_SIGN_IN = "(password_hash IS NOT NULL OR provider <> 'LOCAL')";
-
     private static final RowMapper<Account> ROW = (row, number) -> Account.builder()
             .id(row.getLong("id"))
             .email(row.getString("email"))
@@ -157,8 +154,6 @@ class JdbcAccountStore implements AccountStore {
                 clauses.add("(lower(email) LIKE :like OR lower(first_name) LIKE :like OR lower(last_name) LIKE :like)");
                 params.put("like", "%" + search.text().trim().toLowerCase() + "%");
             }
-            if (search.kind() == AccountSearch.Kind.MEMBER) clauses.add(CAN_SIGN_IN);
-            if (search.kind() == AccountSearch.Kind.CONTACT) clauses.add("NOT " + CAN_SIGN_IN);
             if (search.verified() != null) {
                 clauses.add("email_verified = :verified");
                 params.put("verified", search.verified());

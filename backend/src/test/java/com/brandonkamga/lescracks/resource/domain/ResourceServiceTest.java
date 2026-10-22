@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.resource.domain;
 
-import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
+import com.brandonkamga.lescracks.newsletter.application.Announcements;
+import com.brandonkamga.lescracks.newsletter.application.ArticleNews;
 import com.brandonkamga.lescracks.resource.infra.ArticleRepository;
 import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
@@ -46,7 +47,7 @@ class ResourceServiceTest {
     @Mock private ArticleRepository articles;
     @Mock private StorageService storage;
     @Mock private TaxonomyService taxonomy;
-    @Mock private NewsletterService newsletter;
+    @Mock private Announcements announcements;
 
     private ResourceServiceImpl service;
     private Category category;
@@ -55,7 +56,7 @@ class ResourceServiceTest {
     void setUp() {
         ObjectMapper mapper = new ObjectMapper();
         service = new ResourceServiceImpl(resources, articles,
-                storage, taxonomy, newsletter, new ArticleBody(mapper), mapper);
+                storage, taxonomy, announcements, new ArticleBody(mapper), mapper);
         category = category("Backend");
     }
 
@@ -80,7 +81,8 @@ class ResourceServiceTest {
         assertThat(saved.getTitle()).isEqualTo("Titre de l’article");
         assertThat(saved.getDescription()).isEqualTo("Une description");
         assertThat(saved.getSlug()).isEqualTo("titre-de-l-article");
-        verify(newsletter).notifyResourceSubscribers(saved);
+        verify(announcements).announceArticle(new ArticleNews("Titre de l’article", "Une description",
+                "/blog/titre-de-l-article", saved.getCoverImage()));
 
         ArgumentCaptor<Article> article = ArgumentCaptor.forClass(Article.class);
         verify(articles).save(article.capture());
@@ -96,7 +98,7 @@ class ResourceServiceTest {
         Resource saved = service.createArticle(articleRequest(ResourceStatus.DRAFT), null);
 
         assertThat(saved.getStatus()).isEqualTo(ResourceStatus.DRAFT);
-        verifyNoInteractions(newsletter);
+        verifyNoInteractions(announcements);
     }
 
     @Test
@@ -229,7 +231,7 @@ class ResourceServiceTest {
             assertThat(saved.getStatus()).isEqualTo(ResourceStatus.DRAFT);
             assertThat(saved.getScheduledAt()).isEqualTo(tomorrow);
             assertThat(saved.getPublishedAt()).isNull();
-            verify(newsletter, never()).notifyResourceSubscribers(any());
+            verify(announcements, never()).announceArticle(any());
         }
 
         @Test

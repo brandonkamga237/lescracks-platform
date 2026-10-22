@@ -10,7 +10,7 @@ import com.brandonkamga.lescracks.account.application.SignUpService;
 import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.member.application.ProfileService;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
-import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
+import com.brandonkamga.lescracks.newsletter.application.NewsletterService;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.stats.domain.StatsService;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
@@ -89,6 +89,6 @@ class LesCracksApplicationIT extends PostgresIT {
                 .collect(Collectors.toSet());
 
         assertThat(entities).contains("Resource", "Article",
-                "Category", "Tag", "Event", "NewsletterSubscription");
+                "Category", "Tag", "Event");
     }
 }

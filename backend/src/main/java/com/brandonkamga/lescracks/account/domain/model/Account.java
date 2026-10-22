@@ -9,8 +9,7 @@ import java.time.Instant;
 
 /**
  * What lets a person sign in: an email, a password or a linked provider, a status. The profile
- * is the member module's; a newsletter-only contact is an account without any login method,
- * until the newsletter keeps its own subscribers.
+ * is the member module's, the newsletter list the newsletter's.
  */
 @Data
 @Builder(toBuilder = true)
@@ -49,11 +48,6 @@ public class Account {
     private String signupLanguage;
 
     private String signupTimezone;
-
-    /** False for a newsletter-only contact: no password and no Google or GitHub login. */
-    public boolean hasLoginMethod() {
-        return passwordHash != null || provider != AuthProvider.LOCAL;
-    }
 
     public boolean isActive() {
         return status == AccountStatus.ACTIVE;

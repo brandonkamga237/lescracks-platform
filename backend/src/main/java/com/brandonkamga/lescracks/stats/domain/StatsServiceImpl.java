@@ -5,8 +5,8 @@ import com.brandonkamga.lescracks.event.domain.Event;
 import com.brandonkamga.lescracks.event.domain.EventStatus;
 import com.brandonkamga.lescracks.event.infra.EventRepository;
 import com.brandonkamga.lescracks.member.application.MemberStatistics;
-import com.brandonkamga.lescracks.newsletter.domain.NewsletterStatus;
-import com.brandonkamga.lescracks.newsletter.infra.NewsletterSubscriptionRepository;
+import com.brandonkamga.lescracks.newsletter.application.NewsletterStatistics;
+import com.brandonkamga.lescracks.newsletter.domain.model.SubscriptionStatus;
 import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
 import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
@@ -36,7 +36,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -58,13 +57,13 @@ public class StatsServiceImpl implements StatsService {
     private final MemberStatistics members;
     private final EventRepository events;
     private final ResourceRepository resources;
-    private final NewsletterSubscriptionRepository newsletter;
+    private final NewsletterStatistics newsletter;
     private final TalkVideoRepository talks;
     private final UmamiClient umami;
     private final CategoryRepository categories;
 
     public StatsServiceImpl(AccountStatistics accounts, MemberStatistics members, EventRepository events, ResourceRepository resources,
-                            NewsletterSubscriptionRepository newsletter, TalkVideoRepository talks,
+                            NewsletterStatistics newsletter, TalkVideoRepository talks,
                             UmamiClient umami, CategoryRepository categories) {
         this.accounts = accounts;
         this.members = members;
@@ -138,13 +137,13 @@ public class StatsServiceImpl implements StatsService {
                 total(usersByStatus), usersByStatus, usersByProvider, accounts.verifiedMembers(),
                 accounts.membersCreatedSince(days30),
                 accounts.seenSince(days7), accounts.seenSince(days30),
-                accounts.newsletterContacts(), funnel(accounts.signupsSince(days30)),
+                newsletter.countWithoutAccount(), funnel(accounts.signupsSince(days30)),
                 total(eventsByStatus), eventsByStatus, eventsByType,
                 upcoming, ongoing, past,
                 total(resourcesByStatus), resourcesByStatus, resourcesByCategory,
-                newsletter.countByStatus(NewsletterStatus.SUBSCRIBED),
-                newsletter.countByStatus(NewsletterStatus.UNSUBSCRIBED),
-                newsletter.countByStatusAndSubscribedAtAfter(NewsletterStatus.SUBSCRIBED, days30),
+                newsletter.countByStatus(SubscriptionStatus.SUBSCRIBED),
+                newsletter.countByStatus(SubscriptionStatus.UNSUBSCRIBED),
+                newsletter.subscribedSince(days30),
                 talks.count(), talksPublished);
     }
 
@@ -161,7 +160,9 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public List<UserGrowthPoint> newsletterGrowth(Instant from, Instant to) {
-        return toGrowthPoints(newsletter.newsletterGrowth(from, to));
+        return newsletter.growth(from, to).entrySet().stream()
+                .map(day -> new UserGrowthPoint(day.getKey(), day.getValue()))
+                .toList();
     }
 
     @Override
@@ -319,8 +320,8 @@ public class StatsServiceImpl implements StatsService {
             }
         }
 
-        long unsubscribed = newsletter.countByStatusAndUnsubscribedAtAfter(NewsletterStatus.UNSUBSCRIBED, days7);
-        long subscribed = newsletter.countByStatusAndSubscribedAtAfter(NewsletterStatus.SUBSCRIBED, days7);
+        long unsubscribed = newsletter.unsubscribedSince(days7);
+        long subscribed = newsletter.subscribedSince(days7);
         if (unsubscribed > 0 && unsubscribed >= subscribed) {
             signals.add(new WatchSignal("newsletter-churn", "warning",
                     "Plus de désabonnements que d’abonnements",
@@ -409,13 +410,6 @@ public class StatsServiceImpl implements StatsService {
         return counts;
     }
 
-    private List<UserGrowthPoint> toGrowthPoints(List<Object[]> rows) {
-        return rows.stream()
-                .map(row -> new UserGrowthPoint(
-                        ((Date) row[0]).toLocalDate(),
-                        ((Number) row[1]).longValue()))
-                .collect(Collectors.toList());
-    }
 
     /** Grouped-count rows arrive as [key, count]; enum keys are exposed by name. */
     private Map<String, Long> toCounts(List<Object[]> rows) {

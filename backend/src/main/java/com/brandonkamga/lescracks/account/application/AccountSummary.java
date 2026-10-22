@@ -23,12 +23,6 @@ public class AccountSummary {
     Instant createdAt;
     Instant lastSeenAt;
     String signupPath;
-    boolean loginMethod;
-
-    /** False for a newsletter-only contact: no password and no Google or GitHub login. */
-    public boolean hasLoginMethod() {
-        return loginMethod;
-    }
 
     public boolean isActive() {
         return status == AccountStatus.ACTIVE;
@@ -46,7 +40,6 @@ public class AccountSummary {
                 .createdAt(account.getCreatedAt())
                 .lastSeenAt(account.getLastSeenAt())
                 .signupPath(account.getSignupPath())
-                .loginMethod(account.hasLoginMethod())
                 .build();
     }
 }

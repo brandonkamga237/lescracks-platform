@@ -19,7 +19,6 @@ public class Member {
     String lastName;
     String avatarUrl;
     boolean active;
-    boolean loginMethod;
     Instant createdAt;
     String bio;
     String location;
@@ -27,11 +26,6 @@ public class Member {
     boolean publicBio;
     boolean publicLocation;
     boolean publicLinks;
-
-    /** False for a newsletter-only contact: no password and no Google or GitHub login. */
-    public boolean hasLoginMethod() {
-        return loginMethod;
-    }
 
     public static Member of(AccountSummary account, MemberProfile profile) {
         return Member.builder()
@@ -41,7 +35,6 @@ public class Member {
                 .lastName(account.getLastName())
                 .avatarUrl(profile.getAvatarUrl())
                 .active(account.isActive())
-                .loginMethod(account.hasLoginMethod())
                 .createdAt(account.getCreatedAt())
                 .bio(profile.getBio())
                 .location(profile.getLocation())

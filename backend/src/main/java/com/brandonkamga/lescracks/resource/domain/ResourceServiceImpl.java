@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.resource.domain;
 
-import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
+import com.brandonkamga.lescracks.newsletter.application.Announcements;
+import com.brandonkamga.lescracks.newsletter.application.ArticleNews;
 import com.brandonkamga.lescracks.resource.infra.ArticleRepository;
 import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
@@ -32,18 +33,18 @@ public class ResourceServiceImpl implements ResourceService {
     private final ArticleRepository articles;
     private final StorageService storage;
     private final TaxonomyService taxonomy;
-    private final NewsletterService newsletter;
+    private final Announcements announcements;
     private final ArticleBody articleBody;
     private final ObjectMapper mapper;
 
     public ResourceServiceImpl(ResourceRepository resources, ArticleRepository articles,
                                StorageService storage, TaxonomyService taxonomy,
-                               NewsletterService newsletter, ArticleBody articleBody, ObjectMapper mapper) {
+                               Announcements announcements, ArticleBody articleBody, ObjectMapper mapper) {
         this.resources = resources;
         this.articles = articles;
         this.storage = storage;
         this.taxonomy = taxonomy;
-        this.newsletter = newsletter;
+        this.announcements = announcements;
         this.articleBody = articleBody;
         this.mapper = mapper;
     }
@@ -120,7 +121,7 @@ public class ResourceServiceImpl implements ResourceService {
                 content.categoryId(), content.status(), content.scheduledAt(), content.tagIds());
         Resource saved = resources.save(resource);
         persistArticle(saved, content.body());
-        if (saved.getStatus() == ResourceStatus.PUBLISHED) newsletter.notifyResourceSubscribers(saved);
+        if (saved.getStatus() == ResourceStatus.PUBLISHED) announce(saved);
         return saved;
     }
 
@@ -216,7 +217,12 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public void announce(Long id) {
-        newsletter.notifyResourceSubscribers(require(id));
+        announce(require(id));
+    }
+
+    private void announce(Resource resource) {
+        String page = "/blog/" + (resource.getSlug() != null ? resource.getSlug() : resource.getId());
+        announcements.announceArticle(new ArticleNews(resource.getTitle(), resource.getDescription(), page, resource.getCoverImage()));
     }
 
     private void applyTags(Resource resource, Set<Long> tagIds) {

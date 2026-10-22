@@ -2,7 +2,8 @@ package com.brandonkamga.lescracks.event.domain;
 
 import com.brandonkamga.lescracks.event.api.dto.EventRequest;
 import com.brandonkamga.lescracks.event.infra.EventRepository;
-import com.brandonkamga.lescracks.newsletter.domain.NewsletterService;
+import com.brandonkamga.lescracks.newsletter.application.Announcements;
+import com.brandonkamga.lescracks.newsletter.application.EventNews;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 import com.brandonkamga.lescracks.shared.scheduling.Schedules;
@@ -23,12 +24,12 @@ import org.springframework.data.domain.Pageable;
 @Transactional
 public class EventServiceImpl implements EventService {
     private final EventRepository events;
-    private final NewsletterService newsletter;
+    private final Announcements announcements;
     private final StorageService storage;
 
-    public EventServiceImpl(EventRepository events, NewsletterService newsletter, StorageService storage) {
+    public EventServiceImpl(EventRepository events, Announcements announcements, StorageService storage) {
         this.events = events;
-        this.newsletter = newsletter;
+        this.announcements = announcements;
         this.storage = storage;
     }
 
@@ -101,7 +102,7 @@ public class EventServiceImpl implements EventService {
     public Event create(EventRequest request, MultipartFile coverImageFile) {
         validateDates(request.startDate(), request.endDate());
         Event event = events.save(apply(new Event(), request, coverImageFile));
-        if (event.getStatus() == EventStatus.PUBLISHED) newsletter.notifyEventSubscribers(event);
+        if (event.getStatus() == EventStatus.PUBLISHED) announce(event);
         return event;
     }
 
@@ -163,7 +164,13 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void announce(Long id) {
-        newsletter.notifyEventSubscribers(require(id));
+        announce(require(id));
+    }
+
+    private void announce(Event event) {
+        String page = "/evenements/" + (event.getSlug() != null ? event.getSlug() : event.getId());
+        announcements.announceEvent(new EventNews(event.getTitle(), event.getDescription(), page,
+                event.getCoverImage(), event.getStartDate()));
     }
 
     private String resolveCoverImage(MultipartFile coverImageFile, String existingCoverImage) {

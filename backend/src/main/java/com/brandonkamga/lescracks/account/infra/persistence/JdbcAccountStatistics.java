@@ -12,7 +12,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.brandonkamga.lescracks.account.infra.persistence.JdbcAccountStore.CAN_SIGN_IN;
 import static com.brandonkamga.lescracks.shared.persistence.JdbcValues.at;
 
 @Component
@@ -36,24 +35,19 @@ class JdbcAccountStatistics implements AccountStatistics {
 
     private Map<String, Long> grouped(String column) {
         Map<String, Long> counts = new LinkedHashMap<>();
-        jdbc.sql("SELECT " + column + " AS k, count(*) AS n FROM accounts WHERE " + CAN_SIGN_IN + " GROUP BY " + column + " ORDER BY n DESC")
+        jdbc.sql("SELECT " + column + " AS k, count(*) AS n FROM accounts GROUP BY " + column + " ORDER BY n DESC")
                 .query(row -> { counts.put(row.getString("k"), row.getLong("n")); });
         return counts;
     }
 
     @Override
     public long verifiedMembers() {
-        return jdbc.sql("SELECT count(*) FROM accounts WHERE email_verified AND " + CAN_SIGN_IN).query(Long.class).single();
-    }
-
-    @Override
-    public long newsletterContacts() {
-        return jdbc.sql("SELECT count(*) FROM accounts WHERE NOT " + CAN_SIGN_IN).query(Long.class).single();
+        return jdbc.sql("SELECT count(*) FROM accounts WHERE email_verified").query(Long.class).single();
     }
 
     @Override
     public long membersCreatedSince(Instant since) {
-        return jdbc.sql("SELECT count(*) FROM accounts WHERE created_at > :since AND " + CAN_SIGN_IN)
+        return jdbc.sql("SELECT count(*) FROM accounts WHERE created_at > :since")
                 .param("since", at(since)).query(Long.class).single();
     }
 
@@ -66,7 +60,7 @@ class JdbcAccountStatistics implements AccountStatistics {
     public Map<LocalDate, Long> memberGrowth(Instant from, Instant to) {
         Map<LocalDate, Long> days = new LinkedHashMap<>();
         jdbc.sql("SELECT cast(created_at AS date) AS d, count(*) AS n FROM accounts "
-                        + "WHERE created_at >= :from AND created_at <= :to AND " + CAN_SIGN_IN + " GROUP BY d ORDER BY d")
+                        + "WHERE created_at >= :from AND created_at <= :to GROUP BY d ORDER BY d")
                 .param("from", at(from)).param("to", at(to))
                 .query(row -> { days.put(row.getObject("d", LocalDate.class), row.getLong("n")); });
         return days;
@@ -78,7 +72,7 @@ class JdbcAccountStatistics implements AccountStatistics {
         long[] verified = {0};
         long[] returned = {0};
         jdbc.sql("SELECT id, email_verified, last_seen_at > created_at + INTERVAL '1 day' AS came_back FROM accounts "
-                        + "WHERE created_at > :since AND " + CAN_SIGN_IN)
+                        + "WHERE created_at > :since")
                 .param("since", at(since))
                 .query(row -> {
                     ids.add(row.getLong("id"));

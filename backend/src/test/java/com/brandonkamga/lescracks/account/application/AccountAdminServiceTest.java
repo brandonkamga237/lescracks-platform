@@ -3,7 +3,6 @@ package com.brandonkamga.lescracks.account.application;
 import com.brandonkamga.lescracks.account.domain.model.Account;
 import com.brandonkamga.lescracks.account.domain.model.AccountStatus;
 import com.brandonkamga.lescracks.account.domain.model.AuthProvider;
-import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.ConflictException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -49,15 +48,6 @@ class AccountAdminServiceTest {
 
         assertThatThrownBy(() -> service.resendVerification(member.getId())).isInstanceOf(ConflictException.class);
         verify(verification, never()).send(any());
-    }
-
-    @Test
-    @DisplayName("a newsletter-only contact has no account to confirm")
-    void contactsHaveNoAccount() {
-        Account contact = accounts.save(Account.builder().email("c@example.com").build());
-
-        assertThatThrownBy(() -> service.resendVerification(contact.getId())).isInstanceOf(BadRequestException.class);
-        assertThatThrownBy(() -> service.markVerified(contact.getId())).isInstanceOf(BadRequestException.class);
     }
 
     @Test
