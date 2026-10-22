@@ -52,7 +52,7 @@ class ResourceControllerTest {
     private static ResourceResponse response() {
         return new ResourceResponse(1L, "spring-boot", "Spring Boot", "Description",
                 "https://cdn.example/cover.png", ResourceStatus.PUBLISHED, 2L, "Backend",
-                Set.of("Java"), 3L, Instant.parse("2026-01-01T00:00:00Z"),
+                Set.of("Java"), 3L, 12, Instant.parse("2026-01-01T00:00:00Z"),
                 Instant.parse("2026-01-01T00:00:00Z"), null, null, null, null);
     }
 

@@ -41,6 +41,8 @@ export interface ArticleSummary {
   updatedAt: string;
   tags: string[];
   likeCount: number;
+  /** Different people who opened it. */
+  viewCount?: number;
   publishedAt?: string;
 }
 

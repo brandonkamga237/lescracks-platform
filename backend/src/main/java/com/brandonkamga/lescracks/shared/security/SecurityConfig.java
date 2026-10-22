@@ -64,7 +64,7 @@ public class SecurityConfig {
                 // Anyone may read the catalogue and check an attestation. Reading is what
                 // brings people in; asking them to sign up first is what keeps them out.
                 .requestMatchers(HttpMethod.GET, "/api/events", "/api/events/*").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/events/*/views").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/events/*/views", "/api/resources/*/views").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/certificates/verify/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/members/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/talks", "/api/talks/*").permitAll()

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, ArrowUpRight } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, MessageCircle } from 'lucide-react';
 
 import ArticleCover from '@/components/blog/ArticleCover';
 import ArticleRenderer from '@/components/blog/ArticleRenderer';
@@ -8,11 +8,13 @@ import ArticleComments from '@/components/community/ArticleComments';
 import ReadMarker from '@/components/common/ReadMarker';
 import SEO from '@/components/common/SEO';
 import ShareButton from '@/components/common/ShareButton';
+import StickyActionBar from '@/components/common/StickyActionBar';
 import Layout from '@/components/layout/Layout';
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
 import { articlePath } from '@/lib/slugs';
 import { api } from '@/services/api';
+import { browserVisitorId } from '@/lib/visitor';
 
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' });
 
@@ -27,6 +29,11 @@ export default function BlogPost() {
   const [liking, setLiking] = useState(false);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [views, setViews] = useState<{ id: number; count: number } | null>(null);
+  const [commentCount, setCommentCount] = useState(0);
+  // Once per article and page: the development double effect would otherwise post twice.
+  const counted = useRef<number | null>(null);
+  const actions = useRef<HTMLElement>(null);
   const missing = !hasSlug || post.error?.status === 404;
   const published = loaded ? loaded.publishedAt ?? loaded.createdAt : undefined;
 
@@ -36,6 +43,19 @@ export default function BlogPost() {
       setLikeCount(likes.data.count);
     }
   }, [likes.data]);
+
+  useEffect(() => {
+    if (!loaded || counted.current === loaded.id) return;
+    counted.current = loaded.id;
+    api.recordArticleView(loaded.id, browserVisitorId())
+      .then(({ viewCount }) => setViews({ id: loaded.id, count: viewCount }))
+      .catch(() => undefined);
+  }, [loaded]);
+  const viewCount = loaded ? (views?.id === loaded.id ? views.count : loaded.viewCount ?? 0) : 0;
+
+  function goToDiscussion() {
+    document.getElementById('discussion')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
   async function toggleLike() {
     if (!loaded) return;
@@ -75,6 +95,7 @@ export default function BlogPost() {
                 <p className="label mt-4">
                   {published && <>Publié le <time dateTime={published}>{dateFormat.format(new Date(published))}</time>  ·  </>}
                   {loaded.readingMinutes ?? 1} min de lecture
+                  {viewCount > 0 && <>  ·  {viewCount.toLocaleString('fr-FR')} {viewCount > 1 ? 'lectures' : 'lecture'}</>}
                 </p>
               </header>
             )}
@@ -101,7 +122,7 @@ export default function BlogPost() {
                 )}
               </div>
 
-              <aside className="rounded-lg bg-card p-6 lg:sticky lg:top-24" aria-label="Partager l’article">
+              <aside ref={actions} className="rounded-lg bg-card p-6 lg:sticky lg:top-24" aria-label="Réagir à l’article">
                 <p className="text-sm leading-relaxed text-t3">Cet article t’a aidé ? Fais-le savoir, ou envoie-le à quelqu’un qui en a besoin.</p>
                 <button
                   type="button"
@@ -114,13 +135,32 @@ export default function BlogPost() {
                   {liked ? 'Coup de cœur envoyé' : 'Mettre un coup de cœur'}
                   {likeCount > 0 && <span className="rounded-full bg-noir-800 px-2 py-0.5 text-xs text-t2">{likeCount}</span>}
                 </button>
+                <button type="button" onClick={goToDiscussion}
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded border border-line px-4 py-3 text-sm font-medium text-t2 transition-colors hover:border-line-strong hover:text-t1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400">
+                  <MessageCircle className="h-5 w-5 text-gold-ink" aria-hidden />
+                  Commenter
+                  {commentCount > 0 && <span className="rounded-full bg-noir-800 px-2 py-0.5 text-xs text-t2">{commentCount}</span>}
+                </button>
                 <ShareButton title={loaded.title} path={articlePath(loaded)} label="Partager l’article" className="mt-3" />
               </aside>
             </div>
-            <ArticleComments resourceId={loaded.id} returnPath={articlePath(loaded)} articleSlug={loaded.slug ?? String(loaded.id)} />
+            <ArticleComments resourceId={loaded.id} returnPath={articlePath(loaded)} articleSlug={loaded.slug ?? String(loaded.id)} onCountChange={setCommentCount} />
             <div className="mt-16 border-t border-line pt-8">
               <Link to="/blog" className="link inline-flex min-h-11 items-center gap-3 text-sm">Lire d’autres articles<ArrowUpRight className="h-4 w-4" aria-hidden /></Link>
             </div>
+            {/* On a phone the reactions sit after the article: the bar keeps them in reach while reading. */}
+            <StickyActionBar anchor={actions} label="Réagir à l’article" className="lg:hidden">
+              <div className="grid flex-1 grid-cols-3 gap-2">
+                <button type="button" onClick={() => void toggleLike()} disabled={liking} aria-pressed={liked}
+                  className={`flex min-h-11 items-center justify-center gap-1.5 rounded text-sm font-medium transition-colors disabled:opacity-50 ${liked ? 'bg-gold-400/15 text-t1' : 'text-t2 hover:text-t1'}`}>
+                  <Heart filled={liked} />{likeCount > 0 ? likeCount : <span className="sr-only sm:not-sr-only">J’aime</span>}<span className="sr-only"> coup de cœur</span>
+                </button>
+                <button type="button" onClick={goToDiscussion} className="flex min-h-11 items-center justify-center gap-1.5 rounded text-sm font-medium text-t2 transition-colors hover:text-t1">
+                  <MessageCircle className="h-5 w-5 text-gold-ink" aria-hidden />{commentCount > 0 ? commentCount : 'Commenter'}<span className="sr-only">{commentCount > 0 ? ' commentaires' : ''}</span>
+                </button>
+                <ShareButton title={loaded.title} path={articlePath(loaded)} label="Partager" variant="primary" className="[&>button]:min-h-11 [&>button]:px-3" />
+              </div>
+            </StickyActionBar>
           </div>
         )}
       </article>

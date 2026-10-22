@@ -58,6 +58,10 @@ public class Resource {
     @Column(name = "scheduled_at")
     private Instant scheduledAt;
 
+    /** Different people who opened it; counted in SQL, one atomic increment per new reader. */
+    @Column(name = "view_count", insertable = false, updatable = false)
+    private int viewCount;
+
     /** First time it went public; the catalogue's "newest first" follows it. */
     @Column(name = "published_at")
     private Instant publishedAt;

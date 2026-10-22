@@ -82,6 +82,8 @@ export const api = {
   resourceLikes: (id: number, signal?: AbortSignal) => http.get<ResourceLikeStatus>(`/resources/${id}/likes`, undefined, signal),
   likeResource: (id: number) => http.post<ResourceLikeStatus>(`/resources/${id}/likes`),
   unlikeResource: (id: number) => http.delete<ResourceLikeStatus>(`/resources/${id}/likes`),
+  recordArticleView: (id: number, visitorId: string) =>
+    http.post<{ viewCount: number }>(`/resources/${id}/views`, { visitorId }),
   comments: (resourceId: number, signal?: AbortSignal) => http.get<CommentThread[]>(`/resources/${resourceId}/comments`, undefined, signal),
   postComment: (resourceId: number, body: string, parentId?: number) => http.post<ArticleComment>(`/resources/${resourceId}/comments`, { body, parentId }),
   editComment: (id: number, body: string) => http.put<ArticleComment>(`/comments/${id}`, { body }),

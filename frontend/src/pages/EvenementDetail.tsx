@@ -6,11 +6,13 @@ import SEO from '@/components/common/SEO';
 import ShareButton from '@/components/common/ShareButton';
 import LineArt from '@/components/illustrations/LineArt';
 import { TYPE_LABEL } from '@/components/events/AgendaItem';
-import EventRegistrationCard from '@/components/events/EventRegistrationCard';
+import EventRegistrationAction from '@/components/events/EventRegistrationAction';
+import StickyActionBar from '@/components/common/StickyActionBar';
 import ProjectSubmission from '@/components/events/ProjectSubmission';
 import ViewCount from '@/components/events/ViewCount';
 import Layout from '@/components/layout/Layout';
 import { useApi } from '@/hooks/useApi';
+import { useEventRegistration } from '@/hooks/useEventRegistration';
 import { api } from '@/services/api';
 import { downloadIcs, googleCalendarUrl } from '@/lib/calendar';
 import { markdownToPlainText } from '@/lib/plainText';
@@ -30,6 +32,8 @@ export default function EvenementDetail() {
   const [views, setViews] = useState<{ id: number; count: number } | null>(null);
   // Once per event and page: the development double effect would otherwise post twice.
   const counted = useRef<number | null>(null);
+  const heroAction = useRef<HTMLDivElement>(null);
+  const registration = useEventRegistration(loaded);
 
   useEffect(() => {
     if (!loaded || loaded.status !== 'PUBLISHED' || counted.current === loaded.id) return;
@@ -49,6 +53,8 @@ export default function EvenementDetail() {
   const now = Date.now();
   const status = loaded?.status === 'CANCELLED' ? 'Annulé' : loaded?.status === 'COMPLETED' || (hasEndDate && end.getTime() < now) ? 'Terminé' : hasDate && start.getTime() > now ? 'À venir' : hasEndDate ? 'En cours' : 'Date passée';
 
+  const isOpen = status === 'À venir' || status === 'En cours';
+
   return (
     <Layout>
       <SEO title={loaded?.title ?? (missing ? 'Événement introuvable' : 'Événement')} description={loaded ? markdownToPlainText(loaded.description).slice(0, 300) : 'Découvre les rendez-vous LesCracks pour apprendre et pratiquer la tech ensemble.'} image={loaded?.coverImage || undefined} url={loaded ? eventPath(loaded) : '/evenements'} />
@@ -67,6 +73,7 @@ export default function EvenementDetail() {
             <div className="flex flex-wrap items-center gap-3"><span className="rounded-full bg-gold-400 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-black">{TYPE_LABEL[loaded.type]}</span><span className="label">{formatLabels[loaded.format]}</span><span className="label">· {status}</span><ViewCount count={viewCount} spelledOut className="label" /></div>
             <h1 className="mt-3 break-words font-display text-3xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl lg:text-5xl">{loaded.title}</h1>
             {hasDate && <p className="mt-3 text-base sm:text-lg font-semibold text-t2"><time dateTime={loaded.startDate}>{dateFormat.format(start)}</time></p>}
+            {isOpen && <div ref={heroAction}><EventRegistrationAction event={loaded} state={registration} variant="hero" /></div>}
           </header>
         </>}
         </div>
@@ -82,8 +89,7 @@ export default function EvenementDetail() {
           {status === 'Terminé' && <p className="mb-10 rounded bg-card px-6 py-5 text-sm leading-relaxed text-t3">Cet événement est terminé. Explore l’agenda pour découvrir les prochains rendez-vous.</p>}
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-16">
             <section aria-labelledby="event-description" className="min-w-0"><h2 id="event-description" className="font-display text-3xl font-bold leading-tight text-t1">Au programme</h2><div className="mt-5 min-w-0 break-words"><Prose text={loaded.description} /></div>{loaded.acceptsSubmissions && <ProjectSubmission event={loaded} />}</section>
-            {/* On a phone the date and place come first: they are what someone opening a shared link looks for. */}
-            <aside className="-order-1 rounded-lg bg-card p-6 sm:p-7 lg:order-none" aria-label="Informations pratiques">
+            <aside className="rounded-lg bg-card p-6 sm:p-7" aria-label="Informations pratiques">
               <h2 className="font-display text-xl font-bold text-t1">Le rendez-vous en détail</h2>
               <dl className="mt-6 space-y-6">
                 <div className="flex gap-3"><CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" aria-hidden /><div><dt className="label">Début</dt><dd className="mt-2 text-sm leading-relaxed text-t1">{hasDate ? <time dateTime={loaded.startDate}>{dateFormat.format(start)}</time> : 'Date non renseignée'}</dd></div></div>
@@ -92,18 +98,22 @@ export default function EvenementDetail() {
                 {loaded.location && <div className="flex gap-3"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" aria-hidden /><div className="min-w-0"><dt className="label">Lieu</dt><dd className="mt-2 break-words text-sm leading-relaxed text-t1">{loaded.location}</dd></div></div>}
               </dl>
               <p className="mt-6 border-t border-line pt-4 text-xs leading-relaxed text-t3">Les horaires sont affichés dans ton fuseau horaire.</p>
-              <div className="mt-5"><EventRegistrationCard event={loaded} open={status === 'À venir' || status === 'En cours'} /></div>
               <div className="mt-5 grid gap-2">
-                {hasDate && (status === 'À venir' || status === 'En cours') && <>
-                  <a href={googleCalendarUrl(loaded, `${window.location.origin}${eventPath(loaded)}`)} target="_blank" rel="noopener noreferrer" className="btn-primary w-full"><CalendarPlus className="h-4 w-4" aria-hidden />Ajouter à Google Agenda</a>
-                  <button type="button" onClick={() => downloadIcs(loaded, `${window.location.origin}${eventPath(loaded)}`)} className="btn-secondary w-full"><Download className="h-4 w-4" aria-hidden />Apple, Outlook (.ics)</button>
-                </>}
                 <ShareButton title={loaded.title} path={eventPath(loaded)} label="Partager le rendez-vous" />
+                {hasDate && isOpen && <>
+                  <a href={googleCalendarUrl(loaded, `${window.location.origin}${eventPath(loaded)}`)} target="_blank" rel="noopener noreferrer" className="btn-secondary w-full"><CalendarPlus className="h-4 w-4" aria-hidden />Ajouter à Google Agenda</a>
+                  <button type="button" onClick={() => downloadIcs(loaded, `${window.location.origin}${eventPath(loaded)}`)} className="inline-flex min-h-11 items-center justify-center gap-2 text-sm text-t3 underline-offset-4 hover:text-t1 hover:underline"><Download className="h-4 w-4" aria-hidden />Apple, Outlook (.ics)</button>
+                </>}
               </div>
             </aside>
           </div>
           <div className="mt-16 flex flex-col justify-between gap-5 rounded-lg bg-card p-6 sm:flex-row sm:items-center sm:p-8"><div><h2 className="font-display text-2xl font-bold text-t1">Un autre rendez-vous à découvrir ?</h2><p className="mt-2 text-sm text-t3">Retrouve tous les formats dans l’agenda LesCracks.</p></div><Link to={cataloguePath} className="btn-primary shrink-0">Explorer l’agenda<ArrowUpRight className="h-4 w-4" aria-hidden /></Link></div>
           </div>
+          {isOpen && !registration.isAdmin && (
+            <StickyActionBar anchor={heroAction} label="Participer à l’événement">
+              <EventRegistrationAction event={loaded} state={registration} variant="bar" />
+            </StickyActionBar>
+          )}
         </>}
       </article>
     </Layout>
