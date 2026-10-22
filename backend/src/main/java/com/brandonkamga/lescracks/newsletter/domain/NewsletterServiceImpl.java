@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -43,7 +44,7 @@ public class NewsletterServiceImpl implements NewsletterService {
     public NewsletterSubscription status(String username) {
         User user = user(username);
         return subscriptions.findByUserId(user.getId())
-                .orElseGet(() -> NewsletterSubscription.builder().user(user)
+                .orElseGet(() -> NewsletterSubscription.builder().userId(user.getId())
                     .status(NewsletterStatus.UNSUBSCRIBED)
                     .subscribedAt(null)
                     .build());
@@ -67,7 +68,7 @@ public class NewsletterServiceImpl implements NewsletterService {
         }
         User contact = user;
         NewsletterSubscription subscription = subscriptions.findByUserId(contact.getId())
-                .orElseGet(() -> NewsletterSubscription.builder().user(contact).build());
+                .orElseGet(() -> NewsletterSubscription.builder().userId(contact.getId()).build());
         if (subscription.getStatus() == NewsletterStatus.SUBSCRIBED && subscription.getId() != null) return subscription;
         subscription.setStatus(NewsletterStatus.PENDING);
         subscription.setUnsubscribedAt(null);
@@ -85,7 +86,7 @@ public class NewsletterServiceImpl implements NewsletterService {
 
     private NewsletterSubscription subscribe(User user) {
         NewsletterSubscription subscription = subscriptions.findByUserId(user.getId())
-                .orElseGet(() -> NewsletterSubscription.builder().user(user).build());
+                .orElseGet(() -> NewsletterSubscription.builder().userId(user.getId()).build());
         subscription.setStatus(NewsletterStatus.SUBSCRIBED);
         subscription.setUnsubscribedAt(null);
         return subscriptions.save(subscription);
@@ -113,7 +114,7 @@ public class NewsletterServiceImpl implements NewsletterService {
     public NewsletterSubscription unsubscribeById(Long userId) {
         User user = users.require(userId);
         NewsletterSubscription subscription = subscriptions.findByUserId(user.getId())
-                .orElseGet(() -> NewsletterSubscription.builder().user(user).build());
+                .orElseGet(() -> NewsletterSubscription.builder().userId(user.getId()).build());
         subscription.setStatus(NewsletterStatus.UNSUBSCRIBED);
         subscription.setUnsubscribedAt(Instant.now());
         return subscriptions.save(subscription);
@@ -123,7 +124,7 @@ public class NewsletterServiceImpl implements NewsletterService {
     public NewsletterSubscription subscribeById(Long userId) {
         User user = users.require(userId);
         NewsletterSubscription subscription = subscriptions.findByUserId(user.getId())
-                .orElseGet(() -> NewsletterSubscription.builder().user(user).build());
+                .orElseGet(() -> NewsletterSubscription.builder().userId(user.getId()).build());
         subscription.setStatus(NewsletterStatus.SUBSCRIBED);
         subscription.setUnsubscribedAt(null);
         return subscriptions.save(subscription);
@@ -131,16 +132,20 @@ public class NewsletterServiceImpl implements NewsletterService {
 
     @Override
     public void notifyEventSubscribers(Event event) {
-        subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED)
-                .forEach(subscription -> mail.send(new EventAnnouncement(subscription.getUser().getEmail(),
+        var active = subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED);
+        Map<Long, User> people = people(active);
+        active.stream().filter(subscription -> people.containsKey(subscription.getUserId()))
+                .forEach(subscription -> mail.send(new EventAnnouncement(people.get(subscription.getUserId()).getEmail(),
                         event.getTitle(), event.getDescription(), "/evenements/" + slugOrId(event.getSlug(), event.getId()),
                         event.getCoverImage(), event.getStartDate(), subscription.getToken())));
     }
 
     @Override
     public void notifyResourceSubscribers(Resource resource) {
-        subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED)
-                .forEach(subscription -> mail.send(new ResourceAnnouncement(subscription.getUser().getEmail(),
+        var active = subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED);
+        Map<Long, User> people = people(active);
+        active.stream().filter(subscription -> people.containsKey(subscription.getUserId()))
+                .forEach(subscription -> mail.send(new ResourceAnnouncement(people.get(subscription.getUserId()).getEmail(),
                         resource.getTitle(), resource.getDescription(), "/ressources/" + slugOrId(resource.getSlug(), resource.getId()),
                         resource.getCoverImage(), subscription.getToken())));
     }
@@ -159,8 +164,10 @@ public class NewsletterServiceImpl implements NewsletterService {
     @Override
     public int broadcast(String subject, JsonNode body) {
         var active = subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED);
+        Map<Long, User> people = people(active);
         active.forEach(subscription -> {
-            User user = subscription.getUser();
+            User user = people.get(subscription.getUserId());
+            if (user == null) return;
             mail.send(new NewsletterIssue(user.getEmail(), subject, body, user.getFirstName(), user.getLastName(),
                     subscription.getToken()));
         });
@@ -180,6 +187,10 @@ public class NewsletterServiceImpl implements NewsletterService {
 
     private static String slugOrId(String slug, Long id) {
         return slug != null ? slug : String.valueOf(id);
+    }
+
+    private Map<Long, User> people(List<NewsletterSubscription> subscriptions) {
+        return users.findAll(subscriptions.stream().map(NewsletterSubscription::getUserId).toList());
     }
 
     private User user(String username) {

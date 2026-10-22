@@ -55,7 +55,7 @@ class NewsletterServiceTest {
 
         NewsletterSubscription subscription = service.subscribePublic(" Awa@Example.com ", "Awa", null);
 
-        assertThat(subscription.getUser()).isSameAs(contact);
+        assertThat(subscription.getUserId()).isEqualTo(4L);
         assertThat(subscription.getStatus()).isEqualTo(NewsletterStatus.PENDING);
         verify(mail).send(new NewsletterConfirmation("awa@example.com", subscription.getToken()));
     }

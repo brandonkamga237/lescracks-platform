@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.newsletter.api;
 
 import com.brandonkamga.lescracks.identity.domain.User;
+import com.brandonkamga.lescracks.identity.domain.UserDirectory;
 import com.brandonkamga.lescracks.newsletter.api.dto.AdminSubscriberResponse;
 import com.brandonkamga.lescracks.newsletter.api.dto.BroadcastRequest;
 import com.brandonkamga.lescracks.newsletter.api.dto.NewsletterCampaignResponse;
@@ -28,16 +29,20 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/newsletter")
 public class NewsletterController {
     private final NewsletterService newsletter;
     private final NewsletterSubscriptionRepository subscriptions;
+    private final UserDirectory people;
 
-    public NewsletterController(NewsletterService newsletter, NewsletterSubscriptionRepository subscriptions) {
+    public NewsletterController(NewsletterService newsletter, NewsletterSubscriptionRepository subscriptions,
+                                UserDirectory people) {
         this.newsletter = newsletter;
         this.subscriptions = subscriptions;
+        this.people = people;
     }
 
     @GetMapping
@@ -109,19 +114,14 @@ public class NewsletterController {
     @GetMapping("/admin/subscribers")
     @PreAuthorize("hasRole('ADMIN')")
     public List<AdminSubscriberResponse> subscribers() {
-        return subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED).stream()
-            .map(subscription -> new AdminSubscriberResponse(subscription.getUser().getId(),
-                subscription.getUser().getEmail(), subscription.getUser().getFirstName(),
-                subscription.getUser().getLastName(), subscription.getStatus(),
-                subscription.getSubscribedAt(), subscription.getUnsubscribedAt()))
-            .toList();
+        return toAdminResponses(subscriptions.findByStatus(NewsletterStatus.SUBSCRIBED));
     }
 
     @GetMapping("/admin/subscriptions")
     @PreAuthorize("hasRole('ADMIN')")
     public List<AdminSubscriberResponse> listSubscriptions(@RequestParam(required = false) NewsletterStatus status) {
         List<NewsletterSubscription> list = status == null ? subscriptions.findAll() : subscriptions.findByStatus(status);
-        return list.stream().map(this::toAdminResponse).toList();
+        return toAdminResponses(list);
     }
 
     @PostMapping("/admin/subscriptions/{userId}/unsubscribe")
@@ -140,10 +140,12 @@ public class NewsletterController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<StreamingResponseBody> exportSubscriptions() {
         List<NewsletterSubscription> list = subscriptions.findAll();
+        Map<Long, User> users = people.findAll(list.stream().map(NewsletterSubscription::getUserId).toList());
         StreamingResponseBody body = out -> {
             out.write("email;firstName;lastName;status;subscribedAt;unsubscribedAt\n".getBytes(StandardCharsets.UTF_8));
             for (NewsletterSubscription s : list) {
-                User user = s.getUser();
+                User user = users.get(s.getUserId());
+                if (user == null) continue;
                 String row = csvLine(user.getEmail(), user.getFirstName(), user.getLastName(),
                         s.getStatus().name(),
                         s.getSubscribedAt() == null ? "" : formatter.format(s.getSubscribedAt()),
@@ -168,8 +170,17 @@ public class NewsletterController {
     /** {@code pending}: signed up from the public form, address not confirmed yet. */
     public record NewsletterStats(long subscribed, long unsubscribed, long pending) { }
 
+    private List<AdminSubscriberResponse> toAdminResponses(List<NewsletterSubscription> list) {
+        Map<Long, User> users = people.findAll(list.stream().map(NewsletterSubscription::getUserId).toList());
+        return list.stream().filter(subscription -> users.containsKey(subscription.getUserId()))
+                .map(subscription -> toAdminResponse(subscription, users.get(subscription.getUserId()))).toList();
+    }
+
     private AdminSubscriberResponse toAdminResponse(NewsletterSubscription subscription) {
-        User user = subscription.getUser();
+        return toAdminResponse(subscription, people.require(subscription.getUserId()));
+    }
+
+    private AdminSubscriberResponse toAdminResponse(NewsletterSubscription subscription, User user) {
         return new AdminSubscriberResponse(user.getId(), user.getEmail(), user.getFirstName(),
                 user.getLastName(), subscription.getStatus(), subscription.getSubscribedAt(),
                 subscription.getUnsubscribedAt());
