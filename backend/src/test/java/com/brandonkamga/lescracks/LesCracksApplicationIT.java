@@ -1,5 +1,8 @@
 package com.brandonkamga.lescracks;
 
+import com.brandonkamga.lescracks.content.application.ArticleAdminService;
+import com.brandonkamga.lescracks.content.application.ArticleCatalog;
+import com.brandonkamga.lescracks.content.application.TalkService;
 import com.brandonkamga.lescracks.event.domain.EventService;
 import com.brandonkamga.lescracks.account.application.AccountDirectory;
 import com.brandonkamga.lescracks.account.application.AdminAuthService;
@@ -11,11 +14,10 @@ import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.member.application.ProfileService;
 import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.newsletter.application.NewsletterService;
-import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.stats.domain.StatsService;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 import com.brandonkamga.lescracks.support.PostgresIT;
-import com.brandonkamga.lescracks.taxonomy.domain.TaxonomyService;
+import com.brandonkamga.lescracks.taxonomy.application.TaxonomyService;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.DisplayName;
@@ -54,7 +56,7 @@ class LesCracksApplicationIT extends PostgresIT {
     @Test
     @DisplayName("every domain contributes exactly one implementation of its service")
     void everyDomainServiceIsWired() {
-        Stream.of(ResourceService.class, TaxonomyService.class, EventService.class,
+        Stream.of(ArticleCatalog.class, ArticleAdminService.class, TalkService.class, TaxonomyService.class, EventService.class,
                         NewsletterService.class, StatsService.class, StorageService.class,
                         Mailer.class, SignInService.class, SignUpService.class,
                         EmailVerificationService.class, PasswordResetService.class, AccountDirectory.class,
@@ -66,7 +68,7 @@ class LesCracksApplicationIT extends PostgresIT {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "/api/resources", "/api/events", "/api/categories", "/api/tags",
+            "/api/resources", "/api/resources/{slug}", "/api/talks", "/api/events", "/api/categories", "/api/tags",
             "/api/newsletter/subscribe", "/api/files/{key}", "/api/me", "/api/auth/login",
             "/api/admin/stats/overview", "/api/admin/users", "/seo/pages/{page}",
             "/api/sitemap.xml"
@@ -82,13 +84,12 @@ class LesCracksApplicationIT extends PostgresIT {
     }
 
     @Test
-    @DisplayName("the entities of every domain are part of the persistence unit")
+    @DisplayName("the entities of the modules not migrated yet are part of the persistence unit")
     void entitiesFromEveryDomainAreScanned() {
         Set<String> entities = entityManagerFactory.getMetamodel().getEntities().stream()
                 .map(type -> type.getJavaType().getSimpleName())
                 .collect(Collectors.toSet());
 
-        assertThat(entities).contains("Resource", "Article",
-                "Category", "Tag", "Event");
+        assertThat(entities).contains("Event", "Badge");
     }
 }

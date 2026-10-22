@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.stats.domain;
 
 import com.brandonkamga.lescracks.account.application.AccountStatistics;
+import com.brandonkamga.lescracks.content.application.ContentStatistics;
 import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
 import com.brandonkamga.lescracks.engagement.domain.model.Counts;
 import com.brandonkamga.lescracks.engagement.domain.model.TargetType;
@@ -10,9 +11,6 @@ import com.brandonkamga.lescracks.event.infra.EventRepository;
 import com.brandonkamga.lescracks.member.application.MemberStatistics;
 import com.brandonkamga.lescracks.newsletter.application.NewsletterStatistics;
 import com.brandonkamga.lescracks.newsletter.domain.model.SubscriptionStatus;
-import com.brandonkamga.lescracks.resource.domain.Resource;
-import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
-import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
 import com.brandonkamga.lescracks.stats.api.dto.AudienceResponse;
 import com.brandonkamga.lescracks.stats.api.dto.ContentViewsResponse;
 import com.brandonkamga.lescracks.stats.api.dto.MemberPortraitResponse;
@@ -27,10 +25,8 @@ import com.brandonkamga.lescracks.stats.api.dto.ViewedResource;
 import com.brandonkamga.lescracks.stats.api.dto.WatchResponse;
 import com.brandonkamga.lescracks.stats.api.dto.WatchSignal;
 import com.brandonkamga.lescracks.stats.infra.UmamiClient;
-import com.brandonkamga.lescracks.talk.domain.TalkStatus;
-import com.brandonkamga.lescracks.talk.infra.TalkVideoRepository;
-import com.brandonkamga.lescracks.taxonomy.domain.Category;
-import com.brandonkamga.lescracks.taxonomy.infra.CategoryRepository;
+import com.brandonkamga.lescracks.taxonomy.application.TaxonomyService;
+import com.brandonkamga.lescracks.taxonomy.domain.model.Category;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import org.slf4j.Logger;
@@ -60,29 +56,26 @@ public class StatsServiceImpl implements StatsService {
     private final MemberStatistics members;
     private final EngagementCounts engagement;
     private final EventRepository events;
-    private final ResourceRepository resources;
+    private final ContentStatistics content;
     private final NewsletterStatistics newsletter;
-    private final TalkVideoRepository talks;
     private final UmamiClient umami;
-    private final CategoryRepository categories;
+    private final TaxonomyService taxonomy;
 
-    public StatsServiceImpl(AccountStatistics accounts, MemberStatistics members, EngagementCounts engagement, EventRepository events, ResourceRepository resources,
-                            NewsletterStatistics newsletter, TalkVideoRepository talks,
-                            UmamiClient umami, CategoryRepository categories) {
+    public StatsServiceImpl(AccountStatistics accounts, MemberStatistics members, EngagementCounts engagement, EventRepository events,
+                            ContentStatistics content, NewsletterStatistics newsletter, UmamiClient umami, TaxonomyService taxonomy) {
         this.accounts = accounts;
         this.members = members;
         this.engagement = engagement;
         this.events = events;
-        this.resources = resources;
+        this.content = content;
         this.newsletter = newsletter;
-        this.talks = talks;
         this.umami = umami;
-        this.categories = categories;
+        this.taxonomy = taxonomy;
     }
 
     @Override
     public MemberPortraitResponse memberPortrait() {
-        Map<Long, String> themes = categories.findAll().stream().collect(Collectors.toMap(Category::getId, Category::getName));
+        Map<Long, String> themes = themeNames();
         // An interest whose theme was deleted since has no name to show: it is left out.
         List<NamedCount> interests = members.byInterest().entrySet().stream()
                 .filter(entry -> themes.containsKey(entry.getKey()))
@@ -121,8 +114,8 @@ public class StatsServiceImpl implements StatsService {
         Map<String, Long> usersByProvider = accounts.membersByProvider();
         Map<String, Long> eventsByStatus = toCounts(events.countGroupedByStatus());
         Map<String, Long> eventsByType = toCounts(events.countGroupedByType());
-        Map<String, Long> resourcesByStatus = toCounts(resources.countGroupedByStatus());
-        Map<String, Long> resourcesByCategory = toCounts(resources.countGroupedByCategory());
+        Map<String, Long> resourcesByStatus = content.articlesByStatus();
+        Map<String, Long> resourcesByCategory = articlesByTheme();
 
         long upcoming = 0;
         long ongoing = 0;
@@ -136,7 +129,6 @@ public class StatsServiceImpl implements StatsService {
             else past++;
         }
 
-        long talksPublished = talks.countByStatus(TalkStatus.PUBLISHED);
 
         return new StatsOverviewResponse(
                 total(usersByStatus), usersByStatus, usersByProvider, accounts.verifiedMembers(),
@@ -149,7 +141,19 @@ public class StatsServiceImpl implements StatsService {
                 newsletter.countByStatus(SubscriptionStatus.SUBSCRIBED),
                 newsletter.countByStatus(SubscriptionStatus.UNSUBSCRIBED),
                 newsletter.subscribedSince(days30),
-                talks.count(), talksPublished);
+                content.countTalks(), content.countPublishedTalks());
+    }
+
+    private Map<Long, String> themeNames() {
+        return taxonomy.listCategories().stream().collect(Collectors.toMap(Category::getId, Category::getName));
+    }
+
+    /** Fullest theme first, by name. */
+    private Map<String, Long> articlesByTheme() {
+        Map<Long, String> themes = themeNames();
+        Map<String, Long> counts = new LinkedHashMap<>();
+        content.articlesByCategory().forEach((id, count) -> counts.merge(themes.getOrDefault(id, "?"), count, Long::sum));
+        return counts;
     }
 
     private SignupFunnel funnel(AccountStatistics.SignupCohort cohort) {
@@ -173,8 +177,7 @@ public class StatsServiceImpl implements StatsService {
     @Override
     public List<TopResourceResponse> topResources(int limit) {
         Map<Long, Counts> ranked = engagement.listMostLiked(TargetType.ARTICLE, limit);
-        Map<Long, String> titles = resources.findAllById(ranked.keySet()).stream()
-                .collect(Collectors.toMap(Resource::getId, Resource::getTitle));
+        Map<Long, String> titles = content.articleTitles(ranked.keySet());
         return ranked.entrySet().stream().filter(entry -> titles.containsKey(entry.getKey()))
                 .map(entry -> new TopResourceResponse(entry.getKey(), titles.get(entry.getKey()), entry.getValue().likes()))
                 .toList();
@@ -226,13 +229,15 @@ public class StatsServiceImpl implements StatsService {
         if (!umami.isEnabled()) return ContentViewsResponse.unavailable(days);
         try {
             Map<String, Long> urls = urlViews(days);
-            Map<String, Long> resourceViews = pick(urls, "/ressources/");
+            // Articles moved from /ressources to /blog; both still count until the old links fade out.
+            Map<String, Long> resourceViews = new HashMap<>(pick(urls, "/ressources/"));
+            pick(urls, "/blog/").forEach((slug, views) -> resourceViews.merge(slug, views, Long::sum));
+            Map<Long, String> themes = themeNames();
             Map<String, Long> eventViews = pick(urls, "/evenements/");
 
-            List<ViewedResource> viewedResources = resources.findBySlugIn(resourceViews.keySet()).stream()
-                    .map(r -> new ViewedResource(r.getId(), r.getSlug(), r.getTitle(), r.getCoverImage(),
-                            r.getCategory() != null ? r.getCategory().getName() : null,
-                            resourceViews.getOrDefault(r.getSlug(), 0L)))
+            List<ViewedResource> viewedResources = content.articlesBySlug(resourceViews.keySet()).stream()
+                    .map(article -> new ViewedResource(article.id(), article.slug(), article.title(), article.coverImage(),
+                            themes.get(article.categoryId()), resourceViews.getOrDefault(article.slug(), 0L)))
                     .sorted(Comparator.comparingLong(ViewedResource::views).reversed())
                     .limit(12)
                     .toList();
@@ -314,9 +319,9 @@ public class StatsServiceImpl implements StatsService {
 
         if (umami.isEnabled() && !urlViews.isEmpty()) {
             final Map<String, Long> resourceViews = urlViews;
-            long unseen = resources.findByStatusOrderByCreatedAtDesc(ResourceStatus.PUBLISHED).stream()
-                    .filter(r -> r.getCreatedAt().isBefore(days30))
-                    .filter(r -> resourceViews.getOrDefault("/ressources/" + r.getSlug(), 0L) < 5)
+            long unseen = content.publishedSlugsBefore(days30).stream()
+                    .filter(slug -> resourceViews.getOrDefault("/ressources/" + slug, 0L)
+                            + resourceViews.getOrDefault("/blog/" + slug, 0L) < 5)
                     .count();
             if (unseen > 0) {
                 signals.add(new WatchSignal("unseen-resources", "info",
@@ -335,9 +340,7 @@ public class StatsServiceImpl implements StatsService {
                     "Voir la newsletter", "/admin/newsletter"));
         }
 
-        long staleDrafts = resources.findByStatusOrderByCreatedAtDesc(ResourceStatus.DRAFT).stream()
-                .filter(r -> r.getCreatedAt().isBefore(days14))
-                .count();
+        long staleDrafts = content.countDraftsUntouchedSince(days14);
         if (staleDrafts > 0) {
             signals.add(new WatchSignal("stale-drafts", "info",
                     staleDrafts + " brouillon" + (staleDrafts > 1 ? "s" : "") + " en attente",

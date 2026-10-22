@@ -1,16 +1,15 @@
 package com.brandonkamga.lescracks.stats.domain;
 
 import com.brandonkamga.lescracks.account.application.AccountStatistics;
+import com.brandonkamga.lescracks.content.application.ContentStatistics;
 import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
 import com.brandonkamga.lescracks.event.infra.EventRepository;
 import com.brandonkamga.lescracks.member.application.MemberStatistics;
 import com.brandonkamga.lescracks.newsletter.application.NewsletterStatistics;
-import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
 import com.brandonkamga.lescracks.stats.api.dto.NamedCount;
 import com.brandonkamga.lescracks.stats.infra.UmamiClient;
-import com.brandonkamga.lescracks.talk.infra.TalkVideoRepository;
-import com.brandonkamga.lescracks.taxonomy.domain.Category;
-import com.brandonkamga.lescracks.taxonomy.infra.CategoryRepository;
+import com.brandonkamga.lescracks.taxonomy.application.TaxonomyService;
+import com.brandonkamga.lescracks.taxonomy.domain.model.Category;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,14 +32,13 @@ class StatsServiceImplTest {
 
     private final AccountStatistics accounts = mock(AccountStatistics.class);
     private final MemberStatistics members = mock(MemberStatistics.class);
-    private final CategoryRepository categories = mock(CategoryRepository.class);
-    private final StatsServiceImpl stats = new StatsServiceImpl(accounts, members, mock(EngagementCounts.class), mock(EventRepository.class), mock(ResourceRepository.class),
-            mock(NewsletterStatistics.class), mock(TalkVideoRepository.class), mock(UmamiClient.class), categories);
+    private final TaxonomyService taxonomy = mock(TaxonomyService.class);
+    private final StatsServiceImpl stats = withUmami(mock(UmamiClient.class));
 
     @Test
     @DisplayName("the portrait names each interest, puts the fullest first and leaves out deleted themes")
     void memberPortrait() {
-        when(categories.findAll()).thenReturn(List.of(
+        when(taxonomy.listCategories()).thenReturn(List.of(
                 Category.builder().id(1L).name("Backend").build(), Category.builder().id(2L).name("Data & IA").build()));
         when(members.byInterest()).thenReturn(Map.of(1L, 4L, 2L, 9L, 99L, 3L));
         when(members.bySituation()).thenReturn(Map.of("STUDENT", 2L, "EMPLOYED", 7L));
@@ -61,8 +59,8 @@ class StatsServiceImplTest {
     }
 
     private StatsServiceImpl withUmami(UmamiClient umami) {
-        return new StatsServiceImpl(accounts, members, mock(EngagementCounts.class), mock(EventRepository.class), mock(ResourceRepository.class),
-                mock(NewsletterStatistics.class), mock(TalkVideoRepository.class), umami, categories);
+        return new StatsServiceImpl(accounts, members, mock(EngagementCounts.class), mock(EventRepository.class),
+                mock(ContentStatistics.class), mock(NewsletterStatistics.class), umami, taxonomy);
     }
 
     @Test

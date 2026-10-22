@@ -1,8 +1,7 @@
 package com.brandonkamga.lescracks.seo.api;
 
 import com.brandonkamga.lescracks.event.domain.EventService;
-import com.brandonkamga.lescracks.resource.domain.ResourceService;
-import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
+import com.brandonkamga.lescracks.content.application.ArticleCatalog;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.PageRequest;
@@ -19,12 +18,12 @@ import java.time.format.DateTimeFormatter;
 @RequestMapping("/api/sitemap.xml")
 public class SitemapController {
 
-    private final ResourceService resources;
+    private final ArticleCatalog articles;
     private final EventService events;
     private static final DateTimeFormatter W3C = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
-    public SitemapController(ResourceService resources, EventService events) {
-        this.resources = resources;
+    public SitemapController(ArticleCatalog articles, EventService events) {
+        this.articles = articles;
         this.events = events;
     }
 
@@ -44,12 +43,10 @@ public class SitemapController {
         addUrl(xml, base, "/conditions-utilisation", "0.3", "yearly");
         addUrl(xml, base, "/politique-confidentialite", "0.3", "yearly");
 
-        var published = resources.search(ResourceStatus.PUBLISHED, null, null, null, PageRequest.of(0, 10_000));
-        published.forEach(resource -> {
-            String lastmod = W3C.format(resource.getUpdatedAt().atOffset(ZoneOffset.UTC));
-            String slug = resource.getSlug() != null ? resource.getSlug() : String.valueOf(resource.getId());
+        articles.listPublished().forEach(article -> {
+            String lastmod = W3C.format(article.getUpdatedAt().atOffset(ZoneOffset.UTC));
             xml.append("  <url>\n");
-            xml.append("    <loc>").append(escape(base + "/blog/" + slug)).append("</loc>\n");
+            xml.append("    <loc>").append(escape(base + article.path())).append("</loc>\n");
             xml.append("    <lastmod>").append(escape(lastmod)).append("</lastmod>\n");
             xml.append("    <priority>0.7</priority>\n");
             xml.append("    <changefreq>weekly</changefreq>\n");

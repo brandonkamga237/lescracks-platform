@@ -1,7 +1,6 @@
 package com.brandonkamga.lescracks.shared.bootstrap;
 
 import com.brandonkamga.lescracks.event.infra.EventRepository;
-import com.brandonkamga.lescracks.resource.infra.ResourceRepository;
 import com.brandonkamga.lescracks.shared.util.Slugs;
 
 import org.slf4j.Logger;
@@ -15,24 +14,15 @@ public class SlugBackfill implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(SlugBackfill.class);
 
-    private final ResourceRepository resources;
     private final EventRepository events;
 
-    public SlugBackfill(ResourceRepository resources, EventRepository events) {
-        this.resources = resources;
+    public SlugBackfill(EventRepository events) {
         this.events = events;
     }
 
     @Override
     @Transactional
     public void run(String... args) {
-        resources.findAll().stream()
-                .filter(resource -> resource.getSlug() == null || resource.getSlug().isBlank())
-                .forEach(resource -> {
-                    resource.setSlug(Slugs.uniqueFrom(resource.getTitle(), resources::existsBySlug));
-                    resources.save(resource);
-                });
-
         events.findAll().stream()
                 .filter(event -> event.getSlug() == null || event.getSlug().isBlank())
                 .forEach(event -> {
