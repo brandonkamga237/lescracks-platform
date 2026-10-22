@@ -175,7 +175,7 @@ export const adminApi = {
   audience: (days = 30, signal?: AbortSignal) =>
     http.get<AudienceStats>('/admin/stats/audience', { days }, signal),
   eventRegistrations: (id: number, signal?: AbortSignal) => http.get<AdminRegistration[]>(`/events/admin/${id}/registrations`, undefined, signal),
-  markAttendance: (registrationId: number, status: 'ATTENDED' | 'ABSENT') =>
+  markAttendance: (registrationId: number, status: 'ATTENDED' | 'ABSENT' | 'REGISTERED') =>
     http.patch<unknown>(`/events/admin/registrations/${registrationId}`, { status }),
   eventProjects: (id: number, signal?: AbortSignal) => http.get<AdminProject[]>(`/events/admin/${id}/submissions`, undefined, signal),
   reviewProject: (id: number, review: { status?: ProjectStatus; score?: number | null; rank?: number | null; note?: string }) =>
