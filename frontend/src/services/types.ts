@@ -231,8 +231,6 @@ export interface AdminUser {
   location?: string;
   marketingConsent: boolean;
   completion: number;
-  /** False for a newsletter-only contact (no password, no social login). */
-  hasAccount: boolean;
   onboarded: boolean;
   lastSeenAt?: string;
   /** The page the member first arrived on. */
@@ -248,8 +246,10 @@ export interface AdminSummary {
 /** PENDING: signed up from the public form, address not confirmed yet. */
 export type NewsletterState = 'PENDING' | 'SUBSCRIBED' | 'UNSUBSCRIBED';
 
+/** `accountId` is null for a visitor who only left an address. */
 export interface AdminSubscriber {
-  userId: number;
+  id: number;
+  accountId: number | null;
   email: string;
   firstName: string;
   lastName: string;
@@ -482,5 +482,6 @@ export interface AdminComment {
   createdAt: string;
   editedAt?: string;
   author?: { id: number; name: string; email: string };
-  article: { id: number; title: string; slug?: string };
+  /** What the comment is under; absent once that content was deleted. */
+  target?: { type: 'ARTICLE' | 'EVENT' | 'TALK'; id: number; title: string; path: string };
 }

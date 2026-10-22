@@ -11,8 +11,8 @@ import com.brandonkamga.lescracks.member.domain.model.MemberSituation;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
-import com.brandonkamga.lescracks.taxonomy.domain.Category;
-import com.brandonkamga.lescracks.taxonomy.domain.TaxonomyService;
+import com.brandonkamga.lescracks.taxonomy.domain.model.Category;
+import com.brandonkamga.lescracks.taxonomy.application.TaxonomyService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -58,9 +58,7 @@ class ProfileServiceTest {
     }
 
     private static Category category(long id) {
-        Category category = new Category();
-        category.setId(id);
-        return category;
+        return Category.builder().id(id).build();
     }
 
     @Test

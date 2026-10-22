@@ -29,17 +29,14 @@ class JdbcAccountStatisticsIT extends PostgresIT {
     }
 
     @Test
-    @DisplayName("newsletter-only contacts are counted apart from members, who can sign in")
-    void membersAndContacts() {
-        long contacts = statistics.newsletterContacts();
+    @DisplayName("members are counted by provider, confirmation and sign-up day")
+    void members() {
         long verified = statistics.verifiedMembers();
         long github = statistics.membersByProvider().getOrDefault("GITHUB", 0L);
 
-        save("contact@example.com", null, AuthProvider.LOCAL, false);
         save("member@example.com", "hash", AuthProvider.LOCAL, true);
         save("github@example.com", null, AuthProvider.GITHUB, true);
 
-        assertThat(statistics.newsletterContacts()).isEqualTo(contacts + 1);
         assertThat(statistics.verifiedMembers()).isEqualTo(verified + 2);
         assertThat(statistics.membersByProvider().get("GITHUB")).isEqualTo(github + 1);
         assertThat(statistics.membersCreatedSince(Instant.now().minus(1, ChronoUnit.HOURS))).isGreaterThanOrEqualTo(2);
@@ -56,7 +53,6 @@ class JdbcAccountStatisticsIT extends PostgresIT {
         accounts.save(Account.builder().email("back@example.com").firstName("A").lastName("B").passwordHash("hash")
                 .emailVerified(true).createdAt(Instant.now().minus(3, ChronoUnit.DAYS)).lastSeenAt(Instant.now()).build());
         save("gone@example.com", "hash", AuthProvider.LOCAL, false);
-        save("contact2@example.com", null, AuthProvider.LOCAL, false);
 
         AccountStatistics.SignupCohort after = statistics.signupsSince(since);
         assertThat(after.signedUp()).isEqualTo(before.signedUp() + 2);

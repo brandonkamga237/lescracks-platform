@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.event.api.dto;
 
-import com.brandonkamga.lescracks.event.domain.RegistrationStatus;
-import com.brandonkamga.lescracks.event.domain.RegistrationView;
+import com.brandonkamga.lescracks.event.domain.model.RegistrationStatus;
+import com.brandonkamga.lescracks.event.application.RegistrationView;
 
 import java.time.Instant;
 

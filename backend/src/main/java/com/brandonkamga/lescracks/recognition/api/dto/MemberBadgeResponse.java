@@ -1,6 +1,6 @@
 package com.brandonkamga.lescracks.recognition.api.dto;
 
-import com.brandonkamga.lescracks.recognition.domain.MemberBadge;
+import com.brandonkamga.lescracks.recognition.domain.model.MemberBadge;
 
 import java.time.Instant;
 

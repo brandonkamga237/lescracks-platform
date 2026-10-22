@@ -8,8 +8,8 @@ import com.brandonkamga.lescracks.member.domain.model.MemberProfile;
 import com.brandonkamga.lescracks.member.domain.model.MemberSituation;
 import com.brandonkamga.lescracks.member.domain.port.MemberProfileStore;
 import com.brandonkamga.lescracks.support.PostgresIT;
-import com.brandonkamga.lescracks.taxonomy.domain.Category;
-import com.brandonkamga.lescracks.taxonomy.infra.CategoryRepository;
+import com.brandonkamga.lescracks.taxonomy.domain.model.Category;
+import com.brandonkamga.lescracks.taxonomy.domain.port.CategoryStore;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,22 +32,19 @@ class JdbcMemberProfileStoreIT extends PostgresIT {
     @Autowired private AccountStore accounts;
     @Autowired private MemberProfileStore profiles;
     @Autowired private MemberStatistics statistics;
-    @Autowired private CategoryRepository categories;
+    @Autowired private CategoryStore categories;
 
     private Long theme;
     private Long other;
 
     @BeforeEach
     void setUp() {
-        theme = categories.saveAndFlush(category("Profil IT")).getId();
-        other = categories.saveAndFlush(category("Profil IT bis")).getId();
+        theme = categories.save(category("Profil IT")).getId();
+        other = categories.save(category("Profil IT bis")).getId();
     }
 
     private static Category category(String name) {
-        Category category = new Category();
-        category.setName(name);
-        category.setSlug(name.toLowerCase().replace(' ', '-'));
-        return category;
+        return Category.builder().name(name).slug(name.toLowerCase().replace(' ', '-')).build();
     }
 
     private Long account(String email) {

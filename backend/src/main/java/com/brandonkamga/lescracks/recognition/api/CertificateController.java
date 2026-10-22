@@ -3,8 +3,8 @@ package com.brandonkamga.lescracks.recognition.api;
 import com.brandonkamga.lescracks.recognition.api.dto.AdminCertificateResponse;
 import com.brandonkamga.lescracks.recognition.api.dto.CertificateResponse;
 import com.brandonkamga.lescracks.recognition.api.dto.IssueRequest;
-import com.brandonkamga.lescracks.recognition.domain.CertificateService;
-import com.brandonkamga.lescracks.recognition.domain.CertificateView;
+import com.brandonkamga.lescracks.recognition.application.CertificateService;
+import com.brandonkamga.lescracks.recognition.application.CertificateView;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -31,13 +31,13 @@ public class CertificateController {
 
     @GetMapping("/mine")
     public List<CertificateResponse> mine(Principal principal) {
-        return certificates.mine(principal.getName()).stream().map(CertificateResponse::of).toList();
+        return certificates.listMine(principal.getName()).stream().map(CertificateResponse::of).toList();
     }
 
     @GetMapping("/admin/events/{eventId}")
     @PreAuthorize("hasRole('ADMIN')")
     public List<AdminCertificateResponse> forEvent(@PathVariable Long eventId) {
-        return admin(certificates.forEvent(eventId));
+        return admin(certificates.listForEvent(eventId));
     }
 
     @PostMapping("/admin/events/{eventId}/drafts")

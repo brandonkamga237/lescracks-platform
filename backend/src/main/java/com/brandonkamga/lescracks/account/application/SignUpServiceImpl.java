@@ -29,25 +29,23 @@ public class SignUpServiceImpl implements SignUpService {
     @Override
     public AccountSummary register(Registration registration) {
         String email = registration.email().trim().toLowerCase();
-        Account existing = accounts.findByEmail(email).orElse(null);
-        if (existing != null && existing.hasLoginMethod()) {
+        if (accounts.findByEmail(email).isPresent()) {
             metrics.register(false);
             throw new BadRequestException("Cette adresse email est déjà utilisée.");
         }
-        Account account = existing != null ? existing : Account.builder()
+        Account account = Account.builder()
                 .email(email)
+                .passwordHash(passwords.hash(registration.password()))
+                .firstName(registration.firstName().trim())
+                .lastName(registration.lastName().trim())
                 .status(AccountStatus.ACTIVE)
                 .provider(AuthProvider.LOCAL)
                 .build();
-        account.setPasswordHash(passwords.hash(registration.password()));
-        account.setFirstName(registration.firstName().trim());
-        account.setLastName(registration.lastName().trim());
-        account.setEmailVerified(false);
         Arrival arrival = registration.arrival();
         if (arrival != null) account.recordArrival(arrival.path(), arrival.language(), arrival.timezone());
         AccountSummary saved = AccountSummary.of(accounts.save(account));
         // Before the email goes out: a listener refusing the phone number undoes everything.
-        events.registered(new AccountRegistered(saved.getId(), saved.getEmail(), registration.phone(),
+        events.registered(new AccountRegistered(saved.getId(), saved.getEmail(), saved.getFirstName(), saved.getLastName(), registration.phone(),
                 registration.marketingConsent(), Boolean.TRUE.equals(registration.newsletter())));
         verification.send(saved);
         metrics.register(true);

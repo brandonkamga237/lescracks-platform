@@ -11,7 +11,7 @@ import com.brandonkamga.lescracks.member.application.ProfileServiceImpl;
 import com.brandonkamga.lescracks.member.domain.port.MemberProfileStore;
 import com.brandonkamga.lescracks.shared.config.TransactionalServices;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
-import com.brandonkamga.lescracks.taxonomy.domain.TaxonomyService;
+import com.brandonkamga.lescracks.taxonomy.application.TaxonomyService;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -4,7 +4,6 @@ import com.brandonkamga.lescracks.account.domain.model.Account;
 import com.brandonkamga.lescracks.account.domain.model.AccountSearch;
 import com.brandonkamga.lescracks.account.domain.model.AccountStatus;
 import com.brandonkamga.lescracks.account.domain.port.AccountStore;
-import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.ConflictException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 import com.brandonkamga.lescracks.shared.paging.PageQuery;
@@ -48,14 +47,14 @@ public class AccountAdminServiceImpl implements AccountAdminService {
 
     @Override
     public void resendVerification(Long id) {
-        Account account = requireLogin(id);
+        Account account = requireAccount(id);
         if (account.isEmailVerified()) throw new ConflictException("Cette adresse est déjà confirmée.");
         verification.send(AccountSummary.of(account));
     }
 
     @Override
     public AccountSummary markVerified(Long id) {
-        Account account = requireLogin(id);
+        Account account = requireAccount(id);
         account.setEmailVerified(true);
         return AccountSummary.of(accounts.save(account));
     }
@@ -64,11 +63,5 @@ public class AccountAdminServiceImpl implements AccountAdminService {
         return accounts.findById(id).orElseThrow(() -> new NotFoundException("Utilisateur", "id", id));
     }
 
-    private Account requireLogin(Long id) {
-        Account account = requireAccount(id);
-        if (!account.hasLoginMethod()) {
-            throw new BadRequestException("Ce contact est seulement abonné à la newsletter : il n’a pas de compte à confirmer.");
-        }
-        return account;
-    }
+
 }

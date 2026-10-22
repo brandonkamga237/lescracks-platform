@@ -1,8 +1,6 @@
 package com.brandonkamga.lescracks.account.application;
 
 import com.brandonkamga.lescracks.account.domain.model.Account;
-import com.brandonkamga.lescracks.account.domain.model.AccountStatus;
-import com.brandonkamga.lescracks.account.domain.model.AuthProvider;
 import com.brandonkamga.lescracks.account.domain.port.AccountStore;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
@@ -41,18 +39,6 @@ public class AccountDirectoryImpl implements AccountDirectory {
         if (ids.isEmpty()) return Map.of();
         return accounts.findAllById(ids).stream().map(AccountSummary::of)
                 .collect(Collectors.toMap(AccountSummary::getId, Function.identity()));
-    }
-
-    @Override
-    public AccountSummary createContact(String email, String firstName, String lastName) {
-        return AccountSummary.of(accounts.save(Account.builder()
-                .email(email.trim().toLowerCase())
-                .firstName(firstName == null ? "" : firstName.trim())
-                .lastName(lastName == null ? "" : lastName.trim())
-                .status(AccountStatus.ACTIVE)
-                .emailVerified(false)
-                .provider(AuthProvider.LOCAL)
-                .build()));
     }
 
     @Override

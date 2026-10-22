@@ -1,6 +1,6 @@
 package com.brandonkamga.lescracks.recognition.api.dto;
 
-import com.brandonkamga.lescracks.recognition.domain.BadgeDraft;
+import com.brandonkamga.lescracks.recognition.application.BadgeDraft;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

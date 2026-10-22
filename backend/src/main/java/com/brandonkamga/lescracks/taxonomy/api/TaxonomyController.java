@@ -4,8 +4,7 @@ import com.brandonkamga.lescracks.taxonomy.api.dto.CategoryRequest;
 import com.brandonkamga.lescracks.taxonomy.api.dto.CategoryResponse;
 import com.brandonkamga.lescracks.taxonomy.api.dto.TagRequest;
 import com.brandonkamga.lescracks.taxonomy.api.dto.TagResponse;
-import com.brandonkamga.lescracks.taxonomy.domain.TaxonomyMapper;
-import com.brandonkamga.lescracks.taxonomy.domain.TaxonomyService;
+import com.brandonkamga.lescracks.taxonomy.application.TaxonomyService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,49 +16,42 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * How the catalogue is organised.
- *
- * Categories and tags share a controller because they are never used apart: a tag without its
- * category means nothing, and every screen that lists one lists the other.
- */
+/** How the blog is organised: themes and tags share a controller because every screen lists both. */
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Catégories et tags")
 public class TaxonomyController {
 
     private final TaxonomyService taxonomy;
-    private final TaxonomyMapper mapper;
 
-    public TaxonomyController(TaxonomyService taxonomy, TaxonomyMapper mapper) {
+    public TaxonomyController(TaxonomyService taxonomy) {
         this.taxonomy = taxonomy;
-        this.mapper = mapper;
     }
 
     @GetMapping("/categories")
     @Operation(summary = "Toutes les catégories")
     public List<CategoryResponse> categories() {
-        return taxonomy.categories().stream().map(mapper::toResponse).toList();
+        return taxonomy.listCategories().stream().map(CategoryResponse::of).toList();
     }
 
     @GetMapping("/tags")
     @Operation(summary = "Les tags, par ordre alphabétique")
     public List<TagResponse> tags() {
-        return taxonomy.tags().stream().map(mapper::toResponse).toList();
+        return taxonomy.listTags().stream().map(TagResponse::of).toList();
     }
 
     @PostMapping("/admin/categories")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryResponse createCategory(@Valid @RequestBody CategoryRequest request) {
-        return mapper.toResponse(taxonomy.createCategory(request.name()));
+        return CategoryResponse.of(taxonomy.createCategory(request.name()));
     }
 
     @PutMapping("/admin/categories/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public CategoryResponse renameCategory(@PathVariable Long id,
                                            @Valid @RequestBody CategoryRequest request) {
-        return mapper.toResponse(taxonomy.renameCategory(id, request.name()));
+        return CategoryResponse.of(taxonomy.renameCategory(id, request.name()));
     }
 
     @DeleteMapping("/admin/categories/{id}")
@@ -73,13 +65,13 @@ public class TaxonomyController {
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public TagResponse createTag(@Valid @RequestBody TagRequest request) {
-        return mapper.toResponse(taxonomy.createTag(request.name()));
+        return TagResponse.of(taxonomy.createTag(request.name()));
     }
 
     @PutMapping("/admin/tags/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public TagResponse renameTag(@PathVariable Long id, @Valid @RequestBody TagRequest request) {
-        return mapper.toResponse(taxonomy.renameTag(id, request.name()));
+        return TagResponse.of(taxonomy.renameTag(id, request.name()));
     }
 
     @DeleteMapping("/admin/tags/{id}")

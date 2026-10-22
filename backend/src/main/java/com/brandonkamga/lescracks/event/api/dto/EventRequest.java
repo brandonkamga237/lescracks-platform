@@ -1,8 +1,9 @@
 package com.brandonkamga.lescracks.event.api.dto;
 
-import com.brandonkamga.lescracks.event.domain.EventFormat;
-import com.brandonkamga.lescracks.event.domain.EventStatus;
-import com.brandonkamga.lescracks.event.domain.EventType;
+import com.brandonkamga.lescracks.event.application.EventDraft;
+import com.brandonkamga.lescracks.event.domain.model.EventFormat;
+import com.brandonkamga.lescracks.event.domain.model.EventStatus;
+import com.brandonkamga.lescracks.event.domain.model.EventType;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -27,4 +28,9 @@ public record EventRequest(
         @Min(1) @Max(4) Integer maxTeamSize,
         /** Last moment to submit; absent means the end of the event. */
         Instant submissionDeadline) {
+
+    public EventDraft toDraft() {
+        return new EventDraft(title, description, type, format, startDate, endDate, location, status, scheduledAt,
+                acceptsSubmissions, maxTeamSize, submissionDeadline);
+    }
 }

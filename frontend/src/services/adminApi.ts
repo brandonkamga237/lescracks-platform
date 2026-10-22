@@ -47,9 +47,7 @@ export interface AdminArticleFilters extends Query {
   status?: ResourceStatus;
 }
 
-/** MEMBER: can sign in; CONTACT: newsletter only. */
 export interface UserFilters {
-  kind?: 'MEMBER' | 'CONTACT';
   verified?: boolean;
 }
 
@@ -165,8 +163,8 @@ export const adminApi = {
     http.post<void>('/newsletter/admin/test', { subject, body, email }),
   newsletterPreview: (subject: string, body: ArticleBlock[]) =>
     http.post<{ html: string }>('/newsletter/admin/preview', { subject, body }),
-  newsletterUnsubscribe: (userId: number) => http.post<AdminSubscriber>(`/newsletter/admin/subscriptions/${userId}/unsubscribe`),
-  newsletterSubscribe: (userId: number) => http.post<AdminSubscriber>(`/newsletter/admin/subscriptions/${userId}/subscribe`),
+  newsletterUnsubscribe: (subscriberId: number) => http.post<AdminSubscriber>(`/newsletter/admin/subscriptions/${subscriberId}/unsubscribe`),
+  newsletterSubscribe: (subscriberId: number) => http.post<AdminSubscriber>(`/newsletter/admin/subscriptions/${subscriberId}/subscribe`),
   newsletterCampaigns: (signal?: AbortSignal) => http.get<NewsletterCampaign[]>('/newsletter/admin/campaigns', undefined, signal),
   exportUsers: () => downloadCsv('/admin/users/export', 'lescracks-users.csv'),
   exportNewsletter: () => downloadCsv('/newsletter/admin/subscriptions/export', 'lescracks-newsletter.csv'),

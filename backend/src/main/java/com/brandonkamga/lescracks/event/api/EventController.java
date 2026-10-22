@@ -2,74 +2,64 @@ package com.brandonkamga.lescracks.event.api;
 
 import com.brandonkamga.lescracks.event.api.dto.EventRequest;
 import com.brandonkamga.lescracks.event.api.dto.EventResponse;
-import com.brandonkamga.lescracks.event.api.dto.EventViewRequest;
-import com.brandonkamga.lescracks.event.api.dto.EventViewsResponse;
-import com.brandonkamga.lescracks.event.domain.Event;
-import com.brandonkamga.lescracks.event.domain.EventFormat;
-import com.brandonkamga.lescracks.event.domain.EventService;
-import com.brandonkamga.lescracks.event.domain.EventType;
+import com.brandonkamga.lescracks.event.application.EventAdminService;
+import com.brandonkamga.lescracks.event.application.EventCatalog;
+import com.brandonkamga.lescracks.event.domain.model.EventFormat;
+import com.brandonkamga.lescracks.event.domain.model.EventType;
 import com.brandonkamga.lescracks.shared.dto.PageResponse;
+import com.brandonkamga.lescracks.shared.paging.PageQuery;
+import com.brandonkamga.lescracks.storage.api.Uploads;
 
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/events")
 public class EventController {
-    private final EventService events;
+    private static final int MAX_PAGE_SIZE = 100;
 
-    public EventController(EventService events) {
-        this.events = events;
+    private final EventCatalog catalog;
+    private final EventAdminService admin;
+
+    public EventController(EventCatalog catalog, EventAdminService admin) {
+        this.catalog = catalog;
+        this.admin = admin;
     }
 
     @GetMapping
     public PageResponse<EventResponse> published(@RequestParam(required = false) EventType type,
                                                  @RequestParam(required = false) EventFormat format,
-                                                 @PageableDefault(size = 12) Pageable pageable) {
-        return PageResponse.of(events.published(type, format, pageable), EventController::response);
+                                                 @RequestParam(defaultValue = "0") int page,
+                                                 @RequestParam(defaultValue = "12") int size) {
+        return PageResponse.of(catalog.search(type, format, pageOf(page, size)), EventResponse::of);
     }
 
     @GetMapping("/upcoming")
-    public PageResponse<EventResponse> upcoming(@PageableDefault(size = 12) Pageable pageable) {
-        return PageResponse.of(events.upcoming(pageable), EventController::response);
+    public PageResponse<EventResponse> upcoming(@RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "12") int size) {
+        return PageResponse.of(catalog.listUpcoming(pageOf(page, size)), EventResponse::of);
     }
 
     @GetMapping("/past")
-    public PageResponse<EventResponse> past(@PageableDefault(size = 12) Pageable pageable) {
-        return PageResponse.of(events.past(pageable), EventController::response);
+    public PageResponse<EventResponse> past(@RequestParam(defaultValue = "0") int page,
+                                            @RequestParam(defaultValue = "12") int size) {
+        return PageResponse.of(catalog.listPast(pageOf(page, size)), EventResponse::of);
     }
 
     @GetMapping("/{slug}")
     public EventResponse get(@PathVariable String slug) {
-        Event event = events.requireBySlugOrId(slug);
-        if (event.getStatus() != com.brandonkamga.lescracks.event.domain.EventStatus.PUBLISHED) {
-            throw new com.brandonkamga.lescracks.shared.exception.NotFoundException("Event", "slug", slug);
-        }
-        return response(event);
-    }
-
-    /** Open to everyone: anonymous visitors count too, by the random id their browser keeps. */
-    @PostMapping("/{id}/views")
-    public EventViewsResponse recordView(@PathVariable Long id, @RequestBody(required = false) EventViewRequest request,
-                                         Authentication authentication) {
-        var body = request != null ? request : new EventViewRequest(null);
-        return new EventViewsResponse(events.recordView(id, body.toVisitor(authentication != null ? authentication.getName() : null)));
+        return EventResponse.of(catalog.requirePublished(slug));
     }
 
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
-    public PageResponse<EventResponse> all(@PageableDefault(size = 20) Pageable pageable) {
-        return PageResponse.of(events.all(pageable), EventController::response);
+    public PageResponse<EventResponse> all(@RequestParam(defaultValue = "0") int page,
+                                           @RequestParam(defaultValue = "20") int size) {
+        return PageResponse.of(admin.list(pageOf(page, size)), EventResponse::of);
     }
 
     @PostMapping(value = "/admin", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -77,7 +67,7 @@ public class EventController {
     @ResponseStatus(HttpStatus.CREATED)
     public EventResponse create(@Valid @RequestPart("data") EventRequest request,
                                 @RequestPart(value = "coverImageFile", required = false) MultipartFile coverImageFile) {
-        return response(events.create(request, coverImageFile));
+        return EventResponse.of(admin.create(request.toDraft(), Uploads.of(coverImageFile)));
     }
 
     @PutMapping(value = "/admin/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -85,18 +75,17 @@ public class EventController {
     public EventResponse update(@PathVariable Long id,
                                 @Valid @RequestPart("data") EventRequest request,
                                 @RequestPart(value = "coverImageFile", required = false) MultipartFile coverImageFile) {
-        return response(events.update(id, request, coverImageFile));
+        return EventResponse.of(admin.update(id, request.toDraft(), Uploads.of(coverImageFile)));
     }
 
     @DeleteMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) { events.delete(id); }
+    public void delete(@PathVariable Long id) {
+        admin.delete(id);
+    }
 
-    private static EventResponse response(Event event) {
-        return new EventResponse(event.getId(), event.getSlug(), event.getTitle(), event.getDescription(), event.getType(),
-                event.getFormat(), event.getStartDate(), event.getEndDate(), event.getLocation(), event.getCoverImage(),
-                event.getStatus(), event.getCreatedAt(), event.getUpdatedAt(), event.getScheduledAt(), event.getViewCount(),
-                event.getRegistrationCount(), event.isAcceptsSubmissions(), event.getMaxTeamSize(), event.submissionsCloseAt());
+    private static PageQuery pageOf(int page, int size) {
+        return new PageQuery(Math.max(0, page), Math.clamp(size, 1, MAX_PAGE_SIZE));
     }
 }

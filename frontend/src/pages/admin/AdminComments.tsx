@@ -4,7 +4,6 @@ import { Check, EyeOff, ExternalLink, RotateCcw, Trash2 } from 'lucide-react';
 import { AdminAction, AdminConfirm, AdminPagination, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
 import { SEGMENT, Segmented } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
-import { articlePath } from '@/lib/slugs';
 import { adminApi } from '@/services/adminApi';
 import { ApiError } from '@/services/http';
 import type { AdminComment, CommentStatus } from '@/services/types';
@@ -89,11 +88,11 @@ export default function AdminComments() {
                 </ul>
               )}
               <p className="mt-2 text-xs text-t4">
-                {comment.parentId ? 'Réponse' : 'Commentaire'} sur « {comment.article.title} » · {dateFormat.format(new Date(comment.createdAt))}{comment.editedAt ? ' · modifié' : ''}
+                {comment.parentId ? 'Réponse' : 'Commentaire'} sur « {comment.target?.title ?? 'un contenu supprimé'} » · {dateFormat.format(new Date(comment.createdAt))}{comment.editedAt ? ' · modifié' : ''}
               </p>
             </div>
             <div className="flex items-center gap-2" role="group" aria-label="Actions de modération">
-              <AdminAction icon={ExternalLink} label="Voir" onClick={() => window.open(`${articlePath(comment.article)}#commentaire-${comment.id}`, '_blank', 'noopener')} />
+              {comment.target && <AdminAction icon={ExternalLink} label="Voir" onClick={() => window.open(`${comment.target?.path}#commentaire-${comment.id}`, '_blank', 'noopener')} />}
               {comment.status === 'HIDDEN' && <AdminAction icon={RotateCcw} label="Rétablir" disabled={busy === comment.id} onClick={() => void moderate(comment, 'VISIBLE')} />}
               {comment.status === 'VISIBLE' && comment.reportCount > 0 && <AdminAction icon={Check} label="Garder" disabled={busy === comment.id} onClick={() => void moderate(comment, 'VISIBLE')} />}
               {comment.status === 'VISIBLE' && <AdminAction icon={EyeOff} label="Masquer" danger disabled={busy === comment.id} onClick={() => void moderate(comment, 'HIDDEN')} />}

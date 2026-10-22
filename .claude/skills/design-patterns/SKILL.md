@@ -114,6 +114,9 @@ Before writing any of these, use or extend the kernel one:
 - Publication lifecycle (status, slug, cover, scheduled/published dates), slugs, CSV export,
   visitor keys, one-time tokens: one implementation each in the kernel. A second copy in a
   module is a review blocker.
+- Uploaded files: the controller turns a `MultipartFile` into an `Upload` with `Uploads.of`
+  (`storage/api`), the use case resolves or discards a cover with `CoverImages` (`storage/domain`).
+  No servlet type below `api/`.
 
 If two modules need the same thing and the kernel lacks it, move it to the kernel in its own
 commit first, then use it.

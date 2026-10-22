@@ -14,8 +14,7 @@ public record MemberAdminResponse(Long id, String email, String firstName, Strin
                                   AccountStatus status, boolean verified, AuthProvider provider, Instant createdAt,
                                   String phone, String country, MemberSituation situation, MemberGoal goal,
                                   String location, boolean marketingConsent, int completion,
-                                  /** False for a newsletter-only contact. */
-                                  boolean hasAccount, boolean onboarded, Instant lastSeenAt, String signupPath) {
+                                  boolean onboarded, Instant lastSeenAt, String signupPath) {
 
     public static MemberAdminResponse of(MemberView view) {
         AccountSummary account = view.account();
@@ -24,6 +23,6 @@ public record MemberAdminResponse(Long id, String email, String firstName, Strin
                 account.getStatus(), account.isEmailVerified(), account.getProvider(), account.getCreatedAt(),
                 profile.getPhone(), profile.getCountry(), profile.getSituation(), profile.getGoal(),
                 profile.getLocation(), profile.isMarketingConsent(), view.completion().percent(),
-                account.hasLoginMethod(), profile.getOnboardedAt() != null, account.getLastSeenAt(), account.getSignupPath());
+                profile.getOnboardedAt() != null, account.getLastSeenAt(), account.getSignupPath());
     }
 }

@@ -55,7 +55,6 @@ public class InMemoryAccountStore implements AccountStore {
     public List<Account> searchAll(AccountSearch search) {
         return rows.values().stream()
                 .filter(account -> search.verified() == null || account.isEmailVerified() == search.verified())
-                .filter(account -> search.kind() == null || (search.kind() == AccountSearch.Kind.MEMBER) == account.hasLoginMethod())
                 .sorted(Comparator.comparing(Account::getCreatedAt).reversed())
                 .map(account -> account.toBuilder().build()).toList();
     }

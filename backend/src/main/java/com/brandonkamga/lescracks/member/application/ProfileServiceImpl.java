@@ -7,7 +7,7 @@ import com.brandonkamga.lescracks.member.domain.model.MemberProfile;
 import com.brandonkamga.lescracks.member.domain.port.MemberProfileStore;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
-import com.brandonkamga.lescracks.taxonomy.domain.TaxonomyService;
+import com.brandonkamga.lescracks.taxonomy.application.TaxonomyService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

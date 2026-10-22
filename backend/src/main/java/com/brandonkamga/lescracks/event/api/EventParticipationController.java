@@ -8,8 +8,8 @@ import com.brandonkamga.lescracks.event.api.dto.RegistrationResponse;
 import com.brandonkamga.lescracks.event.api.dto.ReviewRequest;
 import com.brandonkamga.lescracks.event.api.dto.SubmissionRequest;
 import com.brandonkamga.lescracks.event.api.dto.SubmissionResponse;
-import com.brandonkamga.lescracks.event.domain.EventRegistrationService;
-import com.brandonkamga.lescracks.event.domain.EventSubmissionService;
+import com.brandonkamga.lescracks.event.application.RegistrationService;
+import com.brandonkamga.lescracks.event.application.SubmissionService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -27,10 +27,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/events")
 public class EventParticipationController {
-    private final EventRegistrationService registrations;
-    private final EventSubmissionService submissions;
+    private final RegistrationService registrations;
+    private final SubmissionService submissions;
 
-    public EventParticipationController(EventRegistrationService registrations, EventSubmissionService submissions) {
+    public EventParticipationController(RegistrationService registrations, SubmissionService submissions) {
         this.registrations = registrations;
         this.submissions = submissions;
     }
@@ -54,12 +54,12 @@ public class EventParticipationController {
     /** Under /registrations/ so it never reads as an event slug on the public /api/events/{slug}. */
     @GetMapping("/registrations/mine")
     public List<MyEventResponse> mine(Principal principal) {
-        return registrations.mine(principal.getName()).stream().map(MyEventResponse::of).toList();
+        return registrations.listMine(principal.getName()).stream().map(MyEventResponse::of).toList();
     }
 
     @GetMapping("/{id}/submission")
     public ResponseEntity<SubmissionResponse> submission(@PathVariable Long id, Principal principal) {
-        return submissions.mine(id, principal.getName())
+        return submissions.findMine(id, principal.getName())
                 .map(view -> ResponseEntity.ok(SubmissionResponse.of(view, principal.getName())))
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
@@ -72,7 +72,7 @@ public class EventParticipationController {
     @GetMapping("/admin/{id}/registrations")
     @PreAuthorize("hasRole('ADMIN')")
     public List<AdminRegistrationResponse> registrations(@PathVariable Long id) {
-        return registrations.forEvent(id).stream().map(AdminRegistrationResponse::of).toList();
+        return registrations.listForEvent(id).stream().map(AdminRegistrationResponse::of).toList();
     }
 
     @PatchMapping("/admin/registrations/{registrationId}")
@@ -84,7 +84,7 @@ public class EventParticipationController {
     @GetMapping("/admin/{id}/submissions")
     @PreAuthorize("hasRole('ADMIN')")
     public List<AdminSubmissionResponse> submissions(@PathVariable Long id) {
-        return submissions.forEvent(id).stream().map(AdminSubmissionResponse::of).toList();
+        return submissions.listForEvent(id).stream().map(AdminSubmissionResponse::of).toList();
     }
 
     @PatchMapping("/admin/submissions/{submissionId}")

@@ -1,6 +1,6 @@
 package com.brandonkamga.lescracks.event.api.dto;
 
-import com.brandonkamga.lescracks.event.domain.ProjectDraft;
+import com.brandonkamga.lescracks.event.application.ProjectDraft;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

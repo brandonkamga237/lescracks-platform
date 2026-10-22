@@ -5,10 +5,7 @@ import java.time.LocalDate;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * The figures the dashboard reads about accounts, each computed by one SQL query. "Members"
- * are accounts that can sign in; newsletter-only contacts are counted apart.
- */
+/** The figures the dashboard reads about accounts, each computed by one SQL query. */
 public interface AccountStatistics {
 
     Map<String, Long> membersByStatus();
@@ -16,8 +13,6 @@ public interface AccountStatistics {
     Map<String, Long> membersByProvider();
 
     long verifiedMembers();
-
-    long newsletterContacts();
 
     long membersCreatedSince(Instant since);
 
