@@ -3,15 +3,13 @@ French-language tech training platform: resources, events, participations, Accom
 Monorepo: `frontend/` React + Vite (SPA), `backend/` Spring Boot + PostgreSQL + MinIO.
 
 ## Structure
-- `backend/src/main/java/com/brandonkamga/lescracks/` → **package by business domain**, one package per domain: `identity`, `resource`, `taxonomy`, `event`, `newsletter`, `stats`, `storage`, `mail`, `seo`. Each one holds its own entities, services, repositories and payloads, split into three layers:
-  - `<feature>/api/` → controllers (REST under `/api/*`; `seo/api` serves `/seo`, outside `/api`), and `<feature>/api/dto/` → exposed payloads (never entities)
-  - `<feature>/domain/` → JPA entities, enums, business logic (service interface + Impl), mappers
-  - `<feature>/infra/` → Spring Data JPA repositories and external adapters (MinIO, mail, Spring Security glue)
-  - `identity/` covers admins, members, identities and tokens: local sessions plus OIDC synchronisation
+- `backend/src/main/java/com/brandonkamga/lescracks/` → **one package per business capability**. Target map (migration in progress, module by module): `account` (sign-in, credentials, admins), `member` (profile, welcome answers), `newsletter` (its own subscribers, with or without an account) and `engagement` (views, likes, comments on any target; content modules plug in as `ContentTargets`), `taxonomy` (themes and tags), `content` (blog articles + Talk episodes; routes keep their `/api/resources` and `/api/talks` paths) and `event` (events, registrations, hackathon projects; other modules read an event through `EventDirectory`) — migrated, `recognition`, `notification` (emails), `analytics`, `storage`, `seo`. Not yet moved: `community` (now only public profiles), `mail` (→ `notification`), `stats` (→ `analytics`)
+  - Every module uses the same skeleton: `api/` + `api/dto/` (HTTP), `application/` (use cases, commands), `domain/model/` + `domain/port/` (plain Java), `infra/persistence/`, `infra/<technology>/`, `infra/config/` (assembly + transactions). Rules, patterns and reuse: **`.claude/skills/design-patterns/SKILL.md`, mandatory for every backend change**
   - `shared/` → cross-cutting code only, never business rules:
-    - `shared/security/` → SecurityConfig (route rules) + KeycloakRoleConverter. Identity is Keycloak's; the API only verifies tokens
+    - `shared/security/` → SecurityConfig (route rules) + KeycloakRoleConverter. Local accounts and their sessions live in `account`; Keycloak only issues the Google/GitHub tokens the API verifies
     - `shared/config/` → OpenApiConfig, JacksonConfig, AppBeans; `shared/bootstrap/` → startup seeders and backfills
-    - `shared/exception/` → business exceptions + `GlobalExceptionHandler`; `shared/dto/` → ApiError, PageResponse; `shared/util/` → Slugs
+    - `shared/exception/` → business exceptions (carry an `ErrorCode`, no HTTP type) + `GlobalExceptionHandler`; `shared/dto/` → ApiError, PageResponse; `shared/paging/` → PageQuery, Paged; `shared/util/` → Slugs
+    - `shared/config/TransactionalServices` → wraps plain-Java application services in their transaction
 - `backend/src/main/resources/`
   - `application.yaml` + `application-{dev,prod,test}.yml`
   - `db/migration/` → Flyway migrations `V{n}__description.sql`
@@ -24,7 +22,7 @@ Monorepo: `frontend/` React + Vite (SPA), `backend/` Spring Boot + PostgreSQL + 
 - `docker-compose.yml` → local dev stack (postgres, minio + backend under profile `app`)
 - `docker-compose.prod.yml` → prod stack (postgres, minio, backend, frontend, Traefik), deployed by CI
 - `.env.example` → shape of the production variables (no secrets)
-- `.claude/skills/` → project skills: `git-workflow`, `dev-setup`, `backend-endpoint`, `db-migration`, `frontend-page`, `seo-page`
+- `.claude/skills/` → project skills: `design-patterns`, `git-workflow`, `dev-setup`, `backend-endpoint`, `db-migration`, `frontend-page`, `seo-page`
 
 ## Commands (exact)
 Backend (from `backend/`):
@@ -59,18 +57,19 @@ Before any commit or PR:
 - Worth writing: a non-obvious workaround, an external constraint, a counter-intuitive decision, a known trap
 
 ### Backend
-- New code goes into the package of the domain it belongs to, never into a layer-wide package: `<feature>/api` (controller + `api/dto`), `<feature>/domain` (entities, enums, service interface + `XxxServiceImpl`), `<feature>/infra` (repositories, external adapters)
-- Prefer calling another domain through its `domain` service rather than its repositories; `stats`, `seo` and `shared/bootstrap` are the existing exceptions, as read-only aggregation and seeding cut across every domain
-- Controllers return the response record (or `ResponseEntity<XxxResponse>`); requests translate themselves into domain commands (`request.toRegistration()`), responses build themselves from entities (`XxxResponse.of(entity)`)
-- Dependency direction `api → domain ← infra`: `domain` never imports an `api` class; another domain is reached through its service interface (e.g. `UserDirectory`), never its repositories
-- SOLID and the patterns in use (command objects, `EmailTemplate` strategy, after-commit email delivery): see `.claude/skills/backend-endpoint/SKILL.md`
-- Never expose a `<feature>/domain/` entity: always a DTO
+- **Architecture, SOLID and design patterns are non-negotiable**: follow `.claude/skills/design-patterns/SKILL.md` for every feature, fix and refactor, and run its checklist before committing. `ArchitectureTest` enforces the dependency rule in CI
+- Dependency direction `api → application → domain ← infra`: `domain` and `application` are plain Java (no Spring, JPA, servlet, Hibernate, Micrometer); I/O goes through ports in `domain/port` implemented by adapters in `infra`; services are assembled in `infra/config`
+- Another module is reached through its `application` interfaces (e.g. `UserDirectory`) or a domain event, never its ports, entities or repositories; `stats`/`analytics`, `seo` and `shared/bootstrap` read across modules until each exposes a query port
+- Reuse before writing: paging, errors, slugs, publication lifecycle, CSV export, visitor keys live once in `shared`; a second copy in a module is a review blocker
+- Controllers return the response record (or `ResponseEntity<XxxResponse>`); requests translate themselves into commands (`request.toRegistration()`), responses build themselves from models (`XxxResponse.of(model)`)
+- Never expose a domain model or a JPA entity: always a DTO
 - Errors: throw `NotFoundException` / `BadRequestException` / `ForbiddenException` / `ConflictException`; do not set the status in the controller, `GlobalExceptionHandler` does it
-- DB schema: Flyway only (`ddl-auto: validate` everywhere). A new entity field means a new `V{n}__...sql` migration; never edit a migration that has already been applied
-- Lombok (`@Data`, `@Builder`) on DTOs and entities; logging through `slf4j`
+- DB access: **plain SQL through `JdbcClient`, no ORM**, in modules on the new skeleton; JPA remains only in modules not migrated yet. No N+1: no query in a loop, related data in one query per list, aggregates computed by PostgreSQL, indexes for every filtered or joined column (see the design-patterns skill)
+- DB schema: Flyway only (`ddl-auto: validate` for the remaining JPA entities). A new entity field means a new `V{n}__...sql` migration; never edit a migration that has already been applied
+- Lombok (`@Data`, `@Builder`) on DTOs and models; logging through `slf4j`
 - Public vs protected endpoints are declared in `SecurityConfig`, plus `@PreAuthorize` on each admin method; roles come from the Keycloak realm: `user`, `admin`
 - Text shown to users (emails, API errors) in French; everything else in English
-- Tests mirror the production layout: `src/test/.../<feature>/{api,domain,infra}/`, never a global `controller`/`service`/`repository` split. Shared fixtures live in `support/`; domain fixtures stay in their feature package. The suffix picks the suite: `*Test` runs without Docker via `./mvnw test` (pure unit tests plus light slices like `@WebMvcTest`), `*IT` runs via `./mvnw verify` against real PostgreSQL through Testcontainers (extend `support/PostgresIT`)
+- Tests mirror the production layout: `src/test/.../<module>/{api,application,domain,infra}/`; application tests use copying in-memory fakes for stores (`InMemoryXxxStore`) and assert on what was stored, never a global `controller`/`service`/`repository` split. Shared fixtures live in `support/`; domain fixtures stay in their feature package. The suffix picks the suite: `*Test` runs without Docker via `./mvnw test` (pure unit tests plus light slices like `@WebMvcTest`), `*IT` runs via `./mvnw verify` against real PostgreSQL through Testcontainers (extend `support/PostgresIT`)
 
 ### Frontend
 - Import through the `@/...` alias (never deep relative paths)
@@ -111,8 +110,8 @@ Before any commit or PR:
 
 ## Architecture
 - Client-rendered SPA → nginx routes bot user-agents to `/seo/*` (HTML + JSON-LD snapshots rendered by the backend). Every new indexable public page needs its snapshot in `SeoController` and its nginx entry
-- Flyway owns the schema (Hibernate only validates) → keeps dev and prod from drifting apart
-- Keycloak owns identity (password, Google, GitHub, reset, login throttling); the API is an OAuth2 resource server and holds no credentials. Adding a provider is realm configuration, not code
+- Flyway owns the schema → keeps dev and prod from drifting apart; SQL adapters are checked against it by their ITs
+- Members and admins sign in locally (`account`: BCrypt hashes, JDBC sessions); Google and GitHub go through Keycloak, whose tokens the API verifies as an OAuth2 resource server and syncs into a local account
 - MinIO (S3-compatible) for files and images, no application disk storage in production
 - Frontend and backend ship as separate containers behind Traefik; the frontend only talks to the backend through `/api/*`
 
@@ -121,13 +120,13 @@ Before any commit or PR:
 - **Application** = either a 360 application or an event registration (`event != null`)
 - **Participation** = someone enrolled on an event or on the 360, `IN_PROGRESS` then `COMPLETED` or `ABANDONED`
 - **Attestation** = proof of a completed participation, checkable by anyone at `/attestations/{code}`
-- **Resource** = a published piece of content (title, cover, category, status, schedule); today every resource is an **Article** (`articles` table: block body written in the back office), shown on the blog
+- **Article** = a blog post (title, cover, theme, tags, status, schedule, block body written in the back office), in the `articles` table owned by `content`. The API and the frontend still call it a "resource" (`/api/resources`, `ResourceResponse` shape)
 - **SEO snapshot** = server-rendered HTML served to bots instead of the SPA
 
 ## Current product scope (September 2026)
 - The current backend controllers and DTOs are the source of truth when older architecture notes above differ from the code.
 - Do not restore removed programmes, applications, participations, attestations, articles, or SEO snapshot controllers as part of frontend work. Do not invent progress, favourites, event registration, or personalised history without backend support.
-- The site has a **Blog** (`/blog`, articles only; old `/ressources` links redirect) and a **Formations** tab (`/formations`, courses coming soon: no course model or progress yet). Ebooks and videos were removed (V24). Public event detail routes use numeric IDs. Reading needs no account. CrackLab is out of the navigation for now (its routes stay reachable by link); no navigation entry carries a gold highlight. Marketing copy avoids "gratuit" and any mention of French or francophone.
+- The site has a **Blog** (`/blog`, articles only; old `/ressources` links redirect) and a **Formations** tab (`/formations`, courses coming soon: no course model or progress yet). Ebooks and videos were removed (V24). Public event detail routes use numeric IDs. Reading needs no account. CrackLab was removed (old `/cracklab` links redirect home; its tables stay in the database, unused); no navigation entry carries a gold highlight. Marketing copy avoids "gratuit" and any mention of French or francophone.
 - Preserve the black, anthracite, white and gold palette (`#d4af37`). Visitor, member and administrator experiences must use a coherent shared session and actual backend data.
 - Local member/admin authentication uses backend sessions; existing OIDC authentication is a separate transport. Do not send a stale OIDC bearer token alongside local cookie authentication.
 - Validate frontend changes with `pnpm typecheck`, `pnpm lint`, and `pnpm build`. Browser checks using API fixtures verify UI behaviour, not live backend integration.

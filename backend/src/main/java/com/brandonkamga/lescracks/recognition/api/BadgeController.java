@@ -5,7 +5,7 @@ import com.brandonkamga.lescracks.recognition.api.dto.BadgeHolderResponse;
 import com.brandonkamga.lescracks.recognition.api.dto.BadgeRequest;
 import com.brandonkamga.lescracks.recognition.api.dto.BadgeResponse;
 import com.brandonkamga.lescracks.recognition.api.dto.MemberBadgeResponse;
-import com.brandonkamga.lescracks.recognition.domain.BadgeService;
+import com.brandonkamga.lescracks.recognition.application.BadgeService;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -27,14 +27,14 @@ public class BadgeController {
 
     @GetMapping("/mine")
     public List<MemberBadgeResponse> mine(Principal principal) {
-        return badges.mine(principal.getName()).stream().map(MemberBadgeResponse::of).toList();
+        return badges.listMine(principal.getName()).stream().map(MemberBadgeResponse::of).toList();
     }
 
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public List<BadgeResponse> catalogue() {
-        Map<Long, Long> holders = badges.holderCounts();
-        return badges.catalogue().stream().map(badge -> BadgeResponse.of(badge, holders.getOrDefault(badge.getId(), 0L))).toList();
+        Map<Long, Long> holders = badges.countHolders();
+        return badges.listCatalogue().stream().map(badge -> BadgeResponse.of(badge, holders.getOrDefault(badge.getId(), 0L))).toList();
     }
 
     @PostMapping("/admin")
@@ -47,7 +47,7 @@ public class BadgeController {
     @PutMapping("/admin/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public BadgeResponse update(@PathVariable Long id, @Valid @RequestBody BadgeRequest request) {
-        return BadgeResponse.of(badges.update(id, request.toDraft()), badges.holderCounts().getOrDefault(id, 0L));
+        return BadgeResponse.of(badges.update(id, request.toDraft()), badges.countHolders().getOrDefault(id, 0L));
     }
 
     @DeleteMapping("/admin/{id}")
@@ -60,7 +60,7 @@ public class BadgeController {
     @GetMapping("/admin/{id}/holders")
     @PreAuthorize("hasRole('ADMIN')")
     public List<BadgeHolderResponse> holders(@PathVariable Long id) {
-        return badges.holders(id).stream().map(BadgeHolderResponse::of).toList();
+        return badges.listHolders(id).stream().map(BadgeHolderResponse::of).toList();
     }
 
     @PostMapping("/admin/{id}/holders")

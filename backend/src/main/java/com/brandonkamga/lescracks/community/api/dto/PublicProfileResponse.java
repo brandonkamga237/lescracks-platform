@@ -1,6 +1,6 @@
 package com.brandonkamga.lescracks.community.api.dto;
 
-import com.brandonkamga.lescracks.community.domain.PublicProfile;
+import com.brandonkamga.lescracks.community.application.PublicProfile;
 import com.brandonkamga.lescracks.recognition.api.dto.MemberBadgeResponse;
 import com.brandonkamga.lescracks.storage.domain.StoredFiles;
 

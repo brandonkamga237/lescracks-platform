@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.event.api.dto;
 
-import com.brandonkamga.lescracks.event.domain.ProjectReview;
-import com.brandonkamga.lescracks.event.domain.SubmissionStatus;
+import com.brandonkamga.lescracks.event.application.ProjectReview;
+import com.brandonkamga.lescracks.event.domain.model.SubmissionStatus;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

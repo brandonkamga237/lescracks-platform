@@ -1,22 +1,19 @@
 package com.brandonkamga.lescracks.seo.api;
 
-import com.brandonkamga.lescracks.event.domain.Event;
-import com.brandonkamga.lescracks.event.domain.EventFormat;
-import com.brandonkamga.lescracks.event.domain.EventService;
-import com.brandonkamga.lescracks.event.domain.EventStatus;
-import com.brandonkamga.lescracks.resource.api.dto.ResourceResponse;
-import com.brandonkamga.lescracks.resource.domain.Article;
-import com.brandonkamga.lescracks.resource.domain.Resource;
-import com.brandonkamga.lescracks.resource.api.ResourceMapper;
-import com.brandonkamga.lescracks.resource.domain.ResourceService;
-import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
+import com.brandonkamga.lescracks.event.application.EventCatalog;
+import com.brandonkamga.lescracks.event.domain.model.Event;
+import com.brandonkamga.lescracks.event.domain.model.EventFormat;
+import com.brandonkamga.lescracks.event.domain.model.EventStatus;
+import com.brandonkamga.lescracks.content.application.ArticleCatalog;
+import com.brandonkamga.lescracks.content.application.ArticleView;
+import com.brandonkamga.lescracks.content.application.TalkService;
+import com.brandonkamga.lescracks.content.domain.model.Article;
+import com.brandonkamga.lescracks.shared.paging.PageQuery;
 import com.brandonkamga.lescracks.shared.util.PlainText;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
-import com.brandonkamga.lescracks.talk.domain.TalkService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -40,15 +38,14 @@ public class SeoController {
     private static final int PREVIEW_WIDTH = 1296;
     private static final int PREVIEW_HEIGHT = 614;
 
-    private final ResourceService resources;
-    private final EventService events;
+    private final ArticleCatalog articles;
+    private final EventCatalog events;
     private final TalkService talks;
-    private final ResourceMapper mapper;
     private final ObjectMapper objectMapper;
 
     private final Map<String, PageMeta> pageMeta = Map.of(
             "home", new PageMeta("LesCracks · Apprendre la tech et passer à la pratique",
-                    "LesCracks : articles, ateliers et challenges CrackLab pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant.",
+                    "LesCracks : articles, ateliers et rendez-vous pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant.",
                     "/", "LesCracks : apprendre la tech et passer à la pratique"),
             "a-propos", new PageMeta("À propos · LesCracks",
                     "Ce que fait LesCracks : un blog tech, des formations à venir, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant.",
@@ -73,12 +70,10 @@ public class SeoController {
                     "/talk", "Le Talk")
     );
 
-    public SeoController(ResourceService resources, EventService events, TalkService talks,
-                         ResourceMapper mapper, ObjectMapper objectMapper) {
-        this.resources = resources;
+    public SeoController(ArticleCatalog articles, EventCatalog events, TalkService talks, ObjectMapper objectMapper) {
+        this.articles = articles;
         this.events = events;
         this.talks = talks;
-        this.mapper = mapper;
         this.objectMapper = objectMapper;
     }
 
@@ -89,12 +84,8 @@ public class SeoController {
 
     @GetMapping(value = "/evenements/{slug}", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<String> event(@PathVariable String slug, HttpServletRequest request) {
-        Event event = events.requireBySlugOrId(slug);
-        if (event.getStatus() != EventStatus.PUBLISHED) {
-            throw new NotFoundException("Event", "slug", slug);
-        }
-
-        String canonical = canonical(request, "/evenements/" + (event.getSlug() != null ? event.getSlug() : event.getId()));
+        Event event = events.requirePublished(slug).event();
+        String canonical = canonical(request, event.path());
         SeoHtml html = new SeoHtml(event.getTitle() + " · LesCracks", PlainText.excerpt(event.getDescription(), 160), canonical)
                 .type("website")
                 .image(absolute(request, event.getCoverImage()), event.getTitle(), null, null);
@@ -167,7 +158,6 @@ public class SeoController {
                 new SeoHtml.Link(canonical(request, "/formations"), "Formations"),
                 new SeoHtml.Link(canonical(request, "/evenements"), "Événements"),
                 new SeoHtml.Link(canonical(request, "/talk"), "LesCracks Talk"),
-                new SeoHtml.Link(canonical(request, "/cracklab"), "CrackLab"),
                 new SeoHtml.Link(canonical(request, "/a-propos"), "À propos")
         );
         html.navigation("Navigation principale", nav);
@@ -177,7 +167,6 @@ public class SeoController {
             html.section("Formations", canonical(request, "/formations"), "Des parcours complets, étape par étape, bientôt disponibles.");
             html.section("Événements", canonical(request, "/evenements"), "Ateliers, bootcamps, webinaires et conférences pour pratiquer avec d’autres, en ligne ou sur place.");
             html.section("LesCracks Talk", canonical(request, "/talk"), "Des conversations vidéo avec celles et ceux qui construisent la tech africaine.");
-            html.section("CrackLab", canonical(request, "/cracklab"), "Des casse-têtes à résoudre en raisonnant, un classement chaque semaine et des badges à débloquer.");
             html.section("À propos", canonical(request, "/a-propos"), "Qui est derrière LesCracks, ce que nous faisons et pourquoi.");
             addResourceLinks(html, request);
             addEventLinks(html, request);
@@ -201,34 +190,32 @@ public class SeoController {
     }
 
     private String buildResourceDetail(String slug, HttpServletRequest request) {
-        Resource resource = resources.requirePublishedBySlugOrId(slug);
-        ResourceResponse response = mapper.toResponse(resource);
-        String canonical = canonical(request, "/blog/" + (response.slug() != null ? response.slug() : response.id()));
-        SeoHtml html = new SeoHtml(response.title() + " · LesCracks", response.description(), canonical)
-                .image(absolute(request, response.coverImage()), response.title(), null, null);
+        ArticleView view = articles.requirePublished(slug);
+        Article article = view.article();
+        String canonical = canonical(request, article.path());
+        SeoHtml html = new SeoHtml(article.getTitle() + " · LesCracks", article.getDescription(), canonical)
+                .image(absolute(request, article.getCoverImage()), article.getTitle(), null, null);
 
         html.breadcrumbs(List.of(
                 new SeoHtml.Link(canonical(request, "/"), "Accueil"),
                 new SeoHtml.Link(canonical(request, "/blog"), "Blog"),
-                new SeoHtml.Link(canonical, response.title())
+                new SeoHtml.Link(canonical, article.getTitle())
         ));
 
-        html.heading(response.title());
-        html.paragraph(response.description());
+        html.heading(article.getTitle());
+        html.paragraph(article.getDescription());
 
         List<Map<String, Object>> breadcrumbItems = List.of(
                 Map.of("name", "Accueil", "item", baseUrl(request) + "/"),
                 Map.of("name", "Blog", "item", baseUrl(request) + "/blog"),
-                Map.of("name", response.title(), "item", canonical)
+                Map.of("name", article.getTitle(), "item", canonical)
         );
 
         html.type("article");
-        html.fact("Catégorie", response.categoryName());
-        html.fact("Temps de lecture", response.readingMinutes() + " min");
+        html.fact("Catégorie", view.category() == null ? null : view.category().getName());
+        html.fact("Temps de lecture", article.getReadingMinutes() + " min");
 
-        String prose = resources.article(response.id())
-                .map(Article::getPlainText)
-                .orElse(null);
+        String prose = article.getPlainText();
         if (prose != null && !prose.isBlank()) {
             for (String paragraph : prose.split("\n\n+")) {
                 html.paragraph(paragraph);
@@ -238,12 +225,13 @@ public class SeoController {
         Map<String, Object> jsonLd = new LinkedHashMap<>();
         jsonLd.put("@context", "https://schema.org");
         jsonLd.put("@type", "Article");
-        jsonLd.put("headline", response.title());
-        jsonLd.put("description", response.description());
-        jsonLd.put("image", absolute(request, response.coverImage()));
+        jsonLd.put("headline", article.getTitle());
+        jsonLd.put("description", article.getDescription());
+        jsonLd.put("image", absolute(request, article.getCoverImage()));
         jsonLd.put("url", canonical);
-        jsonLd.put("datePublished", ISO.format(response.createdAt().atOffset(ZoneOffset.UTC)));
-        jsonLd.put("dateModified", ISO.format(response.updatedAt().atOffset(ZoneOffset.UTC)));
+        Instant published = article.getPublishedAt() != null ? article.getPublishedAt() : article.getCreatedAt();
+        jsonLd.put("datePublished", ISO.format(published.atOffset(ZoneOffset.UTC)));
+        jsonLd.put("dateModified", ISO.format(article.getUpdatedAt().atOffset(ZoneOffset.UTC)));
         jsonLd.put("author", Map.of("@type", "Organization", "name", "LesCracks"));
         html.jsonLd(writeJson(jsonLd));
 
@@ -252,20 +240,19 @@ public class SeoController {
     }
 
     private void addEventLinks(SeoHtml html, HttpServletRequest request) {
-        var published = events.published(null, null, PageRequest.of(0, 50));
+        var published = events.search(null, null, new PageQuery(0, 50)).items();
         if (published.isEmpty()) {
             html.paragraph("Aucun événement publié pour le moment.");
             return;
         }
 
         List<SeoHtml.Link> links = new ArrayList<>();
-        published.forEach(event -> links.add(new SeoHtml.Link(
-                canonical(request, "/evenements/" + (event.getSlug() != null ? event.getSlug() : event.getId())), event.getTitle())));
+        published.forEach(view -> links.add(new SeoHtml.Link(canonical(request, view.event().path()), view.event().getTitle())));
         html.links("Prochains événements", links);
     }
 
     private void addTalkLinks(SeoHtml html) {
-        var published = talks.published(PageRequest.of(0, 50));
+        var published = talks.listPublished(new PageQuery(0, 50)).items();
         if (published.isEmpty()) {
             html.paragraph("Le premier épisode se prépare.");
             return;
@@ -277,18 +264,14 @@ public class SeoController {
     }
 
     private void addResourceLinks(SeoHtml html, HttpServletRequest request) {
-        var published = resources.search(ResourceStatus.PUBLISHED, null, null, null, PageRequest.of(0, 50));
+        var published = articles.search(null, null, null, new PageQuery(0, 50)).items();
         if (published.isEmpty()) {
             html.paragraph("Aucun article publié pour le moment.");
             return;
         }
 
         List<SeoHtml.Link> links = new ArrayList<>();
-        published.forEach(resource -> {
-            ResourceResponse response = mapper.toSummary(resource);
-            String slug = response.slug() != null ? response.slug() : String.valueOf(response.id());
-            links.add(new SeoHtml.Link(canonical(request, "/blog/" + slug), response.title()));
-        });
+        published.forEach(view -> links.add(new SeoHtml.Link(canonical(request, view.article().path()), view.article().getTitle())));
         html.links("Articles récents", links);
     }
 
@@ -385,7 +368,7 @@ public class SeoController {
                 : "https://schema.org/EventScheduled";
     }
 
-    private String formatEventType(com.brandonkamga.lescracks.event.domain.EventType type) {
+    private String formatEventType(com.brandonkamga.lescracks.event.domain.model.EventType type) {
         return switch (type) {
             case BOOTCAMP -> "Bootcamp";
             case WORKSHOP -> "Atelier";

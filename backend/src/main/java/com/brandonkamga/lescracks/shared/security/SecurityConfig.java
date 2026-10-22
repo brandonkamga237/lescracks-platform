@@ -1,7 +1,6 @@
 package com.brandonkamga.lescracks.shared.security;
 
-import com.brandonkamga.lescracks.identity.infra.LastSeenFilter;
-import com.brandonkamga.lescracks.identity.infra.UserRepository;
+import com.brandonkamga.lescracks.account.infra.security.LastSeenFilter;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,12 +64,10 @@ public class SecurityConfig {
                 // Anyone may read the catalogue and check an attestation. Reading is what
                 // brings people in; asking them to sign up first is what keeps them out.
                 .requestMatchers(HttpMethod.GET, "/api/events", "/api/events/*").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/events/*/views").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/events/*/views", "/api/resources/*/views").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/certificates/verify/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/members/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/talks", "/api/talks/*").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/cracklab/challenges", "/api/cracklab/challenges/*", "/api/cracklab/ranking",
-                        "/api/cracklab/members/*", "/api/cracklab/results/*", "/api/cracklab/share/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/resources", "/api/resources/*").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/categories", "/api/tags").permitAll()
                 .requestMatchers("/api/files/**").permitAll()
@@ -86,11 +83,6 @@ public class SecurityConfig {
                     .accessDeniedHandler(errors));
 
         return http.build();
-    }
-
-    @Bean
-    LastSeenFilter lastSeenFilter(UserRepository users) {
-        return new LastSeenFilter(users);
     }
 
     @Bean

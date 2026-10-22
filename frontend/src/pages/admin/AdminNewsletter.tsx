@@ -51,13 +51,13 @@ export default function AdminNewsletter() {
   const campaigns = useApi((signal) => adminApi.newsletterCampaigns(signal), []);
 
   async function toggle(subscriber: AdminSubscriber) {
-    setBusyId(subscriber.userId);
+    setBusyId(subscriber.id);
     setError('');
     setNotice('');
     try {
       await (subscriber.status === 'SUBSCRIBED'
-        ? adminApi.newsletterUnsubscribe(subscriber.userId)
-        : adminApi.newsletterSubscribe(subscriber.userId));
+        ? adminApi.newsletterUnsubscribe(subscriber.id)
+        : adminApi.newsletterSubscribe(subscriber.id));
       setNotice(`${subscriber.email} a été ${subscriber.status === 'SUBSCRIBED' ? 'désabonné' : 'abonné'}.`);
       await subscriptions.reload();
       await stats.reload();
@@ -240,7 +240,7 @@ export default function AdminNewsletter() {
             onRetry={subscriptions.reload}
           >
             {shown.map((s) => (
-              <AdminRow key={s.userId}>
+              <AdminRow key={s.id}>
                 <div className="min-w-0 flex-1">
                   <p className="break-words font-display font-medium text-t1">{s.email}</p>
                   <p className="mt-1 text-xs text-t3">{[s.firstName, s.lastName].filter(Boolean).join(' ')}</p>
@@ -252,7 +252,7 @@ export default function AdminNewsletter() {
                 </span>
                 <button
                   type="button"
-                  disabled={busyId === s.userId}
+                  disabled={busyId === s.id}
                   onClick={() => void toggle(s)}
                   className={`inline-flex min-h-11 items-center rounded border px-3 text-xs font-medium transition-colors disabled:opacity-50 sm:min-h-9 ${s.status === 'SUBSCRIBED' ? 'border-error/30 text-error-ink hover:bg-error/10' : 'border-success/30 text-success-ink hover:bg-success/10'}`}
                 >

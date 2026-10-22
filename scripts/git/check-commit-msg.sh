@@ -46,7 +46,7 @@ pattern='^(feat|fix|perf|refactor|docs|test|build|ci|chore|style|revert)(\([a-z0
 if ! [[ "$header" =~ $pattern ]]; then
   fail "Header must read 'type(scope): description' — got: $header
   type: feat | fix | perf | refactor | docs | test | build | ci | chore | style | revert
-  scope (optional): lowercase, e.g. identity, cracklab, ci"
+  scope (optional): lowercase, e.g. account, event, ci"
 fi
 
 # GitHub appends " (#123)" to a squashed title; the limit is for what the author wrote.

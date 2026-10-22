@@ -1,7 +1,7 @@
 package com.brandonkamga.lescracks.event.api.dto;
 
-import com.brandonkamga.lescracks.event.domain.SubmissionStatus;
-import com.brandonkamga.lescracks.event.domain.SubmissionView;
+import com.brandonkamga.lescracks.event.domain.model.SubmissionStatus;
+import com.brandonkamga.lescracks.event.application.SubmissionView;
 
 import java.time.Instant;
 import java.util.List;

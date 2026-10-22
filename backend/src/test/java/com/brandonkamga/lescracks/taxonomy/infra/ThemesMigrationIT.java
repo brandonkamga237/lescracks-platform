@@ -74,7 +74,8 @@ class ThemesMigrationIT extends PostgresIT {
         long member = jdbc.queryForObject("insert into users (email, first_name, last_name, status) values ('awa@example.com', 'Awa', 'D', 'ACTIVE') returning id", Long.class);
         jdbc.update("insert into user_interests (user_id, category_id) values (?, ?), (?, ?)", member, frontend, member, web);
 
-        flyway.migrate();
+        // Up to V25 only: later migrations reshape these tables (V34 renames user_interests).
+        Flyway.configure().configuration(flyway.getConfiguration()).target("25").load().migrate();
 
         assertThat(jdbc.queryForList("select name from categories order by name", String.class)).containsExactlyInAnyOrder(
                 "Développement web", "Backend & bases de données", "Mobile", "Data & IA", "DevOps & Cloud", "Cybersécurité",

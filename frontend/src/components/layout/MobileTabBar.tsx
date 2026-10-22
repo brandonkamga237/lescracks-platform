@@ -5,7 +5,7 @@ import type { LucideIcon } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useSession } from '@/hooks/useSession';
-import { fillClass } from '@/lib/cracklab';
+import { fillClass } from '@/lib/progress';
 
 interface TabDef {
   to: string;

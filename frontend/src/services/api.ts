@@ -1,19 +1,10 @@
 import { http } from '@/services/http';
-import type { Query } from '@/services/http';
 import type {
-  ArticleComment, ArticleSummary, AuthProvider, BlogTheme, CommentThread, Category, Certificate, MemberBadge, PublicProfile, EventRegistration, MyEvent, Project, ProjectDraft, ChallengeDetail, ChallengeDifficulty, ChallengeSubmission, ChallengeSummary, CrackLabProgress, CrackLabPublicResult, RankingEntry, RankingPeriod, EventFormat, EventSummary, EventType, PageResponse,
+  ArticleComment, ArticleSummary, AuthProvider, BlogTheme, CommentThread, Category, Certificate, MemberBadge, PublicProfile, EventRegistration, MyEvent, Project, ProjectDraft, EventFormat, EventSummary, EventType, PageResponse,
   NewsletterStatus, ResourceLikeStatus, Tag, TalkVideo, UserIdentity, UserProfile,
   UserProfileUpdate, OnboardingAnswers, SignupContext,
 } from '@/services/types';
 
-
-export interface CrackLabFilters extends Query {
-  difficulty?: ChallengeDifficulty;
-  category?: string;
-  tag?: string;
-  page?: number;
-  size?: number;
-}
 
 export interface RegisterRequest {
   email: string;
@@ -91,25 +82,13 @@ export const api = {
   resourceLikes: (id: number, signal?: AbortSignal) => http.get<ResourceLikeStatus>(`/resources/${id}/likes`, undefined, signal),
   likeResource: (id: number) => http.post<ResourceLikeStatus>(`/resources/${id}/likes`),
   unlikeResource: (id: number) => http.delete<ResourceLikeStatus>(`/resources/${id}/likes`),
+  recordArticleView: (id: number, visitorId: string) =>
+    http.post<{ viewCount: number }>(`/resources/${id}/views`, { visitorId }),
   comments: (resourceId: number, signal?: AbortSignal) => http.get<CommentThread[]>(`/resources/${resourceId}/comments`, undefined, signal),
   postComment: (resourceId: number, body: string, parentId?: number) => http.post<ArticleComment>(`/resources/${resourceId}/comments`, { body, parentId }),
   editComment: (id: number, body: string) => http.put<ArticleComment>(`/comments/${id}`, { body }),
   deleteComment: (id: number) => http.delete<void>(`/comments/${id}`),
   reportComment: (id: number, reason?: string) => http.post<void>(`/comments/${id}/reports`, { reason }),
-  cracklab: {
-    challenges: (filters: CrackLabFilters = {}, signal?: AbortSignal) =>
-      http.get<PageResponse<ChallengeSummary>>('/cracklab/challenges', filters, signal),
-    challenge: (slug: string, signal?: AbortSignal) => http.get<ChallengeDetail>(`/cracklab/challenges/${encodeURIComponent(slug)}`, undefined, signal),
-    submit: (slug: string, answer: string) => http.post<ChallengeSubmission>(`/cracklab/challenges/${encodeURIComponent(slug)}/submissions`, { answer }),
-    answers: (slug: string, signal?: AbortSignal) => http.get<ChallengeSubmission[]>(`/cracklab/challenges/${encodeURIComponent(slug)}/submissions`, undefined, signal),
-    mine: (signal?: AbortSignal) => http.get<ChallengeSubmission[]>('/cracklab/submissions/mine', undefined, signal),
-    vote: (submissionId: number, value: -1 | 0 | 1) => http.put<{ voteScore: number; myVote: -1 | 0 | 1 }>(`/cracklab/submissions/${submissionId}/vote`, { value }),
-    ranking: (period: RankingPeriod = 'all', page = 0, size = 20, signal?: AbortSignal) =>
-      http.get<PageResponse<RankingEntry>>('/cracklab/ranking', { period, page, size }, signal),
-    progress: (signal?: AbortSignal) => http.get<CrackLabProgress>('/cracklab/me/progress', undefined, signal),
-    member: (id: number, signal?: AbortSignal) => http.get<CrackLabProgress>(`/cracklab/members/${id}`, undefined, signal),
-    result: (id: number, signal?: AbortSignal) => http.get<CrackLabPublicResult>(`/cracklab/results/${id}`, undefined, signal),
-  },
 };
 
 export default api;

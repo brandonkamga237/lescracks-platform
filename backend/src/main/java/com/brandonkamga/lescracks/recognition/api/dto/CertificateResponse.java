@@ -1,8 +1,8 @@
 package com.brandonkamga.lescracks.recognition.api.dto;
 
-import com.brandonkamga.lescracks.recognition.domain.Certificate;
-import com.brandonkamga.lescracks.recognition.domain.CertificateKind;
-import com.brandonkamga.lescracks.recognition.domain.CertificateStatus;
+import com.brandonkamga.lescracks.recognition.domain.model.Certificate;
+import com.brandonkamga.lescracks.recognition.domain.model.CertificateKind;
+import com.brandonkamga.lescracks.recognition.domain.model.CertificateStatus;
 
 import java.time.Instant;
 

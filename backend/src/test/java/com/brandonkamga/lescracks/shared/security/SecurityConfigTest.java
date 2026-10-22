@@ -1,13 +1,19 @@
 package com.brandonkamga.lescracks.shared.security;
 
 import com.brandonkamga.lescracks.event.api.EventController;
-import com.brandonkamga.lescracks.event.domain.EventService;
-import com.brandonkamga.lescracks.event.domain.EventVisitor;
-import com.brandonkamga.lescracks.resource.api.ResourceController;
-import com.brandonkamga.lescracks.resource.domain.Resource;
-import com.brandonkamga.lescracks.resource.api.ResourceMapper;
-import com.brandonkamga.lescracks.resource.domain.ResourceService;
-import com.brandonkamga.lescracks.identity.infra.UserRepository;
+import com.brandonkamga.lescracks.event.application.EventAdminService;
+import com.brandonkamga.lescracks.event.application.EventCatalog;
+import com.brandonkamga.lescracks.engagement.api.ReactionController;
+import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
+import com.brandonkamga.lescracks.engagement.application.ReactionService;
+import com.brandonkamga.lescracks.engagement.domain.model.Target;
+import com.brandonkamga.lescracks.shared.util.VisitorKeys;
+import com.brandonkamga.lescracks.content.api.ArticleController;
+import com.brandonkamga.lescracks.content.application.ArticleAdminService;
+import com.brandonkamga.lescracks.content.application.ArticleCatalog;
+import com.brandonkamga.lescracks.shared.paging.Paged;
+import com.brandonkamga.lescracks.account.infra.persistence.JdbcLastSeen;
+import com.brandonkamga.lescracks.account.infra.security.LastSeenFilterConfig;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 
 import org.junit.jupiter.api.DisplayName;
@@ -15,8 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -38,31 +42,33 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Who may call what. The rules are declared in one place, so they are asserted in one place
  * rather than restated in every controller test.
  *
- * The resource routes are the probe because they exercise all three cases at once: an open
+ * The article routes are the probe because they exercise all three cases at once: an open
  * read, the {@code /api/*&#47;admin} matcher, and the {@code @PreAuthorize} behind it. Adding a
  * domain does not need a copy of this class — it needs a line here only if it introduces a
  * *kind* of rule that is not covered yet.
  *
  * No database, so this runs in the fast suite despite booting a Spring slice.
  */
-@WebMvcTest({ResourceController.class, EventController.class})
-@Import({SecurityConfig.class, KeycloakRoleConverter.class, SecurityErrorWriter.class})
+@WebMvcTest({ArticleController.class, EventController.class, ReactionController.class})
+@Import({SecurityConfig.class, KeycloakRoleConverter.class, SecurityErrorWriter.class, LastSeenFilterConfig.class})
 class SecurityConfigTest {
 
     @Autowired private MockMvc mockMvc;
 
-    @MockitoBean private ResourceService resources;
-    @MockitoBean private ResourceMapper mapper;
-    @MockitoBean private EventService events;
+    @MockitoBean private ArticleCatalog catalog;
+    @MockitoBean private ArticleAdminService articles;
+    @MockitoBean private EventCatalog events;
+    @MockitoBean private EventAdminService eventAdmin;
+    @MockitoBean private ReactionService reactions;
+    @MockitoBean private EngagementCounts engagement;
     @MockitoBean private StorageService storage;
-    // The security chain registers the last-seen touch, which needs the users table.
-    @MockitoBean private UserRepository users;
+    // The security chain registers the last-seen touch, which needs the database.
+    @MockitoBean private JdbcLastSeen lastSeen;
 
     @Test
     @DisplayName("reading the catalogue needs no account: that is what brings people in")
     void catalogueIsOpenToAnonymous() throws Exception {
-        when(resources.search(any(), any(), any(), any(), any()))
-                .thenReturn(new PageImpl<>(List.of(), PageRequest.of(0, 12), 0));
+        when(catalog.search(any(), any(), any(), any())).thenReturn(new Paged<>(List.of(), 0, 12, 0));
 
         mockMvc.perform(get("/api/resources")).andExpect(status().isOk());
     }
@@ -88,8 +94,7 @@ class SecurityConfigTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void adminRouteAcceptsAnAdmin() throws Exception {
-        when(resources.search(any(), any(), any(), any(), any()))
-                .thenReturn(new PageImpl<>(List.of(new Resource()), PageRequest.of(0, 20), 1));
+        when(articles.list(any(), any())).thenReturn(new Paged<>(List.of(), 0, 20, 0));
 
         mockMvc.perform(get("/api/resources/admin")).andExpect(status().isOk());
     }
@@ -104,7 +109,7 @@ class SecurityConfigTest {
     @DisplayName("the one open write: an anonymous visitor may be counted on an event page")
     void eventViewIsOpenToAnonymous() throws Exception {
         UUID browser = UUID.randomUUID();
-        when(events.recordView(eq(1L), eq(EventVisitor.anonymous(browser)))).thenReturn(1);
+        when(reactions.recordView(eq(Target.event(1L)), eq(VisitorKeys.anonymous(browser)))).thenReturn(1);
 
         mockMvc.perform(post("/api/events/1/views").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"visitorId\":\"" + browser + "\"}"))

@@ -1,12 +1,9 @@
 package com.brandonkamga.lescracks.seo.api;
 
-import com.brandonkamga.lescracks.cracklab.domain.ChallengeService;
-import com.brandonkamga.lescracks.event.domain.EventService;
-import com.brandonkamga.lescracks.resource.domain.ResourceService;
-import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
+import com.brandonkamga.lescracks.event.application.EventCatalog;
+import com.brandonkamga.lescracks.content.application.ArticleCatalog;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,15 +17,13 @@ import java.time.format.DateTimeFormatter;
 @RequestMapping("/api/sitemap.xml")
 public class SitemapController {
 
-    private final ResourceService resources;
-    private final EventService events;
-    private final ChallengeService challenges;
+    private final ArticleCatalog articles;
+    private final EventCatalog events;
     private static final DateTimeFormatter W3C = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 
-    public SitemapController(ResourceService resources, EventService events, ChallengeService challenges) {
-        this.resources = resources;
+    public SitemapController(ArticleCatalog articles, EventCatalog events) {
+        this.articles = articles;
         this.events = events;
-        this.challenges = challenges;
     }
 
     @GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
@@ -43,41 +38,26 @@ public class SitemapController {
         addUrl(xml, base, "/formations", "0.6", "monthly");
         addUrl(xml, base, "/evenements", "0.6", "daily");
         addUrl(xml, base, "/talk", "0.6", "weekly");
-        addUrl(xml, base, "/cracklab", "0.7", "weekly");
-        addUrl(xml, base, "/cracklab/classement", "0.5", "daily");
         addUrl(xml, base, "/a-propos", "0.5", "monthly");
         addUrl(xml, base, "/conditions-utilisation", "0.3", "yearly");
         addUrl(xml, base, "/politique-confidentialite", "0.3", "yearly");
 
-        var published = resources.search(ResourceStatus.PUBLISHED, null, null, null, PageRequest.of(0, 10_000));
-        published.forEach(resource -> {
-            String lastmod = W3C.format(resource.getUpdatedAt().atOffset(ZoneOffset.UTC));
-            String slug = resource.getSlug() != null ? resource.getSlug() : String.valueOf(resource.getId());
+        articles.listPublished().forEach(article -> {
+            String lastmod = W3C.format(article.getUpdatedAt().atOffset(ZoneOffset.UTC));
             xml.append("  <url>\n");
-            xml.append("    <loc>").append(escape(base + "/blog/" + slug)).append("</loc>\n");
+            xml.append("    <loc>").append(escape(base + article.path())).append("</loc>\n");
             xml.append("    <lastmod>").append(escape(lastmod)).append("</lastmod>\n");
             xml.append("    <priority>0.7</priority>\n");
             xml.append("    <changefreq>weekly</changefreq>\n");
             xml.append("  </url>\n");
         });
 
-        var upcoming = events.published(null, null, PageRequest.of(0, 10_000));
-        upcoming.forEach(event -> {
+        events.listPublished().forEach(event -> {
             String lastmod = W3C.format(event.getUpdatedAt().atOffset(ZoneOffset.UTC));
-            String slug = event.getSlug() != null ? event.getSlug() : String.valueOf(event.getId());
             xml.append("  <url>\n");
-            xml.append("    <loc>").append(escape(base + "/evenements/" + slug)).append("</loc>\n");
+            xml.append("    <loc>").append(escape(base + event.path())).append("</loc>\n");
             xml.append("    <lastmod>").append(escape(lastmod)).append("</lastmod>\n");
             xml.append("    <priority>0.7</priority>\n");
-            xml.append("    <changefreq>weekly</changefreq>\n");
-            xml.append("  </url>\n");
-        });
-
-        challenges.published(null, null, null, PageRequest.of(0, 10_000)).forEach(challenge -> {
-            xml.append("  <url>\n");
-            xml.append("    <loc>").append(escape(base + "/cracklab/challenges/" + challenge.getSlug())).append("</loc>\n");
-            xml.append("    <lastmod>").append(escape(W3C.format(challenge.getUpdatedAt().atOffset(ZoneOffset.UTC)))).append("</lastmod>\n");
-            xml.append("    <priority>0.6</priority>\n");
             xml.append("    <changefreq>weekly</changefreq>\n");
             xml.append("  </url>\n");
         });
