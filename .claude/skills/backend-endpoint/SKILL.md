@@ -9,7 +9,7 @@ description: Add or change a REST endpoint or a domain service in the LesCracks 
 
 Code is organised by business domain: everything below lives under `<feature>/`
 (`identity`, `resource`, `taxonomy`, `event`, `newsletter`, `stats`, `storage`, `mail`,
-`seo`, `cracklab`, `talk`), with `api/` for HTTP, `domain/` for entities and business
+`seo`, `talk`, `community`, `recognition`), with `api/` for HTTP, `domain/` for entities and business
 logic, `infra/` for repositories and external adapters.
 
 1. **Request / response** — `<feature>/api/dto/XxxRequest.java`, `XxxResponse.java`

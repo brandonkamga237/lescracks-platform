@@ -41,7 +41,7 @@ type(scope): description
   (tooling, housekeeping), `style` (formatting only), `revert`.
 - **scope** (optional, lowercase): the domain or area touched. Backend domains: `identity`,
   `resource`, `taxonomy`, `event`, `newsletter`, `stats`, `storage`, `mail`, `seo`,
-  `cracklab`. Cross-cutting: `ui`, `admin`, `auth`, `ci`, `docker`, `deps`, `keycloak`,
+  `community`, `recognition`, `talk`. Cross-cutting: `ui`, `admin`, `auth`, `ci`, `docker`, `deps`, `keycloak`,
   `tooling`.
 - **description**: English, imperative or a plain statement of the result, 100 characters
   max for the whole header.
@@ -65,7 +65,7 @@ editing a Flyway migration that is already applied.
 ## Pull requests
 
 - Into `develop`: **squash merge**. The PR title becomes the commit, so it follows the
-  commit format above (`feat(cracklab): show the score in points`). CI checks the title, the
+  commit format above (`feat(event): show the registration deadline`). CI checks the title, the
   description and every commit of the PR.
 - From `develop` into `main`: **merge commit**, never squash. A squash would create a commit
   on `main` that `develop` does not have, and the two branches would drift apart at every

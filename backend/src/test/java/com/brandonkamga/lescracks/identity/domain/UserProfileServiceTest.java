@@ -75,11 +75,11 @@ class UserProfileServiceTest {
     @Test
     @DisplayName("the arrival context is recorded once and never overwritten")
     void contextIsKeptFromTheFirstVisit() {
-        member.setSignupPath("/cracklab");
+        member.setSignupPath("/blog");
 
         service.onboard("eric@example.com", new OnboardingAnswers(null, null, null, null, null, null, new Arrival("/talk", "fr", "Europe/Paris")));
 
-        assertThat(member.getSignupPath()).isEqualTo("/cracklab");
+        assertThat(member.getSignupPath()).isEqualTo("/blog");
         assertThat(member.getSignupTimezone()).isEqualTo("Europe/Paris");
     }
 

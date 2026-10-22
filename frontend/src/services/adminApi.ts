@@ -2,7 +2,7 @@ import { ENV } from '@/config/env';
 import { prepareImage } from '@/lib/image';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminArticle, AdminBadge, AdminComment, AdminCertificate, BadgeHolder, AdminChallenge, AdminProject, AdminRegistration, ProjectStatus, AdminSubscriber, AdminSummary, ChallengeDifficulty, ChallengeStatus, ChallengeSubmission, SubmissionStatus, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, MemberPortrait, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
+import type { AdminArticle, AdminBadge, AdminComment, AdminCertificate, BadgeHolder, AdminProject, AdminRegistration, ProjectStatus, AdminSubscriber, AdminSummary, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, MemberPortrait, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal } from '@/services/types';
 
 export interface ArticleRequest {
   title: string;
@@ -39,21 +39,6 @@ export interface TalkRequest {
   durationMinutes?: number;
   publishedAt?: string;
   status?: TalkStatus;
-}
-export interface ChallengeRequest {
-  title: string;
-  category: string;
-  difficulty: ChallengeDifficulty;
-  tags: string[];
-  problem: string;
-  constraints?: string;
-  expectedFormat?: string;
-  maxWords?: number;
-  referenceSolution: string;
-  /** `id` keeps an existing criterion, so the grades given on it stay attached. */
-  criteria: { id?: number; label: string; maxPoints: number }[];
-  status: ChallengeStatus;
-  scheduledAt?: string | null;
 }
 export interface AdminArticleFilters extends Query {
   page?: number;
@@ -224,18 +209,6 @@ export const adminApi = {
   admins: (signal?: AbortSignal) => http.get<AdminSummary[]>('/admin/admins', undefined, signal),
   createAdmin: (username: string, password: string) => http.post<AdminSummary>('/admin/admins', { username, password }),
   deleteAdmin: (id: number) => http.delete<void>(`/admin/admins/${id}`),
-  cracklab: {
-    challenges: (page = 0, signal?: AbortSignal) => http.get<PageResponse<AdminChallenge>>('/cracklab/admin/challenges', { page, size: 50 }, signal),
-    challenge: (id: number, signal?: AbortSignal) => http.get<AdminChallenge>(`/cracklab/admin/challenges/${id}`, undefined, signal),
-    create: (body: ChallengeRequest) => http.post<AdminChallenge>('/cracklab/admin/challenges', body),
-    update: (id: number, body: ChallengeRequest) => http.put<AdminChallenge>(`/cracklab/admin/challenges/${id}`, body),
-    remove: (id: number) => http.delete<void>(`/cracklab/admin/challenges/${id}`),
-    submissions: (filters: { status?: SubmissionStatus; challengeId?: number; page?: number } = {}, signal?: AbortSignal) =>
-      http.get<PageResponse<ChallengeSubmission>>('/cracklab/admin/submissions', { size: 50, ...filters }, signal),
-    submission: (id: number, signal?: AbortSignal) => http.get<ChallengeSubmission>(`/cracklab/admin/submissions/${id}`, undefined, signal),
-    grade: (id: number, criteria: { criterionId: number; points: number; feedback?: string }[]) =>
-      http.put<ChallengeSubmission>(`/cracklab/admin/submissions/${id}/evaluation`, { criteria }),
-  },
 };
 
 export default adminApi;

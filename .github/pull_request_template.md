@@ -1,6 +1,6 @@
 <!--
 The title becomes the commit on the target branch (squash merge):
-  type(scope): description   e.g. feat(cracklab): show the score in points
+  type(scope): description   e.g. feat(event): show the registration deadline
 See CONTRIBUTING.md.
 -->
 

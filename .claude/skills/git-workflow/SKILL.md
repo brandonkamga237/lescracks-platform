@@ -73,7 +73,7 @@ type(scope): imperative description, in English
 
 `type` ∈ `feat`, `fix`, `perf`, `refactor`, `docs`, `test`, `build`, `ci`, `chore`,
 `style`, `revert`. `scope` (optional, lowercase) = the domain or area touched (`identity`,
-`cracklab`, `seo`, `ui`, `ci`, …). Header ≤ 100 characters; `!` marks a breaking change.
+`event`, `seo`, `ui`, `ci`, …). Header ≤ 100 characters; `!` marks a breaking change.
 `scripts/git/check-commit-msg.sh` enforces this in the hook and in CI — run it on a
 message file to check before committing. The full list of scopes is in `CONTRIBUTING.md`.
 
