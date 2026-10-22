@@ -5,7 +5,6 @@ import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
 import com.brandonkamga.lescracks.resource.domain.ThemeArticles;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -71,14 +70,4 @@ public interface ResourceRepository extends JpaRepository<Resource, Long> {
             """)
     List<Object[]> countGroupedByCategory();
 
-    @Modifying
-    @Query(value = "insert into resource_views (resource_id, visitor_key) values (:resourceId, :visitorKey) on conflict do nothing", nativeQuery = true)
-    int insertView(@Param("resourceId") Long resourceId, @Param("visitorKey") String visitorKey);
-
-    @Modifying
-    @Query(value = "update resources set view_count = view_count + 1 where id = :resourceId", nativeQuery = true)
-    void incrementViews(@Param("resourceId") Long resourceId);
-
-    @Query(value = "select view_count from resources where id = :resourceId", nativeQuery = true)
-    int viewCount(@Param("resourceId") Long resourceId);
 }

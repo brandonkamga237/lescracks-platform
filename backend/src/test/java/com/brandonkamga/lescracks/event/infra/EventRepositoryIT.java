@@ -51,17 +51,4 @@ class EventRepositoryIT extends PostgresIT {
                 .extracting(Event::getTitle).containsExactly("Passe sans fin", "Fini");
     }
 
-    @Test
-    @DisplayName("a visitor key is recorded once per event, and the counter follows")
-    void recordsEachVisitorOnce() {
-        Event event = save("Hackathon", days(-1), days(10));
-
-        assertThat(events.insertView(event.getId(), "a:browser")).isEqualTo(1);
-        events.incrementViews(event.getId());
-        assertThat(events.insertView(event.getId(), "a:browser")).isZero();
-        assertThat(events.insertView(event.getId(), "m:member")).isEqualTo(1);
-        events.incrementViews(event.getId());
-
-        assertThat(events.viewCount(event.getId())).isEqualTo(2);
-    }
 }

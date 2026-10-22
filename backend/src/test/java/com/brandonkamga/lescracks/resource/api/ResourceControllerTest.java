@@ -62,7 +62,7 @@ class ResourceControllerTest {
         var page = new PageImpl<>(List.of(new Resource()), PageRequest.of(0, 12), 1);
         when(resources.search(eq(ResourceStatus.PUBLISHED), any(), any(), any(), any()))
                 .thenReturn(page);
-        when(mapper.toSummary(any(Resource.class))).thenReturn(response());
+        when(mapper.summaries(any())).thenReturn(resource -> response());
 
         mockMvc.perform(get("/api/resources"))
                 .andExpect(status().isOk())

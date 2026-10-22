@@ -2,7 +2,11 @@ package com.brandonkamga.lescracks.shared.security;
 
 import com.brandonkamga.lescracks.event.api.EventController;
 import com.brandonkamga.lescracks.event.domain.EventService;
-import com.brandonkamga.lescracks.event.domain.EventVisitor;
+import com.brandonkamga.lescracks.engagement.api.ReactionController;
+import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
+import com.brandonkamga.lescracks.engagement.application.ReactionService;
+import com.brandonkamga.lescracks.engagement.domain.model.Target;
+import com.brandonkamga.lescracks.shared.util.VisitorKeys;
 import com.brandonkamga.lescracks.resource.api.ResourceController;
 import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.resource.api.ResourceMapper;
@@ -11,6 +15,7 @@ import com.brandonkamga.lescracks.account.infra.persistence.JdbcLastSeen;
 import com.brandonkamga.lescracks.account.infra.security.LastSeenFilterConfig;
 import com.brandonkamga.lescracks.storage.domain.StorageService;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * No database, so this runs in the fast suite despite booting a Spring slice.
  */
-@WebMvcTest({ResourceController.class, EventController.class})
+@WebMvcTest({ResourceController.class, EventController.class, ReactionController.class})
 @Import({SecurityConfig.class, KeycloakRoleConverter.class, SecurityErrorWriter.class, LastSeenFilterConfig.class})
 class SecurityConfigTest {
 
@@ -54,7 +59,16 @@ class SecurityConfigTest {
 
     @MockitoBean private ResourceService resources;
     @MockitoBean private ResourceMapper mapper;
+
+    // A mocked mapper would hand back no function at all: lists map each item to an empty response.
+    @BeforeEach
+    void mapListsToEmptyResponses() {
+        when(mapper.summaries(any())).thenReturn(resource -> null);
+        when(mapper.responses(any())).thenReturn(resource -> null);
+    }
     @MockitoBean private EventService events;
+    @MockitoBean private ReactionService reactions;
+    @MockitoBean private EngagementCounts engagement;
     @MockitoBean private StorageService storage;
     // The security chain registers the last-seen touch, which needs the database.
     @MockitoBean private JdbcLastSeen lastSeen;
@@ -105,7 +119,7 @@ class SecurityConfigTest {
     @DisplayName("the one open write: an anonymous visitor may be counted on an event page")
     void eventViewIsOpenToAnonymous() throws Exception {
         UUID browser = UUID.randomUUID();
-        when(events.recordView(eq(1L), eq(EventVisitor.anonymous(browser)))).thenReturn(1);
+        when(reactions.recordView(eq(Target.event(1L)), eq(VisitorKeys.anonymous(browser)))).thenReturn(1);
 
         mockMvc.perform(post("/api/events/1/views").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"visitorId\":\"" + browser + "\"}"))

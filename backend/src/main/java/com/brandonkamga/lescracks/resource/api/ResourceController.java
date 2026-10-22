@@ -3,6 +3,7 @@ package com.brandonkamga.lescracks.resource.api;
 import com.brandonkamga.lescracks.resource.api.dto.ArticleResourceRequest;
 import com.brandonkamga.lescracks.resource.api.dto.ResourceResponse;
 import com.brandonkamga.lescracks.resource.api.dto.ThemeResponse;
+import com.brandonkamga.lescracks.resource.domain.Resource;
 import com.brandonkamga.lescracks.resource.domain.ResourceService;
 import com.brandonkamga.lescracks.resource.domain.ResourceStatus;
 import com.brandonkamga.lescracks.shared.dto.PageResponse;
@@ -15,6 +16,7 @@ import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 
@@ -38,7 +40,8 @@ public class ResourceController {
                                                     @RequestParam(required = false) Long categoryId,
                                                     @RequestParam(required = false) Long tagId,
                                                     @PageableDefault(size = 12) Pageable pageable) {
-        return PageResponse.of(resources.search(ResourceStatus.PUBLISHED, search, categoryId, tagId, pageable), mapper::toSummary);
+        Page<Resource> page = resources.search(ResourceStatus.PUBLISHED, search, categoryId, tagId, pageable);
+        return PageResponse.of(page, mapper.summaries(page.getContent()));
     }
 
     @GetMapping("/themes")
@@ -60,7 +63,8 @@ public class ResourceController {
                                               @RequestParam(required = false) Long categoryId,
                                               @RequestParam(required = false) Long tagId,
                                               @PageableDefault(size = 20) Pageable pageable) {
-        return PageResponse.of(resources.search(status, search, categoryId, tagId, pageable), mapper::toResponse);
+        Page<Resource> page = resources.search(status, search, categoryId, tagId, pageable);
+        return PageResponse.of(page, mapper.responses(page.getContent()));
     }
 
     @PostMapping(value = "/admin/articles", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

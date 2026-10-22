@@ -155,15 +155,4 @@ class ResourceRepositoryIT extends PostgresIT {
                 .containsExactly(tuple("Backend", 2L), tuple("Frontend", 1L));
     }
 
-    @Test
-    @DisplayName("an article counts each reader once, in SQL, and the entity reads the figure")
-    void countsEachReaderOnce() {
-        Resource article = save(backend, "Lue", ResourceStatus.PUBLISHED);
-
-        assertThat(resources.insertView(article.getId(), "a:browser")).isEqualTo(1);
-        resources.incrementViews(article.getId());
-        assertThat(resources.insertView(article.getId(), "a:browser")).isZero();
-
-        assertThat(resources.viewCount(article.getId())).isEqualTo(1);
-    }
 }

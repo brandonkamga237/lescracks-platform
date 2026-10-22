@@ -1,5 +1,7 @@
 package com.brandonkamga.lescracks.resource.domain;
 
+import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
+import com.brandonkamga.lescracks.engagement.domain.model.Target;
 import com.brandonkamga.lescracks.newsletter.application.Announcements;
 import com.brandonkamga.lescracks.newsletter.application.ArticleNews;
 import com.brandonkamga.lescracks.resource.infra.ArticleRepository;
@@ -34,17 +36,19 @@ public class ResourceServiceImpl implements ResourceService {
     private final StorageService storage;
     private final TaxonomyService taxonomy;
     private final Announcements announcements;
+    private final EngagementCounts engagement;
     private final ArticleBody articleBody;
     private final ObjectMapper mapper;
 
     public ResourceServiceImpl(ResourceRepository resources, ArticleRepository articles,
                                StorageService storage, TaxonomyService taxonomy,
-                               Announcements announcements, ArticleBody articleBody, ObjectMapper mapper) {
+                               Announcements announcements, EngagementCounts engagement, ArticleBody articleBody, ObjectMapper mapper) {
         this.resources = resources;
         this.articles = articles;
         this.storage = storage;
         this.taxonomy = taxonomy;
         this.announcements = announcements;
+        this.engagement = engagement;
         this.articleBody = articleBody;
         this.mapper = mapper;
     }
@@ -150,6 +154,7 @@ public class ResourceServiceImpl implements ResourceService {
         deleteCoverImage(resource.getCoverImage());
         articles.findByResourceId(id).ifPresent(articles::delete);
         resources.delete(resource);
+        engagement.forget(Target.article(id));
     }
 
     private void deleteCoverImage(String coverImage) {

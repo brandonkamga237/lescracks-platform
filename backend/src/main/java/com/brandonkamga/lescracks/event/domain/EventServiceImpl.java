@@ -2,6 +2,8 @@ package com.brandonkamga.lescracks.event.domain;
 
 import com.brandonkamga.lescracks.event.api.dto.EventRequest;
 import com.brandonkamga.lescracks.event.infra.EventRepository;
+import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
+import com.brandonkamga.lescracks.engagement.domain.model.Target;
 import com.brandonkamga.lescracks.newsletter.application.Announcements;
 import com.brandonkamga.lescracks.newsletter.application.EventNews;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
@@ -25,11 +27,13 @@ import org.springframework.data.domain.Pageable;
 public class EventServiceImpl implements EventService {
     private final EventRepository events;
     private final Announcements announcements;
+    private final EngagementCounts engagement;
     private final StorageService storage;
 
-    public EventServiceImpl(EventRepository events, Announcements announcements, StorageService storage) {
+    public EventServiceImpl(EventRepository events, Announcements announcements, EngagementCounts engagement, StorageService storage) {
         this.events = events;
         this.announcements = announcements;
+        this.engagement = engagement;
         this.storage = storage;
     }
 
@@ -65,13 +69,6 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public Page<Event> all(Pageable pageable) { return events.findAll(pageable); }
-
-    @Override
-    public int recordView(Long id, EventVisitor visitor) {
-        if (require(id).getStatus() != EventStatus.PUBLISHED) throw new NotFoundException("Event", "id", id);
-        if (events.insertView(id, visitor.key()) == 1) events.incrementViews(id);
-        return events.viewCount(id);
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -117,6 +114,7 @@ public class EventServiceImpl implements EventService {
         Event event = require(id);
         deleteCoverImage(event.getCoverImage());
         events.delete(event);
+        engagement.forget(Target.event(id));
     }
 
     private Event apply(Event event, EventRequest request, MultipartFile coverImageFile) {

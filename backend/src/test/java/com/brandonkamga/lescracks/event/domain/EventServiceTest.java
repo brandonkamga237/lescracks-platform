@@ -2,6 +2,7 @@ package com.brandonkamga.lescracks.event.domain;
 
 import com.brandonkamga.lescracks.event.api.dto.EventRequest;
 import com.brandonkamga.lescracks.event.infra.EventRepository;
+import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
 import com.brandonkamga.lescracks.newsletter.application.Announcements;
 import com.brandonkamga.lescracks.newsletter.application.EventNews;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
@@ -30,6 +31,7 @@ class EventServiceTest {
 
     @Mock private EventRepository events;
     @Mock private Announcements announcements;
+    @Mock private EngagementCounts engagement;
     @Mock private StorageService storage;
 
     private EventServiceImpl service;
@@ -37,7 +39,7 @@ class EventServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new EventServiceImpl(events, announcements, storage);
+        service = new EventServiceImpl(events, announcements, engagement, storage);
     }
 
     private EventRequest request(EventStatus status, Instant scheduledAt) {
@@ -76,30 +78,4 @@ class EventServiceTest {
                 .hasMessageContaining("début");
     }
 
-    @Test
-    @DisplayName("a visitor counts once: the first view raises the figure, the next ones only read it")
-    void countsEachVisitorOnce() {
-        Event event = Event.builder().id(3L).status(EventStatus.PUBLISHED).build();
-        when(events.findById(3L)).thenReturn(Optional.of(event));
-        var visitor = EventVisitor.anonymous(java.util.UUID.randomUUID());
-
-        when(events.insertView(3L, visitor.key())).thenReturn(1);
-        when(events.viewCount(3L)).thenReturn(1);
-        assertThat(service.recordView(3L, visitor)).isEqualTo(1);
-        verify(events).incrementViews(3L);
-
-        when(events.insertView(3L, visitor.key())).thenReturn(0);
-        service.recordView(3L, visitor);
-        verify(events, org.mockito.Mockito.times(1)).incrementViews(3L);
-    }
-
-    @Test
-    @DisplayName("a draft cannot collect views: it answers as if it did not exist")
-    void draftsAreNotCounted() {
-        when(events.findById(4L)).thenReturn(Optional.of(Event.builder().id(4L).status(EventStatus.DRAFT).build()));
-
-        assertThatThrownBy(() -> service.recordView(4L, EventVisitor.anonymous(java.util.UUID.randomUUID())))
-                .isInstanceOf(com.brandonkamga.lescracks.shared.exception.NotFoundException.class);
-        verify(events, never()).insertView(any(), any());
-    }
 }

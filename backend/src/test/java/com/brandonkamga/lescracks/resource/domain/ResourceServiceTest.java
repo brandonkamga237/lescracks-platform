@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.resource.domain;
 
+import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
 import com.brandonkamga.lescracks.newsletter.application.Announcements;
 import com.brandonkamga.lescracks.newsletter.application.ArticleNews;
 import com.brandonkamga.lescracks.resource.infra.ArticleRepository;
@@ -48,6 +49,7 @@ class ResourceServiceTest {
     @Mock private StorageService storage;
     @Mock private TaxonomyService taxonomy;
     @Mock private Announcements announcements;
+    @Mock private EngagementCounts engagement;
 
     private ResourceServiceImpl service;
     private Category category;
@@ -56,7 +58,7 @@ class ResourceServiceTest {
     void setUp() {
         ObjectMapper mapper = new ObjectMapper();
         service = new ResourceServiceImpl(resources, articles,
-                storage, taxonomy, announcements, new ArticleBody(mapper), mapper);
+                storage, taxonomy, announcements, engagement, new ArticleBody(mapper), mapper);
         category = category("Backend");
     }
 

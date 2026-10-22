@@ -283,9 +283,8 @@ public class SeoController {
 
         List<SeoHtml.Link> links = new ArrayList<>();
         published.forEach(resource -> {
-            ResourceResponse response = mapper.toSummary(resource);
-            String slug = response.slug() != null ? response.slug() : String.valueOf(response.id());
-            links.add(new SeoHtml.Link(canonical(request, "/blog/" + slug), response.title()));
+            String slug = resource.getSlug() != null ? resource.getSlug() : String.valueOf(resource.getId());
+            links.add(new SeoHtml.Link(canonical(request, "/blog/" + slug), resource.getTitle()));
         });
         html.links("Articles récents", links);
     }
