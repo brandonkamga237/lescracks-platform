@@ -128,6 +128,8 @@ class JdbcEventIT extends PostgresIT {
             assertThat(found.getMemberIds()).containsExactly(awa, kofi);
         });
         assertThat(submissions.findTaken(hackathon.getId(), List.of(kofi), null)).containsExactly(kofi);
+        assertThat(submissions.findByUser(kofi)).singleElement().extracting(Submission::getMemberIds)
+                .isEqualTo(new LinkedHashSet<>(List.of(awa, kofi)));
         assertThat(submissions.findTaken(hackathon.getId(), List.of(kofi), project.getId())).isEmpty();
 
         project.setMemberIds(new LinkedHashSet<>(List.of(awa)));
@@ -155,6 +157,18 @@ class JdbcEventIT extends PostgresIT {
     @Test
     @DisplayName("the dashboard reads grouped counts, the timing of published events, and events by slug or id")
     void statistics() {
+        Event funnel = event("it-funnel", EventStatus.PUBLISHED, now.plus(400, ChronoUnit.DAYS), null);
+        registrations.save(Registration.builder().eventId(funnel.getId()).userId(awa).status(RegistrationStatus.ATTENDED).build());
+        registrations.shiftCount(funnel.getId(), 1);
+        submissions.save(Submission.builder().eventId(funnel.getId()).ownerId(awa).title("P").repositoryUrl("https://g/x")
+                .description("D").memberIds(new LinkedHashSet<>(List.of(awa))).build());
+        assertThat(statistics.funnels(1)).singleElement().satisfies(entry -> {
+            assertThat(entry.id()).isEqualTo(funnel.getId());
+            assertThat(entry.registrations()).isEqualTo(1);
+            assertThat(entry.attended()).isEqualTo(1);
+            assertThat(entry.projects()).isEqualTo(1);
+        });
+
         Instant today = now.truncatedTo(ChronoUnit.DAYS);
         var before = statistics.publishedTiming(now, today);
         Event next = event("it-stat-next", EventStatus.PUBLISHED, now.plus(3, ChronoUnit.DAYS), null);

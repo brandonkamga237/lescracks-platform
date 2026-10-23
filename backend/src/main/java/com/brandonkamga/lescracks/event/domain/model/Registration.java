@@ -42,10 +42,10 @@ public class Registration {
         updatedAt = Instant.now();
     }
 
-    /** After the event: ATTENDED or ABSENT, never on a cancelled registration. */
+    /** After the event: ATTENDED or ABSENT, or back to REGISTERED to undo a mistaken click; never on a cancelled registration. */
     public void markAttendance(RegistrationStatus attendance) {
-        if (attendance != RegistrationStatus.ATTENDED && attendance != RegistrationStatus.ABSENT) {
-            throw new BadRequestException("Indique « présent » ou « absent ».");
+        if (attendance == null || attendance == RegistrationStatus.CANCELLED) {
+            throw new BadRequestException("Indique « présent », « absent » ou « non pointé ».");
         }
         if (status == RegistrationStatus.CANCELLED) throw new BadRequestException("Cette inscription a été annulée.");
         status = attendance;

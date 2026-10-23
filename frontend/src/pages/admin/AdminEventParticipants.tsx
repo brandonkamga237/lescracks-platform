@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Download, ExternalLink, Loader2 } from 'lucide-react';
+import { ArrowLeft, Download, ExternalLink, Info, Loader2 } from 'lucide-react';
 
 import { AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
 import EventCertificates from '@/components/admin/EventCertificates';
@@ -33,12 +33,22 @@ function downloadCsv(title: string, rows: AdminRegistration[]) {
   URL.revokeObjectURL(link.href);
 }
 
+/** One sentence above each tab: what it is for and what a click does. */
+function Explainer({ children }: { children: ReactNode }) {
+  return (
+    <p className="mb-5 flex gap-2.5 rounded-lg border border-gold-400/25 bg-gold-400/5 p-4 text-sm leading-relaxed text-t2">
+      <Info className="mt-0.5 h-4 w-4 shrink-0 text-gold-ink" aria-hidden /><span>{children}</span>
+    </p>
+  );
+}
+
 interface RegistrationsProps {
   eventId: number;
   title: string;
+  hackathon: boolean;
 }
 
-function Registrations({ eventId, title }: RegistrationsProps) {
+function Registrations({ eventId, title, hackathon }: RegistrationsProps) {
   const list = useApi((signal) => adminApi.eventRegistrations(eventId, signal), [eventId]);
   const [statuses, setStatuses] = useState<Record<number, RegistrationStatus>>({});
   const [busy, setBusy] = useState<number | null>(null);
@@ -46,7 +56,9 @@ function Registrations({ eventId, title }: RegistrationsProps) {
   const rows = (list.data ?? []).map((row) => ({ ...row, status: statuses[row.id] ?? row.status }));
   const present = rows.filter((row) => row.status === 'ATTENDED').length;
 
-  async function mark(row: AdminRegistration, status: 'ATTENDED' | 'ABSENT') {
+  // Clicking the active choice again takes the mark back: a mistaken click is never final.
+  async function mark(row: AdminRegistration, choice: 'ATTENDED' | 'ABSENT') {
+    const status = row.status === choice ? 'REGISTERED' : choice;
     setBusy(row.id);
     setFailure('');
     try {
@@ -61,8 +73,14 @@ function Registrations({ eventId, title }: RegistrationsProps) {
 
   return (
     <div>
+      <Explainer>
+        {hackathon
+          ? 'Les personnes inscrites au hackathon. Le pointage est facultatif ici : les attestations viennent des projets (onglet Projets).'
+          : 'Après l’événement, pointe qui était là. Seules les personnes « Présent » recevront une attestation.'}
+        {' '}Un nouveau clic sur le bouton actif annule le pointage.
+      </Explainer>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-t3">{rows.filter((row) => row.status !== 'CANCELLED').length} inscrits · {present} présents</p>
+        <p className="text-sm text-t3">{rows.filter((row) => row.status !== 'CANCELLED').length} inscrits · {present} présents · {rows.filter((row) => row.status === 'REGISTERED').length} non pointés</p>
         <button type="button" disabled={!rows.length} onClick={() => downloadCsv(title, rows)} className="btn-secondary inline-flex items-center gap-2">
           <Download className="h-4 w-4" aria-hidden />CSV
         </button>
@@ -75,14 +93,15 @@ function Registrations({ eventId, title }: RegistrationsProps) {
               <p className="truncate text-sm font-medium text-t1">{row.name || row.email}</p>
               <p className="truncate text-xs text-t3">{row.email} · {dateFormat.format(new Date(row.registeredAt))}</p>
             </div>
-            {row.status === 'CANCELLED' ? <span className="text-xs text-t4">Annulé</span> : (
-              <div className="flex gap-2" role="group" aria-label={`Présence de ${row.name || row.email}`}>
+            {row.status === 'CANCELLED' ? <span className="text-xs text-t4">A annulé son inscription</span> : (
+              <div className="flex items-center gap-2" role="group" aria-label={`Présence de ${row.name || row.email}`}>
+                {row.status === 'REGISTERED' && <span className="mr-1 text-xs text-t4">Non pointé</span>}
                 {(['ATTENDED', 'ABSENT'] as const).map((status) => (
                   <button key={status} type="button" aria-pressed={row.status === status} disabled={busy === row.id} onClick={() => void mark(row, status)}
                     className={`min-h-9 rounded border px-3 text-xs font-medium transition-colors disabled:opacity-50 ${row.status === status
                       ? status === 'ATTENDED' ? 'border-gold-400 bg-gold-400 text-black' : 'border-line bg-noir-800 text-t1'
                       : 'border-line text-t3 hover:text-t1'}`}>
-                    {ATTENDANCE_LABEL[status]}
+                    {row.status === status ? `${ATTENDANCE_LABEL[status]} ✓` : ATTENDANCE_LABEL[status]}
                   </button>
                 ))}
               </div>
@@ -177,11 +196,18 @@ function Projects({ eventId }: { eventId: number }) {
   const projects = (list.data ?? []).map((project) => updated[project.id] ?? project);
 
   return (
+    <>
+    <Explainer>
+      « Soumis » : l’équipe peut encore modifier son projet. « En revue » le verrouille. « Retenu » ouvre droit à une attestation,
+      « Non retenu » n’en donne pas. Classement 1 = lauréat, 2 et 3 = podium : une attestation et un badge en plus.
+      Rien n’est envoyé aux équipes tant que tu n’émets pas les attestations.
+    </Explainer>
     <AdminState loading={list.loading} error={list.error} empty={!projects.length} emptyMessage="Aucun projet soumis pour l’instant." onRetry={list.reload}>
       {projects.map((project) => (
         <ProjectReviewCard key={project.id} project={project} onSaved={(saved) => setUpdated((current) => ({ ...current, [saved.id]: saved }))} />
       ))}
     </AdminState>
+    </>
   );
 }
 
@@ -197,6 +223,18 @@ export default function AdminEventParticipants() {
     <AdminSection title={title} description="Inscrits, présence, projets et attestations de cet événement."
       action={<Link to="/admin/evenements" className="btn-secondary inline-flex items-center gap-2"><ArrowLeft className="h-4 w-4" aria-hidden />Événements</Link>}>
       <AdminState loading={event.loading} error={event.error} empty={false} emptyMessage="" onRetry={event.reload}>
+        <ol className="mb-6 grid gap-3 sm:grid-cols-3">
+          {[
+            ['Inscrits', event.data?.acceptsSubmissions ? 'Qui participe. Rien à faire, sauf exporter la liste.' : 'Après l’événement, pointe qui était présent.'],
+            ...(event.data?.acceptsSubmissions ? [['Projets', 'Évalue chaque projet : statut, note, classement.']] : []),
+            ['Attestations', 'Prépare les brouillons, vérifie-les, puis émets : chacun reçoit un email.'],
+          ].map(([step, text], index) => (
+            <li key={step} className="rounded-lg border border-line-soft bg-card p-4">
+              <p className="text-sm font-semibold text-t1"><span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-gold-400 text-xs font-bold text-black">{index + 1}</span>{step}</p>
+              <p className="mt-2 text-xs leading-relaxed text-t3">{text}</p>
+            </li>
+          ))}
+        </ol>
         <div className="mb-5">
           <Segmented label="Vue">
             {([
@@ -211,7 +249,7 @@ export default function AdminEventParticipants() {
         </div>
         {tab === 'projects' && event.data?.acceptsSubmissions ? <Projects eventId={eventId} />
           : tab === 'certificates' ? <EventCertificates eventId={eventId} acceptsSubmissions={Boolean(event.data?.acceptsSubmissions)} />
-            : <Registrations eventId={eventId} title={title} />}
+            : <Registrations eventId={eventId} title={title} hackathon={Boolean(event.data?.acceptsSubmissions)} />}
       </AdminState>
     </AdminSection>
   );

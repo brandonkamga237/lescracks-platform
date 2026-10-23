@@ -123,6 +123,11 @@ public class SubmissionServiceImpl implements SubmissionService {
         return views(List.of(saved), requireEvent(saved.getEventId())).get(0);
     }
 
+    @Override
+    public List<Submission> listOf(Long userId) {
+        return submissions.findByUser(userId);
+    }
+
     /** Every team of the list from one lookup of the members, owner first, then by name. */
     private List<SubmissionView> views(Collection<Submission> list, Event event) {
         Map<Long, Member> found = people.findAll(list.stream().flatMap(submission -> submission.getMemberIds().stream())

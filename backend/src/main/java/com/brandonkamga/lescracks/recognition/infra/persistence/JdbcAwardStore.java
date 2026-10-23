@@ -1,5 +1,6 @@
 package com.brandonkamga.lescracks.recognition.infra.persistence;
 
+import com.brandonkamga.lescracks.recognition.domain.model.Badge;
 import com.brandonkamga.lescracks.recognition.domain.model.MemberBadge;
 import com.brandonkamga.lescracks.recognition.domain.port.AwardStore;
 
@@ -7,7 +8,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Optional;
 
 import static com.brandonkamga.lescracks.shared.persistence.JdbcValues.at;
@@ -57,6 +61,18 @@ class JdbcAwardStore implements AwardStore {
                 .param("badge", award.getBadge().getId()).param("user", award.getUserId()).param("reason", award.getReason())
                 .param("awardedAt", at(award.getAwardedAt())).update();
         return find(award.getBadge().getId(), award.getUserId()).orElseThrow();
+    }
+
+    @Override
+    public Set<Long> addAll(Badge badge, Collection<Long> userIds, String reason) {
+        if (userIds.isEmpty()) return Set.of();
+        return new HashSet<>(jdbc.sql("""
+                        INSERT INTO member_badges (badge_id, user_id, reason)
+                        SELECT :badge, unnest(CAST(:users AS BIGINT[])), :reason
+                        ON CONFLICT (badge_id, user_id) DO NOTHING
+                        RETURNING user_id""")
+                .param("badge", badge.getId()).param("users", userIds.toArray(Long[]::new)).param("reason", reason)
+                .query(Long.class).list());
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.brandonkamga.lescracks.stats.domain;
 import com.brandonkamga.lescracks.account.application.AccountStatistics;
 import com.brandonkamga.lescracks.content.application.ContentStatistics;
 import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
+import com.brandonkamga.lescracks.engagement.domain.model.TargetType;
+import com.brandonkamga.lescracks.engagement.domain.model.Counts;
 import com.brandonkamga.lescracks.event.application.EventStatistics;
 import com.brandonkamga.lescracks.member.application.MemberStatistics;
 import com.brandonkamga.lescracks.newsletter.application.NewsletterStatistics;
@@ -17,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +36,8 @@ class StatsServiceImplTest {
     private final AccountStatistics accounts = mock(AccountStatistics.class);
     private final MemberStatistics members = mock(MemberStatistics.class);
     private final TaxonomyService taxonomy = mock(TaxonomyService.class);
+    private final EngagementCounts engagement = mock(EngagementCounts.class);
+    private final EventStatistics events = mock(EventStatistics.class);
     private final StatsServiceImpl stats = withUmami(mock(UmamiClient.class));
 
     @Test
@@ -59,7 +64,7 @@ class StatsServiceImplTest {
     }
 
     private StatsServiceImpl withUmami(UmamiClient umami) {
-        return new StatsServiceImpl(accounts, members, mock(EngagementCounts.class), mock(EventStatistics.class),
+        return new StatsServiceImpl(accounts, members, engagement, events,
                 mock(ContentStatistics.class), mock(NewsletterStatistics.class), umami, taxonomy);
     }
 
@@ -80,5 +85,24 @@ class StatsServiceImplTest {
         assertThat(audience.available()).isTrue();
         assertThat(audience.visitors()).isEqualTo(612);
         assertThat(audience.events()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("conversions put each event's page views beside its registrations, and list the channels that bring members")
+    void conversions() {
+        when(accounts.signupsBySource(any())).thenReturn(Map.of("WhatsApp", 7L));
+        when(accounts.signupsByLandingPage(any(), anyInt())).thenReturn(Map.of("/evenements/hackathon", 4L));
+        when(events.funnels(12)).thenReturn(List.of(new EventStatistics.EventFunnel(1L, "hackathon", "Hackathon", Instant.EPOCH, true, 30, 0, 9)));
+        when(engagement.countsOf(eq(TargetType.EVENT), any())).thenReturn(Map.of(1L, new Counts(400, 0)));
+
+        var conversions = stats.conversions(30);
+
+        assertThat(conversions.signupsBySource()).containsExactly(new NamedCount("WhatsApp", 7));
+        assertThat(conversions.signupsByLandingPage()).containsExactly(new NamedCount("/evenements/hackathon", 4));
+        assertThat(conversions.events()).singleElement().satisfies(event -> {
+            assertThat(event.views()).isEqualTo(400);
+            assertThat(event.registrations()).isEqualTo(30);
+            assertThat(event.projects()).isEqualTo(9);
+        });
     }
 }

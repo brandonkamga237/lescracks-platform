@@ -39,7 +39,7 @@ class SignUpServiceTest {
 
     private static Registration registration(String email) {
         return new Registration(email, "a-long-password", " Awa ", " Diallo ", "+237 6 77 12 34 56", true, true,
-                new Arrival("/ressources", "fr", "Africa/Dakar"));
+                new Arrival("/ressources", "fr", "Africa/Dakar", "WhatsApp"));
     }
 
     @Test

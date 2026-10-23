@@ -1,6 +1,8 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Mic, Rocket, Trophy, Video, Wrench } from 'lucide-react';
+import { ArrowUpRight, Mic, Rocket, Trophy, Users, Video, Wrench } from 'lucide-react';
+
+import ShareButton from '@/components/common/ShareButton';
 
 import ViewCount from '@/components/events/ViewCount';
 import { eventPath } from '@/lib/slugs';
@@ -32,11 +34,11 @@ function AgendaItem({ event, cataloguePath }: AgendaItemProps) {
   const TypeIcon = TYPE_ICON[event.type];
 
   return (
-    <li>
+    <li className="flex items-start gap-2 border-t border-line pr-2">
       <Link
         to={eventPath(event)}
         state={{ cataloguePath }}
-        className="group grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-start gap-x-4 border-t border-line px-2 py-6 transition-colors hover:bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[6rem_minmax(0,1fr)_auto] sm:gap-x-8"
+        className="group grid min-w-0 flex-1 grid-cols-[3.5rem_minmax(0,1fr)_auto] items-start gap-x-4 px-2 py-6 transition-colors hover:bg-noir-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[6rem_minmax(0,1fr)_auto] sm:gap-x-8"
       >
         <span aria-hidden className="pt-0.5">
           {hasDate ? (
@@ -60,10 +62,16 @@ function AgendaItem({ event, cataloguePath }: AgendaItemProps) {
             <TypeIcon className="h-3.5 w-3.5 shrink-0 text-gold-ink" aria-hidden />
             {meta}
             <ViewCount count={event.viewCount ?? 0} className="ml-2" />
+            {event.registrationCount > 0 && (
+              <span className="ml-2 inline-flex items-center gap-1.5 font-semibold text-gold-ink">
+                <Users className="h-3.5 w-3.5" aria-hidden />{event.registrationCount.toLocaleString('fr-FR')} {event.registrationCount > 1 ? 'inscrits' : 'inscrit'}
+              </span>
+            )}
           </span>
         </span>
         <ArrowUpRight className="mt-1 h-5 w-5 text-t4 opacity-0 transition-opacity group-hover:text-gold-ink group-hover:opacity-100" aria-hidden />
       </Link>
+      <ShareButton title={event.title} path={eventPath(event)} label={`Partager « ${event.title} »`} iconOnly className="mt-5 shrink-0" />
     </li>
   );
 }

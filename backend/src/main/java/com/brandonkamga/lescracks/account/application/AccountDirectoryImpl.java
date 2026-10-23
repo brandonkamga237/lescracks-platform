@@ -7,6 +7,7 @@ import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -42,6 +43,13 @@ public class AccountDirectoryImpl implements AccountDirectory {
     }
 
     @Override
+    public Map<String, AccountSummary> findAllByEmail(Collection<String> emails) {
+        if (emails.isEmpty()) return Map.of();
+        return accounts.findAllByEmail(emails).stream().map(AccountSummary::of)
+                .collect(Collectors.toMap(account -> account.getEmail().toLowerCase(Locale.ROOT), Function.identity(), (first, second) -> first));
+    }
+
+    @Override
     public AccountSummary rename(Long id, String firstName, String lastName) {
         Account account = requireAccount(id);
         if (firstName != null) account.setFirstName(required(firstName, "Le prénom"));
@@ -54,7 +62,7 @@ public class AccountDirectoryImpl implements AccountDirectory {
     public void recordArrival(Long id, Arrival arrival) {
         if (arrival == null) return;
         Account account = requireAccount(id);
-        account.recordArrival(arrival.path(), arrival.language(), arrival.timezone());
+        account.recordArrival(arrival.path(), arrival.language(), arrival.timezone(), arrival.source());
         accounts.save(account);
     }
 

@@ -111,7 +111,7 @@ function AppRoutes() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [location.pathname]);
 
-  useEffect(() => { rememberArrival(`${location.pathname}${location.search}`); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { rememberArrival(`${location.pathname}${location.search}`, location.search); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Once after sign-up, whatever the way in: the welcome questions, then back where the member was going.
   if (isSignedIn && !isAdmin && user?.onboardingRequired && !WELCOME_EXEMPT.some((path) => location.pathname.startsWith(path))) {

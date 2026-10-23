@@ -28,6 +28,22 @@ class JdbcEventStatistics implements EventStatistics {
     }
 
     @Override
+    public List<EventFunnel> funnels(int limit) {
+        // The subqueries run once per listed event, each on an index on event_id.
+        return jdbc.sql("""
+                        SELECT e.id, e.slug, e.title, e.start_date, e.accepts_submissions, e.registration_count,
+                               (SELECT count(*) FROM event_registrations r WHERE r.event_id = e.id AND r.status = 'ATTENDED') AS attended,
+                               (SELECT count(*) FROM event_submissions s WHERE s.event_id = e.id) AS projects
+                        FROM events e WHERE e.status IN ('PUBLISHED', 'COMPLETED')
+                        ORDER BY e.start_date DESC LIMIT :limit""")
+                .param("limit", limit)
+                .query((row, number) -> new EventFunnel(row.getLong("id"), row.getString("slug"), row.getString("title"),
+                        instant(row, "start_date"), row.getBoolean("accepts_submissions"), row.getLong("registration_count"),
+                        row.getLong("attended"), row.getLong("projects")))
+                .list();
+    }
+
+    @Override
     public Map<String, Long> eventsByStatus() {
         return grouped("status");
     }

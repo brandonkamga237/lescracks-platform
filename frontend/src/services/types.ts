@@ -130,6 +130,31 @@ export interface MemberBadge {
   reason?: string;
 }
 
+export interface Conversions {
+  days: number;
+  signupsBySource: { name: string; count: number }[];
+  signupsByLandingPage: { name: string; count: number }[];
+  events: { id: number; slug?: string; title: string; startDate: string; acceptsSubmissions: boolean;
+    views: number; registrations: number; attended: number; projects: number }[];
+}
+
+/** What a grant did: new holders, members who already had it, and addresses nobody uses. */
+export interface BulkAwardResult {
+  awarded: number;
+  alreadyHeld: number;
+  unknownEmails: string[];
+}
+
+export interface MemberActivity {
+  events: {
+    id: number; slug?: string; title: string; type: EventType; startDate: string; status: RegistrationStatus;
+    project?: { id: number; title: string; status: ProjectStatus; rank?: number } | null;
+  }[];
+  badges: { badgeId: number; code: string; name: string; icon: string; system: boolean; awardedAt: string; reason?: string }[];
+  certificates: { code: string; kind: CertificateKind; title: string; issuedAt: string }[];
+  comments: number;
+}
+
 export interface AdminBadge {
   id: number;
   code: string;
@@ -411,7 +436,7 @@ export type MemberSituation = 'STUDENT' | 'EMPLOYED' | 'CAREER_CHANGE' | 'JOB_SE
 export type MemberGoal = 'FIND_JOB' | 'LEVEL_UP' | 'FREELANCE' | 'BUILD_PROJECT';
 export type ProfileField = 'PHONE' | 'SITUATION' | 'INTERESTS' | 'GOAL' | 'CITY' | 'AVATAR' | 'BIO';
 
-export interface SignupContext { path?: string; language?: string; timezone?: string; }
+export interface SignupContext { path?: string; language?: string; timezone?: string; source?: string; }
 
 export interface OnboardingAnswers {
   phone?: string;

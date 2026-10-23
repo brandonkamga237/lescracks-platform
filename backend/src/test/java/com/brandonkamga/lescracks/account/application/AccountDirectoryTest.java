@@ -38,11 +38,12 @@ class AccountDirectoryTest {
     @Test
     @DisplayName("the arrival is kept from the first visit only")
     void arrivalIsKeptOnce() {
-        directory.recordArrival(account.getId(), new Arrival("/blog", "fr", "Africa/Douala"));
-        directory.recordArrival(account.getId(), new Arrival("/talk", "en", "Europe/Paris"));
+        directory.recordArrival(account.getId(), new Arrival("/blog", "fr", "Africa/Douala", "LinkedIn"));
+        directory.recordArrival(account.getId(), new Arrival("/talk", "en", "Europe/Paris", "Google"));
 
         assertThat(accounts.stored(account.getId()).getSignupPath()).isEqualTo("/blog");
         assertThat(accounts.stored(account.getId()).getSignupTimezone()).isEqualTo("Africa/Douala");
+        assertThat(accounts.stored(account.getId()).getSignupSource()).isEqualTo("LinkedIn");
     }
 
     @Test

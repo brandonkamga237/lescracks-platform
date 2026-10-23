@@ -15,4 +15,7 @@ public interface MemberDirectory {
 
     /** Two queries whatever the number of ids; unknown ids are simply absent. */
     Map<Long, Member> findAll(Collection<Long> ids);
+
+    /** Keyed by lower-cased email; unknown addresses are absent. Three queries whatever the number. */
+    Map<String, Member> findAllByEmail(Collection<String> emails);
 }

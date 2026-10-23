@@ -3,6 +3,7 @@ import { Download, Eye, Search, SlidersHorizontal, Trash2 } from 'lucide-react';
 
 import { GOAL_LABEL, PROVIDER_LABEL as providerLabels, SITUATION_LABEL } from '@/lib/memberProfile';
 import { countryName, displayPhone } from '@/lib/phone';
+import MemberActivityPanel from '@/components/admin/MemberActivityPanel';
 import MemberPortrait from '@/components/admin/MemberPortrait';
 import SignupFunnel from '@/components/admin/SignupFunnel';
 import { AdminAction, AdminConfirm, AdminModal, AdminPagination, AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
@@ -55,7 +56,7 @@ function UserDetail({ id, onClose, onChanged }: UserDetailProps) {
   }
 
   return (
-    <AdminModal open onClose={onClose} title="Fiche utilisateur" description="Détails du compte" busy={loading}>
+    <AdminModal open onClose={onClose} title="Fiche utilisateur" description="Le compte, puis tout ce que la personne a fait sur la plateforme" busy={loading}>
       {loading ? <p className="py-8 text-center text-t3">Chargement…</p> : null}
       {error ? <p role="alert" className="rounded-lg border border-error/30 bg-error/10 p-4 text-sm text-t1">{error.message}</p> : null}
       {data && !data.verified && (
@@ -133,6 +134,7 @@ function UserDetail({ id, onClose, onChanged }: UserDetailProps) {
           </div>
         </dl>
       )}
+      {data && <MemberActivityPanel memberId={data.id} email={data.email} />}
     </AdminModal>
   );
 }

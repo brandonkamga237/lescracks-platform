@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,7 +30,7 @@ class JdbcAccountStore implements AccountStore {
 
     private static final String COLUMNS = """
             id, email, password_hash, first_name, last_name, status, email_verified, provider,
-            created_at, updated_at, last_seen_at, signup_path, signup_language, signup_timezone""";
+            created_at, updated_at, last_seen_at, signup_path, signup_language, signup_timezone, signup_source""";
 
     private static final RowMapper<Account> ROW = (row, number) -> Account.builder()
             .id(row.getLong("id"))
@@ -46,6 +47,7 @@ class JdbcAccountStore implements AccountStore {
             .signupPath(row.getString("signup_path"))
             .signupLanguage(row.getString("signup_language"))
             .signupTimezone(row.getString("signup_timezone"))
+            .signupSource(row.getString("signup_source"))
             .build();
 
     private final JdbcClient jdbc;
@@ -70,6 +72,15 @@ class JdbcAccountStore implements AccountStore {
     public List<Account> findAllById(Collection<Long> ids) {
         if (ids.isEmpty()) return List.of();
         return jdbc.sql("SELECT " + COLUMNS + " FROM accounts WHERE id IN (:ids)").param("ids", ids).query(ROW).list();
+    }
+
+    @Override
+    public List<Account> findAllByEmail(Collection<String> emails) {
+        if (emails.isEmpty()) return List.of();
+        // Served by accounts_email_lower_idx.
+        return jdbc.sql("SELECT " + COLUMNS + " FROM accounts WHERE lower(email) IN (:emails)")
+                .param("emails", emails.stream().map(email -> email.trim().toLowerCase(Locale.ROOT)).distinct().toList())
+                .query(ROW).list();
     }
 
     @Override
@@ -116,14 +127,15 @@ class JdbcAccountStore implements AccountStore {
         params.put("signupPath", account.getSignupPath());
         params.put("signupLanguage", account.getSignupLanguage());
         params.put("signupTimezone", account.getSignupTimezone());
+        params.put("signupSource", account.getSignupSource());
         if (account.getId() == null) {
             params.put("createdAt", at(account.getCreatedAt()));
             params.put("lastSeenAt", at(account.getLastSeenAt()));
             Long id = jdbc.sql("""
                     INSERT INTO accounts (email, password_hash, first_name, last_name, status, email_verified, provider,
-                                          created_at, updated_at, last_seen_at, signup_path, signup_language, signup_timezone)
+                                          created_at, updated_at, last_seen_at, signup_path, signup_language, signup_timezone, signup_source)
                     VALUES (:email, :passwordHash, :firstName, :lastName, :status, :emailVerified, :provider,
-                            :createdAt, :updatedAt, :lastSeenAt, :signupPath, :signupLanguage, :signupTimezone)
+                            :createdAt, :updatedAt, :lastSeenAt, :signupPath, :signupLanguage, :signupTimezone, :signupSource)
                     RETURNING id""").params(params).query(Long.class).single();
             return account.toBuilder().id(id).build();
         }
@@ -133,7 +145,7 @@ class JdbcAccountStore implements AccountStore {
                 UPDATE accounts SET email = :email, password_hash = :passwordHash, first_name = :firstName,
                        last_name = :lastName, status = :status, email_verified = :emailVerified, provider = :provider,
                        updated_at = :updatedAt, signup_path = :signupPath, signup_language = :signupLanguage,
-                       signup_timezone = :signupTimezone
+                       signup_timezone = :signupTimezone, signup_source = :signupSource
                 WHERE id = :id""").params(params).update();
         if (updated == 0) throw new IllegalStateException("No account " + account.getId() + " to update");
         return account.toBuilder().build();

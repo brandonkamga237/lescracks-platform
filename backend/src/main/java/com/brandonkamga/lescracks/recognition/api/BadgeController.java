@@ -4,6 +4,8 @@ import com.brandonkamga.lescracks.recognition.api.dto.AwardRequest;
 import com.brandonkamga.lescracks.recognition.api.dto.BadgeHolderResponse;
 import com.brandonkamga.lescracks.recognition.api.dto.BadgeRequest;
 import com.brandonkamga.lescracks.recognition.api.dto.BadgeResponse;
+import com.brandonkamga.lescracks.recognition.api.dto.BulkAwardRequest;
+import com.brandonkamga.lescracks.recognition.api.dto.BulkAwardResponse;
 import com.brandonkamga.lescracks.recognition.api.dto.MemberBadgeResponse;
 import com.brandonkamga.lescracks.recognition.application.BadgeService;
 
@@ -68,6 +70,13 @@ public class BadgeController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void award(@PathVariable Long id, @Valid @RequestBody AwardRequest request) {
         badges.awardByEmail(id, request.email(), request.reason());
+    }
+
+    /** Many members at once: pasted emails and/or the people of an event. Each new holder gets an email. */
+    @PostMapping("/admin/{id}/holders/bulk")
+    @PreAuthorize("hasRole('ADMIN')")
+    public BulkAwardResponse awardMany(@PathVariable Long id, @Valid @RequestBody BulkAwardRequest request) {
+        return BulkAwardResponse.of(badges.awardMany(id, request.toGrant()));
     }
 
     @DeleteMapping("/admin/{id}/holders/{userId}")

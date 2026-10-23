@@ -77,7 +77,12 @@ public class RegistrationServiceImpl implements RegistrationService {
 
     @Override
     public List<MyEvent> listMine(String email) {
-        List<Registration> mine = registrations.findActiveByMember(people.require(email).getId());
+        return listOf(people.require(email).getId());
+    }
+
+    @Override
+    public List<MyEvent> listOf(Long userId) {
+        List<Registration> mine = registrations.findActiveByMember(userId);
         Map<Long, Event> byId = events.findAllById(mine.stream().map(Registration::getEventId).toList()).stream()
                 .collect(Collectors.toMap(Event::getId, Function.identity()));
         return mine.stream().filter(registration -> byId.containsKey(registration.getEventId()))

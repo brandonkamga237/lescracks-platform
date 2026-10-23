@@ -5,6 +5,7 @@ import { FacebookIcon, LinkedInIcon, XIcon } from '@/components/icons/BrandIcons
 import type { LucideIcon } from 'lucide-react';
 
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
+import { track } from '@/lib/analytics';
 
 interface ShareButtonProps {
   title: string;
@@ -17,6 +18,8 @@ interface ShareButtonProps {
   /** Message sent with the link, in place of the title: "J'ai eu 82/100, à toi". */
   text?: string;
   variant?: 'primary' | 'secondary';
+  /** A square icon button, for cards and lists; the label stays for screen readers. */
+  iconOnly?: boolean;
   className?: string;
 }
 
@@ -38,7 +41,7 @@ const NETWORKS: Network[] = [
  * On a phone it hands over to the system share sheet, which already knows the reader's apps;
  * elsewhere it opens a small panel. The link preview people see is the backend's snapshot.
  */
-export default function ShareButton({ title, path, url: absolute, label = 'Partager', text, variant = 'secondary', className = '' }: ShareButtonProps) {
+export default function ShareButton({ title, path, url: absolute, label = 'Partager', text, variant = 'secondary', iconOnly = false, className = '' }: ShareButtonProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const container = useRef<HTMLDivElement>(null);
@@ -58,7 +61,10 @@ export default function ShareButton({ title, path, url: absolute, label = 'Parta
   async function trigger() {
     const touch = window.matchMedia('(pointer: coarse)').matches;
     if (touch && typeof navigator.share === 'function') {
-      try { await navigator.share(text ? { title, text, url } : { title: shareTitle, url }); } catch { /* the reader closed the sheet */ }
+      try {
+        await navigator.share(text ? { title, text, url } : { title: shareTitle, url });
+        track('Partage', { réseau: 'Partage du téléphone', page: path ?? window.location.pathname });
+      } catch { /* the reader closed the sheet */ }
       return;
     }
     setOpen((value) => !value);
@@ -67,6 +73,7 @@ export default function ShareButton({ title, path, url: absolute, label = 'Parta
   async function copy() {
     try {
       await navigator.clipboard.writeText(url);
+      track('Partage', { réseau: 'Lien copié', page: path ?? window.location.pathname });
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -76,8 +83,9 @@ export default function ShareButton({ title, path, url: absolute, label = 'Parta
 
   return (
     <div ref={container} className={`relative ${className}`}>
-      <button type="button" onClick={() => void trigger()} aria-expanded={open} aria-controls={panelId} className={`${variant === 'primary' ? 'btn-primary' : 'btn-secondary'} w-full`}>
-        <Share2 className="h-4 w-4" aria-hidden />{label}
+      <button type="button" onClick={() => void trigger()} aria-expanded={open} aria-controls={panelId} className={`${variant === 'primary' ? 'btn-primary' : 'btn-secondary'} ${iconOnly ? 'w-11 px-0' : 'w-full'}`}
+        title={iconOnly ? label : undefined}>
+        <Share2 className="h-4 w-4" aria-hidden />{iconOnly ? <span className="sr-only">{label}</span> : label}
       </button>
 
       {open && (
@@ -85,7 +93,7 @@ export default function ShareButton({ title, path, url: absolute, label = 'Parta
           <ul className="grid grid-cols-3 gap-1">
             {NETWORKS.map(({ name, icon: Icon, href }) => (
               <li key={name}>
-                <a href={href(url, shareTitle)} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}
+                <a href={href(url, shareTitle)} target="_blank" rel="noopener noreferrer" onClick={() => { track('Partage', { réseau: name, page: path ?? window.location.pathname }); setOpen(false); }}
                   className="flex min-h-16 flex-col items-center justify-center gap-1.5 rounded text-t3 transition-colors hover:bg-noir-800 hover:text-t1">
                   <span aria-hidden><Icon className="h-5 w-5" /></span>
                   <span className="text-[11px]">{name}</span>

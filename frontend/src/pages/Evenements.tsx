@@ -106,6 +106,7 @@ export default function Evenements() {
                   <EventSpotlight
                     event={spotlight}
                     kicker={spotlightDate > Date.now() ? 'Prochain rendez-vous' : 'À l’affiche'}
+                    open={spotlightDate > Date.now() || Boolean(spotlight.endDate && new Date(spotlight.endDate).getTime() > Date.now())}
                     cataloguePath={cataloguePath}
                   />
                 </div>
