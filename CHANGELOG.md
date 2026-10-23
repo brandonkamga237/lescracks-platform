@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.10.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.9.0...v1.10.0) (2026-10-23)
+
+
+### Features
+
+* **admin:** member activity sheet and bulk badge awards ([#129](https://github.com/brandonkamga237/lescracks-platform/issues/129)) ([fdcf427](https://github.com/brandonkamga237/lescracks-platform/commit/fdcf427524939304e7fa1f17115fa4db87c96ab6))
+* **event:** put sign-up, sharing and the hackathon principle up front ([#128](https://github.com/brandonkamga237/lescracks-platform/issues/128)) ([e63e717](https://github.com/brandonkamga237/lescracks-platform/commit/e63e7171f7958d6d8a2c519080b0cb6f86a664b4))
+* **stats:** link traffic to sign-ups and event participation ([#130](https://github.com/brandonkamga237/lescracks-platform/issues/130)) ([cd26720](https://github.com/brandonkamga237/lescracks-platform/commit/cd267202bfbbf3a681790eba7d66d757c5090302))
+
 ## [1.9.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.8.0...v1.9.0) (2026-10-22)
 
 
