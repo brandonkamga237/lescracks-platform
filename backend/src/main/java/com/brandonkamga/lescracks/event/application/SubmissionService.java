@@ -1,5 +1,7 @@
 package com.brandonkamga.lescracks.event.application;
 
+import com.brandonkamga.lescracks.event.domain.model.Submission;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -16,4 +18,7 @@ public interface SubmissionService {
     List<SubmissionView> listForEvent(Long eventId);
 
     SubmissionView review(Long submissionId, ProjectReview review);
+
+    /** The projects a member is named on, latest first, for their admin sheet. */
+    List<Submission> listOf(Long userId);
 }

@@ -209,6 +209,11 @@ final class InMemoryEvents {
         }
 
         @Override
+        public List<Submission> findByUser(Long userId) {
+            return rows.values().stream().filter(s -> s.getMemberIds().contains(userId)).map(Submissions::copy).toList();
+        }
+
+        @Override
         public Submission save(Submission submission) {
             Submission stored = copy(submission).toBuilder().id(submission.getId() == null ? ids.getAndIncrement() : submission.getId()).build();
             Set<Long> taken = findTaken(stored.getEventId(), stored.getMemberIds(), stored.getId());
@@ -241,6 +246,13 @@ final class InMemoryEvents {
         @Override
         public Member require(Long id) {
             return Optional.ofNullable(byId.get(id)).orElseThrow(() -> new NotFoundException("Member", "id", id));
+        }
+
+        @Override
+        public Map<String, Member> findAllByEmail(Collection<String> emails) {
+            Map<String, Member> found = new HashMap<>();
+            emails.forEach(email -> find(email).ifPresent(member -> found.put(email.trim().toLowerCase(), member)));
+            return found;
         }
 
         @Override

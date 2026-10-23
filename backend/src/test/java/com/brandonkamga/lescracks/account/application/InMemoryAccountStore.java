@@ -45,6 +45,12 @@ public class InMemoryAccountStore implements AccountStore {
     }
 
     @Override
+    public List<Account> findAllByEmail(Collection<String> emails) {
+        return rows.values().stream().filter(account -> emails.stream().anyMatch(email -> email.trim().equalsIgnoreCase(account.getEmail())))
+                .map(account -> account.toBuilder().build()).toList();
+    }
+
+    @Override
     public Paged<Account> search(AccountSearch search, PageQuery page) {
         List<Account> all = searchAll(search);
         List<Account> slice = all.stream().skip((long) page.page() * page.size()).limit(page.size()).toList();

@@ -71,6 +71,9 @@ class JdbcAccountStoreIT extends PostgresIT {
         assertThat(accounts.findAllById(List.of(a.getId(), b.getId(), -1L))).extracting(Account::getEmail)
                 .containsExactlyInAnyOrder("batch-a@example.com", "batch-b@example.com");
         assertThat(accounts.findAllById(List.of())).isEmpty();
+        assertThat(accounts.findAllByEmail(List.of(" BATCH-A@example.com", "batch-b@example.com", "nobody@example.com")))
+                .extracting(Account::getEmail).containsExactlyInAnyOrder("batch-a@example.com", "batch-b@example.com");
+        assertThat(accounts.findAllByEmail(List.of())).isEmpty();
     }
 
     @Test

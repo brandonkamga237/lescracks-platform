@@ -2,7 +2,7 @@ import { ENV } from '@/config/env';
 import { prepareImage } from '@/lib/image';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminArticle, AdminBadge, AdminComment, AdminCertificate, BadgeHolder, AdminProject, AdminRegistration, ProjectStatus, AdminSubscriber, AdminSummary, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, MemberPortrait, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal, Conversions } from '@/services/types';
+import type { AdminArticle, AdminBadge, AdminComment, AdminCertificate, BadgeHolder, AdminProject, AdminRegistration, ProjectStatus, AdminSubscriber, AdminSummary, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, MemberPortrait, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal, BulkAwardResult, MemberActivity, Conversions } from '@/services/types';
 
 export interface ArticleRequest {
   title: string;
@@ -146,6 +146,7 @@ export const adminApi = {
   resendUserVerification: (id: number) => http.post<void>(`/admin/users/${id}/verification-email`),
   verifyUser: (id: number) => http.post<AdminUser>(`/admin/users/${id}/verify`),
   user: (id: number, signal?: AbortSignal) => http.get<AdminUser>(`/admin/users/${id}`, undefined, signal),
+  userActivity: (id: number, signal?: AbortSignal) => http.get<MemberActivity>(`/admin/users/${id}/activity`, undefined, signal),
   updateUserStatus: (id: number, status: AdminUser['status']) =>
     http.patch<AdminUser>(`/admin/users/${id}/status`, { status }),
   deleteUser: (id: number) => http.delete<void>(`/admin/users/${id}`),
@@ -176,7 +177,7 @@ export const adminApi = {
   audience: (days = 30, signal?: AbortSignal) =>
     http.get<AudienceStats>('/admin/stats/audience', { days }, signal),
   eventRegistrations: (id: number, signal?: AbortSignal) => http.get<AdminRegistration[]>(`/events/admin/${id}/registrations`, undefined, signal),
-  markAttendance: (registrationId: number, status: 'ATTENDED' | 'ABSENT') =>
+  markAttendance: (registrationId: number, status: 'ATTENDED' | 'ABSENT' | 'REGISTERED') =>
     http.patch<unknown>(`/events/admin/registrations/${registrationId}`, { status }),
   eventProjects: (id: number, signal?: AbortSignal) => http.get<AdminProject[]>(`/events/admin/${id}/submissions`, undefined, signal),
   reviewProject: (id: number, review: { status?: ProjectStatus; score?: number | null; rank?: number | null; note?: string }) =>
@@ -191,6 +192,8 @@ export const adminApi = {
   deleteBadge: (id: number) => http.delete<void>(`/badges/admin/${id}`),
   badgeHolders: (id: number, signal?: AbortSignal) => http.get<BadgeHolder[]>(`/badges/admin/${id}/holders`, undefined, signal),
   awardBadge: (id: number, email: string, reason?: string) => http.post<void>(`/badges/admin/${id}/holders`, { email, reason }),
+  awardBadgeToMany: (id: number, grant: { emails: string[]; eventId?: number; presentOnly: boolean; reason?: string }) =>
+    http.post<BulkAwardResult>(`/badges/admin/${id}/holders/bulk`, grant),
   revokeBadge: (id: number, userId: number) => http.delete<void>(`/badges/admin/${id}/holders/${userId}`),
   eventCertificates: (eventId: number, signal?: AbortSignal) => http.get<AdminCertificate[]>(`/certificates/admin/events/${eventId}`, undefined, signal),
   prepareCertificates: (eventId: number) => http.post<AdminCertificate[]>(`/certificates/admin/events/${eventId}/drafts`),

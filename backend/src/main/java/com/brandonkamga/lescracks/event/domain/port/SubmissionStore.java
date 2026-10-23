@@ -20,6 +20,9 @@ public interface SubmissionStore {
     /** Ranked projects first, then by score, then the earliest; members in one more query. */
     List<Submission> findByEvent(Long eventId);
 
+    /** Every project a member is named on, latest first; members in one more query. */
+    List<Submission> findByUser(Long userId);
+
     /** Replaces the team with {@code memberIds}. */
     Submission save(Submission submission);
 }

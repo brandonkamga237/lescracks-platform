@@ -138,6 +138,23 @@ export interface Conversions {
     views: number; registrations: number; attended: number; projects: number }[];
 }
 
+/** What a grant did: new holders, members who already had it, and addresses nobody uses. */
+export interface BulkAwardResult {
+  awarded: number;
+  alreadyHeld: number;
+  unknownEmails: string[];
+}
+
+export interface MemberActivity {
+  events: {
+    id: number; slug?: string; title: string; type: EventType; startDate: string; status: RegistrationStatus;
+    project?: { id: number; title: string; status: ProjectStatus; rank?: number } | null;
+  }[];
+  badges: { badgeId: number; code: string; name: string; icon: string; system: boolean; awardedAt: string; reason?: string }[];
+  certificates: { code: string; kind: CertificateKind; title: string; issuedAt: string }[];
+  comments: number;
+}
+
 export interface AdminBadge {
   id: number;
   code: string;

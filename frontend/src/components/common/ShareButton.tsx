@@ -18,6 +18,8 @@ interface ShareButtonProps {
   /** Message sent with the link, in place of the title: "J'ai eu 82/100, à toi". */
   text?: string;
   variant?: 'primary' | 'secondary';
+  /** A square icon button, for cards and lists; the label stays for screen readers. */
+  iconOnly?: boolean;
   className?: string;
 }
 
@@ -39,7 +41,7 @@ const NETWORKS: Network[] = [
  * On a phone it hands over to the system share sheet, which already knows the reader's apps;
  * elsewhere it opens a small panel. The link preview people see is the backend's snapshot.
  */
-export default function ShareButton({ title, path, url: absolute, label = 'Partager', text, variant = 'secondary', className = '' }: ShareButtonProps) {
+export default function ShareButton({ title, path, url: absolute, label = 'Partager', text, variant = 'secondary', iconOnly = false, className = '' }: ShareButtonProps) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const container = useRef<HTMLDivElement>(null);
@@ -81,8 +83,9 @@ export default function ShareButton({ title, path, url: absolute, label = 'Parta
 
   return (
     <div ref={container} className={`relative ${className}`}>
-      <button type="button" onClick={() => void trigger()} aria-expanded={open} aria-controls={panelId} className={`${variant === 'primary' ? 'btn-primary' : 'btn-secondary'} w-full`}>
-        <Share2 className="h-4 w-4" aria-hidden />{label}
+      <button type="button" onClick={() => void trigger()} aria-expanded={open} aria-controls={panelId} className={`${variant === 'primary' ? 'btn-primary' : 'btn-secondary'} ${iconOnly ? 'w-11 px-0' : 'w-full'}`}
+        title={iconOnly ? label : undefined}>
+        <Share2 className="h-4 w-4" aria-hidden />{iconOnly ? <span className="sr-only">{label}</span> : label}
       </button>
 
       {open && (

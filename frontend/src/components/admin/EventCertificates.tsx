@@ -68,12 +68,13 @@ export default function EventCertificates({ eventId, acceptsSubmissions }: Event
 
   return (
     <div>
-      <p className="mb-4 text-sm text-t3">
-        {acceptsSubmissions
-          ? 'Les brouillons reprennent chaque membre d’un projet non rejeté, plus le lauréat (1re place) et le podium (2e et 3e).'
-          : 'Les brouillons reprennent les inscrits pointés « présent ».'}
-        {' '}Rien n’est envoyé tant que tu n’émets pas.
-      </p>
+      <ol className="mb-5 space-y-1.5 rounded-lg border border-gold-400/25 bg-gold-400/5 p-4 text-sm leading-relaxed text-t2">
+        <li><strong className="text-t1">1. Préparer les brouillons</strong> : {acceptsSubmissions
+          ? 'une attestation pour chaque membre d’un projet non rejeté, plus le lauréat (1re place) et le podium (2e et 3e).'
+          : 'une attestation pour chaque inscrit pointé « Présent ».'} Tu peux recommencer : personne n’est compté deux fois.</li>
+        <li><strong className="text-t1">2. Vérifier</strong> : « Aperçu » montre le document ; supprime un brouillon qui ne doit pas exister.</li>
+        <li><strong className="text-t1">3. Émettre</strong> : coche puis « Émettre ». Chaque personne reçoit un email avec son lien. Une erreur ? « Révoquer ».</li>
+      </ol>
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <button type="button" disabled={busy} onClick={() => void run(() => adminApi.prepareCertificates(eventId), 'Brouillons préparés.')} className="btn-secondary inline-flex items-center gap-2">
           {busy && !confirm ? <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden /> : <FileCheck2 className="h-4 w-4" aria-hidden />}Préparer les brouillons

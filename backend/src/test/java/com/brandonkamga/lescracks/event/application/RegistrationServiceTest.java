@@ -82,7 +82,7 @@ class RegistrationServiceTest {
     }
 
     @Test
-    @DisplayName("attendance is present or absent, never a return to « registered », and never on a cancelled seat")
+    @DisplayName("attendance is present or absent, can be undone back to « registered », and never touches a cancelled seat")
     void attendanceIsPresentOrAbsent() {
         Registration awa = service.register(workshop.getId(), "awa@example.com");
         Registration kofi = service.register(workshop.getId(), "kofi@example.com");
@@ -90,7 +90,8 @@ class RegistrationServiceTest {
 
         assertThat(service.markAttendance(awa.getId(), RegistrationStatus.ATTENDED).getStatus()).isEqualTo(RegistrationStatus.ATTENDED);
         assertThat(registrations.findById(awa.getId())).get().extracting(Registration::getStatus).isEqualTo(RegistrationStatus.ATTENDED);
-        assertThatThrownBy(() -> service.markAttendance(awa.getId(), RegistrationStatus.REGISTERED)).isInstanceOf(BadRequestException.class);
+        assertThat(service.markAttendance(awa.getId(), RegistrationStatus.REGISTERED).getStatus()).isEqualTo(RegistrationStatus.REGISTERED);
+        assertThatThrownBy(() -> service.markAttendance(awa.getId(), RegistrationStatus.CANCELLED)).isInstanceOf(BadRequestException.class);
         assertThatThrownBy(() -> service.markAttendance(kofi.getId(), RegistrationStatus.ABSENT)).isInstanceOf(BadRequestException.class);
     }
 
