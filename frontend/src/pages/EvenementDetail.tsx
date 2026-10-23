@@ -7,6 +7,7 @@ import ShareButton from '@/components/common/ShareButton';
 import LineArt from '@/components/illustrations/LineArt';
 import { TYPE_LABEL } from '@/components/events/AgendaItem';
 import EventRegistrationAction from '@/components/events/EventRegistrationAction';
+import HackathonSteps from '@/components/events/HackathonSteps';
 import StickyActionBar from '@/components/common/StickyActionBar';
 import ProjectSubmission from '@/components/events/ProjectSubmission';
 import ViewCount from '@/components/events/ViewCount';
@@ -74,6 +75,8 @@ export default function EvenementDetail() {
             <h1 className="mt-3 break-words font-display text-3xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl lg:text-5xl">{loaded.title}</h1>
             {hasDate && <p className="mt-3 text-base sm:text-lg font-semibold text-t2"><time dateTime={loaded.startDate}>{dateFormat.format(start)}</time></p>}
             {isOpen && <div ref={heroAction}><EventRegistrationAction event={loaded} state={registration} variant="hero" /></div>}
+            {!isOpen && <div className="mt-6 w-fit"><ShareButton title={loaded.title} path={eventPath(loaded)} label="Partager le rendez-vous" /></div>}
+            {loaded.acceptsSubmissions && <HackathonSteps event={loaded} />}
           </header>
         </>}
         </div>

@@ -1,6 +1,8 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Users } from 'lucide-react';
+
+import ShareButton from '@/components/common/ShareButton';
 
 import { markdownToPlainText } from '@/lib/plainText';
 import { eventPath } from '@/lib/slugs';
@@ -17,13 +19,15 @@ interface EventSpotlightProps {
   /** Gold label above the title, e.g. "Prochain rendez-vous". */
   kicker?: string;
   cataloguePath: string;
+  /** Still ahead or running: the button invites to sign up rather than to read. */
+  open?: boolean;
 }
 
 /**
  * The next rendez-vous, announced like the headline of an issue:
  * a monumental date rail facing the editorial block.
  */
-function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath }: EventSpotlightProps) {
+function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath, open = false }: EventSpotlightProps) {
   const start = new Date(event.startDate);
   const hasDate = !Number.isNaN(start.getTime());
   const meta = [TYPE_LABEL[event.type], FORMAT_LABEL[event.format], event.location]
@@ -59,6 +63,11 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
             {meta}
           </span>
           <ViewCount count={event.viewCount ?? 0} className="kicker-muted" />
+          {event.registrationCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-gold-ink">
+              <Users className="h-4 w-4" aria-hidden />{event.registrationCount.toLocaleString('fr-FR')} {event.registrationCount > 1 ? 'inscrits' : 'inscrit'}
+            </span>
+          )}
         </p>
         <h3 className="mt-3 max-w-3xl break-words font-display text-2xl font-bold leading-tight tracking-tight text-t1 sm:text-3xl lg:text-4xl">
           <Link
@@ -72,14 +81,17 @@ function EventSpotlight({ event, kicker = 'Prochain rendez-vous', cataloguePath 
         <p className="mt-6 line-clamp-3 max-w-2xl text-base leading-normal text-t3">
           {markdownToPlainText(event.description)}
         </p>
-        <Link
-          to={eventPath(event)}
-          state={{ cataloguePath }}
-          className="btn-primary mt-8"
-        >
-          Voir le rendez-vous
-          <ArrowRight className="h-4 w-4" aria-hidden />
-        </Link>
+        <div className="mt-8 flex items-center gap-3">
+          <Link
+            to={eventPath(event)}
+            state={{ cataloguePath }}
+            className="btn-primary min-h-12 px-7 text-base"
+          >
+            {open ? 'Je participe' : 'Voir le rendez-vous'}
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+          <ShareButton title={event.title} path={eventPath(event)} label={`Partager « ${event.title} »`} iconOnly className="shrink-0" />
+        </div>
       </div>
     </article>
   );

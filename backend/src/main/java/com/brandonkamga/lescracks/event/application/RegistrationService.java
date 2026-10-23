@@ -24,7 +24,7 @@ public interface RegistrationService {
     /** Oldest first, cancelled ones included. */
     List<RegistrationView> listForEvent(Long eventId);
 
-    /** After the event: ATTENDED or ABSENT. */
+    /** After the event: ATTENDED or ABSENT; REGISTERED undoes the marking. */
     Registration markAttendance(Long registrationId, RegistrationStatus status);
 
     /** Signs members up without the "event still ahead" check: the people named on a project. */

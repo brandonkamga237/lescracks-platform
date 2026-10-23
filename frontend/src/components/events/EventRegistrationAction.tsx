@@ -1,4 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
+
+import ShareButton from '@/components/common/ShareButton';
+import { eventPath } from '@/lib/slugs';
 import { ArrowRight, Check, Loader2, Send, Users } from 'lucide-react';
 
 import type { EventRegistrationState } from '@/hooks/useEventRegistration';
@@ -24,7 +27,7 @@ function scrollToProject() {
 export default function EventRegistrationAction({ event, state, variant }: EventRegistrationActionProps) {
   const { pathname } = useLocation();
   const bar = variant === 'bar';
-  const size = bar ? 'shrink-0' : 'min-h-12 w-full px-7 text-base sm:w-auto';
+  const size = bar ? 'shrink-0' : 'min-h-14 w-full px-8 text-base shadow-[0_0_0_6px_rgba(212,175,55,0.15)] sm:w-auto';
   const deadline = event.acceptsSubmissions && event.submissionsCloseAt ? `Projets jusqu’au ${dayFormat.format(new Date(event.submissionsCloseAt))}` : null;
   const people = state.count > 0 ? `${state.count.toLocaleString('fr-FR')} ${state.count > 1 ? 'inscrits' : 'inscrit'}` : null;
 
@@ -62,7 +65,10 @@ export default function EventRegistrationAction({ event, state, variant }: Event
   return (
     <div className="mt-7 space-y-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
-        {action}
+        <div className="flex items-center gap-3">
+          {action}
+          <ShareButton title={event.title} path={eventPath(event)} label="Partager le rendez-vous" iconOnly className="shrink-0" />
+        </div>
         {(people || deadline) && (
           <p className="flex items-center gap-2 text-sm text-t2">
             {people && <><Users className="h-4 w-4 shrink-0 text-gold-ink" aria-hidden />{people}</>}
