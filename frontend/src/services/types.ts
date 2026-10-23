@@ -130,6 +130,14 @@ export interface MemberBadge {
   reason?: string;
 }
 
+export interface Conversions {
+  days: number;
+  signupsBySource: { name: string; count: number }[];
+  signupsByLandingPage: { name: string; count: number }[];
+  events: { id: number; slug?: string; title: string; startDate: string; acceptsSubmissions: boolean;
+    views: number; registrations: number; attended: number; projects: number }[];
+}
+
 export interface AdminBadge {
   id: number;
   code: string;
@@ -411,7 +419,7 @@ export type MemberSituation = 'STUDENT' | 'EMPLOYED' | 'CAREER_CHANGE' | 'JOB_SE
 export type MemberGoal = 'FIND_JOB' | 'LEVEL_UP' | 'FREELANCE' | 'BUILD_PROJECT';
 export type ProfileField = 'PHONE' | 'SITUATION' | 'INTERESTS' | 'GOAL' | 'CITY' | 'AVATAR' | 'BIO';
 
-export interface SignupContext { path?: string; language?: string; timezone?: string; }
+export interface SignupContext { path?: string; language?: string; timezone?: string; source?: string; }
 
 export interface OnboardingAnswers {
   phone?: string;

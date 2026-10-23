@@ -5,6 +5,7 @@ import { FacebookIcon, LinkedInIcon, XIcon } from '@/components/icons/BrandIcons
 import type { LucideIcon } from 'lucide-react';
 
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
+import { track } from '@/lib/analytics';
 
 interface ShareButtonProps {
   title: string;
@@ -58,7 +59,10 @@ export default function ShareButton({ title, path, url: absolute, label = 'Parta
   async function trigger() {
     const touch = window.matchMedia('(pointer: coarse)').matches;
     if (touch && typeof navigator.share === 'function') {
-      try { await navigator.share(text ? { title, text, url } : { title: shareTitle, url }); } catch { /* the reader closed the sheet */ }
+      try {
+        await navigator.share(text ? { title, text, url } : { title: shareTitle, url });
+        track('Partage', { réseau: 'Partage du téléphone', page: path ?? window.location.pathname });
+      } catch { /* the reader closed the sheet */ }
       return;
     }
     setOpen((value) => !value);
@@ -67,6 +71,7 @@ export default function ShareButton({ title, path, url: absolute, label = 'Parta
   async function copy() {
     try {
       await navigator.clipboard.writeText(url);
+      track('Partage', { réseau: 'Lien copié', page: path ?? window.location.pathname });
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -85,7 +90,7 @@ export default function ShareButton({ title, path, url: absolute, label = 'Parta
           <ul className="grid grid-cols-3 gap-1">
             {NETWORKS.map(({ name, icon: Icon, href }) => (
               <li key={name}>
-                <a href={href(url, shareTitle)} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}
+                <a href={href(url, shareTitle)} target="_blank" rel="noopener noreferrer" onClick={() => { track('Partage', { réseau: name, page: path ?? window.location.pathname }); setOpen(false); }}
                   className="flex min-h-16 flex-col items-center justify-center gap-1.5 rounded text-t3 transition-colors hover:bg-noir-800 hover:text-t1">
                   <span aria-hidden><Icon className="h-5 w-5" /></span>
                   <span className="text-[11px]">{name}</span>
