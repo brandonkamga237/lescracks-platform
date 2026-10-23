@@ -54,7 +54,7 @@ public class AccountDirectoryImpl implements AccountDirectory {
     public void recordArrival(Long id, Arrival arrival) {
         if (arrival == null) return;
         Account account = requireAccount(id);
-        account.recordArrival(arrival.path(), arrival.language(), arrival.timezone());
+        account.recordArrival(arrival.path(), arrival.language(), arrival.timezone(), arrival.source());
         accounts.save(account);
     }
 

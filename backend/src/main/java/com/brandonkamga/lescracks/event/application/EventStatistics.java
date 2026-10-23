@@ -16,6 +16,14 @@ public interface EventStatistics {
     record Timing(long upcoming, long ongoing, long past) {
     }
 
+    /** How far people went with an event, from signing up to showing up or handing in a project. */
+    record EventFunnel(Long id, String slug, String title, Instant startDate, boolean acceptsSubmissions,
+                       long registrations, long attended, long projects) {
+    }
+
+    /** Published or finished events, the latest first. */
+    List<EventFunnel> funnels(int limit);
+
     Map<String, Long> eventsByStatus();
 
     Map<String, Long> eventsByType();

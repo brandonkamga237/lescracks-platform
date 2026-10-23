@@ -11,11 +11,13 @@ class AccountTest {
     @DisplayName("blank arrival details are not recorded, and a recorded one is never overwritten")
     void arrival() {
         Account account = Account.builder().build();
-        account.recordArrival(" ", " fr ", null);
-        account.recordArrival("/blog", "en", "Africa/Douala");
+        account.recordArrival(" ", " fr ", null, " ");
+        account.recordArrival("/blog", "en", "Africa/Douala", "WhatsApp");
+        account.recordArrival("/talk", "en", "Africa/Douala", "LinkedIn");
 
         assertThat(account.getSignupPath()).isEqualTo("/blog");
         assertThat(account.getSignupLanguage()).isEqualTo("fr");
         assertThat(account.getSignupTimezone()).isEqualTo("Africa/Douala");
+        assertThat(account.getSignupSource()).isEqualTo("WhatsApp");
     }
 }
