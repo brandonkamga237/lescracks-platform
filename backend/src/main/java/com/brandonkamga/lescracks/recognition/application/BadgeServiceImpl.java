@@ -4,6 +4,10 @@ import com.brandonkamga.lescracks.recognition.domain.model.Badge;
 import com.brandonkamga.lescracks.recognition.domain.model.MemberBadge;
 import com.brandonkamga.lescracks.recognition.domain.port.AwardStore;
 import com.brandonkamga.lescracks.recognition.domain.port.BadgeStore;
+import com.brandonkamga.lescracks.event.application.RegistrationService;
+import com.brandonkamga.lescracks.event.domain.model.RegistrationStatus;
+import com.brandonkamga.lescracks.mail.domain.BadgeAwardedEmail;
+import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.member.application.Member;
 import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
@@ -13,9 +17,12 @@ import com.brandonkamga.lescracks.shared.util.Slugs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public class BadgeServiceImpl implements BadgeService {
     private static final Logger log = LoggerFactory.getLogger(BadgeServiceImpl.class);
@@ -23,11 +30,16 @@ public class BadgeServiceImpl implements BadgeService {
     private final BadgeStore badges;
     private final AwardStore awards;
     private final MemberDirectory people;
+    private final RegistrationService registrations;
+    private final Mailer mailer;
 
-    public BadgeServiceImpl(BadgeStore badges, AwardStore awards, MemberDirectory people) {
+    public BadgeServiceImpl(BadgeStore badges, AwardStore awards, MemberDirectory people, RegistrationService registrations,
+                            Mailer mailer) {
         this.badges = badges;
         this.awards = awards;
         this.people = people;
+        this.registrations = registrations;
+        this.mailer = mailer;
     }
 
     @Override
@@ -72,12 +84,52 @@ public class BadgeServiceImpl implements BadgeService {
     @Override
     public MemberBadge awardByEmail(Long badgeId, String email, String reason) {
         Member member = people.find(email).orElseThrow(() -> new BadRequestException("Aucun membre n’a l’adresse " + email + "."));
-        return give(require(badgeId), member.getId(), reason);
+        Badge badge = require(badgeId);
+        String why = clean(reason);
+        if (!awards.addAll(badge, List.of(member.getId()), why).isEmpty()) notify(badge, member, why);
+        return awards.find(badge.getId(), member.getId()).orElseThrow();
     }
 
+    @Override
+    public BulkAward awardMany(Long badgeId, BadgeGrant grant) {
+        Badge badge = require(badgeId);
+        Map<Long, Member> recipients = new LinkedHashMap<>();
+        List<String> unknown = new ArrayList<>();
+        List<String> emails = grant.emails() == null ? List.of() : grant.emails().stream()
+                .map(email -> email.trim().toLowerCase(Locale.ROOT)).filter(email -> !email.isEmpty()).distinct().toList();
+        Map<String, Member> byEmail = people.findAllByEmail(emails);
+        for (String email : emails) {
+            Member member = byEmail.get(email);
+            if (member == null) unknown.add(email);
+            else recipients.put(member.getId(), member);
+        }
+        if (grant.eventId() != null) {
+            registrations.listForEvent(grant.eventId()).stream()
+                    .filter(view -> grant.presentOnly()
+                            ? view.registration().getStatus() == RegistrationStatus.ATTENDED
+                            : view.registration().isActive())
+                    .forEach(view -> recipients.putIfAbsent(view.member().getId(), view.member()));
+        }
+        if (recipients.isEmpty() && unknown.isEmpty()) throw new BadRequestException("Indique au moins un email ou un événement.");
+        String why = clean(grant.reason());
+        Set<Long> added = awards.addAll(badge, recipients.keySet(), why);
+        added.forEach(id -> notify(badge, recipients.get(id), why));
+        log.info("Badge {} given to {} members ({} already held it)", badge.getCode(), added.size(), recipients.size() - added.size());
+        return new BulkAward(added.size(), recipients.size() - added.size(), unknown);
+    }
+
+    private void notify(Badge badge, Member member, String reason) {
+        mailer.send(new BadgeAwardedEmail(member.getEmail(), member.getFirstName(), badge.getName(), badge.getDescription(), reason,
+                member.getId()));
+    }
+
+    private static String clean(String reason) {
+        return reason == null || reason.isBlank() ? null : reason.trim();
+    }
+
+    // Rules give badges silently: the attestation that earned it already sends its own email.
     private MemberBadge give(Badge badge, Long userId, String reason) {
-        MemberBadge award = awards.add(MemberBadge.builder().badge(badge).userId(userId)
-                .reason(reason == null || reason.isBlank() ? null : reason.trim()).build());
+        MemberBadge award = awards.add(MemberBadge.builder().badge(badge).userId(userId).reason(clean(reason)).build());
         log.info("Badge {} held by member {}", badge.getCode(), userId);
         return award;
     }

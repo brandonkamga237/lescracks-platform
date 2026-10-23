@@ -14,10 +14,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -102,6 +104,17 @@ final class InMemoryRecognition {
                 rows.put(stored.getId(), stored);
                 return stored.toBuilder().build();
             });
+        }
+
+        @Override
+        public Set<Long> addAll(Badge badge, Collection<Long> userIds, String reason) {
+            Set<Long> added = new LinkedHashSet<>();
+            for (Long userId : userIds) {
+                if (find(badge.getId(), userId).isPresent()) continue;
+                add(MemberBadge.builder().badge(badge).userId(userId).reason(reason).build());
+                added.add(userId);
+            }
+            return added;
         }
 
         @Override

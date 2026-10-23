@@ -21,6 +21,9 @@ public interface RegistrationService {
     /** The member's current and past events, latest first; cancelled ones are left out. */
     List<MyEvent> listMine(String email);
 
+    /** The same, by account id, for the member's admin sheet. */
+    List<MyEvent> listOf(Long userId);
+
     /** Oldest first, cancelled ones included. */
     List<RegistrationView> listForEvent(Long eventId);
 

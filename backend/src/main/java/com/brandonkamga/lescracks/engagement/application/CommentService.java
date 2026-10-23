@@ -27,4 +27,7 @@ public interface CommentService {
     ModeratedComment moderate(Long commentId, CommentStatus status);
 
     void erase(Long commentId);
+
+    /** Every comment a member ever posted, for their admin sheet. */
+    long countWrittenBy(Long authorId);
 }

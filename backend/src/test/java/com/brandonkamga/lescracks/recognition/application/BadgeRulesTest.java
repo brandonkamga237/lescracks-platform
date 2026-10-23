@@ -21,7 +21,7 @@ class BadgeRulesTest {
     private final InMemoryRecognition.Badges badges = new InMemoryRecognition.Badges();
     private final InMemoryRecognition.Awards awards = new InMemoryRecognition.Awards();
     private final EventDirectory events = mock(EventDirectory.class);
-    private final BadgeRules rules = new BadgeRules(new BadgeServiceImpl(badges, awards, null), events);
+    private final BadgeRules rules = new BadgeRules(new BadgeServiceImpl(badges, awards, null, null, null), events);
 
     @BeforeEach
     void setUp() {

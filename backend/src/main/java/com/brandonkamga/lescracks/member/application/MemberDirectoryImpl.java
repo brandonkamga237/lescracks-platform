@@ -48,6 +48,15 @@ public class MemberDirectoryImpl implements MemberDirectory {
         return members;
     }
 
+    @Override
+    public Map<String, Member> findAllByEmail(Collection<String> emails) {
+        Map<String, AccountSummary> found = accounts.findAllByEmail(emails);
+        Map<Long, Member> byId = findAll(found.values().stream().map(AccountSummary::getId).toList());
+        Map<String, Member> members = new LinkedHashMap<>();
+        found.forEach((email, account) -> members.put(email, byId.get(account.getId())));
+        return members;
+    }
+
     private Member member(AccountSummary account) {
         return Member.of(account, profiles.find(account.getId()).orElseGet(() -> MemberProfile.empty(account.getId())));
     }

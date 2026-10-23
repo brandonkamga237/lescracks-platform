@@ -16,6 +16,9 @@ public interface AccountDirectory {
     /** Several accounts in one query, by id; unknown ids are simply absent. */
     Map<Long, AccountSummary> findAll(Collection<Long> ids);
 
+    /** Several accounts in one query, keyed by lower-cased email; unknown addresses are absent. */
+    Map<String, AccountSummary> findAllByEmail(Collection<String> emails);
+
     /** Null leaves a name as it is; a blank name is refused. */
     AccountSummary rename(Long id, String firstName, String lastName);
 
