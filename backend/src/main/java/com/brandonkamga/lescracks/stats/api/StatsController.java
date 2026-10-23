@@ -2,6 +2,7 @@ package com.brandonkamga.lescracks.stats.api;
 
 import com.brandonkamga.lescracks.stats.api.dto.AudienceResponse;
 import com.brandonkamga.lescracks.stats.api.dto.ContentViewsResponse;
+import com.brandonkamga.lescracks.stats.api.dto.ConversionsResponse;
 import com.brandonkamga.lescracks.stats.api.dto.MemberPortraitResponse;
 import com.brandonkamga.lescracks.stats.api.dto.StatsOverviewResponse;
 import com.brandonkamga.lescracks.stats.api.dto.WatchResponse;
@@ -65,6 +66,12 @@ public class StatsController {
     }
 
     /** Who the members are: situation, goal, country, interests and sign-in method. */
+    /** Which channels and pages bring members, and how far each event takes them. */
+    @GetMapping("/conversions")
+    public ConversionsResponse conversions(@RequestParam(defaultValue = "30") int days) {
+        return stats.conversions(Math.clamp(days, 1, 365));
+    }
+
     @GetMapping("/members")
     public MemberPortraitResponse members() { return stats.memberPortrait(); }
 

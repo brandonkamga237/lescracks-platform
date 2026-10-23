@@ -42,7 +42,7 @@ public class SignUpServiceImpl implements SignUpService {
                 .provider(AuthProvider.LOCAL)
                 .build();
         Arrival arrival = registration.arrival();
-        if (arrival != null) account.recordArrival(arrival.path(), arrival.language(), arrival.timezone());
+        if (arrival != null) account.recordArrival(arrival.path(), arrival.language(), arrival.timezone(), arrival.source());
         AccountSummary saved = AccountSummary.of(accounts.save(account));
         // Before the email goes out: a listener refusing the phone number undoes everything.
         events.registered(new AccountRegistered(saved.getId(), saved.getEmail(), saved.getFirstName(), saved.getLastName(), registration.phone(),

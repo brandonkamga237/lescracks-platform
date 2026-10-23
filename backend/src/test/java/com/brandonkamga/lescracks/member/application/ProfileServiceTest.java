@@ -77,7 +77,7 @@ class ProfileServiceTest {
         when(taxonomy.requireCategory(3L)).thenReturn(category(3));
 
         service.onboard("eric@example.com", new OnboardingAnswers("+237 6 77 12 34 56", MemberSituation.CAREER_CHANGE,
-                MemberGoal.FIND_JOB, Set.of(3L), " Douala ", true, new Arrival("/ressources/docker", "fr-CM", "Africa/Douala")));
+                MemberGoal.FIND_JOB, Set.of(3L), " Douala ", true, new Arrival("/ressources/docker", "fr-CM", "Africa/Douala", null)));
 
         assertThat(stored().getPhone()).isEqualTo("+237677123456");
         assertThat(stored().getCountry()).isEqualTo("CM");

@@ -2,7 +2,7 @@ import { ENV } from '@/config/env';
 import { prepareImage } from '@/lib/image';
 import { http } from '@/services/http';
 import type { Query } from '@/services/http';
-import type { AdminArticle, AdminBadge, AdminComment, AdminCertificate, BadgeHolder, AdminProject, AdminRegistration, ProjectStatus, AdminSubscriber, AdminSummary, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, MemberPortrait, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal, BulkAwardResult, MemberActivity } from '@/services/types';
+import type { AdminArticle, AdminBadge, AdminComment, AdminCertificate, BadgeHolder, AdminProject, AdminRegistration, ProjectStatus, AdminSubscriber, AdminSummary, AdminUser, ArticleBlock, AudienceStats, AuthProvider, Category, ContentViews, MemberPortrait, EventFormat, EventStatus, EventSummary, EventType, NewsletterCampaign, NewsletterStats, PageResponse, ResourceStatus, Tag, TalkStatus, TalkVideo, TopResource, UserGrowthPoint, WatchSignal, BulkAwardResult, MemberActivity, Conversions } from '@/services/types';
 
 export interface ArticleRequest {
   title: string;
@@ -173,6 +173,7 @@ export const adminApi = {
     http.get<{ from: string; to: string; points: UserGrowthPoint[] }>('/admin/stats/user-growth', { from, to }, signal),
   newsletterGrowth: (from: string, to: string, signal?: AbortSignal) =>
     http.get<{ from: string; to: string; points: UserGrowthPoint[] }>('/admin/stats/newsletter-growth', { from, to }, signal),
+  conversions: (days = 30, signal?: AbortSignal) => http.get<Conversions>('/admin/stats/conversions', { days }, signal),
   audience: (days = 30, signal?: AbortSignal) =>
     http.get<AudienceStats>('/admin/stats/audience', { days }, signal),
   eventRegistrations: (id: number, signal?: AbortSignal) => http.get<AdminRegistration[]>(`/events/admin/${id}/registrations`, undefined, signal),

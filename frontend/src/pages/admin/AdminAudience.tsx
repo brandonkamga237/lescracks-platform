@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Globe2 } from 'lucide-react';
 
 import { AdminSection, AdminState } from '@/components/admin/AdminTable';
+import ConversionsPanel from '@/components/admin/ConversionsPanel';
 import { BarList, Kpi, Panel, PeriodSelect, SERIES_MUTED, TrendChart, deltaPct, fmt, fmtDuration } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
 import { countryName } from '@/lib/phone';
@@ -18,7 +19,7 @@ export default function AdminAudience() {
   return (
     <AdminSection
       title="Audience"
-      description="Qui visite LesCracks, d’où viennent-ils et qu’est-ce qu’ils regardent."
+      description="Qui visite LesCracks, d’où viennent-ils, ce qu’ils regardent, et ce qui les fait s’inscrire."
       action={<PeriodSelect value={days} onChange={setDays} />}
     >
       <AdminState loading={audience.loading} error={audience.error}
@@ -90,6 +91,7 @@ export default function AdminAudience() {
           </>
         )}
       </AdminState>
+      <ConversionsPanel days={days} />
     </AdminSection>
   );
 }

@@ -11,6 +11,7 @@ import com.brandonkamga.lescracks.newsletter.application.NewsletterStatistics;
 import com.brandonkamga.lescracks.newsletter.domain.model.SubscriptionStatus;
 import com.brandonkamga.lescracks.stats.api.dto.AudienceResponse;
 import com.brandonkamga.lescracks.stats.api.dto.ContentViewsResponse;
+import com.brandonkamga.lescracks.stats.api.dto.ConversionsResponse;
 import com.brandonkamga.lescracks.stats.api.dto.MemberPortraitResponse;
 import com.brandonkamga.lescracks.stats.api.dto.NamedCount;
 import com.brandonkamga.lescracks.stats.api.dto.SeriesPoint;
@@ -211,6 +212,19 @@ public class StatsServiceImpl implements StatsService {
             log.warn("Umami audience unavailable: {}", exception.getMessage());
             return AudienceResponse.unavailable(days);
         }
+    }
+
+    @Override
+    public ConversionsResponse conversions(int days) {
+        Instant since = Instant.now().minus(days, ChronoUnit.DAYS);
+        List<EventStatistics.EventFunnel> funnels = events.funnels(12);
+        Map<Long, Counts> views = engagement.countsOf(TargetType.EVENT, funnels.stream().map(EventStatistics.EventFunnel::id).toList());
+        return new ConversionsResponse(days,
+                grouped(accounts.signupsBySource(since)),
+                grouped(accounts.signupsByLandingPage(since, 10)),
+                funnels.stream().map(funnel -> new ConversionsResponse.EventFunnel(funnel.id(), funnel.slug(), funnel.title(),
+                        funnel.startDate(), funnel.acceptsSubmissions(), views.getOrDefault(funnel.id(), Counts.NONE).views(),
+                        funnel.registrations(), funnel.attended(), funnel.projects())).toList());
     }
 
     @Override

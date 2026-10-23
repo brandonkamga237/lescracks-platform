@@ -38,7 +38,7 @@ class JdbcAccountStoreIT extends PostgresIT {
         Account saved = accounts.save(Account.builder().email("round@example.com").passwordHash("hash")
                 .firstName("Awa").lastName("Diallo").provider(AuthProvider.GITHUB).emailVerified(true)
                 .createdAt(Instant.now().minus(2, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MICROS))
-                .signupPath("/blog").signupLanguage("fr").signupTimezone("Africa/Douala").build());
+                .signupPath("/blog").signupLanguage("fr").signupTimezone("Africa/Douala").signupSource("WhatsApp").build());
 
         Account found = accounts.findByEmail("ROUND@Example.com").orElseThrow();
         assertThat(found.getId()).isEqualTo(saved.getId());

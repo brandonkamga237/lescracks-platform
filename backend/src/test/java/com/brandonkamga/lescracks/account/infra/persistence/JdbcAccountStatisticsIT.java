@@ -45,6 +45,21 @@ class JdbcAccountStatisticsIT extends PostgresIT {
     }
 
     @Test
+    @DisplayName("new members are counted by the channel and the page that brought them")
+    void conversions() {
+        Instant since = Instant.now().minus(1, ChronoUnit.HOURS);
+        long whatsapp = statistics.signupsBySource(since).getOrDefault("IT-WhatsApp", 0L);
+        for (String email : new String[] {"wa1@example.com", "wa2@example.com"}) {
+            accounts.save(Account.builder().email(email).firstName("A").lastName("B").passwordHash("h")
+                    .signupSource("IT-WhatsApp").signupPath("/evenements/it-conv").build());
+        }
+        accounts.save(Account.builder().email("nosource@example.com").firstName("A").lastName("B").passwordHash("h").build());
+
+        assertThat(statistics.signupsBySource(since)).containsEntry("IT-WhatsApp", whatsapp + 2).containsKey("Inconnue");
+        assertThat(statistics.signupsByLandingPage(since, 50)).containsEntry("/evenements/it-conv", 2L);
+    }
+
+    @Test
     @DisplayName("the sign-up cohort counts who confirmed and who came back a day later")
     void signupCohort() {
         Instant since = Instant.now().minus(7, ChronoUnit.DAYS);

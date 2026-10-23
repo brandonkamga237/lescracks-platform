@@ -22,6 +22,12 @@ public interface AccountStatistics {
     /** New members per day, in order. */
     Map<LocalDate, Long> memberGrowth(Instant from, Instant to);
 
+    /** New members since then per channel they came through; "Inconnue" for those who signed up before it was recorded. */
+    Map<String, Long> signupsBySource(Instant since);
+
+    /** The first pages that new members landed on, the most productive first. */
+    Map<String, Long> signupsByLandingPage(Instant since, int limit);
+
     /** Members who signed up since then, and how far they went. */
     SignupCohort signupsSince(Instant since);
 

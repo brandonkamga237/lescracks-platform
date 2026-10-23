@@ -49,15 +49,19 @@ public class Account {
 
     private String signupTimezone;
 
+    /** WhatsApp, LinkedIn, Google, a campaign tag, or "Direct"; as the browser reported it on the first visit. */
+    private String signupSource;
+
     public boolean isActive() {
         return status == AccountStatus.ACTIVE;
     }
 
     /** Recorded once, from the first visit that led to an account; later calls never overwrite it. */
-    public void recordArrival(String path, String language, String timezone) {
+    public void recordArrival(String path, String language, String timezone, String source) {
         if (signupPath == null) signupPath = trimmed(path);
         if (signupLanguage == null) signupLanguage = trimmed(language);
         if (signupTimezone == null) signupTimezone = trimmed(timezone);
+        if (signupSource == null) signupSource = trimmed(source);
     }
 
     private static String trimmed(String value) {

@@ -46,6 +46,26 @@ class JdbcAccountStatistics implements AccountStatistics {
     }
 
     @Override
+    public Map<String, Long> signupsBySource(Instant since) {
+        Map<String, Long> counts = new LinkedHashMap<>();
+        jdbc.sql("""
+                        SELECT coalesce(signup_source, 'Inconnue') AS k, count(*) AS n FROM accounts
+                        WHERE created_at > :since GROUP BY 1 ORDER BY n DESC""")
+                .param("since", at(since)).query(row -> { counts.put(row.getString("k"), row.getLong("n")); });
+        return counts;
+    }
+
+    @Override
+    public Map<String, Long> signupsByLandingPage(Instant since, int limit) {
+        Map<String, Long> counts = new LinkedHashMap<>();
+        jdbc.sql("""
+                        SELECT signup_path AS k, count(*) AS n FROM accounts
+                        WHERE created_at > :since AND signup_path IS NOT NULL GROUP BY 1 ORDER BY n DESC LIMIT :limit""")
+                .param("since", at(since)).param("limit", limit).query(row -> { counts.put(row.getString("k"), row.getLong("n")); });
+        return counts;
+    }
+
+    @Override
     public long membersCreatedSince(Instant since) {
         return jdbc.sql("SELECT count(*) FROM accounts WHERE created_at > :since")
                 .param("since", at(since)).query(Long.class).single();
