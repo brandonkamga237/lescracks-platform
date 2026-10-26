@@ -302,7 +302,8 @@ services:
     restart: unless-stopped
     environment:
       GF_SECURITY_ADMIN_USER:     ${GRAFANA_ADMIN_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      # Grafana is public at grafana.lescracks.com: no fallback password.
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD must be set in .env}
       GF_USERS_ALLOW_SIGN_UP: 'false'
       GF_SERVER_ROOT_URL: 'https://grafana.lescracks.com'
     volumes:
