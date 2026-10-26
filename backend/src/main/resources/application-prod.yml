@@ -43,7 +43,8 @@ springdoc:
 app:
   admin:
     bootstrap-username: ${ADMIN_USERNAME:admin}
-    bootstrap-password: ${ADMIN_PASSWORD:admin}
+    # Only read while no admin exists; an empty value then stops the startup.
+    bootstrap-password: ${ADMIN_PASSWORD:}
   site:
     url: ${SITE_URL}
   cors:
