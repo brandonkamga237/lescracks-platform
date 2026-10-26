@@ -16,11 +16,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 /**
- * The API verifies tokens Keycloak signed and nothing more.
- *
- * There is no login endpoint here, no password hashing, no reset flow and no provider
- * plumbing: all of that is realm configuration now. What remains is the decision of which
- * routes are open, which is the only part that belongs to the application.
+ * Which routes are open, and how a caller proves who they are: the session cookie of a local
+ * sign-in (account module), or a bearer token Keycloak signed for Google/GitHub.
  */
 @Configuration
 @EnableMethodSecurity
@@ -40,7 +37,9 @@ public class SecurityConfig {
         }
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            // No cookie, no session: every request carries its own bearer token.
+            // No CSRF token, yet the session cookie cannot be ridden: it is SameSite=Lax, so other
+            // sites never send it on a write, and the CORS filter above answers 403 to any
+            // Origin outside CORS_ORIGINS, lescracks.com subdomains included (SecurityConfigTest).
             .csrf(csrf -> csrf.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             // Rejections happen in this chain, never in a controller, so the error body has
