@@ -1,15 +1,18 @@
 # LesCracks Platform
 
-French-language tech training platform: the Accompagnement 360 mentoring programme,
-learning resources, community events and a showcase of its learners.
+Tech learning platform: a blog, events and hackathons (registrations, team projects),
+the LesCracks Talk, member profiles with badges and certificates, and a newsletter.
 
 Monorepo: a Spring Boot API (`backend/`) and a React SPA (`frontend/`), shipped as
 separate containers behind Traefik.
 
 | Part | Stack | Notes |
 |---|---|---|
-| [backend/](backend/README.md) | Spring Boot, PostgreSQL, Flyway, MinIO, JWT + OAuth2 | REST API under `/api` |
+| [backend/](backend/README.md) | Spring Boot, Java 21, PostgreSQL (plain SQL, Flyway), MinIO, server sessions + Keycloak tokens | REST API under `/api` |
 | [frontend/](frontend/README.md) | React, Vite, TypeScript, Tailwind, Radix | SPA served by Nginx |
+
+**Architecture, with diagrams of the whole system:** [docs/architecture/](docs/architecture/README.md).
+How well the code follows its own rules, measured: [design audit](docs/architecture/design-audit.md).
 
 ## Quick start
 
@@ -54,12 +57,14 @@ or `frontend/`, and do not rename `docker-compose.prod.yml`: CI refers to it by 
 ## Branches and deployment
 
 ```
-feature/* | fix/* | docs/*  →  develop  →  (PR)  →  main  →  production deploy
+feature/* | fix/* | docs/*  →  develop  →  (PR)  →  main  →  release PR  →  vX.Y.Z  →  deploy
 hotfix/*                    →  main
 ```
 
-Every push to `main` runs the GitHub Actions pipeline: build the images, push them
-to Docker Hub, then deploy over SSH to the VPS. See `.github/workflows/deploy.yml`.
+Nothing deploys on a plain push. Merging into `main` lets release-please open a release
+PR; merging that PR tags `vX.Y.Z`, builds the images, pushes them to Docker Hub and
+deploys that version over SSH (`.github/workflows/release.yml`, `deploy.yml`). A rollback
+is a manual run of `deploy.yml` with an earlier tag.
 
 Production variables are described in `.env.example`; the real `.env` lives on the
 server (`/root/lescracks/.env`) and is never committed.
