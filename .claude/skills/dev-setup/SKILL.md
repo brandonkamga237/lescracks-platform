@@ -45,10 +45,14 @@ DB_PORT=5433 MINIO_PORT=9002 MINIO_CONSOLE_PORT=9003 docker compose up -d
 ```
 Pass the same `DB_PORT` / `MINIO_PORT` to the backend if it runs outside a container.
 
-**The backend dies at startup on a schema error**
-`ddl-auto: validate` is on in development too: Hibernate refuses to start when the
-entities do not match the schema. That is intended. The cause is almost always an
-entity changed without a Flyway migration → see the `db-migration` skill.
+**A request fails with `column ... does not exist` / `relation ... does not exist`**
+There is no ORM to validate the schema at startup: a SQL adapter changed without its
+Flyway migration fails on the first query. Run `./mvnw verify` (the `*IT` suite catches
+it) and add the migration → see the `db-migration` skill.
+
+**The backend refuses to start: `No admin exists yet and ADMIN_PASSWORD is not set`**
+An empty database needs a first admin. Set `ADMIN_PASSWORD` (the dev profile defaults it
+to `admin`; prod never does).
 
 **`Flyway ... checksum mismatch`**
 A migration that was already applied has been edited. Never "fix" it by editing the

@@ -62,10 +62,10 @@ Before any commit or PR:
 - Another module is reached through its `application` interfaces (e.g. `UserDirectory`) or a domain event, never its ports, entities or repositories; `stats`/`analytics`, `seo` and `shared/bootstrap` read across modules until each exposes a query port
 - Reuse before writing: paging, errors, slugs, publication lifecycle, CSV export, visitor keys live once in `shared`; a second copy in a module is a review blocker
 - Controllers return the response record (or `ResponseEntity<XxxResponse>`); requests translate themselves into commands (`request.toRegistration()`), responses build themselves from models (`XxxResponse.of(model)`)
-- Never expose a domain model or a JPA entity: always a DTO
+- Never expose a domain model: always a DTO
 - Errors: throw `NotFoundException` / `BadRequestException` / `ForbiddenException` / `ConflictException`; do not set the status in the controller, `GlobalExceptionHandler` does it
-- DB access: **plain SQL through `JdbcClient`, no ORM**, in modules on the new skeleton; JPA remains only in modules not migrated yet. No N+1: no query in a loop, related data in one query per list, aggregates computed by PostgreSQL, indexes for every filtered or joined column (see the design-patterns skill)
-- DB schema: Flyway only (`ddl-auto: validate` for the remaining JPA entities). A new entity field means a new `V{n}__...sql` migration; never edit a migration that has already been applied
+- DB access: **plain SQL through `JdbcClient`, no ORM** (JPA and Hibernate are no longer on the classpath). No N+1: no query in a loop, related data in one query per list, aggregates computed by PostgreSQL, indexes for every filtered or joined column (see the design-patterns skill)
+- DB schema: Flyway only; each SQL adapter's `*IT` proves it matches the migrations. A new column means a new `V{n}__...sql` migration; never edit a migration that has already been applied
 - Lombok (`@Data`, `@Builder`) on DTOs and models; logging through `slf4j`
 - Public vs protected endpoints are declared in `SecurityConfig`, plus `@PreAuthorize` on each admin method; roles come from the Keycloak realm: `user`, `admin`
 - Text shown to users (emails, API errors) in French; everything else in English
