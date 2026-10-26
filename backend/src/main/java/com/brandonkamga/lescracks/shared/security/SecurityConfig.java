@@ -1,7 +1,5 @@
 package com.brandonkamga.lescracks.shared.security;
 
-import com.brandonkamga.lescracks.account.infra.security.LastSeenFilter;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,10 +34,11 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, KeycloakRoleConverter roleConverter,
-                                    SecurityErrorWriter errors, LastSeenFilter lastSeen) throws Exception {
+                                    SecurityErrorWriter errors, List<AuthenticatedRequestFilter> afterAuthentication) throws Exception {
+        for (AuthenticatedRequestFilter filter : afterAuthentication) {
+            http.addFilterAfter(filter, AuthorizationFilter.class);
+        }
         http
-            // Runs once auth is settled; harmless for anonymous and admin principals.
-            .addFilterAfter(lastSeen, AuthorizationFilter.class)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             // No cookie, no session: every request carries its own bearer token.
             .csrf(csrf -> csrf.disable())
