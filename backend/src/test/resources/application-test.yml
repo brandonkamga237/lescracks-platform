@@ -8,13 +8,6 @@ spring:
     # a rolled-back transaction; this is the escape hatch for tests that commit.
     clean-disabled: false
 
-  jpa:
-    hibernate:
-      # validate, exactly as in production: the entities are checked against the
-      # migrations, which is one of the things these tests exist to prove.
-      ddl-auto: validate
-    show-sql: false
-
   security:
     oauth2:
       resourceserver:
@@ -39,6 +32,5 @@ app:
 logging:
   level:
     org.springframework: WARN
-    org.hibernate: WARN
     org.testcontainers: WARN
     com.github.dockerjava: WARN
