@@ -1,6 +1,8 @@
 package com.brandonkamga.lescracks;
 
+import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.library.dependencies.Slice;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 import org.junit.jupiter.api.BeforeAll;
@@ -65,6 +67,16 @@ class ArchitectureTest {
         noClasses().that().resideOutsideOfPackage(ROOT + "." + module + "..")
                 .should().dependOnClassesThat().resideInAnyPackage(
                         ROOT + "." + module + ".domain.port..", ROOT + "." + module + ".infra..")
+                .check(classes);
+    }
+
+    // shared/bootstrap seeds demo data through module services, so shared is left out of the slices.
+    @Test
+    @DisplayName("modules depend on each other in one direction only: no cycle between business capabilities")
+    void modulesHaveNoCycles() {
+        slices().matching(ROOT + ".(*)..")
+                .that(DescribedPredicate.describe("are not shared", (Slice slice) -> !"shared".equals(slice.getNamePart(1))))
+                .should().beFreeOfCycles()
                 .check(classes);
     }
 
