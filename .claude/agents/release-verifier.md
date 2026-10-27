@@ -42,8 +42,10 @@ q(){ docker exec lescracks-postgres psql -U "$U" -d "$D" -At -c "$1"; }
    the home page references. A bot must get a snapshot:
    `curl -s -A Googlebot https://lescracks.com/blog` contains a `<title>`, and an article URL
    contains `application/ld+json`.
-6. **Data health**: run the three queries under "Health checks" in
-   `docs/architecture/database.md` through `q`; each must return `0` rows.
+6. **Data health**: each query must print `0`.
+   - Registration counters: `q "select count(*) from events e where registration_count <> (select count(*) from event_registrations r where r.event_id = e.id and r.status <> 'CANCELLED')"`
+   - Like and view counters: `q "select count(*) from engagement_counters c where like_count <> (select count(*) from content_likes l where (l.target_type, l.target_id) = (c.target_type, c.target_id)) or view_count <> (select count(*) from content_views v where (v.target_type, v.target_id) = (c.target_type, c.target_id))"`
+   - Engagement rows whose target is gone: `q "select count(*) from (select target_type, target_id from comments union all select target_type, target_id from content_likes union all select target_type, target_id from content_views union all select target_type, target_id from engagement_counters) x where not exists (select 1 from articles a where x.target_type = 'ARTICLE' and a.id = x.target_id union all select 1 from events e where x.target_type = 'EVENT' and e.id = x.target_id union all select 1 from talk_videos t where x.target_type = 'TALK' and t.id = x.target_id)"`
 
 ## Report
 

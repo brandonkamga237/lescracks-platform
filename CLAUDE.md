@@ -3,8 +3,7 @@
 Tech learning platform: a blog, events and hackathons (registrations, team projects), the
 LesCracks Talk, member profiles with badges and certificates, a newsletter, and a back office.
 Monorepo: `backend/` (Spring Boot 3, Java 21, PostgreSQL, MinIO) and `frontend/` (React SPA,
-Vite, TypeScript, Tailwind). The architecture, with diagrams, is in `docs/architecture/README.md`;
-the full database schema is in `docs/architecture/database.md`.
+Vite, TypeScript, Tailwind).
 
 ## Layout
 
@@ -17,7 +16,6 @@ the full database schema is in `docs/architecture/database.md`.
   (every API call), `hooks/`, `contexts/`, `lib/` (pure helpers)
 - `frontend/nginx.conf`: SPA, `/api` proxy, SEO bot routing
 - `docker-compose.yml` (dev), `docker-compose.prod.yml` (prod, deployed by CI), `.env.example`
-- `docs/architecture/`: architecture, design audit, database schema
 
 ## Commands
 

@@ -11,9 +11,6 @@ separate containers behind Traefik.
 | [backend/](backend/README.md) | Spring Boot, Java 21, PostgreSQL (plain SQL, Flyway), MinIO, server sessions + Keycloak tokens | REST API under `/api` |
 | [frontend/](frontend/README.md) | React, Vite, TypeScript, Tailwind, Radix | SPA served by Nginx |
 
-**Architecture, with diagrams of the whole system:** [docs/architecture/](docs/architecture/README.md).
-How well the code follows its own rules, measured: [design audit](docs/architecture/design-audit.md).
-
 ## Quick start
 
 Requirements: Docker, JDK 21, Node 22 and pnpm.
