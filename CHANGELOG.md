@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.1](https://github.com/brandonkamga237/lescracks-platform/compare/v1.10.0...v1.10.1) (2026-10-27)
+
+
+### Bug Fixes
+
+* harden admin bootstrap, tighten the schema and document the architecture ([#139](https://github.com/brandonkamga237/lescracks-platform/issues/139)) ([068cef0](https://github.com/brandonkamga237/lescracks-platform/commit/068cef08a074bf6ff516ddff319801037f67b923))
+
 ## [1.10.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.9.0...v1.10.0) (2026-10-23)
 
 
