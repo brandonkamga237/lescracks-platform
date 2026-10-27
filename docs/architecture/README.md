@@ -6,6 +6,7 @@ that changes the system can change its picture in the same diff.
 
 - The rules every change must follow: [`.claude/skills/design-patterns/SKILL.md`](../../.claude/skills/design-patterns/SKILL.md)
 - How well the code follows them, measured: [design-audit.md](design-audit.md)
+- The complete database schema: [database.md](database.md), [schema.sql](schema.sql)
 
 Contents
 
@@ -346,8 +347,9 @@ sequenceDiagram
 
 ## 8. Data model
 
-Live tables after V40, grouped by owning module. Only keys and the columns that explain a
-relationship are shown. `target_type` + `target_id` is a **polymorphic** reference
+The essentials below; **every table, column, type, constraint and index** is in
+[database.md](database.md) (one diagram per module plus a data dictionary) and
+[schema.sql](schema.sql). Only keys and the columns that explain a relationship are shown here. `target_type` + `target_id` is a **polymorphic** reference
 (`ARTICLE`, `EVENT`, `TALK`): it has no foreign key, by design (one engagement table for
 every kind of content).
 
@@ -359,7 +361,6 @@ erDiagram
     accounts ||--o{ account_tokens : "verification, reset"
     accounts |o--o| newsletter_subscribers : "may be (account_id)"
     categories ||--o{ member_interests : ""
-    categories ||--o{ tags : groups
     categories ||--o{ articles : "theme (category_id)"
     articles ||--o{ article_tags : ""
     tags ||--o{ article_tags : ""
