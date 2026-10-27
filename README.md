@@ -75,9 +75,11 @@ All code is in English — identifiers, files, comments, commit messages. French
 reserved for what users read: the interface, page content, API error messages and
 email bodies.
 
-The detailed rules (structure, style, git workflow, architecture decisions) live in
-[CLAUDE.md](CLAUDE.md). The workflows where a wrong move is expensive — schema
-migration, new endpoint, SEO snapshot — are documented under `.claude/skills/`.
+The rules that apply everywhere (layout, commands, git workflow) are in
+[CLAUDE.md](CLAUDE.md); backend, frontend and infrastructure conventions are in
+`.claude/rules/`. The workflows where a wrong move is expensive — schema migration, new
+endpoint, SEO snapshot — are documented under `.claude/skills/`, and `.claude/agents/`
+holds two reviewers: one for backend architecture, one for production after a release.
 
 ---
 
