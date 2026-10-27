@@ -51,7 +51,7 @@ an integration test for every SQL adapter. The weak points are elsewhere:
 | Application services > 150 lines | `CommentServiceImpl` 185, `BadgeServiceImpl` 163, `CertificateServiceImpl` 158, `SubmissionServiceImpl` 154 |
 | Services with > 5 collaborators | `StatsServiceImpl` 8, `ArticleAdminServiceImpl` 8, `CertificateServiceImpl` 7, `MemberActivityServiceImpl` 6 |
 | Cross-module dependency cycles | 0 |
-| Schema | 40 Flyway migrations, 27 live tables + 6 unused `cracklab_*` |
+| Schema | 40 Flyway migrations, 27 live tables + 6 unused `cracklab_*` (dropped since in V41) |
 | Frontend | 132 TS/TSX files, ~13 400 lines; 0 `any`; 0 `fetch` outside `services/`; 0 deep relative imports; 4 inline styles |
 | Frontend lint | 0 errors, 39 warnings (see R10) |
 | First JS bundle | 859 kB → 575 kB (177 kB gzip) |
@@ -70,6 +70,15 @@ an integration test for every SQL adapter. The weak points are elsewhere:
 | F8 | Low | Stale docs: `db-migration` skill (baseline, `DataInitializer`, JPA entities), `dev-setup`, backend README, `CLAUDE.md`, root README | Rewritten to match the code |
 | F9 | Low | Frontend dependencies `path` (browser polyfill, unused) and `@types/react-router-dom` v5 (conflicts with v7's own types); orphan JSDoc in `http.ts` | Removed |
 | F10 | — | Module acyclicity was true but unchecked | `ArchitectureTest.modulesHaveNoCycles` |
+| F11 | Medium | Deleting an account cascaded its registrations and likes but left `registration_count` and `like_count` as they were | `AccountDeleting` event; event and engagement correct their counters in the same transaction |
+| F12 | Medium | `accounts.email` and `admins.username` unique only in their exact spelling | V42: unique on `lower(...)` |
+| F13 | Low | `event_submission_members.event_id` could disagree with its project's event | V43: composite foreign key |
+| F14 | Low | Newsletter greeted members by the name copied at sign-up | `AccountRenamed` event keeps the subscriber in step |
+| F15 | Low | Six unused `cracklab_*` tables | V41 drops them |
+
+The schema review behind F11–F15 also kept three things on purpose (nullable `event_id` in
+`certificates_once`, polymorphic engagement targets, `report_count`); the reasons are in
+[database.md](database.md#decisions-from-the-october-2026-schema-review).
 
 ## Remaining work, by priority
 

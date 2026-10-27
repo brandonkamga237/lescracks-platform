@@ -1,6 +1,6 @@
 # LesCracks architecture
 
-How the platform is built **today** (October 2026, release after V40), drawn from the code
+How the platform is built **today** (October 2026, schema at V43), drawn from the code
 rather than from intentions. Every diagram is Mermaid, so GitHub renders it and a pull request
 that changes the system can change its picture in the same diff.
 
@@ -189,7 +189,7 @@ Green: on the target skeleton and checked by `ArchitectureTest`. Brown: not migr
 | `seo` | none (reads others) | — | `/seo/**`, `/api/sitemap.xml` |
 | `shared` | — | paging, errors, slugs, CSV, visitor keys, publication scheduler, transactions, security chain | — |
 
-Leftover tables nobody reads: `cracklab_*` (CrackLab was removed; kept on purpose).
+The CrackLab tables were dropped in V41.
 
 ## 5. Inside a module: ports and adapters
 
