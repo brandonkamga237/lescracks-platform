@@ -63,9 +63,10 @@ docker compose down -v && docker compose up -d
 ```
 (`-v` drops the volumes, and therefore the local data — never in production.)
 
-**GitHub / Google OAuth locally**
-The keys are empty by default; the app starts but the OAuth buttons fail. Fill in
-`GITHUB_CLIENT_ID` / `GOOGLE_CLIENT_ID` and their secrets in a root `.env` to test them.
+**Google / GitHub sign-in locally**
+Those buttons go through the dev Keycloak (`docker compose` starts it on :8081 with the realm in
+`keycloak/realm`). Local email and password sign-in needs no Keycloak at all; the Google and
+GitHub identity providers need their client keys set in that realm to work.
 
 ## Do not
 

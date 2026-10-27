@@ -9,13 +9,16 @@ description: Create or change a page or component in the LesCracks frontend (Rea
 
 - Public page → `src/pages/Xxx.tsx` (PascalCase)
 - Admin page → `src/pages/admin/AdminXxx.tsx`, rendered inside `AdminLayout`
-- Reusable component → `src/components/{landing,cards,resources,admin,layout,common}/`
+- Reusable component → `src/components/<area>/` (`account`, `admin`, `blog`, `common`, `community`,
+  `events`, `layout`, `media`, `recognition`, `talks`…)
+- Pure helper (no React) → `src/lib/`
 - UI primitive (Radix + Tailwind) → `src/components/ui/`
 - Hook → `src/hooks/useXxx.ts`
 
-The route is declared in `src/App.tsx` (import plus `<Route>`). Admin pages sit under
+The route is declared in `src/App.tsx`: the page is imported with `React.lazy`, so it ships as
+its own chunk, then gets its `<Route>`. Admin pages sit under
 the admin layout and are guarded client-side by the `AdminRoute` wrapper in `App.tsx`,
-which reads `isAdmin` from `useAuth()`.
+which reads `isAdmin` from `useSession()`.
 
 ## Non-negotiable conventions
 
@@ -23,8 +26,8 @@ which reads `isAdmin` from `useAuth()`.
 - **No `fetch` inside a component.** Every API call goes through `src/services/`:
   - `api.ts` → public and authenticated endpoints alike
   - `adminApi.ts` → `/api/admin` endpoints
-  Both send the session cookie through `credentials: 'include'`; no token is handled in
-  JavaScript.
+  Both go through `services/http.ts`, which sends the session cookie (local sign-in) or the
+  OIDC bearer token (Google/GitHub members), never both.
   Add the method to the service with its exported TypeScript type, then call it from
   the page.
 - **Never hardcode an API URL**: the base comes from `ENV.API_BASE_URL`
@@ -35,7 +38,7 @@ which reads `isAdmin` from `useAuth()`.
   comments in English.
 - Light and dark themes through `ThemeContext`: use `dark:` variants rather than a
   fixed colour.
-- Auth state through `useAuth()` (`AuthContext`), never by reading the token directly.
+- Session state through `useSession()`, never by reading a token or a cookie directly.
 
 ## SEO — required on a public page
 
