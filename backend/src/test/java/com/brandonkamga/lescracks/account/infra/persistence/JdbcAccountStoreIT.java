@@ -12,6 +12,7 @@ import com.brandonkamga.lescracks.support.PostgresIT;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -19,6 +20,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Every statement of JdbcAccountStore against PostgreSQL, with the schema Flyway builds. */
 @Transactional
@@ -44,6 +46,16 @@ class JdbcAccountStoreIT extends PostgresIT {
         assertThat(found.getId()).isEqualTo(saved.getId());
         assertThat(found).usingRecursiveComparison().ignoringFields("updatedAt").isEqualTo(saved);
         assertThat(accounts.findById(saved.getId())).isPresent();
+    }
+
+    @Test
+    @DisplayName("the same address in another case is a second account the database refuses")
+    void emailIsUniqueWhateverItsCase() {
+        save("case@example.com", "hash", AuthProvider.LOCAL, false);
+
+        // Last statement: the refused INSERT aborts the surrounding test transaction.
+        assertThatThrownBy(() -> save("CASE@Example.com", "hash", AuthProvider.LOCAL, false))
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test

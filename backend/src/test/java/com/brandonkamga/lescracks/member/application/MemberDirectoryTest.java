@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.member.application;
 
 import com.brandonkamga.lescracks.account.application.AccountDirectoryImpl;
+import com.brandonkamga.lescracks.account.domain.port.AccountEvents;
 import com.brandonkamga.lescracks.account.application.InMemoryAccountStore;
 import com.brandonkamga.lescracks.account.domain.model.Account;
 import com.brandonkamga.lescracks.account.domain.model.AccountStatus;
@@ -12,13 +13,14 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.Mockito.mock;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MemberDirectoryTest {
 
     private final InMemoryAccountStore accounts = new InMemoryAccountStore();
     private final InMemoryMemberProfileStore profiles = new InMemoryMemberProfileStore();
-    private final MemberDirectoryImpl directory = new MemberDirectoryImpl(new AccountDirectoryImpl(accounts), profiles);
+    private final MemberDirectoryImpl directory = new MemberDirectoryImpl(new AccountDirectoryImpl(accounts, mock(AccountEvents.class)), profiles);
 
     @Test
     @DisplayName("a member joins the account and the profile; one without a profile still comes back")

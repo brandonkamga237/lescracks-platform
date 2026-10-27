@@ -1,15 +1,12 @@
 # Only what differs from application.yaml. Every value there already has a dev default,
 # so this file is about visibility, not about wiring.
-spring:
-  jpa:
-    show-sql: true
-
 logging:
   level:
     com.brandonkamga.lescracks: DEBUG
     org.springframework.security: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
+    # JdbcClient runs on JdbcTemplate: the SQL it sends, then each bound parameter.
+    org.springframework.jdbc.core.JdbcTemplate: DEBUG
+    org.springframework.jdbc.core.StatementCreatorUtils: TRACE
 
 app:
   admin:

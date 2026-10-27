@@ -87,8 +87,8 @@ interface RequestOptions {
 /** Who is asking: the bearer token for OIDC members, the session cookie otherwise. */
 function credentialsFor(path: string, transport?: AuthTransport) {
   const headers: Record<string, string> = {};
-  // The token rides in the header, never in a cookie: the API is stateless and CSRF is not
-  // a concern for a request the browser will not send on its own.
+  // Sign-in, sign-up and reset always set or clear the session cookie, whatever transport the
+  // tab used last; an OIDC member never also sends that cookie.
   const cookieEndpoint = /^\/(?:admin\/)?auth\/(?:login|register|logout|forgot-password|reset-password)$/.test(path);
   const mode = cookieEndpoint ? 'cookie' : transport ?? getAuthTransport();
   const token = mode === 'oidc' ? currentAccessToken() : null;
@@ -160,9 +160,6 @@ async function request<T>(method: string, path: string, options: RequestOptions 
     options.signal?.removeEventListener('abort', cancel);
   }
 }
-
-/** The file name a Content-Disposition header carries, UTF-8 form first. */
-
 
 /** A proxy or gateway can answer html where json was expected; that is still an error. */
 function safeParse(text: string): unknown {

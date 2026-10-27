@@ -68,9 +68,9 @@ Every response uses the `ApiResponse<T>` envelope:
 
 ## Database schema
 
-**Flyway owns the schema in every environment.** Hibernate runs with
-`ddl-auto: validate` and never creates anything. Adding a field to an entity without
-the matching migration makes startup fail — that is on purpose.
+**Flyway owns the schema in every environment.** There is no ORM: every adapter
+writes its SQL through `JdbcClient`, and its `*IT` (run by `./mvnw verify` against
+PostgreSQL in Testcontainers) proves that SQL matches the migrations.
 
 ```bash
 # New migration

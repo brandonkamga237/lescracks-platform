@@ -75,4 +75,9 @@ public class ReactionServiceImpl implements ReactionService, EngagementCounts {
         reactions.forget(target);
         comments.deleteByTarget(target);
     }
+
+    @Override
+    public void forgetMember(Long accountId) {
+        reactions.releaseLikesOf(accountId);
+    }
 }

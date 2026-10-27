@@ -62,10 +62,10 @@ Before any commit or PR:
 - Another module is reached through its `application` interfaces (e.g. `UserDirectory`) or a domain event, never its ports, entities or repositories; `stats`/`analytics`, `seo` and `shared/bootstrap` read across modules until each exposes a query port
 - Reuse before writing: paging, errors, slugs, publication lifecycle, CSV export, visitor keys live once in `shared`; a second copy in a module is a review blocker
 - Controllers return the response record (or `ResponseEntity<XxxResponse>`); requests translate themselves into commands (`request.toRegistration()`), responses build themselves from models (`XxxResponse.of(model)`)
-- Never expose a domain model or a JPA entity: always a DTO
+- Never expose a domain model: always a DTO
 - Errors: throw `NotFoundException` / `BadRequestException` / `ForbiddenException` / `ConflictException`; do not set the status in the controller, `GlobalExceptionHandler` does it
-- DB access: **plain SQL through `JdbcClient`, no ORM**, in modules on the new skeleton; JPA remains only in modules not migrated yet. No N+1: no query in a loop, related data in one query per list, aggregates computed by PostgreSQL, indexes for every filtered or joined column (see the design-patterns skill)
-- DB schema: Flyway only (`ddl-auto: validate` for the remaining JPA entities). A new entity field means a new `V{n}__...sql` migration; never edit a migration that has already been applied
+- DB access: **plain SQL through `JdbcClient`, no ORM** (JPA and Hibernate are no longer on the classpath). No N+1: no query in a loop, related data in one query per list, aggregates computed by PostgreSQL, indexes for every filtered or joined column (see the design-patterns skill)
+- DB schema: Flyway only; each SQL adapter's `*IT` proves it matches the migrations. A new column means a new `V{n}__...sql` migration; never edit a migration that has already been applied
 - Lombok (`@Data`, `@Builder`) on DTOs and models; logging through `slf4j`
 - Public vs protected endpoints are declared in `SecurityConfig`, plus `@PreAuthorize` on each admin method; roles come from the Keycloak realm: `user`, `admin`
 - Text shown to users (emails, API errors) in French; everything else in English
@@ -126,7 +126,7 @@ Before any commit or PR:
 ## Current product scope (September 2026)
 - The current backend controllers and DTOs are the source of truth when older architecture notes above differ from the code.
 - Do not restore removed programmes, applications, participations, attestations, articles, or SEO snapshot controllers as part of frontend work. Do not invent progress, favourites, event registration, or personalised history without backend support.
-- The site has a **Blog** (`/blog`, articles only; old `/ressources` links redirect) and a **Formations** tab (`/formations`, courses coming soon: no course model or progress yet). Ebooks and videos were removed (V24). Public event detail routes use numeric IDs. Reading needs no account. CrackLab was removed (old `/cracklab` links redirect home; its tables stay in the database, unused); no navigation entry carries a gold highlight. Marketing copy avoids "gratuit" and any mention of French or francophone.
+- The site has a **Blog** (`/blog`, articles only; old `/ressources` links redirect) and a **Formations** tab (`/formations`, courses coming soon: no course model or progress yet). Ebooks and videos were removed (V24). Public event detail routes use numeric IDs. Reading needs no account. CrackLab was removed (old `/cracklab` links redirect home; its tables were dropped in V41); no navigation entry carries a gold highlight. Marketing copy avoids "gratuit" and any mention of French or francophone.
 - Preserve the black, anthracite, white and gold palette (`#d4af37`). Visitor, member and administrator experiences must use a coherent shared session and actual backend data.
 - Local member/admin authentication uses backend sessions; existing OIDC authentication is a separate transport. Do not send a stale OIDC bearer token alongside local cookie authentication.
 - Validate frontend changes with `pnpm typecheck`, `pnpm lint`, and `pnpm build`. Browser checks using API fixtures verify UI behaviour, not live backend integration.

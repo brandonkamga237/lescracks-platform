@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.account.infra.security;
 
 import com.brandonkamga.lescracks.account.infra.persistence.JdbcLastSeen;
+import com.brandonkamga.lescracks.shared.security.AuthenticatedRequestFilter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,11 +19,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * Stamps users.last_seen_at on authenticated member requests. The update is
+ * Stamps accounts.last_seen_at on authenticated member requests. The update is
  * conditional and self-throttling: one row write per member per hour, and it
  * never blocks or fails the request it rode along with.
  */
-public class LastSeenFilter extends OncePerRequestFilter {
+public class LastSeenFilter extends OncePerRequestFilter implements AuthenticatedRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(LastSeenFilter.class);
 
     private final JdbcLastSeen lastSeen;

@@ -117,6 +117,24 @@ class JdbcEventIT extends PostgresIT {
     }
 
     @Test
+    @DisplayName("a leaving member's active registrations come off each event's count; a cancelled one was already off")
+    void releasesALeavingMembersSeats() {
+        Event kept = event("it-leave-1", EventStatus.PUBLISHED, now.plus(1, ChronoUnit.DAYS), null);
+        Event cancelled = event("it-leave-2", EventStatus.PUBLISHED, now.plus(2, ChronoUnit.DAYS), null);
+        registrations.save(Registration.builder().eventId(kept.getId()).userId(awa).build());
+        registrations.save(Registration.builder().eventId(kept.getId()).userId(kofi).build());
+        registrations.shiftCount(kept.getId(), 2);
+        Registration gone = registrations.save(Registration.builder().eventId(cancelled.getId()).userId(awa).build());
+        gone.cancel();
+        registrations.save(gone);
+
+        registrations.releaseCountsOf(awa);
+
+        assertThat(events.findById(kept.getId())).get().extracting(Event::getRegistrationCount).isEqualTo(1);
+        assertThat(events.findById(cancelled.getId())).get().extracting(Event::getRegistrationCount).isEqualTo(0);
+    }
+
+    @Test
     @DisplayName("a teammate finds the project with its whole team; a member taken elsewhere is reported, and the database refuses them")
     void submissions() {
         Event hackathon = event("it-hack", EventStatus.PUBLISHED, now, now.plus(10, ChronoUnit.DAYS));

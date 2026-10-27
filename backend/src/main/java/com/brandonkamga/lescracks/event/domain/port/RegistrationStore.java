@@ -21,4 +21,7 @@ public interface RegistrationStore {
 
     /** Moves the event's registration_count atomically, so two members signing up at once both count. */
     void shiftCount(Long eventId, int delta);
+
+    /** Takes the member's active registrations off their events' counts, in one statement. */
+    void releaseCountsOf(Long userId);
 }

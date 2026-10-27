@@ -14,4 +14,7 @@ public interface ReactionService {
     LikeStatus like(Target target, String email);
 
     LikeStatus unlike(Target target, String email);
+
+    /** The member's account is about to go: their likes stop counting. */
+    void forgetMember(Long accountId);
 }

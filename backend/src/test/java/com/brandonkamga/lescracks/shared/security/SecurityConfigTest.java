@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -103,6 +104,23 @@ class SecurityConfigTest {
     @DisplayName("a write is refused before it reaches the service")
     void deleteRejectsAnonymous() throws Exception {
         mockMvc.perform(delete("/api/resources/admin/1")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("a signed-in write sent from a page of another origin is refused, even a lescracks.com subdomain")
+    void foreignOriginCannotRideTheSessionCookie() throws Exception {
+        mockMvc.perform(delete("/api/resources/admin/1").header("Origin", "https://umami.lescracks.com"))
+                .andExpect(status().isForbidden());
+
+        verifyNoInteractions(articles);
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void theSiteItselfMayWrite() throws Exception {
+        mockMvc.perform(delete("/api/resources/admin/1").header("Origin", "http://localhost:5173"))
+                .andExpect(status().is2xxSuccessful());
     }
 
     @Test
