@@ -23,4 +23,7 @@ public interface NewsletterService {
 
     /** A new account: its address joins its subscription if it had one, and subscribes if asked. */
     void attachAccount(Long accountId, String email, String firstName, String lastName, boolean wantsNewsletter);
+
+    /** The member changed their name: newsletters greet them by the new one. */
+    void renameSubscriber(String email, String firstName, String lastName);
 }

@@ -170,6 +170,12 @@ final class InMemoryEvents {
         public void shiftCount(Long eventId, int delta) {
             events.shift(eventId, delta);
         }
+
+        @Override
+        public void releaseCountsOf(Long userId) {
+            rows.values().stream().filter(r -> r.getUserId().equals(userId) && r.isActive())
+                    .forEach(r -> events.shift(r.getEventId(), -1));
+        }
     }
 
     static final class Submissions implements SubmissionStore {

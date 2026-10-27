@@ -1,8 +1,10 @@
 package com.brandonkamga.lescracks.account.application;
 
 import com.brandonkamga.lescracks.account.domain.model.Account;
+import com.brandonkamga.lescracks.account.domain.model.AccountDeleting;
 import com.brandonkamga.lescracks.account.domain.model.AccountSearch;
 import com.brandonkamga.lescracks.account.domain.model.AccountStatus;
+import com.brandonkamga.lescracks.account.domain.port.AccountEvents;
 import com.brandonkamga.lescracks.account.domain.port.AccountStore;
 import com.brandonkamga.lescracks.shared.exception.ConflictException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
@@ -14,10 +16,12 @@ import java.util.List;
 public class AccountAdminServiceImpl implements AccountAdminService {
     private final AccountStore accounts;
     private final EmailVerificationService verification;
+    private final AccountEvents events;
 
-    public AccountAdminServiceImpl(AccountStore accounts, EmailVerificationService verification) {
+    public AccountAdminServiceImpl(AccountStore accounts, EmailVerificationService verification, AccountEvents events) {
         this.accounts = accounts;
         this.verification = verification;
+        this.events = events;
     }
 
     @Override
@@ -43,7 +47,11 @@ public class AccountAdminServiceImpl implements AccountAdminService {
     }
 
     @Override
-    public void delete(Long id) { accounts.delete(requireAccount(id).getId()); }
+    public void delete(Long id) {
+        Long existing = requireAccount(id).getId();
+        events.deleting(new AccountDeleting(existing));
+        accounts.delete(existing);
+    }
 
     @Override
     public void resendVerification(Long id) {

@@ -68,6 +68,20 @@ class JdbcEngagementIT extends PostgresIT {
     }
 
     @Test
+    @DisplayName("a leaving member's likes come off each counter, in one statement, and nobody else's")
+    void releasesALeavingMembersLikes() {
+        Target talk = new Target(TargetType.TALK, 77L);
+        reactions.addLike(ARTICLE, awa);
+        reactions.addLike(ARTICLE, kofi);
+        reactions.addLike(talk, awa);
+
+        reactions.releaseLikesOf(awa);
+
+        assertThat(reactions.counts(ARTICLE).likes()).isEqualTo(1);
+        assertThat(reactions.counts(talk).likes()).isZero();
+    }
+
+    @Test
     @DisplayName("comments go in and come back by target, oldest first, and are updated, counted and deleted")
     void comments() {
         Comment first = comments.save(Comment.builder().targetType(TargetType.ARTICLE).targetId(ARTICLE.id()).authorId(awa).body("Premier")

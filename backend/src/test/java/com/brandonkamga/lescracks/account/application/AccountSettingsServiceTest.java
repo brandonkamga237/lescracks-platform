@@ -1,6 +1,8 @@
 package com.brandonkamga.lescracks.account.application;
 
 import com.brandonkamga.lescracks.account.domain.model.Account;
+import com.brandonkamga.lescracks.account.domain.model.AccountDeleting;
+import com.brandonkamga.lescracks.account.domain.port.AccountEvents;
 import com.brandonkamga.lescracks.account.domain.port.PasswordHasher;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 
@@ -13,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -20,13 +23,14 @@ class AccountSettingsServiceTest {
 
     private final InMemoryAccountStore accounts = new InMemoryAccountStore();
     @Mock private PasswordHasher passwords;
+    @Mock private AccountEvents events;
 
     private AccountSettingsServiceImpl service;
     private Account account;
 
     @BeforeEach
     void setUp() {
-        service = new AccountSettingsServiceImpl(accounts, passwords);
+        service = new AccountSettingsServiceImpl(accounts, passwords, events);
         account = accounts.save(Account.builder().email("awa@example.com").passwordHash("old").build());
     }
 
@@ -55,10 +59,11 @@ class AccountSettingsServiceTest {
     }
 
     @Test
-    @DisplayName("closing the account deletes it")
+    @DisplayName("closing an account warns the other modules first, then deletes it")
     void closes() {
         service.close("awa@example.com");
 
+        verify(events).deleting(new AccountDeleting(account.getId()));
         assertThat(accounts.findById(account.getId())).isEmpty();
     }
 }

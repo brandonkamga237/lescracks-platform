@@ -47,6 +47,11 @@ public class RegistrationServiceImpl implements RegistrationService {
         userIds.forEach(userId -> signUp(eventId, userId));
     }
 
+    @Override
+    public void forgetMember(Long userId) {
+        registrations.releaseCountsOf(userId);
+    }
+
     private Registration signUp(Long eventId, Long userId) {
         Optional<Registration> existing = registrations.find(eventId, userId);
         if (existing.isPresent() && existing.get().isActive()) return existing.get();

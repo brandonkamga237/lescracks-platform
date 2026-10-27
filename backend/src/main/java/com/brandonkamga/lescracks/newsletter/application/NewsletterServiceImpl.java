@@ -85,6 +85,14 @@ public class NewsletterServiceImpl implements NewsletterService {
         subscribers.save(subscriber);
     }
 
+    @Override
+    public void renameSubscriber(String email, String firstName, String lastName) {
+        subscribers.findByEmail(email).ifPresent(subscriber -> {
+            subscriber.rename(firstName, lastName);
+            subscribers.save(subscriber);
+        });
+    }
+
     private Subscriber forAccount(AccountSummary account) {
         Subscriber subscriber = subscribers.findByEmail(account.getEmail())
                 .orElseGet(() -> Subscriber.of(account.getEmail(), account.getFirstName(), account.getLastName()));

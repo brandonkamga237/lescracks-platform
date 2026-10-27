@@ -1,6 +1,8 @@
 package com.brandonkamga.lescracks.account.application;
 
 import com.brandonkamga.lescracks.account.domain.model.Account;
+import com.brandonkamga.lescracks.account.domain.model.AccountDeleting;
+import com.brandonkamga.lescracks.account.domain.port.AccountEvents;
 import com.brandonkamga.lescracks.account.domain.port.AccountStore;
 import com.brandonkamga.lescracks.account.domain.port.PasswordHasher;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
@@ -9,10 +11,12 @@ import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 public class AccountSettingsServiceImpl implements AccountSettingsService {
     private final AccountStore accounts;
     private final PasswordHasher passwords;
+    private final AccountEvents events;
 
-    public AccountSettingsServiceImpl(AccountStore accounts, PasswordHasher passwords) {
+    public AccountSettingsServiceImpl(AccountStore accounts, PasswordHasher passwords, AccountEvents events) {
         this.accounts = accounts;
         this.passwords = passwords;
+        this.events = events;
     }
 
     @Override
@@ -30,7 +34,9 @@ public class AccountSettingsServiceImpl implements AccountSettingsService {
 
     @Override
     public void close(String email) {
-        accounts.delete(require(email).getId());
+        Long id = require(email).getId();
+        events.deleting(new AccountDeleting(id));
+        accounts.delete(id);
     }
 
     private Account require(String email) {

@@ -1,10 +1,13 @@
 package com.brandonkamga.lescracks;
 
+import com.tngtech.archunit.base.DescribedPredicate;
 import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.library.dependencies.Slice;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -57,19 +60,36 @@ class ArchitectureTest {
                 .check(classes);
     }
 
-    // shared/security registers account's last-seen filter in the security chain.
     @ParameterizedTest
     @ValueSource(strings = {"account", "member", "newsletter", "engagement", "taxonomy", "content", "event", "recognition"})
     @DisplayName("other modules reach a migrated module through its application layer, never its ports or adapters")
     void portsAndAdaptersStayInside(String module) {
-        noClasses().that().resideOutsideOfPackages(ROOT + "." + module + "..", ROOT + ".shared.security..")
+        noClasses().that().resideOutsideOfPackage(ROOT + "." + module + "..")
                 .should().dependOnClassesThat().resideInAnyPackage(
                         ROOT + "." + module + ".domain.port..", ROOT + "." + module + ".infra..")
                 .check(classes);
     }
 
-    // event, stats, talk and taxonomy still take request DTOs in their services: they join this
-    // list when their step of the migration removes that.
+    // shared/bootstrap seeds demo data through module services, so shared is left out of the slices.
+    @Test
+    @DisplayName("modules depend on each other in one direction only: no cycle between business capabilities")
+    void modulesHaveNoCycles() {
+        slices().matching(ROOT + ".(*)..")
+                .that(DescribedPredicate.describe("are not shared", (Slice slice) -> !"shared".equals(slice.getNamePart(1))))
+                .should().beFreeOfCycles()
+                .check(classes);
+    }
+
+    @Test
+    @DisplayName("shared holds building blocks only: it never reaches into a module's adapters or controllers")
+    void sharedNeverDependsOnAModulesInfraOrApi() {
+        noClasses().that().resideInAPackage(ROOT + ".shared..")
+                .should().dependOnClassesThat().resideInAnyPackage(ROOT + ".(*).infra..", ROOT + ".(*).api..")
+                .check(classes);
+    }
+
+    // stats still builds its HTTP payloads in its service: it joins this list when its step of
+    // the migration removes that.
     @ParameterizedTest
     @ValueSource(strings = {"account", "member", "newsletter", "engagement", "taxonomy", "content", "event", "recognition", "mail", "storage"})
     @DisplayName("a module's domain knows nothing about HTTP payloads or controllers, its own or another's")

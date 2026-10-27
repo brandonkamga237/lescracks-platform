@@ -1,6 +1,8 @@
 package com.brandonkamga.lescracks.account.application;
 
 import com.brandonkamga.lescracks.account.domain.model.Account;
+import com.brandonkamga.lescracks.account.domain.model.AccountRenamed;
+import com.brandonkamga.lescracks.account.domain.port.AccountEvents;
 import com.brandonkamga.lescracks.account.domain.port.AccountStore;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
@@ -15,9 +17,11 @@ import java.util.stream.Collectors;
 
 public class AccountDirectoryImpl implements AccountDirectory {
     private final AccountStore accounts;
+    private final AccountEvents events;
 
-    public AccountDirectoryImpl(AccountStore accounts) {
+    public AccountDirectoryImpl(AccountStore accounts, AccountEvents events) {
         this.accounts = accounts;
+        this.events = events;
     }
 
     @Override
@@ -55,7 +59,9 @@ public class AccountDirectoryImpl implements AccountDirectory {
         if (firstName != null) account.setFirstName(required(firstName, "Le prénom"));
         if (lastName != null) account.setLastName(required(lastName, "Le nom"));
         account.setUpdatedAt(Instant.now());
-        return AccountSummary.of(accounts.save(account));
+        Account saved = accounts.save(account);
+        events.renamed(new AccountRenamed(saved.getId(), saved.getEmail(), saved.getFirstName(), saved.getLastName()));
+        return AccountSummary.of(saved);
     }
 
     @Override

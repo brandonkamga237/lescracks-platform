@@ -32,4 +32,7 @@ public interface RegistrationService {
 
     /** Signs members up without the "event still ahead" check: the people named on a project. */
     void ensureRegistered(Long eventId, Collection<Long> userIds);
+
+    /** The member's account is about to go: their registrations stop counting on each event. */
+    void forgetMember(Long userId);
 }

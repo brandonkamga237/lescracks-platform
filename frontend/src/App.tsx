@@ -10,22 +10,24 @@ import AdminLayout from '@/components/layout/AdminLayout';
 import AuthCallback from '@/pages/AuthCallback';
 import AuthPage, { ResetPasswordPage } from '@/pages/AuthPage';
 import AdminLogin from '@/pages/AdminLogin';
-
-import About from '@/pages/About';
-import EvenementDetail from '@/pages/EvenementDetail';
-import Privacy from '@/pages/Privacy';
-import Terms from '@/pages/Terms';
-import VerifyEmail from '@/pages/VerifyEmail';
-import Unsubscribe from '@/pages/Unsubscribe';
-import NewsletterConfirm from '@/pages/NewsletterConfirm';
-import Evenements from '@/pages/Evenements';
 import Landing from '@/pages/Landing';
 import NotFound from '@/pages/NotFound';
-import Profile from '@/pages/Profile';
-import Blog from '@/pages/Blog';
-import BlogPost from '@/pages/BlogPost';
-import Formations from '@/pages/Formations';
-import Talk from '@/pages/Talk';
+
+// Only the landing page and sign-in ship in the first load; each other page is its own chunk,
+// so a visitor reading one article never downloads the code highlighter for the whole site.
+const About = lazy(() => import('@/pages/About'));
+const EvenementDetail = lazy(() => import('@/pages/EvenementDetail'));
+const Privacy = lazy(() => import('@/pages/Privacy'));
+const Terms = lazy(() => import('@/pages/Terms'));
+const VerifyEmail = lazy(() => import('@/pages/VerifyEmail'));
+const Unsubscribe = lazy(() => import('@/pages/Unsubscribe'));
+const NewsletterConfirm = lazy(() => import('@/pages/NewsletterConfirm'));
+const Evenements = lazy(() => import('@/pages/Evenements'));
+const Profile = lazy(() => import('@/pages/Profile'));
+const Blog = lazy(() => import('@/pages/Blog'));
+const BlogPost = lazy(() => import('@/pages/BlogPost'));
+const Formations = lazy(() => import('@/pages/Formations'));
+const Talk = lazy(() => import('@/pages/Talk'));
 
 // The back office is never part of a visitor's first load: it ships as its own chunk.
 const AdminDashboard = lazy(() => import('@/pages/admin/AdminDashboard'));
@@ -51,6 +53,14 @@ function Waiting() {
     <div role="status" className="flex min-h-screen flex-col items-center justify-center gap-4 text-t3">
       <div aria-hidden="true" className="h-8 w-8 animate-spin rounded-full border-2 border-gold-400 border-t-transparent motion-reduce:animate-none" />
       <p>Vérification de ta session…</p>
+    </div>
+  );
+}
+
+function PageLoading() {
+  return (
+    <div role="status" aria-label="Chargement" className="flex min-h-screen items-center justify-center">
+      <div aria-hidden="true" className="h-8 w-8 animate-spin rounded-full border-2 border-gold-400 border-t-transparent motion-reduce:animate-none" />
     </div>
   );
 }
@@ -119,6 +129,7 @@ function AppRoutes() {
   }
 
   return (
+    <Suspense fallback={<PageLoading />}>
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
@@ -174,6 +185,7 @@ function AppRoutes() {
 
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </Suspense>
   );
 }
 

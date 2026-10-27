@@ -12,8 +12,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 /**
- * Ensures at least one admin exists on first prod boot.
- * The credentials come from environment variables, so they are not committed.
+ * Creates the first admin of an empty back office from ADMIN_USERNAME / ADMIN_PASSWORD.
+ *
+ * Once any admin exists it does nothing: re-creating a missing username on every boot meant a
+ * deployment without those variables opened an "admin"/"admin" account next to the real ones.
  */
 @Component
 public class AdminBootstrap implements CommandLineRunner {
@@ -27,7 +29,7 @@ public class AdminBootstrap implements CommandLineRunner {
     public AdminBootstrap(AdminStore admins,
                           PasswordHasher passwords,
                           @Value("${app.admin.bootstrap-username:admin}") String username,
-                          @Value("${app.admin.bootstrap-password:admin}") String password) {
+                          @Value("${app.admin.bootstrap-password:}") String password) {
         this.admins = admins;
         this.passwords = passwords;
         this.username = username;
@@ -36,14 +38,17 @@ public class AdminBootstrap implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (admins.findByUsername(username).isPresent()) {
+        if (!admins.findAll().isEmpty()) {
             return;
         }
+        if (password == null || password.isBlank()) {
+            throw new IllegalStateException("No admin exists yet and ADMIN_PASSWORD is not set: refusing to create one with a default password");
+        }
         admins.save(Admin.builder()
-                .username(username)
+                .username(username.trim())
                 .passwordHash(passwords.hash(password))
                 .status(AdminStatus.ACTIVE)
                 .build());
-        log.info("Bootstrapped admin '{}'", username);
+        log.info("Bootstrapped admin '{}'", username.trim());
     }
 }

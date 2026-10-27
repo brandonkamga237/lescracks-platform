@@ -96,6 +96,15 @@ class JdbcReactionStore implements ReactionStore {
     }
 
     @Override
+    public void releaseLikesOf(Long accountId) {
+        jdbc.sql("""
+                        UPDATE engagement_counters c SET like_count = greatest(c.like_count - 1, 0)
+                        FROM content_likes l
+                        WHERE l.account_id = :account AND c.target_type = l.target_type AND c.target_id = l.target_id""")
+                .param("account", accountId).update();
+    }
+
+    @Override
     public void forget(Target target) {
         for (String table : new String[] {"content_views", "content_likes", "engagement_counters"}) {
             jdbc.sql("DELETE FROM " + table + " WHERE target_type = :type AND target_id = :id")

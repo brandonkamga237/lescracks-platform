@@ -156,6 +156,11 @@ final class InMemoryEngagement {
         }
 
         @Override
+        public void releaseLikesOf(Long accountId) {
+            // Like counts are derived from the likes here, so there is no separate counter to correct.
+        }
+
+        @Override
         public void forget(Target target) {
             views.removeIf(v -> v.startsWith(target + "/"));
             likes.removeIf(l -> l.startsWith(target + "/"));

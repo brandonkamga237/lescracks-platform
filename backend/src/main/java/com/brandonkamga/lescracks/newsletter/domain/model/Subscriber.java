@@ -54,6 +54,11 @@ public class Subscriber {
                 .build();
     }
 
+    public void rename(String firstName, String lastName) {
+        this.firstName = firstName == null ? "" : firstName.trim();
+        this.lastName = lastName == null ? "" : lastName.trim();
+    }
+
     public boolean isSubscribed() {
         return status == SubscriptionStatus.SUBSCRIBED;
     }

@@ -1,6 +1,8 @@
 package com.brandonkamga.lescracks.account.application;
 
 import com.brandonkamga.lescracks.account.domain.model.Account;
+import com.brandonkamga.lescracks.account.domain.model.AccountRenamed;
+import com.brandonkamga.lescracks.account.domain.port.AccountEvents;
 import com.brandonkamga.lescracks.shared.exception.BadRequestException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -11,16 +13,21 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 class AccountDirectoryTest {
 
     private final InMemoryAccountStore accounts = new InMemoryAccountStore();
+    private final AccountEvents events = mock(AccountEvents.class);
     private AccountDirectoryImpl directory;
     private Account account;
 
     @BeforeEach
     void setUp() {
-        directory = new AccountDirectoryImpl(accounts);
+        directory = new AccountDirectoryImpl(accounts, events);
         account = accounts.save(Account.builder().email("eric@example.com").firstName("Eric").lastName("T").build());
     }
 
@@ -33,6 +40,16 @@ class AccountDirectoryTest {
 
         assertThatThrownBy(() -> directory.rename(account.getId(), null, " ")).isInstanceOf(BadRequestException.class);
         assertThat(accounts.stored(account.getId()).getLastName()).isEqualTo("T");
+    }
+
+    @Test
+    @DisplayName("a rename tells the modules that keep a copy of the name, and a refused one tells nobody")
+    void renameIsPublished() {
+        directory.rename(account.getId(), "Éric", "Tchana");
+        assertThatThrownBy(() -> directory.rename(account.getId(), " ", null)).isInstanceOf(BadRequestException.class);
+
+        verify(events).renamed(new AccountRenamed(account.getId(), "eric@example.com", "Éric", "Tchana"));
+        verify(events, times(1)).renamed(any());
     }
 
     @Test

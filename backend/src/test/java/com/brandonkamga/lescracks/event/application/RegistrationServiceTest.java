@@ -82,6 +82,21 @@ class RegistrationServiceTest {
     }
 
     @Test
+    @DisplayName("a member who leaves the platform stops counting on the events they still held, and only those")
+    void forgetsALeavingMember() {
+        Event other = event(EventStatus.PUBLISHED, now.plus(6, ChronoUnit.DAYS), null);
+        service.register(workshop.getId(), "awa@example.com");
+        service.register(other.getId(), "awa@example.com");
+        service.cancel(other.getId(), "awa@example.com");
+        service.register(workshop.getId(), "kofi@example.com");
+
+        service.forgetMember(1L);
+
+        assertThat(events.stored(workshop.getId()).getRegistrationCount()).isEqualTo(1);
+        assertThat(events.stored(other.getId()).getRegistrationCount()).isZero();
+    }
+
+    @Test
     @DisplayName("attendance is present or absent, can be undone back to « registered », and never touches a cancelled seat")
     void attendanceIsPresentOrAbsent() {
         Registration awa = service.register(workshop.getId(), "awa@example.com");

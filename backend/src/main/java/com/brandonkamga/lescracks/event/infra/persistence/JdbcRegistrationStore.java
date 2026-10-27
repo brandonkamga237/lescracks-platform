@@ -85,4 +85,13 @@ class JdbcRegistrationStore implements RegistrationStore {
         jdbc.sql("UPDATE events SET registration_count = greatest(registration_count + :delta, 0) WHERE id = :event")
                 .param("delta", delta).param("event", eventId).update();
     }
+
+    @Override
+    public void releaseCountsOf(Long userId) {
+        jdbc.sql("""
+                        UPDATE events e SET registration_count = greatest(e.registration_count - 1, 0)
+                        FROM event_registrations r
+                        WHERE r.event_id = e.id AND r.user_id = :user AND r.status <> 'CANCELLED'""")
+                .param("user", userId).update();
+    }
 }
