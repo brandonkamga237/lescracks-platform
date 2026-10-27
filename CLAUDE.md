@@ -82,5 +82,13 @@ Use `pnpm`, never `npm`. Before a commit, the checks of the area you touched mus
 - Skills (`.claude/skills/`): `design-patterns` (backend architecture, mandatory for backend
   changes), `backend-endpoint`, `db-migration`, `frontend-page`, `seo-page`, `dev-setup`,
   `git-workflow`, plus UI and motion skills
-- Subagents (`.claude/agents/`): `architecture-reviewer` checks a branch against the backend
-  rules before a PR; `release-verifier` checks production after a deployment
+- Subagents (`.claude/agents/`), each with an evidence-first report format:
+  - `feature-planner` plans a feature from the code (read-only) → `feature-builder` builds it
+    on a branch, committing as it goes
+  - `bug-fixer` reproduces a bug with a failing test, fixes the cause, keeps the test
+  - `schema-keeper` writes migrations and adapter changes, and the production checks they need
+  - `dependency-upgrader` adopts a dependency bump from its official release notes
+  - `architecture-reviewer` reviews a backend branch before a PR (read-only)
+  - `release-verifier` checks production after a deployment (read-only, hook-guarded)
+- Agent memory lives in `.claude/agent-memory/<agent>/` and is committed: review what agents
+  write there like code. Agents that read external content (web pages, server output) keep none
