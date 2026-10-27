@@ -84,8 +84,8 @@ public class AccountServices {
     }
 
     @Bean
-    AccountSettingsService accountSettingsService(AccountStore accounts, PasswordHasher passwords) {
-        return transactional.wrap(AccountSettingsService.class, new AccountSettingsServiceImpl(accounts, passwords));
+    AccountSettingsService accountSettingsService(AccountStore accounts, PasswordHasher passwords, AccountEvents events) {
+        return transactional.wrap(AccountSettingsService.class, new AccountSettingsServiceImpl(accounts, passwords, events));
     }
 
     @Bean
@@ -101,8 +101,8 @@ public class AccountServices {
     }
 
     @Bean
-    AccountAdminService accountAdminService(AccountStore accounts, EmailVerificationService verification) {
-        return transactional.wrap(AccountAdminService.class, new AccountAdminServiceImpl(accounts, verification));
+    AccountAdminService accountAdminService(AccountStore accounts, EmailVerificationService verification, AccountEvents events) {
+        return transactional.wrap(AccountAdminService.class, new AccountAdminServiceImpl(accounts, verification, events));
     }
 
     @Bean

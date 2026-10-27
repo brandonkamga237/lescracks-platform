@@ -1,9 +1,12 @@
 package com.brandonkamga.lescracks.account.application;
 
 import com.brandonkamga.lescracks.account.domain.model.Account;
+import com.brandonkamga.lescracks.account.domain.model.AccountDeleting;
+import com.brandonkamga.lescracks.account.domain.port.AccountEvents;
 import com.brandonkamga.lescracks.account.domain.model.AccountStatus;
 import com.brandonkamga.lescracks.account.domain.model.AuthProvider;
 import com.brandonkamga.lescracks.shared.exception.ConflictException;
+import com.brandonkamga.lescracks.shared.exception.NotFoundException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,12 +26,26 @@ class AccountAdminServiceTest {
 
     private final InMemoryAccountStore accounts = new InMemoryAccountStore();
     @Mock private EmailVerificationService verification;
+    @Mock private AccountEvents events;
 
     private AccountAdminServiceImpl service;
 
     @BeforeEach
     void setUp() {
-        service = new AccountAdminServiceImpl(accounts, verification);
+        service = new AccountAdminServiceImpl(accounts, verification, events);
+    }
+
+    @Test
+    @DisplayName("deleting a member warns the other modules first; an unknown id warns nobody")
+    void deletes() {
+        Account member = accounts.save(Account.builder().email("awa@example.com").passwordHash("hash").build());
+
+        service.delete(member.getId());
+        assertThatThrownBy(() -> service.delete(999L)).isInstanceOf(NotFoundException.class);
+
+        verify(events).deleting(new AccountDeleting(member.getId()));
+        verify(events, never()).deleting(new AccountDeleting(999L));
+        assertThat(accounts.findById(member.getId())).isEmpty();
     }
 
     @Test

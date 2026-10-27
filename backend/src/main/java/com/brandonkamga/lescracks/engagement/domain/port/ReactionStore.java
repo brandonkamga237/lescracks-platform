@@ -31,4 +31,7 @@ public interface ReactionStore {
 
     /** Drops the views, likes and counters of a target that no longer exists. */
     void forget(Target target);
+
+    /** Takes the member's likes off each target's like count, in one statement. */
+    void releaseLikesOf(Long accountId);
 }
