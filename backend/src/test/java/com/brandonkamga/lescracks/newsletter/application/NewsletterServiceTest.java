@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.newsletter.application;
 
 import com.brandonkamga.lescracks.account.application.AccountDirectoryImpl;
+import com.brandonkamga.lescracks.account.domain.port.AccountEvents;
 import com.brandonkamga.lescracks.account.application.InMemoryAccountStore;
 import com.brandonkamga.lescracks.account.domain.model.Account;
 import com.brandonkamga.lescracks.newsletter.domain.model.Subscriber;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.mockito.Mockito.mock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +35,7 @@ class NewsletterServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new NewsletterServiceImpl(subscribers, new AccountDirectoryImpl(accounts), mail);
+        service = new NewsletterServiceImpl(subscribers, new AccountDirectoryImpl(accounts, mock(AccountEvents.class)), mail);
     }
 
     @Test
@@ -47,6 +49,19 @@ class NewsletterServiceTest {
 
         service.confirm(pending.getToken());
         assertThat(subscribers.stored("awa@example.com").isSubscribed()).isTrue();
+    }
+
+    @Test
+    @DisplayName("a member's new name reaches their subscription; an address not on the list is left alone")
+    void renamesTheSubscriber() {
+        service.attachAccount(7L, "eric@example.com", "Eric", "T", true);
+
+        service.renameSubscriber("eric@example.com", " Éric ", "Tchana");
+        service.renameSubscriber("nobody@example.com", "X", "Y");
+
+        assertThat(subscribers.stored("eric@example.com").getFirstName()).isEqualTo("Éric");
+        assertThat(subscribers.stored("eric@example.com").getLastName()).isEqualTo("Tchana");
+        assertThat(subscribers.findByEmail("nobody@example.com")).isEmpty();
     }
 
     @Test

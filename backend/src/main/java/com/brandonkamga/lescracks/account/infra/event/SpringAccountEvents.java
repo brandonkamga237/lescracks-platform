@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.account.infra.event;
 
 import com.brandonkamga.lescracks.account.domain.model.AccountRegistered;
+import com.brandonkamga.lescracks.account.domain.model.AccountRenamed;
 import com.brandonkamga.lescracks.account.domain.port.AccountEvents;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,6 +19,11 @@ public class SpringAccountEvents implements AccountEvents {
 
     @Override
     public void registered(AccountRegistered event) {
+        publisher.publishEvent(event);
+    }
+
+    @Override
+    public void renamed(AccountRenamed event) {
         publisher.publishEvent(event);
     }
 }

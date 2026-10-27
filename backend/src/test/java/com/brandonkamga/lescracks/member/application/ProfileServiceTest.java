@@ -1,6 +1,7 @@
 package com.brandonkamga.lescracks.member.application;
 
 import com.brandonkamga.lescracks.account.application.AccountDirectoryImpl;
+import com.brandonkamga.lescracks.account.domain.port.AccountEvents;
 import com.brandonkamga.lescracks.account.application.Arrival;
 import com.brandonkamga.lescracks.account.application.InMemoryAccountStore;
 import com.brandonkamga.lescracks.account.domain.model.Account;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Set;
 
+import static org.mockito.Mockito.mock;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doThrow;
@@ -45,7 +47,7 @@ class ProfileServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ProfileServiceImpl(new AccountDirectoryImpl(accounts), profiles, storage, taxonomy);
+        service = new ProfileServiceImpl(new AccountDirectoryImpl(accounts, mock(AccountEvents.class)), profiles, storage, taxonomy);
         id = accounts.save(Account.builder().email("eric@example.com").firstName("Eric").lastName("T").provider(AuthProvider.GOOGLE).build()).getId();
     }
 

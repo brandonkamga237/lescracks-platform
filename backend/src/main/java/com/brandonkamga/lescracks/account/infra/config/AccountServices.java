@@ -53,8 +53,8 @@ public class AccountServices {
     }
 
     @Bean
-    AccountDirectory accountDirectory(AccountStore accounts) {
-        return transactional.wrap(AccountDirectory.class, new AccountDirectoryImpl(accounts));
+    AccountDirectory accountDirectory(AccountStore accounts, AccountEvents events) {
+        return transactional.wrap(AccountDirectory.class, new AccountDirectoryImpl(accounts, events));
     }
 
     @Bean
