@@ -4,20 +4,8 @@
 #
 # Services: PostgreSQL · MinIO · Keycloak · Backend (Spring Boot) · Frontend (Nginx/SPA)
 #
-# Prerequisites on the server:
-#   - Docker + Docker Compose plugin installed
-#   - Traefik running on network "traefik-public" (see /root/traefik/)
-#   - .env file at /root/lescracks/.env  (copy from .env.example, fill secrets)
-#
-# First-time setup:
-#   mkdir -p /root/lescracks && cd /root/lescracks
-#   cp .env.example .env && nano .env
-#   docker compose -f docker-compose.prod.yml up -d
-#
-# Daily operations:
-#   docker compose -f docker-compose.prod.yml ps
-#   docker compose -f docker-compose.prod.yml logs -f backend
-#   docker compose -f docker-compose.prod.yml restart backend
+# Prerequisites on the server: Docker with the Compose plugin, Traefik on the external
+# network "traefik-public", and a .env next to this file (copy .env.example, fill secrets).
 # =============================================================================
 
 services:
