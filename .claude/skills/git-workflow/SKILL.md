@@ -37,7 +37,7 @@ does not exist on `develop`, and the branches drift apart).
 finished and verified, commit it. A typical split for a backend plus frontend feature:
 
 ```
-feat(events): add waitlist columns          (Flyway migration + entity)
+feat(events): add waitlist columns          (Flyway migration + SQL adapter)
 feat(events): expose waitlist in API        (DTO + service + controller + SecurityConfig)
 feat(events): show waitlist state on detail (page + frontend service)
 test(events): cover waitlist service        (tests)
@@ -87,12 +87,12 @@ file list: the diff already provides one.
   `Co-Authored-By: Claude ...` trailer, no "Generated with …", no hint in the body or
   in the PR description. The author of the commits is the user. The hook and the
   `Conventions` CI job reject them; `.claude/settings.json` sets `attribution` to empty so
-  Claude Code never adds them. Only `CLAUDE.md` and `.claude/` may be named.
+  Claude Code never adds them. Only the exact strings `CLAUDE.md` and `.claude/` may appear: a `(claude)` scope is refused, use
+  `(tooling)` for changes to that setup.
 - No secrets and no `.env` (see `.gitignore`).
 - No `git push --force`, no `git reset --hard` on shared work, no rewriting of
   history that has already been pushed.
-- No direct commit on `main` (outside a deliberate `hotfix/`): `main` triggers the
-  production deployment.
+- No direct commit on `main` or `develop`: both are protected and only take pull requests.
 
 ## Merging
 

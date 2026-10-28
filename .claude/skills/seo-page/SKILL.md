@@ -22,7 +22,8 @@ done. Missing one leaves the page invisible to engines, with no visible error.
 - Return a complete HTML document: `<title>`, `<meta name="description">`, OG tags,
   real textual content, and a schema.org JSON-LD block matching the type (`Event`,
   `Article`, `Person`, `Organization`, …).
-- The content comes from the database through the repositories, never hardcoded text.
+- The content comes from the modules' application services (`ArticleCatalog`, `EventCatalog`,
+  `TalkService`), never hardcoded text and never another module's tables.
 - Static marketing pages → `/seo/pages/{name}`; detail pages → `/seo/{type}/{slug}`.
 
 ## 2. nginx routing — `frontend/nginx.conf`

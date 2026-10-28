@@ -11,13 +11,12 @@ the dependency rule and the patterns. This file is the step-by-step for one endp
 ## The full chain
 
 Everything lives under `<module>/` (`account`, `member`, `newsletter`, `content`, `event`,
-`engagement`, `recognition`, `taxonomy`, `notification`, `analytics`, `storage`, `seo`).
-Modules not yet moved to the skeleton keep `api/`, `domain/`, `infra/`; new code in them still
-follows the steps below as closely as their layout allows.
+`engagement`, `recognition`, `taxonomy`). `community`, `stats`, `mail`, `seo` and `storage` are
+not on the skeleton yet; new code in them follows the steps below as closely as their layout allows.
 
 1. **Request / response** — `<module>/api/dto/XxxRequest.java`, `XxxResponse.java`.
    Java records. Validation (`@NotBlank`, `@Size`, `@Email`…) on requests only. Never
-   expose a domain model or an entity.
+   expose a domain model.
    - A request translates itself into a command: `public Registration toRegistration()`.
    - A response builds itself from the model: `public static UserProfileResponse of(User user, …)`.
 
@@ -30,7 +29,8 @@ follows the steps below as closely as their layout allows.
 
 4. **Port and adapter** — when the use case needs I/O that no port offers yet, add the
    interface in `domain/port` and its implementation in `infra/<technology>/` or
-   `infra/persistence/` (entity + `XxxJpaRepository` + `JpaXxxStore` + mapper).
+   `infra/persistence/JdbcXxxStore` (plain SQL through `JdbcClient`, its `RowMapper` next to the
+   SQL, an `*IT` covering every statement). A schema change goes through the `db-migration` skill.
 
 5. **Assembly** — `<module>/infra/config/XxxServices.java` builds the service with
    `transactional.wrap(XxxService.class, new XxxServiceImpl(...))`. Name read methods
@@ -55,8 +55,8 @@ follows the steps below as closely as their layout allows.
 
 ## Conventions
 
-- Roles come from the Keycloak realm (`user`, `admin`) or the local session; in Spring,
-  `hasRole("ADMIN")`.
+- Admins sign in locally (`admins` table) and get `ROLE_ADMIN`; members sign in locally or with
+  a Keycloak token for Google/GitHub. In Spring, `hasRole("ADMIN")`.
 - Text shown to users (emails, error messages) stays in French; everything else is English.
 - Logging: `slf4j`, INFO for business actions, DEBUG for technical detail. Never log a
   token, a password or the body of an email.

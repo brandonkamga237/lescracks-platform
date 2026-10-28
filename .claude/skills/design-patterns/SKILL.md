@@ -1,6 +1,6 @@
 ---
 name: design-patterns
-description: The architecture, SOLID rules and design patterns every LesCracks backend change must follow — module skeleton, ports and adapters, plain SQL persistence without ORM, no N+1 and performance rules, where each pattern applies, what to reuse from shared/kernel, and the checklist to run before committing. Use for every backend feature, fix or refactor, and whenever deciding where a class goes or whether a pattern is worth it.
+description: The architecture, SOLID rules and design patterns every LesCracks backend change must follow — module skeleton, ports and adapters, plain SQL persistence without ORM, no N+1 and performance rules, where each pattern applies, what to reuse from shared, and the checklist to run before committing. Use for every backend feature, fix or refactor, and whenever deciding where a class goes or whether a pattern is worth it.
 ---
 
 # Architecture and design patterns
@@ -21,10 +21,10 @@ is on the author and the reviewer.
 | `engagement` | Views, likes, comments, reports — on any target (article, event, talk) | The targets themselves |
 | `recognition` | Badges, certificates | — |
 | `taxonomy` | Themes (categories), tags | — |
-| `notification` | Email templates and delivery | Business decisions about who gets what |
-| `analytics` | Dashboard aggregates, read through each module's query port | Writes |
+| `notification` (today `mail`) | Email templates and delivery | Business decisions about who gets what |
+| `analytics` (today `stats`) | Dashboard aggregates, read through each module's query port | Writes |
 | `storage`, `seo` | Files (MinIO), bot snapshots | — |
-| `shared/kernel` | Reusable building blocks (below) | Business rules of any module |
+| `shared` | Reusable building blocks (below) | Business rules of any module |
 
 A new feature first answers: *which capability is this?* If the answer is "two of them", it is
 two changes talking through a port or an event. If no module fits, propose a new one — never
@@ -73,7 +73,7 @@ api ──▶ application ──▶ domain ◀── infra
 - **O** — a new variant is a new class: a new email is a record + an `EmailTemplate`; a new
   reaction target is a new `TargetType` value, not a new table and service.
 - **L** — every implementation of a port honours its contract, test doubles included
-  (`InMemoryUserStore` copies like a database, so a forgotten `save` fails the test).
+  (`InMemoryAccountStore` copies like a database, so a forgotten `save` fails the test).
 - **I** — narrow ports: other modules get `MemberDirectory`, not the whole profile service.
 - **D** — services depend on ports, receive them by constructor, never `new` a collaborator,
   never field injection.
@@ -82,8 +82,8 @@ api ──▶ application ──▶ domain ◀── infra
 
 | Pattern | Use it for | Example |
 | --- | --- | --- |
-| **Ports & Adapters** | Anything that touches I/O: database, mail, files, tokens, metrics | `UserStore` ← `JpaUserStore`; `PasswordHasher` ← `BCryptPasswordHasher` |
-| **Repository (as a port)** | Loading and saving an aggregate | `UserStore.save(user)` returns the stored copy; always save explicitly, there is no dirty checking |
+| **Ports & Adapters** | Anything that touches I/O: database, mail, files, tokens, metrics | `AccountStore` ← `JdbcAccountStore`; `PasswordHasher` ← `BCryptPasswordHasher` |
+| **Repository (as a port)** | Loading and saving an aggregate | `AccountStore.save(account)` returns the stored copy; always save explicitly, there is no dirty checking |
 | **Data Mapper** | SQL row ⇄ domain model, inside `infra/persistence` only | a `RowMapper` per aggregate in its `JdbcXxxStore` |
 | **Aggregate** | A cluster changed together, one root, one store | `Event` with its registrations rules; reference other aggregates **by id** |
 | **Value Object** | A concept with rules and no identity | `PhoneNumber`, `Slug`, `EmailAddress`, `PageQuery` — immutable records that validate in their constructor |
@@ -104,28 +104,27 @@ never vary (ports are the exception: they exist for the dependency rule and for 
 factory for one constructor, a generic `BaseService<T>`, an abstract class "for later". Two
 real variants first, then the abstraction.
 
-## 5. Reuse before writing: shared/kernel
+## 5. Reuse before writing: shared
 
-Before writing any of these, use or extend the kernel one:
+Before writing any of these, use or extend the one in `shared`:
 
 - Paging: `PageQuery`, `Paged<T>` (domain) and `PageResponse.of(paged, mapper)` (api).
 - Errors: `NotFoundException`, `BadRequestException`, `ConflictException`, `ForbiddenException`,
   `UnauthenticatedException` — they carry an `ErrorCode`; never an HTTP status.
 - Publication lifecycle (status, slug, cover, scheduled/published dates), slugs, CSV export,
-  visitor keys, one-time tokens: one implementation each in the kernel. A second copy in a
+  visitor keys, one-time tokens: one implementation each in `shared`. A second copy in a
   module is a review blocker.
 - Uploaded files: the controller turns a `MultipartFile` into an `Upload` with `Uploads.of`
   (`storage/api`), the use case resolves or discards a cover with `CoverImages` (`storage/domain`).
   No servlet type below `api/`.
 
-If two modules need the same thing and the kernel lacks it, move it to the kernel in its own
+If two modules need the same thing and `shared` lacks it, move it to `shared` in its own
 commit first, then use it.
 
 ## 6. Persistence: plain SQL, no ORM
 
-Modules on the skeleton use **no ORM**: no `@Entity`, no Spring Data repository, no Hibernate.
-Their adapters write SQL by hand with Spring's `JdbcClient`. JPA only survives in modules not
-migrated yet, and disappears from each one at its migration step.
+There is **no ORM** anywhere: no `@Entity`, no Spring Data repository, no Hibernate (none of them
+is on the classpath). Adapters write SQL by hand with Spring's `JdbcClient`.
 
 - One adapter per port, `infra/persistence/JdbcXxxStore`, SQL in Java text blocks, every
   column named (never `SELECT *`), values always bound as named parameters.
@@ -161,8 +160,8 @@ The rule: **the number of queries of a use case does not grow with the number of
 
 ## 8. Database rules
 
-- One table belongs to one module. Cross-module links are `xxx_id` columns with a foreign key,
-  never a JPA relation to another module's entity.
+- One table belongs to one module. Cross-module links are `xxx_id` columns with a foreign key;
+  a module never joins another module's tables in its SQL.
 - Same concept, same shape everywhere: `TIMESTAMPTZ` for every instant, `VARCHAR(220)` slugs,
   `VARCHAR(1000)` URLs, `status VARCHAR(20)` with a `CHECK`.
 - Identify people by id, never by email.
@@ -185,7 +184,7 @@ The rule: **the number of queries of a use case does not grow with the number of
 1. Which module owns this? Is it in the right folder of the skeleton?
 2. Does `domain`/`application` import anything from Spring, JPA, servlet, `infra` or `api`?
 3. Is every change to an aggregate saved through its store?
-4. Is anything here already in `shared/kernel` or another module? Reuse it.
+4. Is anything here already in `shared` or another module? Reuse it.
 5. Did I add an abstraction with a single case? Remove it.
 6. Did I touch another module's tables, entities or repositories? Go through its interface.
 7. Persistence in plain SQL, no ORM; no query in a loop; lists load related data in one
