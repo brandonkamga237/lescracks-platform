@@ -1,83 +1,30 @@
-# LesCracks Platform
+# LesCracks
 
-Tech learning platform: a blog, events and hackathons (registrations, team projects),
-the LesCracks Talk, member profiles with badges and certificates, and a newsletter.
+The platform behind [lescracks.com](https://lescracks.com): a tech blog, events and
+hackathons, the LesCracks Talk, member profiles with badges and certificates, and a
+newsletter.
 
-Monorepo: a Spring Boot API (`backend/`) and a React SPA (`frontend/`), shipped as
-separate containers behind Traefik.
+| | |
+| --- | --- |
+| [`backend/`](backend/README.md) | REST API — Spring Boot 3, Java 21, PostgreSQL, MinIO |
+| [`frontend/`](frontend/README.md) | Web app — React, TypeScript, Vite, Tailwind |
 
-| Part | Stack | Notes |
-|---|---|---|
-| [backend/](backend/README.md) | Spring Boot, Java 21, PostgreSQL (plain SQL, Flyway), MinIO, server sessions + Keycloak tokens | REST API under `/api` |
-| [frontend/](frontend/README.md) | React, Vite, TypeScript, Tailwind, Radix | SPA served by Nginx |
+## Getting started
 
-## Quick start
-
-Requirements: Docker, JDK 21, Node 22 and pnpm.
+Requirements: Docker, JDK 21, Node 22, pnpm.
 
 ```bash
-# 1. Dependencies (PostgreSQL + MinIO) — no .env needed
-docker compose up -d
-
-# 2. API — http://localhost:8080
-cd backend && ./mvnw spring-boot:run
-
-# 3. SPA — http://localhost:5173
-cd frontend && pnpm install && pnpm dev
+docker compose up -d                         # PostgreSQL and MinIO
+(cd backend && ./mvnw spring-boot:run)       # API on http://localhost:8080
+(cd frontend && pnpm install && pnpm dev)    # app on http://localhost:5173, in a second terminal
 ```
 
-Vite proxies `/api`, `/oauth2` and `/login/oauth2` to `localhost:8080`, so the
-frontend needs no configuration in development.
+No configuration is needed in development.
 
-Everything in containers instead:
+## Contributing
 
-```bash
-docker compose --profile app up -d --build
-```
-
-If ports 5432 / 9000 / 9001 are already taken on your machine:
-
-```bash
-DB_PORT=5433 MINIO_PORT=9002 MINIO_CONSOLE_PORT=9003 docker compose up -d
-```
-
-## Docker files
-
-| File | Purpose |
-|---|---|
-| `docker-compose.yml` | Local development (profile `app` adds the backend) |
-| `docker-compose.prod.yml` | Production, deployed to the VPS by CI |
-
-One compose file per environment, at the root. Do not recreate one under `backend/`
-or `frontend/`, and do not rename `docker-compose.prod.yml`: CI refers to it by name.
-
-## Branches and deployment
-
-```
-feature/* | fix/* | docs/*  →  develop  →  (PR)  →  main  →  release PR  →  vX.Y.Z  →  deploy
-hotfix/*                    →  main
-```
-
-Nothing deploys on a plain push. Merging into `main` lets release-please open a release
-PR; merging that PR tags `vX.Y.Z`, builds the images, pushes them to Docker Hub and
-deploys that version over SSH (`.github/workflows/release.yml`, `deploy.yml`). A rollback
-is a manual run of `deploy.yml` with an earlier tag.
-
-Production variables are described in `.env.example`; the real `.env` lives on the
-server (`/root/lescracks/.env`) and is never committed.
-
-## Conventions
-
-All code is in English — identifiers, files, comments, commit messages. French is
-reserved for what users read: the interface, page content, API error messages and
-email bodies.
-
-The rules that apply everywhere (layout, commands, git workflow) are in
-[CLAUDE.md](CLAUDE.md); backend, frontend and infrastructure conventions are in
-`.claude/rules/`. The workflows where a wrong move is expensive — schema migration, new
-endpoint, SEO snapshot — are documented under `.claude/skills/`, and `.claude/agents/`
-holds two reviewers: one for backend architecture, one for production after a release.
+Branches, commit format and review rules are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
-Built by **Brandon Kamga**
+© 2026 Brandon Kamga. All rights reserved.
