@@ -11,9 +11,6 @@ separate containers behind Traefik.
 | [backend/](backend/README.md) | Spring Boot, Java 21, PostgreSQL (plain SQL, Flyway), MinIO, server sessions + Keycloak tokens | REST API under `/api` |
 | [frontend/](frontend/README.md) | React, Vite, TypeScript, Tailwind, Radix | SPA served by Nginx |
 
-**Architecture, with diagrams of the whole system:** [docs/architecture/](docs/architecture/README.md).
-How well the code follows its own rules, measured: [design audit](docs/architecture/design-audit.md).
-
 ## Quick start
 
 Requirements: Docker, JDK 21, Node 22 and pnpm.
@@ -75,9 +72,11 @@ All code is in English — identifiers, files, comments, commit messages. French
 reserved for what users read: the interface, page content, API error messages and
 email bodies.
 
-The detailed rules (structure, style, git workflow, architecture decisions) live in
-[CLAUDE.md](CLAUDE.md). The workflows where a wrong move is expensive — schema
-migration, new endpoint, SEO snapshot — are documented under `.claude/skills/`.
+The rules that apply everywhere (layout, commands, git workflow) are in
+[CLAUDE.md](CLAUDE.md); backend, frontend and infrastructure conventions are in
+`.claude/rules/`. The workflows where a wrong move is expensive — schema migration, new
+endpoint, SEO snapshot — are documented under `.claude/skills/`, and `.claude/agents/`
+holds two reviewers: one for backend architecture, one for production after a release.
 
 ---
 
