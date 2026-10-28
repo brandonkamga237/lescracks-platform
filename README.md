@@ -48,13 +48,6 @@ Requirements: Git, Docker, JDK 21, Node 22 and pnpm. No configuration file is ne
 4. Open http://localhost:5173. On the first start the API creates the blog themes, a sample
    article and a sample event.
 
-| | URL | Sign-in |
-| --- | --- | --- |
-| Web app | http://localhost:5173 | create an account |
-| Back office | http://localhost:5173/admin/connexion | `admin` / `admin` |
-| API documentation | http://localhost:8080/swagger-ui.html | — |
-| Emails sent in development | http://localhost:8025 | — |
-
 To stop the services: `docker compose down` (add `-v` to also erase the local data).
 
 ## Contributing

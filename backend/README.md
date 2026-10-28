@@ -15,8 +15,6 @@ Start PostgreSQL and MinIO from the repository root with `docker compose up -d`,
 ./mvnw verify            # with integration tests (requires Docker)
 ```
 
-API documentation is served at http://localhost:8080/swagger-ui.html in development.
-
 ## Configuration
 
 Development runs on defaults. Production variables are listed in
