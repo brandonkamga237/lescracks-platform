@@ -33,6 +33,12 @@ grep -qE '(^|[^a-z_])(insert|update|delete|drop|alter|truncate|create|grant|revo
 grep -qE '>+ *(/|~|\.|\$|[a-z0-9_-]+\.[a-z0-9]+)' <<< "$scrubbed" && deny "redirection to a file"
 grep -qE '(cat|less|more|head|tail|bat) +[^|;&]*\.env([^a-z]|$)|(^|[^a-z_./-])(env|printenv)([^a-z_.-]|$)' <<< "$scrubbed" \
   && deny "printing secrets"
-grep -qE 'gehmit' <<< "$scrubbed" && deny "the gehmit containers belong to another project"
+# Other projects share the machine: a command aimed at one container must aim at a lescracks one.
+while IFS= read -r segment; do
+  if grep -qE 'docker +(logs|exec|inspect|top|stats|port|diff)([^a-z_-]|$)' <<< "$segment" \
+     && ! grep -qE 'lescracks-[a-z0-9_-]+' <<< "$segment"; then
+    deny "only the lescracks-* containers are in scope"
+  fi
+done < <(printf '%s\n' "$scrubbed" | tr ';&|' '\n\n\n')
 
 exit 0

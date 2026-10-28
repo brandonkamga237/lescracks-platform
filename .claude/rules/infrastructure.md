@@ -23,4 +23,5 @@ paths:
   `deploy.yml` ships a tag to the VPS, and a rollback is a manual run of it with an earlier tag
 - A new indexable public page needs its snapshot in `SeoController` and its entry in
   `frontend/nginx.conf` (`seo-page` skill)
-- Production is checked over `ssh contabo`, read-only, with the `release-verifier` subagent
+- Production is checked read-only with the `release-verifier` subagent; server details stay out
+  of the repository (`.claude/release-verifier.local.md`, not committed)
