@@ -18,17 +18,44 @@ newsletter.
 | [`backend/`](backend/README.md) | REST API — Spring Boot 3, Java 21, PostgreSQL, MinIO |
 | [`frontend/`](frontend/README.md) | Web app — React, TypeScript, Vite, Tailwind |
 
-## Getting started
+## Run it locally
 
-Requirements: Docker, JDK 21, Node 22, pnpm.
+Requirements: Git, Docker, JDK 21, Node 22 and pnpm. No configuration file is needed.
 
-```bash
-docker compose up -d                         # PostgreSQL and MinIO
-(cd backend && ./mvnw spring-boot:run)       # API on http://localhost:8080
-(cd frontend && pnpm install && pnpm dev)    # app on http://localhost:5173, in a second terminal
-```
+1. Clone the repository and start the services it depends on:
 
-No configuration is needed in development.
+   ```bash
+   git clone https://github.com/brandonkamga237/lescracks-platform.git
+   cd lescracks-platform
+   docker compose up -d
+   ```
+
+2. Start the API, from the repository root:
+
+   ```bash
+   cd backend
+   ./mvnw spring-boot:run
+   ```
+
+3. In a second terminal, start the web app, from the repository root:
+
+   ```bash
+   cd frontend
+   pnpm install
+   pnpm dev
+   ```
+
+4. Open http://localhost:5173. On the first start the API creates the blog themes, a sample
+   article and a sample event.
+
+| | URL | Sign-in |
+| --- | --- | --- |
+| Web app | http://localhost:5173 | create an account |
+| Back office | http://localhost:5173/admin/connexion | `admin` / `admin` |
+| API documentation | http://localhost:8080/swagger-ui.html | — |
+| Emails sent in development | http://localhost:8025 | — |
+
+To stop the services: `docker compose down` (add `-v` to also erase the local data).
 
 ## Contributing
 
