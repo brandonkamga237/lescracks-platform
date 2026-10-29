@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.3](https://github.com/brandonkamga237/lescracks-platform/compare/v1.10.2...v1.10.3) (2026-10-29)
+
+
+### Bug Fixes
+
+* **frontend:** show a percentage only when the comparison base can support it ([#149](https://github.com/brandonkamga237/lescracks-platform/issues/149)) ([0014d37](https://github.com/brandonkamga237/lescracks-platform/commit/0014d37b1bd55ed89a7eb4ccef971112a90be33c))
+
 ## [1.10.2](https://github.com/brandonkamga237/lescracks-platform/compare/v1.10.1...v1.10.2) (2026-10-29)
 
 
