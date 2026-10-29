@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.10.2](https://github.com/brandonkamga237/lescracks-platform/compare/v1.10.1...v1.10.2) (2026-10-29)
+
+
+### Bug Fixes
+
+* **frontend:** keep Google and GitHub members signed in for the whole 30-day session ([#145](https://github.com/brandonkamga237/lescracks-platform/issues/145)) ([ef23641](https://github.com/brandonkamga237/lescracks-platform/commit/ef23641b940daa56ad844475e9d08420f5be245b))
+* **stats:** correct the dashboard growth figures and what they mean ([#146](https://github.com/brandonkamga237/lescracks-platform/issues/146)) ([c61a681](https://github.com/brandonkamga237/lescracks-platform/commit/c61a681b2a0342104645da9731f18da53d9a81a6))
+
 ## [1.10.1](https://github.com/brandonkamga237/lescracks-platform/compare/v1.10.0...v1.10.1) (2026-10-27)
 
 
