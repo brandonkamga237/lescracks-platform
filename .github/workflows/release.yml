@@ -1,6 +1,7 @@
-# Keeps a release pull request open against main, built from the conventional commits merged
-# since the last tag. Merging that PR bumps the version, writes CHANGELOG.md, tags vX.Y.Z,
-# publishes the GitHub release, then deploys that version (deploy.yml).
+# Opens a release pull request against main, built from the conventional commits merged since
+# the last tag, and lets it merge itself once its checks pass. That merge bumps the version,
+# writes CHANGELOG.md, tags vX.Y.Z, publishes the GitHub release, then deploys that version
+# (deploy.yml).
 #
 # It runs with a personal token, not GITHUB_TOKEN: a PR or tag created by GITHUB_TOKEN triggers
 # no workflow, so the required "Commit messages" check would never run on the release PR, and
@@ -41,6 +42,22 @@ jobs:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      # One merge into main is enough to ship: the release PR merges itself once the checks main
+      # requires have passed. The personal token enables it, so the push of that merge runs this
+      # workflow again, which tags the version and deploys it.
+      - name: Merge the release PR once its checks pass
+        if: steps.release.outputs.prs_created == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          RELEASE_PR: ${{ steps.release.outputs.pr }}
+        run: |
+          number=$(jq -r '.number' <<< "$RELEASE_PR")
+          if [ "$(gh api "repos/$GITHUB_REPOSITORY" --jq .allow_auto_merge)" != "true" ]; then
+            echo "::error::Turn on Settings > General > Pull Requests > Allow auto-merge, or merge release PR #$number by hand."
+            exit 1
+          fi
+          gh pr merge "$number" --auto --merge --repo "$GITHUB_REPOSITORY"
 
   deploy:
     name: Deploy

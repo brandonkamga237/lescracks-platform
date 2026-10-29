@@ -6,6 +6,8 @@ import React from 'react';
 import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
+import type { Comparison } from '@/lib/comparison';
+
 // Primary series — the brand gold. One metric, one line.
 export const SERIES = '#D4AF37';
 // Previous period or secondary series — desaturated, never mistaken for live data.
@@ -49,9 +51,6 @@ const fmtDay = (iso: string) => {
   return `${d}/${m}`;
 };
 
-export const deltaPct = (value: number | null | undefined, previous: number | null | undefined) =>
-  value == null || previous == null || previous === 0 ? null
-    : Math.round(((value - previous) / previous) * 100);
 
 // ── Delta badge ────────────────────────────────────────────────────────────────
 export const Delta = ({ pct, invert = false }: { pct: number | null; invert?: boolean }) => {
@@ -87,26 +86,31 @@ export const Sparkline = ({ data, dataKey = 'value' }: { data: Record<string, nu
 
 // ── KPI ────────────────────────────────────────────────────────────────────────
 export const Kpi = ({
-  label, value, delta, hint, spark, sparkKey,
+  label, value, delta, comparison, hint, spark, sparkKey,
 }: {
   label: string;
   value: React.ReactNode;
   delta?: number | null;
+  comparison?: Comparison;
   hint?: string;
   spark?: Record<string, number | string>[];
   sparkKey?: string;
-}) => (
+}) => {
+  const pct = comparison ? comparison.pct : delta;
+  return (
   // Two per row on a phone: the figure and its trend, the sparkline only where there is room for it.
   <div className="rounded-lg border border-line-soft bg-card p-3.5 sm:p-6">
     <p className="truncate text-xs text-t3 sm:text-sm">{label}</p>
     <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 sm:mt-3">
       <p className="font-display text-2xl font-semibold tabular-nums sm:text-4xl">{value}</p>
-      {delta != null && <Delta pct={delta} />}
+      {pct != null && <Delta pct={pct} />}
     </div>
-    {hint && <p className="mt-1.5 line-clamp-2 text-[11px] leading-snug text-t4 sm:mt-2 sm:text-xs">{hint}</p>}
+    {comparison?.note && <p className="mt-1.5 text-[11px] leading-snug text-t3 sm:mt-2 sm:text-xs">{comparison.note}</p>}
+    {hint && <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-t4 sm:text-xs">{hint}</p>}
     {spark && <div className="mt-4 hidden sm:block"><Sparkline data={spark} dataKey={sparkKey} /></div>}
   </div>
-);
+  );
+};
 
 // ── Custom tooltip ─────────────────────────────────────────────────────────────
 type ChartTooltipProps = {

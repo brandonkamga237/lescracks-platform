@@ -95,14 +95,17 @@ from the commits merged since the last tag.
 
 How a release goes:
 
-1. `develop` is merged into `main` (merge commit, by the maintainer).
-2. The `Release` workflow opens, or updates, a pull request `chore(main): release X.Y.Z` with
-   the new `CHANGELOG.md` entry. It stays open and grows with each merge into `main`.
-3. When the release should be cut, the maintainer merges that PR (**Create a merge commit**).
-   The workflow then tags `vX.Y.Z`, publishes the GitHub release with the same notes, builds
-   the images `backend-lescracks:vX.Y.Z` and `frontend-lescracks:vX.Y.Z` and deploys them.
+1. `develop` is merged into `main` (merge commit, by the maintainer). That is the only manual step.
+2. The `Release` workflow opens a pull request `chore(main): release X.Y.Z` with the new
+   `CHANGELOG.md` entry and turns on its auto-merge (merge commit).
+3. Once the checks `main` requires pass, that PR merges itself. The workflow then tags `vX.Y.Z`,
+   publishes the GitHub release with the same notes, builds the images
+   `backend-lescracks:vX.Y.Z` and `frontend-lescracks:vX.Y.Z` and deploys them, about five
+   minutes after step 1.
 
-Merging `develop` into `main` alone deploys nothing. A change with no `feat`, `fix`, `perf` or
+This needs **Settings → General → Pull Requests → Allow auto-merge**; without it the workflow
+fails with that instruction and the release PR waits to be merged by hand. To hold a release,
+turn off auto-merge on the release PR before its checks finish. A change with no `feat`, `fix`, `perf` or
 `revert` commit (a refactor, a dependency bump) opens no release PR: ship it with the next
 release, or force one with `Release-As`.
 

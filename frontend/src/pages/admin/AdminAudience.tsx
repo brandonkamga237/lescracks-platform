@@ -3,7 +3,8 @@ import { Globe2 } from 'lucide-react';
 
 import { AdminSection, AdminState } from '@/components/admin/AdminTable';
 import ConversionsPanel from '@/components/admin/ConversionsPanel';
-import { BarList, Kpi, Panel, PeriodSelect, SERIES_MUTED, TrendChart, deltaPct, fmt, fmtDuration } from '@/components/admin/viz';
+import { BarList, Kpi, Panel, PeriodSelect, SERIES_MUTED, TrendChart, fmt, fmtDuration } from '@/components/admin/viz';
+import { compareWith } from '@/lib/comparison';
 import { useApi } from '@/hooks/useApi';
 import { countryName } from '@/lib/phone';
 import { adminApi } from '@/services/adminApi';
@@ -15,6 +16,7 @@ export default function AdminAudience() {
   const [days, setDays] = useState(30);
   const audience = useApi((signal) => adminApi.audience(days, signal), [days]);
   const data = audience.data;
+  const before = `les ${days} jours d’avant`;
 
   return (
     <AdminSection
@@ -38,13 +40,13 @@ export default function AdminAudience() {
           <>
             <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
               <Kpi label="Visiteurs" value={fmt(data.visitors)}
-                delta={deltaPct(data.visitors, data.previousVisitors)}
+                comparison={compareWith(data.visitors, data.previousVisitors, before)}
                 hint="personnes distinctes" />
               <Kpi label="Visites" value={fmt(data.visits)}
-                delta={deltaPct(data.visits, data.previousVisits)}
+                comparison={compareWith(data.visits, data.previousVisits, before)}
                 hint="sessions sur la période" />
               <Kpi label="Pages vues" value={fmt(data.pageviews)}
-                delta={deltaPct(data.pageviews, data.previousPageviews)}
+                comparison={compareWith(data.pageviews, data.previousPageviews, before)}
                 hint="pages consultées au total" />
               <Kpi label="Durée d’une visite" value={fmtDuration(data.avgVisitSeconds)}
                 hint={data.bounceRate != null ? `${data.bounceRate.toLocaleString('fr-FR')} % repartent après une page` : undefined} />
