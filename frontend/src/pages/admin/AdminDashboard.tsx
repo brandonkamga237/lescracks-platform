@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 
 import { AdminSection, AdminState } from '@/components/admin/AdminTable';
 import SignupFunnel from '@/components/admin/SignupFunnel';
-import { Delta, Kpi, Panel, PeriodSelect, SEGMENT, Segmented, TrendChart, deltaPct } from '@/components/admin/viz';
+import { Delta, Kpi, Panel, PeriodSelect, SEGMENT, Segmented, TrendChart, fmt } from '@/components/admin/viz';
+import { compareWith, growthOf } from '@/lib/comparison';
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
 import { adminApi } from '@/services/adminApi';
@@ -19,7 +20,8 @@ function daysAgo(n: number) {
 type MetricKey = 'visitors' | 'registrations' | 'newsletter';
 
 const METRICS: { key: MetricKey; label: string }[] = [
-  { key: 'visitors', label: 'Visiteurs' },
+  // Visits, not visitors: unique visitors cannot be added up day after day.
+  { key: 'visitors', label: 'Visites' },
   { key: 'registrations', label: 'Nouvelles inscriptions' },
   { key: 'newsletter', label: 'Nouveaux abonnés' },
 ];
@@ -35,12 +37,6 @@ function splitByDate<T extends { date: string }>(points: T[], days: number) {
     current: points.filter((p) => p.date > start),
     previous: points.filter((p) => p.date > previousStart && p.date <= start),
   };
-}
-
-/** How much a total grew over the period: what it gained, against what it was at the start. */
-function growthPct(total: number, gained: number) {
-  const atStart = total - gained;
-  return atStart > 0 ? Math.round((gained / atStart) * 100) : null;
 }
 
 const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`);
@@ -78,11 +74,15 @@ export default function AdminDashboard() {
       : metric === 'registrations' ? split.current.map((p) => ({ date: p.date, value: p.count }))
         : splitNewsletter.current.map((p) => ({ date: p.date, value: p.joined }));
 
+  const before = `les ${days} jours d’avant`;
+
   // The pace of arrivals against the same number of days just before, not the growth of a total.
-  const trendDelta =
-    metric === 'visitors' ? deltaPct(audience.data?.visits, audience.data?.previousVisits)
-      : metric === 'registrations' ? deltaPct(sum(split.current, (p) => p.count), sum(split.previous, (p) => p.count))
-        : deltaPct(sum(splitNewsletter.current, (p) => p.joined), sum(splitNewsletter.previous, (p) => p.joined));
+  const [trendTotal, trendPrevious] =
+    metric === 'visitors' ? [audience.data?.visits ?? 0, audience.data?.previousVisits ?? 0]
+      : metric === 'registrations' ? [newMembers, sum(split.previous, (p) => p.count)]
+        : [joined, sum(splitNewsletter.previous, (p) => p.joined)];
+  const trend = compareWith(trendTotal, trendPrevious, before);
+  const perDay = (trendTotal / days).toLocaleString('fr-FR', { maximumFractionDigits: 1 });
 
   const signals = watch.data?.signals ?? [];
   const today = new Date();
@@ -99,7 +99,7 @@ export default function AdminDashboard() {
           <Kpi
             label={`Visiteurs · ${days} jours`}
             value={audience.data?.available ? (audience.data.visitors ?? 0).toLocaleString('fr-FR') : '—'}
-            delta={deltaPct(audience.data?.visitors, audience.data?.previousVisitors)}
+            comparison={audience.data?.available ? compareWith(audience.data.visitors, audience.data.previousVisitors, before) : undefined}
             hint={audience.data?.available
               ? `${(audience.data.pageviews ?? 0).toLocaleString('fr-FR')} pages vues`
               : 'Audience indisponible pour le moment.'}
@@ -111,7 +111,7 @@ export default function AdminDashboard() {
             <Kpi
               label="Membres inscrits"
               value={stats.users.toLocaleString('fr-FR')}
-              delta={growthPct(stats.users, newMembers)}
+              delta={growthOf(stats.users, newMembers)}
               hint={`${signed(newMembers)} sur ${days} jours · ${stats.usersActiveLast30d.toLocaleString('fr-FR')} actifs sur 30 jours`}
               spark={split.current.map((p) => ({ date: p.date, value: p.count }))}
             />
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
             <Kpi
               label="Abonnés à la lettre"
               value={stats.newsletterSubscribers.toLocaleString('fr-FR')}
-              delta={growthPct(stats.newsletterSubscribers, joined - left)}
+              delta={growthOf(stats.newsletterSubscribers, joined - left)}
               hint={`${signed(joined)} arrivés · −${left} partis sur ${days} jours`}
               spark={splitNewsletter.current.map((p) => ({ date: p.date, value: p.joined - p.left }))}
             />
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
       <Panel
         className="mt-6"
         title="Comment ça évolue"
-        subtitle="Par jour sur la période choisie ; le pourcentage compare au même nombre de jours juste avant."
+        subtitle="Jour par jour sur la période choisie, comparé au même nombre de jours juste avant."
         action={
           <Segmented label="Indicateur">
             {METRICS.map((m) => (
@@ -150,9 +150,11 @@ export default function AdminDashboard() {
           <p className="py-16 text-center text-sm text-t3">Les données d’audience ne sont pas encore disponibles.</p>
         ) : (
           <>
-            <div className="mb-4 flex items-center gap-3">
-              <span className="text-sm text-t3">Sur la période</span>
-              {trendDelta != null && <Delta pct={trendDelta} />}
+            <div className="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="font-display text-2xl font-semibold tabular-nums text-t1">{fmt(trendTotal)}</span>
+              <span className="text-sm text-t3">sur la période · {perDay} par jour</span>
+              {trend.pct != null && <Delta pct={trend.pct} />}
+              {trend.note && <span className="text-xs text-t4">{trend.note}</span>}
             </div>
             <TrendChart data={chartData} series={[{ key: 'value', name: METRICS.find((m) => m.key === metric)?.label ?? '' }]} className="h-44 sm:h-72" />
           </>
