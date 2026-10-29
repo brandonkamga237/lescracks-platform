@@ -59,10 +59,24 @@ export function SessionProvider({ children }: SessionProviderProps) {
       }
     };
 
+    // oidc-client-ts only renews a token that is about to expire while the page is open: one that
+    // expired while the browser was closed (or the laptop asleep) is never renewed, and a Google or
+    // GitHub member came back signed out long before the 30 days of the realm session.
+    const renewExpiredOidcToken = async () => {
+      const user = authRef.current.user;
+      if (!user?.expired || !user.refresh_token) return;
+      try {
+        await authRef.current.signinSilent();
+      } catch {
+        // The realm session itself is over; the probe below then finds no identity.
+      }
+    };
+
     const requestId = ++revision.current;
     if (!identityRef.current.isSignedIn) setLoading(true);
     setError(null);
     try {
+      if (getAuthTransport() === 'oidc') await renewExpiredOidcToken();
       const probe = () => Promise.allSettled([api.me(), adminApi.me()] as const);
       let mode = getAuthTransport();
       let results = await probe();

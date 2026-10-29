@@ -35,7 +35,8 @@ concurrency:
 env:
   BACKEND_IMAGE:  brandoniscoding/backend-lescracks
   FRONTEND_IMAGE: brandoniscoding/frontend-lescracks
-  DEPLOY_PATH:    /root/lescracks
+  # A secret rather than a value in this public file: GitHub masks it in the public run logs.
+  DEPLOY_PATH:    ${{ secrets.DEPLOY_PATH }}
   VERSION:        ${{ inputs.version }}
 
 jobs:
@@ -127,6 +128,13 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.version }}
+
+      - name: Deployment directory is configured
+        run: |
+          [[ "$DEPLOY_PATH" == /* ]] || {
+            echo "::error::Secret DEPLOY_PATH is missing or not an absolute path."
+            exit 1
+          }
 
       - name: Compose file is version-aware
         run: |

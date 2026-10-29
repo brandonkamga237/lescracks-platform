@@ -19,7 +19,7 @@ public interface AccountStatistics {
     /** Accounts of any kind active since then. */
     long seenSince(Instant since);
 
-    /** New members per day, in order. */
+    /** New members per UTC day, in order; days without one are absent. */
     Map<LocalDate, Long> memberGrowth(Instant from, Instant to);
 
     /** New members since then per channel they came through; "Inconnue" for those who signed up before it was recorded. */

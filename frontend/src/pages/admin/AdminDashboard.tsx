@@ -20,9 +20,32 @@ type MetricKey = 'visitors' | 'registrations' | 'newsletter';
 
 const METRICS: { key: MetricKey; label: string }[] = [
   { key: 'visitors', label: 'Visiteurs' },
-  { key: 'registrations', label: 'Inscriptions' },
-  { key: 'newsletter', label: 'Abonnés' },
+  { key: 'registrations', label: 'Nouvelles inscriptions' },
+  { key: 'newsletter', label: 'Nouveaux abonnés' },
 ];
+
+/**
+ * The last `days` days and the `days` before them, by date. The series has one point per day,
+ * so a period is a date range, never a number of points.
+ */
+function splitByDate<T extends { date: string }>(points: T[], days: number) {
+  const start = daysAgo(days);
+  const previousStart = daysAgo(days * 2);
+  return {
+    current: points.filter((p) => p.date > start),
+    previous: points.filter((p) => p.date > previousStart && p.date <= start),
+  };
+}
+
+/** How much a total grew over the period: what it gained, against what it was at the start. */
+function growthPct(total: number, gained: number) {
+  const atStart = total - gained;
+  return atStart > 0 ? Math.round((gained / atStart) * 100) : null;
+}
+
+const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`);
+
+const sum = <T,>(points: T[], value: (p: T) => number) => points.reduce((acc, p) => acc + value(p), 0);
 
 export default function AdminDashboard() {
   const { name } = useSession();
@@ -43,37 +66,23 @@ export default function AdminDashboard() {
 
   const stats = overview.data;
 
-  const split = useMemo(() => {
-    const points = growth.data?.points ?? [];
-    const half = points.length - Math.min(days, points.length);
-    const current = points.slice(Math.max(0, half));
-    const previous = points.slice(0, Math.max(0, half)).slice(-days);
-    return { current, previous };
-  }, [growth.data, days]);
+  const split = useMemo(() => splitByDate(growth.data?.points ?? [], days), [growth.data, days]);
+  const splitNewsletter = useMemo(() => splitByDate(letter.data?.points ?? [], days), [letter.data, days]);
 
-  const splitNewsletter = useMemo(() => {
-    const points = letter.data?.points ?? [];
-    const half = points.length - Math.min(days, points.length);
-    const current = points.slice(Math.max(0, half));
-    const previous = points.slice(0, Math.max(0, half)).slice(-days);
-    return { current, previous };
-  }, [letter.data, days]);
+  const newMembers = sum(split.current, (p) => p.count);
+  const joined = sum(splitNewsletter.current, (p) => p.joined);
+  const left = sum(splitNewsletter.current, (p) => p.left);
 
-  const sum = (points: { count: number }[]) => points.reduce((acc, p) => acc + p.count, 0);
+  const chartData: Record<string, number | string>[] =
+    metric === 'visitors' ? (audience.data?.series ?? []).map((p) => ({ date: p.date, value: p.visits }))
+      : metric === 'registrations' ? split.current.map((p) => ({ date: p.date, value: p.count }))
+        : splitNewsletter.current.map((p) => ({ date: p.date, value: p.joined }));
 
-  const chartData = useMemo((): Record<string, number | string>[] => {
-    if (metric === 'visitors') {
-      return (audience.data?.series ?? []).map((p) => ({ date: p.date, value: p.visits }));
-    }
-    const pts = metric === 'registrations' ? split.current : splitNewsletter.current;
-    return pts.map((p) => ({ date: p.date, value: p.count }));
-  }, [metric, audience.data, split, splitNewsletter]);
-
-  const trendDelta = useMemo(() => {
-    if (metric === 'visitors') return deltaPct(audience.data?.visits, audience.data?.previousVisits);
-    const { current, previous } = metric === 'registrations' ? split : splitNewsletter;
-    return deltaPct(sum(current), sum(previous));
-  }, [metric, audience.data, split, splitNewsletter]);
+  // The pace of arrivals against the same number of days just before, not the growth of a total.
+  const trendDelta =
+    metric === 'visitors' ? deltaPct(audience.data?.visits, audience.data?.previousVisits)
+      : metric === 'registrations' ? deltaPct(sum(split.current, (p) => p.count), sum(split.previous, (p) => p.count))
+        : deltaPct(sum(splitNewsletter.current, (p) => p.joined), sum(splitNewsletter.previous, (p) => p.joined));
 
   const signals = watch.data?.signals ?? [];
   const today = new Date();
@@ -102,8 +111,8 @@ export default function AdminDashboard() {
             <Kpi
               label="Membres inscrits"
               value={stats.users.toLocaleString('fr-FR')}
-              delta={deltaPct(sum(split.current), sum(split.previous))}
-              hint={`${stats.usersActiveLast30d.toLocaleString('fr-FR')} actifs sur 30 jours`}
+              delta={growthPct(stats.users, newMembers)}
+              hint={`${signed(newMembers)} sur ${days} jours · ${stats.usersActiveLast30d.toLocaleString('fr-FR')} actifs sur 30 jours`}
               spark={split.current.map((p) => ({ date: p.date, value: p.count }))}
             />
           )}
@@ -113,9 +122,9 @@ export default function AdminDashboard() {
             <Kpi
               label="Abonnés à la lettre"
               value={stats.newsletterSubscribers.toLocaleString('fr-FR')}
-              delta={deltaPct(sum(splitNewsletter.current), sum(splitNewsletter.previous))}
-              hint={`${stats.newsletterNewLast30d.toLocaleString('fr-FR')} nouveaux sur 30 jours`}
-              spark={splitNewsletter.current.map((p) => ({ date: p.date, value: p.count }))}
+              delta={growthPct(stats.newsletterSubscribers, joined - left)}
+              hint={`${signed(joined)} arrivés · −${left} partis sur ${days} jours`}
+              spark={splitNewsletter.current.map((p) => ({ date: p.date, value: p.joined - p.left }))}
             />
           )}
         </AdminState>
@@ -125,7 +134,7 @@ export default function AdminDashboard() {
       <Panel
         className="mt-6"
         title="Comment ça évolue"
-        subtitle="Lecture sur la période choisie, comparée à la précédente."
+        subtitle="Par jour sur la période choisie ; le pourcentage compare au même nombre de jours juste avant."
         action={
           <Segmented label="Indicateur">
             {METRICS.map((m) => (

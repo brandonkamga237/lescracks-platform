@@ -79,8 +79,8 @@ class JdbcAccountStatistics implements AccountStatistics {
     @Override
     public Map<LocalDate, Long> memberGrowth(Instant from, Instant to) {
         Map<LocalDate, Long> days = new LinkedHashMap<>();
-        jdbc.sql("SELECT cast(created_at AS date) AS d, count(*) AS n FROM accounts "
-                        + "WHERE created_at >= :from AND created_at <= :to GROUP BY d ORDER BY d")
+        jdbc.sql("SELECT cast(created_at AT TIME ZONE 'UTC' AS date) AS d, count(*) AS n FROM accounts "
+                        + "WHERE created_at >= :from AND created_at < :to GROUP BY d ORDER BY d")
                 .param("from", at(from)).param("to", at(to))
                 .query(row -> { days.put(row.getObject("d", LocalDate.class), row.getLong("n")); });
         return days;

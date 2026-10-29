@@ -17,6 +17,7 @@ import com.brandonkamga.lescracks.stats.api.dto.NamedCount;
 import com.brandonkamga.lescracks.stats.api.dto.SeriesPoint;
 import com.brandonkamga.lescracks.stats.api.dto.SignupFunnel;
 import com.brandonkamga.lescracks.stats.api.dto.StatsOverviewResponse;
+import com.brandonkamga.lescracks.stats.api.dto.SubscriberFlowPoint;
 import com.brandonkamga.lescracks.stats.api.dto.TopResourceResponse;
 import com.brandonkamga.lescracks.stats.api.dto.UserGrowthPoint;
 import com.brandonkamga.lescracks.stats.api.dto.ViewedEvent;
@@ -149,18 +150,30 @@ public class StatsServiceImpl implements StatsService {
         return new SignupFunnel(cohort.signedUp(), cohort.verified(), members.countOnboarded(cohort.accountIds()), cohort.returned());
     }
 
+    // Every day of the range, quiet days included: the dashboard compares periods by date, and a
+    // series with only the active days made the last 30 points span far more than 30 days.
     @Override
     public List<UserGrowthPoint> userGrowth(Instant from, Instant to) {
-        return accounts.memberGrowth(from, to).entrySet().stream()
-                .map(day -> new UserGrowthPoint(day.getKey(), day.getValue()))
-                .toList();
+        Map<LocalDate, Long> joined = accounts.memberGrowth(from, to);
+        return daysOf(from, to).stream().map(day -> new UserGrowthPoint(day, joined.getOrDefault(day, 0L))).toList();
     }
 
     @Override
-    public List<UserGrowthPoint> newsletterGrowth(Instant from, Instant to) {
-        return newsletter.growth(from, to).entrySet().stream()
-                .map(day -> new UserGrowthPoint(day.getKey(), day.getValue()))
+    public List<SubscriberFlowPoint> newsletterGrowth(Instant from, Instant to) {
+        Map<LocalDate, Long> joined = newsletter.growth(from, to);
+        Map<LocalDate, Long> left = newsletter.unsubscriptions(from, to);
+        return daysOf(from, to).stream()
+                .map(day -> new SubscriberFlowPoint(day, joined.getOrDefault(day, 0L), left.getOrDefault(day, 0L)))
                 .toList();
+    }
+
+    /** The UTC days from {@code from} until {@code to}, which is exclusive when it falls on midnight. */
+    private static List<LocalDate> daysOf(Instant from, Instant to) {
+        LocalDate first = LocalDate.ofInstant(from, ZoneOffset.UTC);
+        LocalDate end = LocalDate.ofInstant(to.minusNanos(1), ZoneOffset.UTC);
+        List<LocalDate> days = new ArrayList<>();
+        for (LocalDate day = first; !day.isAfter(end); day = day.plusDays(1)) days.add(day);
+        return days;
     }
 
     @Override

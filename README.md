@@ -1,83 +1,59 @@
-# LesCracks Platform
+# LesCracks
 
-Tech learning platform: a blog, events and hackathons (registrations, team projects),
-the LesCracks Talk, member profiles with badges and certificates, and a newsletter.
+[![Release](https://img.shields.io/github/v/release/brandonkamga237/lescracks-platform)](https://github.com/brandonkamga237/lescracks-platform/releases)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Flescracks.com)](https://lescracks.com)
+[![Last commit](https://img.shields.io/github/last-commit/brandonkamga237/lescracks-platform/develop)](https://github.com/brandonkamga237/lescracks-platform/commits/develop)
+![Java 21](https://img.shields.io/badge/Java-21-007396?logo=openjdk&logoColor=white)
+![Spring Boot 3](https://img.shields.io/badge/Spring%20Boot-3-6DB33F?logo=springboot&logoColor=white)
+![React 18](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
 
-Monorepo: a Spring Boot API (`backend/`) and a React SPA (`frontend/`), shipped as
-separate containers behind Traefik.
+The platform behind [lescracks.com](https://lescracks.com): a tech blog, events and
+hackathons, the LesCracks Talk, member profiles with badges and certificates, and a
+newsletter.
 
-| Part | Stack | Notes |
-|---|---|---|
-| [backend/](backend/README.md) | Spring Boot, Java 21, PostgreSQL (plain SQL, Flyway), MinIO, server sessions + Keycloak tokens | REST API under `/api` |
-| [frontend/](frontend/README.md) | React, Vite, TypeScript, Tailwind, Radix | SPA served by Nginx |
+| | |
+| --- | --- |
+| [`backend/`](backend/README.md) | REST API — Spring Boot 3, Java 21, PostgreSQL, MinIO |
+| [`frontend/`](frontend/README.md) | Web app — React, TypeScript, Vite, Tailwind |
 
-## Quick start
+## Run it locally
 
-Requirements: Docker, JDK 21, Node 22 and pnpm.
+Requirements: Git, Docker, JDK 21, Node 22 and pnpm. No configuration file is needed.
 
-```bash
-# 1. Dependencies (PostgreSQL + MinIO) — no .env needed
-docker compose up -d
+1. Clone the repository and start the services it depends on:
 
-# 2. API — http://localhost:8080
-cd backend && ./mvnw spring-boot:run
+   ```bash
+   git clone https://github.com/brandonkamga237/lescracks-platform.git
+   cd lescracks-platform
+   docker compose up -d
+   ```
 
-# 3. SPA — http://localhost:5173
-cd frontend && pnpm install && pnpm dev
-```
+2. Start the API, from the repository root:
 
-Vite proxies `/api`, `/oauth2` and `/login/oauth2` to `localhost:8080`, so the
-frontend needs no configuration in development.
+   ```bash
+   cd backend
+   ./mvnw spring-boot:run
+   ```
 
-Everything in containers instead:
+3. In a second terminal, start the web app, from the repository root:
 
-```bash
-docker compose --profile app up -d --build
-```
+   ```bash
+   cd frontend
+   pnpm install
+   pnpm dev
+   ```
 
-If ports 5432 / 9000 / 9001 are already taken on your machine:
+4. Open http://localhost:5173. On the first start the API creates the blog themes, a sample
+   article and a sample event.
 
-```bash
-DB_PORT=5433 MINIO_PORT=9002 MINIO_CONSOLE_PORT=9003 docker compose up -d
-```
+To stop the services: `docker compose down` (add `-v` to also erase the local data).
 
-## Docker files
+## Contributing
 
-| File | Purpose |
-|---|---|
-| `docker-compose.yml` | Local development (profile `app` adds the backend) |
-| `docker-compose.prod.yml` | Production, deployed to the VPS by CI |
-
-One compose file per environment, at the root. Do not recreate one under `backend/`
-or `frontend/`, and do not rename `docker-compose.prod.yml`: CI refers to it by name.
-
-## Branches and deployment
-
-```
-feature/* | fix/* | docs/*  →  develop  →  (PR)  →  main  →  release PR  →  vX.Y.Z  →  deploy
-hotfix/*                    →  main
-```
-
-Nothing deploys on a plain push. Merging into `main` lets release-please open a release
-PR; merging that PR tags `vX.Y.Z`, builds the images, pushes them to Docker Hub and
-deploys that version over SSH (`.github/workflows/release.yml`, `deploy.yml`). A rollback
-is a manual run of `deploy.yml` with an earlier tag.
-
-Production variables are described in `.env.example`; the real `.env` lives on the
-server (`/root/lescracks/.env`) and is never committed.
-
-## Conventions
-
-All code is in English — identifiers, files, comments, commit messages. French is
-reserved for what users read: the interface, page content, API error messages and
-email bodies.
-
-The rules that apply everywhere (layout, commands, git workflow) are in
-[CLAUDE.md](CLAUDE.md); backend, frontend and infrastructure conventions are in
-`.claude/rules/`. The workflows where a wrong move is expensive — schema migration, new
-endpoint, SEO snapshot — are documented under `.claude/skills/`, and `.claude/agents/`
-holds two reviewers: one for backend architecture, one for production after a release.
+Branches, commit format and review rules are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
-Built by **Brandon Kamga**
+© 2026 Brandon Kamga. All rights reserved.
