@@ -9,6 +9,8 @@ import com.brandonkamga.lescracks.event.application.EventStatistics;
 import com.brandonkamga.lescracks.member.application.MemberStatistics;
 import com.brandonkamga.lescracks.newsletter.application.NewsletterStatistics;
 import com.brandonkamga.lescracks.stats.api.dto.NamedCount;
+import com.brandonkamga.lescracks.stats.api.dto.SubscriberFlowPoint;
+import com.brandonkamga.lescracks.stats.api.dto.UserGrowthPoint;
 import com.brandonkamga.lescracks.stats.infra.UmamiClient;
 import com.brandonkamga.lescracks.taxonomy.application.TaxonomyService;
 import com.brandonkamga.lescracks.taxonomy.domain.model.Category;
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +41,7 @@ class StatsServiceImplTest {
     private final TaxonomyService taxonomy = mock(TaxonomyService.class);
     private final EngagementCounts engagement = mock(EngagementCounts.class);
     private final EventStatistics events = mock(EventStatistics.class);
+    private final NewsletterStatistics newsletter = mock(NewsletterStatistics.class);
     private final StatsServiceImpl stats = withUmami(mock(UmamiClient.class));
 
     @Test
@@ -65,7 +69,7 @@ class StatsServiceImplTest {
 
     private StatsServiceImpl withUmami(UmamiClient umami) {
         return new StatsServiceImpl(accounts, members, engagement, events,
-                mock(ContentStatistics.class), mock(NewsletterStatistics.class), umami, taxonomy);
+                mock(ContentStatistics.class), newsletter, umami, taxonomy);
     }
 
     @Test
@@ -104,5 +108,43 @@ class StatsServiceImplTest {
             assertThat(event.registrations()).isEqualTo(30);
             assertThat(event.projects()).isEqualTo(9);
         });
+    }
+
+    @Test
+    @DisplayName("growth has one point per day of the range, quiet days at zero, so periods compare by date")
+    void growthCoversEveryDay() {
+        Instant from = Instant.parse("2026-10-01T00:00:00Z");
+        Instant to = Instant.parse("2026-10-05T00:00:00Z");
+        when(accounts.memberGrowth(from, to)).thenReturn(Map.of(LocalDate.parse("2026-10-02"), 3L, LocalDate.parse("2026-10-04"), 1L));
+
+        assertThat(stats.userGrowth(from, to)).containsExactly(
+                new UserGrowthPoint(LocalDate.parse("2026-10-01"), 0),
+                new UserGrowthPoint(LocalDate.parse("2026-10-02"), 3),
+                new UserGrowthPoint(LocalDate.parse("2026-10-03"), 0),
+                new UserGrowthPoint(LocalDate.parse("2026-10-04"), 1));
+    }
+
+    @Test
+    @DisplayName("a range ending now still includes today")
+    void growthIncludesToday() {
+        Instant from = Instant.parse("2026-10-01T00:00:00Z");
+        Instant now = Instant.parse("2026-10-02T15:30:00Z");
+        when(accounts.memberGrowth(from, now)).thenReturn(Map.of(LocalDate.parse("2026-10-02"), 2L));
+
+        assertThat(stats.userGrowth(from, now)).extracting(UserGrowthPoint::date)
+                .containsExactly(LocalDate.parse("2026-10-01"), LocalDate.parse("2026-10-02"));
+    }
+
+    @Test
+    @DisplayName("the newsletter flow reports who joined and who left each day, so its net change can go down")
+    void newsletterFlow() {
+        Instant from = Instant.parse("2026-10-01T00:00:00Z");
+        Instant to = Instant.parse("2026-10-03T00:00:00Z");
+        when(newsletter.growth(from, to)).thenReturn(Map.of(LocalDate.parse("2026-10-01"), 4L));
+        when(newsletter.unsubscriptions(from, to)).thenReturn(Map.of(LocalDate.parse("2026-10-02"), 6L));
+
+        assertThat(stats.newsletterGrowth(from, to)).containsExactly(
+                new SubscriberFlowPoint(LocalDate.parse("2026-10-01"), 4, 0),
+                new SubscriberFlowPoint(LocalDate.parse("2026-10-02"), 0, 6));
     }
 }

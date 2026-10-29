@@ -48,8 +48,18 @@ class JdbcNewsletterStatistics implements NewsletterStatistics {
     @Override
     public Map<LocalDate, Long> growth(Instant from, Instant to) {
         Map<LocalDate, Long> days = new LinkedHashMap<>();
-        jdbc.sql("SELECT cast(subscribed_at AS date) AS d, count(*) AS n FROM newsletter_subscribers "
-                        + "WHERE status = 'SUBSCRIBED' AND subscribed_at >= :from AND subscribed_at <= :to GROUP BY d ORDER BY d")
+        jdbc.sql("SELECT cast(subscribed_at AT TIME ZONE 'UTC' AS date) AS d, count(*) AS n FROM newsletter_subscribers "
+                        + "WHERE status IN ('SUBSCRIBED', 'UNSUBSCRIBED') AND subscribed_at >= :from AND subscribed_at < :to GROUP BY d ORDER BY d")
+                .param("from", at(from)).param("to", at(to))
+                .query(row -> { days.put(row.getObject("d", LocalDate.class), row.getLong("n")); });
+        return days;
+    }
+
+    @Override
+    public Map<LocalDate, Long> unsubscriptions(Instant from, Instant to) {
+        Map<LocalDate, Long> days = new LinkedHashMap<>();
+        jdbc.sql("SELECT cast(unsubscribed_at AT TIME ZONE 'UTC' AS date) AS d, count(*) AS n FROM newsletter_subscribers "
+                        + "WHERE status = 'UNSUBSCRIBED' AND unsubscribed_at >= :from AND unsubscribed_at < :to GROUP BY d ORDER BY d")
                 .param("from", at(from)).param("to", at(to))
                 .query(row -> { days.put(row.getObject("d", LocalDate.class), row.getLong("n")); });
         return days;
