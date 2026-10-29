@@ -77,6 +77,21 @@ class JdbcSubscriberStoreIT extends PostgresIT {
     }
 
     @Test
+    @DisplayName("an unsubscription is counted on its day, and leaves the daily growth of subscriptions")
+    void unsubscriptionsPerDay() {
+        Subscriber leaving = Subscriber.of("leaving@example.com", null, null);
+        leaving.subscribe();
+        leaving = subscribers.save(leaving);
+        leaving.unsubscribe();
+        subscribers.save(leaving);
+        Instant from = Instant.now().minus(1, ChronoUnit.DAYS);
+        Instant to = Instant.now().plus(1, ChronoUnit.MINUTES);
+
+        assertThat(statistics.unsubscriptions(from, to).values().stream().mapToLong(Long::longValue).sum()).isGreaterThanOrEqualTo(1);
+        assertThat(statistics.unsubscriptions(to, to.plus(1, ChronoUnit.DAYS))).isEmpty();
+    }
+
+    @Test
     @DisplayName("campaigns are recorded and listed newest first")
     void campaigns() {
         campaigns.save(Campaign.builder().subject("Avant").message("{}").recipientCount(3).sentAt(Instant.now().minus(1, ChronoUnit.DAYS)).build());

@@ -294,6 +294,13 @@ export interface UserGrowthPoint {
   count: number;
 }
 
+/** One day of the newsletter list: who joined and who left. */
+export interface SubscriberFlowPoint {
+  date: string;
+  joined: number;
+  left: number;
+}
+
 export interface TopResource {
   id: number;
   title: string;

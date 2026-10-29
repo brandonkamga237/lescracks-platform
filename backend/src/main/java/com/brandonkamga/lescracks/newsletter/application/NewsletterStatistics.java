@@ -18,6 +18,12 @@ public interface NewsletterStatistics {
     /** Subscribers with no account behind them. */
     long countWithoutAccount();
 
-    /** New subscriptions per day, in order. */
+    /**
+     * Confirmed subscriptions per UTC day, in order, counting those who left since: with
+     * {@link #unsubscriptions} it gives the net change of the list. Days without one are absent.
+     */
     Map<LocalDate, Long> growth(Instant from, Instant to);
+
+    /** Unsubscriptions per UTC day, in order; days without one are absent. */
+    Map<LocalDate, Long> unsubscriptions(Instant from, Instant to);
 }
