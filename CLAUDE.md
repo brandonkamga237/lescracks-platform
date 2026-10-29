@@ -53,7 +53,8 @@ Use `pnpm`, never `npm`. Before a commit, the checks of the area you touched mus
   `scripts/git/check-commit-msg.sh`
 - Never mention Claude, AI or a generation tool in a commit, PR title or PR body
 - PRs target `develop` and are squash-merged with `scripts/git/merge-to-develop.sh <pr>` once
-  CI is green. Only the maintainer merges into `main` (merge commit, then the release PR)
+  CI is green. Only the maintainer merges `develop` into `main` (merge commit); the release PR
+  then merges itself once its checks pass, which tags and deploys
 - Releases are cut by release-please from the commit types (`fix` patch, `feat` minor, `!`
   major). Never edit `CHANGELOG.md`, `version.txt` or `.release-please-manifest.json`
 - The step-by-step lives in the `git-workflow` skill; the full policy in `CONTRIBUTING.md`

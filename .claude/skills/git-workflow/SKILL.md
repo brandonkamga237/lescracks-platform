@@ -98,8 +98,9 @@ file list: the diff already provides one.
 
 - Into `develop`: `scripts/git/merge-to-develop.sh <pr>` once the checks are green. It refuses
   any base other than `develop`, then squash-merges and deletes the branch.
-- Into `main`: never. The user merges `develop` into `main` by hand (merge commit). Direct
-  `gh pr merge` and pushes to `main` / `develop` are denied in `.claude/settings.json`.
+- Into `main`: never. The user merges `develop` into `main` by hand (merge commit); the release
+  PR release-please opens then merges itself once its checks pass, and the version deploys.
+  Direct `gh pr merge` and pushes to `main` / `develop` are denied in `.claude/settings.json`.
 - Releases are cut by release-please from what reaches `main`: pick the commit type with the
   version bump in mind (`fix` → patch, `feat` → minor, `!` → major). Never edit
   `CHANGELOG.md`, `version.txt` or `.release-please-manifest.json`.
