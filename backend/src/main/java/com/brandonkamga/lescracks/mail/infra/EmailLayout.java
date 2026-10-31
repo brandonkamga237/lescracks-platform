@@ -142,8 +142,14 @@ public class EmailLayout {
         return "<p style=\"margin:0 0 20px 0;font-size:16px;line-height:1.65;color:#262626;\">" + text + "</p>";
     }
 
-    public String cover(String url, String alt) {
-        return "<img src=\"" + url + "\" alt=\"" + alt + "\" width=\"518\" style=\"display:block;width:100%;max-width:518px;height:auto;border:0;border-radius:4px;margin:0 0 24px 0;\" />";
+    /** A heading that opens {@code href}: the title of an announcement leads to its page. */
+    public String heading(String text, String href) {
+        return heading("<a href=\"" + href + "\" style=\"color:#0b0b0b;text-decoration:none;\">" + text + "</a>");
+    }
+
+    public String cover(String url, String alt, String href) {
+        return "<a href=\"" + href + "\" style=\"text-decoration:none;\"><img src=\"" + url + "\" alt=\"" + alt
+                + "\" width=\"550\" style=\"display:block;width:100%;max-width:550px;height:auto;border:0;border-radius:4px;margin:0 0 20px 0;\" /></a>";
     }
 
     public String button(String label, String url) {

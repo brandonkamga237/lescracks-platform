@@ -45,6 +45,17 @@ class EventAnnouncementTemplateTest {
     }
 
     @Test
+    @DisplayName("the cover and the title open the event page, not only the button")
+    void coverAndTitleOpenThePage() {
+        var rendered = template.render(new EventAnnouncement("awa@example.com", "Hackathon 001", DESCRIPTION,
+                "/evenements/hackathon-001", "/api/files/cover.jpg", null, null));
+
+        assertThat(rendered.html())
+                .containsPattern("<a href=\"https://lescracks.com/evenements/hackathon-001\"[^>]*><img src=\"https://lescracks.com/api/files/cover.jpg\"")
+                .containsPattern("<h1[^>]*><a href=\"https://lescracks.com/evenements/hackathon-001\"[^>]*>Hackathon 001</a></h1>");
+    }
+
+    @Test
     @DisplayName("a short description is kept whole")
     void keepsAShortDescription() {
         var rendered = template.render(new EventAnnouncement("awa@example.com", "Atelier Git", "Une heure pour *enfin* comprendre le rebase.",
