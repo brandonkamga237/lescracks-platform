@@ -7,6 +7,8 @@ import com.brandonkamga.lescracks.event.application.EventCatalogImpl;
 import com.brandonkamga.lescracks.event.application.EventDirectory;
 import com.brandonkamga.lescracks.event.application.EventSchedule;
 import com.brandonkamga.lescracks.event.application.EventViews;
+import com.brandonkamga.lescracks.event.application.RegistrantMessages;
+import com.brandonkamga.lescracks.event.application.RegistrantMessagesImpl;
 import com.brandonkamga.lescracks.event.application.RegistrationService;
 import com.brandonkamga.lescracks.event.application.RegistrationServiceImpl;
 import com.brandonkamga.lescracks.event.application.SubmissionService;
@@ -15,6 +17,7 @@ import com.brandonkamga.lescracks.event.domain.port.EventStore;
 import com.brandonkamga.lescracks.event.domain.port.RegistrationStore;
 import com.brandonkamga.lescracks.event.domain.port.SubmissionStore;
 import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
+import com.brandonkamga.lescracks.mail.domain.Mailer;
 import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.newsletter.application.Announcements;
 import com.brandonkamga.lescracks.shared.config.TransactionalServices;
@@ -58,6 +61,11 @@ public class EventServices {
     @Bean
     ScheduledPublishing eventSchedule(EventStore events, Announcements announcements) {
         return transactional.wrap(ScheduledPublishing.class, new EventSchedule(events, announcements));
+    }
+
+    @Bean
+    RegistrantMessages registrantMessages(EventStore events, RegistrationStore registrations, MemberDirectory people, Mailer mail) {
+        return transactional.wrap(RegistrantMessages.class, new RegistrantMessagesImpl(events, registrations, people, mail));
     }
 
     @Bean
