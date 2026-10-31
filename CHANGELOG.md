@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.10.3...v1.11.0) (2026-10-31)
+
+
+### Features
+
+* **event:** write to everyone registered for an event from the back office ([#154](https://github.com/brandonkamga237/lescracks-platform/issues/154)) ([a2e7a20](https://github.com/brandonkamga237/lescracks-platform/commit/a2e7a206d26586d9e3a06b89ff4368b2579e21f0))
+
 ## [1.10.3](https://github.com/brandonkamga237/lescracks-platform/compare/v1.10.2...v1.10.3) (2026-10-29)
 
 
