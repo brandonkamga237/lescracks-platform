@@ -22,7 +22,7 @@ class ResourceAnnouncementTemplateTest {
         assertThat(rendered.html())
                 .contains("Pourquoi une requête passe de 2 s à 3 ms avec le bon index.")
                 .contains("…")
-                .doesNotContain("**")
+                .doesNotContain("**", "Ou ouvre ce lien")
                 .contains("href=\"https://lescracks.com/ressources/index-postgresql\"");
     }
 }
