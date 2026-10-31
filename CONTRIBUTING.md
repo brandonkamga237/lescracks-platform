@@ -50,7 +50,12 @@ type(scope): description
 - **body** (optional): the why and any consequence (a migration to apply, a variable to set).
   Not a file list: the diff already is one.
 
-One commit is one logical change that compiles and passes its checks. Commit as you go.
+Commits are **atomic and many**: one commit per smallest change that stands on its own and
+leaves the build green, made as you go. A migration, a store method, a service rule, a DTO, a
+route, a test, an email template, a component, a label or a doc section is each its own commit
+when it can be. Refactoring, behaviour and formatting never share a commit, nor do backend,
+frontend and docs. Since pull requests are rebase-merged, this granularity is the history of
+`develop` and `main`.
 
 ### Never in a commit or a pull request
 
