@@ -4,10 +4,13 @@ import com.brandonkamga.lescracks.event.api.dto.AdminRegistrationResponse;
 import com.brandonkamga.lescracks.event.api.dto.AdminSubmissionResponse;
 import com.brandonkamga.lescracks.event.api.dto.AttendanceRequest;
 import com.brandonkamga.lescracks.event.api.dto.MyEventResponse;
+import com.brandonkamga.lescracks.event.api.dto.RegistrantMessageRequest;
+import com.brandonkamga.lescracks.event.api.dto.RegistrantMessageResponse;
 import com.brandonkamga.lescracks.event.api.dto.RegistrationResponse;
 import com.brandonkamga.lescracks.event.api.dto.ReviewRequest;
 import com.brandonkamga.lescracks.event.api.dto.SubmissionRequest;
 import com.brandonkamga.lescracks.event.api.dto.SubmissionResponse;
+import com.brandonkamga.lescracks.event.application.RegistrantMessages;
 import com.brandonkamga.lescracks.event.application.RegistrationService;
 import com.brandonkamga.lescracks.event.application.SubmissionService;
 
@@ -29,10 +32,13 @@ import java.util.List;
 public class EventParticipationController {
     private final RegistrationService registrations;
     private final SubmissionService submissions;
+    private final RegistrantMessages messages;
 
-    public EventParticipationController(RegistrationService registrations, SubmissionService submissions) {
+    public EventParticipationController(RegistrationService registrations, SubmissionService submissions,
+                                        RegistrantMessages messages) {
         this.registrations = registrations;
         this.submissions = submissions;
+        this.messages = messages;
     }
 
     @GetMapping("/{id}/registration")
@@ -73,6 +79,12 @@ public class EventParticipationController {
     @PreAuthorize("hasRole('ADMIN')")
     public List<AdminRegistrationResponse> registrations(@PathVariable Long id) {
         return registrations.listForEvent(id).stream().map(AdminRegistrationResponse::of).toList();
+    }
+
+    @PostMapping("/admin/{id}/registrants/messages")
+    @PreAuthorize("hasRole('ADMIN')")
+    public RegistrantMessageResponse writeToRegistrants(@PathVariable Long id, @Valid @RequestBody RegistrantMessageRequest request) {
+        return new RegistrantMessageResponse(messages.write(id, request.message()));
     }
 
     @PatchMapping("/admin/registrations/{registrationId}")

@@ -239,6 +239,12 @@ final class InMemoryEvents {
             return member;
         }
 
+        Member addSuspended(Long id, String email, String firstName) {
+            Member member = Member.builder().id(id).email(email).firstName(firstName).lastName("L").active(false).build();
+            byId.put(id, member);
+            return member;
+        }
+
         @Override
         public Optional<Member> find(String email) {
             return byId.values().stream().filter(member -> member.getEmail().equalsIgnoreCase(email)).findFirst();

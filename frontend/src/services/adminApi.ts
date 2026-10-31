@@ -177,6 +177,8 @@ export const adminApi = {
   audience: (days = 30, signal?: AbortSignal) =>
     http.get<AudienceStats>('/admin/stats/audience', { days }, signal),
   eventRegistrations: (id: number, signal?: AbortSignal) => http.get<AdminRegistration[]>(`/events/admin/${id}/registrations`, undefined, signal),
+  writeToRegistrants: (id: number, message: string) =>
+    http.post<{ sent: number }>(`/events/admin/${id}/registrants/messages`, { message }),
   markAttendance: (registrationId: number, status: 'ATTENDED' | 'ABSENT' | 'REGISTERED') =>
     http.patch<unknown>(`/events/admin/registrations/${registrationId}`, { status }),
   eventProjects: (id: number, signal?: AbortSignal) => http.get<AdminProject[]>(`/events/admin/${id}/submissions`, undefined, signal),
