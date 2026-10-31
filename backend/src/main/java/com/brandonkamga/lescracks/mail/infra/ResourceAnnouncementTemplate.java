@@ -23,7 +23,7 @@ public class ResourceAnnouncementTemplate implements EmailTemplate<ResourceAnnou
         String url = layout.url(email.path());
         String body = layout.heading(title)
                         + layout.cover(layout.absoluteImage(email.coverImage()), title)
-                        + layout.paragraph(layout.escapeHtml(email.description()))
+                        + layout.paragraph(layout.summary(email.description()))
                         + layout.button("Découvrir la ressource", url) + layout.fallbackLink("Ou ouvre ce lien :", url);
         return layout.newsletter("Nouvelle ressource LesCracks : " + email.title(), email.title(), body, email.unsubscribeToken());
     }
