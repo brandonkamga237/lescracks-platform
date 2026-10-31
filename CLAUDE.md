@@ -48,8 +48,11 @@ Use `pnpm`, never `npm`. Before a commit, the checks of the area you touched mus
 - Never edit on `main` or `develop`: branch first, off `develop`, without tracking it:
   `git switch -c feature/x --no-track origin/develop` (`fix/`, `docs/`, `chore/` likewise;
   `hotfix/` branches off `main`)
-- Commit as you go, one logical change per commit, header `type(scope): description` (≤ 100
-  characters; types `feat fix perf refactor docs test build ci chore style revert`), checked by
+- Commit as you go, in many small atomic commits: one per smallest change that stands alone and
+  keeps the build green (a migration, a store method, a DTO, a route, a test, a component, a doc
+  section). Never mix backend, frontend and docs, or refactoring and behaviour, in one commit
+- Header `type(scope): description` (≤ 100 characters; types
+  `feat fix perf refactor docs test build ci chore style revert`), checked by
   `scripts/git/check-commit-msg.sh`
 - Never mention Claude, AI or a generation tool in a commit, PR title or PR body
 - PRs target `develop` and are squash-merged with `scripts/git/merge-to-develop.sh <pr>` once
