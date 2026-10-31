@@ -4,7 +4,6 @@ import com.brandonkamga.lescracks.mail.domain.EventUpdateEmail;
 
 import org.springframework.stereotype.Component;
 
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Locale;
@@ -13,8 +12,6 @@ import java.util.stream.Collectors;
 @Component
 public class EventUpdateEmailTemplate implements EmailTemplate<EventUpdateEmail> {
     private static final DateTimeFormatter DEADLINE = DateTimeFormatter.ofPattern("EEEE d MMMM 'à' HH'h'mm", Locale.FRANCE);
-    // Deadlines are announced in the community's time, GMT+1 all year round.
-    private static final ZoneId COMMUNITY_TIME = ZoneId.of("Africa/Douala");
 
     private final EmailLayout layout;
 
@@ -35,7 +32,7 @@ public class EventUpdateEmailTemplate implements EmailTemplate<EventUpdateEmail>
         String greeting = name.isEmpty() ? "Bonjour," : "Bonjour " + layout.escapeHtml(name) + ",";
         String deadline = email.submissionsCloseAt() == null ? ""
                 : layout.paragraph("<strong style=\"color:#0b0b0b;\">Clôture : "
-                + layout.escapeHtml(DEADLINE.format(email.submissionsCloseAt().atZone(COMMUNITY_TIME))) + " (GMT+1)</strong>");
+                + layout.escapeHtml(DEADLINE.format(email.submissionsCloseAt().atZone(EmailLayout.COMMUNITY_TIME))) + " (GMT+1)</strong>");
         String body = layout.heading(title)
                 + layout.paragraph(greeting)
                 + paragraphs(email.message())
