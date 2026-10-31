@@ -1,5 +1,7 @@
 package com.brandonkamga.lescracks.mail.infra;
 
+import com.brandonkamga.lescracks.shared.util.PlainText;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,8 @@ public class EmailLayout {
 
     /** Footer of every email sent to newsletter subscribers. */
     public static final String NEWSLETTER_NOTE = "Tu reçois cet email parce que tu es abonné à la newsletter LesCracks.";
+
+    private static final int SUMMARY_LENGTH = 220;
 
     private final String siteUrl;
 
@@ -124,6 +128,14 @@ public class EmailLayout {
 
     public String heading(String text) {
         return "<h1 style=\"margin:0 0 16px 0;font-size:24px;line-height:1.3;font-weight:700;color:#0b0b0b;\">" + text + "</h1>";
+    }
+
+    /**
+     * A few lines of plain words from a Markdown text, escaped. An announcement is a teaser: the
+     * whole description, with its sections and lists, belongs on the page the button opens.
+     */
+    public String summary(String markdown) {
+        return escapeHtml(PlainText.excerpt(markdown, SUMMARY_LENGTH));
     }
 
     public String paragraph(String text) {

@@ -31,7 +31,7 @@ public class EventAnnouncementTemplate implements EmailTemplate<EventAnnouncemen
                 + layout.escapeHtml(DATE.format(email.startsAt().atZone(ZoneId.of("Europe/Paris")))) + "</strong>");
         String body = layout.heading(title)
                         + layout.cover(layout.absoluteImage(email.coverImage()), title) + date
-                        + layout.paragraph(layout.escapeHtml(email.description()))
+                        + layout.paragraph(layout.summary(email.description()))
                         + layout.button("Voir l'événement", url) + layout.fallbackLink("Ou ouvre ce lien :", url);
         return layout.newsletter("Nouvel événement LesCracks : " + email.title(), email.title(), body, email.unsubscribeToken());
     }
