@@ -56,6 +56,15 @@ class EventAnnouncementTemplateTest {
     }
 
     @Test
+    @DisplayName("the start is written in the community's time, GMT+1, even in summer")
+    void writesTheStartInCommunityTime() {
+        var rendered = template.render(new EventAnnouncement("awa@example.com", "Atelier Git", "Le rebase.",
+                "/evenements/atelier-git", null, Instant.parse("2026-07-01T09:00:00Z"), null));
+
+        assertThat(rendered.html()).contains("mercredi 1 juillet à 10h00 (GMT+1)");
+    }
+
+    @Test
     @DisplayName("a short description is kept whole")
     void keepsAShortDescription() {
         var rendered = template.render(new EventAnnouncement("awa@example.com", "Atelier Git", "Une heure pour *enfin* comprendre le rebase.",

@@ -4,7 +4,6 @@ import com.brandonkamga.lescracks.mail.domain.EventAnnouncement;
 
 import org.springframework.stereotype.Component;
 
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -28,7 +27,7 @@ public class EventAnnouncementTemplate implements EmailTemplate<EventAnnouncemen
         String title = layout.escapeHtml(email.title());
         String url = layout.url(email.path());
         String date = email.startsAt() == null ? "" : layout.paragraph("<strong style=\"color:#0b0b0b;\">"
-                + layout.escapeHtml(DATE.format(email.startsAt().atZone(ZoneId.of("Europe/Paris")))) + "</strong>");
+                + layout.escapeHtml(DATE.format(email.startsAt().atZone(EmailLayout.COMMUNITY_TIME))) + " (GMT+1)</strong>");
         String body = layout.cover(layout.absoluteImage(email.coverImage()), title, url)
                         + layout.heading(title, url) + date
                         + layout.paragraph(layout.summary(email.description()))
