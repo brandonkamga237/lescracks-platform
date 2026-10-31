@@ -40,7 +40,7 @@ class EventAnnouncementTemplateTest {
                 .contains("La tech au service des femmes : comprendre, protéger, accompagner. Octobre Rose nous rappelle")
                 .contains("…")
                 .doesNotContain("##", "**", "Pourquoi ce hackathon", "Toutes les règles sont sur la page")
-                .contains("href=\"https://lescracks.com/evenements/hackathon-001\"");
+                .contains("href=\"https://lescracks.com/evenements/hackathon-001\"", "Lire la suite");
         assertThat(rendered.text()).doesNotContain("Calendrier").contains("https://lescracks.com/evenements/hackathon-001");
     }
 
