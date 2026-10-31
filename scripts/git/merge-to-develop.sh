@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Squash-merges a pull request into develop, and only into develop.
+# Rebase-merges a pull request into develop, and only into develop: every atomic commit of the
+# branch lands on develop as it is, so the history shows each change.
 # Merging into main stays a human decision: this script refuses any other base branch.
 #
 # Usage: scripts/git/merge-to-develop.sh <pr-number> [--dry-run]
@@ -44,9 +45,9 @@ case "$checks_status" in
 esac
 
 if [[ "$dry_run" == "--dry-run" ]]; then
-  echo "✓ PR #$pr ($head → develop) would be squash-merged as: $title (#$pr)"
+  echo "✓ PR #$pr ($head → develop) would be rebase-merged: $(gh pr view "$pr" --json commits -q '.commits | length') commit(s)"
   exit 0
 fi
 
-gh pr merge "$pr" --squash --delete-branch --subject "$title (#$pr)"
-echo "✓ PR #$pr squash-merged into develop: $title (#$pr)"
+gh pr merge "$pr" --rebase --delete-branch
+echo "✓ PR #$pr rebase-merged into develop: $title"
