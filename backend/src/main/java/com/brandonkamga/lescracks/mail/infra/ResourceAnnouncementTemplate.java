@@ -21,10 +21,10 @@ public class ResourceAnnouncementTemplate implements EmailTemplate<ResourceAnnou
     public RenderedEmail render(ResourceAnnouncement email) {
         String title = layout.escapeHtml(email.title());
         String url = layout.url(email.path());
-        String body = layout.heading(title)
-                        + layout.cover(layout.absoluteImage(email.coverImage()), title)
-                        + layout.paragraph(layout.escapeHtml(email.description()))
-                        + layout.button("Découvrir la ressource", url) + layout.fallbackLink("Ou ouvre ce lien :", url);
+        String body = layout.cover(layout.absoluteImage(email.coverImage()), title, url)
+                        + layout.heading(title, url)
+                        + layout.paragraph(layout.summary(email.description()))
+                        + layout.button("Lire la suite", url);
         return layout.newsletter("Nouvelle ressource LesCracks : " + email.title(), email.title(), body, email.unsubscribeToken());
     }
 }

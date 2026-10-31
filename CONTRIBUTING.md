@@ -50,7 +50,12 @@ type(scope): description
 - **body** (optional): the why and any consequence (a migration to apply, a variable to set).
   Not a file list: the diff already is one.
 
-One commit is one logical change that compiles and passes its checks. Commit as you go.
+Commits are **atomic and many**: one commit per smallest change that stands on its own and
+leaves the build green, made as you go. A migration, a store method, a service rule, a DTO, a
+route, a test, an email template, a component, a label or a doc section is each its own commit
+when it can be. Refactoring, behaviour and formatting never share a commit, nor do backend,
+frontend and docs. Since pull requests are rebase-merged, this granularity is the history of
+`develop` and `main`.
 
 ### Never in a commit or a pull request
 
@@ -64,9 +69,9 @@ editing a Flyway migration that is already applied.
 
 ## Pull requests
 
-- Into `develop`: **squash merge**. The PR title becomes the commit, so it follows the
-  commit format above (`feat(event): show the registration deadline`). CI checks the title, the
-  description and every commit of the PR.
+- Into `develop`: **rebase merge**. Every commit of the branch lands on `develop` as it is, so
+  each one must follow the commit format above and leave the build green on its own. CI checks
+  the title, the description and every commit of the PR.
 - From `develop` into `main`: **merge commit**, never squash. A squash would create a commit
   on `main` that `develop` does not have, and the two branches would drift apart at every
   release.
@@ -76,7 +81,7 @@ editing a Flyway migration that is already applied.
 
 - Into `develop`: anyone, including a coding agent, through `scripts/git/merge-to-develop.sh <pr>`.
   It refuses any other base branch, a draft, a title outside the commit format, a forbidden
-  mention, or checks that are not green; then it squash-merges and deletes the branch.
+  mention, or checks that are not green; then it rebase-merges and deletes the branch.
 - Into `main`: **only the maintainer**, by hand. A coding agent never merges into `main`: the
   shared agent settings deny `gh pr merge` and direct pushes to `main` and `develop`, so the
   script above is its only way to merge.

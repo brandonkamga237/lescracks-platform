@@ -27,24 +27,33 @@ CLAUDE.md), `chore/` (tooling), `hotfix/` (production emergency, branches off `m
 Short name, in English, kebab-case.
 
 PR target: `develop` — except `hotfix/`, which targets `main`. Into `develop` the PR is
-**squash-merged**: its title becomes the commit, so it follows the message format below.
+**rebase-merged**: each commit of the branch lands on `develop` as it is, so each one follows
+the message format below and keeps the build green.
 `develop` into `main` is a **merge commit**, never a squash (a squash commit on `main`
 does not exist on `develop`, and the branches drift apart).
 
 ## Commit progressively
 
-**Do not pile the whole task into one final commit.** As soon as a coherent chunk is
-finished and verified, commit it. A typical split for a backend plus frontend feature:
+**Many small atomic commits, never one big one.** Commit after each smallest step that stands on
+its own and keeps the build green; the maintainer wants the history to show every change, and
+rebase merges keep it on `develop` and `main`. A backend plus frontend feature becomes:
 
 ```
-feat(events): add waitlist columns          (Flyway migration + SQL adapter)
-feat(events): expose waitlist in API        (DTO + service + controller + SecurityConfig)
-feat(events): show waitlist state on detail (page + frontend service)
-test(events): cover waitlist service        (tests)
+feat(event): add the waitlist columns                   (Flyway migration)
+feat(event): store and read an event's waitlist         (JdbcEventStore + its IT)
+feat(event): put a member on the waitlist when full     (domain rule + its test)
+feat(event): expose the waitlist position in the API    (DTO + controller)
+feat(event): allow members to join a waitlist           (SecurityConfig route)
+feat(frontend): call the waitlist endpoints             (services/api.ts + types)
+feat(frontend): show the waitlist state on an event     (component)
+feat(frontend): let members join the waitlist           (button + page wiring)
+docs(event): note the waitlist in the event skill       (docs)
 ```
 
 Splitting rules:
-- One commit = **one logical change** that compiles and leaves the project healthy
+- One commit = **the smallest change** that compiles and leaves the project healthy; when in
+  doubt, split
+- Backend, frontend and docs never share a commit
 - Never mix in a single commit: a feature and a refactor, code and a large reformat,
   two unrelated subjects
 - A rename or file move gets its own commit
@@ -97,7 +106,7 @@ file list: the diff already provides one.
 ## Merging
 
 - Into `develop`: `scripts/git/merge-to-develop.sh <pr>` once the checks are green. It refuses
-  any base other than `develop`, then squash-merges and deletes the branch.
+  any base other than `develop`, then rebase-merges and deletes the branch.
 - Into `main`: never. The user merges `develop` into `main` by hand (merge commit); the release
   PR release-please opens then merges itself once its checks pass, and the version deploys.
   Direct `gh pr merge` and pushes to `main` / `develop` are denied in `.claude/settings.json`.

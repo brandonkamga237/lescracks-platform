@@ -1,8 +1,11 @@
 package com.brandonkamga.lescracks.mail.infra;
 
+import com.brandonkamga.lescracks.shared.util.PlainText;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,6 +17,11 @@ public class EmailLayout {
 
     /** Footer of every email sent to newsletter subscribers. */
     public static final String NEWSLETTER_NOTE = "Tu reçois cet email parce que tu es abonné à la newsletter LesCracks.";
+
+    /** Dates are written in the community's time, GMT+1 all year round. */
+    public static final ZoneId COMMUNITY_TIME = ZoneId.of("Africa/Douala");
+
+    private static final int SUMMARY_LENGTH = 220;
 
     private final String siteUrl;
 
@@ -89,20 +97,20 @@ public class EmailLayout {
                 <body style="margin:0;padding:0;background-color:#f4f4f2;">
                   <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f4f4f2;">
                     <tr>
-                      <td align="center" style="padding:32px 16px 40px 16px;">
+                      <td align="center" style="padding:24px 8px 32px 8px;">
                         <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;width:100%%;">
                           <tr>
-                            <td style="background-color:#0b0b0b;padding:20px 40px;border-radius:4px 4px 0 0;">
+                            <td style="background-color:#0b0b0b;padding:16px 24px;border-radius:4px 4px 0 0;">
                               <a href="%2$s" style="text-decoration:none;"><img src="%2$s/images/email-logo.png" width="74" height="30" alt="LesCracks" style="display:block;border:0;width:74px;height:30px;font-family:%3$s;font-size:18px;font-weight:700;color:#d4af37;" /></a>
                             </td>
                           </tr>
                           <tr>
-                            <td style="background-color:#ffffff;padding:40px;border:1px solid #e6e6e3;border-top:0;border-radius:0 0 4px 4px;font-family:%3$s;font-size:16px;line-height:1.65;color:#262626;">
+                            <td style="background-color:#ffffff;padding:28px 24px 8px 24px;border:1px solid #e6e6e3;border-top:0;border-radius:0 0 4px 4px;font-family:%3$s;font-size:16px;line-height:1.65;color:#262626;">
                               %4$s
                             </td>
                           </tr>
                           <tr>
-                            <td style="padding:24px 40px 0 40px;font-family:%3$s;font-size:12px;line-height:1.6;color:#6b6b6b;">
+                            <td style="padding:20px 24px 0 24px;font-family:%3$s;font-size:12px;line-height:1.6;color:#6b6b6b;">
                               <p style="margin:0 0 8px 0;">
                                 <a href="%2$s" style="color:#262626;font-weight:600;text-decoration:none;">LesCracks</a>
                                 <span style="color:#b5b5b5;">&nbsp;&middot;&nbsp;</span>
@@ -126,12 +134,26 @@ public class EmailLayout {
         return "<h1 style=\"margin:0 0 16px 0;font-size:24px;line-height:1.3;font-weight:700;color:#0b0b0b;\">" + text + "</h1>";
     }
 
+    /**
+     * A few lines of plain words from a Markdown text, escaped. An announcement is a teaser: the
+     * whole description, with its sections and lists, belongs on the page the button opens.
+     */
+    public String summary(String markdown) {
+        return escapeHtml(PlainText.excerpt(markdown, SUMMARY_LENGTH));
+    }
+
     public String paragraph(String text) {
         return "<p style=\"margin:0 0 20px 0;font-size:16px;line-height:1.65;color:#262626;\">" + text + "</p>";
     }
 
-    public String cover(String url, String alt) {
-        return "<img src=\"" + url + "\" alt=\"" + alt + "\" width=\"518\" style=\"display:block;width:100%;max-width:518px;height:auto;border:0;border-radius:4px;margin:0 0 24px 0;\" />";
+    /** A heading that opens {@code href}: the title of an announcement leads to its page. */
+    public String heading(String text, String href) {
+        return heading("<a href=\"" + href + "\" style=\"color:#0b0b0b;text-decoration:none;\">" + text + "</a>");
+    }
+
+    public String cover(String url, String alt, String href) {
+        return "<a href=\"" + href + "\" style=\"text-decoration:none;\"><img src=\"" + url + "\" alt=\"" + alt
+                + "\" width=\"550\" style=\"display:block;width:100%;max-width:550px;height:auto;border:0;border-radius:4px;margin:0 0 20px 0;\" /></a>";
     }
 
     public String button(String label, String url) {

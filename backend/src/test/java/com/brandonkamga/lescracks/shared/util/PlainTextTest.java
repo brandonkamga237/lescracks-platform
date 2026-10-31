@@ -29,4 +29,11 @@ class PlainTextTest {
         assertThat(PlainText.excerpt("Court", 20)).isEqualTo("Court");
         assertThat(PlainText.of(null)).isEmpty();
     }
+
+    @Test
+    @DisplayName("the ellipsis never follows a comma, a colon or a dash left by the cut")
+    void excerptDropsTrailingPunctuation() {
+        assertThat(PlainText.excerpt("Santé, protection, éducation et emploi", 20)).isEqualTo("Santé, protection…");
+        assertThat(PlainText.excerpt("Le défi : coder pour elles", 12)).isEqualTo("Le défi…");
+    }
 }

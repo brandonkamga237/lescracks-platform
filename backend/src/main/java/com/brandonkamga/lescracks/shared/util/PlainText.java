@@ -29,6 +29,6 @@ public final class PlainText {
         String text = of(markdown);
         if (text.length() <= max) return text;
         int cut = text.lastIndexOf(' ', max - 1);
-        return text.substring(0, cut > 0 ? cut : max - 1) + "…";
+        return text.substring(0, cut > 0 ? cut : max - 1).replaceAll("[\\s,;:–—-]+$", "") + "…";
     }
 }
