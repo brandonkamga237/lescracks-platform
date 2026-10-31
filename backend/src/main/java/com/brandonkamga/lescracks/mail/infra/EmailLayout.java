@@ -5,6 +5,7 @@ import com.brandonkamga.lescracks.shared.util.PlainText;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneId;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,6 +17,9 @@ public class EmailLayout {
 
     /** Footer of every email sent to newsletter subscribers. */
     public static final String NEWSLETTER_NOTE = "Tu reçois cet email parce que tu es abonné à la newsletter LesCracks.";
+
+    /** Dates are written in the community's time, GMT+1 all year round. */
+    public static final ZoneId COMMUNITY_TIME = ZoneId.of("Africa/Douala");
 
     private static final int SUMMARY_LENGTH = 220;
 
