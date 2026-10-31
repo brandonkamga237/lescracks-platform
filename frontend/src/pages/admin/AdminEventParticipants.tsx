@@ -4,6 +4,7 @@ import { ArrowLeft, Download, ExternalLink, Info, Loader2 } from 'lucide-react';
 
 import { AdminRow, AdminSection, AdminState } from '@/components/admin/AdminTable';
 import EventCertificates from '@/components/admin/EventCertificates';
+import WriteToRegistrants from '@/components/admin/WriteToRegistrants';
 import { SEGMENT, Segmented } from '@/components/admin/viz';
 import { useApi } from '@/hooks/useApi';
 import { adminApi } from '@/services/adminApi';
@@ -85,6 +86,7 @@ function Registrations({ eventId, title, hackathon }: RegistrationsProps) {
           <Download className="h-4 w-4" aria-hidden />CSV
         </button>
       </div>
+      <WriteToRegistrants eventId={eventId} activeCount={rows.filter((row) => row.status !== 'CANCELLED').length} />
       {failure && <p role="alert" className="mb-4 text-sm text-error-ink">{failure}</p>}
       <AdminState loading={list.loading} error={list.error} empty={!rows.length} emptyMessage="Personne n’est encore inscrit." onRetry={list.reload}>
         {rows.map((row) => (
