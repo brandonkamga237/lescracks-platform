@@ -32,7 +32,7 @@ public class EventAnnouncementTemplate implements EmailTemplate<EventAnnouncemen
         String body = layout.cover(layout.absoluteImage(email.coverImage()), title, url)
                         + layout.heading(title, url) + date
                         + layout.paragraph(layout.summary(email.description()))
-                        + layout.button("Voir l'événement", url);
+                        + layout.button("Lire la suite", url);
         return layout.newsletter("Nouvel événement LesCracks : " + email.title(), email.title(), body, email.unsubscribeToken());
     }
 }
