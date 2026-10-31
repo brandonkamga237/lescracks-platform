@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.11.1](https://github.com/brandonkamga237/lescracks-platform/compare/v1.11.0...v1.11.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* **mail:** drop the raw link under the button of an announcement ([8283442](https://github.com/brandonkamga237/lescracks-platform/commit/82834429ea43b3ab8d72ff4293712471c7c2cba4))
+* **mail:** label the announcement button as the way to the rest ([353fd69](https://github.com/brandonkamga237/lescracks-platform/commit/353fd69d6af3e531f78343dac51af513dea5fc85))
+* **mail:** open the page from the cover and title of an announcement ([3f80836](https://github.com/brandonkamga237/lescracks-platform/commit/3f808369bfd5deb39bc4341491291a3efef84886))
+* **mail:** sum up an article in its announcement ([44d25bf](https://github.com/brandonkamga237/lescracks-platform/commit/44d25bf8ec3ac7f7d5fa7c36ead0c9c137ed1c4c))
+* **mail:** sum up an event in its announcement instead of pasting its description ([e5bad01](https://github.com/brandonkamga237/lescracks-platform/commit/e5bad0155ba9b7e1f17265bb26fdc5e625264f42))
+* **mail:** widen the reading column of emails on phones ([ff5b127](https://github.com/brandonkamga237/lescracks-platform/commit/ff5b1272fef3f8b5d14545ac5215ea9d41cf1eaa))
+* **mail:** write the start of an announced event in GMT+1 ([dde5b72](https://github.com/brandonkamga237/lescracks-platform/commit/dde5b7255e0240a9dd7ffe38be47805fe611a0c1))
+* **shared:** drop the punctuation the cut leaves before an ellipsis ([600784f](https://github.com/brandonkamga237/lescracks-platform/commit/600784f6245f2301f6fe3fe98993285dfe11d2dd))
+
 ## [1.11.0](https://github.com/brandonkamga237/lescracks-platform/compare/v1.10.3...v1.11.0) (2026-10-31)
 
 
