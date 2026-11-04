@@ -139,14 +139,17 @@ a new change.
 - Dependabot opens update PRs against `develop` every Monday: GitHub Actions, Maven, pnpm
   and the Docker base images (majors of Node and Java excluded). They go through CI and
   are merged like any other PR.
-- The `Credentials check` workflow tests the Docker Hub token, `RELEASE_PLEASE_TOKEN` (and its
+- The `Credentials check` workflow tests the Docker Hub token, the automation token (and its
   expiry date, 30 days ahead) and SSH access to the VPS every Monday. A red run means a secret
-  to renew before the next release.
+  to renew before it is needed.
 
-The workflow needs the secret `RELEASE_PLEASE_TOKEN`: a fine-grained personal access token
-limited to this repository, with **Contents**, **Pull requests** and **Issues** set to
-read and write. `GITHUB_TOKEN` cannot be used: what it creates triggers no workflow, so the
-required `Commit messages` check would never run on the release PR.
+### Automation token
+
+The `Back-merge` workflow opens its pull request with the secret `AUTOMATION_TOKEN` (the older
+name `RELEASE_PLEASE_TOKEN` is still read): a fine-grained personal access token limited to
+this repository, with **Contents** and **Pull requests** set to read and write.
+`GITHUB_TOKEN` cannot be used: a pull request it opens triggers no workflow, so the required
+checks would never run on it.
 
 ## Checks before a PR
 
