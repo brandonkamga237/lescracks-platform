@@ -106,13 +106,15 @@ file list: the diff already provides one.
 ## Merging
 
 - Into `develop`: `scripts/git/merge-to-develop.sh <pr>` once the checks are green. It refuses
-  any base other than `develop`, then rebase-merges and deletes the branch.
-- Into `main`: never. The user merges `develop` into `main` by hand (merge commit); the release
-  PR release-please opens then merges itself once its checks pass, and the version deploys.
-  Direct `gh pr merge` and pushes to `main` / `develop` are denied in `.claude/settings.json`.
-- Releases are cut by release-please from what reaches `main`: pick the commit type with the
-  version bump in mind (`fix` → patch, `feat` → minor, `!` → major). Never edit
-  `CHANGELOG.md`, `version.txt` or `.release-please-manifest.json`.
+  any base other than `develop`, then rebase-merges and deletes the branch (or merges `main`
+  back with a merge commit after a hotfix: the `Back-merge` workflow opens that PR itself).
+- Into `main`: never. The user merges `develop` into `main` by hand (merge commit), and the
+  merge deploys. Direct `gh pr merge` and pushes to `main` / `develop` are denied in
+  `.claude/settings.json`.
+- Versions: deploying creates none. The user tags what runs in production from Actions →
+  Tag a version. Never create, move or delete a tag, and never open a `release/*` branch:
+  the `Branch name` check refuses it.
+- After the merge: `scripts/git/prune-branches.sh` deletes the local branch.
 
 ## Before the PR
 
