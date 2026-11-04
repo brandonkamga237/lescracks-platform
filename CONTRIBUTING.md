@@ -12,12 +12,26 @@ skipped hook is still caught.
 
 ## Branches
 
-| Branch | Role | Who writes to it |
-| --- | --- | --- |
-| `main` | Production code. Deployed when a release is cut (see Releases). | Pull requests from `develop` (or `hotfix/*`) only |
-| `develop` | Integration of finished work | Pull requests from work branches only |
-| `feature/*`, `fix/*`, `docs/*`, `chore/*` | One piece of work | You |
-| `hotfix/*` | Production emergency, cut from `main` | You |
+| Branch | Permanent | Role | Deleted |
+| --- | --- | --- | --- |
+| `main` | yes | Production: every merge into it is deployed | never |
+| `develop` | yes | Integration of finished work | never |
+| `feature/*`, `fix/*`, `docs/*`, `chore/*` | no | One piece of work, cut from `develop`, merged into `develop` | automatically, once merged |
+| `hotfix/*` | no | Production emergency, cut from `main`, merged into `main` | automatically, once merged |
+
+There are no release branches: what runs in production becomes a version when the maintainer
+tags it (see Deployments and versions).
+
+The model is enforced, not just written down:
+
+- The `Branch name` check refuses a pull request whose branch breaks it: an unknown prefix, a
+  `release/*` branch, a hotfix aimed at `develop`, or anything other than `develop` and
+  `hotfix/*` aimed at `main` (`scripts/git/check-branch.sh`).
+- GitHub deletes a branch as soon as its pull request is merged.
+- A hotfix comes back to `develop` on its own: after any change reaches `main` without going
+  through `develop`, the `Back-merge` workflow opens the pull request `main` → `develop`.
+- `scripts/git/prune-branches.sh` deletes your local copies of merged branches
+  (`--dry-run` to see them first).
 
 - Cut work branches from the remote without tracking it, so a plain `git push` can never
   land on `develop`:
