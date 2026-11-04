@@ -101,47 +101,38 @@ editing a Flyway migration that is already applied.
   shared agent settings deny `gh pr merge` and direct pushes to `main` and `develop`, so the
   script above is its only way to merge.
 
-## Releases
+## Deployments and versions
 
-Versions follow [SemVer](https://semver.org) and are tagged `vX.Y.Z` on `main`. Nobody picks
-the number by hand: [release-please](https://github.com/googleapis/release-please) derives it
-from the commits merged since the last tag.
+Deploying and versioning are two separate things.
 
-| Commits since the last release | Next version |
+**Every merge into `main` is deployed.** The `Deploy` workflow builds the images of that commit
+(`backend-lescracks:sha-<commit>` and `frontend-lescracks:sha-<commit>`) and runs them in
+production, about five minutes after the merge. It creates no tag and no version.
+
+**A version is the maintainer's decision.** When what runs in production deserves a version,
+the maintainer runs Actions → **Tag a version** → **Run workflow** with the number. It tags the
+commit of the last successful deployment (or another commit given in the form) as `vX.Y.Z`,
+publishes the GitHub release with notes generated from the pull requests merged since the
+previous version, and adds the version to that commit's images. Nothing else ever creates a
+tag.
+
+Versions follow [SemVer](https://semver.org), and the number is picked by hand:
+
+| Since the last version | Next version |
 | --- | --- |
-| only `fix` / `perf` | patch: `1.4.2` → `1.4.3` |
-| at least one `feat` | minor: `1.4.2` → `1.5.0` |
-| a `!` or a `BREAKING CHANGE:` footer | major: `1.4.2` → `2.0.0` |
+| only fixes | patch: `1.4.2` → `1.4.3` |
+| at least one new feature | minor: `1.4.2` → `1.5.0` |
+| a breaking change | major: `1.4.2` → `2.0.0` |
 
-How a release goes:
-
-1. `develop` is merged into `main` (merge commit, by the maintainer). That is the only manual step.
-2. The `Release` workflow opens a pull request `chore(main): release X.Y.Z` with the new
-   `CHANGELOG.md` entry and turns on its auto-merge (merge commit).
-3. Once the checks `main` requires pass, that PR merges itself. The workflow then tags `vX.Y.Z`,
-   publishes the GitHub release with the same notes, builds the images
-   `backend-lescracks:vX.Y.Z` and `frontend-lescracks:vX.Y.Z` and deploys them, about five
-   minutes after step 1.
-
-This needs **Settings → General → Pull Requests → Allow auto-merge**; without it the workflow
-fails with that instruction and the release PR waits to be merged by hand. To hold a release,
-turn off auto-merge on the release PR before its checks finish. A change with no `feat`, `fix`, `perf` or
-`revert` commit (a refactor, a dependency bump) opens no release PR: ship it with the next
-release, or force one with `Release-As`.
+The workflow refuses a number that exists already or is not higher than the last version.
 
 ### Redeploy or roll back
 
-Actions → **Deploy** → **Run workflow**, with the version to run (`v1.4.0`). Its images are
-reused from Docker Hub as they are, and its own `docker-compose.prod.yml` goes with them, so
-an earlier version rolls the whole stack back. Database migrations do not roll back: a release
-with a Flyway migration can only be undone by a new release.
-
-The changelog lists `feat`, `fix`, `perf` and `revert`; the other types stay out of it, so
-the commit type decides what users get to read. To force a number, add a `Release-As: x.y.z`
-line to a commit body.
-
-`CHANGELOG.md`, `version.txt` and `.release-please-manifest.json` belong to the release
-workflow: never edit them by hand, on `develop` or anywhere else.
+Actions → **Deploy** → **Run workflow**, with the commit, branch or tag to run (`v1.4.0`, or a
+commit hash). Its images are reused from Docker Hub when they exist, built otherwise, and its
+own `docker-compose.prod.yml` goes with them, so an earlier commit rolls the whole stack back.
+Database migrations do not roll back: a change with a Flyway migration can only be undone by
+a new change.
 
 ## Dependencies and credentials
 
