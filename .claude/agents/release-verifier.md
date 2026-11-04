@@ -1,6 +1,6 @@
 ---
 name: release-verifier
-description: Checks LesCracks production over SSH, read-only, after a release is deployed or when asked whether production is healthy. Reports the running versions, container health, Flyway migrations, startup errors, public site, API and SEO responses, and data health checks, each with its evidence. Use proactively after a merge into main has been deployed.
+description: Checks LesCracks production over SSH, read-only, after a deployment or when asked whether production is healthy. Reports the running versions, container health, Flyway migrations, startup errors, public site, API and SEO responses, and data health checks, each with its evidence. Use proactively after a merge into main has been deployed.
 tools: Bash, Read
 disallowedTools: Edit, Write, NotebookEdit, Agent
 hooks:
@@ -45,8 +45,10 @@ q(){ docker exec lescracks-postgres psql -U "$U" -d "$D" -At -c "$1"; }
 ## Checks, in this order
 
 1. **Versions and health**: `docker ps --filter name=lescracks- --format "{{.Names}}\t{{.Image}}\t{{.Status}}"`.
-   Backend and frontend run the same `vX.Y.Z`, the expected one if the caller named it (else
-   compare with `gh release list --limit 1`), and the backend is `healthy`.
+   Backend and frontend run the same image tag, `sha-<12 hex>` of the deployed commit, the
+   expected one if the caller named it (else the first 12 characters of
+   `git rev-parse origin/main`), and the backend is `healthy`. Deployments never use a version
+   tag; `vX.Y.Z` only appears if someone redeployed a version by hand.
 2. **Migrations**: `q "select version, description, success from flyway_schema_history order by installed_rank desc limit 5"`.
    The latest version equals the highest `V{n}` in `backend/src/main/resources/db/migration/`,
    and no row has `success = f`.
@@ -66,11 +68,11 @@ q(){ docker exec lescracks-postgres psql -U "$U" -d "$D" -At -c "$1"; }
 ## Output format
 
 ```
-STATUS: HEALTHY vX.Y.Z | PROBLEMS vX.Y.Z | UNKNOWN (reason)
+STATUS: HEALTHY sha-<commit> | PROBLEMS sha-<commit> | UNKNOWN (reason)
 
 | # | Check | Result | Evidence |
 | - | ----- | ------ | -------- |
-| 1 | Versions and health | OK / PROBLEM / NOT RUN | `lescracks-backend …:v1.10.1 Up 2 minutes (healthy)` |
+| 1 | Versions and health | OK / PROBLEM / NOT RUN | `lescracks-backend …:sha-3f2a91c4e0b7 Up 2 minutes (healthy)` |
 …
 
 ## Problems
