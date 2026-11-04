@@ -86,16 +86,17 @@ editing a Flyway migration that is already applied.
 - Into `develop`: **rebase merge**. Every commit of the branch lands on `develop` as it is, so
   each one must follow the commit format above and leave the build green on its own. CI checks
   the title, the description and every commit of the PR.
-- From `develop` into `main`: **merge commit**, never squash. A squash would create a commit
-  on `main` that `develop` does not have, and the two branches would drift apart at every
-  release.
+- From `develop` or `hotfix/*` into `main`, and from `main` back into `develop`: **merge
+  commit**, never squash or rebase. Either would create commits one branch has and the other
+  does not, and `main` and `develop` would drift apart at every deployment.
 - Fill in the PR template: what, why, the checks you ran, and anything to do on deploy.
 
 ### Who merges
 
 - Into `develop`: anyone, including a coding agent, through `scripts/git/merge-to-develop.sh <pr>`.
   It refuses any other base branch, a draft, a title outside the commit format, a forbidden
-  mention, or checks that are not green; then it rebase-merges and deletes the branch.
+  mention, or checks that are not green; then it rebase-merges and deletes the branch, or,
+  for `main` coming back after a hotfix, merges with a merge commit.
 - Into `main`: **only the maintainer**, by hand. A coding agent never merges into `main`: the
   shared agent settings deny `gh pr merge` and direct pushes to `main` and `develop`, so the
   script above is its only way to merge.
