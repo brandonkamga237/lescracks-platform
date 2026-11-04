@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Rebase-merges a pull request into develop, and only into develop: every atomic commit of the
-# branch lands on develop as it is, so the history shows each change.
+# branch lands on develop as it is, so the history shows each change. main coming back into
+# develop after a hotfix gets a merge commit instead.
 # Merging into main stays a human decision: this script refuses any other base branch.
 #
 # Usage: scripts/git/merge-to-develop.sh <pr-number> [--dry-run]
@@ -44,10 +45,20 @@ case "$checks_status" in
   *) fail "checks are failing; see $(field url)/checks" ;;
 esac
 
+# main coming back into develop (a hotfix) keeps its commits as they are: a rebase would copy
+# them, and main itself is never deleted.
+if [[ "$head" == "main" ]]; then
+  method="merge"
+  flags=(--merge)
+else
+  method="rebase-merge"
+  flags=(--rebase --delete-branch)
+fi
+
 if [[ "$dry_run" == "--dry-run" ]]; then
-  echo "✓ PR #$pr ($head → develop) would be rebase-merged: $(gh pr view "$pr" --json commits -q '.commits | length') commit(s)"
+  echo "✓ PR #$pr ($head → develop) would be ${method}d: $(gh pr view "$pr" --json commits -q '.commits | length') commit(s)"
   exit 0
 fi
 
-gh pr merge "$pr" --rebase --delete-branch
-echo "✓ PR #$pr rebase-merged into develop: $title"
+gh pr merge "$pr" "${flags[@]}"
+echo "✓ PR #$pr ${method}d into develop: $title"
