@@ -56,10 +56,11 @@ Use `pnpm`, never `npm`. Before a commit, the checks of the area you touched mus
   `scripts/git/check-commit-msg.sh`
 - Never mention Claude, AI or a generation tool in a commit, PR title or PR body
 - PRs target `develop` and are rebase-merged with `scripts/git/merge-to-develop.sh <pr>` once
-  CI is green, so every atomic commit reaches `develop`. Only the maintainer merges `develop` into `main` (merge commit); the release PR
-  then merges itself once its checks pass, which tags and deploys
-- Releases are cut by release-please from the commit types (`fix` patch, `feat` minor, `!`
-  major). Never edit `CHANGELOG.md`, `version.txt` or `.release-please-manifest.json`
+  CI is green, so every atomic commit reaches `develop`. Only the maintainer merges `develop`
+  into `main` (merge commit), which deploys. No release branches; `Branch name` CI enforces it
+- Deploying never tags: only the maintainer turns production into a version (`vX.Y.Z`) with
+  the `Tag a version` workflow. Never create, move or delete a tag yourself
+- Once a PR is merged, `scripts/git/prune-branches.sh` removes the local branch
 - The step-by-step lives in the `git-workflow` skill; the full policy in `CONTRIBUTING.md`
 
 ## Never
