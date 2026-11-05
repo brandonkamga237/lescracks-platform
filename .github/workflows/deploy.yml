@@ -1,26 +1,27 @@
-# Deploys one release (a vX.Y.Z tag) to the VPS.
+# Deploys a commit to the VPS.
 #
-#   - Release workflow: called right after release-please tags a new version.
-#   - By hand (Actions > Deploy > Run workflow): redeploy a version, or roll back by giving an
-#     earlier one. Images already on Docker Hub are reused as they are; missing ones are built
-#     from the tag.
+#   - Every push to main: the commit just merged goes to production.
+#   - By hand (Actions > Deploy > Run workflow): redeploy any commit, branch or tag, for
+#     instance an earlier one to roll back. Images already on Docker Hub are reused as they
+#     are; missing ones are built from that commit.
 #
-# Images are tagged with the version, so production always runs a known, reproducible build.
+# Deploying never creates a version: images are tagged with the commit they were built from
+# (sha-<12 hex>), and the maintainer decides when what runs in production becomes a version
+# (tag-version.yml).
 #
 # Secrets: DOCKER_USERNAME, DOCKER_TOKEN or DOCKER_PASSWORD, VPS_HOST, VPS_USER,
 #          VPS_SSH_KEY or VPS_SSH_KEY_griote
 name: Deploy
+# tag-version.yml reads the deployed ref from this title to find what runs in production.
+run-name: Deploy ${{ inputs.ref || github.sha }}
 
 on:
-  workflow_call:
-    inputs:
-      version:
-        type: string
-        required: true
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
-      version:
-        description: "Release tag to deploy, e.g. v1.4.0 (an earlier one rolls back)"
+      ref:
+        description: "Commit, branch or tag to deploy (an earlier one rolls back)"
         type: string
         required: true
 
@@ -37,25 +38,32 @@ env:
   FRONTEND_IMAGE: brandoniscoding/frontend-lescracks
   # A secret rather than a value in this public file: GitHub masks it in the public run logs.
   DEPLOY_PATH:    ${{ secrets.DEPLOY_PATH }}
-  VERSION:        ${{ inputs.version }}
 
 jobs:
   plan:
-    name: Check the version
+    name: Resolve the commit
     runs-on: ubuntu-latest
     outputs:
+      commit: ${{ steps.resolve.outputs.commit }}
+      image_tag: ${{ steps.resolve.outputs.image_tag }}
       build: ${{ steps.images.outputs.build }}
     steps:
-      - name: Version is an existing release tag
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Ref names an existing commit
+        id: resolve
         env:
-          GH_TOKEN: ${{ github.token }}
+          REF: ${{ inputs.ref || github.sha }}
         run: |
-          if ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::'$VERSION' is not a release tag (vX.Y.Z)."
+          commit=$(git rev-parse --verify --quiet "$REF^{commit}" || git rev-parse --verify --quiet "origin/$REF^{commit}") || {
+            echo "::error::'$REF' is not a commit, branch or tag of this repository."
             exit 1
-          fi
-          gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$VERSION" --silent \
-            || { echo "::error::Tag $VERSION does not exist."; exit 1; }
+          }
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+          echo "image_tag=sha-${commit:0:12}" >> "$GITHUB_OUTPUT"
+          echo "Deploying $REF -> $commit"
 
       - uses: docker/login-action@v4
         with:
@@ -64,13 +72,15 @@ jobs:
 
       - name: Images already on Docker Hub
         id: images
+        env:
+          IMAGE_TAG: ${{ steps.resolve.outputs.image_tag }}
         run: |
-          if docker manifest inspect "$BACKEND_IMAGE:$VERSION" >/dev/null 2>&1 &&
-             docker manifest inspect "$FRONTEND_IMAGE:$VERSION" >/dev/null 2>&1; then
-            echo "Images for $VERSION found: deploying them as they are."
+          if docker manifest inspect "$BACKEND_IMAGE:$IMAGE_TAG" >/dev/null 2>&1 &&
+             docker manifest inspect "$FRONTEND_IMAGE:$IMAGE_TAG" >/dev/null 2>&1; then
+            echo "Images $IMAGE_TAG found: deploying them as they are."
             echo "build=false" >> "$GITHUB_OUTPUT"
           else
-            echo "Images for $VERSION missing: building them from the tag."
+            echo "Images $IMAGE_TAG missing: building them."
             echo "build=true" >> "$GITHUB_OUTPUT"
           fi
 
@@ -91,7 +101,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.version }}
+          ref: ${{ needs.plan.outputs.commit }}
 
       - uses: docker/setup-buildx-action@v4
 
@@ -100,15 +110,15 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN || secrets.DOCKER_PASSWORD }}
 
-      # latest only follows new releases: rebuilding an old tag by hand must not move it back.
+      # latest only follows main: redeploying an old commit by hand must not move it back.
       - uses: docker/build-push-action@v7
         with:
           context: ./${{ matrix.service }}
           target:  ${{ matrix.target }}
           push:    true
           tags: |
-            ${{ matrix.image }}:${{ inputs.version }}
-            ${{ github.event_name != 'workflow_dispatch' && format('{0}:latest', matrix.image) || '' }}
+            ${{ matrix.image }}:${{ needs.plan.outputs.image_tag }}
+            ${{ github.event_name == 'push' && format('{0}:latest', matrix.image) || '' }}
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to:   type=gha,scope=${{ matrix.service }},mode=max
 
@@ -121,13 +131,15 @@ jobs:
       needs.plan.result == 'success' &&
       (needs.build.result == 'success' || needs.build.result == 'skipped')
     environment: production
+    env:
+      VERSION: ${{ needs.plan.outputs.image_tag }}
 
     steps:
-      # The compose file of the deployed version travels with it, so a rollback also rolls
+      # The compose file of the deployed commit travels with it, so a rollback also rolls
       # back the stack definition.
       - uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.version }}
+          ref: ${{ needs.plan.outputs.commit }}
 
       - name: Deployment directory is configured
         run: |
@@ -139,7 +151,7 @@ jobs:
       - name: Compose file is version-aware
         run: |
           grep -q 'IMAGE_TAG' docker-compose.prod.yml || {
-            echo "::error::$VERSION predates versioned images: its compose file always runs :latest."
+            echo "::error::This commit predates versioned images: its compose file always runs :latest."
             exit 1
           }
 

@@ -1,6 +1,6 @@
-# Enforces the commit rules on every pull request, since a local hook can be skipped.
-# PRs are squash-merged: the title becomes the commit on develop/main, so it is checked
-# like a commit header, and the description (the squash body) like a commit body.
+# Enforces the branching model and the commit rules on every pull request, since a local hook
+# can be skipped. Every commit is checked, and so are the title and the description, which
+# become the merge commit on main.
 name: Conventions
 
 on:
@@ -16,6 +16,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  branch:
+    name: Branch name
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: The branch may go into its target
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: scripts/git/check-branch.sh "$HEAD_REF" "$BASE_REF"
+
   messages:
     name: Commit messages
     runs-on: ubuntu-latest

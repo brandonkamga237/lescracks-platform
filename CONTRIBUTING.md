@@ -12,12 +12,26 @@ skipped hook is still caught.
 
 ## Branches
 
-| Branch | Role | Who writes to it |
-| --- | --- | --- |
-| `main` | Production code. Deployed when a release is cut (see Releases). | Pull requests from `develop` (or `hotfix/*`) only |
-| `develop` | Integration of finished work | Pull requests from work branches only |
-| `feature/*`, `fix/*`, `docs/*`, `chore/*` | One piece of work | You |
-| `hotfix/*` | Production emergency, cut from `main` | You |
+| Branch | Permanent | Role | Deleted |
+| --- | --- | --- | --- |
+| `main` | yes | Production: every merge into it is deployed | never |
+| `develop` | yes | Integration of finished work | never |
+| `feature/*`, `fix/*`, `docs/*`, `chore/*` | no | One piece of work, cut from `develop`, merged into `develop` | automatically, once merged |
+| `hotfix/*` | no | Production emergency, cut from `main`, merged into `main` | automatically, once merged |
+
+There are no release branches: what runs in production becomes a version when the maintainer
+tags it (see Deployments and versions).
+
+The model is enforced, not just written down:
+
+- The `Branch name` check refuses a pull request whose branch breaks it: an unknown prefix, a
+  `release/*` branch, a hotfix aimed at `develop`, or anything other than `develop` and
+  `hotfix/*` aimed at `main` (`scripts/git/check-branch.sh`).
+- GitHub deletes a branch as soon as its pull request is merged.
+- A hotfix comes back to `develop` on its own: after any change reaches `main` without going
+  through `develop`, the `Back-merge` workflow opens the pull request `main` → `develop`.
+- `scripts/git/prune-branches.sh` deletes your local copies of merged branches
+  (`--dry-run` to see them first).
 
 - Cut work branches from the remote without tracking it, so a plain `git push` can never
   land on `develop`:
@@ -72,75 +86,70 @@ editing a Flyway migration that is already applied.
 - Into `develop`: **rebase merge**. Every commit of the branch lands on `develop` as it is, so
   each one must follow the commit format above and leave the build green on its own. CI checks
   the title, the description and every commit of the PR.
-- From `develop` into `main`: **merge commit**, never squash. A squash would create a commit
-  on `main` that `develop` does not have, and the two branches would drift apart at every
-  release.
+- From `develop` or `hotfix/*` into `main`, and from `main` back into `develop`: **merge
+  commit**, never squash or rebase. Either would create commits one branch has and the other
+  does not, and `main` and `develop` would drift apart at every deployment.
 - Fill in the PR template: what, why, the checks you ran, and anything to do on deploy.
 
 ### Who merges
 
 - Into `develop`: anyone, including a coding agent, through `scripts/git/merge-to-develop.sh <pr>`.
   It refuses any other base branch, a draft, a title outside the commit format, a forbidden
-  mention, or checks that are not green; then it rebase-merges and deletes the branch.
+  mention, or checks that are not green; then it rebase-merges and deletes the branch, or,
+  for `main` coming back after a hotfix, merges with a merge commit.
 - Into `main`: **only the maintainer**, by hand. A coding agent never merges into `main`: the
   shared agent settings deny `gh pr merge` and direct pushes to `main` and `develop`, so the
   script above is its only way to merge.
 
-## Releases
+## Deployments and versions
 
-Versions follow [SemVer](https://semver.org) and are tagged `vX.Y.Z` on `main`. Nobody picks
-the number by hand: [release-please](https://github.com/googleapis/release-please) derives it
-from the commits merged since the last tag.
+Deploying and versioning are two separate things.
 
-| Commits since the last release | Next version |
+**Every merge into `main` is deployed.** The `Deploy` workflow builds the images of that commit
+(`backend-lescracks:sha-<commit>` and `frontend-lescracks:sha-<commit>`) and runs them in
+production, about five minutes after the merge. It creates no tag and no version.
+
+**A version is the maintainer's decision.** When what runs in production deserves a version,
+the maintainer runs Actions → **Tag a version** → **Run workflow** with the number. It tags the
+commit of the last successful deployment (or another commit given in the form) as `vX.Y.Z`,
+publishes the GitHub release with notes generated from the pull requests merged since the
+previous version, and adds the version to that commit's images. Nothing else ever creates a
+tag.
+
+Versions follow [SemVer](https://semver.org), and the number is picked by hand:
+
+| Since the last version | Next version |
 | --- | --- |
-| only `fix` / `perf` | patch: `1.4.2` → `1.4.3` |
-| at least one `feat` | minor: `1.4.2` → `1.5.0` |
-| a `!` or a `BREAKING CHANGE:` footer | major: `1.4.2` → `2.0.0` |
+| only fixes | patch: `1.4.2` → `1.4.3` |
+| at least one new feature | minor: `1.4.2` → `1.5.0` |
+| a breaking change | major: `1.4.2` → `2.0.0` |
 
-How a release goes:
-
-1. `develop` is merged into `main` (merge commit, by the maintainer). That is the only manual step.
-2. The `Release` workflow opens a pull request `chore(main): release X.Y.Z` with the new
-   `CHANGELOG.md` entry and turns on its auto-merge (merge commit).
-3. Once the checks `main` requires pass, that PR merges itself. The workflow then tags `vX.Y.Z`,
-   publishes the GitHub release with the same notes, builds the images
-   `backend-lescracks:vX.Y.Z` and `frontend-lescracks:vX.Y.Z` and deploys them, about five
-   minutes after step 1.
-
-This needs **Settings → General → Pull Requests → Allow auto-merge**; without it the workflow
-fails with that instruction and the release PR waits to be merged by hand. To hold a release,
-turn off auto-merge on the release PR before its checks finish. A change with no `feat`, `fix`, `perf` or
-`revert` commit (a refactor, a dependency bump) opens no release PR: ship it with the next
-release, or force one with `Release-As`.
+The workflow refuses a number that exists already or is not higher than the last version.
 
 ### Redeploy or roll back
 
-Actions → **Deploy** → **Run workflow**, with the version to run (`v1.4.0`). Its images are
-reused from Docker Hub as they are, and its own `docker-compose.prod.yml` goes with them, so
-an earlier version rolls the whole stack back. Database migrations do not roll back: a release
-with a Flyway migration can only be undone by a new release.
-
-The changelog lists `feat`, `fix`, `perf` and `revert`; the other types stay out of it, so
-the commit type decides what users get to read. To force a number, add a `Release-As: x.y.z`
-line to a commit body.
-
-`CHANGELOG.md`, `version.txt` and `.release-please-manifest.json` belong to the release
-workflow: never edit them by hand, on `develop` or anywhere else.
+Actions → **Deploy** → **Run workflow**, with the commit, branch or tag to run (`v1.4.0`, or a
+commit hash). Its images are reused from Docker Hub when they exist, built otherwise, and its
+own `docker-compose.prod.yml` goes with them, so an earlier commit rolls the whole stack back.
+Database migrations do not roll back: a change with a Flyway migration can only be undone by
+a new change.
 
 ## Dependencies and credentials
 
 - Dependabot opens update PRs against `develop` every Monday: GitHub Actions, Maven, pnpm
   and the Docker base images (majors of Node and Java excluded). They go through CI and
   are merged like any other PR.
-- The `Credentials check` workflow tests the Docker Hub token, `RELEASE_PLEASE_TOKEN` (and its
+- The `Credentials check` workflow tests the Docker Hub token, the automation token (and its
   expiry date, 30 days ahead) and SSH access to the VPS every Monday. A red run means a secret
-  to renew before the next release.
+  to renew before it is needed.
 
-The workflow needs the secret `RELEASE_PLEASE_TOKEN`: a fine-grained personal access token
-limited to this repository, with **Contents**, **Pull requests** and **Issues** set to
-read and write. `GITHUB_TOKEN` cannot be used: what it creates triggers no workflow, so the
-required `Commit messages` check would never run on the release PR.
+### Automation token
+
+The `Back-merge` workflow opens its pull request with the secret `AUTOMATION_TOKEN` (the older
+name `RELEASE_PLEASE_TOKEN` is still read): a fine-grained personal access token limited to
+this repository, with **Contents** and **Pull requests** set to read and write.
+`GITHUB_TOKEN` cannot be used: a pull request it opens triggers no workflow, so the required
+checks would never run on it.
 
 ## Checks before a PR
 

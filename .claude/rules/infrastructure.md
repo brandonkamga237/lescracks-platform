@@ -19,8 +19,9 @@ paths:
 - A new environment variable goes into `.env.example` and `docker-compose.prod.yml` in the same
   commit. A secret never gets a default value in production configuration
 - Pin image versions; `latest` makes a restart change what runs
-- CI (`.github/workflows/ci.yml`) gates every PR; `release.yml` (release-please) tags versions;
-  `deploy.yml` ships a tag to the VPS, and a rollback is a manual run of it with an earlier tag
+- CI (`.github/workflows/ci.yml`) gates every PR; `deploy.yml` ships every push to `main` with
+  images tagged `sha-<commit>`, and a rollback is a manual run of it with an earlier commit or
+  tag. Versions are tagged by hand with `tag-version.yml`, never by a deployment
 - A new indexable public page needs its snapshot in `SeoController` and its entry in
   `frontend/nginx.conf` (`seo-page` skill)
 - Production is checked read-only with the `release-verifier` subagent; server details stay out

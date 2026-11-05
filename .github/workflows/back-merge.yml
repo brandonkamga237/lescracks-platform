@@ -1,0 +1,50 @@
+# Brings a hotfix back into develop. After every push to main, if main holds changes develop
+# does not have, this opens (or keeps) a pull request from main into develop, so the fix is not
+# lost at the next merge into production. Shipping develop into main changes nothing develop
+# lacks, so it opens nothing.
+#
+# It runs with a personal token, not GITHUB_TOKEN: a pull request opened by GITHUB_TOKEN runs
+# no workflow, so its required checks would never start.
+name: Back-merge
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: back-merge
+  cancel-in-progress: false
+
+jobs:
+  back-merge:
+    name: Main back into develop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Open the pull request when develop lacks changes from main
+        env:
+          GH_TOKEN: ${{ secrets.AUTOMATION_TOKEN || secrets.RELEASE_PLEASE_TOKEN }}
+        run: |
+          # Three dots: what main changed since it last met develop, whatever develop did since.
+          if git diff --quiet origin/develop...origin/main; then
+            echo "develop already has everything main has."
+            exit 0
+          fi
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::main has changes develop lacks, but no AUTOMATION_TOKEN secret is set to open the pull request. Open main → develop by hand."
+            exit 1
+          fi
+          open=$(gh pr list --repo "$GITHUB_REPOSITORY" --base develop --head main --state open --json number --jq '.[0].number // empty')
+          if [ -n "$open" ]; then
+            echo "Pull request #$open already brings main back into develop."
+            exit 0
+          fi
+          gh pr create --repo "$GITHUB_REPOSITORY" --base develop --head main \
+            --title "chore(git): bring the hotfixes of main back into develop" \
+            --body "Opened automatically after a change reached main without going through develop. Merge it with a merge commit (scripts/git/merge-to-develop.sh does), never a rebase: these commits already exist on main."
