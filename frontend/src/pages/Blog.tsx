@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import ArticleRow from '@/components/blog/ArticleRow';
 import SEO from '@/components/common/SEO';
 import { Stagger, StaggerItem } from '@/components/motion/Stagger';
-import SiteShell from '@/components/site/SiteShell';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { PageHero } from '@/components/ui/page-hero';
@@ -41,7 +40,7 @@ export default function Blog() {
   }
 
   return (
-    <SiteShell>
+    <>
       <SEO title="Blog" description="Les articles LesCracks : retours d’expérience, notions expliquées et bonnes pratiques pour progresser en tech." url="/blog" />
       <PageHero
         id="blog-title"
@@ -75,6 +74,6 @@ export default function Blog() {
           )}
         </div>
       </Container>
-    </SiteShell>
+    </>
   );
 }

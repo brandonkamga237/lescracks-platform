@@ -4,7 +4,6 @@ import UpcomingEvents from '@/components/landing/UpcomingEvents';
 import MemberGreeting from '@/components/member/MemberGreeting';
 import MyAgenda from '@/components/member/MyAgenda';
 import MyRecognition from '@/components/member/MyRecognition';
-import SiteShell from '@/components/site/SiteShell';
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
 import { withoutHackathons } from '@/lib/events';
@@ -28,7 +27,7 @@ export default function MemberHome() {
   const articles = recent.data?.content ?? [];
 
   return (
-    <SiteShell>
+    <>
       <SEO title="Dashboard" url="/" />
       <MemberGreeting
         firstName={user?.firstName ?? ''}
@@ -45,6 +44,6 @@ export default function MemberHome() {
       {suggestions.length > 0 && <UpcomingEvents events={suggestions} />}
       <MyRecognition certificates={certificates.data ?? []} badges={badges.data ?? []} />
       {articles.length > 0 && <LatestArticles articles={articles} />}
-    </SiteShell>
+    </>
   );
 }
