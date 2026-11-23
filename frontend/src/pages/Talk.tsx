@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import SEO from '@/components/common/SEO';
 import { YouTubeIcon } from '@/components/icons/BrandIcons';
@@ -7,7 +7,7 @@ import EpisodeRow from '@/components/talks/EpisodeRow';
 import TalkSpotlight from '@/components/talks/TalkSpotlight';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
-import { PageHero } from '@/components/ui/page-hero';
+import { SpaceHeader } from '@/components/ui/space-header';
 import { Pager } from '@/components/ui/pager';
 import { EmptyPanel, ErrorPanel, RowsLoading } from '@/components/ui/panels';
 import { CONTACT_EMAIL } from '@/config/site';
@@ -45,16 +45,9 @@ export default function Talk() {
   return (
     <>
       <SEO title="LesCracks Talk" description="LesCracks Talk, le rendez-vous vidéo qui met en lumière la tech africaine : des conversations avec celles et ceux qui construisent, des produits et des parcours réels." url="/talk" />
-      <PageHero
-        id="talk-title"
-        eyebrow={!talks.loading && !talks.error ? `Le Talk · ${total} épisode${total > 1 ? 's' : ''}` : 'Le Talk'}
-        title={['Des parcours réels.', { text: 'Pas des légendes.', className: 'text-white/40' }]}
-        lead="Des conversations vidéo avec celles et ceux qui construisent la tech africaine : leurs produits, leurs choix, leurs erreurs."
-      >
-        {FOLLOW}
-      </PageHero>
+      <SpaceHeader title="Le Talk" meta={!talks.loading && !talks.error ? `${total} épisode${total > 1 ? 's' : ''}` : undefined} lead="Des conversations avec celles et ceux qui construisent la tech africaine." action={FOLLOW} />
 
-      <Container className="pb-20">
+      <Container className="pb-10">
         <div role="region" aria-label="Épisodes" aria-live="polite" aria-busy={talks.loading}>
           {talks.loading && list.length === 0 && <RowsLoading label="Chargement des épisodes…" />}
           {talks.error && <ErrorPanel title="Les épisodes sont momentanément indisponibles." message={talks.error.message} onRetry={talks.reload} />}
@@ -69,7 +62,7 @@ export default function Talk() {
             <div className={cn('transition-opacity', talks.loading && 'opacity-60')}>
               {latest && <TalkSpotlight video={latest} />}
               {episodes.length > 0 && (
-                <Stagger className={cn('border-t border-white/10', latest && 'mt-14')}>
+                <Stagger className={cn('border-t border-white/10', latest && 'mt-8')}>
                   {episodes.map((video) => <StaggerItem key={video.id}><EpisodeRow video={video} /></StaggerItem>)}
                 </Stagger>
               )}
@@ -79,15 +72,12 @@ export default function Talk() {
         </div>
       </Container>
 
-      <section aria-labelledby="talk-guest-title" className="border-t border-white/10">
-        <Container className="flex flex-col items-start gap-8 py-16 sm:py-20 lg:flex-row lg:items-end lg:justify-between">
-          <h2 id="talk-guest-title" className="max-w-2xl text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">Tu construis quelque chose ? <span className="text-white/40">Viens en parler.</span></h2>
-          <div className="flex flex-wrap gap-3">
-            <Button asChild size="lg" className="font-semibold"><a href={`mailto:${CONTACT_EMAIL}`}>Écris-nous</a></Button>
-            <Button asChild size="lg" variant="outline"><Link to="/blog">Lire le blog</Link></Button>
-          </div>
-        </Container>
-      </section>
+      <Container className="pb-20">
+        <p className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/10 bg-white/[0.03] px-5 py-4 text-sm text-white/60">
+          Tu construis quelque chose et tu veux en parler dans le Talk ?
+          <a href={`mailto:${CONTACT_EMAIL}`} className="font-medium text-gold-400 underline-offset-4 hover:underline">Écris-nous</a>
+        </p>
+      </Container>
     </>
   );
 }
