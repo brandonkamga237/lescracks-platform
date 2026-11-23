@@ -23,9 +23,9 @@ class MemberDirectoryTest {
     private final MemberDirectoryImpl directory = new MemberDirectoryImpl(new AccountDirectoryImpl(accounts, mock(AccountEvents.class)), profiles);
 
     @Test
-    @DisplayName("a member joins the account and the profile; one without a profile still comes back")
+    @DisplayName("a member joins the account and the profile, email verification included; one without a profile still comes back")
     void joinsAccountAndProfile() {
-        Long withProfile = accounts.save(Account.builder().email("a@example.com").firstName("Awa").passwordHash("h").build()).getId();
+        Long withProfile = accounts.save(Account.builder().email("a@example.com").firstName("Awa").emailVerified(true).passwordHash("h").build()).getId();
         Long without = accounts.save(Account.builder().email("b@example.com").firstName("Kofi").status(AccountStatus.BANNED).passwordHash("h").build()).getId();
         profiles.save(MemberProfile.builder().accountId(withProfile).avatarUrl("a.jpg").bio("Dev").publicBio(true).build());
 
@@ -36,5 +36,7 @@ class MemberDirectoryTest {
         assertThat(members.get(withProfile).isPublicBio()).isTrue();
         assertThat(members.get(without).getFirstName()).isEqualTo("Kofi");
         assertThat(members.get(without).isActive()).isFalse();
+        assertThat(members.get(withProfile).isEmailVerified()).isTrue();
+        assertThat(members.get(without).isEmailVerified()).isFalse();
     }
 }

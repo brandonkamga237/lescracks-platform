@@ -19,6 +19,7 @@ public class Member {
     String lastName;
     String avatarUrl;
     boolean active;
+    boolean emailVerified;
     Instant createdAt;
     String bio;
     String location;
@@ -35,6 +36,7 @@ public class Member {
                 .lastName(account.getLastName())
                 .avatarUrl(profile.getAvatarUrl())
                 .active(account.isActive())
+                .emailVerified(account.isEmailVerified())
                 .createdAt(account.getCreatedAt())
                 .bio(profile.getBio())
                 .location(profile.getLocation())
