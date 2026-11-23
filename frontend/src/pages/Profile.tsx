@@ -1,168 +1,118 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowRight, KeyRound, Loader2, Lock, LogOut, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, ArrowUpRight, Award, Lock, ShieldCheck } from 'lucide-react';
 
 import AvatarPicker from '@/components/account/AvatarPicker';
 import ProfileDetails from '@/components/account/ProfileDetails';
 import NewsletterCard from '@/components/common/NewsletterCard';
 import SEO from '@/components/common/SEO';
+import BadgeList from '@/components/recognition/BadgeList';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
-import { Notice, PasswordField } from '@/components/ui/field';
+import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
 import { FIELD_LABEL } from '@/lib/memberProfile';
 import { fillClass } from '@/lib/progress';
 import { cn } from '@/lib/utils';
 import { api } from '@/services/api';
-import { ApiError } from '@/services/http';
-import type { AuthProvider, ProfileField } from '@/services/types';
-
-const PROVIDER_LABEL = { LOCAL: 'Email et mot de passe', GOOGLE: 'Google', GITHUB: 'GitHub' };
+import type { ProfileField } from '@/services/types';
 
 /** Where each missing field of the completion gauge is filled in. */
 const SECTION_OF: Partial<Record<ProfileField, string>> = {
   PHONE: 'contact', SITUATION: 'a-propos', INTERESTS: 'a-propos', GOAL: 'a-propos', CITY: 'a-propos', BIO: 'a-propos',
 };
 
-type IdentityProvider = Exclude<AuthProvider, 'LOCAL'>;
-const IDENTITY_PROVIDERS: IdentityProvider[] = ['GOOGLE', 'GITHUB'];
-
 const CARD = 'rounded-3xl border border-white/10 bg-white/[0.03] p-5 sm:p-6';
-const ROW = 'flex items-center justify-between gap-4 rounded-2xl border border-white/10 px-4 py-3';
+const sinceFormat = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' });
+const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' });
 
-function SecurityHeading({ Icon, title, text }: { Icon: typeof Lock; title: string; text: string }) {
+function Stat({ value, label }: { value: number | undefined; label: string }) {
   return (
-    <div className="flex items-start gap-4">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold-400/15 text-gold-400"><Icon className="h-5 w-5" aria-hidden="true" /></span>
-      <div>
-        <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
-        <p className="mt-0.5 text-sm text-white/55">{text}</p>
-      </div>
-    </div>
+    <li className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5">
+      <span className="block text-2xl font-semibold tabular-nums">{value ?? '–'}</span>
+      <span className="mt-0.5 block text-sm text-white/50">{label}</span>
+    </li>
   );
 }
 
-/** The member's account: who they are, how complete it is, how they sign in. */
+/** The member's profile: who they are, what they have done and earned, and what they tell us. */
 export default function Profile() {
-  const { name, user, isAdmin, refresh, signOut, socialSignIn } = useSession();
-  const navigate = useNavigate();
-  const { hash } = useLocation();
-
-  // /profil#securite and #informations come from the menu: land on that section.
-  useEffect(() => {
-    if (!hash) return;
-    const frame = requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start', behavior: 'smooth' }));
-    return () => cancelAnimationFrame(frame);
-  }, [hash]);
-
-  const [leaving, setLeaving] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
-  const [editingPassword, setEditingPassword] = useState(false);
-  const [passwordBusy, setPasswordBusy] = useState(false);
-  const [passwordError, setPasswordError] = useState('');
-  const [passwordNotice, setPasswordNotice] = useState('');
-  const [identityBusy, setIdentityBusy] = useState(false);
-  const [unlinkBusy, setUnlinkBusy] = useState<AuthProvider | null>(null);
-  const [identityError, setIdentityError] = useState('');
-  const [identityNotice, setIdentityNotice] = useState('');
-
-  function closePasswordForm() {
-    setEditingPassword(false);
-    setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    setPasswordError('');
-  }
-
-  async function savePassword(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setPasswordError('');
-    setPasswordNotice('');
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setPasswordError('Le nouveau mot de passe et sa confirmation ne correspondent pas.');
-      return;
-    }
-    if (passwordForm.newPassword.length < 10) {
-      setPasswordError('Le nouveau mot de passe doit contenir au moins 10 caractères.');
-      return;
-    }
-    setPasswordBusy(true);
-    try {
-      await api.changePassword(passwordForm);
-      closePasswordForm();
-      setPasswordNotice('Ton mot de passe a été mis à jour.');
-    } catch (cause) {
-      setPasswordError(cause instanceof ApiError ? cause.message : 'La mise à jour a échoué. Réessaie.');
-      if (cause instanceof ApiError && cause.isUnauthenticated) await refresh().catch(() => undefined);
-    } finally {
-      setPasswordBusy(false);
-    }
-  }
-
-  // Leave this members-only page first: signed out on it, its guard would send the reader to sign in again.
-  async function leave() {
-    setLeaving(true);
-    navigate('/', { replace: true });
-    await signOut().catch(() => undefined);
-  }
-
-  async function linkProvider(provider: IdentityProvider) {
-    setIdentityError('');
-    setIdentityNotice('');
-    setIdentityBusy(true);
-    try {
-      await socialSignIn(provider.toLowerCase() as 'google' | 'github', '/profil');
-    } catch (cause) {
-      setIdentityBusy(false);
-      setIdentityError(cause instanceof Error ? cause.message : 'Impossible d’ouvrir la fenêtre de connexion.');
-    }
-  }
-
-  async function unlinkProvider(provider: IdentityProvider) {
-    setIdentityError('');
-    setIdentityNotice('');
-    setUnlinkBusy(provider);
-    try {
-      await api.unlinkIdentity(provider);
-      setIdentityNotice('La méthode de connexion a été retirée.');
-      await refresh();
-    } catch (cause) {
-      setIdentityError(cause instanceof ApiError ? cause.message : 'Le retrait a échoué. Réessaie dans un instant.');
-    } finally {
-      setUnlinkBusy(null);
-    }
-  }
+  const { name, user, isAdmin, refresh } = useSession();
+  const mine = useApi((signal) => (user ? api.myEvents(signal) : Promise.resolve([])), [user?.id]);
+  const certificates = useApi((signal) => (user ? api.myCertificates(signal) : Promise.resolve([])), [user?.id]);
+  const badges = useApi((signal) => (user ? api.myBadges(signal) : Promise.resolve([])), [user?.id]);
 
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : name || 'Ton compte';
+  const issued = certificates.data?.filter((certificate) => !certificate.revoked);
+  const attended = mine.data?.filter((event) => event.status === 'ATTENDED').length;
 
   return (
     <>
-      <SEO title="Mon compte" description="Tes informations, ta sécurité et tes connexions LesCracks." url="/profil" />
-      <section aria-labelledby="account-title" className="relative isolate overflow-hidden">
-                <Container className="flex flex-col gap-5 pb-6 pt-8 sm:flex-row sm:items-center sm:justify-between sm:pt-10">
-          <div className="flex min-w-0 items-center gap-5">
-            <AvatarPicker name={name} avatarUrl={user?.avatarUrl} onChanged={refresh} />
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-gold-400">Mon compte</p>
-              <h1 id="account-title" className="mt-1 break-words text-2xl font-semibold tracking-tight sm:text-3xl">{fullName}</h1>
-              {user?.email && <p className="mt-1 truncate text-sm text-white/50">{user.email}</p>}
-            </div>
+      <SEO title="Mon profil" description="Ton profil LesCracks : tes informations, tes attestations et tes badges." url="/profil" />
+      <Container className="flex flex-col gap-5 pb-6 pt-8 sm:flex-row sm:items-center sm:justify-between sm:pt-10">
+        <div className="flex min-w-0 items-center gap-5">
+          <AvatarPicker name={name} avatarUrl={user?.avatarUrl} onChanged={refresh} />
+          <div className="min-w-0">
+            <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">{fullName}</h1>
+            {user && <p className="mt-1 text-sm text-white/50">Membre depuis {sinceFormat.format(new Date(user.createdAt))}</p>}
           </div>
-          <Button type="button" variant="outline" disabled={leaving} onClick={() => void leave()} className="self-start sm:self-center">
-            <LogOut className="h-4 w-4" aria-hidden="true" />{leaving ? 'Déconnexion…' : 'Me déconnecter'}
-          </Button>
-        </Container>
-      </section>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {user && <Button asChild size="sm" variant="outline"><Link to={`/membres/${user.id}`}>Mon profil public<ArrowUpRight className="h-4 w-4" aria-hidden="true" /></Link></Button>}
+          <Button asChild size="sm" variant="outline"><Link to="/profil/securite"><Lock className="h-4 w-4" aria-hidden="true" />Sécurité</Link></Button>
+        </div>
+      </Container>
 
-      <Container className="pb-24">
-
-        {user && user.completion < 100 && user.missing.length > 0 && (
-          <section aria-labelledby="completion-title" className={cn(CARD, 'mb-6')}>
-            <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <h2 id="completion-title" className="text-lg font-semibold tracking-tight">Profil complété à <span className="tabular-nums text-gold-400">{user.completion} %</span></h2>
-              <a href={`#${SECTION_OF[user.missing[0]] ?? 'informations'}`} className="group inline-flex items-center gap-1.5 text-sm text-gold-400">Compléter mon profil<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" /></a>
-            </div>
-            <div aria-hidden="true" className="mt-4 h-1 rounded-full bg-white/10"><div className={cn('h-full rounded-full bg-gold-400', fillClass(user.completion / 100))} /></div>
-            <p className="mt-4 text-sm text-white/55">Il manque : {user.missing.map((field) => FIELD_LABEL[field].toLocaleLowerCase('fr')).join(', ')}. Ça nous aide à te proposer les bons articles et les bons ateliers.</p>
+      <Container className="space-y-10 pb-20">
+        {user && (
+          <section aria-labelledby="stats-title">
+            <h2 id="stats-title" className="sr-only">Mes chiffres</h2>
+            <ul className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+              <Stat value={mine.data?.length} label="Inscriptions" />
+              <Stat value={attended} label="Participations" />
+              <Stat value={issued?.length} label="Attestations" />
+              <Stat value={badges.data?.length} label="Badges" />
+              <li className="col-span-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5 lg:col-span-1">
+                <span className="block text-2xl font-semibold tabular-nums">{user.completion} %</span>
+                <span className="mt-0.5 block text-sm text-white/50">Profil complété</span>
+                <span aria-hidden="true" className="mt-2 block h-1 rounded-full bg-white/10"><span className={cn('block h-full rounded-full bg-gold-400', fillClass(user.completion / 100))} /></span>
+              </li>
+            </ul>
+            {user.completion < 100 && user.missing.length > 0 && (
+              <p className="mt-3 text-sm text-white/55">
+                Il manque : {user.missing.map((field) => FIELD_LABEL[field].toLocaleLowerCase('fr')).join(', ')}.{' '}
+                <a href={`#${SECTION_OF[user.missing[0]] ?? 'informations'}`} className="inline-flex items-center gap-1 text-gold-400 underline-offset-4 hover:underline">Compléter<ArrowRight className="h-3.5 w-3.5" aria-hidden="true" /></a>
+              </p>
+            )}
           </section>
+        )}
+
+        {user && (
+          <div className="grid gap-6 lg:grid-cols-2">
+            <section aria-labelledby="badges-title" className={CARD}>
+              <h2 id="badges-title" className="text-lg font-semibold tracking-tight">Mes badges</h2>
+              {badges.data?.length
+                ? <div className="mt-4"><BadgeList badges={badges.data} /></div>
+                : <p className="mt-2 text-sm text-white/55">Les badges récompensent ta participation à la communauté. Le premier arrive vite.</p>}
+            </section>
+            <section aria-labelledby="certificates-title" className={CARD}>
+              <h2 id="certificates-title" className="text-lg font-semibold tracking-tight">Mes attestations</h2>
+              {issued?.length ? (
+                <ul className="mt-4 space-y-2">
+                  {issued.map((certificate) => (
+                    <li key={certificate.code}>
+                      <Link to={`/attestations/${certificate.code}`} className="group flex items-center gap-3 rounded-2xl border border-white/10 px-4 py-3 transition-colors hover:border-gold-400/40">
+                        <Award className="h-5 w-5 shrink-0 text-gold-400" aria-hidden="true" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium first-letter:uppercase group-hover:text-gold-400">{certificate.title}</span>
+                          {certificate.issuedAt && <span className="block text-xs text-white/45">Délivrée le {dateFormat.format(new Date(certificate.issuedAt))}</span>}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              ) : <p className="mt-2 text-sm text-white/55">Chaque rendez-vous suivi te vaut une attestation vérifiable, à partager avec un recruteur.</p>}
+            </section>
+          </div>
         )}
 
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
@@ -171,65 +121,13 @@ export default function Profile() {
               <section className={CARD}>
                 <div className="flex items-start gap-3 text-sm leading-relaxed text-white/55">
                   <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-gold-400" aria-hidden="true" />
-                  <p>{isAdmin ? 'Tu utilises un compte administrateur. La gestion des contenus se fait dans l’administration.' : 'Tu es connecté avec un fournisseur externe. Ton identité et ton mot de passe se gèrent chez lui.'}</p>
+                  <p>{isAdmin ? 'Tu utilises un compte administrateur. La gestion des contenus se fait dans l’administration.' : 'Tu es connecté avec un fournisseur externe. Ton identité se gère chez lui.'}</p>
                 </div>
                 {isAdmin && <Link to="/admin" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-gold-400">Ouvrir l’administration<ArrowRight className="h-4 w-4" aria-hidden="true" /></Link>}
               </section>
             )}
           </div>
-
-          <div className="min-w-0 space-y-6">
-            <section id="securite" aria-label="Sécurité et connexion" className={cn(CARD, 'scroll-mt-8')}>
-              <div className="flex items-start justify-between gap-4">
-                <SecurityHeading Icon={user?.provider === 'LOCAL' ? Lock : KeyRound} title="Mot de passe" text={user?.provider === 'LOCAL' ? 'Change-le quand tu le souhaites.' : 'Ton compte est lié à un fournisseur externe : le mot de passe se gère chez lui.'} />
-                {user?.provider === 'LOCAL' && !editingPassword && <Button type="button" size="sm" variant="outline" className="shrink-0" onClick={() => { setEditingPassword(true); setPasswordNotice(''); setPasswordError(''); }}>Modifier</Button>}
-              </div>
-              {passwordNotice && <Notice tone="info" className="mt-5">{passwordNotice}</Notice>}
-              {editingPassword && user?.provider === 'LOCAL' && (
-                <form onSubmit={savePassword} className="mt-6" aria-busy={passwordBusy}>
-                  <fieldset disabled={passwordBusy} className="space-y-5">
-                    <legend className="sr-only">Changer le mot de passe</legend>
-                    <PasswordField id="current-password" label="Mot de passe actuel" autoComplete="current-password" required value={passwordForm.currentPassword} onChange={(event) => setPasswordForm({ ...passwordForm, currentPassword: event.target.value })} />
-                    <PasswordField id="new-password" label="Nouveau mot de passe" help="Au moins 10 caractères." autoComplete="new-password" required minLength={10} value={passwordForm.newPassword} onChange={(event) => setPasswordForm({ ...passwordForm, newPassword: event.target.value })} />
-                    <PasswordField id="confirm-password" label="Confirme le nouveau mot de passe" autoComplete="new-password" required minLength={10} value={passwordForm.confirmPassword} onChange={(event) => setPasswordForm({ ...passwordForm, confirmPassword: event.target.value })} />
-                    {passwordError && <Notice tone="error">{passwordError}</Notice>}
-                    <div className="flex flex-wrap gap-3">
-                      <Button type="submit" className="font-semibold">{passwordBusy && <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />}Enregistrer</Button>
-                      <Button type="button" variant="outline" onClick={closePasswordForm}>Annuler</Button>
-                    </div>
-                  </fieldset>
-                </form>
-              )}
-
-              {user && (
-                <div className="mt-8 border-t border-white/10 pt-8">
-                  <SecurityHeading Icon={KeyRound} title="Méthodes de connexion" text="Les façons de te connecter à ton compte." />
-                  {identityError && <Notice tone="error" className="mt-5">{identityError}</Notice>}
-                  {identityNotice && <Notice tone="info" className="mt-5">{identityNotice}</Notice>}
-                  <ul className="mt-5 space-y-2">
-                    <li className={ROW}>
-                      <span className="text-sm">{PROVIDER_LABEL.LOCAL}</span>
-                      <span className={cn('text-xs font-medium', user.provider === 'LOCAL' ? 'text-gold-400' : 'text-white/45')}>{user.provider === 'LOCAL' ? 'Actif' : 'Inactif'}</span>
-                    </li>
-                    {IDENTITY_PROVIDERS.map((provider) => {
-                      const linked = user.identities?.some((identity) => identity.provider === provider);
-                      const onlyMethod = linked && user.provider !== 'LOCAL' && user.identities?.length === 1 && user.identities[0]?.provider === provider;
-                      return (
-                        <li key={provider} className={ROW}>
-                          <span className="text-sm">{PROVIDER_LABEL[provider]}</span>
-                          {linked
-                            ? <button type="button" disabled={Boolean(unlinkBusy) || onlyMethod} onClick={() => void unlinkProvider(provider)} className="min-h-9 text-xs font-medium text-error-ink disabled:opacity-50">{unlinkBusy === provider ? 'Retrait…' : onlyMethod ? 'Obligatoire' : 'Retirer'}</button>
-                            : <button type="button" disabled={identityBusy} onClick={() => void linkProvider(provider)} className="min-h-9 text-xs font-medium text-gold-400 disabled:opacity-50">{identityBusy ? 'Redirection…' : 'Lier'}</button>}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
-            </section>
-
-            <NewsletterCard />
-          </div>
+          <div className="min-w-0"><NewsletterCard /></div>
         </div>
       </Container>
     </>
