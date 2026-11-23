@@ -64,7 +64,7 @@ export function isAdmin(user: User | null | undefined): boolean {
   return rolesOf(user).includes('admin');
 }
 
-export function safeReturnPath(value: unknown, fallback = '/profil'): string {
+export function safeReturnPath(value: unknown, fallback = '/'): string {
   if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//') || value.includes('\\') || Array.from(value).some((character) => character.charCodeAt(0) <= 32)) return fallback;
   try {
     const url = new URL(value, window.location.origin);
