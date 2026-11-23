@@ -8,8 +8,7 @@ import Ribbons from '@/components/landing/Ribbons';
 import Subjects from '@/components/landing/Subjects';
 import UpcomingEvents from '@/components/landing/UpcomingEvents';
 import type { NavItem } from '@/components/site/navigation';
-import SiteFooter from '@/components/site/SiteFooter';
-import SiteHeader from '@/components/site/SiteHeader';
+import SiteShell from '@/components/site/SiteShell';
 import { SPACES } from '@/config/site';
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
@@ -36,21 +35,16 @@ export default function Landing() {
   const articles = recent.data?.content ?? [];
 
   return (
-    <div className="min-h-screen bg-black font-geist text-white antialiased">
+    <SiteShell items={NAV_ITEMS} nextEvent={events[0]} flush>
       <SEO description="LesCracks : articles techniques, ateliers en direct et le Talk pour apprendre la tech avec ceux qui la font." url="/" />
-      <a href="#main-content" className="sr-only z-[60] rounded-full bg-gold-400 px-5 py-3 font-medium text-black focus:not-sr-only focus:fixed focus:left-5 focus:top-3">Aller au contenu</a>
-      <SiteHeader items={NAV_ITEMS} isSignedIn={isSignedIn} nextEvent={events[0]} />
-      <main id="main-content" tabIndex={-1} className="focus:outline-none">
-        <Hero nextEvent={events[0]} isSignedIn={isSignedIn} />
-        <Subjects />
-        <Platform />
-        {events.length > 0 && <UpcomingEvents events={events} />}
-        <Ribbons />
-        {articles.length > 0 && <LatestArticles articles={articles} />}
-        <Faq />
-        <JoinCall isSignedIn={isSignedIn} />
-      </main>
-      <SiteFooter />
-    </div>
+      <Hero nextEvent={events[0]} isSignedIn={isSignedIn} />
+      <Subjects />
+      <Platform />
+      {events.length > 0 && <UpcomingEvents events={events} />}
+      <Ribbons />
+      {articles.length > 0 && <LatestArticles articles={articles} />}
+      <Faq />
+      <JoinCall isSignedIn={isSignedIn} />
+    </SiteShell>
   );
 }
