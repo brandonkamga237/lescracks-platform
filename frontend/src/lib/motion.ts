@@ -1,2 +1,2 @@
-/** The landing's one curve: a quick start that settles slowly. */
-export const EASE = [0.22, 1, 0.36, 1] as const;
+/** Same curve as the CSS --ease-out, for animations driven from JavaScript. */
+export const EASE = [0.23, 1, 0.32, 1] as const;
