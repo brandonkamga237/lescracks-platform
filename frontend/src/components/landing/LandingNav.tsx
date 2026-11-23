@@ -8,6 +8,7 @@ import { GitHubIcon, LinkedInIcon, YouTubeIcon } from '@/components/icons/BrandI
 import MagneticLink from '@/components/landing/MagneticLink';
 import { EASE } from '@/lib/motion';
 import { eventTeaser } from '@/lib/eventMoment';
+import { deriveEventStatus } from '@/lib/eventStatus';
 import { eventPath } from '@/lib/slugs';
 import type { EventSummary } from '@/services/types';
 
@@ -198,7 +199,7 @@ export default function LandingNav({ isSignedIn, nextEvent }: LandingNavProps) {
               <motion.div variants={MENU_ITEM} initial="closed" animate="open" transition={{ delay: 0.55 }} className="relative mt-6">
                 <Link to={eventPath(nextEvent)} onClick={closeMenu} className="flex items-center justify-between gap-4 rounded-2xl border border-gold-400/20 bg-gradient-to-r from-gold-400/[0.12] to-transparent p-4">
                   <span className="min-w-0">
-                    <span className="block text-xs font-medium text-gold-400">Prochain rendez-vous · {eventTeaser(nextEvent.startDate)}</span>
+                    <span className="block text-xs font-medium text-gold-400">{deriveEventStatus(nextEvent.startDate, nextEvent.endDate) === 'open' ? 'En direct maintenant' : `Prochain rendez-vous · ${eventTeaser(nextEvent.startDate)}`}</span>
                     <span className="mt-1 block truncate font-medium">{nextEvent.title}</span>
                   </span>
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold-400 text-black"><ArrowRight className="h-4 w-4" aria-hidden="true" /></span>
