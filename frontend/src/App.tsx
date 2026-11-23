@@ -149,8 +149,11 @@ function AppRoutes() {
       {/* The library became the blog: links already shared keep working. */}
       <Route path="/ressources" element={<Navigate to="/blog" replace />} />
       <Route path="/ressources/:slug" element={<LegacyArticle />} />
-      <Route path="/evenements" element={<Evenements />} />
-      <Route path="/evenements/:id" element={<EvenementDetail />} />
+      <Route path="/rendez-vous" element={<Evenements />} />
+      <Route path="/rendez-vous/:id" element={<EvenementDetail />} />
+      {/* Events became rendez-vous: links already shared keep working. */}
+      <Route path="/evenements" element={<Navigate to="/rendez-vous" replace />} />
+      <Route path="/evenements/:id" element={<LegacyRendezVous />} />
       <Route path="/attestations/:code" element={<Suspense fallback={<Waiting />}><Attestation /></Suspense>} />
       <Route path="/membres/:id" element={<Suspense fallback={<Waiting />}><MemberProfile /></Suspense>} />
       <Route path="/talk" element={<Talk />} />
@@ -194,6 +197,11 @@ function LegacyArticle() {
   const { slug = '' } = useParams();
   const listing = ['ebooks', 'videos', 'articles'].includes(slug);
   return <Navigate to={listing ? '/blog' : `/blog/${slug}`} replace />;
+}
+
+function LegacyRendezVous() {
+  const { id = '' } = useParams();
+  return <Navigate to={`/rendez-vous/${id}`} replace />;
 }
 
 export default function App() {
