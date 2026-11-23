@@ -166,6 +166,8 @@ export default {
     animation: {
       rise: 'rise 300ms var(--ease-out) both',
       'page-in': 'page-in 180ms var(--ease-out) both',
+      // `translate`, not `transform`, so a float can run under a scroll-driven transform.
+      float: 'float 6s ease-in-out infinite',
     },
     keyframes: {
       rise: {
@@ -175,6 +177,9 @@ export default {
       'page-in': {
         from: { opacity: '0' },
         to: { opacity: '1' },
+      },
+      float: {
+        '50%': { translate: '0 -10px' },
       },
     },
     // Overrides Tailwind's weak defaults so every existing `ease-out` / `ease-in-out` gets the strong curve.
