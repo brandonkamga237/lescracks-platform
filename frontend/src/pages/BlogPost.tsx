@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowUpRight, MessageCircle } from 'lucide-react';
 
 import ArticleCover from '@/components/blog/ArticleCover';
@@ -10,13 +9,11 @@ import ReadMarker from '@/components/common/ReadMarker';
 import SEO from '@/components/common/SEO';
 import ShareButton from '@/components/common/ShareButton';
 import StickyActionBar from '@/components/common/StickyActionBar';
-import { SplitText } from '@/components/motion/SplitText';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { EmptyPanel, ErrorPanel } from '@/components/ui/panels';
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
-import { EASE } from '@/lib/motion';
 import { articlePath } from '@/lib/slugs';
 import { cn } from '@/lib/utils';
 import { browserVisitorId } from '@/lib/visitor';
@@ -34,7 +31,7 @@ function Heart({ filled }: { filled: boolean }) {
 
 const COUNT = 'rounded-full bg-white/10 px-2 py-0.5 text-xs tabular-nums text-white/70';
 
-/** An article: its title in the landing's display voice, the text in a reading column, reactions beside it. */
+/** An article: title and reading time up front, the text in a reading column, reactions beside it. */
 export default function BlogPost() {
   const { slug = '' } = useParams();
   const { isSignedIn, signIn } = useSession();
@@ -82,8 +79,8 @@ export default function BlogPost() {
   return (
     <article>
       <SEO title={loaded?.title ?? (missing ? 'Article introuvable' : 'Article')} description={loaded?.description ?? 'Les articles du blog LesCracks.'} image={loaded?.coverImage || undefined} url={loaded ? articlePath(loaded) : '/blog'} />
-      <Container className="pt-8 sm:pt-12">
-        <Link to="/blog" className="group inline-flex min-h-11 items-center gap-2 text-sm text-white/55 transition-colors hover:text-white">
+      <Container className="pt-6 sm:pt-8">
+        <Link to="/blog" className="group inline-flex min-h-10 items-center gap-2 text-sm text-white/55 transition-colors hover:text-white">
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />Tous les articles
         </Link>
 
@@ -92,10 +89,10 @@ export default function BlogPost() {
         {!missing && post.error && <div className="py-16"><ErrorPanel title="Impossible de charger l’article." message={post.error.message} onRetry={post.reload} /></div>}
 
         {loaded && (
-          <header className="max-w-4xl pb-10 pt-8 sm:pb-14 sm:pt-12">
-            {loaded.categoryName && <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EASE }} className="text-sm font-medium text-gold-400">{loaded.categoryName}</motion.p>}
-            <SplitText as="h1" onMount delay={0.08} parts={[loaded.title]} className="mt-5 break-words text-display font-semibold" />
-            <p className="mt-6 text-sm text-white/50">
+          <header className="max-w-3xl pb-8 pt-4">
+            {loaded.categoryName && <p className="text-sm font-medium text-gold-400">{loaded.categoryName}</p>}
+            <h1 className="mt-2 break-words text-2xl font-semibold leading-tight tracking-tight sm:text-4xl">{loaded.title}</h1>
+            <p className="mt-3 text-sm text-white/50">
               {published && <>Publié le <time dateTime={published}>{dateFormat.format(new Date(published))}</time> · </>}
               {loaded.readingMinutes ?? 1} min de lecture
               {viewCount > 0 && <> · {viewCount.toLocaleString('fr-FR')} {viewCount > 1 ? 'lectures' : 'lecture'}</>}
@@ -106,16 +103,15 @@ export default function BlogPost() {
 
       {loaded && (
         <Container className="pb-24">
-          <div className="relative aspect-[16/9] overflow-hidden rounded-3xl bg-white/[0.03] sm:rounded-[2rem]">
-            {loaded.coverImage && failedImage !== loaded.coverImage
-              ? <img src={loaded.coverImage} alt={`Illustration de ${loaded.title}`} onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" />
-              : <ArticleCover size="spotlight" />}
-          </div>
-
-          <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start lg:gap-16 xl:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start lg:gap-14">
             <div className="min-w-0">
-              <p className="max-w-[42rem] whitespace-pre-line break-words text-xl font-medium leading-relaxed text-white sm:text-[1.375rem]">{loaded.description}</p>
-              <hr className="my-10 max-w-[42rem] border-white/10" />
+              <div className="relative aspect-[16/9] max-w-[42rem] overflow-hidden rounded-3xl bg-white/[0.03]">
+                {loaded.coverImage && failedImage !== loaded.coverImage
+                  ? <img src={loaded.coverImage} alt={`Illustration de ${loaded.title}`} onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" />
+                  : <ArticleCover size="spotlight" />}
+              </div>
+              <p className="mt-8 max-w-[42rem] whitespace-pre-line break-words text-lg font-medium leading-relaxed text-white">{loaded.description}</p>
+              <hr className="my-8 max-w-[42rem] border-white/10" />
               <ArticleRenderer article={loaded} />
               <ReadMarker event="Article lu en entier" data={{ article: loaded.slug ?? String(loaded.id) }} />
               {loaded.tags.length > 0 && (
@@ -125,7 +121,7 @@ export default function BlogPost() {
               )}
             </div>
 
-            <aside ref={actions} aria-label="Réagir à l’article" className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 lg:sticky lg:top-8">
+            <aside ref={actions} aria-label="Réagir à l’article" className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 lg:sticky lg:top-6">
               <p className="text-sm leading-relaxed text-white/55">Cet article t’a aidé ? Fais-le savoir, ou envoie-le à quelqu’un qui en a besoin.</p>
               <Button type="button" variant="outline" onClick={() => void toggleLike()} disabled={liking} aria-pressed={liked} className={cn('mt-5 w-full', liked && 'border-gold-400/50 bg-gold-400/10 text-white')}>
                 <Heart filled={liked} />{liked ? 'Coup de cœur envoyé' : 'Coup de cœur'}{likeCount > 0 && <span className={COUNT}>{likeCount}</span>}
