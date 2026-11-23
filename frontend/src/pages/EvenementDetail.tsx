@@ -1,33 +1,58 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowUpRight, CalendarDays, CalendarPlus, Clock3, Download, MapPin, Radio } from 'lucide-react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+
 import Prose from '@/components/common/Prose';
 import SEO from '@/components/common/SEO';
 import ShareButton from '@/components/common/ShareButton';
-import LineArt from '@/components/illustrations/LineArt';
+import StickyActionBar from '@/components/common/StickyActionBar';
 import { TYPE_LABEL } from '@/components/events/AgendaItem';
 import EventRegistrationAction from '@/components/events/EventRegistrationAction';
 import HackathonSteps from '@/components/events/HackathonSteps';
-import StickyActionBar from '@/components/common/StickyActionBar';
 import ProjectSubmission from '@/components/events/ProjectSubmission';
 import ViewCount from '@/components/events/ViewCount';
-import Layout from '@/components/layout/Layout';
+import { SplitText } from '@/components/motion/SplitText';
+import { Button } from '@/components/ui/button';
+import { Container } from '@/components/ui/container';
+import { EmptyPanel, ErrorPanel } from '@/components/ui/panels';
+import { PulseDot } from '@/components/ui/pulse-dot';
 import { useApi } from '@/hooks/useApi';
 import { useEventRegistration } from '@/hooks/useEventRegistration';
-import { api } from '@/services/api';
 import { downloadIcs, googleCalendarUrl } from '@/lib/calendar';
+import { deriveEventStatus } from '@/lib/eventStatus';
+import { EASE } from '@/lib/motion';
 import { markdownToPlainText } from '@/lib/plainText';
 import { eventPath } from '@/lib/slugs';
 import { browserVisitorId } from '@/lib/visitor';
+import { api } from '@/services/api';
 
-const formatLabels = { ONLINE: 'En ligne', OFFLINE: 'Sur place', HYBRID: 'Hybride' } as const;
-const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeStyle: 'short' });
+const FORMAT_LABEL = { ONLINE: 'En ligne', OFFLINE: 'Sur place', HYBRID: 'Hybride' } as const;
+const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'full', timeStyle: 'short' });
 
+interface FactProps {
+  Icon: typeof CalendarDays;
+  label: string;
+  children: React.ReactNode;
+}
+
+function Fact({ Icon, label, children }: FactProps) {
+  return (
+    <div className="flex gap-3">
+      <Icon className="mt-0.5 h-5 w-5 shrink-0 text-gold-400" aria-hidden="true" />
+      <div className="min-w-0">
+        <dt className="text-xs text-white/45">{label}</dt>
+        <dd className="mt-1 break-words text-sm leading-relaxed text-white">{children}</dd>
+      </div>
+    </div>
+  );
+}
+
+/** A rendez-vous: when and what in the landing's display voice, the one action, then the programme. */
 export default function EvenementDetail() {
   const { id = '' } = useParams();
-  const location = useLocation();
   const hasParam = id.trim().length > 0;
-  const event = useApi((signal) => hasParam ? api.event(id, signal) : Promise.resolve(null), [id, hasParam]);
+  const event = useApi((signal) => (hasParam ? api.event(id, signal) : Promise.resolve(null)), [id, hasParam]);
   const loaded = hasParam && !event.loading && !event.error && event.data ? event.data : null;
   const [failedImage, setFailedImage] = useState<string | undefined>(undefined);
   const [views, setViews] = useState<{ id: number; count: number } | null>(null);
@@ -43,82 +68,98 @@ export default function EvenementDetail() {
       .then(({ viewCount }) => setViews({ id: loaded.id, count: viewCount }))
       .catch(() => undefined);
   }, [loaded]);
+
   const viewCount = loaded ? (views?.id === loaded.id ? views.count : loaded.viewCount ?? 0) : 0;
   const missing = !hasParam || event.error?.status === 404;
-  const previousPath: unknown = location.state?.cataloguePath;
-  const cataloguePath = typeof previousPath === 'string' && /^\/rendez-vous(?:\?.*)?$/.test(previousPath) ? previousPath : '/rendez-vous';
-  const start = loaded ? new Date(loaded.startDate) : null;
-  const end = loaded?.endDate ? new Date(loaded.endDate) : null;
-  const hasDate = start && !Number.isNaN(start.getTime());
-  const hasEndDate = end && !Number.isNaN(end.getTime());
-  const now = Date.now();
-  const status = loaded?.status === 'CANCELLED' ? 'Annulé' : loaded?.status === 'COMPLETED' || (hasEndDate && end.getTime() < now) ? 'Terminé' : hasDate && start.getTime() > now ? 'À venir' : hasEndDate ? 'En cours' : 'Date passée';
-
-  const isOpen = status === 'À venir' || status === 'En cours';
+  const tense = loaded ? deriveEventStatus(loaded.startDate, loaded.endDate) : 'upcoming';
+  const cancelled = loaded?.status === 'CANCELLED';
+  const over = !cancelled && (loaded?.status === 'COMPLETED' || tense === 'closed');
+  const isOpen = Boolean(loaded) && !cancelled && !over;
+  const state = cancelled ? 'Annulé' : over ? 'Terminé' : tense === 'open' ? 'En direct' : 'À venir';
 
   return (
-    <Layout>
+    <article>
       <SEO title={loaded?.title ?? (missing ? 'Rendez-vous introuvable' : 'Rendez-vous')} description={loaded ? markdownToPlainText(loaded.description).slice(0, 300) : 'Découvre les rendez-vous LesCracks pour apprendre et pratiquer la tech ensemble.'} image={loaded?.coverImage || undefined} url={loaded ? eventPath(loaded) : '/rendez-vous'} />
-      <article>
-        <div className="mode-raised">
-        <div className="mx-auto max-w-7xl px-5 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-10">
-        <nav aria-label="Fil d’Ariane" className="flex flex-wrap items-center gap-3 text-sm text-t3">
-          <Link to={cataloguePath} className="inline-flex min-h-11 items-center gap-2 rounded-lg hover:text-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"><ArrowLeft className="h-4 w-4" aria-hidden />Tous les rendez-vous</Link>
-          {loaded && <><span aria-hidden>/</span><span className="min-w-0 truncate text-t2" aria-current="page">{loaded.title}</span></>}
-        </nav>
-        {hasParam && event.loading && <p className="py-24 text-center text-t3" role="status">Chargement du rendez-vous…</p>}
-        {(missing || event.error) && <div className="my-12 rounded-lg border border-line bg-noir-900 px-6 py-16 text-center" role="alert"><h1 className="font-display text-3xl font-bold text-t1">{missing ? 'Ce rendez-vous est introuvable.' : 'Impossible de charger ce rendez-vous.'}</h1><p className="mx-auto mt-4 max-w-lg text-t3">{missing ? 'Il n’est peut-être plus publié. Retrouve les autres rendez-vous dans l’agenda.' : event.error?.message}</p>{!missing && <button type="button" onClick={event.reload} className="btn-primary mt-6">Réessayer</button>}<Link to={cataloguePath} className="mx-auto mt-5 block w-fit py-2 text-sm text-gold-ink underline underline-offset-4">Retour à l’agenda</Link></div>}
+      <Container className="pt-8 sm:pt-12">
+        <Link to="/rendez-vous" className="group inline-flex min-h-11 items-center gap-2 text-sm text-white/55 transition-colors hover:text-white">
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />Tous les rendez-vous
+        </Link>
 
-        {loaded && <>
-          <header className="mt-5 max-w-5xl sm:mt-8">
-            <div className="flex flex-wrap items-center gap-3"><span className="rounded-full bg-gold-400 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-black">{TYPE_LABEL[loaded.type]}</span><span className="label">{formatLabels[loaded.format]}</span><span className="label">· {status}</span><ViewCount count={viewCount} spelledOut className="label" /></div>
-            <h1 className="mt-3 break-words font-display text-3xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl lg:text-5xl">{loaded.title}</h1>
-            {hasDate && <p className="mt-3 text-base sm:text-lg font-semibold text-t2"><time dateTime={loaded.startDate}>{dateFormat.format(start)}</time></p>}
+        {hasParam && event.loading && <p role="status" className="py-32 text-center text-white/50">Chargement du rendez-vous…</p>}
+        {missing && <div className="py-16"><EmptyPanel title="Ce rendez-vous est introuvable." description="Il n’est peut-être plus publié. Retrouve les autres dans l’agenda." action={<Button asChild variant="outline"><Link to="/rendez-vous">Retour à l’agenda</Link></Button>} /></div>}
+        {!missing && event.error && <div className="py-16"><ErrorPanel title="Impossible de charger ce rendez-vous." message={event.error.message} onRetry={event.reload} /></div>}
+
+        {loaded && (
+          <header className="max-w-5xl pb-12 pt-8 sm:pb-16 sm:pt-12">
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EASE }} className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
+              <span className="rounded-full bg-gold-400 px-3 py-1 text-xs font-semibold text-black">{TYPE_LABEL[loaded.type]}</span>
+              <span className="text-white/55">{FORMAT_LABEL[loaded.format]}</span>
+              <span className="inline-flex items-center gap-2 text-white/55">· {tense === 'open' && isOpen && <PulseDot />}{state}</span>
+              <ViewCount count={viewCount} spelledOut className="text-white/55" />
+            </motion.div>
+            <SplitText as="h1" onMount delay={0.08} parts={[loaded.title]} className="mt-6 break-words text-display font-semibold" />
+            <p className="mt-5 text-lg text-white/70 first-letter:uppercase"><time dateTime={loaded.startDate}>{dateFormat.format(new Date(loaded.startDate))}</time></p>
             {isOpen && <div ref={heroAction}><EventRegistrationAction event={loaded} state={registration} variant="hero" /></div>}
-            {!isOpen && <div className="mt-6 w-fit"><ShareButton title={loaded.title} path={eventPath(loaded)} label="Partager le rendez-vous" /></div>}
+            {!isOpen && <div className="mt-8 w-fit"><ShareButton title={loaded.title} path={eventPath(loaded)} label="Partager le rendez-vous" /></div>}
             {loaded.acceptsSubmissions && <HackathonSteps event={loaded} />}
           </header>
-        </>}
-        </div>
-        </div>
+        )}
+      </Container>
 
-        {loaded && <>
-          <div className="aspect-[16/9] w-full overflow-hidden bg-noir-800 sm:aspect-[21/9]">
-            {loaded.coverImage && failedImage !== loaded.coverImage ? <img src={loaded.coverImage} alt="" onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" /> : <div aria-hidden className="relative flex h-full w-full items-center justify-end bg-noir-900 pr-[10%]"><span className="absolute bottom-4 left-5 font-display text-6xl font-bold leading-none text-t4 opacity-20 sm:left-8 sm:text-8xl">{TYPE_LABEL[loaded.type]}</span><LineArt motif="calendar" className="relative h-3/5 text-gold-400" /></div>}
+      {loaded && (
+        <Container className="pb-24">
+          <div className="relative aspect-[16/9] overflow-hidden rounded-3xl bg-gradient-to-br from-gold-400/20 to-white/[0.02] sm:aspect-[21/9] sm:rounded-[2rem]">
+            {loaded.coverImage && failedImage !== loaded.coverImage
+              ? <img src={loaded.coverImage} alt="" onError={() => setFailedImage(loaded.coverImage)} className="h-full w-full object-cover" />
+              : <span aria-hidden="true" className="absolute bottom-5 left-6 text-6xl font-semibold tracking-tight text-white/10 sm:text-8xl">{TYPE_LABEL[loaded.type]}</span>}
           </div>
-          <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-14">
 
-          {status === 'Annulé' && <p className="mb-10 rounded bg-card px-6 py-5 text-sm leading-relaxed text-t2" role="status">Ce rendez-vous a été annulé. Les informations ci-dessous sont conservées à titre de référence.</p>}
-          {status === 'Terminé' && <p className="mb-10 rounded bg-card px-6 py-5 text-sm leading-relaxed text-t3">Ce rendez-vous est terminé. Explore l’agenda pour découvrir les prochains rendez-vous.</p>}
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-16">
-            <section aria-labelledby="event-description" className="min-w-0"><h2 id="event-description" className="font-display text-3xl font-bold leading-tight text-t1">Au programme</h2><div className="mt-5 min-w-0 break-words"><Prose text={loaded.description} /></div>{loaded.acceptsSubmissions && <ProjectSubmission event={loaded} />}</section>
-            <aside className="rounded-lg bg-card p-6 sm:p-7" aria-label="Informations pratiques">
-              <h2 className="font-display text-xl font-bold text-t1">Le rendez-vous en détail</h2>
-              <dl className="mt-6 space-y-6">
-                <div className="flex gap-3"><CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" aria-hidden /><div><dt className="label">Début</dt><dd className="mt-2 text-sm leading-relaxed text-t1">{hasDate ? <time dateTime={loaded.startDate}>{dateFormat.format(start)}</time> : 'Date non renseignée'}</dd></div></div>
-                {hasEndDate && <div className="flex gap-3"><Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" aria-hidden /><div><dt className="label">Fin</dt><dd className="mt-2 text-sm leading-relaxed text-t1"><time dateTime={loaded.endDate}>{dateFormat.format(end)}</time></dd></div></div>}
-                <div className="flex gap-3"><Radio className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" aria-hidden /><div><dt className="label">Format</dt><dd className="mt-2 text-sm text-t1">{formatLabels[loaded.format]}</dd></div></div>
-                {loaded.location && <div className="flex gap-3"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" aria-hidden /><div className="min-w-0"><dt className="label">Lieu</dt><dd className="mt-2 break-words text-sm leading-relaxed text-t1">{loaded.location}</dd></div></div>}
+          {cancelled && <p role="status" className="mt-10 rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-5 text-sm leading-relaxed text-white/70">Ce rendez-vous a été annulé. Les informations ci-dessous restent là pour référence.</p>}
+          {over && <p className="mt-10 rounded-3xl border border-white/10 bg-white/[0.03] px-6 py-5 text-sm leading-relaxed text-white/55">Ce rendez-vous est terminé. L’agenda t’attend pour le prochain.</p>}
+
+          <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:gap-16">
+            <section aria-labelledby="programme-title" className="min-w-0">
+              <p className="text-sm font-medium text-gold-400">Au programme</p>
+              <h2 id="programme-title" className="mt-3 text-3xl font-semibold tracking-tight">Ce que tu vas faire.</h2>
+              <div className="mt-6 min-w-0 break-words"><Prose text={loaded.description} /></div>
+              {loaded.acceptsSubmissions && <ProjectSubmission event={loaded} />}
+            </section>
+
+            <aside aria-label="Informations pratiques" className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 lg:sticky lg:top-8">
+              <dl className="space-y-5">
+                <Fact Icon={CalendarDays} label="Début"><time dateTime={loaded.startDate}>{dateFormat.format(new Date(loaded.startDate))}</time></Fact>
+                {loaded.endDate && <Fact Icon={Clock3} label="Fin"><time dateTime={loaded.endDate}>{dateFormat.format(new Date(loaded.endDate))}</time></Fact>}
+                <Fact Icon={Radio} label="Format">{FORMAT_LABEL[loaded.format]}</Fact>
+                {loaded.location && <Fact Icon={MapPin} label="Lieu">{loaded.location}</Fact>}
               </dl>
-              <p className="mt-6 border-t border-line pt-4 text-xs leading-relaxed text-t3">Les horaires sont affichés dans ton fuseau horaire.</p>
+              <p className="mt-6 border-t border-white/10 pt-4 text-xs leading-relaxed text-white/45">Les horaires sont affichés dans ton fuseau horaire.</p>
               <div className="mt-5 grid gap-2">
                 <ShareButton title={loaded.title} path={eventPath(loaded)} label="Partager le rendez-vous" />
-                {hasDate && isOpen && <>
-                  <a href={googleCalendarUrl(loaded, `${window.location.origin}${eventPath(loaded)}`)} target="_blank" rel="noopener noreferrer" className="btn-secondary w-full"><CalendarPlus className="h-4 w-4" aria-hidden />Ajouter à Google Agenda</a>
-                  <button type="button" onClick={() => downloadIcs(loaded, `${window.location.origin}${eventPath(loaded)}`)} className="inline-flex min-h-11 items-center justify-center gap-2 text-sm text-t3 underline-offset-4 hover:text-t1 hover:underline"><Download className="h-4 w-4" aria-hidden />Apple, Outlook (.ics)</button>
-                </>}
+                {isOpen && (
+                  <>
+                    <Button asChild variant="outline" className="w-full"><a href={googleCalendarUrl(loaded, `${window.location.origin}${eventPath(loaded)}`)} target="_blank" rel="noopener noreferrer"><CalendarPlus className="h-4 w-4" aria-hidden="true" />Ajouter à Google Agenda</a></Button>
+                    <button type="button" onClick={() => downloadIcs(loaded, `${window.location.origin}${eventPath(loaded)}`)} className="inline-flex min-h-11 items-center justify-center gap-2 text-sm text-white/55 underline-offset-4 transition-colors hover:text-white hover:underline"><Download className="h-4 w-4" aria-hidden="true" />Apple, Outlook (.ics)</button>
+                  </>
+                )}
               </div>
             </aside>
           </div>
-          <div className="mt-16 flex flex-col justify-between gap-5 rounded-lg bg-card p-6 sm:flex-row sm:items-center sm:p-8"><div><h2 className="font-display text-2xl font-bold text-t1">Un autre rendez-vous à découvrir ?</h2><p className="mt-2 text-sm text-t3">Retrouve tous les formats dans l’agenda LesCracks.</p></div><Link to={cataloguePath} className="btn-primary shrink-0">Explorer l’agenda<ArrowUpRight className="h-4 w-4" aria-hidden /></Link></div>
+
+          <div className="mt-16 flex flex-col justify-between gap-6 rounded-[2rem] border border-white/10 bg-white/[0.03] p-6 sm:flex-row sm:items-center sm:p-10">
+            <div>
+              <p className="text-2xl font-semibold tracking-tight">Un autre rendez-vous ?</p>
+              <p className="mt-2 text-sm text-white/55">Ateliers, webinaires et conférences : tout est dans l’agenda.</p>
+            </div>
+            <Button asChild size="lg" className="shrink-0 font-semibold"><Link to="/rendez-vous">Voir l’agenda<ArrowUpRight className="h-4 w-4" aria-hidden="true" /></Link></Button>
           </div>
+
           {isOpen && !registration.isAdmin && (
             <StickyActionBar anchor={heroAction} label="Participer au rendez-vous">
               <EventRegistrationAction event={loaded} state={registration} variant="bar" />
             </StickyActionBar>
           )}
-        </>}
-      </article>
-    </Layout>
+        </Container>
+      )}
+    </article>
   );
 }
