@@ -64,7 +64,7 @@ export default function AvatarPicker({ name, avatarUrl, onChanged }: AvatarPicke
       <button type="button" onClick={() => input.current?.click()} disabled={Boolean(busy)}
         aria-label={shown ? 'Changer ma photo' : 'Ajouter une photo'}
         className="group relative h-16 w-16 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-400 sm:h-20 sm:w-20">
-        <span className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border border-gold-400/30 bg-gold-400/10 font-display text-2xl text-gold-ink sm:text-3xl">
+        <span className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border border-gold-400/30 bg-gold-400/10 text-2xl text-gold-400 sm:text-3xl">
           {shown
             ? <img src={shown} alt="" className="h-full w-full object-cover" />
             : name ? name.charAt(0).toUpperCase() : <UserRound aria-hidden="true" className="h-8 w-8" />}
@@ -80,7 +80,7 @@ export default function AvatarPicker({ name, avatarUrl, onChanged }: AvatarPicke
       </button>
       <input ref={input} type="file" accept={ACCEPTED} className="sr-only" tabIndex={-1} aria-hidden="true"
         onChange={(event) => { const file = event.target.files?.[0]; if (file) void choose(file); event.target.value = ''; }} />
-      {shown && !busy && <button type="button" onClick={() => void remove()} className="text-xs text-t4 underline-offset-4 hover:text-t1 hover:underline">Retirer</button>}
+      {shown && !busy && <button type="button" onClick={() => void remove()} className="text-xs text-white/45 underline-offset-4 hover:text-white hover:underline">Retirer</button>}
       {failure && <p role="alert" className="max-w-[12rem] text-center text-xs text-error-ink">{failure}</p>}
     </div>
   );
