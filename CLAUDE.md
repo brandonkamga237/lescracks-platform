@@ -75,11 +75,14 @@ Use `pnpm`, never `npm`. Before a commit, the checks of the area you touched mus
 
 - **Article**: a blog post in the `articles` table (module `content`); the API and the
   frontend still call it a "resource" (`/api/resources`)
+- **Rendez-vous**: an event as members see it, on screen and in addresses (`/rendez-vous`);
+  the code, tables and API keep `event` (`/api/events`). Screens never say "événement"
 - **Talk**: an episode of the LesCracks Talk, a YouTube video (`talk_videos`)
 - **Registration**: a member signed up for an event; **submission**: a hackathon team project
 - **Certificate**: proof of participation in an event, checkable by anyone at
   `/attestations/{code}`; **badge**: a distinction awarded to a member
-- **Formations**: the courses tab, "coming soon": there is no course model yet
+- **Cours**: the courses tab (`/cours`), "coming soon": there is no course model yet. Screens
+  never say "formation"
 - **SEO snapshot**: server-rendered HTML that nginx serves to crawlers instead of the SPA
 
 ## Where to look
