@@ -145,7 +145,8 @@ function AppRoutes() {
               them out. Everything below is open. */}
       <Route path="/blog" element={<Blog />} />
       <Route path="/blog/:slug" element={<BlogPost />} />
-      <Route path="/formations" element={<Formations />} />
+      <Route path="/cours" element={<Formations />} />
+      <Route path="/formations" element={<Navigate to="/cours" replace />} />
       {/* The library became the blog: links already shared keep working. */}
       <Route path="/ressources" element={<Navigate to="/blog" replace />} />
       <Route path="/ressources/:slug" element={<LegacyArticle />} />
