@@ -148,6 +148,11 @@
     @apply font-display font-bold tracking-tight;
   }
 
+  /* The redesigned pages set Geist on their root; without this the heading rule above would pull DM Sans back in. */
+  .font-geist :where(h1, h2, h3, h4, h5, h6) {
+    font-family: inherit;
+  }
+
   h1 {
     @apply text-3xl leading-tight sm:text-4xl lg:text-5xl;
   }
