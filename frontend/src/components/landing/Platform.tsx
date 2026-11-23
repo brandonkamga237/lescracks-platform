@@ -19,7 +19,7 @@ const POSES = [
 /** The spaces of the platform, one editorial row each, on the ivory band. */
 export default function Platform() {
   return (
-    <Band tone="ivory" labelledBy="platform-title">
+    <Band id="plateforme" tone="ivory" labelledBy="platform-title">
       <Container className="pb-24 pt-20 sm:pt-28">
         <SectionHeading id="platform-title" tone="light" eyebrow="La plateforme" title={['Tout pour apprendre la tech.', { text: 'Lire, regarder, pratiquer, au même endroit.', className: 'text-black/40' }]} />
 
