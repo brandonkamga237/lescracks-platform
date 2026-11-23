@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Check, Mail } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import { useSession } from '@/hooks/useSession';
 import { api } from '@/services/api';
 import { track } from '@/lib/analytics';
@@ -39,20 +40,22 @@ export default function NewsletterCard() {
   }
 
   return (
-    <div className="flex gap-4 rounded-lg border border-gold-400/20 bg-gold-400/[0.06] p-6">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded border border-gold-400/25 bg-gold-400/10 text-gold-ink"><Mail className="h-5 w-5" aria-hidden /></div>
+    <div className="flex gap-4 rounded-[2rem] border border-gold-400/20 bg-gold-400/[0.05] p-6 sm:p-8">
+      <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gold-400/15 text-gold-400"><Mail className="h-5 w-5" aria-hidden /></div>
       <div className="flex-1">
-        <h3 className="font-display text-lg font-bold text-t1">Newsletter LesCracks</h3>
-        <p className="mt-1 text-sm leading-relaxed text-t4">Les nouveaux articles et rendez-vous, directement par email.</p>
-        <button
+        <h3 className="text-xl font-semibold tracking-tight">Newsletter</h3>
+        <p className="mt-1 text-sm leading-relaxed text-white/55">Les nouveaux articles et rendez-vous, directement par email.</p>
+        <Button
           type="button"
+          size="sm"
+          variant={subscribed ? 'outline' : 'primary'}
           onClick={() => void toggle()}
           disabled={busy || subscribed == null}
-          className={`mt-4 inline-flex items-center gap-2 rounded px-5 py-2.5 text-sm font-semibold transition disabled:opacity-50 ${subscribed ? 'border border-line text-t3 hover:text-t1' : 'bg-gold-400 text-noir-950 hover:bg-gold-300'}`}
+          className="mt-5 font-semibold"
         >
           {subscribed ? <Check className="h-4 w-4" aria-hidden /> : <Mail className="h-4 w-4" aria-hidden />}
           {subscribed ? (busy ? 'Mise à jour…' : 'Abonné · Se désabonner') : (busy ? 'Abonnement…' : 'M’abonner')}
-        </button>
+        </Button>
       </div>
     </div>
   );
