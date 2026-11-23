@@ -30,13 +30,13 @@ export default function Attestation() {
   }
 
   return (
-    <Container className="py-12 sm:py-20">
+    <Container className="pb-16 pt-8 sm:pt-10">
       <SEO title={certificate.data ? `Attestation de ${certificate.data.holderName}` : 'Attestation'} url={`/attestations/${code}`} noindex description="Une attestation LesCracks, vérifiable par son code." />
       <div className="mx-auto max-w-4xl">
         <p className="text-sm font-medium text-gold-400">Attestation</p>
-        <h1 className="mt-4 text-[clamp(1.75rem,4vw,3rem)] font-semibold leading-[1.05] tracking-[-0.04em]">Vérification <span className="font-mono text-white/40">{code}</span></h1>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">Vérification <span className="font-mono text-white/40">{code}</span></h1>
 
-        <div className="mt-10">
+        <div className="mt-6">
           {certificate.loading && <div aria-hidden="true" className="aspect-[1.414] w-full animate-pulse rounded-3xl bg-white/[0.03] motion-reduce:animate-none" />}
           {missing && <EmptyPanel title="Aucune attestation ne porte ce code." description="Vérifie les caractères : le code compte dix lettres et chiffres, sans 0 ni 1." />}
           {!missing && certificate.error && <ErrorPanel title="L’attestation est momentanément indisponible." message={certificate.error.message} onRetry={certificate.reload} />}
