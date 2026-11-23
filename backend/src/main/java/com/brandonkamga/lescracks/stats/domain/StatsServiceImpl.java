@@ -248,7 +248,9 @@ public class StatsServiceImpl implements StatsService {
             Map<String, Long> resourceViews = new HashMap<>(pick(urls, "/ressources/"));
             pick(urls, "/blog/").forEach((slug, views) -> resourceViews.merge(slug, views, Long::sum));
             Map<Long, String> themes = themeNames();
-            Map<String, Long> eventViews = pick(urls, "/evenements/");
+            // Rendez-vous moved from /evenements to /rendez-vous; both still count until the old links fade out.
+            Map<String, Long> eventViews = new HashMap<>(pick(urls, "/evenements/"));
+            pick(urls, "/rendez-vous/").forEach((key, views) -> eventViews.merge(key, views, Long::sum));
 
             List<ViewedResource> viewedResources = content.articlesBySlug(resourceViews.keySet()).stream()
                     .map(article -> new ViewedResource(article.id(), article.slug(), article.title(), article.coverImage(),
@@ -320,8 +322,10 @@ public class StatsServiceImpl implements StatsService {
         Instant soon = now.plus(14, ChronoUnit.DAYS);
         events.publishedStartingBetween(now, soon, 3)
                 .forEach(event -> {
-                    long views = eventViews.getOrDefault("/evenements/" + event.slug(), 0L)
-                            + eventViews.getOrDefault("/evenements/" + event.id(), 0L);
+                    long views = 0;
+                    for (String prefix : List.of("/evenements/", "/rendez-vous/")) {
+                        views += eventViews.getOrDefault(prefix + event.slug(), 0L) + eventViews.getOrDefault(prefix + event.id(), 0L);
+                    }
                     if (views < 25) {
                         signals.add(new WatchSignal("event-low-visibility-" + event.id(), "warning",
                                 "« " + event.title() + " » arrive bientôt",
