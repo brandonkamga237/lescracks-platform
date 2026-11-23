@@ -51,7 +51,7 @@ export default function Hero({ nextEvent, isSignedIn }: HeroProps) {
             </Button>
           </Magnetic>
           <Magnetic className="w-full sm:w-auto">
-            <Button asChild size="lg" variant="outline" className="w-full"><Link to="/evenements">Voir les rendez-vous</Link></Button>
+            <Button asChild size="lg" variant="outline" className="w-full"><Link to="/rendez-vous">Voir les rendez-vous</Link></Button>
           </Magnetic>
         </motion.div>
       </div>

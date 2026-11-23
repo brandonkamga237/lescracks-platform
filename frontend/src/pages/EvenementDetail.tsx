@@ -46,7 +46,7 @@ export default function EvenementDetail() {
   const viewCount = loaded ? (views?.id === loaded.id ? views.count : loaded.viewCount ?? 0) : 0;
   const missing = !hasParam || event.error?.status === 404;
   const previousPath: unknown = location.state?.cataloguePath;
-  const cataloguePath = typeof previousPath === 'string' && /^\/evenements(?:\?.*)?$/.test(previousPath) ? previousPath : '/evenements';
+  const cataloguePath = typeof previousPath === 'string' && /^\/rendez-vous(?:\?.*)?$/.test(previousPath) ? previousPath : '/rendez-vous';
   const start = loaded ? new Date(loaded.startDate) : null;
   const end = loaded?.endDate ? new Date(loaded.endDate) : null;
   const hasDate = start && !Number.isNaN(start.getTime());
@@ -58,7 +58,7 @@ export default function EvenementDetail() {
 
   return (
     <Layout>
-      <SEO title={loaded?.title ?? (missing ? 'Événement introuvable' : 'Événement')} description={loaded ? markdownToPlainText(loaded.description).slice(0, 300) : 'Découvre les rendez-vous LesCracks pour apprendre et pratiquer la tech ensemble.'} image={loaded?.coverImage || undefined} url={loaded ? eventPath(loaded) : '/evenements'} />
+      <SEO title={loaded?.title ?? (missing ? 'Événement introuvable' : 'Événement')} description={loaded ? markdownToPlainText(loaded.description).slice(0, 300) : 'Découvre les rendez-vous LesCracks pour apprendre et pratiquer la tech ensemble.'} image={loaded?.coverImage || undefined} url={loaded ? eventPath(loaded) : '/rendez-vous'} />
       <article>
         <div className="mode-raised">
         <div className="mx-auto max-w-7xl px-5 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-10">

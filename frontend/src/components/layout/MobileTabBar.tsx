@@ -16,8 +16,8 @@ interface TabDef {
 const TABS: readonly TabDef[] = [
   // No home tab: the logo in the header already leads home.
   { to: '/blog', label: 'Blog', icon: Newspaper },
-  { to: '/formations', label: 'Formations', icon: GraduationCap },
-  { to: '/evenements', label: 'Agenda', icon: CalendarDays },
+  { to: '/cours', label: 'Formations', icon: GraduationCap },
+  { to: '/rendez-vous', label: 'Agenda', icon: CalendarDays },
   { to: '/talk', label: 'Talk', icon: Podcast },
 ];
 

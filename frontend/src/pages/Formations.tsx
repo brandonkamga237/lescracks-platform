@@ -43,7 +43,7 @@ export default function Formations() {
 
   return (
     <Layout>
-      <SEO title="Formations" description="Les formations LesCracks arrivent : des parcours complets, étape par étape, pour passer à la pratique en tech." url="/formations" />
+      <SEO title="Formations" description="Les formations LesCracks arrivent : des parcours complets, étape par étape, pour passer à la pratique en tech." url="/cours" />
       <Section tone="raised" spacing="header">
         <PageHeader eyebrow="Bientôt disponible" title="Formations" description="Des parcours complets, étape par étape, pour apprendre une technologie et passer à la pratique." />
       </Section>
