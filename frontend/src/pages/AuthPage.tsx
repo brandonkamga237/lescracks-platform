@@ -1,28 +1,61 @@
-import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
-import { ArrowRight, Eye, EyeOff, Loader2, ShieldCheck } from 'lucide-react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowRight, Loader2 } from 'lucide-react';
 
-import Layout from '@/components/layout/Layout';
 import SEO from '@/components/common/SEO';
-import { safeReturnPath } from '@/services/auth';
-import { api } from '@/services/api';
-import { ApiError } from '@/services/http';
-import { signupContext } from '@/lib/arrival';
+import { GitHubIcon } from '@/components/icons/BrandIcons';
+import { SplitText } from '@/components/motion/SplitText';
+import AuthShell from '@/components/site/AuthShell';
+import { Button } from '@/components/ui/button';
+import { Notice, PasswordField, TextField } from '@/components/ui/field';
 import { useSession } from '@/hooks/useSession';
+import { signupContext } from '@/lib/arrival';
+import { EASE } from '@/lib/motion';
+import { api } from '@/services/api';
+import { safeReturnPath } from '@/services/auth';
+import { ApiError } from '@/services/http';
 
-interface AuthPageProps {
-  mode: 'login' | 'register';
+const ARRIVE = { initial: { opacity: 0, y: 16, filter: 'blur(6px)' }, animate: { opacity: 1, y: 0, filter: 'blur(0px)' } };
+const arrive = (delay: number) => ({ ...ARRIVE, transition: { duration: 0.8, delay, ease: EASE } });
+
+const CARD = 'w-full rounded-[2rem] border border-white/10 bg-black/60 p-6 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.9)] backdrop-blur-xl sm:p-10';
+
+function GoogleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+      <path fill="#EA4335" d="M12 5.04c1.62 0 3.06.56 4.2 1.64l3.12-3.12C17.46 1.8 14.96.72 12 .72 7.44.72 3.58 3.34 1.76 7.28l3.64 2.82C6.24 7.22 8.86 5.04 12 5.04Z" />
+      <path fill="#4285F4" d="M23.28 12.26c0-.8-.07-1.55-.2-2.26H12v4.5h6.34c-.29 1.48-1.14 2.73-2.4 3.58l3.62 2.8c2.1-1.94 3.72-4.8 3.72-8.62Z" />
+      <path fill="#FBBC05" d="M5.42 14.36A7.2 7.2 0 0 1 5.04 12c0-.82.14-1.62.38-2.36L1.78 6.82A11.28 11.28 0 0 0 .72 12c0 1.82.44 3.54 1.06 5.18l3.64-2.82Z" />
+      <path fill="#34A853" d="M12 23.28c2.96 0 5.46-.98 7.28-2.66l-3.62-2.8c-1 .68-2.28 1.08-3.66 1.08-3.14 0-5.76-2.18-6.6-5.06l-3.64 2.82c1.82 3.94 5.68 6.62 10.24 6.62Z" />
+    </svg>
+  );
 }
 
-const inputClass = 'input mt-2';
+interface AuthCardProps {
+  eyebrow: string;
+  title: string;
+  lead: string;
+  children: ReactNode;
+}
+
+/** The heading every sign-in screen opens with, above its form. */
+function AuthCard({ eyebrow, title, lead, children }: AuthCardProps) {
+  return (
+    <motion.section {...arrive(0.1)} aria-labelledby="auth-title" className={CARD}>
+      <p className="text-sm font-medium text-gold-400">{eyebrow}</p>
+      <SplitText as="h1" id="auth-title" onMount delay={0.15} parts={[title]} className="mt-4 text-[clamp(2rem,4vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.04em]" />
+      <p className="mt-3 text-[15px] leading-relaxed text-white/55">{lead}</p>
+      {children}
+    </motion.section>
+  );
+}
 
 export function ResetPasswordPage() {
   const location = useLocation();
   const token = new URLSearchParams(location.search).get('token');
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
-  const [visible, setVisible] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
@@ -48,25 +81,33 @@ export function ResetPasswordPage() {
     }
   }
 
-  return <Layout>
-    <SEO title="Nouveau mot de passe" description="Choisis un nouveau mot de passe pour ton compte LesCracks." url="/reset-password" />
-    <div className="mx-auto max-w-lg px-5 py-8 sm:py-14">
-      <section className="mode-raised rounded-lg p-6 sm:p-9">
-        <p className="kicker">LesCracks / Sécurité</p>
-        <h1 className="mt-4 font-display text-3xl font-bold">Un nouveau départ.</h1>
-        <p className="mt-3 text-sm leading-relaxed text-t3">Choisis un nouveau mot de passe pour retrouver ton compte.</p>
-        {done ? <div role="status" className="mt-6 rounded border border-gold-400/25 p-4 text-sm text-gold-ink">Ton mot de passe a été mis à jour. Tu peux maintenant te connecter.</div> : !token ? <p role="alert" className="mt-6 text-sm text-error-ink">Ce lien est incomplet. Retourne à la connexion pour demander un nouveau lien.</p> : <form onSubmit={submit} className="mt-7" aria-busy={busy}>
-          <fieldset disabled={busy} className="space-y-5"><legend className="sr-only">Nouveau mot de passe</legend>
-            <div><label htmlFor="reset-password" className="text-sm font-medium text-t1">Nouveau mot de passe</label><div className="relative"><input id="reset-password" name="password" type={visible ? 'text' : 'password'} autoComplete="new-password" required minLength={10} value={password} onChange={(event) => setPassword(event.target.value)} className={`${inputClass} pr-14`} aria-describedby="reset-help" /><button type="button" onClick={() => setVisible(!visible)} aria-label={visible ? 'Masquer les mots de passe' : 'Afficher les mots de passe'} aria-pressed={visible} className="absolute right-2 top-2.5 flex h-9 w-9 items-center justify-center rounded-full text-t4 transition hover:text-t1">{visible ? <EyeOff aria-hidden="true" className="h-5 w-5" /> : <Eye aria-hidden="true" className="h-5 w-5" />}</button></div><p id="reset-help" className="mt-2 text-xs text-t3">Au moins 10 caractères.</p></div>
-            <div><label htmlFor="reset-confirmation" className="text-sm font-medium text-t1">Confirme ton mot de passe</label><input id="reset-confirmation" name="confirmation" type={visible ? 'text' : 'password'} autoComplete="new-password" required minLength={10} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} className={inputClass} /></div>
-            {error && <p role="alert" className="rounded border border-error/20 p-3 text-sm text-error-ink">{error}</p>}
-            <button type="submit" className="btn-primary w-full" disabled={busy}>{busy && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}{busy ? 'Enregistrement…' : 'Enregistrer mon mot de passe'}</button>
-          </fieldset>
-        </form>}
-        <Link to="/connexion" replace className="mt-7 block text-center text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Revenir à la connexion</Link>
-      </section>
-    </div>
-  </Layout>;
+  return (
+    <AuthShell>
+      <SEO title="Nouveau mot de passe" description="Choisis un nouveau mot de passe pour ton compte LesCracks." url="/reinitialiser" />
+      <div className="w-full max-w-md">
+        <AuthCard eyebrow="Sécurité" title="Un nouveau départ." lead="Choisis un nouveau mot de passe pour retrouver ton compte.">
+          {done && <Notice tone="info" className="mt-7">Ton mot de passe a été mis à jour. Tu peux maintenant te connecter.</Notice>}
+          {!done && !token && <Notice tone="error" className="mt-7">Ce lien est incomplet. Retourne à la connexion pour demander un nouveau lien.</Notice>}
+          {!done && token && (
+            <form onSubmit={submit} className="mt-8" aria-busy={busy}>
+              <fieldset disabled={busy} className="space-y-5">
+                <legend className="sr-only">Nouveau mot de passe</legend>
+                <PasswordField id="reset-password" label="Nouveau mot de passe" help="Au moins 10 caractères." autoComplete="new-password" required minLength={10} value={password} onChange={(event) => setPassword(event.target.value)} />
+                <PasswordField id="reset-confirmation" label="Confirme ton mot de passe" autoComplete="new-password" required minLength={10} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} />
+                {error && <Notice tone="error">{error}</Notice>}
+                <Button type="submit" size="lg" className="w-full font-semibold">{busy ? <><Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />Enregistrement…</> : 'Enregistrer mon mot de passe'}</Button>
+              </fieldset>
+            </form>
+          )}
+          <p className="mt-8 border-t border-white/10 pt-6 text-center text-sm"><Link to="/connexion" replace className="font-medium text-gold-400 underline-offset-4 hover:underline">Revenir à la connexion</Link></p>
+        </AuthCard>
+      </div>
+    </AuthShell>
+  );
+}
+
+interface AuthPageProps {
+  mode: 'login' | 'register';
 }
 
 export default function AuthPage({ mode }: AuthPageProps) {
@@ -75,7 +116,6 @@ export default function AuthPage({ mode }: AuthPageProps) {
   const { login, createAccount, socialSignIn, isSignedIn, isLoading, isAdmin, error: sessionError } = useSession();
   const [form, setForm] = useState({ email: '', password: '', firstName: '', lastName: '' });
   const [busy, setBusy] = useState<'submit' | 'forgot' | 'google' | 'github' | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -83,14 +123,6 @@ export default function AuthPage({ mode }: AuthPageProps) {
   const state = location.state as { from?: string; expired?: boolean } | null;
   const returnTo = safeReturnPath(new URLSearchParams(location.search).get('retour') ?? state?.from, isAdmin ? '/admin' : '/');
   const registering = mode === 'register';
-
-  useEffect(() => {
-    setError('');
-    setNotice('');
-    setFields({});
-    setForm((value) => ({ ...value, password: '' }));
-    setShowPassword(false);
-  }, [mode]);
 
   function report(cause: unknown) {
     setError(cause instanceof Error && !(cause instanceof TypeError) ? cause.message : 'Impossible de joindre le serveur. Réessaie dans un instant.');
@@ -107,8 +139,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
       if (registering) {
         // Signed in straight away: the welcome questions come next, and confirming the
         // address is asked by a banner instead of blocking the way in.
-        await createAccount({ ...form, email: form.email.trim(), firstName: form.firstName.trim(), lastName: form.lastName.trim(),
-          newsletter, context: signupContext() });
+        await createAccount({ ...form, email: form.email.trim(), firstName: form.firstName.trim(), lastName: form.lastName.trim(), newsletter, context: signupContext() });
       } else {
         await login(form.email.trim(), form.password);
       }
@@ -149,64 +180,75 @@ export default function AuthPage({ mode }: AuthPageProps) {
 
   if (!isLoading && isSignedIn && !sessionError && !busy) return <Navigate to={returnTo} replace />;
 
-  return <Layout>
-    <SEO title={registering ? 'Créer ton compte' : 'Connexion'} description="Retrouve ton espace LesCracks et continue à apprendre la tech." url={registering ? '/inscription' : '/connexion'} />
-    <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-6xl gap-8 px-5 py-8 sm:px-8 sm:py-12 lg:grid-cols-[1fr_1fr] lg:items-center lg:gap-20">
-      <section className="order-2 lg:order-1">
-        <Link to="/" className="kicker">LesCracks / Ton espace</Link>
-        <h1 className="mt-4 max-w-lg font-display text-3xl font-bold leading-[0.95] tracking-tight text-t1 sm:text-5xl lg:text-6xl">{registering ? <>Ta prochaine étape<br /><span className="text-gold-ink">commence ici.</span></> : <>Le bon endroit<br />pour <span className="text-gold-ink">aller plus loin.</span></>}</h1>
-        <p className="mt-4 max-w-md text-base leading-relaxed text-t3 sm:text-lg">{registering ? 'Crée ton compte, suis les nouveaux articles et trouve ton prochain rendez-vous tech.' : 'Retrouve ton espace personnel. Les articles et les rendez-vous t’attendent, à ton rythme.'}</p>
-        <div className="mt-6 flex items-start gap-3 border-t border-line-soft pt-5 text-sm leading-relaxed text-t4"><ShieldCheck aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0 text-gold-ink" /><p>Tu peux aussi lire le blog sans compte.<br /><Link to="/blog" className="mt-2 inline-flex items-center gap-2 text-t2 underline underline-offset-4">Lire le blog <ArrowRight aria-hidden="true" className="h-4 w-4" /></Link></p></div>
-      </section>
-      <section className="order-1 mode-raised rounded-lg p-5 sm:p-9 lg:order-2" aria-labelledby="auth-heading">
-        <p className="text-xs tracking-wide text-gold-ink">{registering ? 'Bienvenue dans la communauté' : 'Heureux de te retrouver'}</p>
-        <h2 id="auth-heading" className="mt-3 font-display text-3xl font-bold">{registering ? 'Créer ton compte' : 'Te connecter'}</h2>
-        <p className="mt-2 text-sm text-t3">{registering ? 'Quelques informations, et c’est parti.' : 'Entre tes identifiants pour continuer.'}</p>
-        {state?.expired && <p role="status" className="mt-5 rounded border border-gold-400/25 bg-gold-400/5 p-3 text-sm text-gold-ink">Connecte-toi pour accéder à cette page. Si ta session a expiré, tu reprendras là où tu en étais.</p>}
-        {sessionError && <p role="alert" className="mt-5 text-sm text-warning-ink">{sessionError.message}</p>}
-        <form onSubmit={submit} className="mt-7" aria-busy={Boolean(busy)}>
-          <fieldset disabled={Boolean(busy)} className="space-y-5">
-            <legend className="sr-only">Tes identifiants</legend>
-            {registering && <div className="grid gap-5 sm:grid-cols-2">
-              <div><label htmlFor="auth-firstName" className="text-sm font-medium text-t1">Prénom</label><input id="auth-firstName" name="firstName" autoComplete="given-name" required value={form.firstName} onChange={(event) => setForm({ ...form, firstName: event.target.value })} className={inputClass} aria-invalid={Boolean(fields.firstName)} aria-describedby={fields.firstName ? 'firstName-error' : undefined} />{fields.firstName && <p id="firstName-error" className="mt-2 text-sm text-error-ink">{fields.firstName}</p>}</div>
-              <div><label htmlFor="auth-lastName" className="text-sm font-medium text-t1">Nom</label><input id="auth-lastName" name="lastName" autoComplete="family-name" required value={form.lastName} onChange={(event) => setForm({ ...form, lastName: event.target.value })} className={inputClass} aria-invalid={Boolean(fields.lastName)} aria-describedby={fields.lastName ? 'lastName-error' : undefined} />{fields.lastName && <p id="lastName-error" className="mt-2 text-sm text-error-ink">{fields.lastName}</p>}</div>
-            </div>}
-            <div><label htmlFor="auth-email" className="text-sm font-medium text-t1">Adresse email</label><input id="auth-email" name="email" autoComplete="email" required type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className={inputClass} aria-invalid={Boolean(fields.email)} aria-describedby={fields.email ? 'email-error' : undefined} />{fields.email && <p id="email-error" className="mt-2 text-sm text-error-ink">{fields.email}</p>}</div>
-            <div><label htmlFor="auth-password" className="text-sm font-medium text-t1">Mot de passe</label><div className="relative"><input id="auth-password" name="password" autoComplete={registering ? 'new-password' : 'current-password'} required minLength={registering ? 10 : undefined} type={showPassword ? 'text' : 'password'} value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} className={`${inputClass} pr-14`} aria-invalid={Boolean(fields.password)} aria-describedby="password-help" /><button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'} aria-pressed={showPassword} className="absolute right-2 top-2.5 flex h-9 w-9 items-center justify-center rounded-full text-t4 transition hover:text-t1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold-400">{showPassword ? <EyeOff aria-hidden="true" className="h-5 w-5" /> : <Eye aria-hidden="true" className="h-5 w-5" />}</button></div><p id="password-help" className={`mt-2 text-xs ${fields.password ? 'text-error-ink' : 'text-t3'}`}>{fields.password ?? (registering ? 'Au moins 10 caractères.' : 'Le mot de passe de ton compte LesCracks.')}</p></div>
-            {registering && (
-              <label className="flex items-start gap-3 text-sm text-t3">
-                <input type="checkbox" checked={newsletter} onChange={(event) => setNewsletter(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#d4af37]" />
-                <span>Recevoir la newsletter : les nouveaux articles et les prochains ateliers, par email. Tu peux te désabonner à tout moment depuis ton compte.</span>
-              </label>
-            )}
-            {error && <p role="alert" className="rounded border border-error/20 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
-            {notice && <p role="status" className="rounded border border-gold-400/20 p-3 text-sm text-gold-ink">{notice}</p>}
-            <button type="submit" className="btn-primary w-full" disabled={Boolean(busy)}>{busy === 'submit' ? <><Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />{registering ? 'Création de ton compte…' : 'Connexion en cours…'}</> : <>{registering ? 'Créer mon compte' : 'Me connecter'}<ArrowRight aria-hidden="true" className="h-4 w-4" /></>}</button>
-            {!registering && <button type="button" onClick={() => void forgot()} className="min-h-10 w-full text-sm text-t2 underline-offset-4 hover:text-gold-ink hover:underline">{busy === 'forgot' ? 'Envoi du lien…' : 'Mot de passe oublié ?'}</button>}
-          </fieldset>
-        </form>
-        <div className="my-6 flex items-center gap-3 text-xs text-t4"><span className="h-px flex-1 bg-line" />ou<span className="h-px flex-1 bg-line" /></div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <button type="button" disabled={Boolean(busy) || isLoading} onClick={() => void social('google')} className="flex min-h-12 items-center justify-center gap-2.5 rounded border border-line-strong px-4 py-3 text-sm font-medium text-t1 transition hover:bg-noir-900 disabled:opacity-60">
-            <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true"><path fill="#EA4335" d="M12 5.04c1.62 0 3.06.56 4.2 1.64l3.12-3.12C17.46 1.8 14.96.72 12 .72 7.44.72 3.58 3.34 1.76 7.28l3.64 2.82C6.24 7.22 8.86 5.04 12 5.04Z"/><path fill="#4285F4" d="M23.28 12.26c0-.8-.07-1.55-.2-2.26H12v4.5h6.34c-.29 1.48-1.14 2.73-2.4 3.58l3.62 2.8c2.1-1.94 3.72-4.8 3.72-8.62Z"/><path fill="#FBBC05" d="M5.42 14.36A7.2 7.2 0 0 1 5.04 12c0-.82.14-1.62.38-2.36L1.78 6.82A11.28 11.28 0 0 0 .72 12c0 1.82.44 3.54 1.06 5.18l3.64-2.82Z"/><path fill="#34A853" d="M12 23.28c2.96 0 5.46-.98 7.28-2.66l-3.62-2.8c-1 .68-2.28 1.08-3.66 1.08-3.14 0-5.76-2.18-6.6-5.06l-3.64 2.82c1.82 3.94 5.68 6.62 10.24 6.62Z"/></svg>
-            {busy === 'google' ? 'Redirection…' : 'Google'}
-          </button>
-          <button type="button" disabled={Boolean(busy) || isLoading} onClick={() => void social('github')} className="flex min-h-12 items-center justify-center gap-2.5 rounded border border-line-strong px-4 py-3 text-sm font-medium text-t1 transition hover:bg-noir-900 disabled:opacity-60">
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2.17c-3.2.7-3.87-1.37-3.87-1.37-.52-1.33-1.28-1.68-1.28-1.68-1.04-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.75 2.69 1.25 3.35.95.1-.75.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11.1 11.1 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.77 1.05.77 2.12v3.14c0 .31.21.67.8.56A11.52 11.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
-            {busy === 'github' ? 'Redirection…' : 'GitHub'}
-          </button>
-        </div>
-        <p className="mt-7 border-t border-line-soft pt-6 text-center text-sm text-t3">{registering ? 'Déjà un compte ? ' : 'Pas encore de compte ? '}<Link className="font-medium text-gold-ink underline-offset-4 hover:underline" to={`${registering ? '/connexion' : '/inscription'}?retour=${encodeURIComponent(returnTo)}`}>{registering ? 'Connecte-toi' : 'Rejoins-nous'}</Link></p>
-      </section>
-    </div>
-    {busy === 'google' || busy === 'github' ? (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-black/95 text-t1">
-        <Loader2 aria-hidden="true" className="h-10 w-10 animate-spin motion-reduce:animate-none text-gold-ink" />
-        <div className="text-center">
-          <p className="font-display text-2xl font-bold">On prépare ton espace.</p>
-          <p className="mt-2 text-sm text-t3">Connexion {busy === 'google' ? 'Google' : 'GitHub'} en cours…</p>
-        </div>
+  const other = `${registering ? '/connexion' : '/inscription'}?retour=${encodeURIComponent(returnTo)}`;
+
+  return (
+    <AuthShell>
+      <SEO title={registering ? 'Créer ton compte' : 'Connexion'} description="Retrouve ton espace LesCracks et continue à apprendre la tech." url={registering ? '/inscription' : '/connexion'} />
+      <div className="w-full max-w-md">
+        <AuthCard
+          eyebrow={registering ? 'Rejoindre LesCracks' : 'Heureux de te revoir'}
+          title={registering ? 'Crée ton compte.' : 'Connecte-toi.'}
+          lead={registering ? 'Inscris-toi aux rendez-vous, garde tes attestations et suis les nouveaux articles.' : 'Ton dashboard, tes rendez-vous et tes attestations t’attendent.'}
+        >
+          {state?.expired && <Notice tone="info" className="mt-6">Connecte-toi pour accéder à cette page. Si ta session a expiré, tu reprendras là où tu en étais.</Notice>}
+          {sessionError && <Notice tone="error" className="mt-6">{sessionError.message}</Notice>}
+
+          <div className="mt-8 grid grid-cols-2 gap-3">
+            <Button type="button" variant="outline" disabled={Boolean(busy) || isLoading} onClick={() => void social('google')}><GoogleIcon />{busy === 'google' ? 'Redirection…' : 'Google'}</Button>
+            <Button type="button" variant="outline" disabled={Boolean(busy) || isLoading} onClick={() => void social('github')}><GitHubIcon className="h-4 w-4" />{busy === 'github' ? 'Redirection…' : 'GitHub'}</Button>
+          </div>
+          <div className="my-7 flex items-center gap-3 text-xs text-white/35"><span className="h-px flex-1 bg-white/10" />ou avec ton email<span className="h-px flex-1 bg-white/10" /></div>
+
+          <form onSubmit={submit} aria-busy={Boolean(busy)}>
+            <fieldset disabled={Boolean(busy)} className="space-y-5">
+              <legend className="sr-only">Tes identifiants</legend>
+              {registering && (
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <TextField id="auth-firstName" label="Prénom" autoComplete="given-name" required value={form.firstName} error={fields.firstName} onChange={(event) => setForm({ ...form, firstName: event.target.value })} />
+                  <TextField id="auth-lastName" label="Nom" autoComplete="family-name" required value={form.lastName} error={fields.lastName} onChange={(event) => setForm({ ...form, lastName: event.target.value })} />
+                </div>
+              )}
+              <TextField id="auth-email" label="Adresse email" type="email" autoComplete="email" required value={form.email} error={fields.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
+              <div>
+                <PasswordField id="auth-password" label="Mot de passe" autoComplete={registering ? 'new-password' : 'current-password'} required minLength={registering ? 10 : undefined} value={form.password} error={fields.password} help={registering ? 'Au moins 10 caractères.' : undefined} onChange={(event) => setForm({ ...form, password: event.target.value })} />
+                {!registering && <button type="button" onClick={() => void forgot()} className="mt-2 min-h-10 text-sm text-white/55 underline-offset-4 transition-colors hover:text-gold-400 hover:underline">{busy === 'forgot' ? 'Envoi du lien…' : 'Mot de passe oublié ?'}</button>}
+              </div>
+              {registering && (
+                <label className="flex items-start gap-3 text-sm leading-relaxed text-white/55">
+                  <input type="checkbox" checked={newsletter} onChange={(event) => setNewsletter(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#d4af37]" />
+                  <span>Recevoir la newsletter : les nouveaux articles et les prochains ateliers, par email. Tu peux te désabonner à tout moment.</span>
+                </label>
+              )}
+              {error && <Notice tone="error">{error}</Notice>}
+              {notice && <Notice tone="info">{notice}</Notice>}
+              <Button type="submit" size="lg" className="w-full font-semibold">
+                {busy === 'submit'
+                  ? <><Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />{registering ? 'Création de ton compte…' : 'Connexion en cours…'}</>
+                  : <>{registering ? 'Créer mon compte' : 'Me connecter'}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" /></>}
+              </Button>
+            </fieldset>
+          </form>
+
+          <p className="mt-8 border-t border-white/10 pt-6 text-center text-sm text-white/55">
+            {registering ? 'Déjà un compte ? ' : 'Pas encore de compte ? '}
+            <Link to={other} className="font-medium text-gold-400 underline-offset-4 hover:underline">{registering ? 'Connecte-toi' : 'Crée-le en une minute'}</Link>
+          </p>
+        </AuthCard>
+        <motion.p {...arrive(0.3)} className="mt-6 text-center text-sm text-white/40">
+          Tu veux juste lire ? <Link to="/blog" className="text-white/70 underline-offset-4 hover:text-white hover:underline">Le blog est ouvert à tous</Link>
+        </motion.p>
       </div>
-    ) : null}
-  </Layout>;
+
+      {(busy === 'google' || busy === 'github') && (
+        <div role="status" className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-black/95">
+          <Loader2 className="h-10 w-10 animate-spin text-gold-400 motion-reduce:animate-none" aria-hidden="true" />
+          <div className="text-center">
+            <p className="text-2xl font-semibold tracking-tight">On prépare ton espace.</p>
+            <p className="mt-2 text-sm text-white/55">Connexion {busy === 'google' ? 'Google' : 'GitHub'} en cours…</p>
+          </div>
+        </div>
+      )}
+    </AuthShell>
+  );
 }

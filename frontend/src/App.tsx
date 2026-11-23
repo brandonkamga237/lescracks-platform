@@ -143,8 +143,8 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route path="/connexion" element={<AuthPage mode="login" />} />
-      <Route path="/inscription" element={<AuthPage mode="register" />} />
+      <Route path="/connexion" element={<AuthPage key="login" mode="login" />} />
+      <Route path="/inscription" element={<AuthPage key="register" mode="register" />} />
       <Route path="/reinitialiser" element={<ResetPasswordPage />} />
       <Route path="/verifier-email" element={<VerifyEmail />} />
       <Route path="/desabonnement" element={<Unsubscribe />} />
