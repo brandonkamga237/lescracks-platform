@@ -12,8 +12,8 @@ interface NavLinkDef {
 
 const LINKS: readonly NavLinkDef[] = [
   { to: '/blog', label: 'Blog' },
-  { to: '/cours', label: 'Formations' },
-  { to: '/rendez-vous', label: 'Événements' },
+  { to: '/cours', label: 'Cours' },
+  { to: '/rendez-vous', label: 'Rendez-vous' },
   { to: '/talk', label: 'Talk' },
   { to: '/a-propos', label: 'À propos' },
 ];
