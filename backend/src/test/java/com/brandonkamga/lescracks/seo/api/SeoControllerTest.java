@@ -94,7 +94,7 @@ class SeoControllerTest {
                 .startDate(Instant.parse("2026-11-01T09:00:00Z")).build();
         when(events.requirePublished("7")).thenReturn(new EventView(event, Counts.NONE));
 
-        mockMvc.perform(get("/seo/evenements/7"))
+        mockMvc.perform(get("/seo/rendez-vous/7"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(allOf(
                         containsString("/rendez-vous/hackathon-001\""),

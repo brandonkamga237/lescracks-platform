@@ -35,8 +35,8 @@ public class SitemapController {
 
         addUrl(xml, base, "/", "1.0", "daily");
         addUrl(xml, base, "/blog", "0.8", "daily");
-        addUrl(xml, base, "/formations", "0.6", "monthly");
-        addUrl(xml, base, "/evenements", "0.6", "daily");
+        addUrl(xml, base, "/cours", "0.6", "monthly");
+        addUrl(xml, base, "/rendez-vous", "0.6", "daily");
         addUrl(xml, base, "/talk", "0.6", "weekly");
         addUrl(xml, base, "/a-propos", "0.5", "monthly");
         addUrl(xml, base, "/conditions-utilisation", "0.3", "yearly");
