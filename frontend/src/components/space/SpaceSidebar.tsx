@@ -60,7 +60,7 @@ function SidebarFoot({ member }: { member: boolean }) {
 
 /** The space on a wide screen: the platform's tabs down the side, the reader at the foot. */
 export default function SpaceSidebar({ member }: { member: boolean }) {
-  const { pathname, hash } = useLocation();
+  const { pathname } = useLocation();
 
   return (
     <aside className="hidden border-r border-white/10 lg:block">
@@ -73,7 +73,7 @@ export default function SpaceSidebar({ member }: { member: boolean }) {
               {group.title && <p className="mb-2 px-4 text-xs font-medium text-white/30">{group.title}</p>}
               <ul className="space-y-1">
                 {group.tabs.map((tab) => {
-                  const active = isTabActive(tab, pathname, hash);
+                  const active = isTabActive(tab, pathname);
                   return (
                     <li key={tab.to}>
                       <Link
