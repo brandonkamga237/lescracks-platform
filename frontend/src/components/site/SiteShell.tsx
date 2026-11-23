@@ -37,9 +37,9 @@ export default function SiteShell({ children, items = SPACES, nextEvent, flush =
     return (
       <div className="min-h-screen bg-black font-geist text-white antialiased lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]">
         <a href="#main-content" className={SKIP}>Aller au contenu</a>
-        <SpaceSidebar />
+        <SpaceSidebar member />
         <div className="flex min-h-screen min-w-0 flex-col pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-0">
-          <SpaceTopBar />
+          <SpaceTopBar member />
           <VerifyEmailBanner />
           <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">{children}</main>
           <footer className="border-t border-white/10 px-4 py-8 text-sm text-white/40 sm:px-8">
@@ -49,7 +49,7 @@ export default function SiteShell({ children, items = SPACES, nextEvent, flush =
             </p>
           </footer>
         </div>
-        <SpaceTabBar />
+        <SpaceTabBar member />
       </div>
     );
   }
