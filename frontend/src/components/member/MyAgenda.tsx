@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
-import { ErrorState } from '@/components/common/States';
 import MyEventRow from '@/components/member/MyEventRow';
 import { Stagger, StaggerItem } from '@/components/motion/Stagger';
 import { Container } from '@/components/ui/container';
+import { ErrorPanel, RowsLoading } from '@/components/ui/panels';
 import { SectionHeading } from '@/components/ui/section-heading';
 import type { MyAgenda as Agenda } from '@/lib/myEvents';
 
@@ -27,8 +27,8 @@ export default function MyAgenda({ agenda, loading, failed, onRetry }: MyAgendaP
       <Container className="pb-20 pt-4 sm:pb-28">
         <SectionHeading id="my-events-title" eyebrow="Mes rendez-vous" title={['Ton agenda.', { text: 'Ceux auxquels tu es inscrit.', className: 'text-white/40' }]} action={{ to: '/rendez-vous', label: 'Tout l’agenda' }} />
 
-        {failed && <div className="mt-14"><ErrorState title="Impossible de charger tes rendez-vous." onRetry={onRetry} /></div>}
-        {loading && !agenda && <div aria-hidden="true" className="mt-14 space-y-px border-t border-white/10">{[0, 1].map((row) => <div key={row} className="h-[97px] animate-pulse border-b border-white/10 bg-white/[0.02] motion-reduce:animate-none" />)}</div>}
+        {failed && <div className="mt-14"><ErrorPanel title="Impossible de charger tes rendez-vous." onRetry={onRetry} /></div>}
+        {loading && !agenda && <div className="mt-14"><RowsLoading rows={2} label="Chargement de tes rendez-vous…" /></div>}
 
         {agenda && ahead.length === 0 && (
           <div className="mt-14 flex flex-col items-start gap-5 rounded-3xl border border-dashed border-white/15 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
