@@ -18,6 +18,12 @@ export default {
     'system-ui',
     'sans-serif'
   ],
+  geist: [
+    'Geist',
+    'DM Sans',
+    'system-ui',
+    'sans-serif'
+  ],
   display: [
     'DM Sans',
     'Inter',
