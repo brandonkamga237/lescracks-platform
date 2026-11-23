@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
-import { Reveal, RevealWords, StaggerItem, StaggerList } from '@/components/landing/motion';
-import { Panel, ParallaxImage } from '@/components/landing/scroll';
+import { Reveal, RevealWords, StaggerItem, StaggerList } from '@/components/motion/Reveal';
+import { Panel, ParallaxImage } from '@/components/motion/Parallax';
 import { EASE } from '@/lib/motion';
 
 const WHATSAPP = 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK';

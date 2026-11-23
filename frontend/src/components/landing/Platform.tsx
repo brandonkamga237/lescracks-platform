@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
-import { Reveal, RevealWords, StaggerItem, StaggerList } from '@/components/landing/motion';
-import { ParallaxImage } from '@/components/landing/scroll';
+import { Reveal, RevealWords, StaggerItem, StaggerList } from '@/components/motion/Reveal';
+import { ParallaxImage } from '@/components/motion/Parallax';
 
 interface Space {
   title: string;

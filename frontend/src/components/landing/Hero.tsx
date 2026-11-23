@@ -4,8 +4,8 @@ import { ArrowRight } from 'lucide-react';
 
 import { TYPE_LABEL } from '@/components/events/AgendaItem';
 import MagneticLink from '@/components/landing/MagneticLink';
-import { RevealWords } from '@/components/landing/motion';
-import TileGrid from '@/components/landing/TileGrid';
+import { RevealWords } from '@/components/motion/Reveal';
+import TileGrid from '@/components/decor/TileGrid';
 import { deriveEventStatus } from '@/lib/eventStatus';
 import { eventTeaser } from '@/lib/eventMoment';
 import { EASE } from '@/lib/motion';
