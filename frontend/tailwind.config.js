@@ -85,6 +85,8 @@ export default {
       // Accent text that stays AA on both black and white sections.
       ink: 'var(--gold-ink)',
     },
+    // The light band of the redesigned pages: warm, never pure white.
+    ivory: '#f4f3ee',
     // Noir pur pour fond
     noir: {
       950: '#000000',
@@ -183,6 +185,11 @@ export default {
       },
     },
     // Overrides Tailwind's weak defaults so every existing `ease-out` / `ease-in-out` gets the strong curve.
+    // The redesigned pages' display scale: the hero promise, then every section title.
+    fontSize: {
+      'display-hero': ['clamp(2.5rem, 6.4vw, 5.25rem)', { lineHeight: '1.02', letterSpacing: '-0.045em' }],
+      display: ['clamp(2rem, 4.6vw, 3.75rem)', { lineHeight: '1.05', letterSpacing: '-0.04em' }],
+    },
     transitionTimingFunction: {
       out: 'var(--ease-out)',
       'in-out': 'var(--ease-in-out)',
