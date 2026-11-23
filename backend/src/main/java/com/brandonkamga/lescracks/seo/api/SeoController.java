@@ -48,7 +48,7 @@ public class SeoController {
                     "LesCracks : articles, ateliers et rendez-vous pour apprendre la tech et passer à la pratique, avec une communauté qui apprend en faisant.",
                     "/", "LesCracks : apprendre la tech et passer à la pratique"),
             "a-propos", new PageMeta("À propos · LesCracks",
-                    "Ce que fait LesCracks : un blog tech, des formations à venir, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant.",
+                    "Ce que fait LesCracks : un blog tech, des cours à venir, des rendez-vous réguliers, un talk vidéo et une communauté qui apprend en faisant.",
                     "/a-propos", "Ce que nous faisons"),
             "conditions-utilisation", new PageMeta("Conditions d’utilisation · LesCracks",
                     "Les conditions d’utilisation de la plateforme LesCracks.",
@@ -56,15 +56,15 @@ public class SeoController {
             "politique-confidentialite", new PageMeta("Politique de confidentialité · LesCracks",
                     "Comment LesCracks protège et utilise tes données personnelles.",
                     "/politique-confidentialite", "Politique de confidentialité"),
-            "rendez-vous", new PageMeta("Événements et ateliers tech · LesCracks",
+            "rendez-vous", new PageMeta("Rendez-vous tech · LesCracks",
                     "Bootcamps, ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble.",
-                    "/rendez-vous", "Événements"),
+                    "/rendez-vous", "Rendez-vous"),
             "blog", new PageMeta("Blog · LesCracks",
                     "Les articles LesCracks : retours d’expérience, notions expliquées et bonnes pratiques pour progresser en tech.",
                     "/blog", "Blog"),
-            "cours", new PageMeta("Formations · LesCracks",
-                    "Les formations LesCracks arrivent : des parcours complets, étape par étape, pour passer à la pratique en tech.",
-                    "/cours", "Formations"),
+            "cours", new PageMeta("Cours · LesCracks",
+                    "Les cours LesCracks arrivent : des parcours complets, étape par étape, pour passer à la pratique en tech.",
+                    "/cours", "Cours"),
             "talk", new PageMeta("LesCracks Talk · La tech africaine en conversations",
                     "Les épisodes du LesCracks Talk : des conversations vidéo avec celles et ceux qui construisent la tech africaine, publiées sur YouTube.",
                     "/talk", "Le Talk")
@@ -92,7 +92,7 @@ public class SeoController {
 
         html.breadcrumbs(List.of(
                 new SeoHtml.Link(canonical(request, "/"), "Accueil"),
-                new SeoHtml.Link(canonical(request, "/rendez-vous"), "Événements"),
+                new SeoHtml.Link(canonical(request, "/rendez-vous"), "Rendez-vous"),
                 new SeoHtml.Link(canonical, event.getTitle())
         ));
 
@@ -131,7 +131,7 @@ public class SeoController {
 
         html.jsonLd(writeJson(breadcrumbJsonLd(request, List.of(
                 Map.of("name", "Accueil", "item", baseUrl(request) + "/"),
-                Map.of("name", "Événements", "item", baseUrl(request) + "/rendez-vous"),
+                Map.of("name", "Rendez-vous", "item", baseUrl(request) + "/rendez-vous"),
                 Map.of("name", event.getTitle(), "item", canonical)
         ))));
 
@@ -155,8 +155,8 @@ public class SeoController {
         List<SeoHtml.Link> nav = List.of(
                 new SeoHtml.Link(canonical(request, "/"), "Accueil"),
                 new SeoHtml.Link(canonical(request, "/blog"), "Blog"),
-                new SeoHtml.Link(canonical(request, "/cours"), "Formations"),
-                new SeoHtml.Link(canonical(request, "/rendez-vous"), "Événements"),
+                new SeoHtml.Link(canonical(request, "/cours"), "Cours"),
+                new SeoHtml.Link(canonical(request, "/rendez-vous"), "Rendez-vous"),
                 new SeoHtml.Link(canonical(request, "/talk"), "LesCracks Talk"),
                 new SeoHtml.Link(canonical(request, "/a-propos"), "À propos")
         );
@@ -164,8 +164,8 @@ public class SeoController {
 
         if ("home".equals(page)) {
             html.section("Blog", canonical(request, "/blog"), "Des articles pour comprendre une notion, éviter un piège ou apprendre d’un retour d’expérience.");
-            html.section("Formations", canonical(request, "/cours"), "Des parcours complets, étape par étape, bientôt disponibles.");
-            html.section("Événements", canonical(request, "/rendez-vous"), "Ateliers, bootcamps, webinaires et conférences pour pratiquer avec d’autres, en ligne ou sur place.");
+            html.section("Cours", canonical(request, "/cours"), "Des parcours complets, étape par étape, bientôt disponibles.");
+            html.section("Rendez-vous", canonical(request, "/rendez-vous"), "Ateliers, bootcamps, webinaires et conférences pour pratiquer avec d’autres, en ligne ou sur place.");
             html.section("LesCracks Talk", canonical(request, "/talk"), "Des conversations vidéo avec celles et ceux qui construisent la tech africaine.");
             html.section("À propos", canonical(request, "/a-propos"), "Qui est derrière LesCracks, ce que nous faisons et pourquoi.");
             addResourceLinks(html, request);
@@ -242,13 +242,13 @@ public class SeoController {
     private void addEventLinks(SeoHtml html, HttpServletRequest request) {
         var published = events.search(null, null, new PageQuery(0, 50)).items();
         if (published.isEmpty()) {
-            html.paragraph("Aucun événement publié pour le moment.");
+            html.paragraph("Aucun rendez-vous publié pour le moment.");
             return;
         }
 
         List<SeoHtml.Link> links = new ArrayList<>();
         published.forEach(view -> links.add(new SeoHtml.Link(canonical(request, view.event().path()), view.event().getTitle())));
-        html.links("Prochains événements", links);
+        html.links("Prochains rendez-vous", links);
     }
 
     private void addTalkLinks(SeoHtml html) {
