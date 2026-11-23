@@ -3,13 +3,13 @@ import { useParams } from 'react-router-dom';
 import { Check, Download, Link2, ShieldCheck } from 'lucide-react';
 
 import SEO from '@/components/common/SEO';
-import { Skeleton } from '@/components/common/Skeleton';
-import { EmptyState, ErrorState } from '@/components/common/States';
-import Layout from '@/components/layout/Layout';
-import { Section } from '@/components/layout/Page';
 import CertificateDocument from '@/components/recognition/CertificateDocument';
+import { Button } from '@/components/ui/button';
+import { Container } from '@/components/ui/container';
+import { EmptyPanel, ErrorPanel } from '@/components/ui/panels';
 import { useApi } from '@/hooks/useApi';
 import { track } from '@/lib/analytics';
+import { cn } from '@/lib/utils';
 import { api } from '@/services/api';
 
 /** An attestation anyone can check by its code, print as a PDF or share. */
@@ -30,36 +30,33 @@ export default function Attestation() {
   }
 
   return (
-    <Layout>
-      <SEO title={certificate.data ? `Attestation de ${certificate.data.holderName}` : 'Attestation'} url={`/attestations/${code}`} noindex
-        description="Une attestation LesCracks, vérifiable par son code." />
-      <Section spacing="tight">
-        {certificate.loading ? (
-          <Skeleton className="mx-auto aspect-[1.414] w-full max-w-4xl rounded-lg" />
-        ) : missing ? (
-          <EmptyState title="Aucune attestation ne porte ce code." description="Vérifie les caractères : le code compte dix lettres et chiffres, sans 0 ni 1." />
-        ) : certificate.error ? (
-          <ErrorState title="L’attestation est momentanément indisponible." message={certificate.error.message} onRetry={certificate.reload} />
-        ) : certificate.data && (
-          <>
-            <p className={`mx-auto mb-5 flex max-w-4xl items-center gap-2 text-sm ${certificate.data.revoked ? 'text-error-ink' : 'text-gold-ink'}`}>
-              <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden />
-              {certificate.data.revoked ? 'Cette attestation a été révoquée par LesCracks.' : 'Attestation authentique, délivrée par LesCracks.'}
-            </p>
-            <CertificateDocument certificate={certificate.data} />
-            {!certificate.data.revoked && (
-              <div className="mx-auto mt-5 flex max-w-4xl flex-wrap gap-3">
-                <button type="button" onClick={() => { track('Attestation téléchargée'); window.print(); }} className="btn-primary">
-                  <Download className="h-4 w-4" aria-hidden />Télécharger en PDF
-                </button>
-                <button type="button" onClick={() => void copyLink()} className="btn-secondary">
-                  {copied ? <Check className="h-4 w-4" aria-hidden /> : <Link2 className="h-4 w-4" aria-hidden />}{copied ? 'Lien copié' : 'Copier le lien'}
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </Section>
-    </Layout>
+    <Container className="py-12 sm:py-20">
+      <SEO title={certificate.data ? `Attestation de ${certificate.data.holderName}` : 'Attestation'} url={`/attestations/${code}`} noindex description="Une attestation LesCracks, vérifiable par son code." />
+      <div className="mx-auto max-w-4xl">
+        <p className="text-sm font-medium text-gold-400">Attestation</p>
+        <h1 className="mt-4 text-[clamp(1.75rem,4vw,3rem)] font-semibold leading-[1.05] tracking-[-0.04em]">Vérification <span className="font-mono text-white/40">{code}</span></h1>
+
+        <div className="mt-10">
+          {certificate.loading && <div aria-hidden="true" className="aspect-[1.414] w-full animate-pulse rounded-3xl bg-white/[0.03] motion-reduce:animate-none" />}
+          {missing && <EmptyPanel title="Aucune attestation ne porte ce code." description="Vérifie les caractères : le code compte dix lettres et chiffres, sans 0 ni 1." />}
+          {!missing && certificate.error && <ErrorPanel title="L’attestation est momentanément indisponible." message={certificate.error.message} onRetry={certificate.reload} />}
+          {certificate.data && (
+            <>
+              <p className={cn('mb-5 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm', certificate.data.revoked ? 'border-error/30 text-error-ink' : 'border-gold-400/30 bg-gold-400/10 text-gold-400')}>
+                <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden="true" />
+                {certificate.data.revoked ? 'Cette attestation a été révoquée par LesCracks.' : 'Attestation authentique, délivrée par LesCracks.'}
+              </p>
+              <CertificateDocument certificate={certificate.data} />
+              {!certificate.data.revoked && (
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Button type="button" size="lg" className="font-semibold" onClick={() => { track('Attestation téléchargée'); window.print(); }}><Download className="h-4 w-4" aria-hidden="true" />Télécharger en PDF</Button>
+                  <Button type="button" size="lg" variant="outline" onClick={() => void copyLink()}>{copied ? <Check className="h-4 w-4" aria-hidden="true" /> : <Link2 className="h-4 w-4" aria-hidden="true" />}{copied ? 'Lien copié' : 'Copier le lien'}</Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </Container>
   );
 }
