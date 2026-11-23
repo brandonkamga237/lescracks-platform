@@ -1,14 +1,11 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 
+import DashSection from '@/components/member/DashSection';
 import MyEventRow from '@/components/member/MyEventRow';
-import { Stagger, StaggerItem } from '@/components/motion/Stagger';
-import { Container } from '@/components/ui/container';
 import { ErrorPanel, RowsLoading } from '@/components/ui/panels';
-import { SectionHeading } from '@/components/ui/section-heading';
 import type { MyAgenda as Agenda } from '@/lib/myEvents';
 
-const PAST_SHOWN = 4;
+const PAST_SHOWN = 3;
 
 interface MyAgendaProps {
   agenda: Agenda | null;
@@ -23,34 +20,27 @@ export default function MyAgenda({ agenda, loading, failed, onRetry }: MyAgendaP
   const past = agenda?.past.slice(0, PAST_SHOWN) ?? [];
 
   return (
-    <section id="mes-rendez-vous" aria-labelledby="my-events-title">
-      <Container className="pb-20 pt-4 sm:pb-28">
-        <SectionHeading id="my-events-title" eyebrow="Mes rendez-vous" title={['Ton agenda.', { text: 'Ceux auxquels tu es inscrit.', className: 'text-white/40' }]} action={{ to: '/rendez-vous', label: 'Tout l’agenda' }} />
-
-        {failed && <div className="mt-14"><ErrorPanel title="Impossible de charger tes rendez-vous." onRetry={onRetry} /></div>}
-        {loading && !agenda && <div className="mt-14"><RowsLoading rows={2} label="Chargement de tes rendez-vous…" /></div>}
-
-        {agenda && ahead.length === 0 && (
-          <div className="mt-14 flex flex-col items-start gap-5 rounded-3xl border border-dashed border-white/15 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
-            <p className="max-w-xl text-white/60">Tu n’es inscrit à aucun rendez-vous à venir. Choisis un atelier ou une conférence : chaque participation te vaut une attestation vérifiable.</p>
-            <Link to="/rendez-vous" className="group inline-flex shrink-0 items-center gap-2 text-sm font-medium text-gold-400">Voir l’agenda<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" /></Link>
-          </div>
-        )}
-        {ahead.length > 0 && (
-          <Stagger className="mt-14 border-t border-white/10">
-            {ahead.map(({ event, tense }) => <StaggerItem key={event.id}><MyEventRow event={event} tense={tense} /></StaggerItem>)}
-          </Stagger>
-        )}
-
-        {past.length > 0 && (
-          <>
-            <h3 className="mt-16 text-sm font-medium text-white/50">Déjà passés</h3>
-            <Stagger className="mt-4 border-t border-white/10">
-              {past.map((event) => <StaggerItem key={event.id}><MyEventRow event={event} tense="past" /></StaggerItem>)}
-            </Stagger>
-          </>
-        )}
-      </Container>
-    </section>
+    <DashSection id="my-events-title" title="Mes rendez-vous" more={{ to: '/rendez-vous', label: 'Agenda' }}>
+      {failed && <ErrorPanel title="Impossible de charger tes rendez-vous." onRetry={onRetry} />}
+      {loading && !agenda && <RowsLoading rows={2} label="Chargement de tes rendez-vous…" />}
+      {agenda && ahead.length === 0 && (
+        <p className="rounded-2xl border border-dashed border-white/15 px-4 py-4 text-sm text-white/55">
+          Aucune inscription à venir. <Link to="/rendez-vous" className="font-medium text-gold-400 underline-offset-4 hover:underline">Choisir un rendez-vous</Link>
+        </p>
+      )}
+      {ahead.length > 0 && (
+        <ul className="border-t border-white/10">
+          {ahead.map(({ event, tense }) => <li key={event.id}><MyEventRow event={event} tense={tense} /></li>)}
+        </ul>
+      )}
+      {past.length > 0 && (
+        <>
+          <h3 className="mb-1 mt-6 text-xs font-medium text-white/40">Déjà passés</h3>
+          <ul className="border-t border-white/10">
+            {past.map((event) => <li key={event.id}><MyEventRow event={event} tense="past" /></li>)}
+          </ul>
+        </>
+      )}
+    </DashSection>
   );
 }
