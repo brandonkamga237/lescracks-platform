@@ -27,7 +27,7 @@ const SECTION_OF: Partial<Record<ProfileField, string>> = {
 type IdentityProvider = Exclude<AuthProvider, 'LOCAL'>;
 const IDENTITY_PROVIDERS: IdentityProvider[] = ['GOOGLE', 'GITHUB'];
 
-const CARD = 'rounded-[2rem] border border-white/10 bg-white/[0.03] p-5 sm:p-8';
+const CARD = 'rounded-3xl border border-white/10 bg-white/[0.03] p-5 sm:p-6';
 const ROW = 'flex items-center justify-between gap-4 rounded-2xl border border-white/10 px-4 py-3';
 
 function SecurityHeading({ Icon, title, text }: { Icon: typeof Lock; title: string; text: string }) {
@@ -137,17 +137,16 @@ export default function Profile() {
     <>
       <SEO title="Mon compte" description="Tes informations, ta sécurité et tes connexions LesCracks." url="/profil" />
       <section aria-labelledby="account-title" className="relative isolate overflow-hidden">
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-80 bg-[radial-gradient(ellipse_55%_70%_at_20%_0%,rgba(212,175,55,0.09),transparent_70%)]" />
-        <Container className="flex flex-col gap-6 pb-10 pt-12 sm:flex-row sm:items-end sm:justify-between sm:pb-14 sm:pt-20">
+                <Container className="flex flex-col gap-5 pb-6 pt-8 sm:flex-row sm:items-center sm:justify-between sm:pt-10">
           <div className="flex min-w-0 items-center gap-5">
             <AvatarPicker name={name} avatarUrl={user?.avatarUrl} onChanged={refresh} />
             <div className="min-w-0">
               <p className="text-sm font-medium text-gold-400">Mon compte</p>
-              <h1 id="account-title" className="mt-2 break-words text-[clamp(1.75rem,4vw,3rem)] font-semibold leading-[1.05] tracking-[-0.04em]">{fullName}</h1>
+              <h1 id="account-title" className="mt-1 break-words text-2xl font-semibold tracking-tight sm:text-3xl">{fullName}</h1>
               {user?.email && <p className="mt-1 truncate text-sm text-white/50">{user.email}</p>}
             </div>
           </div>
-          <Button type="button" variant="outline" disabled={leaving} onClick={() => void leave()} className="self-start sm:self-end">
+          <Button type="button" variant="outline" disabled={leaving} onClick={() => void leave()} className="self-start sm:self-center">
             <LogOut className="h-4 w-4" aria-hidden="true" />{leaving ? 'Déconnexion…' : 'Me déconnecter'}
           </Button>
         </Container>
