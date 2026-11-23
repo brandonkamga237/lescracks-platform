@@ -42,6 +42,7 @@ export default function Header() {
         </nav>
 
         <div className="ml-auto hidden items-center gap-6 lg:flex">
+          {isSignedIn && !isAdmin && user && <NavLink to="/" end className={({ isActive }) => `text-sm transition-colors ${isActive ? 'font-semibold text-t1' : 'font-medium text-t3 hover:text-t1'}`}>Mon espace</NavLink>}
           {isLoading ? <span role="status" className="h-9 w-24 animate-pulse rounded bg-noir-800"><span className="sr-only">Vérification de la session…</span></span> : isSignedIn ? (
             <Link to={isAdmin ? '/admin' : '/profil'} className="flex items-center gap-2.5 text-sm text-t2 transition-colors hover:text-t1">
               <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-gold-400/30 bg-gold-400/10 font-semibold text-gold-ink">{user?.avatarUrl ? <img src={user.avatarUrl} alt="" className="h-full w-full object-cover" /> : name?.trim().charAt(0).toLocaleUpperCase('fr') || <User className="h-4 w-4" aria-hidden />}</span>

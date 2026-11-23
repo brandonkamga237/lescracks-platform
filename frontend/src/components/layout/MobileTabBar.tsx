@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { ArrowRight, CalendarDays, CircleUser, GraduationCap, Info, Lock, LogOut, Newspaper, Podcast, Shield, User } from 'lucide-react';
+import { ArrowRight, CalendarDays, CircleUser, GraduationCap, House, Info, Lock, LogOut, Newspaper, Podcast, Shield, User } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -110,7 +110,7 @@ export default function MobileTabBar() {
                   <nav aria-label="Ton compte">
                     {(isAdmin
                       ? [['/admin', 'Administration', Shield]] as const
-                      : [['/profil', 'Mon compte', User], ['/profil#securite', 'Sécurité et connexion', Lock]] as const
+                      : [['/', 'Mon espace', House], ['/profil', 'Mon compte', User], ['/profil#securite', 'Sécurité et connexion', Lock]] as const
                     ).map(([to, label, Icon]) => (
                       <Link key={to} to={to} className={row}>
                         <Icon className="h-4 w-4 text-t4" aria-hidden />{label}
