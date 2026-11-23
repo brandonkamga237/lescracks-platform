@@ -1,6 +1,8 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Loader2 } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
+import { Notice } from '@/components/ui/field';
 
 interface EditableSectionProps {
   id: string;
@@ -49,32 +51,29 @@ export default function EditableSection({ id, title, description, view, children
   }
 
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-24 rounded-lg border border-line-soft bg-card p-4 sm:p-7">
+    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-24 rounded-[2rem] border border-white/10 bg-white/[0.03] p-5 sm:p-8">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 id={`${id}-title`} className="text-lg text-t1">{title}</h2>
-          {description && <p className="mt-1 text-sm text-t4">{description}</p>}
+          <h2 id={`${id}-title`} className="text-xl font-semibold tracking-tight">{title}</h2>
+          {description && <p className="mt-1 text-sm text-white/45">{description}</p>}
         </div>
         {!editing && (
-          <button type="button" onClick={() => { setEditing(true); setSaved(false); }}
-            className="min-h-10 shrink-0 px-2 text-sm font-medium text-gold-ink underline-offset-4 hover:underline">
-            Modifier
-          </button>
+          <Button type="button" size="sm" variant="outline" onClick={() => { setEditing(true); setSaved(false); }} className="shrink-0">Modifier</Button>
         )}
       </div>
-      {saved && !editing && <p role="status" className="mt-4 text-sm text-gold-ink">Enregistré.</p>}
+      {saved && !editing && <p role="status" className="mt-4 text-sm text-gold-400">Enregistré.</p>}
       {editing ? (
         <form onSubmit={submit} className="mt-5" aria-busy={busy}>
           <fieldset disabled={busy} className="space-y-5">
             <legend className="sr-only">{title}</legend>
             {children}
-            {error && <p role="alert" className="rounded border border-error/25 bg-error/5 p-3 text-sm text-error-ink">{error}</p>}
+            {error && <Notice tone="error">{error}</Notice>}
             <div className="flex flex-wrap gap-3">
-              <button type="submit" className="btn-primary">
+              <Button type="submit" className="font-semibold">
                 {busy && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}
                 {busy ? 'Enregistrement…' : 'Enregistrer'}
-              </button>
-              <button type="button" onClick={cancel} className="btn-secondary">Annuler</button>
+              </Button>
+              <Button type="button" variant="outline" onClick={cancel}>Annuler</Button>
             </div>
           </fieldset>
         </form>
