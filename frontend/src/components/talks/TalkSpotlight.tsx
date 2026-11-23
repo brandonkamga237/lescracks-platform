@@ -2,6 +2,7 @@ import { memo, useState } from 'react';
 import { Play } from 'lucide-react';
 
 import ShareButton from '@/components/common/ShareButton';
+import { Button } from '@/components/ui/button';
 import VideoPlayer from '@/components/media/VideoPlayer';
 import { youtubeThumbnail, youtubeWatchUrl } from '@/lib/youtube';
 import type { TalkVideo } from '@/services/types';
@@ -23,23 +24,21 @@ function TalkSpotlight({ video }: TalkSpotlightProps) {
   ].filter(Boolean).join('  ·  ');
 
   return (
-    <article className="grid items-center gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
+    <article className="grid items-center gap-8 rounded-[2rem] border border-white/10 bg-white/[0.03] p-4 sm:p-6 lg:grid-cols-[1.1fr_1fr] lg:gap-12">
       <VideoPlayer id={`episode-${video.id}`} url={video.youtubeUrl} title={video.title} poster={thumbnail} platform="YouTube" started={playing} onStart={() => setPlaying(true)} />
 
-      <div className="min-w-0">
-        <p className="flex items-baseline gap-3">
-          <span className="kicker">Dernier épisode</span>
-        </p>
-        <h3 className="mt-3 break-words font-display text-2xl font-bold leading-tight tracking-tight text-t1 sm:text-3xl lg:text-4xl">{video.title}</h3>
-        <p className="mt-6 line-clamp-3 max-w-xl text-base leading-normal text-t3">{video.description}</p>
-        {meta && <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.1em] text-t4">{meta}</p>}
+      <div className="min-w-0 p-2 sm:p-4">
+        <p className="text-sm font-medium text-gold-400">Dernier épisode</p>
+        <h3 className="mt-4 break-words text-[clamp(1.75rem,3vw,2.5rem)] font-semibold leading-[1.05] tracking-[-0.04em]">{video.title}</h3>
+        <p className="mt-5 line-clamp-3 max-w-xl text-base leading-relaxed text-white/55">{video.description}</p>
+        {meta && <p className="mt-5 text-sm text-white/45">{meta}</p>}
         <div className="mt-8 flex flex-wrap items-center gap-3">
-          <button type="button" onClick={() => setPlaying(true)} className="btn-primary">
+          <Button type="button" size="lg" onClick={() => setPlaying(true)} className="font-semibold">
             {playing ? 'Lecture en cours' : 'Regarder l’épisode'}
             <Play className="h-4 w-4" aria-hidden />
-          </button>
+          </Button>
           {/* The episode lives on YouTube, so that is the link shared: its own preview card is the video. */}
-          <ShareButton title={video.title} url={youtubeWatchUrl(video.youtubeUrl)} label="Partager" />
+          <ShareButton title={video.title} url={youtubeWatchUrl(video.youtubeUrl)} label="Partager" className="w-auto" />
         </div>
       </div>
     </article>
