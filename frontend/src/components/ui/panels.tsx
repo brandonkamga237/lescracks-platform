@@ -40,7 +40,7 @@ export function ErrorPanel({ title, message, onRetry }: ErrorPanelProps) {
 export function RowsLoading({ rows = 3, label }: { rows?: number; label: string }) {
   return (
     <div role="status" className="border-t border-white/10">
-      {Array.from({ length: rows }, (_, index) => <div key={index} aria-hidden="true" className="h-[97px] animate-pulse border-b border-white/10 bg-white/[0.02] motion-reduce:animate-none" />)}
+      {Array.from({ length: rows }, (_, index) => <div key={index} aria-hidden="true" className="h-[73px] animate-pulse border-b border-white/10 bg-white/[0.02] motion-reduce:animate-none" />)}
       <span className="sr-only">{label}</span>
     </div>
   );
