@@ -4,19 +4,33 @@ import { LogOut } from 'lucide-react';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import MemberAvatar from '@/components/space/MemberAvatar';
-import { MEMBER_TABS, isTabActive } from '@/components/space/spaceTabs';
+import { isTabActive, tabsFor } from '@/components/space/spaceTabs';
+import { Button } from '@/components/ui/button';
 import { COMMUNITY_LINK } from '@/config/site';
 import { useSession } from '@/hooks/useSession';
 import { cn } from '@/lib/utils';
 
-/** The member space on a wide screen: the site's tabs down the side, the member at the foot. */
-export default function SpaceSidebar() {
-  const { pathname } = useLocation();
+/** Who is reading, at the foot of the sidebar: their account, or the way to open one. */
+function SidebarFoot({ member }: { member: boolean }) {
+  const { pathname, search } = useLocation();
   const navigate = useNavigate();
   const { name, user, signOut } = useSession();
   const [leaving, setLeaving] = useState(false);
+  const back = `?retour=${encodeURIComponent(`${pathname}${search}`)}`;
+
+  if (!member) {
+    return (
+      <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+        <p className="text-sm font-medium text-white">Ton espace t’attend.</p>
+        <p className="mt-1.5 text-xs leading-relaxed text-white/50">Inscris-toi aux rendez-vous et garde tes attestations au même endroit.</p>
+        <Button asChild size="sm" className="mt-4 w-full font-semibold"><Link to={`/inscription${back}`}>Rejoindre</Link></Button>
+        <Button asChild size="sm" variant="ghost" className="mt-1 w-full"><Link to={`/connexion${back}`}>Se connecter</Link></Button>
+      </div>
+    );
+  }
+
   const firstName = user?.firstName || name?.trim().split(/\s+/)[0];
-  const onProfile = pathname === '/profil';
+  const onAccount = pathname === '/profil';
 
   async function leave() {
     setLeaving(true);
@@ -29,13 +43,33 @@ export default function SpaceSidebar() {
   }
 
   return (
+    <>
+      <Link to="/profil" aria-current={onAccount ? 'page' : undefined} className={cn('flex items-center gap-3 rounded-2xl p-2 transition-colors', onAccount ? 'bg-white/[0.08]' : 'hover:bg-white/[0.04]')}>
+        <MemberAvatar name={name} avatarUrl={user?.avatarUrl} />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium text-white">{firstName || 'Mon compte'}</span>
+          <span className="block truncate text-xs text-white/45">{user && user.completion < 100 ? `Profil complété à ${user.completion} %` : 'Mon compte'}</span>
+        </span>
+      </Link>
+      <button type="button" disabled={leaving} onClick={() => void leave()} className="mt-2 flex min-h-10 w-full items-center gap-3 rounded-full px-4 text-sm text-white/45 transition-colors hover:text-white disabled:opacity-50">
+        <LogOut className="h-4 w-4" aria-hidden="true" />{leaving ? 'Déconnexion…' : 'Se déconnecter'}
+      </button>
+    </>
+  );
+}
+
+/** The space on a wide screen: the platform's tabs down the side, the reader at the foot. */
+export default function SpaceSidebar({ member }: { member: boolean }) {
+  const { pathname } = useLocation();
+
+  return (
     <aside className="hidden border-r border-white/10 lg:block">
       <div className="sticky top-0 flex h-screen flex-col px-4 py-7">
-        <Link to="/" aria-label="LesCracks, accueil" className="px-3"><LesCracksLogo height={34} className="w-auto" /></Link>
+        <Link to="/" aria-label={member ? 'LesCracks, mon espace' : 'LesCracks, accueil'} className="px-3"><LesCracksLogo height={34} className="w-auto" /></Link>
 
         <nav aria-label="Navigation principale" className="mt-10">
           <ul className="space-y-1">
-            {MEMBER_TABS.map((tab) => {
+            {tabsFor(member).map((tab) => {
               const active = isTabActive(tab, pathname);
               return (
                 <li key={tab.to}>
@@ -54,22 +88,11 @@ export default function SpaceSidebar() {
           </ul>
         </nav>
 
-        <a href={COMMUNITY_LINK.href} target="_blank" rel="noopener noreferrer" aria-label="La communauté sur WhatsApp, nouvel onglet" className="mt-6 flex min-h-11 items-center gap-3 rounded-full border-t border-white/10 px-4 pt-6 text-sm text-white/45 transition-colors hover:text-white">
+        <a href={COMMUNITY_LINK.href} target="_blank" rel="noopener noreferrer" aria-label="La communauté sur WhatsApp, nouvel onglet" className="mt-6 flex min-h-11 items-center gap-3 border-t border-white/10 px-4 pt-6 text-sm text-white/45 transition-colors hover:text-white">
           <COMMUNITY_LINK.Icon className="h-[18px] w-[18px] shrink-0" />La communauté
         </a>
 
-        <div className="mt-auto border-t border-white/10 pt-5">
-          <Link to="/profil" aria-current={onProfile ? 'page' : undefined} className={cn('flex items-center gap-3 rounded-2xl p-2 transition-colors', onProfile ? 'bg-white/[0.08]' : 'hover:bg-white/[0.04]')}>
-            <MemberAvatar name={name} avatarUrl={user?.avatarUrl} />
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium text-white">{firstName || 'Mon compte'}</span>
-              <span className="block truncate text-xs text-white/45">{user && user.completion < 100 ? `Profil complété à ${user.completion} %` : 'Mon compte'}</span>
-            </span>
-          </Link>
-          <button type="button" disabled={leaving} onClick={() => void leave()} className="mt-2 flex min-h-10 w-full items-center gap-3 rounded-full px-4 text-sm text-white/45 transition-colors hover:text-white disabled:opacity-50">
-            <LogOut className="h-4 w-4" aria-hidden="true" />{leaving ? 'Déconnexion…' : 'Se déconnecter'}
-          </button>
-        </div>
+        <div className="mt-auto border-t border-white/10 pt-5"><SidebarFoot member={member} /></div>
       </div>
     </aside>
   );

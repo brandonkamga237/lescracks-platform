@@ -2,28 +2,32 @@ import { Link, useLocation } from 'react-router-dom';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import MemberAvatar from '@/components/space/MemberAvatar';
-import { MEMBER_TABS, isTabActive } from '@/components/space/spaceTabs';
+import { isTabActive, tabsFor } from '@/components/space/spaceTabs';
 import { useSession } from '@/hooks/useSession';
 import { cn } from '@/lib/utils';
 
-/** The member space on a phone: the logo and the account on top. */
-export function SpaceTopBar() {
+/** The space on a phone: the logo on top, with the account or the way in. */
+export function SpaceTopBar({ member }: { member: boolean }) {
+  const { pathname, search } = useLocation();
   const { name, user } = useSession();
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-black/90 px-4 backdrop-blur-xl lg:hidden">
-      <Link to="/" aria-label="LesCracks, accueil" className="flex min-h-11 items-center"><LesCracksLogo height={30} className="w-auto" /></Link>
-      <Link to="/profil" aria-label="Mon compte" className="flex min-h-11 min-w-11 items-center justify-end"><MemberAvatar name={name} avatarUrl={user?.avatarUrl} className="h-8 w-8" /></Link>
+      <Link to="/" aria-label={member ? 'LesCracks, mon espace' : 'LesCracks, accueil'} className="flex min-h-11 items-center"><LesCracksLogo height={30} className="w-auto" /></Link>
+      {member
+        ? <Link to="/profil" aria-label="Mon compte" className="flex min-h-11 min-w-11 items-center justify-end"><MemberAvatar name={name} avatarUrl={user?.avatarUrl} className="h-8 w-8" /></Link>
+        : <Link to={`/connexion?retour=${encodeURIComponent(`${pathname}${search}`)}`} className="flex min-h-11 items-center rounded-full px-4 text-sm font-medium text-gold-400">Se connecter</Link>}
     </header>
   );
 }
 
-/** The site's tabs under the thumb. Colour change only: a bar touched all day should not move. */
-export default function SpaceTabBar() {
+/** The platform's tabs under the thumb. Colour change only: a bar touched all day should not move. */
+export default function SpaceTabBar({ member }: { member: boolean }) {
   const { pathname } = useLocation();
+  const tabs = tabsFor(member);
   return (
     <nav aria-label="Navigation principale" className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
-      <ul className="grid grid-cols-5">
-        {MEMBER_TABS.map((tab) => {
+      <ul className={cn('grid', tabs.length === 5 ? 'grid-cols-5' : 'grid-cols-4')}>
+        {tabs.map((tab) => {
           const active = isTabActive(tab, pathname);
           return (
             <li key={tab.to}>
