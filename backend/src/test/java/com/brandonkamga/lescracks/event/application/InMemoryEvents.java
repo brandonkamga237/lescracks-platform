@@ -4,6 +4,7 @@ import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
 import com.brandonkamga.lescracks.engagement.domain.model.Counts;
 import com.brandonkamga.lescracks.engagement.domain.model.Target;
 import com.brandonkamga.lescracks.engagement.domain.model.TargetType;
+import com.brandonkamga.lescracks.event.domain.model.DueReminder;
 import com.brandonkamga.lescracks.event.domain.model.Event;
 import com.brandonkamga.lescracks.event.domain.model.EventSearch;
 import com.brandonkamga.lescracks.event.domain.model.EventStatus;
@@ -11,6 +12,7 @@ import com.brandonkamga.lescracks.event.domain.model.Registration;
 import com.brandonkamga.lescracks.event.domain.model.Submission;
 import com.brandonkamga.lescracks.event.domain.port.EventStore;
 import com.brandonkamga.lescracks.event.domain.port.RegistrationStore;
+import com.brandonkamga.lescracks.event.domain.port.ReminderStore;
 import com.brandonkamga.lescracks.event.domain.port.SubmissionStore;
 import com.brandonkamga.lescracks.member.application.Member;
 import com.brandonkamga.lescracks.member.application.MemberDirectory;
@@ -234,6 +236,12 @@ final class InMemoryEvents {
         final List<Collection<Long>> lookups = new ArrayList<>();
 
         Member add(Long id, String email, String firstName) {
+            Member member = Member.builder().id(id).email(email).firstName(firstName).lastName("L").active(true).emailVerified(true).build();
+            byId.put(id, member);
+            return member;
+        }
+
+        Member addUnverified(Long id, String email, String firstName) {
             Member member = Member.builder().id(id).email(email).firstName(firstName).lastName("L").active(true).build();
             byId.put(id, member);
             return member;
@@ -335,6 +343,30 @@ final class InMemoryEvents {
         @Override
         public boolean reachable() {
             return true;
+        }
+    }
+
+    /** Due reminders set by the test; a marked one is no longer due, like the SQL's NOT EXISTS. */
+    static final class Reminders implements ReminderStore {
+        private final List<DueReminder> due = new ArrayList<>();
+        final Set<String> marked = new LinkedHashSet<>();
+
+        void add(DueReminder reminder) {
+            due.add(reminder);
+        }
+
+        @Override
+        public List<DueReminder> findDue(Instant now) {
+            return due.stream().filter(reminder -> !marked.contains(key(reminder))).toList();
+        }
+
+        @Override
+        public void markSent(Collection<DueReminder> reminders, Instant at) {
+            reminders.forEach(reminder -> marked.add(key(reminder)));
+        }
+
+        static String key(DueReminder reminder) {
+            return reminder.registrationId() + ":" + reminder.moment();
         }
     }
 }

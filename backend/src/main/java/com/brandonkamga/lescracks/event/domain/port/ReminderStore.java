@@ -15,6 +15,6 @@ public interface ReminderStore {
      */
     List<DueReminder> findDue(Instant now);
 
-    /** Marks these reminders as sent, in one statement; one already marked stays as it was. */
+    /** Marks these reminders as dealt with, in one statement: sent, or never to be sent. One already marked stays as it was. */
     void markSent(Collection<DueReminder> reminders, Instant at);
 }
