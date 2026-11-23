@@ -82,6 +82,11 @@
     scroll-behavior: smooth;
   }
 
+  /* Lenis drives the scroll itself; native smoothing on top of it makes every wheel step stutter. */
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
   body {
     @apply bg-background text-foreground antialiased font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
@@ -146,6 +151,11 @@
      Defaults for headings without their own size: the page title scale of PageHeader. */
   h1, h2, h3, h4, h5, h6 {
     @apply font-display font-bold tracking-tight;
+  }
+
+  /* The redesigned pages set Geist on their root; without this the heading rule above would pull DM Sans back in. */
+  .font-geist :where(h1, h2, h3, h4, h5, h6) {
+    font-family: inherit;
   }
 
   h1 {
@@ -232,6 +242,30 @@
   .link {
     /* Underlined at rest: a phone has no hover to reveal what is clickable. */
     @apply font-medium text-gold-ink underline decoration-gold-400/50 underline-offset-4 transition-colors duration-200 hover:decoration-gold-400;
+  }
+
+  /* ========== TILE GRID — the squared ground of the landing hero and footer ========== */
+  .tile-grid {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+
+  /* The same lines in gold, only inside a circle that follows the pointer (--spot-x / --spot-y). */
+  .tile-grid-gold {
+    background-image: linear-gradient(rgba(212, 175, 55, 0.45) 1px, transparent 1px), linear-gradient(90deg, rgba(212, 175, 55, 0.45) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(220px circle at var(--spot-x, 50%) var(--spot-y, -30%), #000, transparent 70%);
+    mask-image: radial-gradient(220px circle at var(--spot-x, 50%) var(--spot-y, -30%), #000, transparent 70%);
+  }
+
+  .fade-hero {
+    -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 40%, #000 35%, transparent 80%);
+    mask-image: radial-gradient(ellipse 75% 70% at 50% 40%, #000 35%, transparent 80%);
+  }
+
+  .fade-up {
+    -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.6) 45%, transparent 85%);
+    mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.6) 45%, transparent 85%);
   }
 
   /* ========== STAT TILE — charcoal lift, never a shadow ========== */
