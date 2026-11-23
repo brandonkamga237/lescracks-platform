@@ -81,7 +81,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
   const [fields, setFields] = useState<Record<string, string>>({});
   const [newsletter, setNewsletter] = useState(false);
   const state = location.state as { from?: string; expired?: boolean } | null;
-  const returnTo = safeReturnPath(new URLSearchParams(location.search).get('retour') ?? state?.from, isAdmin ? '/admin' : '/profil');
+  const returnTo = safeReturnPath(new URLSearchParams(location.search).get('retour') ?? state?.from, isAdmin ? '/admin' : '/');
   const registering = mode === 'register';
 
   useEffect(() => {

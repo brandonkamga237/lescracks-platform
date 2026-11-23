@@ -15,7 +15,7 @@ export default function AuthCallback() {
   const auth = useAuth();
   const { isLoading, isSignedIn, isAdmin, error, reload } = useSession();
   const navigate = useNavigate();
-  const from = safeReturnPath((auth.user?.state as { from?: string } | undefined)?.from, isAdmin ? '/admin' : '/profil');
+  const from = safeReturnPath((auth.user?.state as { from?: string } | undefined)?.from, isAdmin ? '/admin' : '/');
   const waiting = auth.isLoading || isLoading;
   const failed = !waiting && (auth.error || error || !isSignedIn);
 

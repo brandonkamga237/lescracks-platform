@@ -56,7 +56,7 @@ export default function Welcome() {
   const [city, setCity] = useState(user?.location ?? '');
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState('');
-  const returnTo = safeReturnPath(params.get('retour'), '/blog');
+  const returnTo = safeReturnPath(params.get('retour'), '/');
   const last = step === STEPS.length - 1;
 
   async function finish() {
