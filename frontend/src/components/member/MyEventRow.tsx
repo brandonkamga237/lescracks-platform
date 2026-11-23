@@ -24,7 +24,7 @@ export default function MyEventRow({ event, tense }: { event: MyEvent; tense: Te
     <ListRow
       to={eventPath(event)}
       dense
-      columns="grid-cols-[3.5rem_minmax(0,1fr)_auto] sm:grid-cols-[4.5rem_minmax(0,1fr)_12rem_auto]"
+      columns="grid-cols-[3.5rem_minmax(0,1fr)_auto] sm:grid-cols-[4rem_minmax(0,1fr)_auto]"
       leading={(
         <time dateTime={event.startDate} className="pl-2 leading-none">
           <span className={cn('block text-2xl font-semibold tracking-tight sm:text-3xl', tense === 'past' ? 'text-white/40' : 'text-gold-400')}>{eventDay(event.startDate)}</span>
@@ -32,14 +32,7 @@ export default function MyEventRow({ event, tense }: { event: MyEvent; tense: Te
         </time>
       )}
       title={event.title}
-      subtitle={what}
-      meta={(
-        <>
-          {TYPE_LABEL[event.type]}
-          <br />
-          <span className={cn('inline-flex items-center gap-2', tense === 'live' && 'text-gold-400')}>{tense === 'live' && <PulseDot />}{state}</span>
-        </>
-      )}
+      subtitle={<span className={cn('inline-flex items-center gap-2', tense === 'live' && 'text-gold-400')}>{tense === 'live' && <PulseDot />}{what}</span>}
     />
   );
 }
