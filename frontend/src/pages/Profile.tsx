@@ -56,7 +56,6 @@ export default function Profile() {
   }, [hash]);
 
   const [leaving, setLeaving] = useState(false);
-  const [error, setError] = useState('');
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [editingPassword, setEditingPassword] = useState(false);
   const [passwordBusy, setPasswordBusy] = useState(false);
@@ -98,17 +97,11 @@ export default function Profile() {
     }
   }
 
+  // Leave this members-only page first: signed out on it, its guard would send the reader to sign in again.
   async function leave() {
     setLeaving(true);
-    setError('');
-    try {
-      await signOut();
-      navigate('/', { replace: true });
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'La déconnexion a échoué. Réessaie.');
-    } finally {
-      setLeaving(false);
-    }
+    navigate('/', { replace: true });
+    await signOut().catch(() => undefined);
   }
 
   async function linkProvider(provider: IdentityProvider) {
@@ -161,7 +154,6 @@ export default function Profile() {
       </section>
 
       <Container className="pb-24">
-        {error && <Notice tone="error" className="mb-6">{error}</Notice>}
 
         {user && user.completion < 100 && user.missing.length > 0 && (
           <section aria-labelledby="completion-title" className={cn(CARD, 'mb-6')}>

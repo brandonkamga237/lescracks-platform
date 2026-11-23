@@ -31,11 +31,12 @@ function SidebarFoot({ member }: { member: boolean }) {
 
   const firstName = user?.firstName || name?.trim().split(/\s+/)[0];
 
+  // Leave a members-only page first: signed out on it, its guard would send the reader to sign in again.
   async function leave() {
     setLeaving(true);
+    navigate('/', { replace: true });
     try {
       await signOut();
-      navigate('/', { replace: true });
     } finally {
       setLeaving(false);
     }
