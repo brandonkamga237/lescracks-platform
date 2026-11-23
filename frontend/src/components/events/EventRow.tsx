@@ -14,7 +14,7 @@ export default function EventRow({ event, dense = false }: { event: EventSummary
     <ListRow
       to={eventPath(event)}
       dense={dense}
-      columns={dense ? 'grid-cols-[3.5rem_minmax(0,1fr)_auto] sm:grid-cols-[4.5rem_minmax(0,1fr)_14rem_auto]' : 'grid-cols-[4.5rem_minmax(0,1fr)_auto] sm:grid-cols-[7rem_minmax(0,1fr)_14rem_auto]'}
+      columns={dense ? 'grid-cols-[3.5rem_minmax(0,1fr)_auto] sm:grid-cols-[4rem_minmax(0,1fr)_auto]' : 'grid-cols-[4.5rem_minmax(0,1fr)_auto] sm:grid-cols-[7rem_minmax(0,1fr)_14rem_auto]'}
       leading={(
         <time dateTime={event.startDate} className="pl-2 leading-none">
           <span className={cn('block font-semibold tracking-tight text-gold-400', dense ? 'text-2xl sm:text-3xl' : 'text-4xl sm:text-5xl')}>{eventDay(event.startDate)}</span>
@@ -22,7 +22,7 @@ export default function EventRow({ event, dense = false }: { event: EventSummary
         </time>
       )}
       title={event.title}
-      subtitle={what}
+      subtitle={dense && count ? `${what} · ${count}` : what}
       meta={<>{what}{count && <><br />{count}</>}</>}
     />
   );
