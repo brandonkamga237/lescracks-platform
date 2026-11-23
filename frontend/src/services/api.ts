@@ -25,6 +25,9 @@ export const api = {
   logout: () => http.post<void>('/auth/logout'),
   articles: (page = 0, size = 12, signal?: AbortSignal, categoryId?: number) =>
     http.get<PageResponse<ArticleSummary>>('/resources', { page, size, categoryId }, signal),
+  /** The blog's catalogue, narrowed by words, a theme and a tag. */
+  searchArticles: (filters: { search?: string; categoryId?: number; tagId?: number; page?: number; size?: number }, signal?: AbortSignal) =>
+    http.get<PageResponse<ArticleSummary>>('/resources', { page: 0, size: 12, ...filters }, signal),
   article: (slugOrId: string, signal?: AbortSignal) =>
     http.get<ArticleSummary>(`/resources/${slugOrId}`, undefined, signal),
   events: (filters: { type?: EventType; format?: EventFormat; page?: number; size?: number } = {}, signal?: AbortSignal) =>
