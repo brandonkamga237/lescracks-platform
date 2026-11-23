@@ -1,13 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
-import MemberAvatar from '@/components/member/MemberAvatar';
-import { MEMBER_TABS, isTabActive } from '@/components/member/memberSpaces';
+import MemberAvatar from '@/components/space/MemberAvatar';
+import { MEMBER_TABS, isTabActive } from '@/components/space/spaceTabs';
 import { useSession } from '@/hooks/useSession';
 import { cn } from '@/lib/utils';
 
 /** The member space on a phone: the logo and the account on top. */
-export function MemberTopBar() {
+export function SpaceTopBar() {
   const { name, user } = useSession();
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-black/90 px-4 backdrop-blur-xl lg:hidden">
@@ -18,7 +18,7 @@ export function MemberTopBar() {
 }
 
 /** The site's tabs under the thumb. Colour change only: a bar touched all day should not move. */
-export default function MemberTabBar() {
+export default function SpaceTabBar() {
   const { pathname } = useLocation();
   return (
     <nav aria-label="Navigation principale" className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">

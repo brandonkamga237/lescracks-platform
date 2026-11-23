@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 
 import SignupNudge from '@/components/account/SignupNudge';
 import VerifyEmailBanner from '@/components/account/VerifyEmailBanner';
-import MemberSidebar from '@/components/member/MemberSidebar';
-import MemberTabBar, { MemberTopBar } from '@/components/member/MemberTabBar';
+import SpaceSidebar from '@/components/space/SpaceSidebar';
+import SpaceTabBar, { SpaceTopBar } from '@/components/space/SpaceTabBar';
 import type { NavItem } from '@/components/site/navigation';
 import SiteFooter from '@/components/site/SiteFooter';
 import SiteHeader from '@/components/site/SiteHeader';
@@ -37,9 +37,9 @@ export default function SiteShell({ children, items = SPACES, nextEvent, flush =
     return (
       <div className="min-h-screen bg-black font-geist text-white antialiased lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]">
         <a href="#main-content" className={SKIP}>Aller au contenu</a>
-        <MemberSidebar />
+        <SpaceSidebar />
         <div className="flex min-h-screen min-w-0 flex-col pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-0">
-          <MemberTopBar />
+          <SpaceTopBar />
           <VerifyEmailBanner />
           <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">{children}</main>
           <footer className="border-t border-white/10 px-4 py-8 text-sm text-white/40 sm:px-8">
@@ -49,7 +49,7 @@ export default function SiteShell({ children, items = SPACES, nextEvent, flush =
             </p>
           </footer>
         </div>
-        <MemberTabBar />
+        <SpaceTabBar />
       </div>
     );
   }
