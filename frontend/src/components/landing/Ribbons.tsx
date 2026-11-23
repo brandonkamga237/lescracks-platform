@@ -37,7 +37,7 @@ export default function Ribbons() {
         </motion.div>
       </div>
       <div className="absolute inset-x-[-6%] top-1/2 -translate-y-1/2">
-        <motion.div style={{ rotate: reduced ? 3 : darkTurn }} className="border-y border-white/10 bg-[#111111] py-3.5 sm:py-4">
+        <motion.div style={{ rotate: reduced ? 3 : darkTurn }} className="border-y border-white/10 bg-noir-900 py-3.5 sm:py-4">
           <Marquee speed={-0.7}><Words words={DARK_WORDS} dark /></Marquee>
         </motion.div>
       </div>
