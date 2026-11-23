@@ -29,7 +29,7 @@ function EpisodeRow({ video }: EpisodeRowProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="group relative isolate grid w-full grid-cols-[6rem_minmax(0,1fr)_auto] items-center gap-x-4 border-b border-white/10 px-2 py-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[10rem_minmax(0,1fr)_auto] sm:gap-x-8"
+        className="group relative isolate grid w-full grid-cols-[6rem_minmax(0,1fr)_auto] items-center gap-x-4 border-b border-white/10 px-2 py-3.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 sm:grid-cols-[7.5rem_minmax(0,1fr)_auto] sm:gap-x-6"
       >
         <span aria-hidden="true" className="absolute inset-0 -z-10 origin-left scale-x-0 bg-white/[0.03] transition-transform duration-500 ease-out group-hover:scale-x-100" />
         <span className="relative aspect-[16/9] overflow-hidden rounded-xl bg-white/[0.04]">
@@ -45,12 +45,12 @@ function EpisodeRow({ video }: EpisodeRowProps) {
           </span>
         </span>
         <span className="min-w-0">
-          <span className="block break-words text-lg font-medium tracking-tight transition-[color,transform] duration-500 ease-out group-hover:translate-x-2 group-hover:text-gold-400 sm:text-2xl">
+          <span className="block break-words text-base font-medium tracking-tight transition-[color,transform] duration-500 ease-out group-hover:translate-x-2 group-hover:text-gold-400 sm:text-lg">
             {video.title}
           </span>
           {meta && <span className="mt-1.5 block text-sm text-white/50">{meta}</span>}
         </span>
-        <span aria-hidden className="mr-2 grid h-11 w-11 place-items-center rounded-full border border-white/20 transition-colors group-hover:border-gold-400 group-hover:bg-gold-400 group-hover:text-black"><Play className="h-4 w-4" /></span>
+        <span aria-hidden className="mr-2 grid h-9 w-9 place-items-center rounded-full border border-white/20 transition-colors group-hover:border-gold-400 group-hover:bg-gold-400 group-hover:text-black"><Play className="h-4 w-4" /></span>
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="w-[calc(100%_-_1rem)] max-w-4xl rounded-3xl border-white/10 bg-noir-900 p-3 sm:p-5">
