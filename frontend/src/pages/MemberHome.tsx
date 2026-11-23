@@ -29,7 +29,7 @@ export default function MemberHome() {
 
   return (
     <SiteShell>
-      <SEO title="Mon carnet" url="/" />
+      <SEO title="Mon espace" url="/" />
       <MemberGreeting
         firstName={user?.firstName ?? ''}
         next={next}
