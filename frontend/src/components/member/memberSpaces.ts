@@ -1,21 +1,22 @@
-export interface MemberSpace {
-  index: number;
+import { CalendarDays, GraduationCap, House, Mic, Newspaper, type LucideIcon } from 'lucide-react';
+
+import { SPACES } from '@/config/site';
+
+export interface MemberTab {
   label: string;
-  /** A fifth of a phone's width is too narrow for the long labels. */
-  short: string;
   to: string;
+  Icon: LucideIcon;
+  soon?: boolean;
 }
 
-/** The numbered spaces of the notebook, in the order the sidebar and the tab bar show them. */
-export const MEMBER_SPACES: MemberSpace[] = [
-  { index: 0, label: 'Mon carnet', short: 'Carnet', to: '/' },
-  { index: 1, label: 'Apprendre', short: 'Apprendre', to: '/cours' },
-  { index: 2, label: 'Lire', short: 'Lire', to: '/blog' },
-  { index: 3, label: 'Rendez-vous', short: 'Agenda', to: '/rendez-vous' },
+const ICON_OF: Record<string, LucideIcon> = { '/blog': Newspaper, '/rendez-vous': CalendarDays, '/talk': Mic, '/cours': GraduationCap };
+
+/** The member's tabs: their home, then the platform's spaces in the order every menu shows them. */
+export const MEMBER_TABS: MemberTab[] = [
+  { label: 'Accueil', to: '/', Icon: House },
+  ...SPACES.map((space) => ({ label: space.label, to: space.to, Icon: ICON_OF[space.to] ?? Newspaper, soon: space.soon })),
 ];
 
-/** The space a page belongs to; the notebook only on its own address, the others with their sub-pages. */
-export function spaceOf(pathname: string): number | undefined {
-  if (pathname === '/') return 0;
-  return MEMBER_SPACES.find((space) => space.to !== '/' && (pathname === space.to || pathname.startsWith(`${space.to}/`)))?.index;
-}
+/** The home only on its own address; a space with all its sub-pages. */
+export const isTabActive = (tab: MemberTab, pathname: string) =>
+  tab.to === '/' ? pathname === '/' : pathname === tab.to || pathname.startsWith(`${tab.to}/`);
