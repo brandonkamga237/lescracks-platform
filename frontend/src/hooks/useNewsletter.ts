@@ -26,16 +26,13 @@ export interface Newsletter {
 
 export function useNewsletter(): Newsletter {
   const { isSignedIn, isAdmin, isLoading, user } = useSession();
-  const [subscribed, setSubscribed] = useState<boolean | null>(null);
+  const [status, setSubscribed] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [failure, setFailure] = useState('');
 
   useEffect(() => {
-    if (!user || isAdmin) {
-      setSubscribed(null);
-      return;
-    }
+    if (!user || isAdmin) return;
     const controller = new AbortController();
     api.newsletterStatus(controller.signal)
       .then((response) => setSubscribed(response.status === 'SUBSCRIBED'))
@@ -43,6 +40,8 @@ export function useNewsletter(): Newsletter {
     return () => controller.abort();
   }, [user, isAdmin]);
 
+  // Without a member there is no status to show, whatever an earlier session left behind.
+  const subscribed = user && !isAdmin ? status : null;
   const audience: NewsletterAudience = isLoading || isAdmin ? null : isSignedIn ? (user ? 'member' : null) : 'visitor';
 
   async function subscribeMember() {
