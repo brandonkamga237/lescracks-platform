@@ -102,6 +102,6 @@ public class Event {
     }
 
     public String path() {
-        return "/evenements/" + (slug == null || slug.isBlank() ? id : slug);
+        return "/rendez-vous/" + (slug == null || slug.isBlank() ? id : slug);
     }
 }

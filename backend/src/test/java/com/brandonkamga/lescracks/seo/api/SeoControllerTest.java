@@ -97,7 +97,7 @@ class SeoControllerTest {
         mockMvc.perform(get("/seo/evenements/7"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(allOf(
-                        containsString("/evenements/hackathon-001\""),
+                        containsString("/rendez-vous/hackathon-001\""),
                         containsString("Trois semaines pour construire."),
                         containsString("\"@type\":\"Event\""))));
     }
