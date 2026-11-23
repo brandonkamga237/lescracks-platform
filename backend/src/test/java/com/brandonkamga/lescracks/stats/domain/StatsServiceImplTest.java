@@ -6,11 +6,13 @@ import com.brandonkamga.lescracks.engagement.application.EngagementCounts;
 import com.brandonkamga.lescracks.engagement.domain.model.TargetType;
 import com.brandonkamga.lescracks.engagement.domain.model.Counts;
 import com.brandonkamga.lescracks.event.application.EventStatistics;
+import com.brandonkamga.lescracks.event.application.EventStatistics.EventCard;
 import com.brandonkamga.lescracks.member.application.MemberStatistics;
 import com.brandonkamga.lescracks.newsletter.application.NewsletterStatistics;
 import com.brandonkamga.lescracks.stats.api.dto.NamedCount;
 import com.brandonkamga.lescracks.stats.api.dto.SubscriberFlowPoint;
 import com.brandonkamga.lescracks.stats.api.dto.UserGrowthPoint;
+import com.brandonkamga.lescracks.stats.api.dto.ViewedEvent;
 import com.brandonkamga.lescracks.stats.infra.UmamiClient;
 import com.brandonkamga.lescracks.taxonomy.application.TaxonomyService;
 import com.brandonkamga.lescracks.taxonomy.domain.model.Category;
@@ -70,6 +72,19 @@ class StatsServiceImplTest {
     private StatsServiceImpl withUmami(UmamiClient umami) {
         return new StatsServiceImpl(accounts, members, engagement, events,
                 mock(ContentStatistics.class), newsletter, umami, taxonomy);
+    }
+
+    @Test
+    @DisplayName("a rendez-vous counts the views of its old and new addresses together")
+    void rendezVousViewsUnderBothAddresses() throws Exception {
+        UmamiClient umami = mock(UmamiClient.class);
+        when(umami.isEnabled()).thenReturn(true);
+        when(umami.metrics(eq("url"), any(), any(), anyInt())).thenReturn(json(
+                "[{\"x\":\"/evenements/atelier-git\",\"y\":30},{\"x\":\"/rendez-vous/atelier-git\",\"y\":12}]"));
+        when(events.eventsByPathKey(any())).thenReturn(List.of(
+                new EventCard(5L, "atelier-git", "Atelier Git", Instant.parse("2026-12-04T18:00:00Z"), "PUBLISHED")));
+
+        assertThat(withUmami(umami).contentViews(30).events()).extracting(ViewedEvent::views).containsExactly(42L);
     }
 
     @Test
