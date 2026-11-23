@@ -32,7 +32,8 @@ function headline(firstName: string, next: MyEvent | undefined, live: boolean): 
   const hello = firstName ? `Bonjour ${firstName}.` : 'Bonjour.';
   if (live) return [hello, { text: 'Ton rendez-vous a commencé.', className: 'text-gold-400 sm:block' }];
   if (next) return [hello, { text: 'Ton prochain rendez-vous approche.', className: 'text-gold-400 sm:block' }];
-  return [hello, { text: 'Content de te revoir.', className: 'text-gold-400 sm:block' }];
+  // A member who just signed up lands here too, so nothing that says "again".
+  return [hello, { text: 'Voici ton espace.', className: 'text-gold-400 sm:block' }];
 }
 
 /** The top of the member's home: who they are, what comes next for them, and what they hold. */
