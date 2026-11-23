@@ -21,7 +21,7 @@ export default function MemberProfile() {
   const data = profile.data;
 
   return (
-    <Container className="py-12 sm:py-20">
+    <Container className="pb-16 pt-8 sm:pt-10">
       <SEO title={data?.name ?? 'Membre'} url={`/membres/${id}`} noindex description="Un membre de la communauté LesCracks." />
       <div className="mx-auto max-w-3xl">
         {profile.loading && <div aria-hidden="true" className="h-48 animate-pulse rounded-3xl bg-white/[0.03] motion-reduce:animate-none" />}
@@ -33,11 +33,11 @@ export default function MemberProfile() {
               <MemberAvatar name={data.name} avatarUrl={data.avatarUrl} size="lg" />
               <div className="min-w-0">
                 <p className="text-sm font-medium text-gold-400">Membre depuis {sinceFormat.format(new Date(data.memberSince))}</p>
-                <h1 className="mt-2 break-words text-[clamp(1.75rem,4vw,3rem)] font-semibold leading-[1.05] tracking-[-0.04em]">{data.name}</h1>
+                <h1 className="mt-1 break-words text-2xl font-semibold tracking-tight sm:text-3xl">{data.name}</h1>
                 {data.location && <p className="mt-2 flex items-center gap-1.5 text-sm text-white/55"><MapPin className="h-4 w-4" aria-hidden="true" />{data.location}</p>}
               </div>
             </header>
-            {data.bio && <p className="mt-8 whitespace-pre-line text-lg leading-relaxed text-white/70">{data.bio}</p>}
+            {data.bio && <p className="mt-6 whitespace-pre-line leading-relaxed text-white/70">{data.bio}</p>}
             {data.links && (
               <ul className="mt-6 flex flex-wrap gap-2">
                 {Object.entries(data.links).map(([platform, url]) => (
@@ -46,14 +46,14 @@ export default function MemberProfile() {
               </ul>
             )}
 
-            <section aria-labelledby="badges-title" className="mt-14">
-              <h2 id="badges-title" className="text-2xl font-semibold tracking-tight">Badges</h2>
+            <section aria-labelledby="badges-title" className="mt-10">
+              <h2 id="badges-title" className="text-lg font-semibold tracking-tight">Badges</h2>
               {data.badges.length ? <div className="mt-5"><BadgeList badges={data.badges} /></div> : <p className="mt-3 text-sm text-white/45">Pas encore de badge.</p>}
             </section>
 
             {data.certificates.length > 0 && (
-              <section aria-labelledby="certificates-title" className="mt-14">
-                <h2 id="certificates-title" className="text-2xl font-semibold tracking-tight">Attestations</h2>
+              <section aria-labelledby="certificates-title" className="mt-10">
+                <h2 id="certificates-title" className="text-lg font-semibold tracking-tight">Attestations</h2>
                 <ul className="mt-5 grid gap-3">
                   {data.certificates.map((certificate) => (
                     <li key={certificate.code}>
