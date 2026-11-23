@@ -11,7 +11,7 @@ import CertificateLookup from '@/components/recognition/CertificateLookup';
 import { Badge } from '@/components/ui/badge';
 import { Container } from '@/components/ui/container';
 import { PulseDot } from '@/components/ui/pulse-dot';
-import { COMMUNITY_LINK, CONTACT_EMAIL, LEGAL_LINKS, SOCIAL_LINKS, SPACES } from '@/config/site';
+import { COMMUNITY_LINK, CONTACT_EMAIL, LEGAL_LINKS, SOCIAL_LINKS } from '@/config/site';
 import { useClock } from '@/hooks/useClock';
 
 interface FooterLink {
@@ -22,8 +22,9 @@ interface FooterLink {
 }
 
 const COLUMNS: Array<{ title: string; links: FooterLink[] }> = [
-  { title: 'Plateforme', links: SPACES.map(({ label, to, soon }) => ({ label, to, soon })) },
-  { title: 'LesCracks', links: [{ label: 'À propos', to: '/a-propos' }, { label: 'FAQ', href: '/#faq' }, { label: CONTACT_EMAIL, href: `mailto:${CONTACT_EMAIL}` }] },
+  // The landing's footer moves through the landing, like its bar; the platform is entered through its calls to action.
+  { title: 'Sur cette page', links: [{ label: 'La plateforme', href: '#plateforme' }, { label: 'Agenda', href: '#rendez-vous' }, { label: 'Blog', href: '#blog' }, { label: 'FAQ', href: '#faq' }] },
+  { title: 'LesCracks', links: [{ label: 'À propos', to: '/a-propos' }, { label: CONTACT_EMAIL, href: `mailto:${CONTACT_EMAIL}` }] },
   { title: 'Légal', links: LEGAL_LINKS },
 ];
 
