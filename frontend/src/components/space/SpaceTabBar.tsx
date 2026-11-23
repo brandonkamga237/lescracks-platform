@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import MemberAvatar from '@/components/space/MemberAvatar';
-import { isTabActive, tabsFor } from '@/components/space/spaceTabs';
+import { isTabActive, tabBarTabs } from '@/components/space/spaceTabs';
 import { useSession } from '@/hooks/useSession';
 import { cn } from '@/lib/utils';
 
@@ -23,7 +23,7 @@ export function SpaceTopBar({ member }: { member: boolean }) {
 /** The platform's tabs under the thumb. Colour change only: a bar touched all day should not move. */
 export default function SpaceTabBar({ member }: { member: boolean }) {
   const { pathname } = useLocation();
-  const tabs = tabsFor(member);
+  const tabs = tabBarTabs(member);
   return (
     <nav aria-label="Navigation principale" className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden">
       <ul className={cn('grid', tabs.length === 5 ? 'grid-cols-5' : 'grid-cols-4')}>
