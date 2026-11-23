@@ -9,6 +9,8 @@ import { GOAL_LABEL, SITUATION_LABEL } from '@/lib/memberProfile';
 import { countryName, displayPhone } from '@/lib/phone';
 import { api } from '@/services/api';
 import type { MemberGoal, MemberSituation, UserProfile } from '@/services/types';
+import { fieldClass } from '@/components/ui/field';
+import { cn } from '@/lib/utils';
 
 interface ProfileDetailsProps {
   user: UserProfile;
@@ -22,12 +24,12 @@ interface RowsProps {
 
 function Rows({ rows }: RowsProps) {
   return (
-    <dl className="divide-y divide-line-soft border-y border-line-soft text-sm">
+    <dl className="divide-y divide-white/10 border-y border-white/10 text-sm">
       {rows.map(([label, value]) => (
         // Stacked on phones: a long email beside its label would wrap one character per line.
         <div key={label} className="flex flex-col gap-0.5 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
-          <dt className="text-t4 sm:shrink-0">{label}</dt>
-          <dd className={`min-w-0 [overflow-wrap:anywhere] sm:text-right ${value ? 'text-t1' : 'text-t4'}`}>{value ?? 'À compléter'}</dd>
+          <dt className="text-white/45 sm:shrink-0">{label}</dt>
+          <dd className={`min-w-0 [overflow-wrap:anywhere] sm:text-right ${value ? 'text-white' : 'text-white/45'}`}>{value ?? 'À compléter'}</dd>
         </div>
       ))}
     </dl>
@@ -86,14 +88,14 @@ export default function ProfileDetails({ user, onSaved }: ProfileDetailsProps) {
           ['Membre depuis', Number.isNaN(joined.getTime()) ? null : joined.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })],
         ]} />}>
         <div className="grid gap-5 sm:grid-cols-2">
-          <div><label htmlFor="profile-firstName" className="text-sm font-medium text-t2">Prénom</label>
-            <input id="profile-firstName" autoComplete="given-name" required value={identity.firstName} onChange={(event) => setIdentity({ ...identity, firstName: event.target.value })} className="input mt-2" /></div>
-          <div><label htmlFor="profile-lastName" className="text-sm font-medium text-t2">Nom</label>
-            <input id="profile-lastName" autoComplete="family-name" required value={identity.lastName} onChange={(event) => setIdentity({ ...identity, lastName: event.target.value })} className="input mt-2" /></div>
+          <div><label htmlFor="profile-firstName" className="text-sm font-medium text-white/70">Prénom</label>
+            <input id="profile-firstName" autoComplete="given-name" required value={identity.firstName} onChange={(event) => setIdentity({ ...identity, firstName: event.target.value })} className={fieldClass} /></div>
+          <div><label htmlFor="profile-lastName" className="text-sm font-medium text-white/70">Nom</label>
+            <input id="profile-lastName" autoComplete="family-name" required value={identity.lastName} onChange={(event) => setIdentity({ ...identity, lastName: event.target.value })} className={fieldClass} /></div>
         </div>
-        <div><label htmlFor="profile-username" className="text-sm font-medium text-t2">Nom d’utilisateur <span className="font-normal text-t4">(facultatif)</span></label>
-          <input id="profile-username" value={identity.username} onChange={(event) => setIdentity({ ...identity, username: event.target.value })} className="input mt-2" /></div>
-        <p className="text-xs text-t4">Ton adresse email ne peut pas être modifiée ici.</p>
+        <div><label htmlFor="profile-username" className="text-sm font-medium text-white/70">Nom d’utilisateur <span className="font-normal text-white/45">(facultatif)</span></label>
+          <input id="profile-username" value={identity.username} onChange={(event) => setIdentity({ ...identity, username: event.target.value })} className={fieldClass} /></div>
+        <p className="text-xs text-white/45">Ton adresse email ne peut pas être modifiée ici.</p>
       </EditableSection>
 
       <EditableSection id="a-propos" title="À propos de toi" description="Pour te proposer les bonnes ressources et les bons ateliers."
@@ -106,34 +108,34 @@ export default function ProfileDetails({ user, onSaved }: ProfileDetailsProps) {
             ['Ville', city],
           ]} />
           {user.interestIds.length > 0 && <div className="mt-4 flex flex-wrap gap-1.5">{user.interestIds.map((id) => categoryName(id) &&
-            <span key={id} className="rounded border border-line px-2 py-0.5 text-xs text-t2">{categoryName(id)}</span>)}</div>}
-          {user.bio && <p className="mt-4 whitespace-pre-line text-sm text-t2">{user.bio}</p>}
+            <span key={id} className="rounded-full border border-white/12 px-2.5 py-0.5 text-xs text-white/70">{categoryName(id)}</span>)}</div>}
+          {user.bio && <p className="mt-4 whitespace-pre-line text-sm text-white/70">{user.bio}</p>}
         </>}>
         <div className="grid gap-5 sm:grid-cols-2">
-          <div><label htmlFor="profile-situation" className="text-sm font-medium text-t2">Situation</label>
-            <select id="profile-situation" value={about.situation ?? ''} onChange={(event) => setAbout({ ...about, situation: (event.target.value || undefined) as MemberSituation | undefined })} className="input mt-2">
+          <div><label htmlFor="profile-situation" className="text-sm font-medium text-white/70">Situation</label>
+            <select id="profile-situation" value={about.situation ?? ''} onChange={(event) => setAbout({ ...about, situation: (event.target.value || undefined) as MemberSituation | undefined })} className={fieldClass}>
               <option value="">Choisir</option>{(Object.entries(SITUATION_LABEL) as [MemberSituation, string][]).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
             </select></div>
-          <div><label htmlFor="profile-goal" className="text-sm font-medium text-t2">Objectif</label>
-            <select id="profile-goal" value={about.goal ?? ''} onChange={(event) => setAbout({ ...about, goal: (event.target.value || undefined) as MemberGoal | undefined })} className="input mt-2">
+          <div><label htmlFor="profile-goal" className="text-sm font-medium text-white/70">Objectif</label>
+            <select id="profile-goal" value={about.goal ?? ''} onChange={(event) => setAbout({ ...about, goal: (event.target.value || undefined) as MemberGoal | undefined })} className={fieldClass}>
               <option value="">Choisir</option>{(Object.entries(GOAL_LABEL) as [MemberGoal, string][]).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
             </select></div>
         </div>
-        <div><label htmlFor="profile-location" className="text-sm font-medium text-t2">Ville</label>
-          <input id="profile-location" autoComplete="address-level2" value={about.location} onChange={(event) => setAbout({ ...about, location: event.target.value })} className="input mt-2" /></div>
+        <div><label htmlFor="profile-location" className="text-sm font-medium text-white/70">Ville</label>
+          <input id="profile-location" autoComplete="address-level2" value={about.location} onChange={(event) => setAbout({ ...about, location: event.target.value })} className={fieldClass} /></div>
         <div>
-          <span className="text-sm font-medium text-t2">Centres d’intérêt</span>
+          <span className="text-sm font-medium text-white/70">Centres d’intérêt</span>
           <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Centres d’intérêt">
             {categories.data?.map((category) => {
               const on = about.interestIds.includes(category.id);
               return <button key={category.id} type="button" aria-pressed={on} disabled={!on && about.interestIds.length >= 10}
                 onClick={() => setAbout({ ...about, interestIds: on ? about.interestIds.filter((id) => id !== category.id) : [...about.interestIds, category.id] })}
-                className={`min-h-9 rounded border px-3 text-sm transition-colors disabled:opacity-40 ${on ? 'border-gold-400 bg-gold-400/10 text-t1' : 'border-line text-t3 hover:text-t1'}`}>{category.name}</button>;
+                className={`min-h-9 rounded-full border px-3.5 text-sm transition-colors disabled:opacity-40 ${on ? 'border-gold-400 bg-gold-400 font-medium text-black' : 'border-white/12 text-white/65 hover:text-white'}`}>{category.name}</button>;
             })}
           </div>
         </div>
-        <div><label htmlFor="profile-bio" className="text-sm font-medium text-t2">Quelques mots sur toi</label>
-          <textarea id="profile-bio" rows={3} maxLength={2000} value={about.bio} onChange={(event) => setAbout({ ...about, bio: event.target.value })} className="input mt-2" /></div>
+        <div><label htmlFor="profile-bio" className="text-sm font-medium text-white/70">Quelques mots sur toi</label>
+          <textarea id="profile-bio" rows={3} maxLength={2000} value={about.bio} onChange={(event) => setAbout({ ...about, bio: event.target.value })} className={cn(fieldClass, 'h-auto py-3')} /></div>
       </EditableSection>
 
       <EditableSection id="contact" title="Téléphone" description="Jamais affiché publiquement."
@@ -147,7 +149,7 @@ export default function ProfileDetails({ user, onSaved }: ProfileDetailsProps) {
           ['Nouveautés par WhatsApp ou SMS', user.marketingConsent ? 'Oui' : 'Non'],
         ]} />}>
         <PhoneField value={phone ?? ''} onChange={setPhone} hint="Le pays de ton compte est déduit de l’indicatif." />
-        <label className="flex items-start gap-3 text-sm text-t3">
+        <label className="flex items-start gap-3 text-sm text-white/55">
           <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#d4af37]" />
           <span>Recevoir les nouveautés par WhatsApp ou SMS.</span>
         </label>
@@ -165,7 +167,7 @@ export default function ProfileDetails({ user, onSaved }: ProfileDetailsProps) {
           <Link to={`/membres/${user.id}`} className="link mt-4 inline-flex text-sm">Voir mon profil public</Link>
         </>}>
         {([['publicBio', 'Montrer ma bio'], ['publicLocation', 'Montrer ma ville'], ['publicLinks', 'Montrer mes liens']] as const).map(([key, label]) => (
-          <label key={key} className="flex items-center gap-3 text-sm text-t2">
+          <label key={key} className="flex items-center gap-3 text-sm text-white/70">
             <input type="checkbox" checked={visibility[key]} onChange={(event) => setVisibility({ ...visibility, [key]: event.target.checked })} className="h-4 w-4 shrink-0 accent-[#d4af37]" />
             {label}
           </label>
@@ -180,19 +182,19 @@ export default function ProfileDetails({ user, onSaved }: ProfileDetailsProps) {
         }}
         view={user.socialLinks && Object.keys(user.socialLinks).length > 0
           ? <ul className="space-y-2 text-sm">{Object.entries(user.socialLinks).map(([platform, url]) => (
-            <li key={platform} className="flex items-baseline justify-between gap-4"><span className="capitalize text-t4">{platform}</span>
-              <a href={url} target="_blank" rel="noreferrer" className="min-w-0 truncate text-gold-ink underline-offset-4 hover:underline">{url.replace(/^https?:\/\//, '')}</a></li>))}</ul>
-          : <p className="text-sm text-t4">Aucun lien pour l’instant.</p>}>
+            <li key={platform} className="flex items-baseline justify-between gap-4"><span className="capitalize text-white/45">{platform}</span>
+              <a href={url} target="_blank" rel="noreferrer" className="min-w-0 truncate text-gold-400 underline-offset-4 hover:underline">{url.replace(/^https?:\/\//, '')}</a></li>))}</ul>
+          : <p className="text-sm text-white/45">Aucun lien pour l’instant.</p>}>
         {Object.entries(links).map(([platform, url]) => (
           <div key={platform} className="flex items-center gap-2">
-            <span className="w-20 shrink-0 truncate text-sm capitalize text-t2 sm:w-24">{platform}</span>
-            <input type="url" aria-label={`Lien ${platform}`} value={url} onChange={(event) => setLinks({ ...links, [platform]: event.target.value })} className="input min-w-0" />
+            <span className="w-20 shrink-0 truncate text-sm capitalize text-white/70 sm:w-24">{platform}</span>
+            <input type="url" aria-label={`Lien ${platform}`} value={url} onChange={(event) => setLinks({ ...links, [platform]: event.target.value })} className={cn(fieldClass, 'mt-0 min-w-0')} />
             <button type="button" onClick={() => { const next = { ...links }; delete next[platform]; setLinks(next); }} className="shrink-0 text-sm text-error-ink">Retirer</button>
           </div>
         ))}
         <div className="grid gap-2 sm:grid-cols-[10rem_1fr]">
-          <input value={newLink.platform} onChange={(event) => setNewLink({ ...newLink, platform: event.target.value })} className="input" placeholder="LinkedIn" aria-label="Nom du site" />
-          <input type="url" value={newLink.url} onChange={(event) => setNewLink({ ...newLink, url: event.target.value })} className="input" placeholder="https://…" aria-label="Adresse du lien" />
+          <input value={newLink.platform} onChange={(event) => setNewLink({ ...newLink, platform: event.target.value })} className={cn(fieldClass, 'mt-0')} placeholder="LinkedIn" aria-label="Nom du site" />
+          <input type="url" value={newLink.url} onChange={(event) => setNewLink({ ...newLink, url: event.target.value })} className={cn(fieldClass, 'mt-0')} placeholder="https://…" aria-label="Adresse du lien" />
         </div>
       </EditableSection>
     </div>
