@@ -3,14 +3,14 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
-import MemberAvatar from '@/components/member/MemberAvatar';
-import { MEMBER_TABS, isTabActive } from '@/components/member/memberSpaces';
+import MemberAvatar from '@/components/space/MemberAvatar';
+import { MEMBER_TABS, isTabActive } from '@/components/space/spaceTabs';
 import { COMMUNITY_LINK } from '@/config/site';
 import { useSession } from '@/hooks/useSession';
 import { cn } from '@/lib/utils';
 
 /** The member space on a wide screen: the site's tabs down the side, the member at the foot. */
-export default function MemberSidebar() {
+export default function SpaceSidebar() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { name, user, signOut } = useSession();
