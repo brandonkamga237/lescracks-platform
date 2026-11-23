@@ -1,33 +1,29 @@
-import { CalendarDays, X } from 'lucide-react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
-import AgendaItem, { TYPE_LABEL } from '@/components/events/AgendaItem';
-import EventSpotlight from '@/components/events/EventSpotlight';
-import FilterChips from '@/components/common/FilterChips';
-import Pagination from '@/components/common/Pagination';
 import SEO from '@/components/common/SEO';
-import { Skeleton } from '@/components/common/Skeleton';
-import { EmptyState, ErrorState } from '@/components/common/States';
-import Layout from '@/components/layout/Layout';
-import { PageHeader, Section, Toolbar } from '@/components/layout/Page';
+import { TYPE_LABEL } from '@/components/events/AgendaItem';
+import EventFeature from '@/components/events/EventFeature';
+import EventRow from '@/components/events/EventRow';
+import { Stagger, StaggerItem } from '@/components/motion/Stagger';
+import { Button } from '@/components/ui/button';
+import { Container } from '@/components/ui/container';
+import { PageHero } from '@/components/ui/page-hero';
+import { Pager } from '@/components/ui/pager';
+import { EmptyPanel, ErrorPanel, RowsLoading } from '@/components/ui/panels';
+import { PillTabs } from '@/components/ui/pill-tabs';
 import { useApi } from '@/hooks/useApi';
+import { deriveEventStatus } from '@/lib/eventStatus';
 import { LIST_PAGE_SIZE, worthFiltering } from '@/lib/filters';
+import { cn } from '@/lib/utils';
 import { api } from '@/services/api';
 import type { EventFormat, EventType } from '@/services/types';
 
-const types = Object.entries(TYPE_LABEL) as Array<[EventType, string]>;
+// No more hackathons are run: offering the filter would only lead to the archive.
+const types = (Object.entries(TYPE_LABEL) as Array<[EventType, string]>).filter(([value]) => value !== 'HACKATHON');
 const formats: Array<[EventFormat, string]> = [['ONLINE', 'En ligne'], ['OFFLINE', 'Sur place'], ['HYBRID', 'Hybride']];
 
-/**
- * The events page as a magazine agenda.
- *
- * Unfiltered, it announces the next rendez-vous like a headline, then lists the
- * rest chronologically; the archive sits quietly at the bottom. Filtered, the
- * page collapses to the ruled agenda list alone.
- */
+/** The agenda: the next rendez-vous as a headline, the rest as lines, the past at the bottom. */
 export default function Evenements() {
-  const location = useLocation();
-  const cataloguePath = `${location.pathname}${location.search}`;
   const [params, setParams] = useSearchParams();
   const type = types.find(([value]) => value === params.get('type'))?.[0];
   const format = formats.find(([value]) => value === params.get('format'))?.[0];
@@ -39,11 +35,10 @@ export default function Evenements() {
   const hasFilters = Boolean(type || format);
   const total = events.data?.totalElements ?? 0;
   const discovery = !hasFilters && page === 1;
-  // The archive only exists on the discovery view; no point fetching it under filters.
-  const past = useApi((signal) => discovery ? api.pastEvents(0, 4, signal) : Promise.resolve(null), [discovery]);
-  const spotlight = discovery ? list[0] : undefined;
-  const agenda = spotlight ? list.slice(1) : list;
-  const spotlightDate = spotlight ? new Date(spotlight.startDate).getTime() : 0;
+  // The archive only belongs to the unfiltered first page; no point fetching it otherwise.
+  const past = useApi((signal) => (discovery ? api.pastEvents(0, 4, signal) : Promise.resolve(null)), [discovery]);
+  const featured = discovery && list[0] && deriveEventStatus(list[0].startDate, list[0].endDate) !== 'closed' ? list[0] : undefined;
+  const agenda = featured ? list.slice(1) : list;
 
   function setParam(key: string, value: string | null) {
     const next = new URLSearchParams(params);
@@ -54,86 +49,59 @@ export default function Evenements() {
   }
 
   return (
-    <Layout>
-      <SEO title="Rendez-vous tech" description="Bootcamps, ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble." url="/rendez-vous" />
-      <Section tone="raised" spacing="header">
-        <PageHeader
-          eyebrow="En ligne et sur place"
-          title="Agenda"
-          description="Des rendez-vous pour pratiquer, poser tes questions et rencontrer la communauté."
-          meta={!events.loading && !events.error ? `${total} rendez-vous` : undefined}
-        />
-
+    <>
+      <SEO title="Rendez-vous tech" description="Ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble." url="/rendez-vous" />
+      <PageHero
+        id="agenda-title"
+        eyebrow={!events.loading && !events.error ? `Agenda · ${total} rendez-vous` : 'Agenda'}
+        title={['Prochains rendez-vous.', { text: 'En ligne et sur place.', className: 'text-white/40' }]}
+        lead="Des ateliers, des webinaires et des conférences pour pratiquer, poser tes questions et rencontrer la communauté. Chaque participation te vaut une attestation vérifiable."
+      >
         {worthFiltering(total, hasFilters) && (
-          <Toolbar>
-            <FilterChips legend="Type de rendez-vous" allLabel="Tous les types" options={types} value={type} onChange={(value) => setParam('type', value ?? null)} />
-            <FilterChips legend="Format" allLabel="Tous les formats" options={formats} value={format} onChange={(value) => setParam('format', value ?? null)} />
-            {hasFilters && (
-              <button type="button" onClick={() => setParams({})} className="inline-flex min-h-11 items-center gap-1.5 pb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-t3 transition-colors hover:text-t1">
-                <X className="h-4 w-4" aria-hidden />Effacer
-              </button>
-            )}
-          </Toolbar>
+          <div className="space-y-3">
+            <PillTabs legend="Type de rendez-vous" allLabel="Tous les types" options={types} value={type} onChange={(value) => setParam('type', value ?? null)} />
+            <PillTabs legend="Format" allLabel="Tous les formats" options={formats} value={format} onChange={(value) => setParam('format', value ?? null)} />
+          </div>
         )}
-      </Section>
+      </PageHero>
 
-      <Section>
-        <div aria-label="Rendez-vous" aria-live="polite" aria-busy={events.loading} role="region">
-          {events.loading && list.length === 0 && (
-            <div role="status" className="space-y-5">
-              {discovery && <Skeleton className="h-40 sm:h-56" />}
-              {[0, 1, 2].map((i) => <Skeleton key={i} className="h-16" />)}
-              <span className="sr-only">Chargement des rendez-vous…</span>
-            </div>
-          )}
-          {events.error && <ErrorState title="L’agenda est momentanément indisponible." message={events.error.message} onRetry={events.reload} />}
+      <Container className="pb-20">
+        <div role="region" aria-label="Rendez-vous" aria-live="polite" aria-busy={events.loading}>
+          {events.loading && list.length === 0 && <RowsLoading label="Chargement des rendez-vous…" />}
+          {events.error && <ErrorPanel title="L’agenda est momentanément indisponible." message={events.error.message} onRetry={events.reload} />}
           {!events.loading && !events.error && list.length === 0 && (
-            <EmptyState
-              icon={<CalendarDays className="h-8 w-8" aria-hidden />}
+            <EmptyPanel
               title={page > 1 ? 'Cette page ne contient aucun rendez-vous.' : hasFilters ? 'Aucun rendez-vous ne correspond à ces filtres.' : 'Les prochains rendez-vous se préparent.'}
-              description={hasFilters ? 'Essaie un autre type ou un autre format pour découvrir les rendez-vous disponibles.' : page > 1 ? 'Retrouve les rendez-vous disponibles sur la première page.' : 'Aucun rendez-vous n’est publié pour le moment. Reviens bientôt consulter l’agenda.'}
-              action={(hasFilters || page > 1) && (
-                <button type="button" onClick={page > 1 ? () => setParam('page', null) : () => setParams({})} className="btn-secondary">
-                  {page > 1 ? 'Revenir à la première page' : 'Voir tous les rendez-vous'}
-                </button>
-              )}
+              description={hasFilters ? 'Essaie un autre type ou un autre format.' : page > 1 ? 'Retrouve les rendez-vous sur la première page.' : 'Aucun rendez-vous n’est publié pour le moment. Reviens bientôt.'}
+              action={(hasFilters || page > 1) && <Button type="button" variant="outline" onClick={() => setParams({})}>{page > 1 ? 'Revenir à la première page' : 'Voir tous les rendez-vous'}</Button>}
             />
           )}
           {!events.error && list.length > 0 && (
-            <div className={`transition-opacity ${events.loading ? 'opacity-60' : ''}`}>
-              {spotlight && (
-                <div className="mb-12">
-                  <EventSpotlight
-                    event={spotlight}
-                    kicker={spotlightDate > Date.now() ? 'Prochain rendez-vous' : 'À l’affiche'}
-                    open={spotlightDate > Date.now() || Boolean(spotlight.endDate && new Date(spotlight.endDate).getTime() > Date.now())}
-                    cataloguePath={cataloguePath}
-                  />
-                </div>
-              )}
+            <div className={cn('transition-opacity', events.loading && 'opacity-60')}>
+              {featured && <div className="mb-14"><EventFeature event={featured} /></div>}
               {agenda.length > 0 && (
-                <ul className="border-b border-line">
-                  {agenda.map((event) => <AgendaItem key={event.id} event={event} cataloguePath={cataloguePath} />)}
-                </ul>
+                <Stagger className="border-t border-white/10">
+                  {agenda.map((event) => <StaggerItem key={event.id}><EventRow event={event} /></StaggerItem>)}
+                </Stagger>
               )}
-              <Pagination page={page} totalPages={events.data?.totalPages ?? 0} onPageChange={(value) => setParam('page', value === 1 ? null : String(value))} />
+              <Pager page={page} totalPages={events.data?.totalPages ?? 0} onPageChange={(value) => setParam('page', value === 1 ? null : String(value))} />
             </div>
           )}
         </div>
-      </Section>
+      </Container>
 
-      {/* The archive: quiet, unfiltered view only — the past never competes with what's next. */}
+      {/* The past never competes with what comes next: it waits at the bottom, quieter. */}
       {discovery && !!past.data?.content.length && (
-        <Section tone="raised" aria-labelledby="past-events-heading">
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
-            <h2 id="past-events-heading" className="font-display text-2xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl">Déjà passés</h2>
-            <span className="label">Les rendez-vous précédents</span>
-          </div>
-          <ul aria-label="Rendez-vous passés" className="border-b border-line opacity-80">
-            {past.data.content.map((event) => <AgendaItem key={event.id} event={event} cataloguePath={cataloguePath} />)}
-          </ul>
-        </Section>
+        <section aria-labelledby="past-title" className="border-t border-white/10">
+          <Container className="pb-24 pt-16 sm:pt-20">
+            <p className="text-sm font-medium text-white/40">Archives</p>
+            <h2 id="past-title" className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Déjà passés.</h2>
+            <ul className="mt-10 border-t border-white/10 opacity-70 transition-opacity hover:opacity-100">
+              {past.data.content.map((event) => <li key={event.id}><EventRow event={event} /></li>)}
+            </ul>
+          </Container>
+        </section>
       )}
-    </Layout>
+    </>
   );
 }
