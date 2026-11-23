@@ -17,7 +17,7 @@ const ACTIONS = [
     icon: CalendarDays,
     title: 'Les rendez-vous',
     body: 'Ateliers, webinaires, bootcamps et conférences pour pratiquer en groupe et poser tes questions en direct.',
-    to: '/evenements',
+    to: '/rendez-vous',
     link: 'Voir l’agenda',
   },
   {

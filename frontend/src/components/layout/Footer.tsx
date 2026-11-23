@@ -19,8 +19,8 @@ const NAV: { title: string; links: FooterLink[] }[] = [
     title: 'Plateforme',
     links: [
       { label: 'Blog', href: '/blog', icon: Newspaper },
-      { label: 'Formations', href: '/formations', icon: GraduationCap },
-      { label: 'Événements', href: '/evenements', icon: Calendar },
+      { label: 'Formations', href: '/cours', icon: GraduationCap },
+      { label: 'Événements', href: '/rendez-vous', icon: Calendar },
       { label: 'LesCracks Talk', href: '/talk', icon: Podcast },
       { label: 'À propos', href: '/a-propos', icon: null },
     ],

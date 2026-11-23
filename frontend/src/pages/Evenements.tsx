@@ -55,7 +55,7 @@ export default function Evenements() {
 
   return (
     <Layout>
-      <SEO title="Événements et ateliers tech" description="Bootcamps, ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble." url="/evenements" />
+      <SEO title="Événements et ateliers tech" description="Bootcamps, ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble." url="/rendez-vous" />
       <Section tone="raised" spacing="header">
         <PageHeader
           eyebrow="En ligne et sur place"
