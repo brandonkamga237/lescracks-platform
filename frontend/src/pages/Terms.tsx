@@ -13,7 +13,7 @@ export default function Terms() {
         </p>
         <h2 className="mt-10 font-display text-xl font-bold text-t1">1. Objet du service</h2>
         <p className="mt-4 text-t3 leading-relaxed">
-          LesCracks propose des ressources, événements et contenus autour de la technologie. L'accès au catalogue est public ; certaines fonctionnalités nécessitent la création d'un compte.
+          LesCracks propose des articles, des rendez-vous et des contenus autour de la technologie. L'accès au catalogue est public ; certaines fonctionnalités nécessitent la création d'un compte.
         </p>
         <h2 className="mt-10 font-display text-xl font-bold text-t1">2. Compte utilisateur</h2>
         <p className="mt-4 text-t3 leading-relaxed">

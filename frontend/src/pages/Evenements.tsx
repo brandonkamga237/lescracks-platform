@@ -55,13 +55,13 @@ export default function Evenements() {
 
   return (
     <Layout>
-      <SEO title="Événements et ateliers tech" description="Bootcamps, ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble." url="/rendez-vous" />
+      <SEO title="Rendez-vous tech" description="Bootcamps, ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble." url="/rendez-vous" />
       <Section tone="raised" spacing="header">
         <PageHeader
           eyebrow="En ligne et sur place"
           title="Agenda"
           description="Des rendez-vous pour pratiquer, poser tes questions et rencontrer la communauté."
-          meta={!events.loading && !events.error ? `${total} événement${total > 1 ? 's' : ''}` : undefined}
+          meta={!events.loading && !events.error ? `${total} rendez-vous` : undefined}
         />
 
         {worthFiltering(total, hasFilters) && (
@@ -78,12 +78,12 @@ export default function Evenements() {
       </Section>
 
       <Section>
-        <div aria-label="Événements" aria-live="polite" aria-busy={events.loading} role="region">
+        <div aria-label="Rendez-vous" aria-live="polite" aria-busy={events.loading} role="region">
           {events.loading && list.length === 0 && (
             <div role="status" className="space-y-5">
               {discovery && <Skeleton className="h-40 sm:h-56" />}
               {[0, 1, 2].map((i) => <Skeleton key={i} className="h-16" />)}
-              <span className="sr-only">Chargement des événements…</span>
+              <span className="sr-only">Chargement des rendez-vous…</span>
             </div>
           )}
           {events.error && <ErrorState title="L’agenda est momentanément indisponible." message={events.error.message} onRetry={events.reload} />}
@@ -91,10 +91,10 @@ export default function Evenements() {
             <EmptyState
               icon={<CalendarDays className="h-8 w-8" aria-hidden />}
               title={page > 1 ? 'Cette page ne contient aucun rendez-vous.' : hasFilters ? 'Aucun rendez-vous ne correspond à ces filtres.' : 'Les prochains rendez-vous se préparent.'}
-              description={hasFilters ? 'Essaie un autre type ou un autre format pour découvrir les événements disponibles.' : page > 1 ? 'Retrouve les événements disponibles sur la première page.' : 'Aucun événement n’est publié pour le moment. Reviens bientôt consulter l’agenda.'}
+              description={hasFilters ? 'Essaie un autre type ou un autre format pour découvrir les rendez-vous disponibles.' : page > 1 ? 'Retrouve les rendez-vous disponibles sur la première page.' : 'Aucun rendez-vous n’est publié pour le moment. Reviens bientôt consulter l’agenda.'}
               action={(hasFilters || page > 1) && (
                 <button type="button" onClick={page > 1 ? () => setParam('page', null) : () => setParams({})} className="btn-secondary">
-                  {page > 1 ? 'Revenir à la première page' : 'Voir tous les événements'}
+                  {page > 1 ? 'Revenir à la première page' : 'Voir tous les rendez-vous'}
                 </button>
               )}
             />
@@ -129,7 +129,7 @@ export default function Evenements() {
             <h2 id="past-events-heading" className="font-display text-2xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl">Déjà passés</h2>
             <span className="label">Les rendez-vous précédents</span>
           </div>
-          <ul aria-label="Événements passés" className="border-b border-line opacity-80">
+          <ul aria-label="Rendez-vous passés" className="border-b border-line opacity-80">
             {past.data.content.map((event) => <AgendaItem key={event.id} event={event} cataloguePath={cataloguePath} />)}
           </ul>
         </Section>

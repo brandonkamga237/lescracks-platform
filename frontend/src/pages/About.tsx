@@ -9,7 +9,7 @@ const ACTIONS = [
   {
     icon: BookOpen,
     title: 'Le blog',
-    body: 'Des articles pour comprendre une notion, éviter un piège ou apprendre d’un retour d’expérience. Et bientôt, des formations complètes.',
+    body: 'Des articles pour comprendre une notion, éviter un piège ou apprendre d’un retour d’expérience. Et bientôt, des cours complets.',
     to: '/blog',
     link: 'Lire le blog',
   },

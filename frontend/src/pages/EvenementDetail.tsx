@@ -58,16 +58,16 @@ export default function EvenementDetail() {
 
   return (
     <Layout>
-      <SEO title={loaded?.title ?? (missing ? 'Événement introuvable' : 'Événement')} description={loaded ? markdownToPlainText(loaded.description).slice(0, 300) : 'Découvre les rendez-vous LesCracks pour apprendre et pratiquer la tech ensemble.'} image={loaded?.coverImage || undefined} url={loaded ? eventPath(loaded) : '/rendez-vous'} />
+      <SEO title={loaded?.title ?? (missing ? 'Rendez-vous introuvable' : 'Rendez-vous')} description={loaded ? markdownToPlainText(loaded.description).slice(0, 300) : 'Découvre les rendez-vous LesCracks pour apprendre et pratiquer la tech ensemble.'} image={loaded?.coverImage || undefined} url={loaded ? eventPath(loaded) : '/rendez-vous'} />
       <article>
         <div className="mode-raised">
         <div className="mx-auto max-w-7xl px-5 pb-14 pt-8 sm:px-8 sm:pb-20 sm:pt-10">
         <nav aria-label="Fil d’Ariane" className="flex flex-wrap items-center gap-3 text-sm text-t3">
-          <Link to={cataloguePath} className="inline-flex min-h-11 items-center gap-2 rounded-lg hover:text-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"><ArrowLeft className="h-4 w-4" aria-hidden />Tous les événements</Link>
+          <Link to={cataloguePath} className="inline-flex min-h-11 items-center gap-2 rounded-lg hover:text-gold-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400"><ArrowLeft className="h-4 w-4" aria-hidden />Tous les rendez-vous</Link>
           {loaded && <><span aria-hidden>/</span><span className="min-w-0 truncate text-t2" aria-current="page">{loaded.title}</span></>}
         </nav>
         {hasParam && event.loading && <p className="py-24 text-center text-t3" role="status">Chargement du rendez-vous…</p>}
-        {(missing || event.error) && <div className="my-12 rounded-lg border border-line bg-noir-900 px-6 py-16 text-center" role="alert"><h1 className="font-display text-3xl font-bold text-t1">{missing ? 'Ce rendez-vous est introuvable.' : 'Impossible de charger cet événement.'}</h1><p className="mx-auto mt-4 max-w-lg text-t3">{missing ? 'Il n’est peut-être plus publié. Retrouve les autres rendez-vous dans l’agenda.' : event.error?.message}</p>{!missing && <button type="button" onClick={event.reload} className="btn-primary mt-6">Réessayer</button>}<Link to={cataloguePath} className="mx-auto mt-5 block w-fit py-2 text-sm text-gold-ink underline underline-offset-4">Retour à l’agenda</Link></div>}
+        {(missing || event.error) && <div className="my-12 rounded-lg border border-line bg-noir-900 px-6 py-16 text-center" role="alert"><h1 className="font-display text-3xl font-bold text-t1">{missing ? 'Ce rendez-vous est introuvable.' : 'Impossible de charger ce rendez-vous.'}</h1><p className="mx-auto mt-4 max-w-lg text-t3">{missing ? 'Il n’est peut-être plus publié. Retrouve les autres rendez-vous dans l’agenda.' : event.error?.message}</p>{!missing && <button type="button" onClick={event.reload} className="btn-primary mt-6">Réessayer</button>}<Link to={cataloguePath} className="mx-auto mt-5 block w-fit py-2 text-sm text-gold-ink underline underline-offset-4">Retour à l’agenda</Link></div>}
 
         {loaded && <>
           <header className="mt-5 max-w-5xl sm:mt-8">
@@ -88,8 +88,8 @@ export default function EvenementDetail() {
           </div>
           <div className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-14">
 
-          {status === 'Annulé' && <p className="mb-10 rounded bg-card px-6 py-5 text-sm leading-relaxed text-t2" role="status">Cet événement a été annulé. Les informations ci-dessous sont conservées à titre de référence.</p>}
-          {status === 'Terminé' && <p className="mb-10 rounded bg-card px-6 py-5 text-sm leading-relaxed text-t3">Cet événement est terminé. Explore l’agenda pour découvrir les prochains rendez-vous.</p>}
+          {status === 'Annulé' && <p className="mb-10 rounded bg-card px-6 py-5 text-sm leading-relaxed text-t2" role="status">Ce rendez-vous a été annulé. Les informations ci-dessous sont conservées à titre de référence.</p>}
+          {status === 'Terminé' && <p className="mb-10 rounded bg-card px-6 py-5 text-sm leading-relaxed text-t3">Ce rendez-vous est terminé. Explore l’agenda pour découvrir les prochains rendez-vous.</p>}
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-16">
             <section aria-labelledby="event-description" className="min-w-0"><h2 id="event-description" className="font-display text-3xl font-bold leading-tight text-t1">Au programme</h2><div className="mt-5 min-w-0 break-words"><Prose text={loaded.description} /></div>{loaded.acceptsSubmissions && <ProjectSubmission event={loaded} />}</section>
             <aside className="rounded-lg bg-card p-6 sm:p-7" aria-label="Informations pratiques">
@@ -113,7 +113,7 @@ export default function EvenementDetail() {
           <div className="mt-16 flex flex-col justify-between gap-5 rounded-lg bg-card p-6 sm:flex-row sm:items-center sm:p-8"><div><h2 className="font-display text-2xl font-bold text-t1">Un autre rendez-vous à découvrir ?</h2><p className="mt-2 text-sm text-t3">Retrouve tous les formats dans l’agenda LesCracks.</p></div><Link to={cataloguePath} className="btn-primary shrink-0">Explorer l’agenda<ArrowUpRight className="h-4 w-4" aria-hidden /></Link></div>
           </div>
           {isOpen && !registration.isAdmin && (
-            <StickyActionBar anchor={heroAction} label="Participer à l’événement">
+            <StickyActionBar anchor={heroAction} label="Participer au rendez-vous">
               <EventRegistrationAction event={loaded} state={registration} variant="bar" />
             </StickyActionBar>
           )}
