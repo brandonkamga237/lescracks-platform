@@ -89,7 +89,7 @@ export default function MobileMenu({ id, origin, items, isSignedIn, nextEvent, o
 
       <motion.div variants={ITEM} initial="closed" animate="open" transition={{ delay: 0.6 }} className="relative mt-auto pt-8">
         {isSignedIn ? (
-          <Button asChild size="lg" className="w-full font-semibold"><Link to="/profil" onClick={onClose}>Mon espace</Link></Button>
+          <Button asChild size="lg" className="w-full font-semibold"><Link to="/profil" onClick={onClose}>Mon compte</Link></Button>
         ) : (
           <div className="grid grid-cols-2 gap-3">
             <Button asChild size="lg" variant="outline"><Link to="/connexion" onClick={onClose}>Se connecter</Link></Button>
