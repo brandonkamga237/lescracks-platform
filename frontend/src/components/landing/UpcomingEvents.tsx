@@ -2,8 +2,8 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 
 import { FORMAT_LABEL, TYPE_LABEL } from '@/components/events/AgendaItem';
-import { Reveal, RevealWords, StaggerItem, StaggerList } from '@/components/landing/motion';
-import { Panel } from '@/components/landing/scroll';
+import { Reveal, RevealWords, StaggerItem, StaggerList } from '@/components/motion/Reveal';
+import { Panel } from '@/components/motion/Parallax';
 import { eventDay, eventHour, eventMonth } from '@/lib/eventMoment';
 import { eventPath } from '@/lib/slugs';
 import type { EventSummary } from '@/services/types';

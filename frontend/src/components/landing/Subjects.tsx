@@ -1,7 +1,7 @@
 import { Binary, Boxes, Brain, Cloud, FlaskConical, GitMerge, Hexagon, Infinity as InfinityIcon, Network, Plug, Shapes, ShieldCheck, type LucideIcon } from 'lucide-react';
 
-import Marquee from '@/components/landing/Marquee';
-import { Reveal } from '@/components/landing/motion';
+import Marquee from '@/components/motion/Marquee';
+import { Reveal } from '@/components/motion/Reveal';
 import { TOOL_ICONS } from '@/components/landing/toolIcons';
 
 type Subject = { name: string; tool: keyof typeof TOOL_ICONS } | { name: string; icon: LucideIcon };

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 
-import { Reveal, RevealWords, StaggerItem, StaggerList } from '@/components/landing/motion';
+import { Reveal, RevealWords, StaggerItem, StaggerList } from '@/components/motion/Reveal';
 import { articlePath } from '@/lib/slugs';
 import type { ArticleSummary } from '@/services/types';
 

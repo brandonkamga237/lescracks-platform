@@ -6,8 +6,8 @@ import { ArrowRight, ArrowUp, ArrowUpRight, BadgeCheck, CircleCheck, Mail } from
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import { GitHubIcon, LinkedInIcon, YouTubeIcon } from '@/components/icons/BrandIcons';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
-import { Reveal, RevealWords } from '@/components/landing/motion';
-import TileGrid from '@/components/landing/TileGrid';
+import { Reveal, RevealWords } from '@/components/motion/Reveal';
+import TileGrid from '@/components/decor/TileGrid';
 import { EASE } from '@/lib/motion';
 import { ApiError } from '@/services/http';
 import { api } from '@/services/api';

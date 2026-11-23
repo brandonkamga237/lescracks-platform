@@ -1,7 +1,7 @@
 import { Fragment, useRef } from 'react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 
-import Marquee from '@/components/landing/Marquee';
+import Marquee from '@/components/motion/Marquee';
 
 const GOLD_WORDS = ['Apprendre', 'Partager', 'Pratiquer', 'Progresser'];
 const DARK_WORDS = ['Articles', 'Ateliers', 'Webinaires', 'Le Talk', 'Attestations'];
