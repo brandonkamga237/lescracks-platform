@@ -25,6 +25,7 @@ const Unsubscribe = lazy(() => import('@/pages/Unsubscribe'));
 const NewsletterConfirm = lazy(() => import('@/pages/NewsletterConfirm'));
 const Evenements = lazy(() => import('@/pages/Evenements'));
 const Profile = lazy(() => import('@/pages/Profile'));
+const Security = lazy(() => import('@/pages/Security'));
 const Blog = lazy(() => import('@/pages/Blog'));
 const BlogPost = lazy(() => import('@/pages/BlogPost'));
 const Formations = lazy(() => import('@/pages/Formations'));
@@ -174,6 +175,7 @@ function AppRoutes() {
         <Route path="/conditions-utilisation" element={<Terms />} />
         <Route path="/politique-confidentialite" element={<Privacy />} />
         <Route path="/profil" element={<MemberRoute><Profile /></MemberRoute>} />
+        <Route path="/profil/securite" element={<MemberRoute><Security /></MemberRoute>} />
         <Route path="*" element={<NotFound />} />
       </Route>
 
