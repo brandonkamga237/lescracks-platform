@@ -46,7 +46,7 @@ class EventAdminServiceTest {
         assertThat(stored.getMaxTeamSize()).isEqualTo(1);
         assertThat(stored.isAcceptsSubmissions()).isFalse();
         assertThat(stored.getCoverImage()).isNull();
-        assertThat(newsletter.events).extracting(news -> news.path()).containsExactly("/evenements/atelier-react");
+        assertThat(newsletter.events).extracting(news -> news.path()).containsExactly("/rendez-vous/atelier-react");
     }
 
     @Test
