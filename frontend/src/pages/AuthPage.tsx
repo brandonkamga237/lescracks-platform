@@ -1,11 +1,11 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Loader2 } from 'lucide-react';
 
 import SEO from '@/components/common/SEO';
 import { GitHubIcon } from '@/components/icons/BrandIcons';
-import { SplitText } from '@/components/motion/SplitText';
+import AuthCard from '@/components/site/AuthCard';
 import AuthShell from '@/components/site/AuthShell';
 import { Button } from '@/components/ui/button';
 import { Notice, PasswordField, TextField } from '@/components/ui/field';
@@ -19,8 +19,6 @@ import { ApiError } from '@/services/http';
 const ARRIVE = { initial: { opacity: 0, y: 16, filter: 'blur(6px)' }, animate: { opacity: 1, y: 0, filter: 'blur(0px)' } };
 const arrive = (delay: number) => ({ ...ARRIVE, transition: { duration: 0.8, delay, ease: EASE } });
 
-const CARD = 'w-full rounded-[2rem] border border-white/10 bg-black/60 p-6 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.9)] backdrop-blur-xl sm:p-10';
-
 function GoogleIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
@@ -29,25 +27,6 @@ function GoogleIcon() {
       <path fill="#FBBC05" d="M5.42 14.36A7.2 7.2 0 0 1 5.04 12c0-.82.14-1.62.38-2.36L1.78 6.82A11.28 11.28 0 0 0 .72 12c0 1.82.44 3.54 1.06 5.18l3.64-2.82Z" />
       <path fill="#34A853" d="M12 23.28c2.96 0 5.46-.98 7.28-2.66l-3.62-2.8c-1 .68-2.28 1.08-3.66 1.08-3.14 0-5.76-2.18-6.6-5.06l-3.64 2.82c1.82 3.94 5.68 6.62 10.24 6.62Z" />
     </svg>
-  );
-}
-
-interface AuthCardProps {
-  eyebrow: string;
-  title: string;
-  lead: string;
-  children: ReactNode;
-}
-
-/** The heading every sign-in screen opens with, above its form. */
-function AuthCard({ eyebrow, title, lead, children }: AuthCardProps) {
-  return (
-    <motion.section {...arrive(0.1)} aria-labelledby="auth-title" className={CARD}>
-      <p className="text-sm font-medium text-gold-400">{eyebrow}</p>
-      <SplitText as="h1" id="auth-title" onMount delay={0.15} parts={[title]} className="mt-4 text-[clamp(2rem,4vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.04em]" />
-      <p className="mt-3 text-[15px] leading-relaxed text-white/55">{lead}</p>
-      {children}
-    </motion.section>
   );
 }
 
