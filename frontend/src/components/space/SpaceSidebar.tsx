@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LogOut } from 'lucide-react';
+import { ArrowUpRight, LogOut } from 'lucide-react';
 
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import MemberAvatar from '@/components/space/MemberAvatar';
@@ -91,13 +91,17 @@ export default function SpaceSidebar({ member }: { member: boolean }) {
               </ul>
             </div>
           ))}
+          <div>
+            <p className="mb-2 px-4 text-xs font-medium text-white/30">Communauté</p>
+            <a href={COMMUNITY_LINK.href} target="_blank" rel="noopener noreferrer" aria-label="Le groupe WhatsApp, nouvel onglet" className="group flex min-h-11 items-center gap-3 rounded-full px-4 text-[15px] text-white/55 transition-colors hover:bg-white/[0.04] hover:text-white">
+              <COMMUNITY_LINK.Icon className="h-[18px] w-[18px] shrink-0 text-white/40 group-hover:text-white/70" />
+              Groupe WhatsApp
+              <ArrowUpRight className="ml-auto h-4 w-4 text-white/30 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
+            </a>
+          </div>
         </nav>
 
-        <a href={COMMUNITY_LINK.href} target="_blank" rel="noopener noreferrer" aria-label="La communauté sur WhatsApp, nouvel onglet" className="mt-6 flex min-h-11 items-center gap-3 border-t border-white/10 px-4 pt-6 text-sm text-white/45 transition-colors hover:text-white">
-          <COMMUNITY_LINK.Icon className="h-[18px] w-[18px] shrink-0" />La communauté
-        </a>
-
-        <div className="mt-auto border-t border-white/10 pt-5"><SidebarFoot member={member} /></div>
+        <div className="mt-auto pt-8"><div className="border-t border-white/10 pt-5"><SidebarFoot member={member} /></div></div>
       </div>
     </aside>
   );
