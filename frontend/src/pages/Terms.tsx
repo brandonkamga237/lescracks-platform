@@ -12,7 +12,7 @@ export default function Terms() {
   return (
     <>
       <SEO title="Conditions d'utilisation" description="Les conditions d'utilisation de la plateforme LesCracks." url="/conditions-utilisation" />
-      <LegalDocument id="terms-title" title="Conditions d'utilisation" lead="Les présentes conditions régissent l'utilisation de la plateforme LesCracks. En accédant au site, tu acceptes ces conditions dans leur intégralité." sections={SECTIONS} />
+      <LegalDocument title="Conditions d'utilisation" lead="Les présentes conditions régissent l'utilisation de la plateforme LesCracks. En accédant au site, tu acceptes ces conditions dans leur intégralité." sections={SECTIONS} />
     </>
   );
 }

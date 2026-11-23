@@ -25,7 +25,7 @@ export default function Privacy() {
   return (
     <>
       <SEO title="Politique de confidentialité" description="Comment LesCracks protège et utilise tes données personnelles." url="/politique-confidentialite" />
-      <LegalDocument id="privacy-title" title="Politique de confidentialité" lead="LesCracks respecte ta vie privée. Cette politique explique quelles données sont collectées, comment elles sont utilisées et comment elles sont protégées." sections={SECTIONS} />
+      <LegalDocument title="Politique de confidentialité" lead="LesCracks respecte ta vie privée. Cette politique explique quelles données sont collectées, comment elles sont utilisées et comment elles sont protégées." sections={SECTIONS} />
     </>
   );
 }
