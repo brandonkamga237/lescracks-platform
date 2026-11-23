@@ -24,16 +24,16 @@ function TalkSpotlight({ video }: TalkSpotlightProps) {
   ].filter(Boolean).join('  ·  ');
 
   return (
-    <article className="grid items-center gap-8 rounded-[2rem] border border-white/10 bg-white/[0.03] p-4 sm:p-6 lg:grid-cols-[1.1fr_1fr] lg:gap-12">
+    <article className="grid items-center gap-8 rounded-3xl border border-white/10 bg-white/[0.03] p-3 sm:p-4 lg:grid-cols-[1.2fr_1fr] lg:gap-8">
       <VideoPlayer id={`episode-${video.id}`} url={video.youtubeUrl} title={video.title} poster={thumbnail} platform="YouTube" started={playing} onStart={() => setPlaying(true)} />
 
       <div className="min-w-0 p-2 sm:p-4">
         <p className="text-sm font-medium text-gold-400">Dernier épisode</p>
-        <h3 className="mt-4 break-words text-[clamp(1.75rem,3vw,2.5rem)] font-semibold leading-[1.05] tracking-[-0.04em]">{video.title}</h3>
-        <p className="mt-5 line-clamp-3 max-w-xl text-base leading-relaxed text-white/55">{video.description}</p>
-        {meta && <p className="mt-5 text-sm text-white/45">{meta}</p>}
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <Button type="button" size="lg" onClick={() => setPlaying(true)} className="font-semibold">
+        <h3 className="mt-2 break-words text-xl font-semibold leading-tight tracking-tight sm:text-2xl">{video.title}</h3>
+        <p className="mt-3 line-clamp-3 max-w-xl text-sm leading-relaxed text-white/55">{video.description}</p>
+        {meta && <p className="mt-3 text-sm text-white/45">{meta}</p>}
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <Button type="button" onClick={() => setPlaying(true)} className="font-semibold">
             {playing ? 'Lecture en cours' : 'Regarder l’épisode'}
             <Play className="h-4 w-4" aria-hidden />
           </Button>
