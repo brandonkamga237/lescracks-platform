@@ -24,7 +24,7 @@ interface SiteShellProps {
 const SKIP = 'sr-only z-[60] rounded-full bg-gold-400 px-5 py-3 font-medium text-black focus:not-sr-only focus:fixed focus:left-5 focus:top-3';
 
 /**
- * The frame of every page: the notebook sidebar once a member is signed in, the landing's
+ * The frame of every page: the member space and its sidebar once a member is signed in, the landing's
  * floating bar and footer for everyone else.
  */
 export default function SiteShell({ children, items = SPACES, nextEvent, flush = false }: SiteShellProps) {
