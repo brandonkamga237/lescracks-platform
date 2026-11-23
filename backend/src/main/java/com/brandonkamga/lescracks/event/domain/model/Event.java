@@ -102,6 +102,10 @@ public class Event {
     }
 
     public String path() {
+        return pathOf(id, slug);
+    }
+
+    public static String pathOf(Long id, String slug) {
         return "/rendez-vous/" + (slug == null || slug.isBlank() ? id : slug);
     }
 }
