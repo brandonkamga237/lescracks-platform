@@ -82,6 +82,11 @@
     scroll-behavior: smooth;
   }
 
+  /* Lenis drives the scroll itself; native smoothing on top of it makes every wheel step stutter. */
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
   body {
     @apply bg-background text-foreground antialiased font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
