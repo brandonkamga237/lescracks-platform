@@ -47,6 +47,7 @@ const AdminTalks = lazy(() => import('@/pages/admin/AdminTalks'));
 const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
 const ArticleStudio = lazy(() => import('@/pages/admin/ArticleStudio'));
 const Welcome = lazy(() => import('@/pages/Welcome'));
+const MemberHome = lazy(() => import('@/pages/MemberHome'));
 
 function Waiting() {
   return (
@@ -110,6 +111,15 @@ function AdminRoute({ bare = false }: AdminRouteProps) {
   return <AdminLayout><Suspense fallback={<Waiting />}><Outlet /></Suspense></AdminLayout>;
 }
 
+/** One address, two doors: a visitor gets the landing, a member their own home. */
+function Home() {
+  const { isLoading, isSignedIn, user } = useSession();
+  // Black until the session is known, so a member never sees the landing flash before their home.
+  if (isLoading) return <div role="status" aria-label="Chargement" className="min-h-screen bg-black" />;
+  if (isSignedIn && user) return <MemberHome />;
+  return <Landing />;
+}
+
 // Pages where the welcome questions must not interrupt: signing in, legal reading, the welcome itself.
 const WELCOME_EXEMPT = ['/bienvenue', '/desabonnement', '/newsletter/confirmer', '/auth/callback', '/connexion', '/inscription', '/reinitialiser', '/verifier-email', '/conditions-utilisation', '/politique-confidentialite', '/admin'];
 
@@ -131,7 +141,7 @@ function AppRoutes() {
   return (
     <Suspense fallback={<PageLoading />}>
     <Routes>
-      <Route path="/" element={<Landing />} />
+      <Route path="/" element={<Home />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/connexion" element={<AuthPage mode="login" />} />
       <Route path="/inscription" element={<AuthPage mode="register" />} />
