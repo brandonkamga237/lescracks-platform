@@ -60,7 +60,7 @@ class SeoControllerTest {
                         containsString(">LesCracks Talk</a></h2>"),
                         not(containsString("CrackLab")),
                         containsString(">Blog</a></h2>"),
-                        containsString(">Formations</a></h2>"),
+                        containsString(">Cours</a></h2>"),
                         containsString("\"@type\":\"WebSite\""),
                         containsString("\"alternateName\":[\"Les Cracks\",\"lescracks\"]"),
                         containsString("/icon-512.png"))));
