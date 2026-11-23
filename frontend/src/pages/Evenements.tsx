@@ -7,10 +7,10 @@ import EventRow from '@/components/events/EventRow';
 import { Stagger, StaggerItem } from '@/components/motion/Stagger';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
-import { PageHero } from '@/components/ui/page-hero';
 import { Pager } from '@/components/ui/pager';
 import { EmptyPanel, ErrorPanel, RowsLoading } from '@/components/ui/panels';
 import { PillTabs } from '@/components/ui/pill-tabs';
+import { SpaceHeader } from '@/components/ui/space-header';
 import { useApi } from '@/hooks/useApi';
 import { deriveEventStatus } from '@/lib/eventStatus';
 import { LIST_PAGE_SIZE, worthFiltering } from '@/lib/filters';
@@ -51,19 +51,14 @@ export default function Evenements() {
   return (
     <>
       <SEO title="Rendez-vous tech" description="Ateliers, webinaires et conférences : découvre les rendez-vous LesCracks pour apprendre et pratiquer ensemble." url="/rendez-vous" />
-      <PageHero
-        id="agenda-title"
-        eyebrow={!events.loading && !events.error ? `Agenda · ${total} rendez-vous` : 'Agenda'}
-        title={['Prochains rendez-vous.', { text: 'En ligne et sur place.', className: 'text-white/40' }]}
-        lead="Des ateliers, des webinaires et des conférences pour pratiquer, poser tes questions et rencontrer la communauté. Chaque participation te vaut une attestation vérifiable."
-      >
+      <SpaceHeader title="Rendez-vous" meta={!events.loading && !events.error ? `${total} au total` : undefined} lead="Chaque participation te vaut une attestation vérifiable.">
         {worthFiltering(total, hasFilters) && (
-          <div className="space-y-3">
+          <div className="space-y-2">
             <PillTabs legend="Type de rendez-vous" allLabel="Tous les types" options={types} value={type} onChange={(value) => setParam('type', value ?? null)} />
             <PillTabs legend="Format" allLabel="Tous les formats" options={formats} value={format} onChange={(value) => setParam('format', value ?? null)} />
           </div>
         )}
-      </PageHero>
+      </SpaceHeader>
 
       <Container className="pb-20">
         <div role="region" aria-label="Rendez-vous" aria-live="polite" aria-busy={events.loading}>
@@ -78,10 +73,10 @@ export default function Evenements() {
           )}
           {!events.error && list.length > 0 && (
             <div className={cn('transition-opacity', events.loading && 'opacity-60')}>
-              {featured && <div className="mb-14"><EventFeature event={featured} /></div>}
+              {featured && <div className="mb-8"><EventFeature event={featured} /></div>}
               {agenda.length > 0 && (
                 <Stagger className="border-t border-white/10">
-                  {agenda.map((event) => <StaggerItem key={event.id}><EventRow event={event} /></StaggerItem>)}
+                  {agenda.map((event) => <StaggerItem key={event.id}><EventRow event={event} dense /></StaggerItem>)}
                 </Stagger>
               )}
               <Pager page={page} totalPages={events.data?.totalPages ?? 0} onPageChange={(value) => setParam('page', value === 1 ? null : String(value))} />
@@ -92,12 +87,11 @@ export default function Evenements() {
 
       {/* The past never competes with what comes next: it waits at the bottom, quieter. */}
       {discovery && !!past.data?.content.length && (
-        <section aria-labelledby="past-title" className="border-t border-white/10">
-          <Container className="pb-24 pt-16 sm:pt-20">
-            <p className="text-sm font-medium text-white/40">Archives</p>
-            <h2 id="past-title" className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Déjà passés.</h2>
-            <ul className="mt-10 border-t border-white/10 opacity-70 transition-opacity hover:opacity-100">
-              {past.data.content.map((event) => <li key={event.id}><EventRow event={event} /></li>)}
+        <section aria-labelledby="past-title">
+          <Container className="pb-20">
+            <h2 id="past-title" className="text-lg font-semibold tracking-tight text-white/70">Déjà passés</h2>
+            <ul className="mt-4 border-t border-white/10 opacity-70 transition-opacity hover:opacity-100">
+              {past.data.content.map((event) => <li key={event.id}><EventRow event={event} dense /></li>)}
             </ul>
           </Container>
         </section>
