@@ -2,6 +2,7 @@ import { Binary, Boxes, Brain, Cloud, FlaskConical, GitMerge, Hexagon, Infinity 
 
 import Marquee from '@/components/motion/Marquee';
 import { Reveal } from '@/components/motion/Reveal';
+import { Container } from '@/components/ui/container';
 import { TOOL_ICONS } from '@/components/landing/toolIcons';
 
 type Subject = { name: string; tool: keyof typeof TOOL_ICONS } | { name: string; icon: LucideIcon };
@@ -39,12 +40,14 @@ function SubjectItem({ subject }: { subject: Subject }) {
 export default function Subjects() {
   return (
     <section aria-labelledby="subjects-title" className="border-y border-white/[0.06] py-16 sm:py-20">
-      <Reveal className="mx-auto flex max-w-[1320px] flex-col gap-2 px-4 sm:flex-row sm:items-end sm:justify-between sm:px-8">
+      <Container>
+        <Reveal className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <p className="text-sm font-medium text-gold-400">Les sujets</p>
         <h2 id="subjects-title" className="max-w-lg text-base font-normal leading-normal tracking-normal text-white/50 sm:text-right">
           Des langages et des outils, mais surtout les concepts qui tiennent dans la durée.
         </h2>
-      </Reveal>
+        </Reveal>
+      </Container>
       <div className="mt-10 space-y-5 sm:mt-14">
         <Marquee speed={0.55}>{FIRST_ROW.map((subject) => <SubjectItem key={subject.name} subject={subject} />)}</Marquee>
         <Marquee speed={-0.45}>{SECOND_ROW.map((subject) => <SubjectItem key={subject.name} subject={subject} />)}</Marquee>
