@@ -2,8 +2,10 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 
 import { FORMAT_LABEL, TYPE_LABEL } from '@/components/events/AgendaItem';
-import { Reveal, RevealWords, StaggerItem, StaggerList } from '@/components/motion/Reveal';
-import { Panel } from '@/components/motion/Parallax';
+import { Reveal } from '@/components/motion/Reveal';
+import { SplitText } from '@/components/motion/SplitText';
+import { Stagger, StaggerItem } from '@/components/motion/Stagger';
+import { ScaleInSection } from '@/components/motion/ScaleInSection';
 import { eventDay, eventHour, eventMonth } from '@/lib/eventMoment';
 import { eventPath } from '@/lib/slugs';
 import type { EventSummary } from '@/services/types';
@@ -21,12 +23,12 @@ function attendance(count: number): string | null {
 /** The next rendez-vous as a list, laid over the ivory band. */
 export default function UpcomingEvents({ events }: { events: EventSummary[] }) {
   return (
-    <Panel id="rendez-vous" labelledBy="events-title" className="relative z-20 -mt-8 rounded-t-[2rem] bg-black sm:rounded-t-[3rem]">
+    <ScaleInSection id="rendez-vous" labelledBy="events-title" className="relative z-20 -mt-8 rounded-t-[2rem] bg-black sm:rounded-t-[3rem]">
       <div className="mx-auto max-w-[1320px] px-4 pb-20 pt-20 sm:px-8 sm:pt-28">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Reveal><p className="text-sm font-medium text-gold-400">Agenda</p></Reveal>
-            <RevealWords
+            <SplitText
               id="events-title"
               parts={['Prochains rendez-vous.', { text: 'Ateliers, webinaires et conférences.', className: 'text-white/40' }]}
               className="mt-5 max-w-2xl text-[clamp(2rem,4.6vw,3.75rem)] font-semibold leading-[1.05] tracking-[-0.04em]"
@@ -39,7 +41,7 @@ export default function UpcomingEvents({ events }: { events: EventSummary[] }) {
           </Reveal>
         </div>
 
-        <StaggerList className="mt-14 border-t border-white/10">
+        <Stagger className="mt-14 border-t border-white/10">
           {events.map((event) => {
             const count = attendance(event.registrationCount);
             return (
@@ -65,8 +67,8 @@ export default function UpcomingEvents({ events }: { events: EventSummary[] }) {
               </StaggerItem>
             );
           })}
-        </StaggerList>
+        </Stagger>
       </div>
-    </Panel>
+    </ScaleInSection>
   );
 }

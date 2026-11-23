@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
-import { Reveal, RevealWords, StaggerItem, StaggerList } from '@/components/motion/Reveal';
+import { Reveal } from '@/components/motion/Reveal';
+import { SplitText } from '@/components/motion/SplitText';
+import { Stagger, StaggerItem } from '@/components/motion/Stagger';
 import { ParallaxImage } from '@/components/motion/Parallax';
 
 interface Space {
@@ -28,13 +30,13 @@ export default function Platform() {
     <section aria-labelledby="platform-title" className="relative z-10 rounded-t-[2rem] bg-[#f4f3ee] text-[#0a0a0a] sm:rounded-t-[3rem]">
       <div className="mx-auto max-w-[1320px] px-4 pb-24 pt-20 sm:px-8 sm:pt-28">
         <Reveal><p className="text-sm font-medium text-gold-700">La plateforme</p></Reveal>
-        <RevealWords
+        <SplitText
           id="platform-title"
           parts={['Tout pour apprendre la tech.', { text: 'Lire, regarder, pratiquer, au même endroit.', className: 'text-black/40' }]}
           className="mt-5 max-w-3xl text-[clamp(2rem,4.6vw,3.75rem)] font-semibold leading-[1.05] tracking-[-0.04em]"
         />
 
-        <StaggerList className="mt-16 border-t border-black/10">
+        <Stagger className="mt-16 border-t border-black/10">
           {SPACES.map((space) => (
             <StaggerItem key={space.title} className="group relative grid gap-5 overflow-hidden border-b border-black/10 py-12 last:border-b-0 sm:py-14 lg:grid-cols-[minmax(0,4fr)_minmax(0,7fr)] lg:gap-16">
               <h3 className="flex flex-wrap items-center gap-x-4 gap-y-2 text-3xl font-semibold tracking-[-0.035em] transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:translate-x-2 sm:text-5xl">
@@ -59,7 +61,7 @@ export default function Platform() {
               </span>
             </StaggerItem>
           ))}
-        </StaggerList>
+        </Stagger>
       </div>
     </section>
   );

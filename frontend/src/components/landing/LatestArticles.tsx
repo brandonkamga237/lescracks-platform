@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 
-import { Reveal, RevealWords, StaggerItem, StaggerList } from '@/components/motion/Reveal';
+import { Reveal } from '@/components/motion/Reveal';
+import { SplitText } from '@/components/motion/SplitText';
+import { Stagger, StaggerItem } from '@/components/motion/Stagger';
 import { articlePath } from '@/lib/slugs';
 import type { ArticleSummary } from '@/services/types';
 
@@ -15,7 +17,7 @@ export default function LatestArticles({ articles }: { articles: ArticleSummary[
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Reveal><p className="text-sm font-medium text-gold-400">Blog</p></Reveal>
-            <RevealWords
+            <SplitText
               id="articles-title"
               parts={['À lire.', { text: 'Les derniers articles du blog.', className: 'text-white/40' }]}
               className="mt-5 max-w-2xl text-[clamp(2rem,4.6vw,3.75rem)] font-semibold leading-[1.05] tracking-[-0.04em]"
@@ -28,7 +30,7 @@ export default function LatestArticles({ articles }: { articles: ArticleSummary[
           </Reveal>
         </div>
 
-        <StaggerList className="mt-14 border-t border-white/10">
+        <Stagger className="mt-14 border-t border-white/10">
           {articles.map((article) => {
             const published = article.publishedAt ?? article.createdAt;
             const meta = `${article.categoryName} · ${article.readingMinutes ?? 1} min`;
@@ -57,7 +59,7 @@ export default function LatestArticles({ articles }: { articles: ArticleSummary[
               </StaggerItem>
             );
           })}
-        </StaggerList>
+        </Stagger>
       </div>
     </section>
   );

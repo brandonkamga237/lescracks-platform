@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 
-import { Reveal, RevealWords, StaggerItem, StaggerList } from '@/components/motion/Reveal';
-import { Panel, ParallaxImage } from '@/components/motion/Parallax';
+import { Reveal } from '@/components/motion/Reveal';
+import { SplitText } from '@/components/motion/SplitText';
+import { Stagger, StaggerItem } from '@/components/motion/Stagger';
+import { ParallaxImage } from '@/components/motion/Parallax';
+import { ScaleInSection } from '@/components/motion/ScaleInSection';
 import { EASE } from '@/lib/motion';
 
 const WHATSAPP = 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK';
@@ -21,11 +24,11 @@ export default function Faq() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <Panel id="faq" labelledBy="faq-title" className="relative z-10 rounded-t-[2rem] bg-[#f4f3ee] text-[#0a0a0a] sm:rounded-t-[3rem]">
+    <ScaleInSection id="faq" labelledBy="faq-title" className="relative z-10 rounded-t-[2rem] bg-[#f4f3ee] text-[#0a0a0a] sm:rounded-t-[3rem]">
       <div className="mx-auto grid max-w-[1320px] gap-12 px-4 pb-32 pt-20 sm:px-8 sm:pt-28 lg:grid-cols-[minmax(0,4fr)_minmax(0,7fr)] lg:gap-20">
         <div>
           <Reveal><p className="text-sm font-medium text-gold-700">FAQ</p></Reveal>
-          <RevealWords id="faq-title" parts={['Questions fréquentes']} className="mt-5 text-[clamp(2rem,4.6vw,3.75rem)] font-semibold leading-[1.05] tracking-[-0.04em]" />
+          <SplitText id="faq-title" parts={['Questions fréquentes']} className="mt-5 text-[clamp(2rem,4.6vw,3.75rem)] font-semibold leading-[1.05] tracking-[-0.04em]" />
           <Reveal>
             <p className="mt-6 max-w-sm text-black/60">
               Une autre question ? Pose-la à la communauté sur <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" className="font-medium text-black underline decoration-black/25 underline-offset-4 hover:decoration-black">WhatsApp</a>, on y répond vite.
@@ -34,7 +37,7 @@ export default function Faq() {
           <ParallaxImage src="/images/illustrations/speech.webp" rotate={10} className="mt-12 hidden w-48 lg:block" />
         </div>
 
-        <StaggerList className="border-t border-black/10">
+        <Stagger className="border-t border-black/10">
           {QUESTIONS.map(([question, answer], index) => {
             const expanded = open === index;
             return (
@@ -73,8 +76,8 @@ export default function Faq() {
               </StaggerItem>
             );
           })}
-        </StaggerList>
+        </Stagger>
       </div>
-    </Panel>
+    </ScaleInSection>
   );
 }

@@ -6,7 +6,8 @@ import { ArrowRight, ArrowUp, ArrowUpRight, BadgeCheck, CircleCheck, Mail } from
 import LesCracksLogo from '@/components/common/LesCracksLogo';
 import { GitHubIcon, LinkedInIcon, YouTubeIcon } from '@/components/icons/BrandIcons';
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
-import { Reveal, RevealWords } from '@/components/motion/Reveal';
+import { Reveal } from '@/components/motion/Reveal';
+import { SplitText } from '@/components/motion/SplitText';
 import TileGrid from '@/components/decor/TileGrid';
 import { EASE } from '@/lib/motion';
 import { ApiError } from '@/services/http';
@@ -144,7 +145,7 @@ export default function LandingFooter() {
         <div className="grid gap-12 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:items-end lg:gap-20">
           <div>
             <LesCracksLogo height={40} className="w-auto" />
-            <RevealWords as="p" className="mt-8 max-w-xl text-[clamp(1.85rem,3.6vw,3rem)] font-semibold leading-[1.08] tracking-[-0.04em]" parts={['Le savoir tech,', { text: 'partagé par ceux qui le pratiquent.', className: 'text-gold-400' }]} />
+            <SplitText as="p" className="mt-8 max-w-xl text-[clamp(1.85rem,3.6vw,3rem)] font-semibold leading-[1.08] tracking-[-0.04em]" parts={['Le savoir tech,', { text: 'partagé par ceux qui le pratiquent.', className: 'text-gold-400' }]} />
             <Reveal className="mt-8 flex flex-wrap gap-2">
               {SOCIALS.map(({ label, href, Icon, gold }) => (
                 <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={`${label}, nouvel onglet`} className="group inline-flex h-11 items-center gap-2 rounded-full border border-white/12 bg-white/[0.03] pl-3 pr-4 text-sm text-white/80 transition-[border-color,background-color,color,transform] duration-300 hover:-translate-y-0.5 hover:border-gold-400/50 hover:bg-gold-400/[0.08] hover:text-white">

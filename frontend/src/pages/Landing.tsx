@@ -7,10 +7,12 @@ import LandingFooter from '@/components/landing/LandingFooter';
 import LandingNav from '@/components/landing/LandingNav';
 import LatestArticles from '@/components/landing/LatestArticles';
 import MagneticLink from '@/components/landing/MagneticLink';
-import { Reveal, RevealWords } from '@/components/motion/Reveal';
+import { Reveal } from '@/components/motion/Reveal';
+import { SplitText } from '@/components/motion/SplitText';
 import Platform from '@/components/landing/Platform';
 import Ribbons from '@/components/landing/Ribbons';
-import { Panel, ParallaxImage } from '@/components/motion/Parallax';
+import { ParallaxImage } from '@/components/motion/Parallax';
+import { ScaleInSection } from '@/components/motion/ScaleInSection';
 import Subjects from '@/components/landing/Subjects';
 import UpcomingEvents from '@/components/landing/UpcomingEvents';
 import { useApi } from '@/hooks/useApi';
@@ -22,13 +24,13 @@ const WHATSAPP = 'https://chat.whatsapp.com/BQvJNnAxAWw3NWCkqCfhQK';
 
 function JoinCall({ isSignedIn }: { isSignedIn: boolean }) {
   return (
-    <Panel labelledBy="join-title" className="relative z-20 -mt-8 overflow-hidden rounded-t-[2rem] bg-black sm:rounded-t-[3rem]">
+    <ScaleInSection labelledBy="join-title" className="relative z-20 -mt-8 overflow-hidden rounded-t-[2rem] bg-black sm:rounded-t-[3rem]">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_50%_60%_at_70%_100%,rgba(212,175,55,0.10),transparent_70%)]" />
       <span className="pointer-events-none absolute right-[8%] top-1/2 hidden -translate-y-1/2 md:block">
         <ParallaxImage src="/images/illustrations/handshake.webp" rotate={-8} className="w-44 xl:w-60" />
       </span>
       <div className="relative mx-auto max-w-[1320px] px-4 pb-24 pt-24 sm:px-8 sm:pt-32">
-        <RevealWords
+        <SplitText
           id="join-title"
           parts={isSignedIn ? ['La conversation', { text: 'continue.', className: 'text-gold-400' }] : ['Rejoins', { text: 'la communauté.', className: 'text-gold-400' }]}
           className="max-w-3xl text-[clamp(2.25rem,5.6vw,4.5rem)] font-semibold leading-[1.02] tracking-[-0.045em]"
@@ -51,7 +53,7 @@ function JoinCall({ isSignedIn }: { isSignedIn: boolean }) {
           </MagneticLink>
         </Reveal>
       </div>
-    </Panel>
+    </ScaleInSection>
   );
 }
 
