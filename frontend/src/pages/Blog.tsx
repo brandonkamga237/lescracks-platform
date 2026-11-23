@@ -5,10 +5,10 @@ import SEO from '@/components/common/SEO';
 import { Stagger, StaggerItem } from '@/components/motion/Stagger';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
-import { PageHero } from '@/components/ui/page-hero';
 import { Pager } from '@/components/ui/pager';
 import { EmptyPanel, ErrorPanel, RowsLoading } from '@/components/ui/panels';
 import { PillTabs } from '@/components/ui/pill-tabs';
+import { SpaceHeader } from '@/components/ui/space-header';
 import { useApi } from '@/hooks/useApi';
 import { LIST_PAGE_SIZE, worthFiltering } from '@/lib/filters';
 import { cn } from '@/lib/utils';
@@ -42,16 +42,11 @@ export default function Blog() {
   return (
     <>
       <SEO title="Blog" description="Les articles LesCracks : retours d’expérience, notions expliquées et bonnes pratiques pour progresser en tech." url="/blog" />
-      <PageHero
-        id="blog-title"
-        eyebrow={!blog.loading && !blog.error ? `Blog · ${total} article${total > 1 ? 's' : ''}` : 'Blog'}
-        title={['À lire.', { text: 'Écrit par celles et ceux qui pratiquent.', className: 'text-white/40' }]}
-        lead="Retours d’expérience, notions expliquées simplement et bonnes pratiques pour progresser en tech."
-      >
+      <SpaceHeader title="Blog" meta={!blog.loading && !blog.error ? `${total} article${total > 1 ? 's' : ''}` : undefined}>
         {!!themes.data?.length && worthFiltering(total, Boolean(theme)) && (
           <PillTabs legend="Thème" allLabel="Tous les thèmes" value={theme?.slug} options={themes.data.map((item) => [item.slug, item.name])} onChange={(slug) => setParams(slug ? { theme: slug } : {})} />
         )}
-      </PageHero>
+      </SpaceHeader>
 
       <Container className="pb-24">
         <div role="region" aria-label="Articles" aria-live="polite" aria-busy={blog.loading}>
@@ -67,7 +62,7 @@ export default function Blog() {
           {articles.length > 0 && !blog.error && (
             <div className={cn('transition-opacity', blog.loading && 'opacity-60')}>
               <Stagger className="border-t border-white/10">
-                {articles.map((article) => <StaggerItem key={article.id}><ArticleRow article={article} /></StaggerItem>)}
+                {articles.map((article) => <StaggerItem key={article.id}><ArticleRow article={article} dense /></StaggerItem>)}
               </Stagger>
               <Pager page={page} totalPages={blog.data?.totalPages ?? 0} onPageChange={goTo} />
             </div>
