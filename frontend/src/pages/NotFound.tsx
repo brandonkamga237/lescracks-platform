@@ -1,24 +1,22 @@
-// src/pages/NotFound.tsx
 import { Link } from 'react-router-dom';
-import { ArrowRight, Compass } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+
 import SEO from '@/components/common/SEO';
-import Layout from '@/components/layout/Layout';
+import { SplitText } from '@/components/motion/SplitText';
+import { Button } from '@/components/ui/button';
+import { Container } from '@/components/ui/container';
 
-const NotFound = () => {
+export default function NotFound() {
   return (
-    <Layout showFooter={false} showScrollTop={false}>
+    <Container className="flex min-h-[70vh] flex-col justify-center py-20">
       <SEO title="Page introuvable" description="Cette page n’existe pas ou a été déplacée." url="/404" />
-      <div className="flex min-h-[calc(100dvh_-_5rem)] items-center justify-center px-5 py-16">
-        <div className="w-full max-w-lg rounded-lg border border-line bg-card p-8 text-center sm:p-12">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-lg border border-gold/20 bg-gold/10 text-gold-ink"><Compass className="h-7 w-7" aria-hidden /></div>
-          <p className="kicker mb-4">Erreur 404</p>
-          <h1 className="font-display text-3xl font-bold text-t1">On a perdu le fil.</h1>
-          <p className="mt-4 text-sm leading-relaxed text-t3">Cette page n’existe pas ou n’est plus disponible. Le blog, lui, reste à portée de clic.</p>
-          <div className="mt-8 flex flex-col gap-3"><Link to="/blog" className="btn-primary gap-2">Lire le blog<ArrowRight className="h-4 w-4" aria-hidden /></Link><Link to="/" className="btn-secondary">Revenir à l’accueil</Link></div>
-        </div>
+      <p className="text-sm font-medium text-gold-400">Erreur 404</p>
+      <SplitText as="h1" onMount parts={['On a perdu le fil.', { text: 'Cette page n’existe pas.', className: 'text-white/40 sm:block' }]} className="mt-5 max-w-3xl text-display font-semibold" />
+      <p className="mt-6 max-w-xl text-base leading-relaxed text-white/55">Elle a peut-être été déplacée ou retirée. Le blog et l’agenda, eux, restent à portée de clic.</p>
+      <div className="mt-10 flex flex-wrap gap-3">
+        <Button asChild size="lg" className="font-semibold"><Link to="/blog">Lire le blog<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" /></Link></Button>
+        <Button asChild size="lg" variant="outline"><Link to="/rendez-vous">Voir l’agenda</Link></Button>
       </div>
-    </Layout>
+    </Container>
   );
-};
-
-export default NotFound;
+}
