@@ -43,7 +43,7 @@ export default function MemberGreeting({ firstName, next, live, tally, completio
     <section aria-labelledby="member-title" className="relative isolate overflow-hidden pb-16 pt-12 sm:pb-20 sm:pt-20">
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[60vh] bg-[radial-gradient(ellipse_55%_60%_at_30%_0%,rgba(212,175,55,0.10),transparent_70%)]" />
       <Container>
-        <motion.p {...arrive(0)} className="text-sm font-medium text-gold-400">Mon espace</motion.p>
+        <motion.p {...arrive(0)} className="text-sm font-medium text-gold-400">Dashboard</motion.p>
         <SplitText as="h1" id="member-title" onMount delay={0.1} parts={headline(firstName, next, live)} className="mt-5 max-w-4xl text-display-hero font-semibold" />
 
         {next && (
