@@ -5,6 +5,7 @@ import com.brandonkamga.lescracks.engagement.domain.model.Target;
 import com.brandonkamga.lescracks.engagement.domain.model.TargetType;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /** What content modules read and tell: the figures their cards show, and that a target is gone. */
@@ -17,6 +18,9 @@ public interface EngagementCounts {
 
     /** The most liked targets of a type, most liked first. */
     Map<Long, Counts> listMostLiked(TargetType type, int limit);
+
+    /** The targets of a type the member opened, the most recently opened first, at most {@code limit}. */
+    List<Long> listViewedBy(String memberEmail, TargetType type, int limit);
 
     /** Drops every view, like and comment of a deleted target. */
     void forget(Target target);
