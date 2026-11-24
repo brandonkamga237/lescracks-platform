@@ -120,7 +120,8 @@ export default function Security() {
       <SEO title="Sécurité" description="Ton mot de passe et tes méthodes de connexion LesCracks." url="/profil/securite" />
       <SpaceHeader title="Sécurité" lead="Ton mot de passe et les comptes qui te permettent de te connecter." />
 
-      <Container className="grid max-w-3xl gap-6 pb-20">
+      <Container className="pb-20">
+        <div className="grid max-w-3xl gap-6">
         <section aria-labelledby="password-title" className={CARD}>
           <div className="flex items-start justify-between gap-4">
             <CardHeading id="password-title" Icon={local ? Lock : KeyRound} title="Mot de passe" text={local ? 'Change-le quand tu le souhaites.' : 'Ton compte est lié à un fournisseur externe : le mot de passe se gère chez lui.'} />
@@ -177,6 +178,7 @@ export default function Security() {
           </div>
           <Button type="button" variant="outline" disabled={leaving} onClick={() => void leave()}><LogOut className="h-4 w-4" aria-hidden="true" />{leaving ? 'Déconnexion…' : 'Me déconnecter'}</Button>
         </section>
+        </div>
       </Container>
     </>
   );
