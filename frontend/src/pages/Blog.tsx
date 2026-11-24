@@ -72,7 +72,11 @@ export default function Blog() {
       <SEO title="Blog" description="Les articles LesCracks : retours d’expérience, notions expliquées et bonnes pratiques pour progresser en tech." url="/blog" />
       <SpaceHeader title="Blog" meta={!blog.loading && !blog.error ? `${total} article${total > 1 ? 's' : ''}${filtered ? ' trouvé' + (total > 1 ? 's' : '') : ''}` : undefined} />
 
-      <Container className="grid gap-8 pb-20 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-10">
+      <Container className="pb-5">
+        <SearchField value={typed} onChange={setTyped} label="Rechercher un article" className="lg:ml-[calc(14rem+2.5rem)]" />
+      </Container>
+
+      <Container className="grid gap-6 pb-20 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-10">
         <aside aria-label="Filtres" className="min-w-0 lg:sticky lg:top-6 lg:self-start">
           <BlogFilters
             themes={themes.data ?? []}
@@ -85,10 +89,8 @@ export default function Blog() {
         </aside>
 
         <div className="min-w-0">
-          <SearchField value={typed} onChange={setTyped} label="Rechercher un article" />
-
           {filtered && (
-            <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+            <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
               {search && <span className="rounded-full bg-white/[0.06] px-3 py-1 text-white/70">« {search} »</span>}
               {theme && <span className="rounded-full bg-white/[0.06] px-3 py-1 text-white/70">{theme.name}</span>}
               {tag && <span className="rounded-full bg-white/[0.06] px-3 py-1 text-white/70">#{tag.name}</span>}
@@ -96,7 +98,7 @@ export default function Blog() {
             </div>
           )}
 
-          <div role="region" aria-label="Articles" aria-live="polite" aria-busy={blog.loading} className="mt-6">
+          <div role="region" aria-label="Articles" aria-live="polite" aria-busy={blog.loading}>
             {blog.loading && articles.length === 0 && (
               <div role="status" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {[0, 1, 2].map((index) => <div key={index} aria-hidden="true" className="h-80 animate-pulse rounded-3xl bg-white/[0.03] motion-reduce:animate-none" />)}
@@ -114,7 +116,11 @@ export default function Blog() {
             {articles.length > 0 && !blog.error && (
               <div className={cn('transition-opacity', blog.loading && 'opacity-60')}>
                 <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {articles.map((article) => <li key={article.id}><ArticleCard article={article} /></li>)}
+                  {articles.map((article, index) => {
+                    // The newest article of the first unfiltered page leads, as a wide card.
+                    const lead = index === 0 && page === 1 && !filtered && articles.length > 2;
+                    return <li key={article.id} className={lead ? 'sm:col-span-2 xl:col-span-3' : undefined}><ArticleCard article={article} wide={lead} /></li>;
+                  })}
                 </ul>
                 <Pager page={page} totalPages={blog.data?.totalPages ?? 0} onPageChange={(value) => update({ page: value > 1 ? String(value) : undefined })} />
               </div>
