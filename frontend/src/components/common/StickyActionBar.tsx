@@ -30,7 +30,7 @@ export default function StickyActionBar({ anchor, children, className = '', labe
       {/* Room at the end of the page, so the bar never covers its last lines. */}
       <div aria-hidden className={`h-20 ${className}`} />
       <div role="region" aria-label={label} aria-hidden={!visible}
-      className={`fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 px-3 pb-2 transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none lg:bottom-6 lg:px-0 lg:pb-0 ${visible ? 'translate-y-0 opacity-100' : 'pointer-events-none invisible translate-y-3 opacity-0'} ${className}`}>
+      className={`fixed inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 px-3 pb-2 transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none lg:bottom-6 lg:px-0 lg:pb-0 ${visible ? 'translate-y-0 opacity-100' : 'pointer-events-none invisible translate-y-3 opacity-0'} ${className}`}>
         <div className="mx-auto flex max-w-2xl items-center gap-3 rounded-full border border-white/10 bg-black/90 p-2 pl-4 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.9)] backdrop-blur-xl">
           {children}
         </div>
