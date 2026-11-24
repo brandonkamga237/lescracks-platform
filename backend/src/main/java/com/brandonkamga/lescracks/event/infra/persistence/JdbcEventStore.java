@@ -90,6 +90,7 @@ class JdbcEventStore implements EventStore {
             clauses.add("format = :format");
             params.put("format", search.format().name());
         }
+        if (search.rendezVousOnly()) clauses.add("type <> 'HACKATHON'");
         switch (search.timing()) {
             case UPCOMING -> clauses.add("(start_date > :now OR end_date > :now)");
             case PAST -> clauses.add("start_date <= :now AND (end_date IS NULL OR end_date <= :now)");

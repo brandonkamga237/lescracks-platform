@@ -54,7 +54,11 @@ class JdbcEventIT extends PostgresIT {
     }
 
     private Event event(String slug, EventStatus status, Instant start, Instant end) {
-        return events.save(Event.builder().slug(slug).title("Titre " + slug).description("D").type(EventType.HACKATHON)
+        return event(slug, EventType.HACKATHON, status, start, end);
+    }
+
+    private Event event(String slug, EventType type, EventStatus status, Instant start, Instant end) {
+        return events.save(Event.builder().slug(slug).title("Titre " + slug).description("D").type(type)
                 .format(EventFormat.ONLINE).status(status).startDate(start).endDate(end).acceptsSubmissions(true).maxTeamSize(4).build());
     }
 
@@ -81,21 +85,24 @@ class JdbcEventIT extends PostgresIT {
     }
 
     @Test
-    @DisplayName("an event that has started but not ended is upcoming, not past; filters and totals hold")
+    @DisplayName("an event that has started but not ended is upcoming, not past; filters and totals hold; hackathons stay out of public lists")
     void searchByTiming() {
-        Event running = event("it-running", EventStatus.PUBLISHED, now.minus(1, ChronoUnit.DAYS), now.plus(1, ChronoUnit.DAYS));
-        Event next = event("it-next", EventStatus.PUBLISHED, now.plus(2, ChronoUnit.DAYS), null);
-        Event over = event("it-over", EventStatus.PUBLISHED, now.minus(5, ChronoUnit.DAYS), null);
-        event("it-draft", EventStatus.DRAFT, now.plus(3, ChronoUnit.DAYS), null);
+        Event running = event("it-running", EventType.BOOTCAMP, EventStatus.PUBLISHED, now.minus(1, ChronoUnit.DAYS), now.plus(1, ChronoUnit.DAYS));
+        Event next = event("it-next", EventType.WORKSHOP, EventStatus.PUBLISHED, now.plus(2, ChronoUnit.DAYS), null);
+        Event over = event("it-over", EventType.WORKSHOP, EventStatus.PUBLISHED, now.minus(5, ChronoUnit.DAYS), null);
+        Event hackathon = event("it-hackathon", EventStatus.PUBLISHED, now.plus(2, ChronoUnit.DAYS), null);
+        event("it-draft", EventType.WORKSHOP, EventStatus.DRAFT, now.plus(3, ChronoUnit.DAYS), null);
 
         List<Long> upcoming = events.search(EventSearch.upcoming(), new PageQuery(0, 100), now).items().stream().map(Event::getId).toList();
-        assertThat(upcoming).containsSubsequence(running.getId(), next.getId()).doesNotContain(over.getId());
+        assertThat(upcoming).containsSubsequence(running.getId(), next.getId()).doesNotContain(over.getId(), hackathon.getId());
         assertThat(events.search(EventSearch.past(), new PageQuery(0, 100), now).items()).extracting(Event::getId)
                 .contains(over.getId()).doesNotContain(running.getId(), next.getId());
-        var paged = events.search(EventSearch.published(EventType.HACKATHON, EventFormat.ONLINE), new PageQuery(0, 1), now);
+        var paged = events.search(EventSearch.published(EventType.WORKSHOP, EventFormat.ONLINE), new PageQuery(0, 1), now);
         assertThat(paged.items()).hasSize(1);
-        assertThat(paged.total()).isGreaterThanOrEqualTo(3);
-        assertThat(events.search(EventSearch.backOffice(), new PageQuery(0, 100), now).items()).extracting(Event::getSlug).contains("it-draft");
+        assertThat(paged.total()).isGreaterThanOrEqualTo(2);
+        assertThat(events.search(EventSearch.published(EventType.HACKATHON, null), new PageQuery(0, 100), now).items()).isEmpty();
+        assertThat(events.search(EventSearch.backOffice(), new PageQuery(0, 100), now).items()).extracting(Event::getSlug)
+                .contains("it-draft", "it-hackathon");
     }
 
     @Test
