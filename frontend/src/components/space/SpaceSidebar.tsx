@@ -10,13 +10,24 @@ import { COMMUNITY_LINK } from '@/config/site';
 import { useSession } from '@/hooks/useSession';
 import { cn } from '@/lib/utils';
 
-/** Who is reading, at the foot of the sidebar: their account, or the way to open one. */
+/** Who is reading, at the foot of the sidebar: their account, the way to open one, or the back office for an admin. */
 function SidebarFoot({ member }: { member: boolean }) {
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
-  const { name, user, signOut } = useSession();
+  const { name, user, isAdmin, signOut } = useSession();
   const [leaving, setLeaving] = useState(false);
   const back = `?retour=${encodeURIComponent(`${pathname}${search}`)}`;
+
+  // An admin reading the site keeps a way back to the back office.
+  if (isAdmin) {
+    return (
+      <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+        <p className="text-sm font-medium text-white">Connecté en administrateur</p>
+        <p className="mt-1 truncate text-xs text-white/50">{name}</p>
+        <Button asChild size="sm" className="mt-4 w-full font-semibold"><Link to="/admin">Administration</Link></Button>
+      </div>
+    );
+  }
 
   if (!member) {
     return (
