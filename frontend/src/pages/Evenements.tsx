@@ -64,7 +64,7 @@ export default function Evenements() {
           <div role="tablist" aria-label="Période" className="flex w-full rounded-full border border-white/10 bg-white/[0.03] p-1 sm:inline-flex sm:w-auto">
             {VIEWS.map(([key, label]) => (
               <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => show(key)}
-                className={cn('h-9 flex-1 rounded-full px-5 text-sm transition-[color,background-color] duration-200 active:scale-95 motion-reduce:active:scale-100 sm:flex-none', view === key ? 'bg-gold-400 font-medium text-black' : 'text-white/60 hover:text-white')}>
+                className={cn('h-9 flex-1 whitespace-nowrap rounded-full px-5 text-sm transition-[color,background-color] duration-200 active:scale-95 motion-reduce:active:scale-100 sm:flex-none', view === key ? 'bg-gold-400 font-medium text-black' : 'text-white/60 hover:text-white')}>
                 {label}
               </button>
             ))}
