@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowUpRight } from 'lucide-react';
+import { CalendarDays, ChevronRight, Mic, Newspaper, type LucideIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -14,10 +14,10 @@ export interface NewsItem {
   detail?: string;
 }
 
-const KIND_STYLE: Record<NewsItem['kind'], string> = {
-  Article: 'bg-white/[0.06] text-white/70',
-  Talk: 'bg-white/[0.06] text-white/70',
-  'Rendez-vous': 'bg-gold-400/15 text-gold-400',
+const KIND: Record<NewsItem['kind'], { Icon: LucideIcon; tile: string }> = {
+  Article: { Icon: Newspaper, tile: 'bg-white/[0.06] text-white/75' },
+  Talk: { Icon: Mic, tile: 'bg-white/[0.06] text-white/75' },
+  'Rendez-vous': { Icon: CalendarDays, tile: 'bg-gold-400/15 text-gold-400' },
 };
 
 const relative = new Intl.RelativeTimeFormat('fr-FR', { numeric: 'auto' });
@@ -33,21 +33,24 @@ function ago(iso: string, now: number): string {
 
 /** What was published lately on the platform, articles, episodes and rendez-vous mixed, newest first. */
 export default function PlatformNews({ items, now }: { items: NewsItem[]; now: number }) {
-  if (items.length === 0) return <p className="rounded-2xl border border-dashed border-white/15 px-4 py-4 text-sm text-white/55">Rien de neuf pour l’instant. Les prochaines publications apparaîtront ici.</p>;
+  if (items.length === 0) return <p className="rounded-2xl bg-white/[0.03] px-4 py-4 text-sm text-white/55">Rien de neuf pour l’instant. Les prochaines publications apparaîtront ici.</p>;
   return (
-    <ul className="divide-y divide-white/10 border-y border-white/10">
-      {items.map((item) => (
-        <li key={item.key}>
-          <Link to={item.to} className="group flex items-start gap-3 py-3.5">
-            <span className={cn('mt-0.5 shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium', KIND_STYLE[item.kind])}>{item.kind}</span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-medium transition-colors group-hover:text-gold-400">{item.title}</span>
-              <span className="mt-0.5 block text-xs text-white/45"><time dateTime={item.at}>{ago(item.at, now)}</time>{item.detail && ` · ${item.detail}`}</span>
-            </span>
-            <ArrowUpRight className="mt-1 h-4 w-4 shrink-0 text-white/25 transition-colors group-hover:text-gold-400" aria-hidden="true" />
-          </Link>
-        </li>
-      ))}
+    <ul className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+      {items.map((item) => {
+        const { Icon, tile } = KIND[item.kind];
+        return (
+          <li key={item.key} className="border-b border-white/[0.06] last:border-b-0">
+            <Link to={item.to} className="group flex items-center gap-3 px-3 py-3 transition-colors hover:bg-white/[0.04] active:bg-white/[0.06]">
+              <span className={cn('grid h-10 w-10 shrink-0 place-items-center rounded-xl', tile)}><Icon className="h-[18px] w-[18px]" aria-hidden="true" /></span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium transition-colors group-hover:text-gold-400">{item.title}</span>
+                <span className="mt-0.5 block truncate text-xs text-white/45">{item.kind} · <time dateTime={item.at}>{ago(item.at, now)}</time>{item.detail && ` · ${item.detail}`}</span>
+              </span>
+              <ChevronRight className="h-4 w-4 shrink-0 text-white/25 transition-transform group-hover:translate-x-0.5 group-hover:text-gold-400 motion-reduce:transition-none" aria-hidden="true" />
+            </Link>
+          </li>
+        );
+      })}
     </ul>
   );
 }
