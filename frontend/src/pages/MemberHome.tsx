@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, BookOpen, Sparkles, Target } from 'lucide-react';
 
 import ArticleCard from '@/components/blog/ArticleCard';
 import SEO from '@/components/common/SEO';
@@ -9,6 +9,7 @@ import NextUp from '@/components/dashboard/NextUp';
 import PlatformNews, { type NewsItem } from '@/components/dashboard/PlatformNews';
 import DashSection from '@/components/member/DashSection';
 import MyAgenda from '@/components/member/MyAgenda';
+import { CardRail } from '@/components/ui/card-rail';
 import { Container } from '@/components/ui/container';
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
@@ -41,6 +42,8 @@ export default function MemberHome() {
   const registered = new Set(mine.data?.map((event) => event.id));
   const open = withoutHackathons(upcoming.data?.content ?? []).filter((event) => !registered.has(event.id));
   const read = new Set(reading.data?.map((article) => article.id));
+  // Nothing read yet: the newest articles stand in, so the first visit already offers something to open.
+  const starters = (recent.data?.content ?? []).slice(0, 4);
   const shelves = (themes.data ?? []).filter((theme) => user?.interestIds.includes(theme.id)).slice(0, SHELVES);
 
   const news: NewsItem[] = [
@@ -60,37 +63,43 @@ export default function MemberHome() {
       <Container className="space-y-10 pb-20">
         <NextUp mine={next} live={Boolean(agenda?.live.length)} others={agenda ? Math.max(0, agenda.live.length + agenda.coming.length - 1) : 0} suggestion={next ? undefined : open[0]} />
 
-        <div className="grid gap-10 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:gap-12">
-          <div className="min-w-0 space-y-10">
-            <DashSection id="reading-title" title="Reprendre ta lecture" more={{ to: '/blog', label: 'Blog' }}>
-              {reading.data && reading.data.length === 0 && (
-                <p className="rounded-2xl border border-dashed border-white/15 px-4 py-4 text-sm text-white/55">Les articles que tu ouvres se retrouvent ici, pour y revenir en un clic. <Link to="/blog" className="font-medium text-gold-400 underline-offset-4 hover:underline">Parcourir le blog</Link></p>
-              )}
-              {!!reading.data?.length && (
-                <ul className="grid gap-4 sm:grid-cols-2">
-                  {reading.data.map((article) => <li key={article.id}><ArticleCard article={article} /></li>)}
-                </ul>
-              )}
-            </DashSection>
+        {/* A phone reads top to bottom by importance; a wide screen puts the feeds beside the reading. */}
+        <div className="grid gap-10 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:gap-x-12">
+          <div className="min-w-0 xl:col-start-1 xl:row-start-1">
+            {reading.data?.length ? (
+              <DashSection id="reading-title" title="Reprendre ta lecture" Icon={BookOpen} more={{ to: '/blog', label: 'Blog' }}>
+                <CardRail label="Articles ouverts récemment">{reading.data.map((article) => <ArticleCard key={article.id} article={article} />)}</CardRail>
+              </DashSection>
+            ) : !!starters.length && (
+              <DashSection id="reading-title" title="À lire en premier" Icon={BookOpen} more={{ to: '/blog', label: 'Blog' }}>
+                <CardRail label="Derniers articles">{starters.map((article) => <ArticleCard key={article.id} article={article} />)}</CardRail>
+              </DashSection>
+            )}
+          </div>
 
+          <div className="min-w-0 xl:col-start-2 xl:row-start-1">
+            <DashSection id="news-title" title="Nouveau sur LesCracks" Icon={Sparkles}>
+              <PlatformNews items={news} now={now} />
+            </DashSection>
+          </div>
+
+          <div className="min-w-0 xl:col-start-2 xl:row-start-2">
+            <MyAgenda agenda={agenda} loading={mine.loading} failed={Boolean(mine.error)} onRetry={mine.reload} />
+          </div>
+
+          <div className="min-w-0 space-y-10 xl:col-start-1 xl:row-start-2">
             {shelves.length > 0
               ? shelves.map((theme) => <InterestShelf key={theme.id} theme={theme} read={read} />)
               : themes.data && (
-                <Link to="/profil#a-propos" className="group flex items-center justify-between gap-4 rounded-3xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-gold-400/40">
-                  <span>
-                    <span className="block font-medium">Dis-nous ce qui t’intéresse</span>
-                    <span className="mt-1 block text-sm text-white/55">Choisis tes thèmes sur ton profil : ton dashboard te proposera les articles qui vont avec.</span>
+                <Link to="/profil#a-propos" className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:border-gold-400/40 active:scale-[0.99] motion-reduce:active:scale-100">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gold-400/10 text-gold-400"><Target className="h-5 w-5" aria-hidden="true" /></span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium">Choisis tes thèmes</span>
+                    <span className="mt-0.5 block text-xs text-white/55">Ton dashboard te proposera les articles qui vont avec.</span>
                   </span>
                   <ArrowRight className="h-5 w-5 shrink-0 text-white/40 transition-transform group-hover:translate-x-0.5 group-hover:text-gold-400" aria-hidden="true" />
                 </Link>
               )}
-          </div>
-
-          <div className="min-w-0 space-y-10">
-            <DashSection id="news-title" title="Nouveau sur LesCracks">
-              <PlatformNews items={news} now={now} />
-            </DashSection>
-            <MyAgenda agenda={agenda} loading={mine.loading} failed={Boolean(mine.error)} onRetry={mine.reload} />
           </div>
         </div>
       </Container>
