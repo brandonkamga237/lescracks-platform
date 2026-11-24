@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
 import SignupNudge from '@/components/account/SignupNudge';
@@ -23,9 +23,23 @@ function ContentLoading() {
  * and the account for a member and the way to join for a visitor. A visitor's "/" is the landing,
  * which lives outside it.
  */
+// The code of every page of the platform, fetched while the browser is idle: a tap on a tab
+// then shows the page at once instead of downloading it first.
+const PLATFORM_PAGES = [
+  () => import('@/pages/MemberHome'), () => import('@/pages/Blog'), () => import('@/pages/BlogPost'),
+  () => import('@/pages/Evenements'), () => import('@/pages/EvenementDetail'), () => import('@/pages/Talk'),
+  () => import('@/pages/Formations'), () => import('@/pages/Profile'), () => import('@/pages/Security'),
+];
+
 export default function SiteShell() {
   const { pathname } = useLocation();
   const { isLoading, isSignedIn, isAdmin, user } = useSession();
+
+  useEffect(() => {
+    const whenIdle = window.requestIdleCallback ?? ((task: () => void) => window.setTimeout(task, 1500));
+    const handle = whenIdle(() => PLATFORM_PAGES.forEach((load) => void load().catch(() => undefined)));
+    return () => (window.cancelIdleCallback ?? window.clearTimeout)(handle);
+  }, []);
 
   // Black until the session is known: a member never sees the visitor menu, or the landing, flash first.
   if (isLoading) return <div role="status" aria-label="Chargement" className="min-h-screen bg-black" />;
