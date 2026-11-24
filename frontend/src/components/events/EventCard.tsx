@@ -24,7 +24,7 @@ export default function EventCard({ event, past = false, registered = false }: E
   const count = attendanceLabel(event.registrationCount);
   const Place = event.format === 'ONLINE' ? Video : MapPin;
   return (
-    <Link to={eventPath(event)} className={cn('group flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] transition-colors hover:border-gold-400/40', past && 'opacity-75 hover:opacity-100')}>
+    <Link to={eventPath(event)} className={cn('group flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] transition-[transform,border-color,background-color,box-shadow,opacity] duration-300 ease-out hover:-translate-y-1 hover:border-gold-400/40 hover:bg-white/[0.05] hover:shadow-[0_24px_48px_-24px_rgba(212,175,55,0.25)] active:translate-y-0 active:scale-[0.99] motion-reduce:transform-none', past && 'opacity-75 hover:opacity-100')}>
       <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-gold-400/20 to-white/[0.02]">
         {event.coverImage && !broken
           ? <img src={event.coverImage} alt="" loading="lazy" decoding="async" onError={() => setBroken(true)} className={cn('h-full w-full object-cover transition duration-700 group-hover:scale-105', past && 'grayscale')} />
@@ -40,8 +40,9 @@ export default function EventCard({ event, past = false, registered = false }: E
           {TYPE_LABEL[event.type]}
           {registered && <span className="inline-flex items-center gap-1 rounded-full border border-gold-400/40 px-2 py-0.5 text-gold-400"><Check className="h-3 w-3" aria-hidden="true" />{past ? 'Inscrit' : 'Tu participes'}</span>}
         </p>
-        <h3 className="mt-1.5 line-clamp-2 text-lg font-semibold leading-snug tracking-tight transition-colors group-hover:text-gold-400">{event.title}</h3>
-        <ul className="mt-auto space-y-1.5 pt-4 text-sm text-white/55">
+        <h3 className="mt-1.5 line-clamp-2 text-[17px] font-semibold leading-snug tracking-tight transition-colors group-hover:text-gold-400">{event.title}</h3>
+        <div aria-hidden="true" className="min-h-4 flex-1" />
+        <ul className="space-y-1.5 border-t border-white/[0.07] pt-3 text-sm text-white/55">
           <li className="flex items-center gap-2"><Clock3 className="h-4 w-4 shrink-0 text-white/35" aria-hidden="true" />{eventHour(event.startDate)}</li>
           <li className="flex items-center gap-2"><Place className="h-4 w-4 shrink-0 text-white/35" aria-hidden="true" /><span className="truncate">{eventPlace(event)}</span></li>
           {count && <li className="flex items-center gap-2"><Users className="h-4 w-4 shrink-0 text-white/35" aria-hidden="true" />{count}</li>}
