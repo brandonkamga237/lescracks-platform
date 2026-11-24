@@ -43,8 +43,8 @@ public class ContentServices {
     }
 
     @Bean
-    ArticleCatalog articleCatalog(ArticleStore articles, ArticleViews views, TaxonomyService taxonomy) {
-        return transactional.wrap(ArticleCatalog.class, new ArticleCatalogImpl(articles, views, taxonomy));
+    ArticleCatalog articleCatalog(ArticleStore articles, ArticleViews views, TaxonomyService taxonomy, EngagementCounts engagement) {
+        return transactional.wrap(ArticleCatalog.class, new ArticleCatalogImpl(articles, views, taxonomy, engagement));
     }
 
     @Bean

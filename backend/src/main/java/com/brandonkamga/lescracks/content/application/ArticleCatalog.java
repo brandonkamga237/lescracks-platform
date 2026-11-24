@@ -18,6 +18,9 @@ public interface ArticleCatalog {
     /** Themes holding published articles, the fullest first; empty themes are left out. */
     List<ThemeCount> listThemes();
 
+    /** The published articles the member opened, the most recently opened first, as cards. */
+    List<ArticleView> listReadBy(String memberEmail, int limit);
+
     /** Every published article, without bodies, for the sitemap and the bot snapshots. */
     List<Article> listPublished();
 }
