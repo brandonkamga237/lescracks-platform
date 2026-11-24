@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Clock3, MapPin, Users, Video } from 'lucide-react';
+import { Check, Clock3, MapPin, Users, Video } from 'lucide-react';
 
 import { TYPE_LABEL } from '@/components/events/AgendaItem';
 import { PulseDot } from '@/components/ui/pulse-dot';
@@ -10,8 +10,15 @@ import { eventPath } from '@/lib/slugs';
 import { cn } from '@/lib/utils';
 import type { EventSummary } from '@/services/types';
 
+interface EventCardProps {
+  event: EventSummary;
+  past?: boolean;
+  /** The reader is signed up for it. */
+  registered?: boolean;
+}
+
 /** A rendez-vous as a card: its cover with the date pinned on it, then what, when, where and how many. */
-export default function EventCard({ event, past = false }: { event: EventSummary; past?: boolean }) {
+export default function EventCard({ event, past = false, registered = false }: EventCardProps) {
   const [broken, setBroken] = useState(false);
   const live = !past && isLive(event);
   const count = attendanceLabel(event.registrationCount);
@@ -29,7 +36,10 @@ export default function EventCard({ event, past = false }: { event: EventSummary
         {live && <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-gold-400 px-2.5 py-1 text-xs font-semibold text-black"><PulseDot className="[&>span]:bg-black" />En direct</span>}
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <p className="text-xs font-medium text-gold-400">{TYPE_LABEL[event.type]}</p>
+        <p className="flex items-center justify-between gap-2 text-xs font-medium text-gold-400">
+          {TYPE_LABEL[event.type]}
+          {registered && <span className="inline-flex items-center gap-1 rounded-full border border-gold-400/40 px-2 py-0.5 text-gold-400"><Check className="h-3 w-3" aria-hidden="true" />{past ? 'Inscrit' : 'Tu participes'}</span>}
+        </p>
         <h3 className="mt-1.5 line-clamp-2 text-lg font-semibold leading-snug tracking-tight transition-colors group-hover:text-gold-400">{event.title}</h3>
         <ul className="mt-auto space-y-1.5 pt-4 text-sm text-white/55">
           <li className="flex items-center gap-2"><Clock3 className="h-4 w-4 shrink-0 text-white/35" aria-hidden="true" />{eventHour(event.startDate)}</li>
