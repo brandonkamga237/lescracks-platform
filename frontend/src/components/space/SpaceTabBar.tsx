@@ -9,11 +9,13 @@ import { cn } from '@/lib/utils';
 /** The space on a phone: the logo on top, with the account or the way in. */
 export function SpaceTopBar({ member }: { member: boolean }) {
   const { pathname, search } = useLocation();
-  const { name, user } = useSession();
+  const { name, user, isAdmin } = useSession();
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-white/10 bg-black/90 px-4 backdrop-blur-xl lg:hidden">
       <Link to="/" aria-label={member ? 'LesCracks, mon espace' : 'LesCracks, accueil'} className="flex min-h-11 items-center"><LesCracksLogo height={30} className="w-auto" /></Link>
-      {member
+      {isAdmin
+        ? <Link to="/admin" className="flex min-h-11 items-center rounded-full px-4 text-sm font-medium text-gold-400">Administration</Link>
+        : member
         ? <Link to="/profil" aria-label="Mon compte" className="flex min-h-11 min-w-11 items-center justify-end"><MemberAvatar name={name} avatarUrl={user?.avatarUrl} className="h-8 w-8" /></Link>
         : <Link to={`/connexion?retour=${encodeURIComponent(`${pathname}${search}`)}`} className="flex min-h-11 items-center rounded-full px-4 text-sm font-medium text-gold-400">Se connecter</Link>}
     </header>
