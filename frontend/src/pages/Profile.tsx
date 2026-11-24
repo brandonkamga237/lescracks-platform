@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight, Award, Lock, ShieldCheck } from 'lucide-react';
 
 import AvatarPicker from '@/components/account/AvatarPicker';
@@ -37,6 +38,14 @@ function Stat({ value, label }: { value: number | undefined; label: string }) {
 /** The member's profile: who they are, what they have done and earned, and what they tell us. */
 export default function Profile() {
   const { name, user, isAdmin, refresh } = useSession();
+  const { hash } = useLocation();
+
+  // A link from elsewhere (/profil#a-propos) lands on that section once the page has drawn it.
+  useEffect(() => {
+    if (!hash || !user) return;
+    const frame = requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start', behavior: 'smooth' }));
+    return () => cancelAnimationFrame(frame);
+  }, [hash, user]);
   const mine = useApi((signal) => (user ? api.myEvents(signal) : Promise.resolve([])), [user?.id]);
   const certificates = useApi((signal) => (user ? api.myCertificates(signal) : Promise.resolve([])), [user?.id]);
   const badges = useApi((signal) => (user ? api.myBadges(signal) : Promise.resolve([])), [user?.id]);
