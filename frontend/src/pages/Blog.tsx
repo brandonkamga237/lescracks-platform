@@ -33,14 +33,15 @@ export default function Blog() {
   const [typed, setTyped] = useState(search);
   const settled = useDebouncedValue(typed.trim(), 350);
 
-  const themes = useApi((signal) => api.themes(signal), []);
-  const tags = useApi((signal) => api.tags(signal), []);
+  const themes = useApi((signal) => api.themes(signal), [], 'themes');
+  const tags = useApi((signal) => api.tags(signal), [], 'tags');
   const theme = themes.data?.find((item) => item.slug === themeSlug);
   const tag = tags.data?.find((item) => item.id === tagId);
   const waitingForTheme = Boolean(themeSlug) && !themes.data && !themes.error;
   const blog = useApi(
     (signal) => (waitingForTheme ? new Promise<never>(() => undefined) : api.searchArticles({ search: search || undefined, categoryId: theme?.id, tagId, page: page - 1, size: LIST_PAGE_SIZE }, signal)),
     [search, theme?.id, tagId, page, waitingForTheme],
+    waitingForTheme ? undefined : `blog:${search}:${theme?.id ?? ''}:${tagId ?? ''}:${page}`,
   );
   const articles = blog.data?.content ?? [];
   const total = blog.data?.totalElements ?? 0;

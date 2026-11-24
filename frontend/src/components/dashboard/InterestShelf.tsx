@@ -14,7 +14,7 @@ interface InterestShelfProps {
 
 /** A few articles of one theme the member said they care about, those they have not opened first. */
 export default function InterestShelf({ theme, read }: InterestShelfProps) {
-  const found = useApi((signal) => api.searchArticles({ categoryId: theme.id, size: SHOWN + 6 }, signal), [theme.id]);
+  const found = useApi((signal) => api.searchArticles({ categoryId: theme.id, size: SHOWN + 6 }, signal), [theme.id], `articles:theme:${theme.id}`);
   const articles = found.data?.content ?? [];
   const fresh = [...articles.filter((article) => !read.has(article.id)), ...articles.filter((article) => read.has(article.id))].slice(0, SHOWN);
   if (fresh.length === 0) return null;

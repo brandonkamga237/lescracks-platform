@@ -29,7 +29,7 @@ const FOLLOW = <Button asChild variant="outline"><a href={CHANNEL_URL} target="_
 export default function Talk() {
   const [params, setParams] = useSearchParams();
   const page = positiveInteger(params.get('page'));
-  const talks = useApi((signal) => api.talks(page - 1, 12, signal), [page]);
+  const talks = useApi((signal) => api.talks(page - 1, 12, signal), [page], `talks:${page}`);
   const list = talks.data?.content ?? [];
   const total = talks.data?.totalElements ?? 0;
   const latest = page === 1 ? list[0] : undefined;

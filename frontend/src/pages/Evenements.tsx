@@ -35,8 +35,9 @@ export default function Evenements() {
   const events = useApi(
     (signal) => (view === 'past' ? api.pastEvents(page - 1, LIST_PAGE_SIZE, signal) : api.upcomingEvents(page - 1, LIST_PAGE_SIZE, signal)),
     [view, page],
+    `events:${view}:${page}`,
   );
-  const mine = useApi((signal) => (member ? api.myEvents(signal) : Promise.resolve([])), [member]);
+  const mine = useApi((signal) => (member ? api.myEvents(signal) : Promise.resolve([])), [member], member ? `my-events:${user?.id}` : undefined);
   const registered = new Set(mine.data?.map((event) => event.id));
 
   // LesCracks no longer runs hackathons: the coming ones would only be leftovers.

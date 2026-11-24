@@ -29,12 +29,12 @@ const todayFormat = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'nu
 export default function MemberHome() {
   const { user } = useSession();
   const [now] = useState(() => Date.now());
-  const mine = useApi((signal) => api.myEvents(signal), []);
-  const reading = useApi((signal) => api.myReading(4, signal), []);
-  const upcoming = useApi((signal) => api.upcomingEvents(0, 9, signal), []);
-  const recent = useApi((signal) => api.articles(0, 5, signal), []);
-  const talks = useApi((signal) => api.talks(0, 2, signal), []);
-  const themes = useApi((signal) => api.themes(signal), []);
+  const mine = useApi((signal) => api.myEvents(signal), [], `my-events:${user?.id}`);
+  const reading = useApi((signal) => api.myReading(4, signal), [], `my-reading:${user?.id}`);
+  const upcoming = useApi((signal) => api.upcomingEvents(0, 9, signal), [], 'events:upcoming:dashboard');
+  const recent = useApi((signal) => api.articles(0, 5, signal), [], 'articles:latest');
+  const talks = useApi((signal) => api.talks(0, 2, signal), [], 'talks:latest');
+  const themes = useApi((signal) => api.themes(signal), [], 'themes');
 
   const agenda = mine.data ? splitMyEvents(mine.data) : null;
   const next = agenda ? nextOfMine(agenda) : undefined;
