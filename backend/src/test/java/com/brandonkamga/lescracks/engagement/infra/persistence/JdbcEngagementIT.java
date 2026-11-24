@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -36,6 +37,7 @@ class JdbcEngagementIT extends PostgresIT {
     @Autowired private CommentStore comments;
     @Autowired private ReportStore reports;
     @Autowired private AccountStore accounts;
+    @Autowired private JdbcClient jdbc;
 
     private Long awa;
     private Long kofi;
@@ -44,6 +46,23 @@ class JdbcEngagementIT extends PostgresIT {
     void setUp() {
         awa = accounts.save(Account.builder().email("awa.engagement@example.com").firstName("Awa").lastName("D").passwordHash("h").build()).getId();
         kofi = accounts.save(Account.builder().email("kofi.engagement@example.com").firstName("Kofi").lastName("A").passwordHash("h").build()).getId();
+    }
+
+    @Test
+    @DisplayName("a visitor's views come back by type, the most recently opened first, within the limit")
+    void viewedBy() {
+        Target first = new Target(TargetType.ARTICLE, 900_011L);
+        Target second = new Target(TargetType.ARTICLE, 900_012L);
+        Target third = new Target(TargetType.ARTICLE, 900_013L);
+        reactions.addView(first, "m:reader");
+        reactions.addView(new Target(TargetType.EVENT, 900_014L), "m:reader");
+        reactions.addView(second, "m:reader");
+        reactions.addView(third, "m:someone-else");
+        jdbc.sql("UPDATE content_views SET viewed_at = viewed_at - INTERVAL '1 hour' WHERE target_id = :id").param("id", first.id()).update();
+
+        assertThat(reactions.viewedBy("m:reader", TargetType.ARTICLE, 10)).containsExactly(second.id(), first.id());
+        assertThat(reactions.viewedBy("m:reader", TargetType.ARTICLE, 1)).containsExactly(second.id());
+        assertThat(reactions.viewedBy("m:nobody", TargetType.ARTICLE, 10)).isEmpty();
     }
 
     @Test

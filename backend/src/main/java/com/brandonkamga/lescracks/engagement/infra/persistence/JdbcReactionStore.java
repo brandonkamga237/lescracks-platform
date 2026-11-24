@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /** Each reaction is one statement: the row and its counter change together, without a read first. */
@@ -34,6 +35,17 @@ class JdbcReactionStore implements ReactionStore {
                 ON CONFLICT (target_type, target_id) DO UPDATE SET view_count = engagement_counters.view_count + 1""")
                 .param("type", target.type().name()).param("id", target.id()).param("visitor", visitorKey)
                 .update() == 1;
+    }
+
+    @Override
+    public List<Long> viewedBy(String visitorKey, TargetType type, int limit) {
+        return jdbc.sql("""
+                SELECT target_id FROM content_views
+                WHERE visitor_key = :visitor AND target_type = :type
+                ORDER BY viewed_at DESC, target_id DESC
+                LIMIT :limit""")
+                .param("visitor", visitorKey).param("type", type.name()).param("limit", limit)
+                .query(Long.class).list();
     }
 
     @Override
