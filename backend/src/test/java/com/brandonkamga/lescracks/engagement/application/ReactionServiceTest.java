@@ -7,6 +7,7 @@ import com.brandonkamga.lescracks.engagement.domain.model.TargetType;
 import com.brandonkamga.lescracks.member.application.Member;
 import com.brandonkamga.lescracks.member.application.MemberDirectory;
 import com.brandonkamga.lescracks.shared.exception.NotFoundException;
+import com.brandonkamga.lescracks.shared.util.VisitorKeys;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,6 +45,16 @@ class ReactionServiceTest {
         assertThat(service.recordView(ARTICLE, "a:1")).isEqualTo(1);
         assertThat(service.recordView(ARTICLE, "a:2")).isEqualTo(2);
         assertThatThrownBy(() -> service.recordView(Target.article(8L), "a:1")).isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("a member's opened articles come back from their own views only, the latest first")
+    void viewedBy() {
+        reactions.addView(Target.article(5L), VisitorKeys.member("awa@example.com"));
+        reactions.addView(ARTICLE, VisitorKeys.member("Awa@Example.com "));
+        reactions.addView(Target.article(9L), VisitorKeys.member("kofi@example.com"));
+
+        assertThat(service.listViewedBy("awa@example.com", TargetType.ARTICLE, 10)).containsExactly(7L, 5L);
     }
 
     @Test

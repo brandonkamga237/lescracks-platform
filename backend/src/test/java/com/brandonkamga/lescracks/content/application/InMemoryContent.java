@@ -166,6 +166,8 @@ final class InMemoryContent {
     static final class Engagement implements EngagementCounts {
         final Map<Target, Counts> counts = new HashMap<>();
         final List<Target> forgotten = new ArrayList<>();
+        /** Article ids each member opened, the latest first. */
+        final Map<String, List<Long>> viewed = new HashMap<>();
 
         @Override
         public Counts countsOf(Target target) {
@@ -180,6 +182,11 @@ final class InMemoryContent {
         @Override
         public Map<Long, Counts> listMostLiked(TargetType type, int limit) {
             return Map.of();
+        }
+
+        @Override
+        public List<Long> listViewedBy(String memberEmail, TargetType type, int limit) {
+            return viewed.getOrDefault(memberEmail, List.of()).stream().limit(limit).toList();
         }
 
         @Override
