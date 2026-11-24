@@ -72,12 +72,11 @@ export default function Blog() {
       <SEO title="Blog" description="Les articles LesCracks : retours d’expérience, notions expliquées et bonnes pratiques pour progresser en tech." url="/blog" />
       <SpaceHeader title="Blog" meta={!blog.loading && !blog.error ? `${total} article${total > 1 ? 's' : ''}${filtered ? ' trouvé' + (total > 1 ? 's' : '') : ''}` : undefined} />
 
-      <Container className="pb-5">
-        <SearchField value={typed} onChange={setTyped} label="Rechercher un article" className="lg:ml-[calc(14rem+2.5rem)]" />
-      </Container>
+      {/* One grid: a phone stacks search, filters, results; a wide screen keeps the filters in their own column. */}
+      <Container className="grid gap-x-10 gap-y-5 pb-20 lg:grid-cols-[14rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr]">
+        <SearchField value={typed} onChange={setTyped} label="Rechercher un article" className="min-w-0 lg:col-start-2" />
 
-      <Container className="grid gap-6 pb-20 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-10">
-        <aside aria-label="Filtres" className="min-w-0 lg:sticky lg:top-6 lg:self-start">
+        <aside aria-label="Filtres" className="min-w-0 lg:sticky lg:top-6 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-start">
           <BlogFilters
             themes={themes.data ?? []}
             tags={tags.data ?? []}
@@ -88,7 +87,7 @@ export default function Blog() {
           />
         </aside>
 
-        <div className="min-w-0">
+        <div className="min-w-0 lg:col-start-2">
           {filtered && (
             <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
               {search && <span className="rounded-full bg-white/[0.06] px-3 py-1 text-white/70">« {search} »</span>}
