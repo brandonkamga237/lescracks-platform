@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import ArticleCard from '@/components/blog/ArticleCard';
 import BlogFilters from '@/components/blog/BlogFilters';
 import SEO from '@/components/common/SEO';
+import { Stagger, StaggerItem } from '@/components/motion/Stagger';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { Pager } from '@/components/ui/pager';
@@ -33,14 +34,15 @@ export default function Blog() {
   const [typed, setTyped] = useState(search);
   const settled = useDebouncedValue(typed.trim(), 350);
 
-  const themes = useApi((signal) => api.themes(signal), []);
-  const tags = useApi((signal) => api.tags(signal), []);
+  const themes = useApi((signal) => api.themes(signal), [], 'themes');
+  const tags = useApi((signal) => api.tags(signal), [], 'tags');
   const theme = themes.data?.find((item) => item.slug === themeSlug);
   const tag = tags.data?.find((item) => item.id === tagId);
   const waitingForTheme = Boolean(themeSlug) && !themes.data && !themes.error;
   const blog = useApi(
     (signal) => (waitingForTheme ? new Promise<never>(() => undefined) : api.searchArticles({ search: search || undefined, categoryId: theme?.id, tagId, page: page - 1, size: LIST_PAGE_SIZE }, signal)),
     [search, theme?.id, tagId, page, waitingForTheme],
+    waitingForTheme ? undefined : `blog:${search}:${theme?.id ?? ''}:${tagId ?? ''}:${page}`,
   );
   const articles = blog.data?.content ?? [];
   const total = blog.data?.totalElements ?? 0;
@@ -71,8 +73,11 @@ export default function Blog() {
       <SEO title="Blog" description="Les articles LesCracks : retours d’expérience, notions expliquées et bonnes pratiques pour progresser en tech." url="/blog" />
       <SpaceHeader title="Blog" meta={!blog.loading && !blog.error ? `${total} article${total > 1 ? 's' : ''}${filtered ? ' trouvé' + (total > 1 ? 's' : '') : ''}` : undefined} />
 
-      <Container className="grid gap-8 pb-20 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-10">
-        <aside aria-label="Filtres" className="min-w-0 lg:sticky lg:top-6 lg:self-start">
+      {/* One grid: a phone stacks search, filters, results; a wide screen keeps the filters in their own column. */}
+      <Container className="grid gap-x-10 gap-y-5 pb-20 lg:grid-cols-[14rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr]">
+        <SearchField value={typed} onChange={setTyped} label="Rechercher un article" className="min-w-0 lg:col-start-2" />
+
+        <aside aria-label="Filtres" className="min-w-0 lg:sticky lg:top-6 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-start">
           <BlogFilters
             themes={themes.data ?? []}
             tags={tags.data ?? []}
@@ -83,11 +88,9 @@ export default function Blog() {
           />
         </aside>
 
-        <div className="min-w-0">
-          <SearchField value={typed} onChange={setTyped} label="Rechercher un article" />
-
+        <div className="min-w-0 lg:col-start-2">
           {filtered && (
-            <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+            <div className="mb-4 flex flex-wrap items-center gap-2 text-sm">
               {search && <span className="rounded-full bg-white/[0.06] px-3 py-1 text-white/70">« {search} »</span>}
               {theme && <span className="rounded-full bg-white/[0.06] px-3 py-1 text-white/70">{theme.name}</span>}
               {tag && <span className="rounded-full bg-white/[0.06] px-3 py-1 text-white/70">#{tag.name}</span>}
@@ -95,7 +98,7 @@ export default function Blog() {
             </div>
           )}
 
-          <div role="region" aria-label="Articles" aria-live="polite" aria-busy={blog.loading} className="mt-6">
+          <div role="region" aria-label="Articles" aria-live="polite" aria-busy={blog.loading}>
             {blog.loading && articles.length === 0 && (
               <div role="status" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {[0, 1, 2].map((index) => <div key={index} aria-hidden="true" className="h-80 animate-pulse rounded-3xl bg-white/[0.03] motion-reduce:animate-none" />)}
@@ -112,9 +115,13 @@ export default function Blog() {
             )}
             {articles.length > 0 && !blog.error && (
               <div className={cn('transition-opacity', blog.loading && 'opacity-60')}>
-                <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {articles.map((article) => <li key={article.id}><ArticleCard article={article} /></li>)}
-                </ul>
+                <Stagger key={`${search}:${theme?.id}:${tagId}:${page}`} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {articles.map((article, index) => {
+                    // The newest article of the first unfiltered page leads, as a wide card.
+                    const lead = index === 0 && page === 1 && !filtered && articles.length > 2;
+                    return <StaggerItem key={article.id} className={lead ? 'sm:col-span-2 xl:col-span-3' : undefined}><ArticleCard article={article} wide={lead} /></StaggerItem>;
+                  })}
+                </Stagger>
                 <Pager page={page} totalPages={blog.data?.totalPages ?? 0} onPageChange={(value) => update({ page: value > 1 ? String(value) : undefined })} />
               </div>
             )}

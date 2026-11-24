@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight, Award, Lock, ShieldCheck } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Award, CalendarCheck, CalendarPlus, Lock, Medal, ShieldCheck, type LucideIcon } from 'lucide-react';
 
 import AvatarPicker from '@/components/account/AvatarPicker';
 import ProfileDetails from '@/components/account/ProfileDetails';
@@ -26,11 +26,14 @@ const CARD = 'rounded-3xl border border-white/10 bg-white/[0.03] p-5 sm:p-6';
 const sinceFormat = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' });
 const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' });
 
-function Stat({ value, label }: { value: number | undefined; label: string }) {
+function Stat({ value, label, Icon }: { value: number | undefined; label: string; Icon: LucideIcon }) {
   return (
-    <li className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5">
-      <span className="block text-2xl font-semibold tabular-nums">{value ?? '–'}</span>
-      <span className="mt-0.5 block text-sm text-white/50">{label}</span>
+    <li className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gold-400/10 text-gold-400"><Icon className="h-5 w-5" aria-hidden="true" /></span>
+      <span className="min-w-0">
+        <span className="block text-xl font-semibold leading-tight tabular-nums">{value ?? '–'}</span>
+        <span className="block truncate text-xs text-white/50">{label}</span>
+      </span>
     </li>
   );
 }
@@ -46,9 +49,9 @@ export default function Profile() {
     const frame = requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start', behavior: 'smooth' }));
     return () => cancelAnimationFrame(frame);
   }, [hash, user]);
-  const mine = useApi((signal) => (user ? api.myEvents(signal) : Promise.resolve([])), [user?.id]);
-  const certificates = useApi((signal) => (user ? api.myCertificates(signal) : Promise.resolve([])), [user?.id]);
-  const badges = useApi((signal) => (user ? api.myBadges(signal) : Promise.resolve([])), [user?.id]);
+  const mine = useApi((signal) => (user ? api.myEvents(signal) : Promise.resolve([])), [user?.id], `my-events:${user?.id}`);
+  const certificates = useApi((signal) => (user ? api.myCertificates(signal) : Promise.resolve([])), [user?.id], `my-certificates:${user?.id}`);
+  const badges = useApi((signal) => (user ? api.myBadges(signal) : Promise.resolve([])), [user?.id], `my-badges:${user?.id}`);
 
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : name || 'Ton compte';
   const issued = certificates.data?.filter((certificate) => !certificate.revoked);
@@ -76,10 +79,10 @@ export default function Profile() {
           <section aria-labelledby="stats-title">
             <h2 id="stats-title" className="sr-only">Mes chiffres</h2>
             <ul className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-              <Stat value={mine.data?.length} label="Inscriptions" />
-              <Stat value={attended} label="Participations" />
-              <Stat value={issued?.length} label="Attestations" />
-              <Stat value={badges.data?.length} label="Badges" />
+              <Stat value={mine.data?.length} label="Inscriptions" Icon={CalendarPlus} />
+              <Stat value={attended} label="Participations" Icon={CalendarCheck} />
+              <Stat value={issued?.length} label="Attestations" Icon={Award} />
+              <Stat value={badges.data?.length} label="Badges" Icon={Medal} />
               <li className="col-span-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3.5 lg:col-span-1">
                 <span className="block text-2xl font-semibold tabular-nums">{user.completion} %</span>
                 <span className="mt-0.5 block text-sm text-white/50">Profil complété</span>
@@ -98,13 +101,13 @@ export default function Profile() {
         {user && (
           <div className="grid gap-6 lg:grid-cols-2">
             <section aria-labelledby="badges-title" className={CARD}>
-              <h2 id="badges-title" className="text-lg font-semibold tracking-tight">Mes badges</h2>
+              <h2 id="badges-title" className="flex items-center gap-2.5 text-lg font-semibold tracking-tight"><Medal className="h-5 w-5 text-gold-400" aria-hidden="true" />Mes badges</h2>
               {badges.data?.length
                 ? <div className="mt-4"><BadgeList badges={badges.data} /></div>
                 : <p className="mt-2 text-sm text-white/55">Les badges récompensent ta participation à la communauté. Le premier arrive vite.</p>}
             </section>
             <section aria-labelledby="certificates-title" className={CARD}>
-              <h2 id="certificates-title" className="text-lg font-semibold tracking-tight">Mes attestations</h2>
+              <h2 id="certificates-title" className="flex items-center gap-2.5 text-lg font-semibold tracking-tight"><Award className="h-5 w-5 text-gold-400" aria-hidden="true" />Mes attestations</h2>
               {issued?.length ? (
                 <ul className="mt-4 space-y-2">
                   {issued.map((certificate) => (

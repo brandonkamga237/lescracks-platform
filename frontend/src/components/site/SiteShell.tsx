@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
 import SignupNudge from '@/components/account/SignupNudge';
@@ -23,9 +23,23 @@ function ContentLoading() {
  * and the account for a member and the way to join for a visitor. A visitor's "/" is the landing,
  * which lives outside it.
  */
+// The code of every page of the platform, fetched while the browser is idle: a tap on a tab
+// then shows the page at once instead of downloading it first.
+const PLATFORM_PAGES = [
+  () => import('@/pages/MemberHome'), () => import('@/pages/Blog'), () => import('@/pages/BlogPost'),
+  () => import('@/pages/Evenements'), () => import('@/pages/EvenementDetail'), () => import('@/pages/Talk'),
+  () => import('@/pages/Formations'), () => import('@/pages/Profile'), () => import('@/pages/Security'),
+];
+
 export default function SiteShell() {
   const { pathname } = useLocation();
   const { isLoading, isSignedIn, isAdmin, user } = useSession();
+
+  useEffect(() => {
+    const whenIdle = window.requestIdleCallback ?? ((task: () => void) => window.setTimeout(task, 1500));
+    const handle = whenIdle(() => PLATFORM_PAGES.forEach((load) => void load().catch(() => undefined)));
+    return () => (window.cancelIdleCallback ?? window.clearTimeout)(handle);
+  }, []);
 
   // Black until the session is known: a member never sees the visitor menu, or the landing, flash first.
   if (isLoading) return <div role="status" aria-label="Chargement" className="min-h-screen bg-black" />;
@@ -37,15 +51,15 @@ export default function SiteShell() {
     <div className="min-h-screen bg-black font-geist text-white antialiased lg:grid lg:grid-cols-[16rem_minmax(0,1fr)]">
       <a href="#main-content" className={SKIP}>Aller au contenu</a>
       <SpaceSidebar member={member} />
-      <div className="flex min-h-screen min-w-0 flex-col pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-0">
+      <div className="flex min-h-screen min-w-0 flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
         <SpaceTopBar member={member} />
         {member ? <VerifyEmailBanner /> : <SignupNudge />}
         {/* Opacity only: moving between tabs happens all day, movement would tire. */}
         <main id="main-content" tabIndex={-1} key={pathname} className="flex-1 animate-page-in focus:outline-none">
           <Suspense fallback={<ContentLoading />}><Outlet /></Suspense>
         </main>
-        <footer className="border-t border-white/10 px-4 py-8 text-sm text-white/40 sm:px-8">
-          <p className="flex flex-wrap gap-x-6 gap-y-2">
+        <footer className="border-t border-white/10 px-4 py-4 text-xs text-white/35 sm:px-8 sm:py-6 sm:text-sm">
+          <p className="flex flex-wrap gap-x-4 gap-y-1 sm:gap-x-6">
             <span>© {new Date().getFullYear()} LesCracks</span>
             <Link to="/a-propos" className="transition-colors hover:text-white">À propos</Link>
             {LEGAL_LINKS.map((link) => <Link key={link.to} to={link.to} className="transition-colors hover:text-white">{link.label}</Link>)}

@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
+import { CalendarCheck } from 'lucide-react';
 
 import DashSection from '@/components/member/DashSection';
 import MyEventRow from '@/components/member/MyEventRow';
+import { Button } from '@/components/ui/button';
 import { ErrorPanel, RowsLoading } from '@/components/ui/panels';
 import type { MyAgenda as Agenda } from '@/lib/myEvents';
 
@@ -20,13 +22,14 @@ export default function MyAgenda({ agenda, loading, failed, onRetry }: MyAgendaP
   const past = agenda?.past.slice(0, PAST_SHOWN) ?? [];
 
   return (
-    <DashSection id="my-events-title" title="Mes rendez-vous" more={{ to: '/rendez-vous', label: 'Agenda' }}>
+    <DashSection id="my-events-title" title="Mes rendez-vous" Icon={CalendarCheck} more={{ to: '/rendez-vous', label: 'Agenda' }}>
       {failed && <ErrorPanel title="Impossible de charger tes rendez-vous." onRetry={onRetry} />}
       {loading && !agenda && <RowsLoading rows={2} label="Chargement de tes rendez-vous…" />}
       {agenda && ahead.length === 0 && (
-        <p className="rounded-2xl border border-dashed border-white/15 px-4 py-4 text-sm text-white/55">
-          Aucune inscription à venir. <Link to="/rendez-vous" className="font-medium text-gold-400 underline-offset-4 hover:underline">Choisir un rendez-vous</Link>
-        </p>
+        <div className="flex items-center justify-between gap-3 rounded-2xl bg-white/[0.03] px-4 py-3">
+          <p className="text-sm text-white/55">Aucune inscription à venir.</p>
+          <Button asChild size="sm" variant="outline" className="shrink-0"><Link to="/rendez-vous">Choisir</Link></Button>
+        </div>
       )}
       {ahead.length > 0 && (
         <ul className="border-t border-white/10">

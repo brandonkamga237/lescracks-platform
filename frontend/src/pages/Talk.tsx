@@ -29,7 +29,7 @@ const FOLLOW = <Button asChild variant="outline"><a href={CHANNEL_URL} target="_
 export default function Talk() {
   const [params, setParams] = useSearchParams();
   const page = positiveInteger(params.get('page'));
-  const talks = useApi((signal) => api.talks(page - 1, 12, signal), [page]);
+  const talks = useApi((signal) => api.talks(page - 1, 12, signal), [page], `talks:${page}`);
   const list = talks.data?.content ?? [];
   const total = talks.data?.totalElements ?? 0;
   const latest = page === 1 ? list[0] : undefined;
@@ -55,7 +55,6 @@ export default function Talk() {
             <EmptyPanel
               title={page > 1 ? 'Cette page est vide.' : 'Le premier épisode se prépare.'}
               description={page > 1 ? 'Reviens à la première page pour retrouver les épisodes.' : 'Les conversations seront publiées sur YouTube et référencées ici.'}
-              action={FOLLOW}
             />
           )}
           {!talks.error && list.length > 0 && (

@@ -11,6 +11,7 @@ import { currentAccessToken, safeReturnPath } from '@/services/auth';
 import { ApiError, getAuthTransport, setAuthTransport } from '@/services/http';
 import type { UserProfile } from '@/services/types';
 import { track } from '@/lib/analytics';
+import { forgetApiCache } from '@/hooks/useApi';
 
 const anonymous: SessionIdentity = { isSignedIn: false, isAdmin: false, name: null, email: null, user: null };
 
@@ -160,6 +161,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
   const openAuth = (path: string, returnTo?: string) => navigate(`${path}?retour=${encodeURIComponent(safeReturnPath(returnTo ?? currentPath()))}`);
 
   const signOut = async () => {
+    forgetApiCache();
     const mode = getAuthTransport();
     const idToken = authRef.current.user?.id_token;
     try {

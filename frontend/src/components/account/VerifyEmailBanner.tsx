@@ -43,22 +43,25 @@ export default function VerifyEmailBanner() {
     setHidden(true);
   }
 
+  // One line on a phone: the address is already known to the member, the action is what matters.
   return (
-    <div role="status" className="border-b border-gold-400/25 bg-gold-400/5 px-4 py-2.5 text-sm text-t2">
-      <div className="mx-auto flex max-w-7xl items-start gap-3 sm:items-center">
-        <MailCheck aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-gold-ink sm:mt-0" />
-        <p className="min-w-0 flex-1">
+    <div role="status" className="border-b border-gold-400/20 bg-gold-400/[0.06] px-4 py-2 text-sm text-white/70 sm:px-8">
+      <div className="flex items-center gap-3">
+        <MailCheck aria-hidden="true" className="h-4 w-4 shrink-0 text-gold-400" />
+        <p className="min-w-0 flex-1 truncate">
           {state === 'sent'
-            ? <>Lien envoyé à <span className="font-medium text-t1">{user.email}</span>. Pense à regarder dans les indésirables.</>
-            : <>Confirme ton adresse <span className="break-all font-medium text-t1">{user.email}</span> pour recevoir nos emails.{' '}
-              <button type="button" disabled={state === 'sending'} onClick={() => void resend()}
-                className="font-medium text-gold-ink underline underline-offset-4 hover:text-t1 disabled:opacity-60">
-                {state === 'sending' ? 'Envoi…' : 'Renvoyer le lien'}
-              </button></>}
-          {failure && <span className="mt-1 block text-error-ink">{failure}</span>}
+            ? <>Lien envoyé. <span className="hidden sm:inline">Pense à regarder dans les indésirables.</span></>
+            : <>Confirme ton email<span className="hidden sm:inline"> <span className="font-medium text-white">{user.email}</span> pour recevoir nos emails</span>.</>}
+          {failure && <span className="ml-2 text-error-ink">{failure}</span>}
         </p>
+        {state !== 'sent' && (
+          <button type="button" disabled={state === 'sending'} onClick={() => void resend()}
+            className="shrink-0 rounded-full bg-gold-400/15 px-3 py-1 text-xs font-medium text-gold-400 transition-colors hover:bg-gold-400/25 active:scale-95 disabled:opacity-60 motion-reduce:active:scale-100">
+            {state === 'sending' ? 'Envoi…' : 'Renvoyer'}
+          </button>
+        )}
         <button type="button" onClick={close} aria-label="Masquer ce message"
-          className="-m-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-t4 transition-colors hover:text-t1">
+          className="-mr-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/40 transition-colors hover:text-white">
           <X aria-hidden="true" className="h-4 w-4" />
         </button>
       </div>
