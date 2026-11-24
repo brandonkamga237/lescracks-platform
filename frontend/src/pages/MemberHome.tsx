@@ -64,7 +64,7 @@ export default function MemberHome() {
         <NextUp mine={next} live={Boolean(agenda?.live.length)} others={agenda ? Math.max(0, agenda.live.length + agenda.coming.length - 1) : 0} suggestion={next ? undefined : open[0]} />
 
         {/* A phone reads top to bottom by importance; a wide screen puts the feeds beside the reading. */}
-        <div className="grid gap-10 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:gap-x-12">
+        <div className="grid gap-10 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:grid-rows-[auto_1fr] xl:gap-x-12">
           <div className="min-w-0 xl:col-start-1 xl:row-start-1">
             {reading.data?.length ? (
               <DashSection id="reading-title" title="Reprendre ta lecture" Icon={BookOpen} more={{ to: '/blog', label: 'Blog' }}>
@@ -77,13 +77,10 @@ export default function MemberHome() {
             )}
           </div>
 
-          <div className="min-w-0 xl:col-start-2 xl:row-start-1">
+          <div className="min-w-0 space-y-10 xl:col-start-2 xl:row-span-2 xl:row-start-1">
             <DashSection id="news-title" title="Nouveau sur LesCracks" Icon={Sparkles}>
               <PlatformNews items={news} now={now} />
             </DashSection>
-          </div>
-
-          <div className="min-w-0 xl:col-start-2 xl:row-start-2">
             <MyAgenda agenda={agenda} loading={mine.loading} failed={Boolean(mine.error)} onRetry={mine.reload} />
           </div>
 
