@@ -1,3 +1,5 @@
+import { Target } from 'lucide-react';
+
 import ArticleRow from '@/components/blog/ArticleRow';
 import DashSection from '@/components/member/DashSection';
 import { useApi } from '@/hooks/useApi';
@@ -20,7 +22,7 @@ export default function InterestShelf({ theme, read }: InterestShelfProps) {
   if (fresh.length === 0) return null;
 
   return (
-    <DashSection id={`interest-${theme.id}`} title={theme.name} more={{ to: `/blog?theme=${theme.slug}`, label: `${theme.articleCount} article${theme.articleCount > 1 ? 's' : ''}` }}>
+    <DashSection id={`interest-${theme.id}`} title={`Pour toi · ${theme.name}`} Icon={Target} more={{ to: `/blog?theme=${theme.slug}`, label: `${theme.articleCount} article${theme.articleCount > 1 ? 's' : ''}` }}>
       <ul className="border-t border-white/10">
         {fresh.map((article) => <li key={article.id}><ArticleRow article={article} dense /></li>)}
       </ul>
