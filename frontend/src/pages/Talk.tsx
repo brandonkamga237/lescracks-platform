@@ -55,7 +55,6 @@ export default function Talk() {
             <EmptyPanel
               title={page > 1 ? 'Cette page est vide.' : 'Le premier épisode se prépare.'}
               description={page > 1 ? 'Reviens à la première page pour retrouver les épisodes.' : 'Les conversations seront publiées sur YouTube et référencées ici.'}
-              action={FOLLOW}
             />
           )}
           {!talks.error && list.length > 0 && (
