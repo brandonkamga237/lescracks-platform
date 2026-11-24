@@ -33,8 +33,11 @@ export default function SpaceTabBar({ member }: { member: boolean }) {
           const active = isTabActive(tab, pathname);
           return (
             <li key={tab.to}>
-              <Link to={tab.to} aria-current={active ? 'page' : undefined} className={cn('flex min-h-[4.25rem] flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors', active ? 'text-white' : 'text-white/45')}>
-                <tab.Icon className={cn('h-5 w-5', active && 'text-gold-400')} aria-hidden="true" />
+              <Link to={tab.to} aria-current={active ? 'page' : undefined} className={cn('group flex min-h-16 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors active:scale-95 motion-reduce:active:scale-100', active ? 'text-white' : 'text-white/45')}>
+                {/* The active tab sits on a pill: a phone user finds where they are without reading the labels. */}
+                <span className={cn('grid h-8 w-14 place-items-center rounded-full transition-colors duration-200', active ? 'bg-gold-400/15' : 'group-hover:bg-white/[0.04]')}>
+                  <tab.Icon className={cn('h-5 w-5', active && 'text-gold-400')} aria-hidden="true" />
+                </span>
                 {tab.label}
               </Link>
             </li>
