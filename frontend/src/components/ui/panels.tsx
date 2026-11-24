@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Inbox } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
@@ -11,10 +12,11 @@ interface EmptyPanelProps {
 /** Nothing to show yet, said plainly, with where to go instead. */
 export function EmptyPanel({ title, description, action }: EmptyPanelProps) {
   return (
-    <div role="status" className="rounded-3xl border border-dashed border-white/15 px-6 py-14 text-center sm:px-10">
-      <p className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</p>
-      {description && <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-white/55">{description}</p>}
-      {action && <div className="mt-7 flex flex-wrap justify-center gap-3">{action}</div>}
+    <div role="status" className="rounded-3xl border border-white/10 bg-white/[0.02] px-6 py-10 text-center sm:px-10">
+      <span aria-hidden="true" className="mx-auto mb-4 grid h-11 w-11 place-items-center rounded-2xl bg-gold-400/10 text-gold-400"><Inbox className="h-5 w-5" /></span>
+      <p className="text-lg font-semibold tracking-tight">{title}</p>
+      {description && <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/55">{description}</p>}
+      {action && <div className="mt-6 flex flex-wrap justify-center gap-3">{action}</div>}
     </div>
   );
 }
