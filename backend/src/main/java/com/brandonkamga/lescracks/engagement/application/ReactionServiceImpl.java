@@ -6,9 +6,11 @@ import com.brandonkamga.lescracks.engagement.domain.model.TargetType;
 import com.brandonkamga.lescracks.engagement.domain.port.CommentStore;
 import com.brandonkamga.lescracks.engagement.domain.port.ReactionStore;
 import com.brandonkamga.lescracks.member.application.MemberDirectory;
+import com.brandonkamga.lescracks.shared.util.VisitorKeys;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ReactionServiceImpl implements ReactionService, EngagementCounts {
@@ -68,6 +70,11 @@ public class ReactionServiceImpl implements ReactionService, EngagementCounts {
     @Override
     public Map<Long, Counts> listMostLiked(TargetType type, int limit) {
         return reactions.mostLiked(type, limit);
+    }
+
+    @Override
+    public List<Long> listViewedBy(String memberEmail, TargetType type, int limit) {
+        return reactions.viewedBy(VisitorKeys.member(memberEmail), type, limit);
     }
 
     @Override

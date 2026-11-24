@@ -5,7 +5,9 @@ import { FacebookIcon, LinkedInIcon, XIcon } from '@/components/icons/BrandIcons
 import type { LucideIcon } from 'lucide-react';
 
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
+import { buttonVariants } from '@/components/ui/button-variants';
 import { track } from '@/lib/analytics';
+import { cn } from '@/lib/utils';
 
 interface ShareButtonProps {
   title: string;
@@ -83,18 +85,18 @@ export default function ShareButton({ title, path, url: absolute, label = 'Parta
 
   return (
     <div ref={container} className={`relative ${className}`}>
-      <button type="button" onClick={() => void trigger()} aria-expanded={open} aria-controls={panelId} className={`${variant === 'primary' ? 'btn-primary' : 'btn-secondary'} ${iconOnly ? 'w-11 px-0' : 'w-full'}`}
+      <button type="button" onClick={() => void trigger()} aria-expanded={open} aria-controls={panelId} className={cn(buttonVariants({ variant: variant === 'primary' ? 'primary' : 'outline' }), iconOnly ? 'w-11 px-0' : 'w-full')}
         title={iconOnly ? label : undefined}>
         <Share2 className="h-4 w-4" aria-hidden />{iconOnly ? <span className="sr-only">{label}</span> : label}
       </button>
 
       {open && (
-        <div id={panelId} role="dialog" aria-label={label} className="absolute bottom-full right-0 z-50 mb-2 w-72 rounded-lg border border-line bg-card p-4 shadow-2xl sm:bottom-auto sm:top-full sm:mb-0 sm:mt-2">
+        <div id={panelId} role="dialog" aria-label={label} className="absolute bottom-full right-0 z-50 mb-2 w-72 rounded-3xl border border-white/10 bg-noir-900 p-4 shadow-2xl sm:bottom-auto sm:top-full sm:mb-0 sm:mt-2">
           <ul className="grid grid-cols-3 gap-1">
             {NETWORKS.map(({ name, icon: Icon, href }) => (
               <li key={name}>
                 <a href={href(url, shareTitle)} target="_blank" rel="noopener noreferrer" onClick={() => { track('Partage', { réseau: name, page: path ?? window.location.pathname }); setOpen(false); }}
-                  className="flex min-h-16 flex-col items-center justify-center gap-1.5 rounded text-t3 transition-colors hover:bg-noir-800 hover:text-t1">
+                  className="flex min-h-16 flex-col items-center justify-center gap-1.5 rounded-2xl text-white/55 transition-colors hover:bg-white/[0.05] hover:text-white">
                   <span aria-hidden><Icon className="h-5 w-5" /></span>
                   <span className="text-[11px]">{name}</span>
                 </a>

@@ -296,6 +296,11 @@ final class InMemoryEvents {
         }
 
         @Override
+        public List<Long> listViewedBy(String memberEmail, TargetType type, int limit) {
+            return List.of();
+        }
+
+        @Override
         public void forget(Target target) {
             forgotten.add(target);
         }

@@ -12,6 +12,7 @@ import AuthPage, { ResetPasswordPage } from '@/pages/AuthPage';
 import AdminLogin from '@/pages/AdminLogin';
 import Landing from '@/pages/Landing';
 import NotFound from '@/pages/NotFound';
+import SiteShell from '@/components/site/SiteShell';
 
 // Only the landing page and sign-in ship in the first load; each other page is its own chunk,
 // so a visitor reading one article never downloads the code highlighter for the whole site.
@@ -24,6 +25,7 @@ const Unsubscribe = lazy(() => import('@/pages/Unsubscribe'));
 const NewsletterConfirm = lazy(() => import('@/pages/NewsletterConfirm'));
 const Evenements = lazy(() => import('@/pages/Evenements'));
 const Profile = lazy(() => import('@/pages/Profile'));
+const Security = lazy(() => import('@/pages/Security'));
 const Blog = lazy(() => import('@/pages/Blog'));
 const BlogPost = lazy(() => import('@/pages/BlogPost'));
 const Formations = lazy(() => import('@/pages/Formations'));
@@ -47,6 +49,7 @@ const AdminTalks = lazy(() => import('@/pages/admin/AdminTalks'));
 const AdminUsers = lazy(() => import('@/pages/admin/AdminUsers'));
 const ArticleStudio = lazy(() => import('@/pages/admin/ArticleStudio'));
 const Welcome = lazy(() => import('@/pages/Welcome'));
+const MemberHome = lazy(() => import('@/pages/MemberHome'));
 
 function Waiting() {
   return (
@@ -110,6 +113,12 @@ function AdminRoute({ bare = false }: AdminRouteProps) {
   return <AdminLayout><Suspense fallback={<Waiting />}><Outlet /></Suspense></AdminLayout>;
 }
 
+/** One address, two doors: a visitor gets the landing, a member their dashboard. */
+function Home() {
+  const { isSignedIn, isAdmin, user } = useSession();
+  return isSignedIn && !isAdmin && user ? <MemberHome /> : <Landing />;
+}
+
 // Pages where the welcome questions must not interrupt: signing in, legal reading, the welcome itself.
 const WELCOME_EXEMPT = ['/bienvenue', '/desabonnement', '/newsletter/confirmer', '/auth/callback', '/connexion', '/inscription', '/reinitialiser', '/verifier-email', '/conditions-utilisation', '/politique-confidentialite', '/admin'];
 
@@ -131,36 +140,44 @@ function AppRoutes() {
   return (
     <Suspense fallback={<PageLoading />}>
     <Routes>
-      <Route path="/" element={<Landing />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route path="/connexion" element={<AuthPage mode="login" />} />
-      <Route path="/inscription" element={<AuthPage mode="register" />} />
+      <Route path="/connexion" element={<AuthPage key="login" mode="login" />} />
+      <Route path="/inscription" element={<AuthPage key="register" mode="register" />} />
       <Route path="/reinitialiser" element={<ResetPasswordPage />} />
       <Route path="/verifier-email" element={<VerifyEmail />} />
       <Route path="/desabonnement" element={<Unsubscribe />} />
       <Route path="/newsletter/confirmer" element={<NewsletterConfirm />} />
       <Route path="/admin/connexion" element={<AdminLogin />} />
 
-      {/* Reading is what brings people in; asking them to sign up first is what keeps
-              them out. Everything below is open. */}
-      <Route path="/blog" element={<Blog />} />
-      <Route path="/blog/:slug" element={<BlogPost />} />
-      <Route path="/formations" element={<Formations />} />
+      <Route path="/formations" element={<Navigate to="/cours" replace />} />
       {/* The library became the blog: links already shared keep working. */}
       <Route path="/ressources" element={<Navigate to="/blog" replace />} />
       <Route path="/ressources/:slug" element={<LegacyArticle />} />
-      <Route path="/evenements" element={<Evenements />} />
-      <Route path="/evenements/:id" element={<EvenementDetail />} />
-      <Route path="/attestations/:code" element={<Suspense fallback={<Waiting />}><Attestation /></Suspense>} />
-      <Route path="/membres/:id" element={<Suspense fallback={<Waiting />}><MemberProfile /></Suspense>} />
-      <Route path="/talk" element={<Talk />} />
+      {/* Events became rendez-vous: links already shared keep working. */}
+      <Route path="/evenements" element={<Navigate to="/rendez-vous" replace />} />
+      <Route path="/evenements/:id" element={<LegacyRendezVous />} />
       <Route path="/cracklab/*" element={<Navigate to="/" replace />} />
-      <Route path="/a-propos" element={<About />} />
-      <Route path="/conditions-utilisation" element={<Terms />} />
-      <Route path="/politique-confidentialite" element={<Privacy />} />
-      {/* Verifying a code is done by a recruiter who has no account and wants none. */}
       <Route path="/bienvenue" element={<MemberRoute><Suspense fallback={<Waiting />}><Welcome /></Suspense></MemberRoute>} />
-      <Route path="/profil" element={<MemberRoute><Profile /></MemberRoute>} />
+      {/* The platform: one frame for every page, members and visitors alike. Reading stays open. */}
+      <Route element={<SiteShell />}>
+        <Route path="/" element={<Home />} />
+        {/* Reading is what brings people in; asking them to sign up first is what keeps them out. */}
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
+        <Route path="/cours" element={<Formations />} />
+        <Route path="/rendez-vous" element={<Evenements />} />
+        <Route path="/rendez-vous/:id" element={<EvenementDetail />} />
+        {/* Verifying a code is done by a recruiter who has no account and wants none. */}
+        <Route path="/attestations/:code" element={<Attestation />} />
+        <Route path="/membres/:id" element={<MemberProfile />} />
+        <Route path="/talk" element={<Talk />} />
+        <Route path="/a-propos" element={<About />} />
+        <Route path="/conditions-utilisation" element={<Terms />} />
+        <Route path="/politique-confidentialite" element={<Privacy />} />
+        <Route path="/profil" element={<MemberRoute><Profile /></MemberRoute>} />
+        <Route path="/profil/securite" element={<MemberRoute><Security /></MemberRoute>} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
 
       <Route path="/admin/articles" element={<AdminRoute bare />}>
         <Route path="nouveau" element={<ArticleStudio />} />
@@ -183,7 +200,6 @@ function AppRoutes() {
         <Route path="newsletter" element={<AdminNewsletter />} />
       </Route>
 
-      <Route path="*" element={<NotFound />} />
     </Routes>
     </Suspense>
   );
@@ -194,6 +210,11 @@ function LegacyArticle() {
   const { slug = '' } = useParams();
   const listing = ['ebooks', 'videos', 'articles'].includes(slug);
   return <Navigate to={listing ? '/blog' : `/blog/${slug}`} replace />;
+}
+
+function LegacyRendezVous() {
+  const { id = '' } = useParams();
+  return <Navigate to={`/rendez-vous/${id}`} replace />;
 }
 
 export default function App() {

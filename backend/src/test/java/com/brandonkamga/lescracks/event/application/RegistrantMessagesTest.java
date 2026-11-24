@@ -65,9 +65,9 @@ class RegistrantMessagesTest {
 
         assertThat(count).isEqualTo(2);
         assertThat(sent).containsExactly(
-                new EventUpdateEmail("awa@example.com", "Awa", "Hackathon 001", "/evenements/hackathon-001",
+                new EventUpdateEmail("awa@example.com", "Awa", "Hackathon 001", "/rendez-vous/hackathon-001",
                         "Le thème change.\n\nRendez-vous sur la page.", deadline),
-                new EventUpdateEmail("kofi@example.com", "Kofi", "Hackathon 001", "/evenements/hackathon-001",
+                new EventUpdateEmail("kofi@example.com", "Kofi", "Hackathon 001", "/rendez-vous/hackathon-001",
                         "Le thème change.\n\nRendez-vous sur la page.", deadline));
         assertThat(people.lookups).hasSize(1);
     }

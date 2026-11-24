@@ -1,3 +1,4 @@
+import SignupNudge from '@/components/account/SignupNudge';
 import SEO from '@/components/common/SEO';
 import Faq from '@/components/landing/Faq';
 import Hero from '@/components/landing/Hero';
@@ -10,18 +11,17 @@ import UpcomingEvents from '@/components/landing/UpcomingEvents';
 import type { NavItem } from '@/components/site/navigation';
 import SiteFooter from '@/components/site/SiteFooter';
 import SiteHeader from '@/components/site/SiteHeader';
-import { SPACES } from '@/config/site';
 import { useApi } from '@/hooks/useApi';
 import { useSession } from '@/hooks/useSession';
 import { useSmoothScroll } from '@/hooks/useSmoothScroll';
 import { withoutHackathons } from '@/lib/events';
 import { api } from '@/services/api';
 
-// The landing's own sections light up the matching links while they are read.
-const SECTION_OF: Record<string, string> = { Blog: 'blog', 'Rendez-vous': 'rendez-vous' };
-
+// A showcase: its bar only moves through its own sections. The platform is entered through its calls to action.
 const NAV_ITEMS: NavItem[] = [
-  ...SPACES.map((space) => ({ ...space, section: SECTION_OF[space.label] })),
+  { label: 'La plateforme', href: '#plateforme', section: 'plateforme', illustration: 'cap', summary: 'Lire, regarder, pratiquer' },
+  { label: 'Agenda', href: '#rendez-vous', section: 'rendez-vous', illustration: 'calendar', summary: 'Les prochains rendez-vous' },
+  { label: 'Blog', href: '#blog', section: 'blog', illustration: 'memo', summary: 'Les derniers articles' },
   { label: 'FAQ', href: '#faq', section: 'faq', illustration: 'speech', summary: 'Les questions fréquentes' },
 ];
 
@@ -40,6 +40,7 @@ export default function Landing() {
       <SEO description="LesCracks : articles techniques, ateliers en direct et le Talk pour apprendre la tech avec ceux qui la font." url="/" />
       <a href="#main-content" className="sr-only z-[60] rounded-full bg-gold-400 px-5 py-3 font-medium text-black focus:not-sr-only focus:fixed focus:left-5 focus:top-3">Aller au contenu</a>
       <SiteHeader items={NAV_ITEMS} isSignedIn={isSignedIn} nextEvent={events[0]} />
+      <SignupNudge />
       <main id="main-content" tabIndex={-1} className="focus:outline-none">
         <Hero nextEvent={events[0]} isSignedIn={isSignedIn} />
         <Subjects />

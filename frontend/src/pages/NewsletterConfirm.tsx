@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 
-import Layout from '@/components/layout/Layout';
 import SEO from '@/components/common/SEO';
+import AuthCard from '@/components/site/AuthCard';
+import AuthShell from '@/components/site/AuthShell';
+import { Button } from '@/components/ui/button';
+import { Notice } from '@/components/ui/field';
 import { api } from '@/services/api';
 import { ApiError } from '@/services/http';
 
@@ -26,28 +29,25 @@ export default function NewsletterConfirm() {
     }
   }
 
-  return <Layout>
-    <SEO title="Confirmer l’inscription" description="Confirme ton inscription à la newsletter LesCracks." url="/newsletter/confirmer" />
-    <div className="mx-auto max-w-lg px-5 py-8 sm:py-14">
-      <section className="mode-raised rounded-lg p-6 sm:p-9">
-        <p className="kicker">LesCracks / Newsletter</p>
-        <h1 className="mt-4 font-display text-3xl font-bold">{state === 'done' ? 'Bienvenue.' : 'Confirmer ton inscription'}</h1>
-        {state === 'done' ? (
-          <p role="status" className="mt-4 text-sm leading-relaxed text-t3">C’est confirmé : les nouveaux articles et les prochains ateliers arriveront dans ta boîte mail.</p>
-        ) : (
-          <>
-            <p className="mt-4 text-sm leading-relaxed text-t3">Un clic pour recevoir la newsletter LesCracks.</p>
-            {error && <p role="alert" className="mt-5 rounded border border-error/20 p-3 text-sm text-error-ink">{error}</p>}
-            {token && (
-              <button type="button" onClick={() => void confirm()} disabled={state === 'busy'} className="btn-primary mt-7 w-full">
-                {state === 'busy' && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}
-                {state === 'busy' ? 'Confirmation…' : 'Confirmer mon inscription'}
-              </button>
-            )}
-          </>
-        )}
-        <Link to="/blog" className="mt-6 block text-center text-sm font-medium text-gold-ink underline-offset-4 hover:underline">Lire le blog</Link>
-      </section>
-    </div>
-  </Layout>;
+  return (
+    <AuthShell>
+      <SEO title="Confirmer l’inscription" description="Confirme ton inscription à la newsletter LesCracks." url="/newsletter/confirmer" />
+      <div className="w-full max-w-md">
+        <AuthCard
+          eyebrow="Newsletter"
+          title={state === 'done' ? 'Bienvenue.' : 'Confirme ton inscription.'}
+          lead={state === 'done' ? 'C’est confirmé : les nouveaux articles et les prochains ateliers arriveront dans ta boîte mail.' : 'Un clic pour recevoir la newsletter LesCracks.'}
+        >
+          {error && <Notice tone="error" className="mt-6">{error}</Notice>}
+          {state !== 'done' && token && (
+            <Button type="button" size="lg" onClick={() => void confirm()} disabled={state === 'busy'} className="mt-8 w-full font-semibold">
+              {state === 'busy' && <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />}
+              {state === 'busy' ? 'Confirmation…' : 'Confirmer mon inscription'}
+            </Button>
+          )}
+          <p className="mt-8 border-t border-white/10 pt-6 text-center text-sm"><Link to="/blog" className="font-medium text-gold-400 underline-offset-4 hover:underline">Lire le blog</Link></p>
+        </AuthCard>
+      </div>
+    </AuthShell>
+  );
 }

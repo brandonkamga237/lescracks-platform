@@ -55,7 +55,7 @@ q(){ docker exec lescracks-postgres psql -U "$U" -d "$D" -At -c "$1"; }
 3. **Startup**: `docker logs --since 1h lescracks-backend 2>&1 | grep -E "Started LesCracks|Successfully applied|ERROR|Exception" | tail -20`.
 4. **Actuator**: `docker exec lescracks-backend wget -qO- http://localhost:<management-port>/actuator/health`.
 5. **Public surface**, from this machine, each expected `200`:
-   `https://lescracks.com/`, `/blog`, `/evenements`, `/api/resources?page=0&size=3`,
+   `https://lescracks.com/`, `/blog`, `/rendez-vous`, `/api/resources?page=0&size=3`,
    `/api/events?page=0&size=3`, `/api/categories`, `/sitemap.xml`, and the `index-*.js` asset
    the home page references. A bot must get a snapshot:
    `curl -s -A Googlebot https://lescracks.com/blog` contains a `<title>`, and an article URL

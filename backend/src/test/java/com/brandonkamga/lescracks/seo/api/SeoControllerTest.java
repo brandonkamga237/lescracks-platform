@@ -60,7 +60,7 @@ class SeoControllerTest {
                         containsString(">LesCracks Talk</a></h2>"),
                         not(containsString("CrackLab")),
                         containsString(">Blog</a></h2>"),
-                        containsString(">Formations</a></h2>"),
+                        containsString(">Cours</a></h2>"),
                         containsString("\"@type\":\"WebSite\""),
                         containsString("\"alternateName\":[\"Les Cracks\",\"lescracks\"]"),
                         containsString("/icon-512.png"))));
@@ -94,10 +94,10 @@ class SeoControllerTest {
                 .startDate(Instant.parse("2026-11-01T09:00:00Z")).build();
         when(events.requirePublished("7")).thenReturn(new EventView(event, Counts.NONE));
 
-        mockMvc.perform(get("/seo/evenements/7"))
+        mockMvc.perform(get("/seo/rendez-vous/7"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(allOf(
-                        containsString("/evenements/hackathon-001\""),
+                        containsString("/rendez-vous/hackathon-001\""),
                         containsString("Trois semaines pour construire."),
                         containsString("\"@type\":\"Event\""))));
     }

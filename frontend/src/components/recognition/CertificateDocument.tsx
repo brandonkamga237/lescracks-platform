@@ -43,7 +43,7 @@ export default function CertificateDocument({ certificate, draft = false }: Cert
         {/* The base style gives every <p> 16px: the footer lines take their own, smaller size. */}
         <footer className="grid grid-cols-1 items-end gap-4 text-center leading-snug text-t3 sm:grid-cols-3 sm:text-left print:text-neutral-600 [&_p]:text-xs sm:[&_p]:text-[clamp(0.6rem,1.25vw,0.75rem)]">
           <div>
-            {held && <p>Événement du {held}</p>}
+            {held && <p>Rendez-vous du {held}</p>}
             <p>{draft ? 'Brouillon : pas encore émise' : issued ? `Délivrée le ${issued}` : ''}</p>
           </div>
           <div className="text-center">

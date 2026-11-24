@@ -2,8 +2,12 @@ import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
 
-import { safeReturnPath } from '@/services/auth';
+import AuthCard from '@/components/site/AuthCard';
+import AuthShell from '@/components/site/AuthShell';
+import { Button } from '@/components/ui/button';
+import { Notice } from '@/components/ui/field';
 import { useSession } from '@/hooks/useSession';
+import { safeReturnPath } from '@/services/auth';
 
 /**
  * Where Keycloak sends the reader back.
@@ -15,7 +19,7 @@ export default function AuthCallback() {
   const auth = useAuth();
   const { isLoading, isSignedIn, isAdmin, error, reload } = useSession();
   const navigate = useNavigate();
-  const from = safeReturnPath((auth.user?.state as { from?: string } | undefined)?.from, isAdmin ? '/admin' : '/profil');
+  const from = safeReturnPath((auth.user?.state as { from?: string } | undefined)?.from, isAdmin ? '/admin' : '/');
   const waiting = auth.isLoading || isLoading;
   const failed = !waiting && (auth.error || error || !isSignedIn);
 
@@ -25,20 +29,22 @@ export default function AuthCallback() {
   }, [waiting, auth.error, error, isSignedIn, from, navigate]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black px-6 text-white">
-      <div className="mode-raised max-w-md rounded-lg p-8 text-center">
-        {failed ? <>
-          <h1 className="font-display text-2xl font-bold">La connexion n’a pas abouti</h1>
-          <p role="alert" className="mt-4 text-sm leading-relaxed text-t2">{error?.message ?? 'La connexion sécurisée a été interrompue ou a expiré. Tu peux réessayer sans perdre ta destination.'}</p>
-          {error && <button type="button" onClick={() => void reload().catch(() => undefined)} className="mt-6 w-full rounded border border-gold-400/40 px-5 py-3 text-gold-ink">Réessayer la vérification</button>}
-          <Link to={`/connexion?retour=${encodeURIComponent(from)}`} replace className="mt-4 block rounded bg-gold-400 px-5 py-3 font-semibold text-black">Revenir à la connexion</Link>
-          <Link to="/blog" className="mt-5 block text-sm text-t3 underline">Lire le blog</Link>
-        </> : <div role="status">
-          <div aria-hidden="true" className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-gold-400 border-t-transparent motion-reduce:animate-none" />
-          <h1 className="mt-6 font-display text-2xl">On prépare ton espace.</h1>
-          <p className="mt-3 text-sm text-t3">Vérification de ta connexion en cours…</p>
-        </div>}
+    <AuthShell>
+      <div className="w-full max-w-md">
+        {failed ? (
+          <AuthCard eyebrow="Connexion" title="La connexion n’a pas abouti." lead="La connexion sécurisée a été interrompue ou a expiré. Tu peux réessayer sans perdre ta destination.">
+            {error && <Notice tone="error" className="mt-6">{error.message}</Notice>}
+            {error && <Button type="button" size="lg" variant="outline" onClick={() => void reload().catch(() => undefined)} className="mt-6 w-full">Réessayer la vérification</Button>}
+            <Button asChild size="lg" className="mt-3 w-full font-semibold"><Link to={`/connexion?retour=${encodeURIComponent(from)}`} replace>Revenir à la connexion</Link></Button>
+          </AuthCard>
+        ) : (
+          <div role="status" className="text-center">
+            <div aria-hidden="true" className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-gold-400 border-t-transparent motion-reduce:animate-none" />
+            <p className="mt-6 text-2xl font-semibold tracking-tight">On prépare ton espace.</p>
+            <p className="mt-2 text-sm text-white/55">Vérification de ta connexion en cours…</p>
+          </div>
+        )}
       </div>
-    </div>
+    </AuthShell>
   );
 }

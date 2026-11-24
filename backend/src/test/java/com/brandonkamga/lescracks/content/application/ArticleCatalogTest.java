@@ -15,6 +15,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,7 +26,7 @@ class ArticleCatalogTest {
     private final InMemoryContent.Articles articles = new InMemoryContent.Articles();
     private final InMemoryContent.Engagement engagement = new InMemoryContent.Engagement();
     private final InMemoryTaxonomy taxonomy = new InMemoryTaxonomy();
-    private final ArticleCatalog catalog = new ArticleCatalogImpl(articles, new ArticleViews(taxonomy.service, engagement), taxonomy.service);
+    private final ArticleCatalog catalog = new ArticleCatalogImpl(articles, new ArticleViews(taxonomy.service, engagement), taxonomy.service, engagement);
 
     private Category backend;
     private Category mobile;
@@ -77,6 +78,19 @@ class ArticleCatalogTest {
         assertThat(card.tags()).containsExactly("Java");
         assertThat(card.counts()).isEqualTo(new Counts(40, 3));
         assertThat(card.article().getBody()).isNull();
+    }
+
+    @Test
+    @DisplayName("a member's reading lists the articles they opened, latest first, skipping one unpublished since")
+    void listsWhatAMemberRead() {
+        Article first = article("premier", backend, ArticleStatus.PUBLISHED, Instant.now());
+        Article unpublished = article("retire", backend, ArticleStatus.DRAFT, null);
+        Article last = article("dernier", mobile, ArticleStatus.PUBLISHED, Instant.now());
+        engagement.viewed.put("awa@example.com", List.of(last.getId(), unpublished.getId(), first.getId()));
+
+        assertThat(catalog.listReadBy("awa@example.com", 5)).extracting(view -> view.article().getId()).containsExactly(last.getId(), first.getId());
+        assertThat(catalog.listReadBy("awa@example.com", 1)).extracting(view -> view.article().getId()).containsExactly(last.getId());
+        assertThat(catalog.listReadBy("kofi@example.com", 5)).isEmpty();
     }
 
     @Test

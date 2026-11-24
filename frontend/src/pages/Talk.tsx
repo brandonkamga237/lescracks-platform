@@ -1,16 +1,18 @@
-import { Link, useSearchParams } from 'react-router-dom';
-import { Podcast } from 'lucide-react';
-import { YouTubeIcon } from '@/components/icons/BrandIcons';
+import { useSearchParams } from 'react-router-dom';
 
+import SEO from '@/components/common/SEO';
+import { YouTubeIcon } from '@/components/icons/BrandIcons';
+import { Stagger, StaggerItem } from '@/components/motion/Stagger';
 import EpisodeRow from '@/components/talks/EpisodeRow';
 import TalkSpotlight from '@/components/talks/TalkSpotlight';
-import Pagination from '@/components/common/Pagination';
-import SEO from '@/components/common/SEO';
-import { Skeleton } from '@/components/common/Skeleton';
-import { EmptyState, ErrorState } from '@/components/common/States';
-import Layout from '@/components/layout/Layout';
-import { PageHeader, Section } from '@/components/layout/Page';
+import { Button } from '@/components/ui/button';
+import { Container } from '@/components/ui/container';
+import { SpaceHeader } from '@/components/ui/space-header';
+import { Pager } from '@/components/ui/pager';
+import { EmptyPanel, ErrorPanel, RowsLoading } from '@/components/ui/panels';
+import { CONTACT_EMAIL } from '@/config/site';
 import { useApi } from '@/hooks/useApi';
+import { cn } from '@/lib/utils';
 import { api } from '@/services/api';
 
 const CHANNEL_URL = 'https://youtube.com/@lescracks';
@@ -21,10 +23,9 @@ function positiveInteger(value: string | null): number {
   return Number.isSafeInteger(parsed) && parsed <= 2147483647 ? parsed : 1;
 }
 
-/**
- * LesCracks Talk: the episode catalogue.
- * Conversations about African tech, hosted on YouTube and referenced here.
- */
+const FOLLOW = <Button asChild variant="outline"><a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer"><YouTubeIcon className="h-4 w-4" />Suivre la chaîne</a></Button>;
+
+/** The Talk: the latest episode up front, the others as lines that play here. */
 export default function Talk() {
   const [params, setParams] = useSearchParams();
   const page = positiveInteger(params.get('page'));
@@ -42,79 +43,41 @@ export default function Talk() {
   }
 
   return (
-    <Layout>
-      <SEO
-        title="LesCracks Talk"
-        description="LesCracks Talk, le rendez-vous vidéo qui met en lumière la tech africaine : des conversations avec celles et ceux qui construisent, des produits et des parcours réels."
-        url="/talk"
-      />
+    <>
+      <SEO title="LesCracks Talk" description="LesCracks Talk, le rendez-vous vidéo qui met en lumière la tech africaine : des conversations avec celles et ceux qui construisent, des produits et des parcours réels." url="/talk" />
+      <SpaceHeader title="Le Talk" meta={!talks.loading && !talks.error ? `${total} épisode${total > 1 ? 's' : ''}` : undefined} lead="Des conversations avec celles et ceux qui construisent la tech africaine." action={FOLLOW} />
 
-      <Section tone="raised" spacing="header">
-        <PageHeader
-          eyebrow="Sur YouTube"
-          title="Le Talk"
-          description="Des conversations avec celles et ceux qui construisent la tech africaine."
-          meta={!talks.loading && !talks.error ? `${total} épisode${total > 1 ? 's' : ''}` : undefined}
-          actions={
-            <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" className="btn-primary">
-              <YouTubeIcon className="h-4 w-4" />
-              Suivre la chaîne
-            </a>
-          }
-        />
-      </Section>
-
-      <Section>
-        <div aria-label="Épisodes" aria-live="polite" aria-busy={talks.loading} role="region">
-          {talks.loading && list.length === 0 && (
-            <div role="status" className="space-y-5">
-              <Skeleton className="aspect-[16/10] sm:aspect-[21/9]" />
-              {[0, 1, 2].map((i) => <Skeleton key={i} className="h-16" />)}
-              <span className="sr-only">Chargement des épisodes…</span>
-            </div>
-          )}
-          {talks.error && <ErrorState title="Les épisodes sont momentanément indisponibles." message={talks.error.message} onRetry={talks.reload} />}
+      <Container className="pb-10">
+        <div role="region" aria-label="Épisodes" aria-live="polite" aria-busy={talks.loading}>
+          {talks.loading && list.length === 0 && <RowsLoading label="Chargement des épisodes…" />}
+          {talks.error && <ErrorPanel title="Les épisodes sont momentanément indisponibles." message={talks.error.message} onRetry={talks.reload} />}
           {!talks.loading && !talks.error && list.length === 0 && (
-            <EmptyState
-              icon={<Podcast className="h-8 w-8" aria-hidden />}
+            <EmptyPanel
               title={page > 1 ? 'Cette page est vide.' : 'Le premier épisode se prépare.'}
               description={page > 1 ? 'Reviens à la première page pour retrouver les épisodes.' : 'Les conversations seront publiées sur YouTube et référencées ici.'}
-              action={
-                <a href={CHANNEL_URL} target="_blank" rel="noopener noreferrer" className="btn-secondary">
-                  <YouTubeIcon className="h-4 w-4" />
-                  Suivre la chaîne
-                </a>
-              }
+              action={FOLLOW}
             />
           )}
           {!talks.error && list.length > 0 && (
-            <div className={`transition-opacity ${talks.loading ? 'opacity-60' : ''}`}>
+            <div className={cn('transition-opacity', talks.loading && 'opacity-60')}>
               {latest && <TalkSpotlight video={latest} />}
               {episodes.length > 0 && (
-                <ul className={latest ? 'mt-12' : ''}>
-                  {episodes.map((video) => (
-                    <EpisodeRow key={video.id} video={video} />
-                  ))}
-                </ul>
+                <Stagger className={cn('border-t border-white/10', latest && 'mt-8')}>
+                  {episodes.map((video) => <StaggerItem key={video.id}><EpisodeRow video={video} /></StaggerItem>)}
+                </Stagger>
               )}
-              <Pagination page={page} totalPages={talks.data?.totalPages ?? 0} onPageChange={goToPage} />
+              <Pager page={page} totalPages={talks.data?.totalPages ?? 0} onPageChange={goToPage} />
             </div>
           )}
         </div>
+      </Container>
 
-      </Section>
-
-      <Section tone="raised">
-        <div className="flex flex-col items-start gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <h2 className="max-w-2xl font-display text-2xl font-bold leading-tight tracking-tight text-t1 sm:text-4xl">
-            Tu construis quelque chose ? Viens en parler.
-          </h2>
-          <div className="flex flex-wrap gap-3">
-            <a href="mailto:contact@lescracks.com" className="btn-primary">Écris-nous</a>
-            <Link to="/blog" className="btn-secondary">Lire le blog</Link>
-          </div>
-        </div>
-      </Section>
-    </Layout>
+      <Container className="pb-20">
+        <p className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-white/10 bg-white/[0.03] px-5 py-4 text-sm text-white/60">
+          Tu construis quelque chose et tu veux en parler dans le Talk ?
+          <a href={`mailto:${CONTACT_EMAIL}`} className="font-medium text-gold-400 underline-offset-4 hover:underline">Écris-nous</a>
+        </p>
+      </Container>
+    </>
   );
 }

@@ -120,7 +120,7 @@ export default function ProjectSubmission({ event }: ProjectSubmissionProps) {
           {project.editable && <button type="button" onClick={startEditing} className="btn-secondary">Modifier le projet</button>}
         </div>
       ) : !open ? (
-        <p className="mt-6 text-sm text-t2">Les soumissions sont closes pour cet événement.</p>
+        <p className="mt-6 text-sm text-t2">Les soumissions sont closes pour ce rendez-vous.</p>
       ) : !editing ? (
         <button type="button" onClick={startEditing} className="btn-primary mt-6">Soumettre mon projet</button>
       ) : (

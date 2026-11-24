@@ -25,6 +25,9 @@ export const api = {
   logout: () => http.post<void>('/auth/logout'),
   articles: (page = 0, size = 12, signal?: AbortSignal, categoryId?: number) =>
     http.get<PageResponse<ArticleSummary>>('/resources', { page, size, categoryId }, signal),
+  /** The blog's catalogue, narrowed by words, a theme and a tag. */
+  searchArticles: (filters: { search?: string; categoryId?: number; tagId?: number; page?: number; size?: number }, signal?: AbortSignal) =>
+    http.get<PageResponse<ArticleSummary>>('/resources', { page: 0, size: 12, ...filters }, signal),
   article: (slugOrId: string, signal?: AbortSignal) =>
     http.get<ArticleSummary>(`/resources/${slugOrId}`, undefined, signal),
   events: (filters: { type?: EventType; format?: EventFormat; page?: number; size?: number } = {}, signal?: AbortSignal) =>
@@ -42,6 +45,8 @@ export const api = {
   publicProfile: (id: number, signal?: AbortSignal) => http.get<PublicProfile>(`/members/${id}`, undefined, signal),
   myBadges: (signal?: AbortSignal) => http.get<MemberBadge[]>('/badges/mine', undefined, signal),
   myCertificates: (signal?: AbortSignal) => http.get<Certificate[]>('/certificates/mine', undefined, signal),
+  /** The published articles the member opened, the latest first. */
+  myReading: (limit = 6, signal?: AbortSignal) => http.get<ArticleSummary[]>('/me/reading', { limit }, signal),
   myEvents: (signal?: AbortSignal) => http.get<MyEvent[]>('/events/registrations/mine', undefined, signal),
   /** Undefined when the member is on no project for this event (204). */
   myProject: (id: number, signal?: AbortSignal) => http.get<Project | undefined>(`/events/${id}/submission`, undefined, signal),

@@ -46,7 +46,7 @@ export const SPACES: Space[] = [
   },
   {
     label: 'Rendez-vous',
-    to: '/evenements',
+    to: '/rendez-vous',
     illustration: 'calendar',
     summary: 'Ateliers, webinaires et conférences',
     description: 'Ateliers, webinaires et conférences, en ligne ou sur place. Tu t’inscris en un clic, et chaque participation te vaut une attestation vérifiable.',
@@ -62,7 +62,7 @@ export const SPACES: Space[] = [
   },
   {
     label: 'Cours',
-    to: '/formations',
+    to: '/cours',
     illustration: 'cap',
     summary: 'Des parcours pas à pas',
     description: 'Des parcours pour apprendre pas à pas, leçon après leçon. Certains en accès libre, d’autres en premium. Les premiers arrivent bientôt.',
