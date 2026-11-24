@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { CalendarClock } from 'lucide-react';
 
 import SEO from '@/components/common/SEO';
+import { Stagger, StaggerItem } from '@/components/motion/Stagger';
 import EventCard from '@/components/events/EventCard';
 import EventFeature from '@/components/events/EventFeature';
 import { Container } from '@/components/ui/container';
@@ -104,9 +105,9 @@ export default function Evenements() {
             <div className={cn('transition-opacity', events.loading && 'opacity-60')}>
               {featured && <div className="mb-6"><EventFeature event={featured} /></div>}
               {cards.length > 0 && (
-                <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {cards.map((event) => <li key={event.id}><EventCard event={event} past={view === 'past'} registered={registered.has(event.id)} /></li>)}
-                </ul>
+                <Stagger key={`${view}:${page}`} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {cards.map((event) => <StaggerItem key={event.id}><EventCard event={event} past={view === 'past'} registered={registered.has(event.id)} /></StaggerItem>)}
+                </Stagger>
               )}
               <Pager page={page} totalPages={events.data?.totalPages ?? 0} onPageChange={(value) => setParams({ ...(view === 'past' ? { vue: 'passes' } : {}), ...(value > 1 ? { page: String(value) } : {}) })} />
             </div>

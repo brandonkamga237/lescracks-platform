@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import ArticleCard from '@/components/blog/ArticleCard';
 import BlogFilters from '@/components/blog/BlogFilters';
 import SEO from '@/components/common/SEO';
+import { Stagger, StaggerItem } from '@/components/motion/Stagger';
 import { Button } from '@/components/ui/button';
 import { Container } from '@/components/ui/container';
 import { Pager } from '@/components/ui/pager';
@@ -114,13 +115,13 @@ export default function Blog() {
             )}
             {articles.length > 0 && !blog.error && (
               <div className={cn('transition-opacity', blog.loading && 'opacity-60')}>
-                <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <Stagger key={`${search}:${theme?.id}:${tagId}:${page}`} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {articles.map((article, index) => {
                     // The newest article of the first unfiltered page leads, as a wide card.
                     const lead = index === 0 && page === 1 && !filtered && articles.length > 2;
-                    return <li key={article.id} className={lead ? 'sm:col-span-2 xl:col-span-3' : undefined}><ArticleCard article={article} wide={lead} /></li>;
+                    return <StaggerItem key={article.id} className={lead ? 'sm:col-span-2 xl:col-span-3' : undefined}><ArticleCard article={article} wide={lead} /></StaggerItem>;
                   })}
-                </ul>
+                </Stagger>
                 <Pager page={page} totalPages={blog.data?.totalPages ?? 0} onPageChange={(value) => update({ page: value > 1 ? String(value) : undefined })} />
               </div>
             )}
