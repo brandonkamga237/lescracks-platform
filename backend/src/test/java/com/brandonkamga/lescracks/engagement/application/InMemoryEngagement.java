@@ -14,6 +14,7 @@ import com.brandonkamga.lescracks.shared.paging.Paged;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -106,10 +107,20 @@ final class InMemoryEngagement {
     static final class Reactions implements ReactionStore {
         private final Set<String> views = new HashSet<>();
         private final Set<String> likes = new HashSet<>();
+        private final Map<String, List<Target>> openedBy = new HashMap<>();
 
         @Override
         public boolean addView(Target target, String visitorKey) {
-            return views.add(target + "/" + visitorKey);
+            boolean first = views.add(target + "/" + visitorKey);
+            if (first) openedBy.computeIfAbsent(visitorKey, key -> new ArrayList<>()).add(target);
+            return first;
+        }
+
+        @Override
+        public List<Long> viewedBy(String visitorKey, TargetType type, int limit) {
+            List<Target> opened = new ArrayList<>(openedBy.getOrDefault(visitorKey, List.of()));
+            Collections.reverse(opened);
+            return opened.stream().filter(target -> target.type() == type).map(Target::id).limit(limit).toList();
         }
 
         @Override

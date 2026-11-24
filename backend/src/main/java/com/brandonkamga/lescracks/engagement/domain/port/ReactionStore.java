@@ -5,6 +5,7 @@ import com.brandonkamga.lescracks.engagement.domain.model.Target;
 import com.brandonkamga.lescracks.engagement.domain.model.TargetType;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /** Views and likes, and the counters kept beside them so a list reads its figures in one query. */
@@ -12,6 +13,9 @@ public interface ReactionStore {
 
     /** Counts the visitor once per target; true when this was their first view. */
     boolean addView(Target target, String visitorKey);
+
+    /** The targets of a type the visitor opened, the most recently opened first, at most {@code limit}. */
+    List<Long> viewedBy(String visitorKey, TargetType type, int limit);
 
     /** True when the like is new. */
     boolean addLike(Target target, Long accountId);
