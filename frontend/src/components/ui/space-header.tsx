@@ -28,7 +28,7 @@ export function SpaceHeader({ title, meta, lead, action, children, className }: 
           </h1>
           {lead && <p className="mt-1.5 max-w-2xl text-sm text-white/50">{lead}</p>}
         </div>
-        {action && <div className="shrink-0">{action}</div>}
+        {action && <div className="w-full shrink-0 sm:w-auto">{action}</div>}
       </div>
       {children && <div className="mt-5">{children}</div>}
     </Container>
