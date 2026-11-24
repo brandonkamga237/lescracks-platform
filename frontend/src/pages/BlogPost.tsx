@@ -36,7 +36,7 @@ export default function BlogPost() {
   const { slug = '' } = useParams();
   const { isSignedIn, signIn } = useSession();
   const hasSlug = slug.trim().length > 0;
-  const post = useApi((signal) => (hasSlug ? api.article(slug, signal) : Promise.resolve(null)), [slug, hasSlug]);
+  const post = useApi((signal) => (hasSlug ? api.article(slug, signal) : Promise.resolve(null)), [slug, hasSlug], `article:${slug}`);
   const loaded = hasSlug && !post.loading && !post.error && post.data ? post.data : null;
   const likes = useApi((signal) => (loaded ? api.resourceLikes(loaded.id, signal) : Promise.resolve(null)), [loaded?.id, isSignedIn]);
   const [failedImage, setFailedImage] = useState<string | null>(null);

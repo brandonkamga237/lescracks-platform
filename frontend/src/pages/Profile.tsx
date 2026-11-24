@@ -46,9 +46,9 @@ export default function Profile() {
     const frame = requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start', behavior: 'smooth' }));
     return () => cancelAnimationFrame(frame);
   }, [hash, user]);
-  const mine = useApi((signal) => (user ? api.myEvents(signal) : Promise.resolve([])), [user?.id]);
-  const certificates = useApi((signal) => (user ? api.myCertificates(signal) : Promise.resolve([])), [user?.id]);
-  const badges = useApi((signal) => (user ? api.myBadges(signal) : Promise.resolve([])), [user?.id]);
+  const mine = useApi((signal) => (user ? api.myEvents(signal) : Promise.resolve([])), [user?.id], `my-events:${user?.id}`);
+  const certificates = useApi((signal) => (user ? api.myCertificates(signal) : Promise.resolve([])), [user?.id], `my-certificates:${user?.id}`);
+  const badges = useApi((signal) => (user ? api.myBadges(signal) : Promise.resolve([])), [user?.id], `my-badges:${user?.id}`);
 
   const fullName = user ? `${user.firstName} ${user.lastName}`.trim() : name || 'Ton compte';
   const issued = certificates.data?.filter((certificate) => !certificate.revoked);

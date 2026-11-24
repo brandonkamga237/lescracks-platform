@@ -49,7 +49,7 @@ function Fact({ Icon, label, children }: FactProps) {
 export default function EvenementDetail() {
   const { id = '' } = useParams();
   const hasParam = id.trim().length > 0;
-  const event = useApi((signal) => (hasParam ? api.event(id, signal) : Promise.resolve(null)), [id, hasParam]);
+  const event = useApi((signal) => (hasParam ? api.event(id, signal) : Promise.resolve(null)), [id, hasParam], `event:${id}`);
   const loaded = hasParam && !event.loading && !event.error && event.data ? event.data : null;
   const [failedImage, setFailedImage] = useState<string | undefined>(undefined);
   const [views, setViews] = useState<{ id: number; count: number } | null>(null);
