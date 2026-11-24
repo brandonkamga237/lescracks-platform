@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { illustrationSrc, SOCIAL_LINKS } from '@/config/site';
 import { useScrollLock } from '@/hooks/useScrollLock';
+import { useSession } from '@/hooks/useSession';
 import { EASE } from '@/lib/motion';
 import type { EventSummary } from '@/services/types';
 
@@ -36,6 +37,7 @@ interface MobileMenuProps {
 /** The phone menu, opened as a circle from its button; mount it inside AnimatePresence so it closes the same way. */
 export default function MobileMenu({ id, origin, items, isSignedIn, nextEvent, onClose }: MobileMenuProps) {
   useScrollLock(true);
+  const { isAdmin } = useSession();
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') onClose(); };
@@ -89,7 +91,7 @@ export default function MobileMenu({ id, origin, items, isSignedIn, nextEvent, o
 
       <motion.div variants={ITEM} initial="closed" animate="open" transition={{ delay: 0.6 }} className="relative mt-auto pt-8">
         {isSignedIn ? (
-          <Button asChild size="lg" className="w-full font-semibold"><Link to="/profil" onClick={onClose}>Mon compte</Link></Button>
+          <Button asChild size="lg" className="w-full font-semibold">{isAdmin ? <Link to="/admin" onClick={onClose}>Administration</Link> : <Link to="/profil" onClick={onClose}>Mon compte</Link>}</Button>
         ) : (
           <div className="grid grid-cols-2 gap-3">
             <Button asChild size="lg" variant="outline"><Link to="/connexion" onClick={onClose}>Se connecter</Link></Button>
