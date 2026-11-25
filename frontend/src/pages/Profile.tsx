@@ -5,6 +5,7 @@ import { ArrowRight, ArrowUpRight, Award, CalendarCheck, CalendarPlus, Lock, Med
 import AvatarPicker from '@/components/account/AvatarPicker';
 import ProfileDetails from '@/components/account/ProfileDetails';
 import NewsletterCard from '@/components/common/NewsletterCard';
+import InstallAppCard from '@/components/install/InstallAppCard';
 import SEO from '@/components/common/SEO';
 import BadgeList from '@/components/recognition/BadgeList';
 import { Button } from '@/components/ui/button';
@@ -139,7 +140,7 @@ export default function Profile() {
               </section>
             )}
           </div>
-          <div className="min-w-0"><NewsletterCard /></div>
+          <div className="min-w-0 space-y-6"><InstallAppCard /><NewsletterCard /></div>
         </div>
       </Container>
     </>
