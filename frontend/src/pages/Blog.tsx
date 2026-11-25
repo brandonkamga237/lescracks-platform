@@ -75,18 +75,22 @@ export default function Blog() {
 
       {/* One grid: a phone stacks search, filters, results; a wide screen keeps the filters in their own column. */}
       <Container className="grid gap-x-10 gap-y-5 pb-20 lg:grid-cols-[14rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr]">
-        <SearchField value={typed} onChange={setTyped} label="Rechercher un article" className="min-w-0 lg:col-start-2" />
+        {/* On a phone, search and filters stay pinned under the top bar while the list scrolls;
+            from a laptop the wrapper dissolves and each part takes its grid place. */}
+        <div className="sticky top-16 z-30 -mx-4 space-y-3 border-b border-white/10 bg-black/90 px-4 pb-3 pt-2 backdrop-blur-xl sm:-mx-8 sm:px-8 lg:contents lg:space-y-0">
+          <SearchField value={typed} onChange={setTyped} label="Rechercher un article" className="min-w-0 lg:col-start-2" />
 
-        <aside aria-label="Filtres" className="min-w-0 lg:sticky lg:top-6 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-start">
-          <BlogFilters
-            themes={themes.data ?? []}
-            tags={tags.data ?? []}
-            theme={theme?.slug}
-            tag={tagId}
-            onTheme={(slug) => update({ theme: slug })}
-            onTag={(id) => update({ tag: id ? String(id) : undefined })}
-          />
-        </aside>
+          <aside aria-label="Filtres" className="min-w-0 lg:sticky lg:top-6 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-start">
+            <BlogFilters
+              themes={themes.data ?? []}
+              tags={tags.data ?? []}
+              theme={theme?.slug}
+              tag={tagId}
+              onTheme={(slug) => update({ theme: slug })}
+              onTag={(id) => update({ tag: id ? String(id) : undefined })}
+            />
+          </aside>
+        </div>
 
         <div className="min-w-0 lg:col-start-2">
           {filtered && (
@@ -115,11 +119,11 @@ export default function Blog() {
             )}
             {articles.length > 0 && !blog.error && (
               <div className={cn('transition-opacity', blog.loading && 'opacity-60')}>
-                <Stagger key={`${search}:${theme?.id}:${tagId}:${page}`} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <Stagger key={`${search}:${theme?.id}:${tagId}:${page}`} className="grid gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
                   {articles.map((article, index) => {
                     // The newest article of the first unfiltered page leads, as a wide card.
                     const lead = index === 0 && page === 1 && !filtered && articles.length > 2;
-                    return <StaggerItem key={article.id} className={lead ? 'sm:col-span-2 xl:col-span-3' : undefined}><ArticleCard article={article} wide={lead} /></StaggerItem>;
+                    return <StaggerItem key={article.id} className={lead ? 'sm:col-span-2 xl:col-span-3' : undefined}><ArticleCard article={article} wide={lead} compactOnPhone /></StaggerItem>;
                   })}
                 </Stagger>
                 <Pager page={page} totalPages={blog.data?.totalPages ?? 0} onPageChange={(value) => update({ page: value > 1 ? String(value) : undefined })} />
