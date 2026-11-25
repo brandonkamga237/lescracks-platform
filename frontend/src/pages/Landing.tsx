@@ -1,6 +1,7 @@
 import SignupNudge from '@/components/account/SignupNudge';
 import SEO from '@/components/common/SEO';
 import Faq from '@/components/landing/Faq';
+import InstallAppBanner from '@/components/install/InstallAppBanner';
 import Hero from '@/components/landing/Hero';
 import JoinCall from '@/components/landing/JoinCall';
 import LatestArticles from '@/components/landing/LatestArticles';
@@ -28,7 +29,7 @@ const NAV_ITEMS: NavItem[] = [
 /** The public front door: it composes the site chrome and the landing sections around live data. */
 export default function Landing() {
   useSmoothScroll();
-  const { isSignedIn } = useSession();
+  const { isSignedIn, isAdmin } = useSession();
   const upcoming = useApi((signal) => api.upcomingEvents(0, 6, signal), []);
   const recent = useApi((signal) => api.articles(0, 3, signal), []);
 
@@ -52,6 +53,7 @@ export default function Landing() {
         <JoinCall isSignedIn={isSignedIn} />
       </main>
       <SiteFooter />
+      {!isAdmin && <InstallAppBanner member={false} />}
     </div>
   );
 }
