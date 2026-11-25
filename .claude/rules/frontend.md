@@ -38,14 +38,17 @@ paths:
 
 - Compose pages from shared layers, never from page-local copies:
   - `components/ui/`: design primitives without domain knowledge, variants with `cva`
-    (`Button`, `Badge`, `ArrowCircle`, `ListRow`, `Band`, `SectionHeading`, `PageHero`,
-    `TextField`, `PillTabs`, `Pager`, `EmptyPanel`…)
+    (`Button`, `Badge`, `ArrowCircle`, `ListRow`, `Band`, `SectionHeading`, `SpaceHeader`,
+    `TextField`, `SearchField`, `PillTabs`, `Pager`, `CardRail`, `CategoryChip`, `EmptyPanel`…)
   - `components/motion/`: motion behaviours (`Reveal`, `SplitText`, `Stagger`, `Parallax`,
     `ScaleInSection`, `Marquee`, `Magnetic`); each honours reduced motion itself
   - `components/site/`: the frames (`SiteShell`, `AuthShell`) and the landing chrome
   - `components/space/`: the platform's sidebar, phone bars and tabs
   - domain pieces in their area (`events/EventRow`, `blog/ArticleRow`, `member/`,
     `recognition/CertificateLookup`); `components/landing/` only holds landing sections
+- Inside the platform, design for the phone first: compact page headers, cards that turn into
+  rows on a phone (`ArticleCard compactOnPhone`), filters in a bottom sheet rather than a row
+  that hides most of them, a sticky search, and data keyed in `useApi` so a page comes back at once
 - Links, social accounts and the platform spaces live in `config/site.ts`; never hardcode the
   community URL or a space's route in a component
 - Behaviour shared by several components is a hook (`useNewsletter`, `useScrolledPast`,
