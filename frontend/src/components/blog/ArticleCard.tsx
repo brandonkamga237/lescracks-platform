@@ -59,7 +59,7 @@ export default function ArticleCard({ article, wide = false, compactOnPhone = fa
           )}>{article.title}</h3>
           <ArrowUpRight aria-hidden="true" className={cn('mt-0.5 h-5 w-5 shrink-0 -translate-x-1 translate-y-1 text-gold-400 opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:transition-none', compact && 'hidden sm:block')} />
         </div>
-        {article.description && <p className={cn('mt-2 text-sm leading-relaxed text-white/55', wide ? 'line-clamp-3' : 'line-clamp-2', compact && 'hidden sm:block')}>{article.description}</p>}
+        {article.description && <p className={cn('mt-2 text-sm leading-relaxed text-white/55', wide ? 'line-clamp-2 md:line-clamp-3' : 'line-clamp-2', compact && 'hidden sm:block')}>{article.description}</p>}
         <div aria-hidden="true" className={cn('flex-1', compact ? 'min-h-2 sm:min-h-5' : 'min-h-5')} />
 
         <div className={cn('mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-2', compact ? 'sm:border-t sm:border-white/[0.07] sm:pt-4' : 'border-t border-white/[0.07] pt-4')}>
