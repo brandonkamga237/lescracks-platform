@@ -106,11 +106,11 @@ export default function InstallGuide({ route, open, onOpenChange }: InstallGuide
 
         <div className="mt-6 flex gap-3 border-t border-white/10 px-5 pb-1 pt-4">
           {guide.copyLink && (
-            <Button type="button" variant="outline" size="lg" onClick={() => void copy()} className="flex-1">
+            <Button type="button" variant="outline" size="lg" onClick={() => void copy()} className="flex-1 whitespace-nowrap px-4">
               {copied ? <Check className="h-4 w-4" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}{copied ? 'Lien copié' : 'Copier le lien'}
             </Button>
           )}
-          <Button type="button" size="lg" onClick={() => onOpenChange(false)} className="flex-1 font-semibold">J’ai compris</Button>
+          <Button type="button" size="lg" onClick={() => onOpenChange(false)} className="flex-1 whitespace-nowrap px-4 font-semibold">J’ai compris</Button>
         </div>
       </DialogContent>
     </Dialog>
