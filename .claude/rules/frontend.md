@@ -49,6 +49,12 @@ paths:
 - Inside the platform, design for the phone first: compact page headers, cards that turn into
   rows on a phone (`ArticleCard compactOnPhone`), filters in a bottom sheet rather than a row
   that hides most of them, a sticky search, and data keyed in `useApi` so a page comes back at once
+- The site installs as an app (PWA): `public/site.webmanifest`, and `public/sw.js`, which only
+  answers failed page loads with `offline.html` and must never cache the bundles. Phones still in
+  the browser are invited to install by `components/install/` (`InstallAppBanner`, `InstallGuide`):
+  `lib/installPlatform.ts` picks the gesture (Android prompt or menu, iOS Safari or another iOS
+  browser, in-app browser), `lib/installPrompt.ts` keeps Chrome's prompt, `useInstallNudge` decides
+  when (second page of a visit, once per visit, two weeks after "Plus tard", members before visitors)
 - Links, social accounts and the platform spaces live in `config/site.ts`; never hardcode the
   community URL or a space's route in a component
 - Behaviour shared by several components is a hook (`useNewsletter`, `useScrolledPast`,
