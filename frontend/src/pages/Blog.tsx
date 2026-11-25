@@ -3,7 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 import { X } from 'lucide-react';
 
 import ArticleCard from '@/components/blog/ArticleCard';
+import BlogFilterSheet from '@/components/blog/BlogFilterSheet';
 import BlogFilters from '@/components/blog/BlogFilters';
+import ThemeChips from '@/components/blog/ThemeChips';
 import SEO from '@/components/common/SEO';
 import { Stagger, StaggerItem } from '@/components/motion/Stagger';
 import { Button } from '@/components/ui/button';
@@ -78,9 +80,23 @@ export default function Blog() {
         {/* On a phone, search and filters stay pinned under the top bar while the list scrolls;
             from a laptop the wrapper dissolves and each part takes its grid place. */}
         <div className="sticky top-16 z-30 -mx-4 space-y-3 border-b border-white/10 bg-black/90 px-4 pb-3 pt-2 backdrop-blur-xl sm:-mx-8 sm:px-8 lg:contents lg:space-y-0">
-          <SearchField value={typed} onChange={setTyped} label="Rechercher un article" className="min-w-0 lg:col-start-2" />
+          <div className="flex min-w-0 gap-2 lg:col-start-2">
+            <SearchField value={typed} onChange={setTyped} label="Rechercher un article" className="min-w-0 flex-1" />
+            <BlogFilterSheet
+              themes={themes.data ?? []}
+              tags={tags.data ?? []}
+              theme={theme?.slug}
+              tag={tagId}
+              onTheme={(slug) => update({ theme: slug })}
+              onTag={(id) => update({ tag: id ? String(id) : undefined })}
+              onClear={() => update({ theme: undefined, tag: undefined })}
+              found={blog.loading ? undefined : total}
+              className="lg:hidden"
+            />
+          </div>
+          <ThemeChips themes={themes.data ?? []} theme={theme?.slug} onTheme={(slug) => update({ theme: slug })} className="lg:hidden" />
 
-          <aside aria-label="Filtres" className="min-w-0 lg:sticky lg:top-6 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:self-start">
+          <aside aria-label="Filtres" className="hidden min-w-0 lg:sticky lg:top-6 lg:col-start-1 lg:row-span-2 lg:row-start-1 lg:block lg:self-start">
             <BlogFilters
               themes={themes.data ?? []}
               tags={tags.data ?? []}
