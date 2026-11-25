@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 
 import SignupNudge from '@/components/account/SignupNudge';
 import VerifyEmailBanner from '@/components/account/VerifyEmailBanner';
+import InstallAppBanner from '@/components/install/InstallAppBanner';
 import SpaceSidebar from '@/components/space/SpaceSidebar';
 import SpaceTabBar, { SpaceTopBar } from '@/components/space/SpaceTabBar';
 import { LEGAL_LINKS } from '@/config/site';
@@ -67,6 +68,7 @@ export default function SiteShell() {
         </footer>
       </div>
       <SpaceTabBar member={member} />
+      {!isAdmin && <InstallAppBanner member={member} aboveTabBar />}
     </div>
   );
 }
