@@ -8,6 +8,9 @@ import { SessionProvider } from '@/contexts/AuthContext';
 import { oidcConfig } from '@/services/auth';
 import '@/index.css';
 import { trackLinkClicks } from '@/lib/analytics';
+import { captureInstallPrompt } from '@/lib/installPrompt';
+
+captureInstallPrompt();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -41,3 +44,8 @@ function dismissBootLoader() {
 
 requestAnimationFrame(dismissBootLoader);
 trackLinkClicks();
+
+// Production only: in development the worker would answer for the dev server's pages.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => { void navigator.serviceWorker.register('/sw.js').catch(() => undefined); });
+}
