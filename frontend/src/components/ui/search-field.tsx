@@ -21,7 +21,7 @@ export function SearchField({ value, onChange, label, className }: SearchFieldPr
         placeholder={label}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-12 w-full rounded-full border border-white/10 bg-white/[0.04] pl-11 pr-12 text-[15px] text-white placeholder:text-white/35 transition-colors focus:border-gold-400/60 focus:outline-none focus:ring-2 focus:ring-gold-400/20 [&::-webkit-search-cancel-button]:hidden"
+        className="h-11 w-full rounded-full sm:h-12 border border-white/10 bg-white/[0.04] pl-11 pr-12 text-[15px] text-white placeholder:text-white/35 transition-colors focus:border-gold-400/60 focus:outline-none focus:ring-2 focus:ring-gold-400/20 [&::-webkit-search-cancel-button]:hidden"
       />
       {value && (
         <button type="button" onClick={() => onChange('')} aria-label="Effacer la recherche" className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full text-white/45 transition-colors hover:text-white">

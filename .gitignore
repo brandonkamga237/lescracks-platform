@@ -19,3 +19,6 @@ Thumbs.db
 .claude/settings.local.json
 CLAUDE.local.md
 .claude/*.local.md
+
+# Local design explorations, kept out of the repository
+design/
