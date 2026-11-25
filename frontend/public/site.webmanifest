@@ -1,15 +1,25 @@
 {
+  "id": "/",
   "name": "LesCracks",
   "short_name": "LesCracks",
-  "description": "Vidéos, ebooks, ateliers et challenges pour apprendre la tech et passer à la pratique.",
+  "description": "Articles techniques, rendez-vous en direct et le Talk pour apprendre la tech avec ceux qui la font.",
+  "lang": "fr",
+  "dir": "ltr",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#000000",
   "theme_color": "#000000",
+  "categories": ["education"],
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
     { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Blog", "short_name": "Blog", "url": "/blog", "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Rendez-vous", "short_name": "Rendez-vous", "url": "/rendez-vous", "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Le Talk", "short_name": "Talk", "url": "/talk", "icons": [{ "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
   ]
 }
